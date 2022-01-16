@@ -14,6 +14,7 @@ https://github.com/zoq/nes/blob/master/SuperMarioBros/super_mario_bros.lua
 # AI gym
 https://naereen.github.io/gym-nes-mario-bros/
 https://openai.com/blog/gym-retro/
+https://retro.readthedocs.io/en/latest/integration.html
 
 # playing zelda
 https://www.zeldaclassic.com/downloads/
