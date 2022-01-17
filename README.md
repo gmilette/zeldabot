@@ -19,3 +19,6 @@ https://retro.readthedocs.io/en/latest/integration.html
 # playing zelda
 https://www.zeldaclassic.com/downloads/
 http://datacrystal.romhacking.net/wiki/The_Legend_of_Zelda#Known_Dumps
+
+# game dev links
+https://www.libretro.com/index.php/api/
