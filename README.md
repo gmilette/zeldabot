@@ -13,6 +13,9 @@ https://github.com/zoq/nes/blob/master/SuperMarioBros/super_mario_bros.lua
 zelda map data
 * https://github.com/asweigart/nes_zelda_map_data
 
+Giant map of zelda
+* http://media.tojicode.com/zelda/
+
 # AI gym
 https://naereen.github.io/gym-nes-mario-bros/
 https://openai.com/blog/gym-retro/
