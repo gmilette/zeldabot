@@ -28,3 +28,14 @@ Giant map of zelda
 
 # game dev links
 * https://www.libretro.com/index.php/api/
+
+
+# sub problem: finding shortest paths between places on the map
+Need a grid-based dykstra's algorithm
+* https://levelup.gitconnected.com/dijkstras-shortest-path-algorithm-in-a-grid-eb505eb3a290
+
+Questions to answer:
+* What is optimal path to reach all levels and all items?
+  * without constraint?
+  * adding "need item for level X" constraint
+  * making it easier for player: Prioritize levels 1,2, hearts and white sword
