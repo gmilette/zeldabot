@@ -7,23 +7,24 @@ Hey I just started this project.
 Hacks, AI, hard coded solutions, anything possible, must complete within 1 hour limit, all items must be collected
 
 # links
-http://thealmightyguru.com/Games/Hacking/Wiki/index.php/The_Legend_of_Zelda#Load_Room_With_Enemies
-https://github.com/zoq/nes/blob/master/SuperMarioBros/super_mario_bros.lua
+* http://thealmightyguru.com/Games/Hacking/Wiki/index.php/The_Legend_of_Zelda#Load_Room_With_Enemies
+* https://github.com/zoq/nes/blob/master/SuperMarioBros/super_mario_bros.lua
 
 zelda map data
 * https://github.com/asweigart/nes_zelda_map_data
+* http://inventwithpython.com/blog/2012/12/10/8-bit-nes-legend-of-zelda-map-data/
 
 Giant map of zelda
 * http://media.tojicode.com/zelda/
 
 # AI gym
-https://naereen.github.io/gym-nes-mario-bros/
-https://openai.com/blog/gym-retro/
-https://retro.readthedocs.io/en/latest/integration.html
+* https://naereen.github.io/gym-nes-mario-bros/
+* https://openai.com/blog/gym-retro/
+* https://retro.readthedocs.io/en/latest/integration.html
 
 # playing zelda
-https://www.zeldaclassic.com/downloads/
-http://datacrystal.romhacking.net/wiki/The_Legend_of_Zelda#Known_Dumps
+* https://www.zeldaclassic.com/downloads/
+* http://datacrystal.romhacking.net/wiki/The_Legend_of_Zelda#Known_Dumps
 
 # game dev links
-https://www.libretro.com/index.php/api/
+* https://www.libretro.com/index.php/api/
