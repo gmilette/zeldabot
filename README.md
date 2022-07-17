@@ -34,6 +34,11 @@ Giant map of zelda
 Need a grid-based dykstra's algorithm
 * https://levelup.gitconnected.com/dijkstras-shortest-path-algorithm-in-a-grid-eb505eb3a290
 
+# graphs
+* https://graphviz.org/Gallery/undirected/grid.html vis?
+* https://jgrapht.org/guide/UserOverview#graph-algorithms Algorithms
+* https://github.com/breandan/galoisenne Kotlin
+
 Questions to answer:
 * What is optimal path to reach all levels and all items?
   * without constraint?
