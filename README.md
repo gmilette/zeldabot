@@ -17,6 +17,7 @@ zelda map data
 # Maps
 * http://media.tojicode.com/zelda/
 * https://nesmaps.com/maps/Zelda/ZeldaOverworldQ1.html
+* https://www.ign.com/wikis/the-legend-of-zelda/Overworld_Map
 
 # AI gym
 * https://naereen.github.io/gym-nes-mario-bros/
@@ -30,6 +31,9 @@ zelda map data
 # game dev links
 * https://www.libretro.com/index.php/api/
 
+# rom 
+* https://datacrystal.romhacking.net/wiki/The_Legend_of_Zelda:ROM_map
+* https://datacrystal.romhacking.net/wiki/The_Legend_of_Zelda
 
 # sub problem: finding shortest paths between places on the map
 Need a grid-based dykstra's algorithm
