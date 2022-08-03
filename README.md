@@ -10,7 +10,10 @@ Hacks, AI, hard coded solutions, anything possible, must complete within 1 hour 
 * http://thealmightyguru.com/Games/Hacking/Wiki/index.php/The_Legend_of_Zelda#Load_Room_With_Enemies
 * https://github.com/zoq/nes/blob/master/SuperMarioBros/super_mario_bros.lua
 
-zelda map data
+# Emulators
+* https://humbletoolsmith.com/2018/04/25/creating-a-bot-to-play-nes-games-with-csharp/
+
+# maps
 * https://github.com/asweigart/nes_zelda_map_data
 * http://inventwithpython.com/blog/2012/12/10/8-bit-nes-legend-of-zelda-map-data/
 
