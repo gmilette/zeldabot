@@ -14,8 +14,9 @@ zelda map data
 * https://github.com/asweigart/nes_zelda_map_data
 * http://inventwithpython.com/blog/2012/12/10/8-bit-nes-legend-of-zelda-map-data/
 
-Giant map of zelda
+# Maps
 * http://media.tojicode.com/zelda/
+* https://nesmaps.com/maps/Zelda/ZeldaOverworldQ1.html
 
 # AI gym
 * https://naereen.github.io/gym-nes-mario-bros/
