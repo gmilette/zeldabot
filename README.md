@@ -38,6 +38,9 @@ Hacks, AI, hard coded solutions, anything possible, must complete within 1 hour 
 * https://datacrystal.romhacking.net/wiki/The_Legend_of_Zelda:ROM_map
 * https://datacrystal.romhacking.net/wiki/The_Legend_of_Zelda
 
+# game bot
+* https://humbletoolsmith.com/2018/04/25/creating-a-bot-to-play-nes-games-with-csharp/
+
 # sub problem: finding shortest paths between places on the map
 Need a grid-based dykstra's algorithm
 * https://levelup.gitconnected.com/dijkstras-shortest-path-algorithm-in-a-grid-eb505eb3a290
