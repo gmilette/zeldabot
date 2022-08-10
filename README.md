@@ -1,7 +1,8 @@
-# zeldalua
-A Lua script that can beat NES Zelda in under an hour (someday!)
+# zeldabot
+A bot can beat NES Zelda in under an hour
 
-Hey I just started this project.
+# Status reports
+- Hey I just started this project!
 
 # rules
 Hacks, AI, hard coded solutions, anything possible, must complete within 1 hour limit, all items must be collected
