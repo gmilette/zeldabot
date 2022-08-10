@@ -41,6 +41,7 @@ Hacks, AI, hard coded solutions, anything possible, must complete within 1 hour 
 
 # game bot
 * https://humbletoolsmith.com/2018/04/25/creating-a-bot-to-play-nes-games-with-csharp/
+* https://meatfighter.com/castlevaniabot/
 
 # emulator
 * https://nintaco.com/
