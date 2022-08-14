@@ -54,6 +54,7 @@ Need a grid-based dykstra's algorithm
 * https://graphviz.org/Gallery/undirected/grid.html vis?
 * https://jgrapht.org/guide/UserOverview#graph-algorithms Algorithms
 * https://github.com/breandan/galoisenne Kotlin
+* A star https://github.com/div5yesh/ai-explorer/blob/master/a_star.py
 
 Questions to answer:
 * What is optimal path to reach all levels and all items?
