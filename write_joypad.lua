@@ -4,7 +4,7 @@
 
  Definition of joypad routines.
  --]]
-
+print "this runs on fceux!"
 local S = {};
 
 -- Table keys used to set the button.
