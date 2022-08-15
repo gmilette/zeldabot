@@ -45,6 +45,30 @@ object Addresses {
       0x009D,
       0x009E,
    )
+   val enemyCountdowns = listOf(
+      0x0029, //maybe 1?
+      0x002A,
+      0x002B,
+      0x002C,
+      0x002D,
+      0x002E,
+      0x002F, //?
+   )
+
+   val dropItemType = listOf(
+      0x00AD,
+      0x00AE,
+      0x00AF,
+      0x00B0,
+      0x00B1,
+      0x00B2,
+   )
+
+   val dropEnemyItem = listOf(
+      0x00C2,
+      0x00C3
+   )
+
 
    object Ram {
       val killedEnemyCount = 0x0627

@@ -19,7 +19,7 @@ class ZeldaBot {
     }
 
     private fun apiEnabled() {
-        d { "Hello d" }
+        d { "Let's begin apiEnabled" }
     }
 
     private fun apiDisabled() {
@@ -35,8 +35,8 @@ class ZeldaBot {
     }
 
     var currentGamePad = GamePad.MoveRight;
-    var untilFrame = 0
-    val pressTime = 1
+    private var untilFrame = 0
+    private val pressTime = 1
 
     enum class GamePad {
         None, MoveRight, MoveLeft, MoveDown, MoveUp,
@@ -51,54 +51,14 @@ class ZeldaBot {
         return plan.current().nextStep(frameStateUpdater.state)
     }
 
-    var releasePreviousAction: GamePad? = null
-
     private fun renderFinished() {
         val currentFrame = api.frameCount
 //        d { "execute $currentFrame"}
+        // just make link invincible 2 hearts
+        api.writeCPU(0x066F, 21)
 
-//        if (releasePreviousAction != null) {
-//            releasePreviousAction?.let {
-//                d { "release $it" }
-//                releaseButtons(it)
-//                releasePreviousAction = null
-//            }
-//        } else {
-            d { "press $currentGamePad" }
-            when (currentGamePad) {
-                GamePad.MoveRight -> api.writeGamepad(0, GamepadButtons.Right, true)
-                GamePad.MoveLeft -> api.writeGamepad(0, GamepadButtons.Left, true)
-                GamePad.MoveUp -> api.writeGamepad(0, GamepadButtons.Up, true)
-                GamePad.MoveDown -> api.writeGamepad(0, GamepadButtons.Down, true)
-                GamePad.A -> api.writeGamepad(0, GamepadButtons.A, true)
-                GamePad.B -> api.writeGamepad(0, GamepadButtons.B, true)
-                GamePad.Select -> api.writeGamepad(0, GamepadButtons.Select, true)
-                GamePad.Start -> api.writeGamepad(0, GamepadButtons.Start, true)
-                GamePad.ReleaseA -> api.writeGamepad(0, GamepadButtons.A, false)
-                else -> {}
-            }
-//        }
-
-        if (untilFrame <= currentFrame) {
-//            currentGamePad = when (currentGamePad) {
-//                GamePad.MoveRight -> GamePad.MoveUp
-//                GamePad.MoveLeft -> GamePad.MoveDown
-//                GamePad.MoveUp -> GamePad.MoveLeft
-//                GamePad.MoveDown -> GamePad.MoveRight
-//                else -> GamePad.None
-//            }
-            val previousAction = currentGamePad
-            currentGamePad = getAction(currentFrame, currentGamePad)
-            if (previousAction == currentGamePad) {
-                releasePreviousAction = GamePad.Select
-            }
-            d { "execute $currentGamePad prev $previousAction" }
-            untilFrame = currentFrame + pressTime
-        }
-    }
-
-    fun releaseButtons(pad: GamePad) {
-        when (pad) {
+        d { "press $currentGamePad" }
+        when (currentGamePad) {
             GamePad.MoveRight -> api.writeGamepad(0, GamepadButtons.Right, true)
             GamePad.MoveLeft -> api.writeGamepad(0, GamepadButtons.Left, true)
             GamePad.MoveUp -> api.writeGamepad(0, GamepadButtons.Up, true)
@@ -107,23 +67,15 @@ class ZeldaBot {
             GamePad.B -> api.writeGamepad(0, GamepadButtons.B, true)
             GamePad.Select -> api.writeGamepad(0, GamepadButtons.Select, true)
             GamePad.Start -> api.writeGamepad(0, GamepadButtons.Start, true)
+            GamePad.ReleaseA -> api.writeGamepad(0, GamepadButtons.A, false)
             else -> {}
         }
-//        when (pad) {
-//            GamePad.MoveRight -> api.writeGamepad(
-//                0,
-//                GamepadButtons.Right,
-//                false
-//            )
-//            GamePad.MoveLeft -> api.writeGamepad(0, GamepadButtons.Left, false)
-//            GamePad.MoveUp -> api.writeGamepad(0, GamepadButtons.Up, false)
-//            GamePad.MoveDown -> api.writeGamepad(0, GamepadButtons.Down, false)
-//            GamePad.A -> api.writeGamepad(0, GamepadButtons.A, false)
-//            GamePad.B -> api.writeGamepad(0, GamepadButtons.B, false)
-//            GamePad.Select -> api.writeGamepad(0, GamepadButtons.Select, false)
-//            GamePad.Start -> api.writeGamepad(0, GamepadButtons.Start, false)
-//            else -> {}
-//        }
+
+        if (untilFrame <= currentFrame) {
+            currentGamePad = getAction(currentFrame, currentGamePad)
+            d { "execute $currentGamePad" }
+            untilFrame = currentFrame + pressTime
+        }
     }
 
     companion object {
