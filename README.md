@@ -17,6 +17,7 @@ Hacks, AI, hard coded solutions, anything possible, must complete within 1 hour 
 # maps
 * https://github.com/asweigart/nes_zelda_map_data
 * http://inventwithpython.com/blog/2012/12/10/8-bit-nes-legend-of-zelda-map-data/
+* https://nesmaps.com/maps/Zelda/ZeldaBG.html
 
 # Maps
 * http://media.tojicode.com/zelda/
