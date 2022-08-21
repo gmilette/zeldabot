@@ -56,6 +56,7 @@ Need a grid-based dykstra's algorithm
 * https://jgrapht.org/guide/UserOverview#graph-algorithms Algorithms
 * https://github.com/breandan/galoisenne Kotlin
 * A star https://github.com/div5yesh/ai-explorer/blob/master/a_star.py
+* https://github.com/Suwadith/A-Star-Shortest-Pathfinding-Algorithm-Square-Grid-Java * Star grid
 
 Questions to answer:
 * What is optimal path to reach all levels and all items?
