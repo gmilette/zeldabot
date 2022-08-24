@@ -24,6 +24,8 @@ Hacks, AI, hard coded solutions, anything possible, must complete within 1 hour 
 * https://nesmaps.com/maps/Zelda/ZeldaOverworldQ1.html
 * https://www.ign.com/wikis/the-legend-of-zelda/Overworld_Map
 * https://www.zeldaxtreme.com/legend-of-zelda/maps/ (extreme!)
+* https://i.imgur.com/oXLeDkn.png labeled where stuff is
+* https://twitter.com/MetroidMike64/status/1059878242839076864/photo/1 map grid
 
 # AI gym
 * https://naereen.github.io/gym-nes-mario-bros/
