@@ -23,6 +23,7 @@ Hacks, AI, hard coded solutions, anything possible, must complete within 1 hour 
 * http://media.tojicode.com/zelda/
 * https://nesmaps.com/maps/Zelda/ZeldaOverworldQ1.html
 * https://www.ign.com/wikis/the-legend-of-zelda/Overworld_Map
+* https://www.zeldaxtreme.com/legend-of-zelda/maps/ (extreme!)
 
 # AI gym
 * https://naereen.github.io/gym-nes-mario-bros/
