@@ -61,6 +61,9 @@ Need a grid-based dykstra's algorithm
 * A star https://github.com/div5yesh/ai-explorer/blob/master/a_star.py
 * https://github.com/Suwadith/A-Star-Shortest-Pathfinding-Algorithm-Square-Grid-Java * Star grid
 
+* more a star
+https://github.com/hoc081098/Astar-Dijkstra-GreedyBestFirstSearch-BreadthFirstSearch-DepthFirstSearch/tree/master/src/main/kotlin/com/hoc/kotlin
+
 Questions to answer:
 * What is optimal path to reach all levels and all items?
   * without constraint?
