@@ -1,9 +1,7 @@
 package bot.state
 
-import bot.EnemyState
-import bot.FramePoint
-import bot.FrameState
-import bot.ZeldaBot
+import bot.GamePad
+import bot.plan.PreviousMove
 
 class MapLocationState(
     //
@@ -14,8 +12,24 @@ class MapLocationState(
     val enemyLocationHistory: MutableList<List<FramePoint>> = mutableListOf(),
 
 //    val mapData: List<List<MapCell>>
-    var lastGamePad: ZeldaBot.GamePad = ZeldaBot.GamePad.MoveUp,
+    var lastGamePad: GamePad = GamePad.MoveUp,
+
+    var previousMove: PreviousMove = PreviousMove(),
+
+    // remember for next interation
+    // tried to get from prev to goal
+    var previousLocation: FramePoint = FramePoint(),
+    var previousGamePad: GamePad = GamePad.None,
 
     // the last known framestate
-    var frameState: FrameState = FrameState()
-)
+    var frameState: FrameState = FrameState(),
+
+    var framesOnScreen: Int = 0,
+
+    var currentMapCell: MapCell = MapCell.unknown
+) {
+    fun clearHistory() {
+        enemyLocationHistory.clear()
+        framesOnScreen = 0
+    }
+}

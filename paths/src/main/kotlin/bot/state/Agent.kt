@@ -1,9 +1,5 @@
 package bot.state
 
-import bot.Dir
-import bot.EnemyState
-import bot.FramePoint
-
 data class Agent(
     val point: FramePoint,
     val dir: Dir,

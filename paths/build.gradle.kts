@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.6.21"
+    kotlin("jvm") version "1.7.10"
     application
 }
 
@@ -21,6 +21,7 @@ dependencies {
     implementation(files("libs/*.jar"))
     implementation(files("libs/Nintaco.jar"))
     implementation("co.touchlab:kermit:1.1.3")
+    testImplementation("io.kotest:kotest-assertions-core-jvm:5.4.2")
 }
 
 tasks.test {

@@ -69,6 +69,25 @@ object Addresses {
       0x00C3
    )
 
+   // inventory
+   val selectedItem = 0x0656
+   val numBombs = 0x0658
+   val hasSword = 0x0657
+   val hasBow = 0x065A
+   val hasArrow = 0x0659
+   val hasWhistle = 0x065C
+   val hasFood = 0x065D
+   val hasPotion = 0x065E
+   val hasRod = 0x065F
+   val hasRaft = 0x0660
+   val hasBook = 0x0661
+   val hasRing = 0x0662 //$00-None, $01-Blue Ring, $02-Red Ring.
+   val hasLadder = 0x0663
+   val hasBracelet = 0x0665
+   val hasLetter = 0x0666
+   val hasBoomerang = 0x0674
+   val hasMagicBoomerang = 0x0675
+   val hasShield = 0x0676
 
    object Ram {
       val killedEnemyCount = 0x0627

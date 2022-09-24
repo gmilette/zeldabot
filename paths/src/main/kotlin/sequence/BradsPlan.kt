@@ -1,0 +1,5 @@
+package sequence
+
+class BradsPlan {
+
+}
