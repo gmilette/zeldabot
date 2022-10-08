@@ -150,6 +150,18 @@ enum class Direction {
     Left, Right, Up, Down
 }
 
+fun Direction.pointModifier(): (FramePoint) -> FramePoint {
+    return when (this) {
+        Direction.Up -> { p -> FramePoint(p.x, p.y - 1)}
+        Direction.Down -> { p -> FramePoint(p.x, p.y + 1)}
+        Direction.Left -> { p -> FramePoint(p.x - 1, p.y)}
+        Direction.Right -> { p -> FramePoint(p.x + 1, p.y)}
+    }
+}
+
+val Direction.vertical: Boolean
+    get() = this == Direction.Up || this == Direction.Down
+
 
 class MapCell(
     val point: MapCellPoint,
@@ -199,6 +211,10 @@ class MapCell(
         return exitPoints.firstOrNull()
     }
 
+    fun exitsFor(dir: Direction): List<FramePoint>? {
+        return exits[dir]
+    }
+
     val costImpassible = 99999.0
     val costPassable = 1.0
     // impassible = 99999
@@ -243,6 +259,7 @@ class MapCell(
             exits[it] = mutableListOf()
         }
         val debug = false
+        if (debug) d { " exits for ${this.mapLoc}" }
         for (x in 0..MapConstants.MAX_X) {
             if (passable.get(x, 10)) {
                 if (debug) d { " top exit: $x" }

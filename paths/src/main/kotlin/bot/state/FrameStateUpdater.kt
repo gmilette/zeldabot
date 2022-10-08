@@ -10,7 +10,10 @@ class FrameStateUpdater(
     private val api: API,
     private val hyrule: Hyrule
 ) {
-    var state: MapLocationState = MapLocationState()
+    fun getLinkX() = api.readCPU(Addresses.linkX)
+    fun getLinkY() = api.readCPU(Addresses.linkY)
+    fun getLink() = FramePoint(getLinkX(), getLinkY())
+    var state: MapLocationState = MapLocationState(hyrule)
 
     fun updateFrame(currentFrame: Int, currentGamePad: GamePad) {
         val yAdjustFactor = 61
@@ -146,9 +149,9 @@ class FrameStateUpdater(
 
 //        d { "$currentFrame: $frame" }
 //        d { "MAP --> ${frame.mapLoc}" }
-        if (gameMode != 5) {
-            d { "gameMode --> ${gameMode}" }
-        }
+//        if (gameMode != 5) {
+//            d { "gameMode --> ${gameMode}" }
+//        }
     }
 
     // $00=False, $01=True

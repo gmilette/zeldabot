@@ -50,7 +50,7 @@ data class FrameState(
 //    val droppedItems: List<Int> = emptyList()
     // has to have all the locations on the map
 //    val map.
-    val inventory: Inventory
+    val inventory: Inventory = Inventory(0, 0, emptySet())
 ) {
     val isScrolling: Boolean
         get() = gameMode == 7 || gameMode == 6 || gameMode == 4
@@ -104,6 +104,30 @@ data class FramePoint(val x: Int = 0, val y: Int = 0): Graph.Vertex {
     }
 }
 
+fun FramePoint.directionTo(to: FramePoint): GamePad {
+    return when {
+        x == to.x -> {
+            if (y < to.y) GamePad.MoveDown else GamePad.MoveUp
+        }
+        y == to.y -> {
+            if (x < to.x) GamePad.MoveRight else GamePad.MoveLeft
+        }
+        else -> GamePad.MoveLeft
+    }
+}
+
+fun FramePoint.dirTo(to: FramePoint): Direction {
+    return when {
+        x == to.x -> {
+            if (y < to.y) Direction.Down else Direction.Up
+        }
+        y == to.y -> {
+            if (x < to.x) Direction.Right else Direction.Left
+        }
+        else -> Direction.Down
+    }
+}
+
 fun FramePoint.adjustBy(pad: GamePad) =
     when (pad) {
         GamePad.MoveUp -> this.up
@@ -116,7 +140,6 @@ fun FramePoint.adjustBy(pad: GamePad) =
 val FramePoint.toScreenY
    get() = FramePoint(x, y + 61)
 
-
 val FramePoint.isTop
     get() = y == 0
 val FramePoint.isBottom
@@ -126,20 +149,31 @@ val FramePoint.isRight
 val FramePoint.isLeft
     get() = x == 0
 
+val FramePoint.justMid
+    get() = FramePoint(x, y + 9)
+val FramePoint.justMidEnd
+    get() = FramePoint(x + 15, y + 9)
+
 val FramePoint.upEnd
     get() = FramePoint(x, y + 8 - 1)
 val FramePoint.upEndRight
     get() = FramePoint(x + 16, y + 8 - 1)
 val FramePoint.up
     get() = FramePoint(x, y - 1)
+val FramePoint.up2
+    get() = FramePoint(x, y - 2)
 val FramePoint.down
     get() = FramePoint(x, y + 1)
+val FramePoint.down2
+    get() = FramePoint(x, y + 2)
 val FramePoint.downEnd
     get() = FramePoint(x, y + 16 + 1)
 val FramePoint.downEndRight
     get() = FramePoint(x + 16, y + 16 + 1) // extra 1 just like downEnd
 val FramePoint.right
     get() = FramePoint(x + 1, y)
+val FramePoint.right2
+    get() = FramePoint(x + 2, y)
 
 val FramePoint.rightEnd
     get() = FramePoint(x + 16 + 1, y)
@@ -148,10 +182,14 @@ val FramePoint.rightEndDown
 
 val FramePoint.left
     get() = FramePoint(x - 1, y)
+val FramePoint.left2
+    get() = FramePoint(x - 2, y)
 val FramePoint.leftDown
     get() = FramePoint(x - 1, y + 15)
 
 
+val FramePoint.justLeftDown
+    get() = FramePoint(x, y + 15)
 val FramePoint.justRightEnd
     get() = FramePoint(x + 15, y)
 val FramePoint.justRightEndBottom
@@ -162,6 +200,9 @@ val FramePoint.justLeftBottom
 
 fun FramePoint.distTo(other: FramePoint) =
     abs(x - other.x) + abs(y - other.y)
+
+fun FramePoint.minDistToAny(other: List<FramePoint>) =
+    other.minOf { this.distTo(it) }
 
 val Undefined = FramePoint(0, 0)
 

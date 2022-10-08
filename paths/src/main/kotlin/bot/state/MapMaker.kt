@@ -32,22 +32,41 @@ object MapMaker {
                 val xPx = x * widthOfCell
 //                d { "y $yPx to ${yPx+heightOfCell} x $xPx to " +
 //                        "${xPx + widthOfCell}"}
-                rows.subList(yPx, yPx + heightOfCell).forEach { row ->
-                    val part = row.subList(xPx, xPx + widthOfCell)
-                        .map { mapPassable.contains(it) } //passable.contains(it
-//                    d { " row ${passable.contains(row.subList(xPx, xPx +
-//                            widthOfCell)[1])}"}
-//                    d { " roww $part"}
-                    mapData.add(part.toMutableList())
+                val ALL_IMPASSIBLE = true
+
+                if (ALL_IMPASSIBLE) {
+                    rows.subList(yPx, yPx + heightOfCell).forEach { row ->
+                        val part = row.subList(xPx, xPx + widthOfCell)
+                            .map { mapPassable.contains(it) } //passable.contains(it
+                        mapData.add(part.toMutableList())
+                    }
+                } else {
+                    // doesnt work
+                    // first set of rows actually check passible
+                    rows.subList(yPx, yPx + (heightOfCell / 2)).forEach { row ->
+                        val part = row.subList(xPx, xPx + widthOfCell)
+                            .map { mapPassable.contains(it) } //passable.contains(it
+                        mapData.add(part.toMutableList())
+                    }
+                    // nah the whole second half ends up empty
+                    // second set of rows is only passible, ignore if it really is or not
+                    rows.subList(yPx, yPx + (heightOfCell / 2)).forEach { row ->
+                        val part = row.subList(xPx, xPx + widthOfCell)
+                            .map { true }
+                        mapData.add(part.toMutableList())
+                    }
                 }
                 val mapCell = MapCell(
-                    point, mapLoc, data.get(mapLoc) ?: emptyMapData,
-                    Map2d
-                        (mapData)
+                    point, mapLoc, data.get(mapLoc) ?: emptyMapData, Map2d(mapData)
                 )
+                //168
+//                d { "map size ${mapCell.passable.map.size}" }
                 mapCells[mapLoc] = mapCell
             }
         }
+//                    d { " row ${passable.contains(row.subList(xPx, xPx +
+//                            widthOfCell)[1])}"}
+//                    d { " roww $part"}
 //
 //        passableMap.forEach {
 //            it.forEach {
@@ -116,5 +135,6 @@ val mapPassable = setOf(
     "99",
     "9a",
     "9b",
-    "9d"
+    "9d",
+    "12"
 )

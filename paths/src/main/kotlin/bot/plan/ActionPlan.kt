@@ -33,6 +33,19 @@ interface Action {
     }
 
     fun target() = FramePoint(0,0)
+
+    val name: String
+        get() = this.javaClass.simpleName
+}
+
+class EndAction: Action {
+    override fun complete(state: MapLocationState): Boolean =
+        true
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        d { " DONE! "}
+        return GamePad.MoveUp
+    }
 }
 
 class AlwaysMoveUp: Action {
@@ -121,6 +134,46 @@ fun opportunityKillOrMove(next: MapCell): Action =
         !state.cleared && state.hasEnemies && state.hasNearEnemy()
     }
 
+// assume lined up at the entrance, so link just has to go up
+class GoIn(private val moves:Int = 5): Action {
+    private var movements = 0
+
+    override fun complete(state: MapLocationState): Boolean =
+        movements == moves
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        movements++
+        return GamePad.MoveUp
+    }
+
+    override fun target(): FramePoint {
+        return FramePoint()
+    }
+
+    override val name: String
+        get() = "Go In}"
+}
+
+
+// move to this location then complete
+class InsideNavShop(private val point: FramePoint): Action {
+    override fun complete(state: MapLocationState): Boolean =
+        state.frameState.link.point == point
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        // use the shop map cell
+        return NavUtil.directionToAvoidingObstacle(state.hyrule.getMapCell(42), state.frameState.link.point, point)
+     }
+
+    override fun target(): FramePoint {
+        return point
+    }
+
+    override val name: String
+        get() = "Nav to ${point}"
+}
+
+
 // move to this location then complete
 class InsideNav(private val point: FramePoint): Action {
     override fun complete(state: MapLocationState): Boolean =
@@ -129,6 +182,13 @@ class InsideNav(private val point: FramePoint): Action {
     override fun nextStep(state: MapLocationState): GamePad {
         return navTo(state, point)
     }
+
+    override fun target(): FramePoint {
+        return point
+    }
+
+    override val name: String
+        get() = "Nav to ${point}"
 }
 
 class Bomb(private val target: FramePoint): Action {
@@ -160,14 +220,20 @@ class Bomb(private val target: FramePoint): Action {
 
 fun navTo(state: MapLocationState, to: FramePoint): GamePad =
     NavUtil.directionToAvoidingObstacle(state.currentMapCell, state.frameState.link.point, to).also {
-        d { " **go** $it"}
+        d { " **go** $it (from ${state.frameState.link.point} to ${to} at ${state.currentMapCell.mapLoc}"}
     }
 
 class MoveTo(val next: MapCell): Action {
     private val moveTo = MoveTowardsUtil()
 
+    private var goingTo = FramePoint(0, 0)
+
     override fun complete(state: MapLocationState): Boolean =
         (state.frameState.mapLoc == next.mapLoc)
+
+    override fun target(): FramePoint {
+        return super.target()
+    }
 
     override fun nextStep(state: MapLocationState): GamePad {
         val current = state.currentMapCell
@@ -177,15 +243,24 @@ class MoveTo(val next: MapCell): Action {
             .link.point
 
         val dir = NavUtil.directionToDir(current.point.toFrame(), next.point.toFrame())
-        val exitA = state.currentMapCell.exitFor(dir) ?: return GamePad.MoveUp
-        val exit = when (dir) {
-            Direction.Left -> exitA // keep
-            Direction.Right -> exitA // keep
-            Direction.Down -> exitA //.up
-            Direction.Up -> exitA //.down
-        }
+        val exit = state.currentMapCell.exitFor(dir) ?: return GamePad.MoveUp
+//        val exit = when (dir) {
+//            Direction.Left -> exitA // keep
+//            Direction.Right -> exitA // keep
+//            Direction.Down -> exitA //.up
+//            Direction.Up -> exitA //.down
+//        }
+        val exits = state.currentMapCell.exitsFor(dir) ?: return GamePad.MoveUp
+
+//        d { "exits "}
+//        exits.forEach {
+//            d { " exit -> $it ${linkPt.distTo(it)}"}
+//        }
+
+        goingTo = exits.firstOrNull() ?: FramePoint(0, 0)
+
         d { " go to exit within ${current.mapLoc} -> ${next.mapLoc} from ${linkPt} to ${exit} dir $dir" }
-        return NavUtil.directionToAvoidingObstacle(state.currentMapCell, linkPt, exit).also {
+        return NavUtil.directionToAvoidingObstacle(state.currentMapCell, linkPt, exits).also {
             d { " **go** $it"}
         }
 
@@ -201,6 +276,9 @@ class MoveTo(val next: MapCell): Action {
 //            .link.point, exit)
 //        return GamePad.MoveUp
     }
+
+    override val name: String
+        get() = "Move to ${this.next.mapLoc}"
 }
 
 
@@ -231,10 +309,13 @@ class DecisionAction(
         target = action.target()
         return gamePad
     }
+
+    override val name: String
+        get() = "${action1.name} or ${action2.name}"
 }
 
 class GetLoot: Action {
-    override fun complete(state: FrameState): Boolean =
+    override fun complete(state: MapLocationState): Boolean =
         false
 
     // maybe I should
@@ -249,12 +330,15 @@ class GetLoot: Action {
     }
 
     override fun target() = target
+
+    override val name: String
+        get() = "Get loot"
 }
 
 
 class AlwaysAttack: Action {
     private var previousAttack = false
-    override fun complete(state: FrameState): Boolean =
+    override fun complete(state: MapLocationState): Boolean =
         false
 
     override fun nextStep(state: MapLocationState): GamePad {
@@ -265,7 +349,7 @@ class AlwaysAttack: Action {
 }
 
 class MoveInCircle: Action {
-    override fun complete(state: FrameState): Boolean =
+    override fun complete(state: MapLocationState): Boolean =
         false
 
     override fun nextStep(state: MapLocationState): GamePad =
@@ -287,7 +371,7 @@ class KillAll: Action {
         return target
     }
 
-    override fun complete(state: FrameState): Boolean =
+    override fun complete(state: MapLocationState): Boolean =
         false
 
     override fun nextStep(state: MapLocationState): GamePad {

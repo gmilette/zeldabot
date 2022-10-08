@@ -5,6 +5,7 @@ import bot.plan.PreviousMove
 
 class MapLocationState(
     //
+    var hyrule: Hyrule,
 //    val mapLoc: MapLoc,
     // store some memory of what was happening
     var enemyStateHistory: List<List<EnemyState>> = listOf(),

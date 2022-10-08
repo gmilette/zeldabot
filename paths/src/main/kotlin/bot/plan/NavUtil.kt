@@ -96,7 +96,8 @@ data class PreviousMove(
     val actual: FramePoint = FramePoint(0, 0),
     val triedToMove: Boolean = true,
     // calculated
-    val skipped: Boolean = from.distTo(actual) > 1
+    val skipped: Boolean = from.distTo(actual) > 1,
+    val distOff: Int = from.distTo(actual)
 ) {
     val didntMove: Boolean = from.x == actual.x && from.y == actual.y
     val movedNear: Boolean = from.distTo(actual) < 3
@@ -203,12 +204,18 @@ object NavUtil {
 
     fun directionToAvoidingObstacle(mapCell: MapCell, from: FramePoint, to: FramePoint):
             GamePad {
+        return directionToAvoidingObstacleR(mapCell, from, listOf(to))
+//        return directionToAvoidingObstacleM(mapCell, from, to)
+    }
+
+    fun directionToAvoidingObstacle(mapCell: MapCell, from: FramePoint, to: List<FramePoint>):
+            GamePad {
         return directionToAvoidingObstacleR(mapCell, from, to)
 //        return directionToAvoidingObstacleM(mapCell, from, to)
     }
 
     fun directionToAvoidingObstacleR(mapCell: MapCell, from: FramePoint, to:
-    FramePoint):
+        List<FramePoint>):
             GamePad {
         val route = mapCell.gstar.route(from, to)
         d { " route size ${route.size} "}

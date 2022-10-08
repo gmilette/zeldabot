@@ -2,22 +2,31 @@ package bot.state
 
 import bot.plan.*
 import util.d
+import util.i
 
 class MasterPlan(val segments: List<PlanSegment>) {
-    private val giant = segments.flatMap { it.plan }.map { PlanStep(it, ActionPlan()) }.toMutableList()
-    // what to do here
-//    var actionPlan: ActionPlan = ActionPlan()
+    private val giant = segments.flatMap { seg -> seg.plan.map { PlanStep(seg, it) } }.toMutableList().also {
+        d { " created plan with ${it.size} actions"}
+    }
 
-    // make a giant list?
+    fun log() {
+        val first = giant.firstOrNull()
+
+        first?.inSegment?.apply {
+            d { "** ${phase}: ${name}: ${first.action.name}"}
+        }
+    }
 
     fun current(): Action =
-        giant.first().actionPlan.current()
+        giant.first().action
 
-    fun pop(): ActionPlan =
-        giant.removeFirst().actionPlan
+    fun pop(): Action =
+        giant.removeFirst().action.also {
+            i { "--> switch to ${it.name}"}
+        }
 }
 
-data class PlanStep(val cell: MapCell, val actionPlan: ActionPlan)
+data class PlanStep(val inSegment: PlanSegment, val action: Action)
 
 data class PlanSegment(val phase: String, val name: String, val plan:
     List<Action>) {
@@ -34,50 +43,67 @@ data class PlanSegment(val phase: String, val name: String, val plan:
 
 object PlanBuilder {
     fun makeMasterPlan(mapData: MapCells): MasterPlan {
-
+        val level1Pt = FramePoint(112, 64) // 74
+        val bomb = FramePoint(147, 112)
+        val bombEntrance = FramePoint(144, 104) // wrong
+        val bombHeartEntrance = FramePoint(114, 94) // wrong
+        val selectHeart = FramePoint(152, 100) // still at location 44
         val level1 = levelPlan(mapData, 1)
+        val getStuffMid = FramePoint(120,96)
+        val letterEntry = FramePoint(80,64) // right before 80 80
         val builder = LocationSequenceBuilder(mapData, "get to lev 1")
+//        builder.startAt(44).seg("bomb heart")
+//            .bomb(bomb)
+//            .go(bombEntrance)
+//            .goIn()
+//            .goShop(selectHeart) // still will be at 44
+//            .right.end
+
         builder.startAt(119)
             .phase("get to level 1")
+            .seg("move to level 1")
             .right.up.up.up.up.left
-            .include(level1)
+//            .goIn(level1Pt) // works
+//            .include(level1)
             .phase("gather stuff and blue ring")
+//            .seg("get to bomb heart")
+            .right.upm.rightm.rightm.rightm.rightm // BOMB!
             .seg("bomb heart")
-            .right.up.right.right.right.right // BOMB!
-            .seg("bomb secret")
-            .right // bomb $
-            .seg("get 30 secret")
-            .seg("get 100 secret")
-            .up
+            .bomb(bomb)
+            .go(bombEntrance)
+            .goIn()
+            .goShop(selectHeart) // still will be at 44
             .right
-            .right
-            .up // get secret (need special procedure for this)
-            .seg("get letter")
-            .down.left.up // get letter
-            .down
-            .left
-            .down
-            .seg("get candle")
-            .end
-
-        return builder.build()
-//        val phaseName = "gather stuff and blue ring"
-//        // envision parallel heads up display showing the plan sequence
-//        val builder = PlanBuilder.LocationSequenceBuilder(mapData, phaseName)
-//        builder.startAt(55).right.up.right.right.right
-//            .right // bomb heart
-//            .right // BOMB! (prob need to go right first, maybe bomb the things on the way back
+            .phase("end")
+//            .rightm // "now at the bomb
+//            .seg("bomb heart")
+//            .bomb(bomb)
+//            .goIn(bombEntrance)
+////            .getSecret()
+////            .depart()
+//            .seg("bomb secret")
+//            .right // bomb $
+//            .seg("gather more bombs")
+//            .right // bomb $
+//            .seg("get 30 secret")
+//            .left
+//            .down
+//            .seg("go to 100 secret")
 //            .up
 //            .up
 //            .right
 //            .right
+//            .seg("get 100 secret")
 //            .up // get secret (need special procedure for this)
+//            .seg("get letter")
 //            .down.left.up // get letter
 //            .down
 //            .left
-//            .down // back at 45
+//            .down
+//            .seg("get candle")
+            .end
 
-
+        return builder.build()
     }
 
     fun levelPlan(mapData: MapCells, level: Int): MasterPlan {
@@ -141,10 +167,11 @@ object PlanBuilder {
 
         val builder = LocationSequenceBuilder(mapData, "get to lev 1")
         builder.startAt(119).right.up.up.up.up.left //.end
-            .goIn(level1)
-            .right.up.right.right.right.right // BOMB!
+            .go(level1)
+            .goIn()
+            .right.up.rightm.rightm.rightm.right // BOMB!
             .bomb(bomb)
-            .goIn(bombEntrance)
+            .go(bombEntrance)
             .getSecret()
             .depart()
             .right // bomb heart
@@ -203,7 +230,8 @@ object PlanBuilder {
         }
 
         fun startAt(loc: MapLoc): LocationSequenceBuilder {
-            return add(loc)
+            lastMapLoc = loc
+            return this
         }
 
         fun include(other: MasterPlan): LocationSequenceBuilder {
@@ -226,12 +254,20 @@ object PlanBuilder {
 
         val end: LocationSequenceBuilder
             get() {
-                plan.add(MapCell.end)
+                makeSegment()
+                plan.add(EndAction())
                 return this
             }
         val up: LocationSequenceBuilder
             get() {
                 add(lastMapLoc.up)
+                return this
+            }
+        val upm: LocationSequenceBuilder
+            get() {
+                // don't try to fight
+                val nextLoc = lastMapLoc.up
+                add(nextLoc, MoveTo(mapData.cell(nextLoc)))
                 return this
             }
         val down: LocationSequenceBuilder
@@ -246,13 +282,26 @@ object PlanBuilder {
             }
         val right: LocationSequenceBuilder
             get() {
-                lastMapLoc.right.let {
-                    add(it, opportunityKillOrMove(mapData.cell(it)))
-                }
+                add(lastMapLoc.right)
                 return this
             }
-        fun goIn(point: FramePoint): LocationSequenceBuilder {
-            add(lastMapLoc, InsideNav(point))
+        val rightm: LocationSequenceBuilder
+            get() {
+                // don't try to fight
+                val nextLoc = lastMapLoc.right
+                add(nextLoc, MoveTo(mapData.cell(nextLoc)))
+                return this
+            }
+        fun go(to: FramePoint): LocationSequenceBuilder {
+            add(lastMapLoc, InsideNav(to))
+            return this
+        }
+        fun goShop(to: FramePoint): LocationSequenceBuilder {
+            add(lastMapLoc, InsideNavShop(to))
+            return this
+        }
+        fun goIn(): LocationSequenceBuilder {
+            add(lastMapLoc, GoIn())
             return this
         }
         fun getSecret(): LocationSequenceBuilder {
@@ -272,6 +321,10 @@ object PlanBuilder {
 
         fun build(): MasterPlan {
             return MasterPlan(segments.toList())
+        }
+
+        private fun add(nextLoc: MapLoc) {
+            add(nextLoc, opportunityKillOrMove(mapData.cell(nextLoc)))
         }
 
         private fun add(loc: MapLoc, action: Action): LocationSequenceBuilder {

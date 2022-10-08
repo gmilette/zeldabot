@@ -9,16 +9,21 @@ import java.util.*
 class GStar(
     private val passable: Map2d<Boolean>,
 ) {
-    private val DEBUG = false
-    private val DEBUG_DIR = false
-    private val DEBUG_ONE = false
-    private val MAX_ITER = 300
+    companion object {
+        var DEBUG = false
+        private val DEBUG_DIR = false
+        val DEBUG_ONE = false
+        val MAX_ITER = 300
+        val doSkip = true
+    }
 
     private var iterCount = 0
     // return to this map
     private val initialMap: Map2d<Int> = passable.map { if (it) 1 else 99999 }
     // f values
     private var costsF: Map2d<Int> = initialMap.copy()
+
+    private val neighborFinder = NeighborFinder(passable)
 
     fun reset() {
         costsF = initialMap.copy()
@@ -37,8 +42,14 @@ class GStar(
     val distanceToGoal = mutableMapOf<FramePoint, Int>()
 
     fun route(start: FramePoint, target: FramePoint): List<FramePoint> {
+        return route(start, listOf(target))
+    }
+
+    fun route(start: FramePoint, targets: List<FramePoint>): List<FramePoint> {
         val closedList = mutableSetOf<FramePoint>()
         val cameFrom = mutableMapOf<FramePoint, FramePoint>()
+
+        val target = targets.toList()
 
         val openList: PriorityQueue<FramePoint> = PriorityQueue<FramePoint> { cell1, cell2 ->
             //Compares 2 Node objects stored in the PriorityQueue and Reorders the Queue according to the object which has the lowest fValue
@@ -52,6 +63,7 @@ class GStar(
 
         val costFromStart = mutableMapOf(start to 0)
 
+        var point = FramePoint(0, 0)
         openList.add(start)
         iterCount = 0
         while (true && iterCount < MAX_ITER) {
@@ -67,13 +79,14 @@ class GStar(
 //                            "${distanceToGoal[it]}" }
                 }
             }
-            val point = openList.poll() ?: break
+            point = openList.poll() ?: break
 
             if (DEBUG) {
                 d { " explore $point" }
             }
 
-            if (point == target) {
+//            if (point == target) {
+            if (target.contains(point)) {
                 if (DEBUG) {
                     d { " explore found! $point" }
                 }
@@ -83,7 +96,7 @@ class GStar(
 
             closedList.add(point)
 
-            (point.neighbors - closedList).forEach {
+            (neighborFinder.neighbors(point) - closedList).forEach {
                 if (passable.get(it)) {
 //                if (passableFrom(point, it)) {
                     // raw cost of this cell
@@ -93,7 +106,7 @@ class GStar(
                     // route to get to this point including parent
                     val pathCost = cost + parentCost
 
-                    val costToGoal = it.distTo(target)
+                    val costToGoal = it.minDistToAny(target)
                     val totalCost = costToGoal + pathCost
 
                     if (DEBUG) {
@@ -123,7 +136,8 @@ class GStar(
             }
         }
 
-        return generatePath(target, cameFrom)
+        // todo: actually should pick the best path so far..
+        return generatePath(target, cameFrom, point)
     }
 
     private fun passableFrom(from: FramePoint, to: FramePoint): Boolean {
@@ -160,29 +174,25 @@ class GStar(
         }
     }
 
+    private fun generatePath(targets: List<FramePoint>, cameFrom: Map<FramePoint,
+            FramePoint>, lastExplored: FramePoint): List<FramePoint> {
+        val target = targets.firstOrNull { cameFrom.containsKey(it) }
+//        var current = target
+        var current = target ?: lastExplored
 
-    private fun directionTo(from: FramePoint, to: FramePoint): GamePad {
-        return when {
-            from.x == to.x -> {
-                if (from.y < to.y) GamePad.MoveDown else GamePad.MoveUp
-            }
-            from.y == to.y -> {
-                if (from.x < to.x) GamePad.MoveRight else GamePad.MoveLeft
-            }
-            else -> GamePad.MoveLeft
-        }
-    }
-
-    private fun generatePath(target: FramePoint, cameFrom: Map<FramePoint,
-            FramePoint>): List<FramePoint> {
-        val path = mutableListOf(target)
-        var current = target
-
+        val path = mutableListOf(current)
         while (cameFrom.containsKey(current)) {
             current = cameFrom.getValue(current)
             path.add(0, current)
         }
         if (DEBUG) {
+            if (!cameFrom.containsKey(target)) {
+                d { "no target use $lastExplored"}
+
+                cameFrom.forEach { t, u ->
+                    d { " $t -> $u"}
+                }
+            }
             d { " start " }
             path.forEach {
                 d { "${it.x},${it.y} c ${totalCosts[it]}" }
@@ -199,94 +209,4 @@ class GStar(
             }
         }
     }
-
-    // list of passible nodes
-//    private val FramePoint.neighbors
-//        get() = listOf(this.up, this.down, this.left, this.right).filter {
-//            it.x > 0 && it.x < passible.maxX && it.y > 0 && it.y <
-//                    passible.maxY && passible.get(it) }
-
-    private val FramePoint.neighborsz: List<FramePoint>
-        get() {
-            val neigh = mutableListOf<FramePoint>()
-//            // go up
-//                Direction.Right -> passible.get(from.rightEnd) && passible.get(from.rightEndDown)
-//                Direction.Left -> passible.get(to) && passible.get(from.leftDown)
-//                // should be
-//                // just the to
-//                Direction.Down -> passible.get(from.downEnd)
-//                        && passible.get(from.downEndRight)
-//                Direction.Up -> {
-//                }
-            if (passable.get(this.upEnd) && passable.get(this.upEndRight)) {
-                if (this.up.within()) {
-                    if (DEBUG_DIR) d { " up "}
-                    neigh.add(this.up)
-                }
-            } else {
-                if (DEBUG_DIR) d { " no up "}
-            }
-            if (passable.get(this.downEnd) && passable.get(this.downEndRight)) {
-                if (this.down.within()) {
-                    if (DEBUG_DIR)  d { " down "}
-                    neigh.add(this.down)
-                }
-            } else {
-                if (DEBUG_DIR) d { " no down ${passable.get(this.downEnd)}"}
-            }
-            if (passable.get(this.left) && passable.get(this.leftDown)) {
-                if (this.left.within()) {
-                    if (DEBUG_DIR) d { " left "}
-                    neigh.add(this.left)
-                }
-            } else {
-                if (DEBUG_DIR) d { " no left "}
-            }
-            if (passable.get(this.rightEnd) && passable.get(this.rightEndDown)) {
-                if (this.right.within()) {
-                    if (DEBUG_DIR) d { " right "}
-                    neigh.add(this.right)
-                }
-            } else {
-                if (DEBUG_DIR) d { " no right end ${this.rightEnd} end down ${this.rightEndDown}"}
-            }
-
-            return neigh
-        }
-
-    private val FramePoint.neighbors: List<FramePoint>
-        get() {
-            val neigh = mutableListOf<FramePoint>()
-            val up = this.up
-            if (blockPassable(up) && up.within()) {
-                neigh.add(up)
-            }
-            val down = this.down
-            if (blockPassable(down) && down.within()) {
-                neigh.add(down)
-            }
-            val right = this.right
-            if (blockPassable(right) && right.within()) {
-                neigh.add(right)
-            } else {
-                if (DEBUG) {
-                    d { " r $right not passable" }
-                }
-            }
-            val left = this.left
-            if (blockPassable(left) && left.within()) {
-                neigh.add(left)
-            }
-            return neigh
-        }
-
-    private fun blockPassable(point: FramePoint): Boolean {
-            return passable.get(point) && passable.get(point.justRightEndBottom)
-                    && passable.get(point.justRightEnd)
-                    && passable.get(point.justLeftBottom)
-        }
-
-        private fun FramePoint.within() =
-            x > -1 && x < passable.maxX && y > -1 && y <
-                    passable.maxY
 }

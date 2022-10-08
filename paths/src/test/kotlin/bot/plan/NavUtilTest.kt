@@ -2,8 +2,10 @@ package bot.plan
 
 import bot.GamePad
 import bot.plan.gastar.GStar
+import bot.plan.gastar.SkipLocations
 import bot.state.*
 import io.kotest.matchers.collections.shouldHaveAtLeastSize
+import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import org.junit.Ignore
@@ -26,8 +28,7 @@ class NavUtilTest {
         gstar.setEnemy(FramePoint(30, 15), 10)
 //        gstar.setEnemy(FramePoint(40, 25), 1)
 
-        gstar.route(FramePoint(10, 20),
-            FramePoint(45, 20))
+        gstar.route(FramePoint(10, 20), FramePoint(45, 20))
     }
 
     @Test
@@ -101,10 +102,16 @@ class NavUtilTest {
             when {
                 (x == from.x && y == from.y) -> "L"
                 (x == from.justRightEnd.x && y == from.justRightEnd.y) -> "R"
-                (x == from.leftDown.x && y == from.leftDown.y) -> "D"
+                (x == from.justLeftDown.x && y == from.justLeftDown.y) -> "D"
                 (x == from.justRightEndBottom.x && y == from
                     .justRightEndBottom.y) -> "Z"
-                v -> "."
+                v -> { "."
+//                    if (SkipLocations.hasPt(FramePoint(x, y))) {
+//                        "S"
+//                    } else {
+//                        "."
+//                    }
+                }
                 else -> "X"
             }
         }
@@ -124,6 +131,7 @@ class NavUtilTest {
         }
 
         route shouldNotBe null
+        route.size shouldBeGreaterThan 1
         NavUtil.directionTo(from, route[1]) shouldBe dirResult
     }
 
@@ -143,8 +151,35 @@ class NavUtilTest {
 //        check(120, FramePoint(106 ,128), FramePoint(48,1), GamePad.MoveUp)
 
         //(40 64) to (255 81)
-        check(119, FramePoint(40 ,64), FramePoint(255,80), GamePad.MoveRight)
+//        check(119, FramePoint(40 ,64), FramePoint(255,80), GamePad.MoveRight)
+
+        // leave level 1 but up too high
+        GStar.DEBUG = true
+        check(55, FramePoint(224 ,72), FramePoint(255,72), GamePad.MoveRight)
     }
+
+    @Test
+    fun `test move 40`() {
+        // should go up or at least right
+//        check(56, FramePoint(0, 72), FramePoint(112,0), GamePad.MoveRight)
+
+        //40
+//        check(40, FramePoint(112, 108), FramePoint(112,0), GamePad.MoveRight)
+
+        GStar.DEBUG = true
+        //check(55, FramePoint(112, 88), FramePoint(112,64), GamePad.MoveUp)
+//        42 target (152, 100) link (104, 98)
+        check(42, FramePoint(152, 100), FramePoint(104,98), GamePad.MoveUp)
+    }
+
+    @Test
+    fun `test move 44`() {
+        GStar.DEBUG = true
+        //check(55, FramePoint(112, 88), FramePoint(112,64), GamePad.MoveUp)
+//        42 target (152, 100) link (104, 98)
+        check(44, FramePoint(144, 120), FramePoint(144, 104), GamePad.MoveUp)
+    }
+     //40 from (0, 72) to (112, 0)
     //    56,72
     @Test
     fun `test directions`() {

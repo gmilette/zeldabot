@@ -6,7 +6,7 @@ import bot.state.FrameState
 import bot.state.MapLocationState
 import bot.state.MasterPlan
 
-class PlanRunner(private val masterPlan: MasterPlan) {
+class PlanRunner(val masterPlan: MasterPlan) {
     var action = masterPlan.pop()
 
     // currently does this
