@@ -26,6 +26,7 @@ Hacks, AI, hard coded solutions, anything possible, must complete within 1 hour 
 * https://www.zeldaxtreme.com/legend-of-zelda/maps/ (extreme!)
 * https://i.imgur.com/oXLeDkn.png labeled where stuff is
 * https://twitter.com/MetroidMike64/status/1059878242839076864/photo/1 map grid
+* https://retrocomputing.stackexchange.com/questions/6388/were-the-dungeons-in-legend-of-zelda-designed-to-fit-together [level maps together]
 
 # AI gym
 * https://naereen.github.io/gym-nes-mario-bros/
@@ -39,9 +40,12 @@ Hacks, AI, hard coded solutions, anything possible, must complete within 1 hour 
 # game dev links
 * https://www.libretro.com/index.php/api/
 
-# rom 
-* https://datacrystal.romhacking.net/wiki/The_Legend_of_Zelda:ROM_map
-* https://datacrystal.romhacking.net/wiki/The_Legend_of_Zelda
+# rom / ram memory / dev maps
+* https://datacrystal.romhacking.net/wiki/The_Legend_of_Zelda:ROM_map [most complete]
+* https://www.romhacking.net/?page=documents&game=712
+* http://www.bwass.org/romhack/zelda1/zelda1rammap.txt
+* https://userpages.monmouth.com/~colonel/videogames/zelda/moonmap.html
+* https://github.com/aldonunez/zelda1-disassembly/tree/master/src
 
 # game bot
 * https://humbletoolsmith.com/2018/04/25/creating-a-bot-to-play-nes-games-with-csharp/
