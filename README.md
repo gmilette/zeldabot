@@ -3,6 +3,8 @@ A bot can beat NES Zelda in under an hour
 
 # Status reports
 - Hey I just started this project!
+12/2022
+- Zeldabot can beat level 1, 2, and 3 most of the time, with a clumsy, wiggly romp. Written in 6500 lines of Kotlin. Go zeldabot go!
 
 # rules
 Hacks, AI, hard coded solutions, anything possible, must complete within 1 hour limit, all items must be collected
