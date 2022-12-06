@@ -30,6 +30,7 @@ Hacks, AI, hard coded solutions, anything possible, must complete within 1 hour 
 * https://i.imgur.com/oXLeDkn.png labeled where stuff is
 * https://twitter.com/MetroidMike64/status/1059878242839076864/photo/1 map grid
 * https://retrocomputing.stackexchange.com/questions/6388/were-the-dungeons-in-legend-of-zelda-designed-to-fit-together [level maps together]
+* https://ian-albert.com/games/legend_of_zelda_maps/zelda-dungeon6.png [labelled dungeon maps]
 
 # AI gym
 * https://naereen.github.io/gym-nes-mario-bros/
