@@ -1,29 +1,31 @@
 package bot.plan.gastar
 
-import bot.GamePad
 import bot.state.*
+import bot.state.map.Direction
 import util.Map2d
 import util.d
 import java.util.*
 
 class GStar(
     private val passable: Map2d<Boolean>,
+    halfPassable: Boolean = true
 ) {
     companion object {
         var DEBUG = false
         private val DEBUG_DIR = false
         val DEBUG_ONE = false
-        val MAX_ITER = 300
+        val MAX_ITER = 100000
         val doSkip = true
     }
 
     private var iterCount = 0
     // return to this map
-    private val initialMap: Map2d<Int> = passable.map { if (it) 1 else 99999 }
+//    private val initialMap: Map2d<Int> = passable.map { if (it) 1 else 99999 }
+    private val initialMap: Map2d<Int> = passable.map { 1 }
     // f values
     private var costsF: Map2d<Int> = initialMap.copy()
 
-    private val neighborFinder = NeighborFinder(passable)
+    private val neighborFinder = NeighborFinder(passable, halfPassable)
 
     fun reset() {
         costsF = initialMap.copy()
@@ -40,6 +42,11 @@ class GStar(
 
     val totalCosts = mutableMapOf<FramePoint, Int>()
     val distanceToGoal = mutableMapOf<FramePoint, Int>()
+
+    private val avoid = mutableListOf<FramePoint>()
+    fun clearAvoid() {
+        avoid.clear()
+    }
 
     fun route(start: FramePoint, target: FramePoint): List<FramePoint> {
         return route(start, listOf(target))
@@ -69,7 +76,7 @@ class GStar(
         while (true && iterCount < MAX_ITER) {
             iterCount++
             if (DEBUG) {
-                d { " ****** ITERATION $iterCount ****** "}
+                d { " ****** ITERATION $iterCount open ${openList.size} ****** "}
             }
             if (DEBUG) {
                 openList.forEach {
@@ -96,8 +103,9 @@ class GStar(
 
             closedList.add(point)
 
-            (neighborFinder.neighbors(point) - closedList).forEach {
-                if (passable.get(it)) {
+            (neighborFinder.neighbors(point) - closedList - avoid).shuffled().forEach {
+                // no need to check passable already did
+//                if (passable.get(it)) { // WTF removing causes infinite loop
 //                if (passableFrom(point, it)) {
                     // raw cost of this cell
                     val cost = costsF.get(it)
@@ -111,11 +119,14 @@ class GStar(
 
                     if (DEBUG) {
                         d {
-                            " neighbor cost ${it.x} ${it.y} = $totalCost parent " +
+                            " neighbor cost ${it.x} ${it.y} ${it.direction ?: "n"} = $totalCost parent " +
                                     "$parentCost toGoal = $costToGoal"
                         }
                     }
-                    if (cost < costFromStart.getOrDefault(it, Int.MAX_VALUE)) {
+                // bunch of changes...
+                    val costS = costFromStart.getOrDefault(it, Int.MAX_VALUE)
+//                d {" cost: $cost $costS"}
+                    if (cost < costS) {
                         distanceToGoal[it] = costToGoal
                         costFromStart[it] = pathCost
                         totalCosts[it] = totalCost
@@ -124,11 +135,11 @@ class GStar(
                             openList.add(it)
                         }
                     }
-                } else {
-                    if (DEBUG) {
-                        d { " not passible $it" }
-                    }
-                }
+//                } else {
+//                    if (DEBUG) {
+//                        d { " not passible $it" }
+//                    }
+//                }
             }
 
             if (DEBUG_ONE) {
@@ -136,6 +147,9 @@ class GStar(
             }
         }
 
+        if (DEBUG) {
+            d { " ****** DONE $iterCount ****** "}
+        }
         // todo: actually should pick the best path so far..
         return generatePath(target, cameFrom, point)
     }
@@ -181,16 +195,24 @@ class GStar(
         var current = target ?: lastExplored
 
         val path = mutableListOf(current)
+//        d { " came froms "}
+//        for (entry in cameFrom) {
+//            d { " ${entry.key} -> ${entry.value}"}
+//        }
         while (cameFrom.containsKey(current)) {
             current = cameFrom.getValue(current)
             path.add(0, current)
         }
         if (DEBUG) {
             if (!cameFrom.containsKey(target)) {
-                d { "no target use $lastExplored"}
+                d { "no target use $lastExplored looked for $target"}
 
                 cameFrom.forEach { t, u ->
                     d { " $t -> $u"}
+                }
+                d { " targets "}
+                for (target in targets) {
+                    d {" targ $target" }
                 }
             }
             d { " start " }
@@ -201,6 +223,14 @@ class GStar(
         }
 
         return path.toList().also {
+            // this doesn't work well
+//            if (it.size > 2) {
+//                d { " avoid ${avoid}"}
+//                avoid.add(0, it[1])
+//            }
+//            if (avoid.size > 8) {
+//                avoid.removeLast()
+//            }
             if (DEBUG) {
                 d {
                     it.fold("") { sum, e -> "$sum -> ${e.x},${e.y}" }

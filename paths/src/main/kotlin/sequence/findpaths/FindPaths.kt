@@ -1,6 +1,6 @@
 package sequence.findpaths
 
-import bot.state.*
+import bot.state.map.mapPassable
 import com.github.doyaaaaaken.kotlincsv.client.CsvReader
 import com.github.doyaaaaaken.kotlincsv.client.CsvWriter
 import org.jgrapht.Graph
@@ -50,17 +50,20 @@ class FindPaths {
         }
     }
 
+    // used?
     fun buildMapLocFiles() {
         val fileContent =
-            this::class.java.classLoader.getResource("nes_zelda_overworld_tile_map.txt")
+            this::class.java.classLoader.getResource("nes_zelda_overworld_tile_map_holes.txt")
                 .readText()
 
         val replaced = fileContent.replace(" ", ",")
         val rows: List<List<String>> = CsvReader().readAll(replaced)
 
+        // mapTile2.csv: original
+        // mapTile3.csv: contains bomb holes
         // this works, just need to make sure the bottom is cut off
         val csvWriter2 = CsvWriter()
-        csvWriter2.open("mapTile2.csv", false) {
+        csvWriter2.open("mapTile4.csv", false) {
             // how many rows to read for the first set
             rows.forEachIndexed { x, row ->
                 val rowData = mutableListOf<String>()
@@ -251,12 +254,6 @@ class FindPaths {
 //        tours.forEach { aTour ->
 //            evaluateTour(aTour.map { it.point }, dijkstraAlg)
 //        }
-
-        // can I show a path in the matrix?
-        ///val g = LabeledGraph { a - b - c - a }
-        //        .toJGraphT().toKaliningraph()
-        //        .toTinkerpop().toKaliningraph()
-        //        .toGraphviz().toKaliningraph()
 
 //        https://graphviz.org/Gallery/undirected/grid.html
 

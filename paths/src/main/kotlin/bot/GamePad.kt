@@ -4,7 +4,7 @@ import nintaco.api.GamepadButtons
 
 enum class GamePad {
     None, MoveRight, MoveLeft, MoveDown, MoveUp,
-    A, B, Select, Start, ReleaseA
+    A, B, Select, Start, ReleaseA, ReleaseB
 }
 
 val GamePad.toGamepadButton

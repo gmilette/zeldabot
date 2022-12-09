@@ -2,10 +2,13 @@ package bot.plan
 
 import bot.*
 import bot.state.*
+import bot.state.map.Direction
+import bot.state.map.MapCell
+import bot.state.map.MapConstants
+import bot.state.map.MapRoute
 import util.d
 import kotlin.math.abs
 import kotlin.random.Random
-import java.util.TreeMap
 
 class MoveTowardsUtil() {
     private var directions: MutableList<GamePad> = mutableListOf()
@@ -91,16 +94,23 @@ class MoveTowardsUtil() {
 }
 
 data class PreviousMove(
-    val from: FramePoint = FramePoint(0, 0), val to:
-    FramePoint = FramePoint(0, 0),
+    var previous: PreviousMove? = null,
+    val from: FramePoint = FramePoint(0, 0),
+    val to: FramePoint = FramePoint(0, 0),
     val actual: FramePoint = FramePoint(0, 0),
+    val move: GamePad = GamePad.None,
     val triedToMove: Boolean = true,
     // calculated
     val skipped: Boolean = from.distTo(actual) > 1,
-    val distOff: Int = from.distTo(actual)
+    val distOff: Int = from.distTo(actual),
+    val distOffx: Int = abs(from.x - actual.x),
+    val distOffy: Int = abs(from.y - actual.y),
+    val distAlert: Boolean = ((from.x == to.x && from.x != actual.x) || (from.y == to.y && from.y != actual.y) )
 ) {
     val didntMove: Boolean = from.x == actual.x && from.y == actual.y
     val movedNear: Boolean = from.distTo(actual) < 3
+    val dir: Direction
+        get() = from.dirTo(to)
 }
 
 object NavUtil {
@@ -121,13 +131,18 @@ object NavUtil {
         return manhattanPathFinder(mapCell, from, to) ?: randomDir()
     }
 
-    fun randomDir(): GamePad {
+    fun randomDir(from: FramePoint = FramePoint(100, 100)): GamePad {
+        d { " random dir "}
         val dir = Random.nextInt(4)
-        return when (dir) {
-            0 -> GamePad.MoveLeft
-            1 -> GamePad.MoveRight
-            2 -> GamePad.MoveUp
-            else -> GamePad.MoveDown
+        return when  {
+            dir == 0 && from.x > 3 -> GamePad.MoveLeft
+            dir == 1 && from.x < MapConstants.MAX_X - 3 -> GamePad.MoveRight
+            dir == 2 && from.y > 3 -> GamePad.MoveUp
+            dir == 3 && from.y < MapConstants.MAX_Y - 3 -> GamePad.MoveDown
+            else -> {
+                d { " no movement "}
+                GamePad.None
+            }
         }
     }
 
@@ -214,20 +229,34 @@ object NavUtil {
 //        return directionToAvoidingObstacleM(mapCell, from, to)
     }
 
+    fun routeToAvoidingObstacle(mapCell: MapCell, from: FramePoint, to: List<FramePoint>):
+            List<FramePoint> {
+        return routeToAvoidingObstacleR(mapCell, from, to)
+//        return directionToAvoidingObstacleM(mapCell, from, to)
+    }
+
     fun directionToAvoidingObstacleR(mapCell: MapCell, from: FramePoint, to:
         List<FramePoint>):
             GamePad {
         val route = mapCell.gstar.route(from, to)
-        d { " route size ${route.size} "}
+//        d { " loc: ${mapCell.mapLoc} route size ${route.size} "}
         if (route.size < 2) return randomDir()
 
-        val nextPoint = mapCell.gstar.route(from, to)[1]
-        d { " next point $nextPoint"}
+//        val nextPoint = mapCell.gstar.route(from, to)[1]
+        val nextPoint = route[1]
         return if (nextPoint == null) {
             randomDir()
         } else {
             directionTo(from, nextPoint)
+        }.also {
+            d { " next point $nextPoint dist ${from.distTo(nextPoint)} dir: $it"}
         }
+    }
+
+    fun routeToAvoidingObstacleR(mapCell: MapCell, from: FramePoint, to: List<FramePoint>):
+            List<FramePoint> {
+        val route = mapCell.gstar.route(from, to)
+        return route
     }
 
     // test case
@@ -256,19 +285,50 @@ object NavUtil {
     }
 
     fun directionTo(from: FramePoint, to: FramePoint): GamePad {
+        return directionToDist(from, to)
+//        return when {
+//            // TODO: Redo this
+//            from.x == to.x -> {
+//                if (from.y < to.y) GamePad.MoveDown else GamePad.MoveUp
+//            }
+//            from.y == to.y -> {
+//                if (from.x < to.x) GamePad.MoveRight else GamePad.MoveLeft
+//            }
+//            else -> {
+//                // it could be a corner
+//                d { " default direction to x ${abs(from.x - to.x)} y ${abs(from.y - to.y)}" }
+////                if (abs(from.x - to.x) == 2 && abs(from.y - to.y) == 1) {
+////                    d { " default direction to DOWN corner " }
+////                    GamePad.MoveDown
+////                }
+//                NavUtil.randomDir()
+////                GamePad.MoveLeft
+//            }
+//        }
+    }
+
+    fun directionToDist(from: FramePoint, to: FramePoint): GamePad {
+        val xDist = abs(from.x - to.x)
+        val yDist = abs(from.y - to.y)
         return when {
-            from.x == to.x -> {
+            // TODO: Redo this
+            xDist < yDist -> {
                 if (from.y < to.y) GamePad.MoveDown else GamePad.MoveUp
             }
-            from.y == to.y -> {
+            else ->
                 if (from.x < to.x) GamePad.MoveRight else GamePad.MoveLeft
             }
-            else -> {
-                d { " default direction to " }
-                GamePad.MoveLeft
-            }
+//            else -> {
+//                // it could be a corner
+//                d { " default direction to x ${abs(from.x - to.x)} y ${abs(from.y - to.y)}" }
+////                if (abs(from.x - to.x) == 2 && abs(from.y - to.y) == 1) {
+////                    d { " default direction to DOWN corner " }
+////                    GamePad.MoveDown
+////                }
+//                NavUtil.randomDir()
+////                GamePad.MoveLeft
+//            }
         }
-    }
 
     fun directionToDir(from: FramePoint, to: FramePoint): Direction {
         return when {
@@ -282,6 +342,18 @@ object NavUtil {
         }
     }
 
+    fun MapLoc.directionToDir(to: MapLoc): Direction {
+        return when {
+            to - this == 1 -> Direction.Right
+            to - this == -1 -> Direction.Left
+            to - this == 16 -> Direction.Down
+            to - this == -16 -> Direction.Up
+            else -> {
+                d { " default maploc direction to " }
+                Direction.Left
+            }
+        }
+    }
 
     fun moveTowards(link: FramePoint, target: FramePoint): GamePad {
         val dist = abs(target.x - link.x) + abs(target

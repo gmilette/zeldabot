@@ -1,7 +1,7 @@
 package util
 
 import bot.state.FramePoint
-import bot.state.MapConstants
+import bot.state.map.MapConstants
 import com.github.doyaaaaaken.kotlincsv.client.CsvWriter
 
 class Map2d<T>(

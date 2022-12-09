@@ -1,25 +1,35 @@
 package bot
 
-import bot.plan.NavUtil
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import bot.state.*
 import bot.plan.PlanRunner
+import bot.plan.gastar.SkipPathDb
+import bot.state.map.Hyrule
+import bot.state.map.MapCell
+import bot.state.map.MapConstants
 import nintaco.api.API
 import nintaco.api.ApiSource
 import nintaco.api.Colors
 import nintaco.api.GamepadButtons
+import sequence.ZeldaItem
 import util.d
-import kotlin.random.Random
+import util.i
 
-class ZeldaBot {
+class ZeldaBot(private val monitor: ZeldaMonitor) {
     private val api: API = ApiSource.getAPI()
 
     fun launch() {
+        d { " master plan ${plan.masterPlan.toStringAll()}"}
         api.addFrameListener { renderFinished() }
         api.addStatusListener { message: String -> statusChanged(message) }
         api.addActivateListener { apiEnabled() }
         api.addDeactivateListener { apiDisabled() }
         api.addStopListener { dispose() }
         api.run()
+
 //        api.isPaused = true
 //        api.stepToNextFrame()
     }
@@ -60,24 +70,26 @@ class ZeldaBot {
     var currentGamePad = GamePad.MoveRight;
     private var untilFrame = 0
     private val pressTime = 1
+    private val collectSkip = false
 
     private val hyrule: Hyrule = Hyrule()
 
     var frameStateUpdater: FrameStateUpdater = FrameStateUpdater(api, hyrule)
 
-    val plan = PlanRunner(PlanBuilder.makeMasterPlan(hyrule.mapCellsObject))
+    val plan = PlanRunner(PlanBuilder.makeMasterPlan(hyrule.mapCellsObject, hyrule.levelMap))
 
     var previousLink: FramePoint = FramePoint()
     val collect = SkipLocationCollector()
 
     private fun getAction(currentFrame: Int, currentGamePad: GamePad): GamePad {
         frameStateUpdater.updateFrame(currentFrame, currentGamePad)
-//        if (true) {
-//        val link = frameStateUpdater.getLink()
-//        collect.collect(link, previousLink)
-//        previousLink = link
-//        return GamePad.None
-//        }
+        if (collectSkip) {
+            val link = frameStateUpdater.getLink()
+            collect.collect(link, previousLink)
+            previousLink = link
+            d { collect.toString()}
+            return GamePad.None
+        }
         // filters..
 
         if (frameStateUpdater.state.frameState.isDoneScrolling) {
@@ -91,6 +103,8 @@ class ZeldaBot {
         }
 
         refillBombsIfOut()
+
+        frameStateUpdater.setSword(ZeldaItem.WhiteSword)
 
         // always do
         val nextGamePad = if (false && frameStateUpdater.state.previousMove.skipped) { // && Random.nextBoolean()) {
@@ -120,14 +134,26 @@ class ZeldaBot {
 
         frameStateUpdater.state.previousGamePad = nextGamePad
 
-        plan.masterPlan.log()
-        d { "current --> ${frameStateUpdater.state.frameState.mapLoc}" +
-                " target ${plan.target()} " + "link " +
-                "${frameStateUpdater.state.frameState.link.point} +" +
-                " prev ${frameStateUpdater.state.previousMove}"}
-        drawIt(plan.target(), frameStateUpdater.state.frameState
-            .mapLoc.toString() + " ${frameStateUpdater.state.frameState.link
-            .point}")
+        d { plan.toString() }
+        with (frameStateUpdater.state) {
+            val currentCell = currentMapCell
+            val locCoordinates = "${frameState.level}: ${frameState.mapLoc} : ${currentCell.mapData.name}"
+            d { "current --> " +
+                    "$locCoordinates " +
+                    " target ${plan.target()} " + "link " +
+                    "${frameState.link.point} +" +
+                    " prev ${previousMove}"}
+
+            val alive = this.frameState.enemiesClosestToLink(EnemyState.Alive).size
+            val dead = this.frameState.enemiesClosestToLink(EnemyState.Dead).size
+//            val unknown = this.frameState.enemiesClosestToLink(EnemyState.Unknown).size
+            val killedCt = this.frameState.killedEnemyCount
+            val saw = this.numEnemiesSeen
+            val aliveT = "A: ${alive} d: $dead k ${killedCt} s $saw"
+//            val killedT = "K: ${this.frameState.killedEnemyCount}"
+
+            drawIt(plan.target(), "$locCoordinates $link $aliveT")
+        }
 //        drawMap(frameStateUpdater.state.mapCell)
 
         return nextGamePad
@@ -156,18 +182,6 @@ class ZeldaBot {
     private fun drawIt(point: FramePoint, text: String) {
         val pt = point.toScreenY
         api.drawSprite(SPRITE_ID, pt.x, pt.y)
-//        if (spriteX + SPRITE_SIZE == 255) {
-//            spriteVx = -1
-//        } else if (spriteX == 0) {
-//            spriteVx = 1
-//        }
-//        if (spriteY + SPRITE_SIZE == 231) {
-//            spriteVy = -1
-//        } else if (spriteY == 8) {
-//            spriteVy = 1
-//        }
-//        spriteX += spriteVx
-//        spriteY += spriteVy
         api.color = Colors.DARK_BLUE
         api.fillRect(strX - 1, strY - 1, strWidth + 2, 9)
 //        api.setColor(Colors.BLUE)
@@ -177,21 +191,42 @@ class ZeldaBot {
     }
 
     private fun refillBombsIfOut() {
-        if (frameStateUpdater.state.frameState.inventory.numBombs == 0) {
+        if (frameStateUpdater.state.frameState.inventory.numBombs <= 2) {
             api.writeCPU(Addresses.numBombs, 8)
         }
+        if (frameStateUpdater.state.frameState.inventory.numKeys == 0) {
+            api.writeCPU(Addresses.numKeys, 8)
+        }
+
     }
+
+    private val skipDb = SkipPathDb()
 
     private fun renderFinished() {
         val currentFrame = api.frameCount
-        currentGamePad = getAction(currentFrame, currentGamePad)
-        d { "execute ### $currentFrame ${frameStateUpdater.state.frameState.link.point}"}
+        if (collectSkip) {
+            currentGamePad = getAction(currentFrame, currentGamePad)
+        }
 
-        // just make link invincible 2 hearts
-        api.writeCPU(0x066F, 21)
+        d { "execute ### $currentFrame"}
+        monitor.update(frameStateUpdater.state, plan)
+
+        if (frameStateUpdater.state.currentMapCell.mapLoc != 55) {
+            // just make link invincible 2 hearts
+            api.writeCPU(Addresses.heartContainers, 51)
+        }
 //        return
+        currentGamePad = getAction(currentFrame, currentGamePad)
+        if (doAct) {
+            skipDb.save(
+                frameStateUpdater.state.frameState.level,
+                frameStateUpdater.state.currentMapCell.mapLoc,
+                frameStateUpdater.state.previousMove
+            )
+        }
+        d { " action: ${frameStateUpdater.state.frameState.link.point} -> $currentGamePad"}
 
-        val act = true //currentFrame % 3 == 0
+        val act = doAct && !collectSkip //currentFrame % 3 == 0
         if (act) {
             //  how many times does it press the key? //maybe it should
             //  release after press once?
@@ -226,14 +261,16 @@ class ZeldaBot {
                 )
                 GamePad.Start -> api.writeGamepad(0, GamepadButtons.Start, true)
                 GamePad.ReleaseA -> api.writeGamepad(0, GamepadButtons.A, false)
+                GamePad.ReleaseB -> api.writeGamepad(0, GamepadButtons.B, false)
                 else -> {}
             }
-            if (untilFrame <= currentFrame) {
-                currentGamePad = getAction(currentFrame, currentGamePad)
-                untilFrame = currentFrame + pressTime
-            }
+//            if (untilFrame <= currentFrame) {
+//                currentGamePad = getAction(currentFrame, currentGamePad)
+//                d { " action: ${frameStateUpdater.state.frameState.link.point} -> $currentGamePad"}
+//                untilFrame = currentFrame + pressTime
+//            }
         } else {
-//            d { "skip" }
+            currentGamePad = getAction(currentFrame, currentGamePad)
 //            val toRelease = mutableSetOf<GamePad>(GamePad.MoveRight, GamePad.MoveUp, GamePad.MoveLeft, GamePad.MoveDown)
 //            toRelease.forEach { api.writeGamepad(0, it.toGamepadButton, false) }
 //            api.writeGamepad(0, GamePad.MoveRight.toGamepadButton, false)
@@ -247,11 +284,28 @@ class ZeldaBot {
         private const val STRING = "####"
         private const val SPRITE_ID = 123
         private const val SPRITE_SIZE = 2
+        var doAct = true
+        @JvmStatic
+        fun startIt(monitor: ZeldaMonitor) {
+            ApiSource.initRemoteAPI("localhost", 9999)
+            ZeldaBot(monitor).launch()
+        }
 
         @JvmStatic
         fun main(args: Array<String>) {
             ApiSource.initRemoteAPI("localhost", 9999)
-            ZeldaBot().launch()
+            ZeldaBot(NoOp()).launch()
+        }
+    }
+
+    interface ZeldaMonitor {
+        fun update(state: MapLocationState, plan: PlanRunner)
+    }
+
+    class NoOp: ZeldaMonitor {
+        override fun update(state: MapLocationState, plan: PlanRunner) {
+            // todo
         }
     }
 }
+

@@ -8,7 +8,7 @@ fun main(args: Array<String>) {
     println("Program arguments: ${args.joinToString()}")
 
 //    sequence.findpaths.FindPaths().start()
-//    sequence.findpaths.FindPaths().buildMapLocFiles()
+    sequence.findpaths.FindPaths().buildMapLocFiles()
 //    FindPaths().createMapCells()
 
 }

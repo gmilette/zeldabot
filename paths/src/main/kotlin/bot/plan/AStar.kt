@@ -2,7 +2,7 @@ package bot.plan
 
 import bot.GamePad
 import bot.state.FramePoint
-import bot.state.MapCell
+import bot.state.map.MapCell
 import util.d
 import java.util.*
 

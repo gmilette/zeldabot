@@ -1,7 +1,10 @@
 package bot.state
 
 import bot.GamePad
+import bot.state.map.Direction
+import bot.state.map.MapConstants
 import sequence.ZeldaItem
+import util.d
 import kotlin.math.abs
 
 typealias MapLoc = Int
@@ -9,7 +12,12 @@ typealias MapLoc = Int
 enum class EnemyState {
     // might be alive or dead
     Unknown,
-    Alive, Dead
+    Alive,
+    Dead, // was alive before but now is dead
+//    ProbablyDead,
+    NotSeen,
+    Loot,
+    Projectile
 }
 
 enum class Dir {
@@ -25,6 +33,7 @@ data class FrameState(
      */
     val gameMode: Int = 5,
     val enemies: List<Agent> = emptyList(),
+    val killedEnemyCount: Int = 0,
     val link: Agent = Agent(FramePoint(0, 0), Dir.Right),
 //    val link: FramePoint = Undefined,
 //    val linkDir: Dir = Dir.Unknown,
@@ -50,16 +59,47 @@ data class FrameState(
 //    val droppedItems: List<Int> = emptyList()
     // has to have all the locations on the map
 //    val map.
-    val inventory: Inventory = Inventory(0, 0, emptySet())
+    /**
+     * if the enemy has dropped the dungeon item, like the skeleton holding the key
+     */
+    val inventory: Inventory = Inventory(0, 0, 0, 0, emptySet()),
+    val hasDungeonItem: Boolean = false,
+    val tenth: Int = 0,
+    val level: Int = 0,
+    val clockActivated: Boolean
 ) {
     val isScrolling: Boolean
         get() = gameMode == 7 || gameMode == 6 || gameMode == 4
 
     val isDoneScrolling: Boolean
         get() = gameMode == 4
+
+    fun enemiesClosestToLink(stateOfEnemy: EnemyState = EnemyState.Alive): List<Agent> {
+        return enemies.filter {
+            it.state == stateOfEnemy
+        }.sortedBy {
+            it.point.distTo(link.point)
+        }
+    }
+
+    fun logEnemies() {
+        d { " remaining enemies: ${enemies.size}" }
+        for (enemy in enemiesSorted) {
+            d { " remaining enemy $enemy" }
+        }
+    }
+
+    val enemiesSorted: List<Agent>
+        get() = enemies.sortedBy { it.point.distTo(link.point) }
 }
 
-data class Inventory(val selectedItem: Int, val numBombs: Int, val items: Set<ZeldaItem>)
+data class Inventory(
+    val selectedItem: Int,
+    val numBombs: Int,
+    val numRupees: Int,
+    val numKeys: Int,
+    val items: Set<ZeldaItem>
+)
 
 // y values are 0..7
 // x values are 0..15
@@ -83,7 +123,7 @@ val MapLoc.left
     get() = this - 1
 
 fun MapLocFromPoint(x: Int, y: Int): MapLoc =
-    x + 16*y
+    x + 16 * y
 
 data class MapCellPoint(val x: Int, val y: Int) {
     override fun toString(): String {
@@ -93,25 +133,36 @@ data class MapCellPoint(val x: Int, val y: Int) {
 
 fun MapCellPoint.toFrame() = FramePoint(this.x, this.y)
 
-data class FramePoint(val x: Int = 0, val y: Int = 0): Graph.Vertex {
+data class FramePoint(val x: Int = 0, val y: Int = 0, val direction: Direction? = null) : Graph.Vertex {
+    constructor(x: Int = 0, y: Int = 0) : this(x, y, null)
+
     override fun equals(other: Any?): Boolean {
         return if (other is FramePoint) {
             other.x == x && other.y == y
         } else false
     }
+
+    val oneStr: String
+        get() = "${x}_$y"
+
     override fun toString(): String {
         return "($x, $y)"
     }
 }
+
+fun FramePoint.addDirection(dir: Direction) =
+    this.copy(direction = dir)
 
 fun FramePoint.directionTo(to: FramePoint): GamePad {
     return when {
         x == to.x -> {
             if (y < to.y) GamePad.MoveDown else GamePad.MoveUp
         }
+
         y == to.y -> {
             if (x < to.x) GamePad.MoveRight else GamePad.MoveLeft
         }
+
         else -> GamePad.MoveLeft
     }
 }
@@ -121,9 +172,11 @@ fun FramePoint.dirTo(to: FramePoint): Direction {
         x == to.x -> {
             if (y < to.y) Direction.Down else Direction.Up
         }
+
         y == to.y -> {
             if (x < to.x) Direction.Right else Direction.Left
         }
+
         else -> Direction.Down
     }
 }
@@ -138,7 +191,7 @@ fun FramePoint.adjustBy(pad: GamePad) =
     }
 
 val FramePoint.toScreenY
-   get() = FramePoint(x, y + 61)
+    get() = FramePoint(x, y + 61)
 
 val FramePoint.isTop
     get() = y == 0
@@ -150,9 +203,9 @@ val FramePoint.isLeft
     get() = x == 0
 
 val FramePoint.justMid
-    get() = FramePoint(x, y + 9)
+    get() = FramePoint(x, y + 8)
 val FramePoint.justMidEnd
-    get() = FramePoint(x + 15, y + 9)
+    get() = FramePoint(x + 15, y + 8)
 
 val FramePoint.upEnd
     get() = FramePoint(x, y + 8 - 1)
@@ -164,6 +217,8 @@ val FramePoint.up2
     get() = FramePoint(x, y - 2)
 val FramePoint.down
     get() = FramePoint(x, y + 1)
+val FramePoint.down7
+    get() = FramePoint(x, y + 7)
 val FramePoint.down2
     get() = FramePoint(x, y + 2)
 val FramePoint.downEnd

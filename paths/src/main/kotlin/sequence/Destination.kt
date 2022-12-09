@@ -40,7 +40,6 @@ object Dest {
 sealed class DestType {
     data class LEVEL(val which: Int, val entry: EntryType = EntryType.Walk) :
         DestType()
-
     data class ITEM(val name: ZeldaItem, val entry: EntryType = EntryType.Walk)
         : DestType()
     data class SHOP(val shopType: ShopType = ShopType.C, val entry: EntryType
@@ -63,6 +62,63 @@ enum class ShopType {
 
 enum class EntryType {
     Walk, Fire, Bomb, Statue, WhistleWalk
+}
+
+data class LevelData(
+    val level: Int,
+    val numKeysIn: Int,
+    val numKeysNeeded: Int
+)
+
+object LevelsData {
+    val levels = listOf(
+        // total 20 keys needed only
+        LevelData(
+            level = 1,
+            numKeysIn = 5,
+            numKeysNeeded = 4 // only if use a bomb
+        ),
+        LevelData(
+            level = 2,
+            numKeysIn = 3,
+            numKeysNeeded = 0 // no keys needed is confirmed
+        ),
+        LevelData(
+            level = 3,
+            numKeysIn = 4,
+            numKeysNeeded = 1 // if you have bombs you can skip keys 2 // visual
+        ),
+        LevelData(
+            level = 4,
+            numKeysIn = 2,
+            numKeysNeeded = 2 // visual
+        ),
+        LevelData(
+            level = 5,
+            numKeysIn = 2,
+            numKeysNeeded = 3 //?
+        ),
+        LevelData(
+            level = 6,
+            numKeysIn = 3,
+            numKeysNeeded = 4 //?
+        ),
+        LevelData(
+            level = 7,
+            numKeysIn = 4,
+            numKeysNeeded = 3 //ish
+        ),
+        LevelData(
+            level = 8,
+            numKeysIn = 5,
+            numKeysNeeded = 2 // 2 needed before getting the magic key
+        ),
+        LevelData(
+            level = 9,
+            numKeysIn = 1,
+            numKeysNeeded = 0
+        ),
+    )
 }
 
 enum class ZeldaItem {
