@@ -1,7 +1,5 @@
 package bot.state
 
-import bot.Addresses
-
 val emptyAgent = Agent(FramePoint(0, 0), Dir.Right, EnemyState.Unknown,  0,0)
 data class Agent(
     val point: FramePoint,

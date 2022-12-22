@@ -1,4 +1,4 @@
-package bot.plan
+package bot.plan.astar
 
 import bot.GamePad
 import bot.state.FramePoint

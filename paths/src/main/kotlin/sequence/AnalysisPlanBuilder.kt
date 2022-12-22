@@ -145,17 +145,58 @@ class AnalysisPlanBuilder() {
         }
     }
 
+    class RoutePattern(
+        val from: MapLoc,
+        val to: MapLoc,
+        val transform: List<MapCell>) {
+
+        fun match(fromT: MapCell, toT: MapCell): Boolean =
+            (from == fromT.mapLoc && to == toT.mapLoc)
+    }
+
     class MasterPlanOptimizer(private val hyrule: Hyrule) {
         private val graph: Graph<MapCell, DefaultEdge> =
             DefaultDirectedGraph(DefaultEdge::class.java)
 //        private lateinit var shortestPath: DijkstraShortestPath<MapCell, DefaultEdge>
         private lateinit var shortestPath: FloydWarshallShortestPaths<MapCell, DefaultEdge>
 
+        private val patterns: MutableList<RoutePattern> = mutableListOf()
+
+        val Int.asLoc: MapLoc
+            get() = this
+
+        fun correct(path: List<MapCell>): List<MapCell> {
+            val corrected = mutableListOf<MapCell>()
+            var prev: MapCell? = null
+            for (mapCell in path) {
+                if (prev != null) {
+                    for (pattern in patterns) {
+                        if (pattern.match(prev, mapCell)) {
+                            corrected.addAll(pattern.transform)
+                        }
+                    }
+                }
+                corrected.add(mapCell)
+                prev = mapCell
+            }
+            return corrected
+        }
+
+        fun makePatterns() {
+            val start = 84.asLoc
+            val p = RoutePattern(
+                84, 85, hyrule.mapCellsFor(start, start.down, start.right, start.up)
+            )
+            patterns.add(p)
+        }
+
         // find the path between all the MapCell objects
         init {
             hyrule.mapCells.forEach {
                 graph.addVertex(it)
             }
+
+            makePatterns()
 
             d { " Num vertext: ${graph.vertexSet().size} " }
 
@@ -194,8 +235,20 @@ class AnalysisPlanBuilder() {
             add(63, 47, graph) // raft heart
             add(31, 15, graph) // 100 secret
 
+            // ahh he wont go through the water, need to make it accessible
+//            add(23, 24, graph)
+
+            // need to represent split screen routing
+            remove(98, 97, graph) // through 100 secret
+            remove(85, 86, graph) // can't go through to level 4 from here
+            remove(85, 84, graph) // can't go through to water
+
+            remove(85, 69, graph) // can't go up through this water
+
 //            shortestPath = DijkstraShortestPath(graph)
             shortestPath = FloydWarshallShortestPaths(graph)
+
+            // fix path
 
             // wtf 71
 //            d { " 71 ${hyrule.getMapCell(71).exits}" }
@@ -265,6 +318,11 @@ class AnalysisPlanBuilder() {
             graph.addEdge(hyrule.getMapCell(to), hyrule.getMapCell(from))
         }
 
+        private fun remove(from: Int, to: Int, graph: Graph<MapCell, DefaultEdge>) {
+            graph.removeEdge(hyrule.getMapCell(from), hyrule.getMapCell(to))
+            graph.removeEdge(hyrule.getMapCell(to), hyrule.getMapCell(from))
+        }
+
         fun evaluate(plan: Tour): TourEvaluation {
             val cells = plan.destinations.map { hyrule.getMapCell(it) }
             val distances = mutableListOf<Int>()
@@ -283,6 +341,13 @@ class AnalysisPlanBuilder() {
             return TourEvaluation(distances, plan)
         }
 
+        fun findPath(fromLoc: MapLoc, toLoc: MapLoc): GraphPath<MapCell, DefaultEdge>? {
+            // return a set of mapCel
+            val from = hyrule.getMapCell(fromLoc)
+            val to = hyrule.getMapCell(toLoc)
+            var paths = shortestPath.getPaths(from)
+            return paths.getPath(to)
+        }
         fun findPath(from: MapCell, to: MapCell): GraphPath<MapCell, DefaultEdge>? {
             // return a set of mapCel
             var paths = shortestPath.getPaths(from)

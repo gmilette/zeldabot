@@ -1,11 +1,13 @@
-package bot.state
+package bot.plan
 
 import bot.GamePad
-import bot.plan.*
-import bot.state.map.Direction
-import bot.state.map.MapCell
+import bot.plan.runner.MasterPlan
+import bot.state.FramePoint
+import bot.state.MapLoc
+import bot.state.map.Hyrule
 import bot.state.map.MapCells
 import bot.state.map.level.LevelMapCellsLookup
+import sequence.AnalysisPlanBuilder
 
 
 // master plan
@@ -24,14 +26,32 @@ object InLocations {
     val rightTop = FramePoint(208, 32) //todo
 
     object Overworld {
+        val woodSwordEntry = FramePoint(64, 17)
         val bombHeartSouth = FramePoint(136, 24)
         val arrowShop = FramePoint(48, 16)
+
         val shopRightItem = FramePoint(152, 97)
+        val centerItem = FramePoint(118, 94)
+        val shopHeartItem = FramePoint(152, 96)
 
         val ladderHeartShore = FramePoint(127, 80)
         val ladderHeart = FramePoint(191, 80)
         val inDungeonRaftHeard = FramePoint(96, 65)
-        val shopHeartItem = FramePoint(152, 96)
+
+        val start: MapLoc = 119
+        fun level(level: Int): MapLoc =
+                levelMapLoc[level] ?: 0
+        val levelMapLoc = mapOf(
+            1 to 55,
+            2 to 60,
+            3 to 116,
+            4 to 69,
+            5 to 11,
+            6 to 34,
+            7 to 66,
+            8 to 119,
+            9 to 5
+        )
     }
 
     object Level1 {
@@ -76,8 +96,12 @@ object PlanBuilder {
     val letterEntry = FramePoint(80, 64) // right before 80 80
 
     fun makeMasterPlan(mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
+        val planO = AnalysisPlanBuilder.MasterPlanOptimizer(Hyrule())
 
-        val builder = LocationSequenceBuilder(mapData, levelData, "get to lev 1")
+        val factory = SequenceFactory(mapData, levelData, planO)
+
+//        return levelTour(factory)
+        return real2(factory)
         // save game 6
 //        builder.startAt(44).seg("bomb heart")
 //            .bomb(bomb)
@@ -87,38 +111,83 @@ object PlanBuilder {
 //            .exitShop()
 //            .right.end
 //        return builder.build()
-//        return levelPlan(mapData, levelData, 4)
-        //val level1 = levelPlanDebug(mapData, levelData, 1)
-        return gatherHearts(mapData, levelData)
+//        return levelPlan(factory, 4)
+        //val level1 = levelPlanDebug(factory, 1)
+//        return gatherHearts(factory)
 
-//        return real(mapData, levelData)
+//        return real(factory)
     }
 
-    private fun real(mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
-        val level1 = levelPlan(mapData, levelData, 1)
-        val builder = LocationSequenceBuilder(mapData, levelData, "get to lev 1")
+    private fun levelTour(factory: SequenceFactory): MasterPlan {
+        val builder = factory.make("tour of levels")
+        return builder {
+            startAt(119)
+            seg("level1")
+            routeTo(InLocations.Overworld.level(1))
+            seg("level2")
+            routeTo(InLocations.Overworld.level(2))
+            seg("level3")
+            routeTo(InLocations.Overworld.level(3))
+            seg("level4")
+            routeTo(InLocations.Overworld.level(4))
+            seg("level5")
+            routeTo(InLocations.Overworld.level(5))
+            seg("level6")
+            routeTo(InLocations.Overworld.level(6))
+            seg("level7")
+            routeTo(InLocations.Overworld.level(7))
+            seg("level8")
+            routeTo(InLocations.Overworld.level(8))
+            seg("level9")
+            routeTo(InLocations.Overworld.level(9))
+        }.build()
+    }
+
+    private fun real2(factory: SequenceFactory): MasterPlan {
+        val builder = factory.make("begin!")
+        return builder {
+            startAt(InLocations.Overworld.start)
+            phase("BEGIN!")
+//            include(getWoodSword(factory))
+            include(goToLevel(factory, 2))
+//            .include(levelPlan(factory, 2))
+//            .include(gatherBeginningItems(factory))
+//            .include(goToLevel3(factory))
+//            .include(levelPlan(factory, 3))
+//            .include(goToLevel4(factory))
+//            .include(levelPlan(factory, 4))
+//            .include(gatherHearts(factory))
+//            .include(goToLevel2(factory))
+//            .include(levelPlan(factory, 2))
+        }.build()
+    }
+
+    private fun real(factory: SequenceFactory): MasterPlan {
+        val level1 = levelPlan(factory, 1)
+        val builder = factory.make("get to lev 1")
         return builder.startAt(119)
             .phase("get to level 1")
-            .include(goToLevel1(mapData, levelData))
+            .include(goToLevel1(factory))
             .include(level1)
-            .include(gatherBeginningItems(mapData, levelData))
-            .include(goToLevel3(mapData, levelData))
-            .include(levelPlan(mapData, levelData, 3))
-            .include(goToLevel4(mapData, levelData))
-            .include(levelPlan(mapData, levelData, 4))
-            .include(gatherHearts(mapData, levelData))
-            .include(goToLevel2(mapData, levelData))
-            .include(levelPlan(mapData, levelData, 2))
+            .include(gatherBeginningItems(factory))
+            .include(goToLevel3(factory))
+            .include(levelPlan(factory, 3))
+            .include(goToLevel4(factory))
+            .include(levelPlan(factory, 4))
+            .include(gatherHearts(factory))
+            .include(goToLevel2(factory))
+            .include(levelPlan(factory, 2))
             .end.build()
 
     }
 
-    fun levelPlanDebug(mapData: MapCells, levelData: LevelMapCellsLookup, level: Int): MasterPlan {
+    fun levelPlanDebug(factory: SequenceFactory, optimizer: AnalysisPlanBuilder.MasterPlanOptimizer, level:
+    Int): MasterPlan {
         // shared prob
         val downPoint = FramePoint(120, 90)
         val pushPoint = FramePoint()
         return if (level == 1) {
-            val builder = LocationSequenceBuilder(mapData, levelData, "Destroy level 1")
+            val builder = factory.make( "Destroy level 1")
 //            builder.inLevel.startAt(34)
 //                .push(InLocations.diamondLeftBottomPush, InLocations.diamondLeftTopPush)
 //                .startAt(127)
@@ -138,19 +207,34 @@ object PlanBuilder {
         }
     }
 
-    private fun levelPlan(mapData: MapCells, levelData: LevelMapCellsLookup, level: Int): MasterPlan {
+    private fun levelPlan(factory: SequenceFactory, level: Int): MasterPlan {
         return when (level) {
             1 -> {
-                levelPlan1(mapData, levelData)
+                levelPlan1(factory)
             }
             2 -> {
-                levelPlan2(mapData, levelData)
+                levelPlan2(factory)
             }
             3 -> {
-                levelPlan3(mapData, levelData)
+                levelPlan3(factory)
             }
             4 -> {
-                levelPlan4(mapData, levelData)
+                levelPlan4(factory)
+            }
+            5 -> {
+                levelPlan5(factory)
+            }
+            6 -> {
+                levelPlan6(factory)
+            }
+            7 -> {
+                levelPlan7(factory)
+            }
+            8 -> {
+                levelPlan8(factory)
+            }
+            9 -> {
+                levelPlan9(factory)
             }
             else -> {
                 MasterPlan(emptyList())
@@ -158,9 +242,9 @@ object PlanBuilder {
         }
     }
 
-    private fun levelPlan1(mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
+    private fun levelPlan1(factory: SequenceFactory): MasterPlan {
         val downPoint = FramePoint(120, 90)
-        val builder = LocationSequenceBuilder(mapData, levelData, "Destroy level 1")
+        val builder = factory.make( "Destroy level 1")
         return builder.inLevel.startAt(115)
             .seg("grab key")
             .left
@@ -221,8 +305,8 @@ object PlanBuilder {
     }
 
 
-    private fun levelPlan2(mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
-        val builder = LocationSequenceBuilder(mapData, levelData, "Destroy level 2")
+    private fun levelPlan2(factory: SequenceFactory): MasterPlan {
+        val builder = factory.make( "Destroy level 2")
 
         if (false) {
             return builder.lev(2).startAt(14)
@@ -288,8 +372,8 @@ object PlanBuilder {
             .build()
     }
 
-    private fun levelPlan3(mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
-        val builder = LocationSequenceBuilder(mapData, levelData, "Destroy level 3")
+    private fun levelPlan3(factory: SequenceFactory): MasterPlan {
+        val builder = factory.make( "Destroy level 3")
         // open questions: fighting the trap guys
         return builder.lev(3).startAt(105) // .startAt(124)
             .seg("grab key")
@@ -330,8 +414,8 @@ object PlanBuilder {
 
     }
 
-    private fun levelPlan4(mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
-        val builder = LocationSequenceBuilder(mapData, levelData, "Destroy level 4")
+    private fun levelPlan4(factory: SequenceFactory): MasterPlan {
+        val builder = factory.make( "Destroy level 4")
         if (false) {
             return builder.lev(4).startAt(33)
                 .seg("go go go")
@@ -398,9 +482,111 @@ object PlanBuilder {
             .end
             .build()
     }
+    private fun startGetSword(factory: SequenceFactory): MasterPlan {
+        val builder = factory.make( "Get to level 1")
 
-    private fun goToLevel1(mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
-        val builder = LocationSequenceBuilder(mapData, levelData, "Get to level 1")
+        return builder {
+            startAt(119)
+            seg("get brown sword")
+//            navI
+            end
+        }.build()
+    }
+
+    private fun goToLevel1(factory: SequenceFactory): MasterPlan {
+        val builder = factory.make( "Get to level 1")
+
+        return builder {
+            seg("level1")
+            routeTo(InLocations.Overworld.level(1))
+            end
+        }.build()
+    }
+
+    private fun getWoodSword(factory: SequenceFactory): MasterPlan {
+        val builder = factory.make( "Get wood sword")
+
+        return builder {
+            seg("get wood sword")
+            goTo(InLocations.Overworld.woodSwordEntry)
+            goIn(GamePad.MoveUp, 5)
+            goTo(InLocations.Overworld.centerItem)
+            exitShop()
+            goIn(GamePad.MoveDown, 5)
+            end
+        }.build()
+    }
+
+    private fun goToLevel(factory: SequenceFactory, level: Int): MasterPlan {
+        val builder = factory.make( "Get to level $level")
+
+        return builder {
+            seg("level $level")
+            startAt(InLocations.Overworld.start)
+            routeTo(InLocations.Overworld.level(level), "level $level")
+            end
+        }.build()
+    }
+
+    private fun levelPlan5(factory: SequenceFactory): MasterPlan {
+        val builder = factory.make( "Get to level 1")
+        return builder.lev(5).startAt(119)
+            .seg("move to level 1")
+            .right.up.up.up.up.left
+//            .goIn(level1Pt) // works
+            .end
+            .build()
+    }
+
+    private fun levelPlan6(factory: SequenceFactory): MasterPlan {
+        val builder = factory.make( "Get to level 1")
+        return builder.lev(6).startAt(119)
+            .seg("move to level 1")
+            .right.up.up.up.up.left
+//            .goIn(level1Pt) // works
+            .end
+            .build()
+    }
+
+    private fun levelPlan7(factory: SequenceFactory): MasterPlan {
+        val builder = factory.make( "Get to level 1")
+        return builder.lev(7).startAt(119)
+            .seg("move to level 1")
+            .right.up.up.up.up.left
+//            .goIn(level1Pt) // works
+            .end
+            .build()
+    }
+
+    private fun levelPlan8(factory: SequenceFactory): MasterPlan {
+        val builder = factory.make( "Get to level 1")
+        return builder.lev(8).startAt(119)
+            .seg("move to level 1")
+            .right.up.up.up.up.left
+            .end
+            .build()
+    }
+
+    private fun levelPlan9(factory: SequenceFactory): MasterPlan {
+        val builder = factory.make( "Get to level 1")
+        return builder.lev(9).startAt(119)
+            .seg("move to level 1")
+            .right.up.up.up.up.left
+            .end
+            .build()
+    }
+
+    private fun goToLevel1L(factory: SequenceFactory): MasterPlan {
+        val builder = factory.make( "Get to level 1")
+        return builder.startAt(119)
+            .seg("move to level 1")
+            .routeTo(55)
+            .end
+            .build()
+    }
+
+    private fun goToLevel2(factory: SequenceFactory): MasterPlan {
+        val builder = factory.make( "Get to level 1")
         return builder.startAt(119)
             .seg("move to level 1")
             .right.up.up.up.up.left
@@ -409,18 +595,8 @@ object PlanBuilder {
             .build()
     }
 
-    private fun goToLevel2(mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
-        val builder = LocationSequenceBuilder(mapData, levelData, "Get to level 1")
-        return builder.startAt(119)
-            .seg("move to level 1")
-            .right.up.up.up.up.left
-//            .goIn(level1Pt) // works
-            .end
-            .build()
-    }
-
-    private fun gatherHearts(mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
-        val builder = LocationSequenceBuilder(mapData, levelData, "Gather hearts for level 5")
+    private fun gatherHearts(factory: SequenceFactory): MasterPlan {
+        val builder = factory.make( "Gather hearts for level 5")
         return builder.startAt(69)
             .seg("go get hearts, and capture level 2")
             .down //69
@@ -479,8 +655,8 @@ object PlanBuilder {
             .build()
     }
 
-    private fun gatherBeginningItems(mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
-        val builder = LocationSequenceBuilder(mapData, levelData, "Destroy level 4")
+    private fun gatherBeginningItems(factory: SequenceFactory): MasterPlan {
+        val builder = factory.make( "Destroy level 4")
         return builder.startAt(115)
             .seg("go go go")
             .phase("gather stuff and blue ring")
@@ -524,294 +700,27 @@ object PlanBuilder {
             .build()
     }
 
-    private fun goToLevel3(mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
-        val builder = LocationSequenceBuilder(mapData, levelData, "Destroy level 4")
+    private fun goToLevel3(factory: SequenceFactory): MasterPlan {
+        val builder = factory.make( "Destroy level 4")
         return builder.startAt(115)
             .seg("go go go")
             .end
             .build()
     }
 
-    private fun goToLevel4(mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
-        val builder = LocationSequenceBuilder(mapData, levelData, "Destroy level 4")
+    private fun goToLevel4(factory: SequenceFactory): MasterPlan {
+        val builder = factory.make( "Destroy level 4")
         return builder.startAt(115)
             .seg("go go go")
             .end
             .build()
     }
 
-    private fun blankSegment(mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
-        val builder = LocationSequenceBuilder(mapData, levelData, "Destroy level 4")
+    private fun blankSegment(factory: SequenceFactory): MasterPlan {
+        val builder = factory.make( "Destroy level 4")
         return builder.lev(4).startAt(115)
             .seg("go go go")
             .end
             .build()
-    }
-
-
-    class LocationSequenceBuilder(
-        private val mapData: MapCells,
-        private val levelData: LevelMapCellsLookup,
-        private var phase: String = ""
-    ) {
-        private var segment: String = ""
-        private var plan = mutableListOf<Action>()
-        private var lastMapLoc = 0
-        private val builder = this
-        private val OVERWORLD_LEVEL = 0
-        private var level: Int = OVERWORLD_LEVEL
-        private var segments = mutableListOf<PlanSegment>()
-
-        private fun makeSegment() {
-            if (plan.isNotEmpty()) {
-                segments.add(PlanSegment(phase, segment, plan.toList()))
-                plan = mutableListOf()
-            }
-        }
-
-        fun startAt(loc: MapLoc): LocationSequenceBuilder {
-            lastMapLoc = loc
-            return this
-        }
-
-        fun include(other: MasterPlan): LocationSequenceBuilder {
-            makeSegment()
-            segments.addAll(other.segments)
-            return this
-        }
-
-        fun phase(name: String): LocationSequenceBuilder {
-            makeSegment()
-            phase = name
-            return this
-        }
-
-        fun seg(name: String): LocationSequenceBuilder {
-            makeSegment()
-            segment = name
-            return this
-        }
-
-        val end: LocationSequenceBuilder
-            get() {
-                makeSegment()
-                plan.add(EndAction())
-                return this
-            }
-        val up: LocationSequenceBuilder
-            get() {
-                add(lastMapLoc.up)
-                return this
-            }
-        fun upTo(loc: MapLoc): LocationSequenceBuilder {
-            val nextLoc = loc
-            add(nextLoc, Unstick(MoveTo(mapCell(nextLoc), Direction.Up)))
-            return this
-        }
-        val loot: LocationSequenceBuilder
-            get() {
-                add(lastMapLoc, GetLoot())
-                return this
-            }
-        val pickupDeadItem: LocationSequenceBuilder
-            get() {
-                add(lastMapLoc, PickupDroppedDungeonItemAndKill())
-                return this
-            }
-        val wait: LocationSequenceBuilder
-            get() {
-                add(lastMapLoc, Wait(2500))
-                return this
-            }
-        val killb: LocationSequenceBuilder
-            get() {
-                add(lastMapLoc, KillAll(useBombs = true, waitAfterAttack = false))
-                return this
-            }
-        val killR: LocationSequenceBuilder
-            get() {
-                add(lastMapLoc, KillAll(useBombs = true, waitAfterAttack = true))
-                return this
-            }
-        val kill: LocationSequenceBuilder
-            get() {
-                add(lastMapLoc, KillAll())
-                return this
-            }
-        val kill2: LocationSequenceBuilder
-            get() {
-                add(lastMapLoc, KillAll(numberLeftToBeDead = 2))
-                return this
-            }
-        val upLootThenMove: LocationSequenceBuilder
-            get() {
-                val nextLoc = lastMapLoc.up
-                add(nextLoc, lootThenMove(mapCell(nextLoc)))
-                return this
-            }
-        val upk: LocationSequenceBuilder
-            get() {
-                addKill(lastMapLoc.up)
-                return this
-            }
-        val upm: LocationSequenceBuilder
-            get() {
-                // don't try to fight
-                val nextLoc = lastMapLoc.up
-                add(nextLoc, Unstick(MoveTo(mapCell(nextLoc))))
-                return this
-            }
-        val down: LocationSequenceBuilder
-            get() {
-                add(lastMapLoc.down)
-                return this
-            }
-        val inLevel: LocationSequenceBuilder
-            get() {
-                level = 1
-                return this
-            }
-        fun lev(levelIn: Int): LocationSequenceBuilder {
-            level = levelIn
-            return this
-        }
-        val inOverworld: LocationSequenceBuilder
-            get() {
-                level = OVERWORLD_LEVEL
-                return this
-            }
-        val left: LocationSequenceBuilder
-            get() {
-                add(lastMapLoc.left)
-                return this
-            }
-        val leftLoot: LocationSequenceBuilder
-            get() {
-                val nextLoc = lastMapLoc.left
-                add(nextLoc, GetLoot())
-                return this
-            }
-        val leftm: LocationSequenceBuilder
-            get() {
-                val nextLoc = lastMapLoc.left
-                add(nextLoc, Unstick(MoveTo(mapCell(nextLoc))))
-                return this
-            }
-        val rightKillForKey: LocationSequenceBuilder
-            get() {
-                val nextLoc = lastMapLoc.right
-                // todo: can stop after get a key
-                add(nextLoc, killThenLootThenMove(mapCell(nextLoc)))
-                return this
-            }
-        val right: LocationSequenceBuilder
-            get() {
-                add(lastMapLoc.right)
-                return this
-            }
-        val rightk: LocationSequenceBuilder
-            get() {
-                lootKill()
-                add(lastMapLoc.right)
-                return this
-            }
-        val rightm: LocationSequenceBuilder
-            get() {
-                // don't try to fight
-                val nextLoc = lastMapLoc.right
-                add(nextLoc, Unstick(MoveTo(mapCell(nextLoc))))
-                return this
-            }
-
-        fun push(toB: FramePoint, toT: FramePoint): LocationSequenceBuilder {
-            add(lastMapLoc, InsideNavAbout(toB, 4))
-            add(lastMapLoc, GoDirection(GamePad.MoveUp, 100))
-            add(lastMapLoc, GoDirection(GamePad.MoveRight, 100))
-            add(lastMapLoc, InsideNav(InLocations.middleStair))
-            return this
-        }
-        fun pushWait(toB: FramePoint): LocationSequenceBuilder {
-            // if it fails need to retry
-            add(lastMapLoc, InsideNavAbout(toB, 4))
-            add(lastMapLoc, GoDirection(GamePad.MoveDown, 100))
-            add(lastMapLoc, Wait(300))
-            return this
-        }
-        fun go(to: FramePoint): LocationSequenceBuilder {
-            add(lastMapLoc, InsideNav(to))
-            return this
-        }
-
-        fun goTo(to: FramePoint): LocationSequenceBuilder {
-            goAbout(to, 4, 2, true)
-            return this
-        }
-
-        fun goAbout(to: FramePoint, horizontal: Int, vertical: Int = 1, negVertical: Boolean = false): LocationSequenceBuilder {
-            add(lastMapLoc, InsideNavAbout(to, horizontal, vertical, negVertical))
-            return this
-        }
-
-        fun goShop(to: FramePoint): LocationSequenceBuilder {
-            add(lastMapLoc, InsideNavShop(to))
-            return this
-        }
-
-        fun exitShop(): LocationSequenceBuilder {
-            add(lastMapLoc, ExitShop())
-            return this
-        }
-
-        fun lootKill(): LocationSequenceBuilder {
-            add(lastMapLoc, lootAndKill)
-            return this
-        }
-
-        fun goIn(dir: GamePad = GamePad.MoveUp, num: Int): LocationSequenceBuilder {
-            add(lastMapLoc, GoIn(moves = num, dir = dir))
-            return this
-        }
-
-        fun getSecret(): LocationSequenceBuilder {
-            val secretMoneyLocation: FramePoint = FramePoint(100, 100)
-            add(lastMapLoc, InsideNav(secretMoneyLocation))
-            return this
-        }
-
-        fun depart(): LocationSequenceBuilder {
-            val departSecretLocation: FramePoint = FramePoint(100, 100)
-            add(lastMapLoc, InsideNav(departSecretLocation)) // something different
-            return this
-        }
-
-        fun bomb(target: FramePoint): LocationSequenceBuilder {
-            add(lastMapLoc, Unstick(Bomb(target)))
-            return this
-        }
-
-        fun build(): MasterPlan {
-            return MasterPlan(segments.toList())
-        }
-
-        private fun mapCell(nextLoc: MapLoc): MapCell =
-            if (level == OVERWORLD_LEVEL) {
-                mapData.cell(nextLoc)
-            } else {
-                levelData.cell(level, nextLoc)
-            }
-
-        private fun add(nextLoc: MapLoc) {
-            add(nextLoc, opportunityKillOrMove(mapCell(nextLoc)))
-        }
-
-        private fun addKill(nextLoc: MapLoc) {
-            add(nextLoc, killThenLootThenMove(mapCell(nextLoc)))
-        }
-
-        private fun add(loc: MapLoc, action: Action): LocationSequenceBuilder {
-            lastMapLoc = loc
-            plan.add(action)
-            return this
-        }
     }
 }

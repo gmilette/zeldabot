@@ -1,11 +1,8 @@
 package bot
 
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Text
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import bot.plan.PlanBuilder
 import bot.state.*
-import bot.plan.PlanRunner
+import bot.plan.runner.PlanRunner
 import bot.plan.gastar.SkipPathDb
 import bot.state.map.Hyrule
 import bot.state.map.MapCell
@@ -16,7 +13,6 @@ import nintaco.api.Colors
 import nintaco.api.GamepadButtons
 import sequence.ZeldaItem
 import util.d
-import util.i
 
 class ZeldaBot(private val monitor: ZeldaMonitor) {
     private val api: API = ApiSource.getAPI()
@@ -105,6 +101,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         refillBombsIfOut()
 
         frameStateUpdater.setSword(ZeldaItem.WhiteSword)
+        frameStateUpdater.setLadderAndRaft()
 
         // always do
         val nextGamePad = if (false && frameStateUpdater.state.previousMove.skipped) { // && Random.nextBoolean()) {
@@ -149,7 +146,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 //            val unknown = this.frameState.enemiesClosestToLink(EnemyState.Unknown).size
             val killedCt = this.frameState.killedEnemyCount
             val saw = this.numEnemiesSeen
-            val aliveT = "A: ${alive} d: $dead k ${killedCt} s $saw"
+            val tenth = this.frameState.tenth
+            val aliveT = " t: $tenth A: ${alive} d: $dead k ${killedCt} s $saw"
 //            val killedT = "K: ${this.frameState.killedEnemyCount}"
 
             drawIt(plan.target(), "$locCoordinates $link $aliveT")

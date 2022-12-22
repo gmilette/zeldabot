@@ -41,11 +41,12 @@ repositories {
 }
 
 dependencies {
-    implementation(compose.desktop.currentOs)
+    //implementation(compose.desktop.currentOs)
+    implementation(compose.desktop.macos_arm64)
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.6.0")
     implementation("org.jgrapht:jgrapht-core:1.5.1")
-    testImplementation(kotlin("test"))
     implementation(files("libs/Nintaco.jar"))
+    testImplementation(kotlin("test"))
     implementation("co.touchlab:kermit:1.1.3")
     testImplementation("io.kotest:kotest-assertions-core-jvm:5.5.0")
 }

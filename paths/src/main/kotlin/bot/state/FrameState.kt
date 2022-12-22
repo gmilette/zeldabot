@@ -4,6 +4,7 @@ import bot.GamePad
 import bot.state.map.Direction
 import bot.state.map.MapConstants
 import sequence.ZeldaItem
+import sequence.zeldaItemsRequired
 import util.d
 import kotlin.math.abs
 
@@ -66,8 +67,10 @@ data class FrameState(
     val hasDungeonItem: Boolean = false,
     val tenth: Int = 0,
     val level: Int = 0,
-    val clockActivated: Boolean
+    val clockActivated: Boolean,
+    val swordUseCountdown: Int
 ) {
+    val canUseSword: Boolean = swordUseCountdown == 0
     val isScrolling: Boolean
         get() = gameMode == 7 || gameMode == 6 || gameMode == 4
 
@@ -99,7 +102,16 @@ data class Inventory(
     val numRupees: Int,
     val numKeys: Int,
     val items: Set<ZeldaItem>
-)
+) {
+    val percentComplete: Float
+        get() = items.size.toFloat() / zeldaItemsRequired.size.toFloat()
+
+    val missingItems: Set<ZeldaItem>
+        get() = zeldaItemsRequired - items
+
+    val acquiredItems: Set<ZeldaItem>
+        get() = zeldaItemsRequired.intersect(items)
+}
 
 // y values are 0..7
 // x values are 0..15

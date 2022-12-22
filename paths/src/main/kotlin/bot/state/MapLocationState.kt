@@ -1,7 +1,7 @@
 package bot.state
 
 import bot.GamePad
-import bot.plan.PreviousMove
+import bot.plan.action.PreviousMove
 import bot.state.map.Hyrule
 import bot.state.map.MapCell
 

@@ -121,6 +121,25 @@ object LevelsData {
     )
 }
 
+//todo if you got the white sword, do you still have the wooden?
+val zeldaItemsRequired = setOf<ZeldaItem>(
+    ZeldaItem.MagicSword,
+    ZeldaItem.RedRing,
+    ZeldaItem.MagicalBoomerang,
+    ZeldaItem.BookOfMagic,
+    ZeldaItem.SilverArrow,
+    ZeldaItem.Bow,
+    ZeldaItem.Raft,
+    ZeldaItem.Ladder,
+    ZeldaItem.Letter,
+    ZeldaItem.RedCandle,
+    ZeldaItem.Whistle,
+    ZeldaItem.PowerBracelet,
+    ZeldaItem.MagicKey,
+    ZeldaItem.Potion,
+    ZeldaItem.Wand
+)
+
 enum class ZeldaItem {
     None,
     // named

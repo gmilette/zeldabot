@@ -1,7 +1,7 @@
 package bot.state.map
 
 import bot.GamePad
-import bot.plan.NavUtil
+import bot.plan.action.NavUtil
 import bot.plan.gastar.GStar
 import bot.state.*
 import bot.state.map.level.LevelMapCellsLookup
@@ -9,8 +9,6 @@ import sequence.DestType
 import util.Map2d
 import util.d
 import java.io.File
-import java.util.function.Supplier
-import kotlin.random.Random
 
 
 /**
@@ -34,6 +32,9 @@ class Hyrule {
 
     val mapCells: Collection<MapCell>
         get() = map.values
+
+    fun mapCellsFor(vararg locs: MapLoc) =
+        locs.map { getMapCell(it) }
 
     fun near(from: MapCell, direction: Direction): MapCell? {
         try {

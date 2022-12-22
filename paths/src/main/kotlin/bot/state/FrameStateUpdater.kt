@@ -1,7 +1,7 @@
 package bot.state
 
 import bot.*
-import bot.plan.PreviousMove
+import bot.plan.action.PreviousMove
 import bot.state.map.Hyrule
 import bot.state.map.MapConstants
 import nintaco.api.API
@@ -16,6 +16,11 @@ class FrameStateUpdater(
     fun getLinkY() = api.readCPU(Addresses.linkY)
     fun getLink() = FramePoint(getLinkX(), getLinkY())
     var state: MapLocationState = MapLocationState(hyrule = hyrule)
+
+    fun setLadderAndRaft() {
+        api.writeCPU(Addresses.hasLadder, 1)
+        api.writeCPU(Addresses.hasRaft, 1)
+    }
 
     fun setSword(item: ZeldaItem) {
         when (item) {
@@ -148,6 +153,8 @@ class FrameStateUpdater(
         //24 coin
         //33 clock
 
+        val swordUseCountdown = api.readCPU(Addresses.swordUseCountdown)
+
         val subY = api.readCPU(Addresses.ZeroPage.subY)
         val subX = api.readCPU(Addresses.ZeroPage.subX)
         val mapLoc = api.readCPU(Addresses.ZeroPage.mapLoc)
@@ -239,7 +246,7 @@ class FrameStateUpdater(
 //        state.enemyReasoner.log()
         //enemies
         val frame = FrameState(gameMode, reasonerEnemies, killedEnemyCount, link, subPoint,
-            mapLoc, inventory, hasDungeonItem, tenth, level, clockActivated)
+            mapLoc, inventory, hasDungeonItem, tenth, level, clockActivated, swordUseCountdown)
 
         this.state.previousLocation = link.point
 

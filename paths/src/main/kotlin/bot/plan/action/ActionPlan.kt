@@ -1,7 +1,7 @@
-package bot.plan
+package bot.plan.action
 
 import bot.GamePad
-import bot.plan.NavUtil.directionToDir
+import bot.plan.action.NavUtil.directionToDir
 import bot.plan.gastar.FrameRoute
 import bot.state.*
 import bot.state.map.*
@@ -440,10 +440,10 @@ private class RouteTo(val params: Param = Param()) {
             forceNew = true
             params.planCountMax = 1000
         } else {
-            d { " oops there are alive enemies, keep it" }
-            for (enemy in state.frameState.enemies) {
-                d { " ememy: $enemy" }
-            }
+//            d { " oops there are alive enemies, keep it" }
+//            for (enemy in state.frameState.enemies) {
+//                d { " ememy: $enemy" }
+//            }
             params.planCountMax = 20
         }
 
@@ -629,6 +629,13 @@ class Unstick(private val wrapped: Action, private val howLong:Int = 5000) : Act
         get() = "Wait for ${wrapped.name}"
 }
 
+// complete when link is at this square, otherwise route back to this square
+// this helps
+//class GetBackTo(val next: MapCell, val forceDirection: Direction? = null) : Action {
+//    private val routeTo = RouteTo(params = RouteTo.Param(considerLiveEnemies = false))
+//
+//}
+
 class MoveTo(val next: MapCell, val forceDirection: Direction? = null) : Action {
     private val routeTo = RouteTo(params = RouteTo.Param(considerLiveEnemies = false))
 
@@ -660,6 +667,8 @@ class MoveTo(val next: MapCell, val forceDirection: Direction? = null) : Action 
 
     private var dir: Direction = Direction.Down
 
+    private var start: MapCell? = null
+
     override fun nextStep(state: MapLocationState): GamePad {
         d { " DO MOVE TO cell ${next.mapLoc}" }
 
@@ -669,17 +678,23 @@ class MoveTo(val next: MapCell, val forceDirection: Direction? = null) : Action 
 
 //        val current = state.hyrule.levelMap.cell(1, state.currentMapCell.mapLoc)
         val current = state.currentMapCell
+        if (start == null) {
+            start = current
+        }
         val next = next
         val linkPt = state
             .frameState
             .link.point
 
-//        val dir = NavUtil.directionToDir(current.point.toFrame(), next.point.toFrame())
-        dir = if (forceDirection == null) {
-            current.mapLoc.directionToDir(next.mapLoc)
-        } else {
-            forceDirection
-        }
+        // TODO: need to figure out how to get back on track if get off the plan for some reason
+//        val isInCurrent = false
+//        dir = when {
+//            !isInCurrent -> current.mapLoc.directionToDir(start!!.mapLoc)
+//            else -> forceDirection ?: current.mapLoc.directionToDir(next.mapLoc)
+//        }
+        dir = forceDirection ?: current.mapLoc.directionToDir(next.mapLoc)
+
+
 //        val exit = state.currentMapCell.exitFor(dir) ?: return NavUtil.randomDir(linkPt)
 //        val exit = when (dir) {
 //            Direction.Left -> exitA // keep
@@ -968,7 +983,7 @@ class KillAll(
                 val dist = firstEnemy.point.distTo(link.point)
                 //d { " go find $firstEnemy from $link distance: $dist"}
                 when {
-                    dist < 18 -> {
+                    dist < 18 && state.frameState.canUseSword -> {
                         // is linked turned in the correct direction towards
                         // the enemy?
                         previousAttack = true

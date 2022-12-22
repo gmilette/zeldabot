@@ -3,7 +3,7 @@ package bot.state.map
 import bot.state.MapLoc
 
 class MapCells(
-    private val mapCells: Map<MapLoc, MapCell>
+    private val mapCells: Map<MapLoc, MapCell> = emptyMap()
 ) {
     operator fun invoke(mapLoc: MapLoc): MapCell {
         return cell(mapLoc)

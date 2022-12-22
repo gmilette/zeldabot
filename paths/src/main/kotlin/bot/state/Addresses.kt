@@ -1,4 +1,4 @@
-package bot
+package bot.state
 
 object Addresses {
    // game
@@ -229,6 +229,8 @@ object Addresses {
    val dungeonFloorItem = 0x097
 
    val clockActivated = 0x066C
+
+   val swordUseCountdown = 0x004C
 
    // inventory
    val selectedItem = 0x0656

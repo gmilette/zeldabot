@@ -29,16 +29,20 @@ class LevelCellBuilder {
         buildLevels(LevelSpecBuilder().buildLevel5())
 
     fun level6(): MapCells =
-        buildLevels(LevelSpecBuilder().buildLevel6())
+        MapCells()
+//        buildLevels(LevelSpecBuilder().buildLevel6())
 
     fun level7(): MapCells =
-        buildLevels(LevelSpecBuilder().buildLevel7())
+        MapCells()
+//        buildLevels(LevelSpecBuilder().buildLevel7())
 
     fun level8(): MapCells =
-        buildLevels(LevelSpecBuilder().buildLevel8())
+        MapCells()
+//        buildLevels(LevelSpecBuilder().buildLevel8())
 
     fun level9(): MapCells =
-        buildLevels(LevelSpecBuilder().buildLevel9())
+        MapCells()
+//        buildLevels(LevelSpecBuilder().buildLevel9())
 
     private fun buildLevels(spec: List<LevelSpec>): MapCells {
         val mapCells = mutableMapOf<MapLoc, MapCell>()

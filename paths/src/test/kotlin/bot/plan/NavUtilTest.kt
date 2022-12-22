@@ -1,6 +1,7 @@
 package bot.plan
 
 import bot.GamePad
+import bot.plan.astar.AStar
 import bot.plan.gastar.GStar
 import bot.state.*
 import bot.state.map.Hyrule

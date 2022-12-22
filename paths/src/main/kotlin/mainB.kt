@@ -4,7 +4,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
@@ -15,10 +14,8 @@ import androidx.compose.material.Checkbox
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import bot.ZeldaBot
-import bot.plan.PlanRunner
+import bot.plan.runner.PlanRunner
 import bot.state.*
-import bot.state.map.Hyrule
-import bot.state.map.MapCell
 import bot.state.map.MapConstants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -47,7 +44,7 @@ fun main() = application {
                 fontSize = 20.sp,
             )
             Text(
-                text = "Action (c): ${state?.planRunner?.masterPlan}",
+                text = "Phase: ${state?.planRunner?.masterPlan}",
                 fontSize = 20.sp,
             )
             Text(

@@ -1,13 +1,11 @@
-package bot.plan
+package bot.plan.runner
 
 import bot.GamePad
+import bot.plan.action.Action
 import bot.state.FramePoint
-import bot.state.FrameState
 import bot.state.MapLocationState
-import bot.state.MasterPlan
 import com.github.doyaaaaaken.kotlincsv.client.CsvWriter
 import util.d
-import java.util.concurrent.TimeUnit
 
 class PlanRunner(val masterPlan: MasterPlan) {
     var action = masterPlan.pop()

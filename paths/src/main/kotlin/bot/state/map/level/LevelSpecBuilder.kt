@@ -319,7 +319,6 @@ class LevelSpecBuilder {
             LevelSpec(stairbeforestair, e(l), "bomb left", LevelMapTemplateReader.Temp.lev_stairs_center),
             LevelSpec(stairbeforestair.left, e(r), "last path stair", LevelMapTemplateReader.Temp.lev_stairs_center),
 
-
             LevelSpec(second.left.up, e(u), "last path stair", LevelMapTemplateReader.Temp.lev_stair_side),
             LevelSpec(second.left.up.up, e(u), "!!!!GANNON!!!!", LevelMapTemplateReader.Temp.lev_gannon),
             LevelSpec(second.left.up.up.up, e(u), "Princess", LevelMapTemplateReader.Temp.lev_princess),

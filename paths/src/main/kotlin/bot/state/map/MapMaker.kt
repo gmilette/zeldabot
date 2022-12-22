@@ -73,6 +73,8 @@ object MapMaker {
 
 val mapPassable = setOf(
     "XB", //added for bomb
+    "XL", //added for ladder
+    "XR", //added for easy routing
     "7f",
     "00",
     "02",

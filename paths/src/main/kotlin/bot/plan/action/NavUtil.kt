@@ -1,4 +1,4 @@
-package bot.plan
+package bot.plan.action
 
 import bot.*
 import bot.state.*
@@ -62,9 +62,13 @@ class MoveTowardsUtil() {
         val distD = link.down.distTo(target)
 
         var all = mutableListOf<CostDir>()
-        if (moveLeftVal >= 0 && distLeft < distToGoal) all.add(CostDir(moveLeftVal,
-            distLeft, GamePad
-            .MoveLeft))
+        if (moveLeftVal >= 0 && distLeft < distToGoal) all.add(
+            CostDir(
+                moveLeftVal,
+                distLeft, GamePad
+                    .MoveLeft
+            )
+        )
         if (moveRightVal >= 0 && distR < distToGoal) all.add(CostDir
             (moveRightVal, distR, GamePad.MoveRight))
         if (moveUpValue >= 0 && distU < distToGoal) all.add(CostDir

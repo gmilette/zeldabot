@@ -1,6 +1,6 @@
 package bot.plan.gastar
 
-import bot.plan.PreviousMove
+import bot.plan.action.PreviousMove
 import bot.state.FramePoint
 import bot.state.MapLoc
 import com.github.doyaaaaaken.kotlincsv.client.CsvFileWriter
