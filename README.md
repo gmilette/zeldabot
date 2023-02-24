@@ -4,6 +4,13 @@ A bot can beat NES Zelda in under an hour
 # Status reports
 - Hey I just started this project!
 
+2/2023
+- Defeat Level 7 Grabby Hands screen
+1. If can't use sword, move to safe area inside ring
+2. If there is a hand, move to the attack spot, once at the attack spot attack continuously
+3. If there is no hand, move to the attract cell
+4. If all the hands are dead and there are only suns, proceed.
+
 12/2022
 - Zeldabot can beat level 1, 2, and 3 most of the time, with a clumsy, wiggly romp. Written in 6500 lines of Kotlin. Go zeldabot go!
 
