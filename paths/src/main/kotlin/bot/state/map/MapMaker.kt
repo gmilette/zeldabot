@@ -11,7 +11,7 @@ object MapMaker {
     fun createMapCells(data: Map<MapLoc, MapCellData>): Map<MapLoc, MapCell> {
         d { " read map cells 4" }
 
-        val emptyMapData = MapCellData("unknown")
+        val emptyMapData = MapCellData("unknown", Objective.empty)
 
         // now read in mapTile2
         val fileContent =
@@ -59,7 +59,9 @@ object MapMaker {
                     }
                 }
                 val mapCell = MapCell(
-                    point, mapLoc, data.get(mapLoc) ?: emptyMapData, Map2d(mapData)
+                    point, mapLoc, data.get(mapLoc) ?: emptyMapData, Map2d(mapData),
+                    halfPassable = true,
+                    isLevel = false
                 )
                 //168
 //                d { "map size ${mapCell.passable.map.size}" }
@@ -74,8 +76,14 @@ object MapMaker {
 val mapPassable = setOf(
     "XB", //added for bomb
     "XL", //added for ladder
-    "XR", //added for easy routing
-    "7f",
+    "XR", //added for easy raft, and rock near level 2
+    "XP", //added to pass though like in the 100 secret
+    "XC", //add for places than can be burned with candle // made some guesses about the heart burn
+    "XS", //statues that can be pushed
+    "XW", // revealed by whistle (level 7)
+//    "XN", // not passible so I can block certain paths
+//    "7f", // I do not think this is passable, it is the edge of the lakes, if I disable is it ok?
+    //"3e", // gets link stuck /// that is the half mountain. not exactly passable, but link can walk on it, i added this
     "00",
     "02",
     "06",

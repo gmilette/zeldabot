@@ -13,6 +13,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.material.Checkbox
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import bot.GamePad
 import bot.ZeldaBot
 import bot.plan.runner.PlanRunner
 import bot.state.*
@@ -20,6 +21,7 @@ import bot.state.map.MapConstants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import util.Map2d
 import util.d
 
 fun main() = application {
@@ -35,16 +37,14 @@ fun main() = application {
         var count = remember { mutableStateOf(0) }
         var showMap = remember { mutableStateOf(false) }
         val act = remember { mutableStateOf(true) }
-//        LaunchedEffect("autostart") {
-//            model.start()
-//        }
+
         Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
             Text(
                 text = "Plan: ${state?.mapLoc} ${state?.state?.currentMapCell?.mapData?.name ?: ""}",
                 fontSize = 20.sp,
             )
             Text(
-                text = "Phase: ${state?.planRunner?.masterPlan}",
+                text = state?.planRunner?.masterPlan?.toStringCurrentPlanPhase() ?: "None",
                 fontSize = 20.sp,
             )
             Text(
@@ -66,25 +66,105 @@ fun main() = application {
                 }) {
                 Text("START")
             }
-            Row {
-                Text("Act")
-                Checkbox(
-                    checked = act.value,
-                    onCheckedChange = {
-                        act.value = it
-                        model.changeAct(it)
-                    }
-                )
+            Button(modifier = Modifier.align(Alignment.CenterHorizontally),
+                onClick = {
+                    model.skip()
+                }) {
+                Text("Skip")
+            }
+            Row(
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Button(
+                    onClick = {
+                        model.unStick()
+                    }) {
+                    Text("Unstick")
+                }
+                Button(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = {
+                        model.forceDir(GamePad.MoveRight)
+                    }) {
+                    Text("  R  ")
+                }
+                Button(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = {
+                        model.forceDir(GamePad.MoveLeft)
+                    }) {
+                    Text("  L  ")
+                }
+                Button(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = {
+                        model.forceDir(GamePad.MoveUp)
+                    }) {
+                    Text("  U  ")
+                }
+                Button(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = {
+                        model.forceDir(GamePad.MoveDown)
+                    }) {
+                    Text("  D  ")
+                }
+                Button(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = {
+                        model.forceDir(GamePad.Start, 2)
+                    }) {
+                    Text("  S  ")
+                }
+
+                Button(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = {
+                        model.updateEnemies()
+                    }) {
+                    Text("  Update Enemies  ")
+                }
+
+            }
+            Row(
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Row(
+                ) {
+                    Text("Ladder")
+                    Checkbox(
+                        checked = act.value,
+                        onCheckedChange = {
+                            act.value = it
+                            model.ladder(it)
+                        }
+                    )
+                }
             }
 
-            Row {
-                Text("ShowMap")
-                Checkbox(
-                    checked = showMap.value,
-                    onCheckedChange = {
-                        showMap.value = it
-                    }
-                )
+            Row(
+                modifier = Modifier.align(Alignment.Start)
+            ) {
+                Row {
+                    Text("Act")
+                    Checkbox(
+                        checked = act.value,
+                        onCheckedChange = {
+                            act.value = it
+                            model.changeAct(it)
+                        }
+                    )
+                }
+
+                Row {
+                    Text("ShowMap")
+                    Checkbox(
+                        checked = showMap.value,
+                        onCheckedChange = {
+                            showMap.value = it
+                        }
+                    )
+                }
             }
 
             Row {
@@ -98,11 +178,24 @@ fun main() = application {
                 }
             }
 
+            Row {
+                Column {
+                    Text("Enemies", fontSize = 20.sp)
+                    state?.enemiesInfo?.let { enemies ->
+                        if (enemies.isNotEmpty()) {
+                            enemies.forEachIndexed { index, enemy ->
+                                Text("$index: ${enemy.state.name} ${enemy.point} ${enemy.point.toG} id ${enemy.droppedId}")
+                            }
+                        }
+                    }
+                }
+            }
+
 //            state?.state?.let {mState ->
 //                HyruleMap(mState, state.planRunner)
 //            }
             if (showMap.value) {
-                state?.state?.let { mState ->
+                state?.stateSnapshot?.let { mState ->
                     HyruleMap(mState, state.planRunner)
                 }
 //                showMap.value = false
@@ -115,7 +208,8 @@ fun main() = application {
 private fun HyruleMap(state: MapLocationState, plan: PlanRunner) {
     val link = state.link
     val path: List<FramePoint> = emptyList()
-    val enemies: List<Agent> = state.frameState.enemies
+    val enemies: List<Agent> = state.frameState.enemiesSorted.filter { it.state == EnemyState.Alive }
+    val projectiles: List<Agent> = state.frameState.enemiesSorted.filter { it.state == EnemyState.Projectile }
 
     val v = 2
     Canvas(
@@ -135,11 +229,14 @@ private fun HyruleMap(state: MapLocationState, plan: PlanRunner) {
             notPassable.color = Color.Gray
             val enemyPaint = Paint()
             enemyPaint.color = Color.Red
+            val projPaint = Paint()
+            projPaint.color = Color.Magenta
 //            canvas.drawRect(0f, 0f, MapConstants.MAX_X.toFloat()*(v+1), MapConstants.MAX_Y.toFloat()*(v+1), paint)
 
 //            d { " draw map cell"}
 //            //for
             val passable = state.currentMapCell.passable
+
 ////            canvas.drawRect(x.toFloat(),y.toFloat(),x+v.toFloat(),y+v.toFloat(), passablePaint)
             for (x in 0..255) {
                 val xa = x*v
@@ -157,7 +254,10 @@ private fun HyruleMap(state: MapLocationState, plan: PlanRunner) {
             drawPoint(canvas, v, link, paint)
             // draw path: linkPathPaint
             for (enemy in enemies) {
-                drawPoint(canvas, v, enemy.point, enemyPaint)
+                drawGridPoint(canvas, v, enemy.point, enemyPaint)
+            }
+            for (pro in projectiles) {
+                drawGridPoint(canvas, v, pro.point, projPaint)
             }
 
             drawPoint(canvas, v, plan.target(), targetPaint)
@@ -181,39 +281,79 @@ private fun drawPoint(canvas: Canvas, v: Int, pt: FramePoint, paint: Paint) {
     canvas.drawRect(pt.x*v.toFloat(),pt.y*v.toFloat(),(pt.x+1)*v.toFloat(),(pt.y+1)*v.toFloat(), paint)
 }
 
+private fun drawGridPoint(canvas: Canvas, v: Int, pt: FramePoint, paint: Paint) {
+    canvas.drawRect(pt.x*v.toFloat(),pt.y*v.toFloat(),(pt.x+16)*v.toFloat(),(pt.y+16)*v.toFloat(), paint)
+}
+
 class ZeldaModel : ZeldaBot.ZeldaMonitor {
     val scope = CoroutineScope(Dispatchers.IO)
     val plan = mutableStateOf<ShowState?>(null)
+    var enemiesInfo: List<Agent> = emptyList()
+    private var updateEnemiesOnNext: Boolean = false
+
+    private var stateSnapshot: MapLocationState? = null
+
+    private var bot: ZeldaBot? = null
 
     init {
         start()
     }
 
     override fun update(state: MapLocationState, planRunner: PlanRunner) {
+        if (updateEnemiesOnNext) {
+            enemiesInfo = state.frameState.enemies.toMutableList()
+            stateSnapshot = state
+            updateEnemiesOnNext = false
+        }
         plan.value = ShowState(
             currentAction = planRunner.action.name,
             mapLoc = state.frameState.mapLoc,
             state = state,
-            planRunner = planRunner
+            stateSnapshot = stateSnapshot,
+            planRunner = planRunner,
+            enemiesInfo = enemiesInfo
         )
     }
 
     fun start() {
         val monitor = this
         scope.launch {
-            ZeldaBot.startIt(monitor)
+            bot = ZeldaBot.startIt(monitor)
         }
 //        plan.value = ShowState("Starting...", 0, MapLocationState())
+    }
+
+    fun skip() {
+        bot?.skip()
+    }
+
+    fun unStick() {
+        ZeldaBot.unstick += 100
+    }
+
+    fun forceDir(forcedDirection: GamePad, num: Int = 100) {
+        ZeldaBot.unstick += num
+        ZeldaBot.forcedDirection = forcedDirection
+    }
+
+    fun updateEnemies() {
+        updateEnemiesOnNext = true
     }
 
     fun changeAct(act: Boolean) {
         ZeldaBot.doAct = act
     }
 
+    fun ladder(act: Boolean) {
+        ZeldaBot.hasLadder = act
+    }
+
     data class ShowState(
         val currentAction: String,
         val mapLoc: MapLoc = 0,
         val state: MapLocationState,
-        val planRunner: PlanRunner
+        val stateSnapshot: MapLocationState?,
+        val planRunner: PlanRunner,
+        var enemiesInfo: List<Agent> = emptyList()
     )
 }

@@ -1,67 +1,105 @@
 package sequence
 
+import bot.state.map.Direction
+import bot.state.map.Objective
+
 object Dest {
     val levels = listOf(
-        DestType.LEVEL(1),
-        DestType.LEVEL(2),
-        DestType.LEVEL(3),
-        DestType.LEVEL(4),
-        DestType.LEVEL(5),
-        DestType.LEVEL(6),
-        DestType.LEVEL(7),
-        DestType.LEVEL(8),
-        DestType.LEVEL(9, EntryType.Bomb)
+        DestType.Level(1),
+        DestType.Level(2),
+        DestType.Level(3),
+        DestType.Level(4),
+        DestType.Level(5),
+        DestType.Level(6),
+        DestType.Level(7, entry = EntryType.WhistleWalk),
+        DestType.Level(8, entry = EntryType.Fire(from = Direction.Right)),
+        DestType.Level(9, EntryType.Bomb)
     )
 
     fun level(number: Int) = levels[number - 1]
 
     class Items {
-        val heartBomb = DestType.ITEM(ZeldaItem.BombHeart)
-        val secret20Bomb = DestType.ITEM(ZeldaItem.BombHeart)
+        val heartBomb = DestType.Item(ZeldaItem.BombHeart)
+        val secret20Bomb = DestType.Item(ZeldaItem.BombHeart)
     }
 
     val itemLookup = mutableMapOf<ZeldaItem, DestType>().also { map ->
         ZeldaItem.values().forEach {
-            map[it] = DestType.ITEM(it)
+            map[it] = DestType.Item(it)
         }
     }
 
     fun item(item: ZeldaItem): DestType =
-        itemLookup[item] ?: DestType.ITEM(ZeldaItem.None)
+        itemLookup[item] ?: DestType.Item(ZeldaItem.None)
 
-    class Secrets {
-        val bomb20 = DestType.SECRET_TO_EVERYBODY(20, entry = EntryType.Bomb)
-        val walk100 = DestType.SECRET_TO_EVERYBODY(100, entry = EntryType.Bomb)
+    object Secrets {
+        val bomb20 = DestType.SecretToEverybody(20, entry = EntryType.Bomb)
+        val walk100 = DestType.SecretToEverybody(100)
+        val forest100South = DestType.SecretToEverybody(100, EntryType.Fire(from = Direction.Down))
+        val secretForest30NorthEast = DestType.SecretToEverybody(30, EntryType.Statue)
+        val bombSecret30North  = DestType.SecretToEverybody(30, EntryType.Bomb)
+        val bombHeartNorth = DestType.Heart(entry = EntryType.Bomb)
+        val bombHeartSouth = DestType.Heart(entry = EntryType.Bomb)
+        val fire100SouthBrown = DestType.SecretToEverybody(100, EntryType.Fire(from = Direction.Left)) // or right
+        val fire30GreenSouth = DestType.SecretToEverybody(30, EntryType.Fire(from = Direction.Left))
+        val level2secret10 = DestType.SecretToEverybody(10, EntryType.Statue)
+    }
+
+    object Heart {
+        val fireHeart = DestType.Heart(entry = EntryType.Fire(from = Direction.Up))
+        val raftHeart = DestType.Heart(entry = EntryType.Walk)
+        val ladderHeart = DestType.Heart(entry = EntryType.WalkIn)
+    }
+
+    object Shop {
+        val blueRing = DestType.Shop(ShopType.BlueRing, EntryType.Statue)
+        val candleShopMid = DestType.Shop(ShopType.C, EntryType.Walk)
+        val arrowShop = DestType.Shop(ShopType.B, EntryType.Walk)
+        val eastTreeShop = DestType.Shop(ShopType.C, EntryType.Fire(from = Direction.Left))
+
+        object ItemLocs {
+            val magicShield = Objective.ItemLoc.Left
+            val bait = Objective.ItemLoc.Right
+//            val candle = Objective.ItemLoc.Right
+//            val blueRing = Objective.ItemLoc.Right
+//            val arrow = Objective.ItemLoc.Right
+        }
     }
 
 //    2nd Potion
 }
 
-sealed class DestType {
-    data class LEVEL(val which: Int, val entry: EntryType = EntryType.Walk) :
-        DestType()
-    data class ITEM(val name: ZeldaItem, val entry: EntryType = EntryType.Walk)
-        : DestType()
-    data class SHOP(val shopType: ShopType = ShopType.C, val entry: EntryType
-    = EntryType.Walk) : DestType()
-    object WOMAN : DestType()
-    object MONEY_GAME : DestType()
+sealed class DestType(val entry: EntryType = EntryType.Walk, val name: String = "") {
+    object None: DestType(name = "none")
+    class Level(val which: Int, entry: EntryType = EntryType.Walk) :
+        DestType(entry, "level $which")
+    class Item(val item: ZeldaItem, entry: EntryType = EntryType.Walk)
+        : DestType(entry, "item ${item.name} by ${entry.name}")
+    class Shop(val shopType: ShopType = ShopType.C, entry: EntryType = EntryType.Walk) : DestType(entry,
+        name = "Shop ${shopType.name}")
+    object Woman : DestType()
+    object MoneyGame : DestType()
     object Fairy : DestType()
     object Travel : DestType()
-    data class SECRET_TO_EVERYBODY(
-        val
-        rupees: Int,
-        val
-        entry: EntryType = EntryType.Walk, val name: String = "secret_$rupees"
-    ) : DestType()
+    class Heart(entry: EntryType = EntryType.Walk) : DestType(entry, "heart by ${entry.name}")
+    class SecretToEverybody(
+        val rupees: Int = -1,
+        entry: EntryType = EntryType.Walk,
+    ) : DestType(entry, "secret_$rupees by ${entry.name}")
 }
 
 enum class ShopType {
     A, B, C, Woman, BlueRing
 }
 
-enum class EntryType {
-    Walk, Fire, Bomb, Statue, WhistleWalk
+sealed class EntryType(val name: String) {
+    object Walk: EntryType("walk")
+    object WalkIn: EntryType("walkIn")
+    object Bomb: EntryType("bomb")
+    data class Fire(val from: Direction = Direction.Down): EntryType("fire from $from")
+    data class Push(val from: Direction = Direction.Up): EntryType("push from $from")
+    object Statue: EntryType("statue")
+    object WhistleWalk: EntryType("whistlewalk")
 }
 
 data class LevelData(

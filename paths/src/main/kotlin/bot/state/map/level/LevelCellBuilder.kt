@@ -29,20 +29,16 @@ class LevelCellBuilder {
         buildLevels(LevelSpecBuilder().buildLevel5())
 
     fun level6(): MapCells =
-        MapCells()
-//        buildLevels(LevelSpecBuilder().buildLevel6())
+        buildLevels(LevelSpecBuilder().buildLevel6())
 
     fun level7(): MapCells =
-        MapCells()
-//        buildLevels(LevelSpecBuilder().buildLevel7())
+        buildLevels(LevelSpecBuilder().buildLevel7())
 
     fun level8(): MapCells =
-        MapCells()
-//        buildLevels(LevelSpecBuilder().buildLevel8())
+        buildLevels(LevelSpecBuilder().buildLevel8())
 
     fun level9(): MapCells =
-        MapCells()
-//        buildLevels(LevelSpecBuilder().buildLevel9())
+        buildLevels(LevelSpecBuilder().buildLevel9())
 
     private fun buildLevels(spec: List<LevelSpec>): MapCells {
         val mapCells = mutableMapOf<MapLoc, MapCell>()
@@ -77,8 +73,12 @@ class LevelCellBuilder {
 
         // todo, need to test this function
         val passable = toPass(level)
+//        val typed = toTyped(level)
 
-        return MapCell(MapCellPoint(0, 0), spec.loc, MapCellData(), passable, halfPassable = !spec.isGetItem)
+        // getItem true,
+        return MapCell(MapCellPoint(0, 0), spec.loc, MapCellData(spec.name, Objective.empty, ExitSet()), passable,
+            halfPassable = !spec.isGetItem && spec.isHalfPassable,
+            isLevel = true)
     }
 
     private fun fill(index: Int, fill: String, exits: ExitSet): String =
@@ -119,6 +119,7 @@ class LevelCellBuilder {
         repeat(16) {
             row += when {
                 it == 3 -> "."
+                it == 12 -> "."
                 else -> "X"
             }
         }
@@ -128,14 +129,14 @@ class LevelCellBuilder {
     fun toPass(rows: List<String>): Map2d<Boolean> {
         //map { it.asSequence().map { it != 'X' }
         // 16 trues
-            val passableCell = mutableListOf<Boolean>()
-            val notPassableCell = mutableListOf<Boolean>()
-            val halfPassableCellLeft = mutableListOf<Boolean>()
+        val passableCell = mutableListOf<Boolean>()
+        val notPassableCell = mutableListOf<Boolean>()
+        val halfPassableCellLeft = mutableListOf<Boolean>()
         val halfPassableCellRight = mutableListOf<Boolean>()
-            repeat(16) {
-                passableCell.add(true)
-                notPassableCell.add(false)
-            }
+        repeat(16) {
+            passableCell.add(true)
+            notPassableCell.add(false)
+        }
         repeat(8) {
             halfPassableCellLeft.add(true)
             halfPassableCellRight.add(false)
@@ -144,44 +145,54 @@ class LevelCellBuilder {
             halfPassableCellLeft.add(false)
             halfPassableCellRight.add(true)
         }
-//        repeat(6) {
-//            halfPassableCellLeft.add(true)
-//            halfPassableCellRight.add(false)
-//        }
-//        repeat(10) {
-//            halfPassableCellLeft.add(false)
-//            halfPassableCellRight.add(true)
-//        }
+
+//        val passableCellC = passableCell.map { 'P' }
+//        val passableCellW = passableCell.map { 'W' }
+//        val notPassableCellC = notPassableCell.map { 'X' }
+//        // no
+//        val halfPassableCellLeftC = notPassableCell.map { 'X' }
+//        val halfPassableCellRightC = notPassableCell.map { 'X' }
 
         val longRows = mutableListOf<MutableList<Boolean>>()
-            var rowCt = 0
-            for (row in rows) {
-                val longRow = mutableListOf<Boolean>()
-                val longPassableRow = mutableListOf<Boolean>()
-                for (c in row) {
-                    longPassableRow.addAll(passableCell)
-                    longRow.addAll(
-                        when (c) {
-                            'W' -> notPassableCell
-                            '.' -> passableCell
-                            'R' -> halfPassableCellRight
-                            'L' -> halfPassableCellLeft
-                            else -> notPassableCell
-                        }
-                    )
-                }
-                // if it is the last row then half right?
-                repeat(if (rowCt == 10) 8 else 16) {
-                    longRows.add(longRow)
-                }
+//        val longRowsType = mutableListOf<MutableList<Char>>()
+        var rowCt = 0
+        for (row in rows) {
+            val longRow = mutableListOf<Boolean>()
+            val longPassableRow = mutableListOf<Boolean>()
+//            val longRowC = mutableListOf<Char>()
+            for (c in row) {
+                longPassableRow.addAll(passableCell)
+                longRow.addAll(
+                    when (c) {
+                        'W' -> notPassableCell
+                        '.' -> passableCell
+                        'R' -> halfPassableCellRight
+                        'L' -> halfPassableCellLeft
+                        else -> notPassableCell
+                    }
+                )
+//                longRowC.addAll(
+//                    when (c) {
+//                        'W' -> passableCellW
+//                        '.' -> passableCellC
+//                        'R' -> halfPassableCellRightC
+//                        'L' -> halfPassableCellLeftC
+//                        else -> notPassableCellC
+//                    }
+//                )
+            }
+            // if it is the last row then half right?
+            repeat(if (rowCt == 10) 8 else 16) {
+                longRows.add(longRow)
+            }
 //                repeat(if (rowCt == 10) 4 else 8) {
 //                    longRows.add(longRow)
 //                }
 //                repeat(if (rowCt == 10) 4 else 8) {
 //                    longRows.add(longPassableRow)
 //                }
-                rowCt++
-            }
+            rowCt++
+        }
         return Map2d(longRows.toList())
     }
 }

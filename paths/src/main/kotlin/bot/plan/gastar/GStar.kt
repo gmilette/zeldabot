@@ -8,7 +8,8 @@ import java.util.*
 
 class GStar(
     private val passable: Map2d<Boolean>,
-    halfPassable: Boolean = true
+    halfPassable: Boolean = true,
+    isLevel: Boolean = false
 ) {
     companion object {
         var DEBUG = false
@@ -21,11 +22,16 @@ class GStar(
     private var iterCount = 0
     // return to this map
 //    private val initialMap: Map2d<Int> = passable.map { if (it) 1 else 99999 }
-    private val initialMap: Map2d<Int> = passable.map { 1 }
+    // if it is on a divisible by 16 area 1, if not it is a 10
+//    private val initialMap: Map2d<Int> = passable.map { 1 }
+
+    // this really helps keep zelda on track, it's a little strict though walking half way
+    // is also acceptable
+    val initialMap: Map2d<Int> = passable.mapXy { x,y -> if (x % 16 == 0 || y % 16 == 0) 1 else 1000 }
     // f values
     private var costsF: Map2d<Int> = initialMap.copy()
 
-    private val neighborFinder = NeighborFinder(passable, halfPassable)
+    private val neighborFinder = NeighborFinder(passable, halfPassable, isLevel)
 
     fun reset() {
         costsF = initialMap.copy()
@@ -35,9 +41,15 @@ class GStar(
 
     fun setEnemy(point: FramePoint, size: Int = 16) {
         costsF.modify(point, size) {
-            ENEMY_COST
+            it + 100
         }
         // then add some cost to points around it
+        costsF.modify(point, size*2) {
+            it + 50
+        }
+        costsF.modify(point, size*3) {
+            it + 25
+        }
     }
 
     val totalCosts = mutableMapOf<FramePoint, Int>()
@@ -52,7 +64,16 @@ class GStar(
         return route(start, listOf(target))
     }
 
-    fun route(start: FramePoint, targets: List<FramePoint>): List<FramePoint> {
+    private fun setEnemyCosts(enemies: List<FramePoint> = emptyList()) {
+        reset()
+        for (enemy in enemies) {
+            setEnemy(enemy)
+        }
+    }
+
+    fun route(start: FramePoint, targets: List<FramePoint>, enemies: List<FramePoint> = emptyList()): List<FramePoint> {
+//        setEnemyCosts(enemies)
+
         val closedList = mutableSetOf<FramePoint>()
         val cameFrom = mutableMapOf<FramePoint, FramePoint>()
 

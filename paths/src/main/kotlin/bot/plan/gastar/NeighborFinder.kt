@@ -6,6 +6,7 @@ import bot.state.map.pointModifier
 import bot.state.map.vertical
 import util.Map2d
 import util.d
+import java.lang.Exception
 
 // list of passible nodes
 //    private val FramePoint.neighbors
@@ -15,7 +16,11 @@ import util.d
 
 class NeighborFinder(
     private val passable: Map2d<Boolean>,
-    private val halfPassable: Boolean = true
+    private val halfPassable: Boolean = true,
+    /**
+     * inside the level, link cannot move halfway into any part of the top two grids
+     */
+    private val isLevel: Boolean = false
 ) {
     fun neighbors(point: FramePoint): List<FramePoint> {
         val neigh = mutableListOf<FramePoint>()
@@ -99,7 +104,7 @@ class NeighborFinder(
         }
     }
 
-    fun blockPassableMeta(point: FramePoint): Boolean {
+    private fun blockPassableMeta(point: FramePoint): Boolean {
         // levels have special rules for exits
         // todo: add more logic here
 //        d { " passable $point ${passable.get(point)} $halfPassable"}
@@ -108,13 +113,23 @@ class NeighborFinder(
                 blockPassable(point)
             }
             // check point end end
-            point.y <= 32 && (!passable.get(point) || !passable.get(point.justRightEnd)) -> {
+            // was <= 32
+            // (isLevel && point.y <= 24)
+            (isLevel && point.y <= 32) && (!passable.get(point) || !passable.get(point.justRightEnd)) -> {
                 if (GStar.DEBUG) {
                     d { " failed cuz y (pt: $point) < 32 ${passable.get(point)} ${passable.get(point.justRightEnd)}" }
                 }
                 false
             }
-            else -> blockPassableHalf(point)
+            else -> {
+                blockPassableHalf(point)
+//                return try {
+//                blockPassableHalf(point)
+//                } catch(e: Exception) {
+//                    d { "errr " + passable.map.size}
+//                    return false
+//                }
+            }
         }
     }
 

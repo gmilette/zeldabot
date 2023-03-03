@@ -1,9 +1,9 @@
 package bot
 
 import bot.plan.PlanBuilder
-import bot.state.*
 import bot.plan.runner.PlanRunner
 import bot.plan.gastar.SkipPathDb
+import bot.state.*
 import bot.state.map.Hyrule
 import bot.state.map.MapCell
 import bot.state.map.MapConstants
@@ -26,8 +26,15 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         api.addStopListener { dispose() }
         api.run()
 
+        // run at 400% always for now
+        api.setSpeed(400)
+
 //        api.isPaused = true
 //        api.stepToNextFrame()
+    }
+
+    private fun loadSave() {
+//        api.loadState()
     }
 
     private fun apiEnabled() {
@@ -49,6 +56,12 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         strWidth = api.getStringWidth(STRING, false)
         strX = 0 //(256 - strWidth) / 2
         strY = (240 - 8) - 40  /// 2 // interesting that's size
+
+        api.createSprite(
+            SPRITE_ID,
+            SPRITE_SIZE,
+            SPRITE_SIZE, sprite)
+
     }
 
     private fun apiDisabled() {
@@ -77,6 +90,11 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     var previousLink: FramePoint = FramePoint()
     val collect = SkipLocationCollector()
 
+    fun skip() {
+        d { " ** SKIP"}
+        plan.advance()
+    }
+
     private fun getAction(currentFrame: Int, currentGamePad: GamePad): GamePad {
         frameStateUpdater.updateFrame(currentFrame, currentGamePad)
         if (collectSkip) {
@@ -86,6 +104,15 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             d { collect.toString()}
             return GamePad.None
         }
+        if (unstick > 0) {
+            unstick--
+            return if (forcedDirection == GamePad.None) {
+                GamePad.randomDirection()
+            } else {
+                forcedDirection
+            }
+        }
+
         // filters..
 
         if (frameStateUpdater.state.frameState.isDoneScrolling) {
@@ -98,10 +125,16 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             return GamePad.None
         }
 
-        refillBombsIfOut()
+        refillIfOut()
 
-        frameStateUpdater.setSword(ZeldaItem.WhiteSword)
-        frameStateUpdater.setLadderAndRaft()
+        frameStateUpdater.setSword(ZeldaItem.MagicSword)
+        frameStateUpdater.setLadderAndRaft(ZeldaBot.hasLadder)
+        frameStateUpdater.setRedCandle()
+        frameStateUpdater.setHaveWhistle()
+        frameStateUpdater.setBait()
+        if (frameStateUpdater.state.frameState.clockActivated) {
+            frameStateUpdater.deactivateClock()
+        }
 
         // always do
         val nextGamePad = if (false && frameStateUpdater.state.previousMove.skipped) { // && Random.nextBoolean()) {
@@ -148,9 +181,23 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             val saw = this.numEnemiesSeen
             val tenth = this.frameState.tenth
             val aliveT = " t: $tenth A: ${alive} d: $dead k ${killedCt} s $saw"
-//            val killedT = "K: ${this.frameState.killedEnemyCount}"
 
-            drawIt(plan.target(), "$locCoordinates $link $aliveT")
+
+
+            try {
+                frameState.enemies.filter { it.droppedId != 0 && it.droppedId != 128 }.firstOrNull()?.let { agent ->
+                    drawIt(agent.point, "#${agent.droppedId}")
+                } ?: run {
+                    drawIt(plan.target(), "$locCoordinates $link $aliveT")
+                }
+//                for (agent in frameState.enemies.filter { it.droppedId != 0 }) {
+//                    drawIt(agent.point, "#${agent.droppedId}")
+////                    val pt = agent.point.toScreenY
+////                    api.drawString("#${agent.droppedId}", pt.x, pt.y, false)
+//                }
+            } catch (e: Exception) {
+
+            }
         }
 //        drawMap(frameStateUpdater.state.mapCell)
 
@@ -188,14 +235,21 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         api.drawString("$text", strX, strY, false)
     }
 
-    private fun refillBombsIfOut() {
+    private fun drawDroppedItem(point: FramePoint, text: String) {
+        val pt = point.toScreenY
+        api.drawString("$text", pt.x, pt.y, false)
+    }
+
+    private fun refillIfOut() {
         if (frameStateUpdater.state.frameState.inventory.numBombs <= 2) {
             api.writeCPU(Addresses.numBombs, 8)
         }
         if (frameStateUpdater.state.frameState.inventory.numKeys == 0) {
-            api.writeCPU(Addresses.numKeys, 8)
+            api.writeCPU(Addresses.numKeys, 2)
         }
-
+        if (frameStateUpdater.state.frameState.inventory.numRupees < 250) {
+            api.writeCPU(Addresses.numRupees, 252)
+        }
     }
 
     private val skipDb = SkipPathDb()
@@ -211,7 +265,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 
         if (frameStateUpdater.state.currentMapCell.mapLoc != 55) {
             // just make link invincible 2 hearts
-            api.writeCPU(Addresses.heartContainers, 51)
+            api.writeCPU(Addresses.heartContainers, 0xCC)
         }
 //        return
         currentGamePad = getAction(currentFrame, currentGamePad)
@@ -223,6 +277,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             )
         }
         d { " action: ${frameStateUpdater.state.frameState.link.point} -> $currentGamePad"}
+//        d { " selecting item ${frameStateUpdater.state.frameState.inventory.selectedItem}"}
 
         val act = doAct && !collectSkip //currentFrame % 3 == 0
         if (act) {
@@ -281,13 +336,27 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     companion object {
         private const val STRING = "####"
         private const val SPRITE_ID = 123
+        private const val SPRITE_ID_2 = 456
         private const val SPRITE_SIZE = 2
+        var hasLadder = true
         var doAct = true
+        var unstick = 0
+        var forcedDirection = GamePad.None
         @JvmStatic
-        fun startIt(monitor: ZeldaMonitor) {
+        fun startIt(monitor: ZeldaMonitor): ZeldaBot {
             ApiSource.initRemoteAPI("localhost", 9999)
-            ZeldaBot(monitor).launch()
+            val bot = ZeldaBot(monitor)
+            bot.launch()
+            return bot
         }
+
+//        @JvmStatic
+//        fun startActionTest(monitor: ZeldaMonitor) {
+//            ApiSource.initRemoteAPI("localhost", 9999)
+//            // which save state to load
+//            // which action to start
+//            ZeldaBot(monitor).launch()
+//        }
 
         @JvmStatic
         fun main(args: Array<String>) {

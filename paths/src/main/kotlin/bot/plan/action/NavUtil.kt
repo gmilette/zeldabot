@@ -233,10 +233,10 @@ object NavUtil {
 //        return directionToAvoidingObstacleM(mapCell, from, to)
     }
 
-    fun routeToAvoidingObstacle(mapCell: MapCell, from: FramePoint, to: List<FramePoint>):
+    fun routeToAvoidingObstacle(mapCell: MapCell, from: FramePoint, to: List<FramePoint>, avoid: List<FramePoint> = emptyList()):
             List<FramePoint> {
-        return routeToAvoidingObstacleR(mapCell, from, to)
-//        return directionToAvoidingObstacleM(mapCell, from, to)
+        val route = mapCell.gstar.route(from, to, avoid)
+        return route
     }
 
     fun directionToAvoidingObstacleR(mapCell: MapCell, from: FramePoint, to:
@@ -255,12 +255,6 @@ object NavUtil {
         }.also {
             d { " next point $nextPoint dist ${from.distTo(nextPoint)} dir: $it"}
         }
-    }
-
-    fun routeToAvoidingObstacleR(mapCell: MapCell, from: FramePoint, to: List<FramePoint>):
-            List<FramePoint> {
-        val route = mapCell.gstar.route(from, to)
-        return route
     }
 
     // test case

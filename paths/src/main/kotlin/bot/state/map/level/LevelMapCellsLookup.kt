@@ -6,11 +6,9 @@ import bot.state.map.MapCells
 import java.io.File
 
 data class LevelMapCellsLookup(val mapCells: MutableMap<Int, MapCells> = mutableMapOf()) {
-    val getItemCell: MapCell? = null
     init {
         val reader = LevelCellBuilder()
-        val lev1Cells = reader.level1()
-        mapCells[1] = lev1Cells
+        mapCells[1] = reader.level1()
         mapCells[2] = reader.level2()
         mapCells[3] = reader.level3()
         mapCells[4] = reader.level4()
@@ -38,5 +36,14 @@ data class LevelMapCellsLookup(val mapCells: MutableMap<Int, MapCells> = mutable
         val levelMap = mapCells[level] ?: throw IllegalArgumentException("not exist " +
                 "$mapLoc")
         return levelMap.cell(mapLoc)
+    }
+
+    fun cellOrEmpty(level: Int, mapLoc: MapLoc): MapCell {
+        val levelMap = mapCells[level] ?: return MapCell.unknown
+        return try {
+            levelMap.cell(mapLoc)
+        } catch (e: Exception) {
+            MapCell.unknown
+        }
     }
 }

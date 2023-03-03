@@ -17,9 +17,26 @@ class FrameStateUpdater(
     fun getLink() = FramePoint(getLinkX(), getLinkY())
     var state: MapLocationState = MapLocationState(hyrule = hyrule)
 
-    fun setLadderAndRaft() {
-        api.writeCPU(Addresses.hasLadder, 1)
-        api.writeCPU(Addresses.hasRaft, 1)
+    fun setLadderAndRaft(enable: Boolean) {
+        api.writeCPU(Addresses.hasLadder, enable.intTrue)
+        api.writeCPU(Addresses.hasRaft, enable.intTrue)
+    }
+
+    fun setBait() {
+        d { " !! deactivate clock "}
+        api.writeCPU(Addresses.hasFood, 1)
+    }
+
+    fun deactivateClock() {
+        api.writeCPU(Addresses.clockActivated, 0)
+    }
+
+    fun setRedCandle() {
+        api.writeCPU(Addresses.hasCandle, 2)
+    }
+
+    fun setHaveWhistle() {
+        api.writeCPU(Addresses.hasWhistle, 1)
     }
 
     fun setSword(item: ZeldaItem) {
@@ -43,10 +60,16 @@ class FrameStateUpdater(
         val linkY = api.readCPU(Addresses.linkY) - yAdjustFactor
         val linkPoint = FramePoint(linkX, linkY)
         val linkDir = mapDir(Addresses.linkDir)
-        val link = Agent(linkPoint, linkDir)
+        val linkDir2 = Addresses.moveDir
+        d { " Link direction $linkDir2"}
+        val link = Agent(0, linkPoint, linkDir)
         val tenth = api.readCPU(Addresses.tenthEnemyCount)
 
         val killedEnemyCount = api.readCPU(Addresses.Ram.killedEnemyCount)
+//        val screenOptions = api.readRAM(Addresses.screenOptions)
+        // works
+        // turns into 1 is candle used
+        val candleUsed = api.readCPU(Addresses.Ram.candleUsed)
 
         val enemyData = mutableListOf<AgentData>()
         val enemies = mutableListOf<Agent>()
@@ -70,12 +93,13 @@ class FrameStateUpdater(
             // type 15: i think it's the clock
             //  dropped item type 24 i think it's a bomb
             val droppedId = api.readCPU(Addresses.dropItemType[i])
+            val projectileState = ProjectileMapper.map(i, droppedId)
             val droppedEnemyItem = api.readCPU(Addresses.dropEnemyItem[i])
             val dropped = droppedItemMap(droppedId)
             // if this changes, it is an indication that the enemy was alive
             val countDown = api.readCPU(Addresses.enemyCountdowns[i])
             if (droppedId != 0) {
-                d { " dropped item type $droppedId $dropped" }
+                d { " $i: dropped item type $droppedId $dropped" }
                 // && droppedId != 24
             }
             // enemyData
@@ -93,7 +117,7 @@ class FrameStateUpdater(
             val wasAlive = state.enemyReasoner.wasAlive(i)
                 // doesn't always reset to 0
 //            val enemyState = if (xStatus == 0 && wasAlive(i)) EnemyState.Alive else EnemyState.Dead // a number of different dead states
-            val enemy = Agent(pt, dir, enemyStateCalc, countDown, xHp)
+            val enemy = Agent(i, pt, dir, enemyStateCalc, countDown, xHp, projectileState, droppedId)
             enemies.add(enemy)
 
             val data = AgentData(
@@ -107,7 +131,8 @@ class FrameStateUpdater(
                 presence = xPresence,
                 droppedId = droppedId,
                 droppedEnemyItem = droppedEnemyItem,
-                droppedItem = dropped
+                droppedItem = dropped,
+                projectileState = projectileState
             )
 
 //            d { "!! enemy $i: $data"}
@@ -119,9 +144,9 @@ class FrameStateUpdater(
             val stateCalc = state.enemyReasoner.makeState(i)
             //d { "!! enemy $i: $stateCalc"}
             val latest = state.enemyReasoner.latest(i)
-            val enemy = Agent(latest.point, latest.dir,
+            val enemy = Agent(i, latest.point, latest.dir,
                 stateCalc, latest.countDown,
-                latest.hp)
+                latest.hp, latest.projectileState, droppedId = latest.droppedId)
             reasonerEnemies.add(enemy)
         }
 
@@ -166,7 +191,9 @@ class FrameStateUpdater(
         state.currentMapCell = if (level == MapConstants.overworld) {
             hyrule.getMapCell(mapLoc)
         } else {
-            state.hyrule.levelMap.cell(level, mapLoc)
+            val a = state.hyrule.levelMap.cellOrEmpty(level, mapLoc)
+            d { "GGG cell is $a lev $level map $mapLoc" }
+            state.hyrule.levelMap.cellOrEmpty(level, mapLoc)
         }
 
         state.enemyReasoner.add(enemyPoint)
@@ -192,8 +219,13 @@ class FrameStateUpdater(
         when (api.readCPU(Addresses.hasSword)) {
             1 -> items.add(ZeldaItem.WoodenSword)
             2 -> items.add(ZeldaItem.WhiteSword)
-            2 -> items.add(ZeldaItem.MagicSword)
+            3 -> items.add(ZeldaItem.MagicSword)
             else -> {}
+        }
+        val candleStatus = api.readCPU(Addresses.hasCandle)
+        when (candleStatus) {
+            1 -> items.add(ZeldaItem.RedCandle)
+            2 -> items.add(ZeldaItem.BlueCandle)
         }
         if (api.readCpuB(Addresses.hasBow)) items.add(ZeldaItem.Bow)
         if (api.readCpuB(Addresses.hasBook)) items.add(ZeldaItem.BookOfMagic)
@@ -311,7 +343,7 @@ enum class DroppedItem(val num: Int) {
     Map(23),
 
     Clock(33),
-    Heart(34), //0x22
+    Heart(34), //0x22, yep
     Fairy(35),
     Boomerang(29),
 
@@ -363,3 +395,6 @@ enum class DroppedItem(val num: Int) {
 //    55=Arrow Normal??
 //    FF=Glitched Items
 }
+
+val Boolean.intTrue: Int
+    get() = if (this) 1 else 0

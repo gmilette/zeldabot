@@ -2,6 +2,10 @@ package util
 
 import co.touchlab.kermit.Logger
 
+object LoggerOverride {
+    var log = true
+}
+
 inline fun v(message: () -> String) = log { Logger.v(message()) }
 
 inline fun d(t: Throwable? = null, message: () -> String) = log { Logger.d( message()) }
@@ -15,5 +19,7 @@ inline fun e(t: Throwable? = null, message: () -> String) = log { Logger.e( mess
 /** @suppress */
 @PublishedApi
 internal inline fun log(block: () -> Unit) {
-    block()
+    if (LoggerOverride.log) {
+        block()
+    }
 }

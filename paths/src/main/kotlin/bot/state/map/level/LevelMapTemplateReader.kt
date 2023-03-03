@@ -22,10 +22,11 @@ class LevelMapTemplateReader {
         lev_grid,
         lev_grid_center,
         lev_maze,
+        lev_maze_path,
         lev_stairs_center,
         lev_triforce,
-        lev_water_center,
         lev_getitem,
+        lev_getitem_move,
         lev_corner,
         lev_cross,
         lev_stair_side,
@@ -33,15 +34,22 @@ class LevelMapTemplateReader {
         lev_block2center,
         lev_corner_bottom4,
         lev_dragon_top,
+        lev_water_center,
+        lev_water_center_path,
         lev_water_maze,
+        lev_water_maze_path,
         lev_water_line,
+        lev_water_line_path,
         lev_water_circle,
+        lev_water_circle_path,
         lev_water_line_right,
+        lev_water_line_right_path,
         lev_triple_line,
         lev_side_angle,
         lev_spiral,
         lev_princess,
-        lev_gannon
+        lev_gannon,
+        lev_water_round_center
     }
 
     init {

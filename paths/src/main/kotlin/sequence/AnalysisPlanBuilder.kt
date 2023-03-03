@@ -6,13 +6,9 @@ import bot.state.map.Hyrule
 import bot.state.map.MapCell
 import org.jgrapht.Graph
 import org.jgrapht.GraphPath
-import org.jgrapht.alg.shortestpath.DijkstraShortestPath
 import org.jgrapht.alg.shortestpath.FloydWarshallShortestPaths
 import org.jgrapht.graph.DefaultDirectedGraph
 import org.jgrapht.graph.DefaultEdge
-import sequence.findpaths.Destination
-import sequence.findpaths.DistanceTable
-import sequence.findpaths.Plan
 import util.d
 
 class AnalysisPlanBuilder() {
@@ -157,7 +153,8 @@ class AnalysisPlanBuilder() {
     class MasterPlanOptimizer(private val hyrule: Hyrule) {
         private val graph: Graph<MapCell, DefaultEdge> =
             DefaultDirectedGraph(DefaultEdge::class.java)
-//        private lateinit var shortestPath: DijkstraShortestPath<MapCell, DefaultEdge>
+
+        //        private lateinit var shortestPath: DijkstraShortestPath<MapCell, DefaultEdge>
         private lateinit var shortestPath: FloydWarshallShortestPaths<MapCell, DefaultEdge>
 
         private val patterns: MutableList<RoutePattern> = mutableListOf()
@@ -238,12 +235,33 @@ class AnalysisPlanBuilder() {
             // ahh he wont go through the water, need to make it accessible
 //            add(23, 24, graph)
 
-            // need to represent split screen routing
-            remove(98, 97, graph) // through 100 secret
+            // dont go up or down in lost woods
+            // only across it
+            val lostWoods: MapLoc = 97
+            remove(lostWoods, 97.up, graph)
+            remove(lostWoods, 97.down, graph)
+            // this goes forever
+            graph.removeEdge(hyrule.getMapCell(lostWoods), hyrule.getMapCell(lostWoods.left))
+            remove(85, 86, graph) // can't go through to level 4 from here
+//            remove(98, 99, graph)
+            // maybe need?
+//            remove(98, 97, graph) // through 100 secret
             remove(85, 86, graph) // can't go through to level 4 from here
             remove(85, 84, graph) // can't go through to water
 
-            remove(85, 69, graph) // can't go up through this water
+            // yes can do
+//            remove(85, 69, graph) // can't go up through this water
+
+            remove(29, 28, graph) // can't go through mountain
+            val lostDesert: MapLoc = 27
+            remove(lostDesert, lostDesert + 16, graph) // do not get lost in the part before the level 5
+
+            remove(116, 117, graph) // dont go through this weird place
+            remove(101, 117, graph)
+
+            remove(39, 38, graph) // crossing a river, lazy, I could just add to map too
+
+            remove(109, 110, graph) // dont get stuck trying to pass through level 8 tree
 
 //            shortestPath = DijkstraShortestPath(graph)
             shortestPath = FloydWarshallShortestPaths(graph)
@@ -292,7 +310,7 @@ class AnalysisPlanBuilder() {
 
             d { " path ${path?.length}" }
             for (mapCell in path.vertexList) {
-                d { "${mapCell.mapLoc}"}
+                d { "${mapCell.mapLoc}" }
             }
             val a = 1
         }
@@ -345,61 +363,63 @@ class AnalysisPlanBuilder() {
             // return a set of mapCel
             val from = hyrule.getMapCell(fromLoc)
             val to = hyrule.getMapCell(toLoc)
-            var paths = shortestPath.getPaths(from)
+            val paths = shortestPath.getPaths(from)
             return paths.getPath(to)
         }
+
         fun findPath(from: MapCell, to: MapCell): GraphPath<MapCell, DefaultEdge>? {
             // return a set of mapCel
-            var paths = shortestPath.getPaths(from)
+            val paths = shortestPath.getPaths(from)
             return paths.getPath(to)
         }
+    }
 
-        fun destinationLookup(mapData: Map<MapLoc, MapCell>) {
-            val lookup = mutableMapOf<DestType, MapCell>()
-            mapData.forEach { loc, data ->
-                data.mapData.objectives.forEach {
-                    lookup.put(it.type, data)
-                }
-            }
-
-            // all required objectives
-
-            // make list of destinations
-//            val sequence: List<MapCell> = listOf(
-//                lookup[Dest.level(1)],
-//                Dest.itemLookup[ZeldaItem.BombHeart],
-//                lookup[Dest.level(2)],
-//                lookup[Dest.level(3)],
-//            )
-
+//        fun destinationLookup(mapData: Map<MapLoc, MapCell>) {
+//            val lookup = mutableMapOf<DestType, MapCell>()
+//            mapData.forEach { loc, data ->
+//                data.mapData.objective.forEach {
+//                    lookup.put(it.type, data)
+//                }
+//            }
+//
+//            // all required objectives
+//
+//            // make list of destinations
+////            val sequence: List<MapCell> = listOf(
+////                lookup[Dest.level(1)],
+////                Dest.itemLookup[ZeldaItem.BombHeart],
+////                lookup[Dest.level(2)],
+////                lookup[Dest.level(3)],
+////            )
+//
+////            val sequence: List<MapCell> = listOf(
+////                mapData[119] ?: throw RuntimeException("err"),
+////                mapData[120] ?: throw RuntimeException("err"),
+////                mapData[104] ?: throw RuntimeException("err"),
+////                mapData[88] ?: throw RuntimeException("err"),
+////                mapData[72] ?: throw RuntimeException("err"),
+////                mapData[56] ?: throw RuntimeException("err"),
+////                mapData[55] ?: throw RuntimeException("err")
+////            )
+//
 //            val sequence: List<MapCell> = listOf(
 //                mapData[119] ?: throw RuntimeException("err"),
-//                mapData[120] ?: throw RuntimeException("err"),
-//                mapData[104] ?: throw RuntimeException("err"),
-//                mapData[88] ?: throw RuntimeException("err"),
-//                mapData[72] ?: throw RuntimeException("err"),
-//                mapData[56] ?: throw RuntimeException("err"),
 //                mapData[55] ?: throw RuntimeException("err")
 //            )
-
-            val sequence: List<MapCell> = listOf(
-                mapData[119] ?: throw RuntimeException("err"),
-                mapData[55] ?: throw RuntimeException("err")
-            )
-
-            // this creates a plan step
-            // for each objective
-            var prev = sequence.first()
-            sequence.forEach {
-                if (prev != sequence.first()) {
-                    val path = findPath(prev, it)
-                    path?.vertexList?.forEach {
-                        d { " from: ${it.mapData.name} ${it.mapLoc}" }
-                    }
-                }
-                prev = it
-            }
-        }
-    }
+//
+//            // this creates a plan step
+//            // for each objective
+//            var prev = sequence.first()
+//            sequence.forEach {
+//                if (prev != sequence.first()) {
+//                    val path = findPath(prev, it)
+//                    path?.vertexList?.forEach {
+//                        d { " from: ${it.mapData.name} ${it.mapLoc}" }
+//                    }
+//                }
+//                prev = it
+//            }
+//        }
+//    }
 
 }

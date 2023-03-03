@@ -1,12 +1,15 @@
 package bot.state
 
-val emptyAgent = Agent(FramePoint(0, 0), Dir.Right, EnemyState.Unknown,  0,0)
+val emptyAgent = Agent(0, FramePoint(0, 0), Dir.Right, EnemyState.Unknown,  0,0)
 data class Agent(
+    val index: Int = 0,
     val point: FramePoint,
     val dir: Dir,
     val state: EnemyState = EnemyState.Unknown,
     val countDown: Int = 0,
     val hp: Int = 0,
+    val projectileState: ProjectileState = ProjectileState.NotProjectile,
+    val droppedId: Int = 0
 ) {
     val isLoot: Boolean
         get() = state == EnemyState.Loot
@@ -31,7 +34,8 @@ data class AgentData(
     val presence: Int = 0,
     val droppedId: Int = 0,
     val droppedEnemyItem: Int = 0,
-    val droppedItem: DroppedItem = DroppedItem.Unknown
+    val droppedItem: DroppedItem = DroppedItem.Unknown,
+    val projectileState: ProjectileState = ProjectileState.NotProjectile
 )
 //val xStatus = api.readCPU(Addresses.enemyStatus[i])
 //val xHp = api.readCPU(Addresses.enemyHp[i])

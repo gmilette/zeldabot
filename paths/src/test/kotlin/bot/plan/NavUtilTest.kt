@@ -1,6 +1,7 @@
 package bot.plan
 
 import bot.GamePad
+import bot.plan.action.NavUtil
 import bot.plan.astar.AStar
 import bot.plan.gastar.GStar
 import bot.state.*
@@ -107,6 +108,10 @@ class NavUtilTest {
 
         val target = targets.get(0)
 
+//        cell.gstar.initialMap.write("TESTORIGINAMAP.csv") {  v, x, y ->
+//            v.toString()
+//        }
+
         cell.passable.write("check_1192") { v, x, y ->
             when {
                 (x == 115 && y == 104) -> "M"
@@ -177,6 +182,7 @@ class NavUtilTest {
 
     @Test
     fun `test move 40`() {
+        //32, 96) link (56, 120
         // should go up or at least right
 //        check(56, FramePoint(0, 72), FramePoint(112,0), GamePad.MoveRight)
 
@@ -186,11 +192,12 @@ class NavUtilTest {
         GStar.DEBUG = true
         //check(55, FramePoint(112, 88), FramePoint(112,64), GamePad.MoveUp)
 //        42 target (152, 100) link (104, 98)
-        check(42, FramePoint(152, 100), FramePoint(104,98), GamePad.MoveUp)
+        check(13, FramePoint(56, 120), FramePoint(32, 96), GamePad.MoveUp, level = 7)
     }
 
     @Test
-    fun `test move 44`() {
+    fun `test move 45`() {
+        //(64, 24) to next (0, 0) [(80, 16)
         GStar.DEBUG = true
         //check(55, FramePoint(112, 88), FramePoint(112,64), GamePad.MoveUp)
 //        42 target (152, 100) link (104, 98)
@@ -200,7 +207,7 @@ class NavUtilTest {
 //        148, 128) to (147, 112) at 44
 
         // cant get in //144, 104
-        //check(44, FramePoint(162, 128), FramePoint(162, 118), GamePad.MoveUp)
+        check(45, FramePoint(64, 24), FramePoint(80, 16), GamePad.MoveRight)
     }
 
     @Test

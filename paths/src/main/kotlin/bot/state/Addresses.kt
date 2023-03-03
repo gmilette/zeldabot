@@ -11,13 +11,13 @@ object Addresses {
    const val gameMode = 0x0012 // Game Mode
    const val level = 0x0010 // level 0 overworld
 
-   val heart1 = 0x0650
-   val heart1Full = 0x0651
-   val heart2 = 0x0652
-   val heart2Full = 0x0653
-   val heart3 = 0x0654
-   val heart3Full = 0x0655
-   val heartContainers = 0x066F
+   const val heart1 = 0x0650
+   const val heart1Full = 0x0651
+   const val heart2 = 0x0652
+   const val heart2Full = 0x0653
+   const val heart3 = 0x0654
+   const val heart3Full = 0x0655
+   const val heartContainers = 0x066F
 
       // relative to each screen which is maybe 240 x 240?
    const val linkX = 0x0070
@@ -198,6 +198,8 @@ object Addresses {
       0x00B0,
       0x00B1,
       0x00B2,
+      // enemy projectile state
+      // $00=Not Existant, $10=In Movement, $20=Start of Blowing Animation, $28=End of Blowing Animation, $30=Being Deflected by Shield
       0x00B3,
       0x00B4,
       0x00B5,
@@ -225,55 +227,59 @@ object Addresses {
    // 23 map
    // 29 boomerang
    // 3 nothing?
-   val dungeonTypeOfItem = 0x0AB
-   val dungeonFloorItem = 0x097
+   const val dungeonTypeOfItem = 0x0AB
+   const val dungeonFloorItem = 0x097
 
-   val clockActivated = 0x066C
+   const val clockActivated = 0x066C
 
-   val swordUseCountdown = 0x004C
+   const val swordUseCountdown = 0x004C
 
    // inventory
-   val selectedItem = 0x0656
-   val numBombs = 0x0658
-   val numKeys = 0x066E
-   val numRupees = 0x066D
+   const val selectedItem = 0x0656
+   const val numBombs = 0x0658
+   const val numKeys = 0x066E //066E
+   const val numRupees = 0x066D
 
    //0657    Current sword               $00=None, $01=Sword, $02=White Sword, $03=Magical Sword
-   val hasSword = 0x0657
-   val hasBow = 0x065A
-   val hasArrow = 0x0659
-   val hasWhistle = 0x065C
-   val hasFood = 0x065D
-   val hasPotion = 0x065E
-   val hasRod = 0x065F
-   val hasRaft = 0x0660
-   val hasBook = 0x0661
-   val hasRing = 0x0662 //$00-None, $01-Blue Ring, $02-Red Ring.
-   val hasLadder = 0x0663
-   val hasBracelet = 0x0665
-   val hasLetter = 0x0666
-   val hasBoomerang = 0x0674
-   val hasMagicBoomerang = 0x0675
-   val hasShield = 0x0676
+   const val hasSword = 0x0657
+   // $00=None, $01=Blue Candle, $02=Red Candle
+   const val hasCandle = 0x065B
+   const val hasBow = 0x065A
+   const val hasArrow = 0x0659
+   const val hasWhistle = 0x065C
+   const val hasFood = 0x065D
+   const val hasPotion = 0x065E
+   const val hasRod = 0x065F
+   const val hasRaft = 0x0660
+   const val hasBook = 0x0661
+   const val hasRing = 0x0662 //$00-None, $01-Blue Ring, $02-Red Ring.
+   const val hasLadder = 0x0663
+   const val hasBracelet = 0x0665
+   const val hasLetter = 0x0666
+   const val hasBoomerang = 0x0674
+   const val hasMagicBoomerang = 0x0675
+   const val hasShield = 0x0676
 
    //TODO
-   val enemiesKilledAlt = 0x052A
-   val enemiesKilledWithoutTakingDamage = 0x0627
+   const val enemiesKilledAlt = 0x052A
+   const val enemiesKilledWithoutTakingDamage = 0x0627
 
    object Ram {
-      val killedEnemyCount = 0x0627
+      const val killedEnemyCount = 0x0627
+      const val screenOptions = 0x04CD
+      const val candleUsed = 0x0513
       // num hearts
       // need more info
-      val hearts = 0x0650
+      const val hearts = 0x0650
       // Low Nibble = how many hearts are filled. High Nybble = Number of heart containers - 1
-      val containers = 0x066F
+      const val containers = 0x066F
    }
 
    object ZeroPage {
-      val mapLoc = 0x00EB // Value equals map x location + 0x10 * map y location
+      const val mapLoc = 0x00EB // Value equals map x location + 0x10 * map y location
       // n
-      val subY = 0x00FC // ? Used for storyboard text and subscreen position
-      val subX = 0x00FD // ?
-      val screenScrolling = 0x00e8 //$00=No, $08=Northbound, $04=Southbound, $01=Eastbound, $02=Westbound
+      const val subY = 0x00FC // ? Used for storyboard text and subscreen position
+      const val subX = 0x00FD // ?
+      const val screenScrolling = 0x00e8 //$00=No, $08=Northbound, $04=Southbound, $01=Eastbound, $02=Westbound
    }
 }

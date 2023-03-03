@@ -18,7 +18,8 @@ enum class EnemyState {
 //    ProbablyDead,
     NotSeen,
     Loot,
-    Projectile
+    Projectile,
+    InactiveProjectile
 }
 
 enum class Dir {
@@ -35,7 +36,7 @@ data class FrameState(
     val gameMode: Int = 5,
     val enemies: List<Agent> = emptyList(),
     val killedEnemyCount: Int = 0,
-    val link: Agent = Agent(FramePoint(0, 0), Dir.Right),
+    val link: Agent = Agent(0, FramePoint(0, 0), Dir.Right),
 //    val link: FramePoint = Undefined,
 //    val linkDir: Dir = Dir.Unknown,
 //    val enemies: List<FramePoint> = emptyList(),
@@ -57,7 +58,7 @@ data class FrameState(
     val mapLoc: MapLoc = 119,
     // check this, and if it exists, then go to the enemy x,y location to
     // collect it
-//    val droppedItems: List<Int> = emptyList()
+//    val droppedItems: List<Int> = emptyList(),
     // has to have all the locations on the map
 //    val map.
     /**
@@ -99,8 +100,8 @@ data class FrameState(
 data class Inventory(
     val selectedItem: Int,
     val numBombs: Int,
-    val numRupees: Int,
     val numKeys: Int,
+    val numRupees: Int,
     val items: Set<ZeldaItem>
 ) {
     val percentComplete: Float
@@ -111,6 +112,20 @@ data class Inventory(
 
     val acquiredItems: Set<ZeldaItem>
         get() = zeldaItemsRequired.intersect(items)
+
+    val hasCandle: Boolean
+        get() = items.contains(ZeldaItem.BlueCandle) || items.contains((ZeldaItem.RedCandle))
+
+    object Selected {
+        val boomerang = 0
+        val bomb = 1
+        val arrow = 2
+        val candle = 4
+        val whistle = 5
+        val bait = 6 //?
+        val potionletter = 7
+        val wand = 8 //?
+    }
 }
 
 // y values are 0..7
@@ -133,6 +148,7 @@ val MapLoc.right
 
 val MapLoc.left
     get() = this - 1
+
 
 fun MapLocFromPoint(x: Int, y: Int): MapLoc =
     x + 16 * y
@@ -161,6 +177,9 @@ data class FramePoint(val x: Int = 0, val y: Int = 0, val direction: Direction? 
         return "($x, $y)"
     }
 }
+
+val FramePoint.toG: FramePoint
+    get() = FramePoint(x / 16, y / 16)
 
 fun FramePoint.addDirection(dir: Direction) =
     this.copy(direction = dir)
@@ -223,6 +242,8 @@ val FramePoint.upEnd
     get() = FramePoint(x, y + 8 - 1)
 val FramePoint.upEndRight
     get() = FramePoint(x + 16, y + 8 - 1)
+val FramePoint.upOneGrid
+    get() = FramePoint(x, y - 16)
 val FramePoint.up
     get() = FramePoint(x, y - 1)
 val FramePoint.up2

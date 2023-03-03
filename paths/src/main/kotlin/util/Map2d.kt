@@ -44,13 +44,22 @@ class Map2d<T>(
         return Map2d(map.map { it.map { toT -> transform(toT) }.toMutableList() })
     }
 
+    fun <V> mapXy(transform: (Int, Int) -> V): Map2d<V> {
+        // change to values
+        return Map2d(map.mapIndexed{ x, r -> r.mapIndexed { y, c -> transform(x, y) }.toMutableList() })
+    }
+
     fun modify(point: FramePoint, size: Int = 16, how: (T) -> T) {
-            for (y in point.y..point.y+size) {
-                for (x in point.x..point.x+size) {
+        for (y in point.y..point.y + size) {
+            for (x in point.x..point.x + size) {
+                try {
                     val newVal = how(map[y][x])
                     map[y][x] = newVal
+                } catch (e: IndexOutOfBoundsException) {
+                    // just ignore this for now
                 }
             }
+        }
     }
 
     fun get(point: FramePoint): T =

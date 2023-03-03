@@ -4,6 +4,9 @@ import bot.state.FramePoint
 import bot.state.MapLoc
 import sequence.*
 
+val Int.grid
+    get() = this * 16
+
 class MapBuilder {
     val u = Direction.Up
     val r = Direction.Right
@@ -15,6 +18,13 @@ class MapBuilder {
 
     fun e(vararg dir: Direction): ExitSet {
         return ExitSet(*dir)
+    }
+
+    private object InDest {
+        val centerLevel = FramePoint(112, 64)
+        val centerLevel3 = FramePoint(128, 64)
+        val centerLevel6 = FramePoint(120, 64)
+        val centerRaftHeart = FramePoint(6.grid, 4.grid)
     }
 
     fun build(): Map<MapLoc, MapCellData> {
@@ -30,7 +40,7 @@ class MapBuilder {
 
         // should flatmap it
         val objectiveToMapCell = objectives.mapValues {
-            it.value.objectives to it.value
+            it.value.objective to it.value
         }
 
         // if entryType == fire, requires candle
@@ -50,7 +60,7 @@ class MapBuilder {
         objectives[1] = MapCellData(
             "topleftrock",
             Objective(
-                FramePoint(100, 100), DestType.SECRET_TO_EVERYBODY
+                FramePoint(100, 100), DestType.SecretToEverybody
                     (20, EntryType.Walk)
             ),
             exits = e(l, d, r)
@@ -58,7 +68,7 @@ class MapBuilder {
         objectives[3] = MapCellData(
             "topleftrock",
             Objective(
-                FramePoint(100, 100), DestType.SECRET_TO_EVERYBODY
+                FramePoint(100, 100), DestType.SecretToEverybody
                     (20, EntryType.Bomb)
             ),
             exits = e(l, d)
@@ -66,16 +76,13 @@ class MapBuilder {
         objectives[4] = MapCellData(
             "nexttolev9woman",
             Objective(
-                FramePoint(100, 100), DestType.WOMAN
+                FramePoint(100, 100), DestType.Woman
             ),
             exits = e(r)
         )
         objectives[5] = MapCellData(
             "lev9",
-            Objective(
-                FramePoint(100, 100), Dest.level(9)
-            ),
-            exits = e(r)
+            Objective(FramePoint(5.grid, 6.grid), Dest.level(9))
         )
         objectives[6] = MapCellData(
             "lev9",
@@ -86,7 +93,7 @@ class MapBuilder {
             Objective(
                 100,
                 100,
-                DestType.SECRET_TO_EVERYBODY(20, EntryType.Bomb)
+                DestType.SecretToEverybody(20, EntryType.Bomb)
             ),
             exits = e(d, l, r)
         )
@@ -100,46 +107,46 @@ class MapBuilder {
         )
         objectives[10] = MapCellData(
             "lev9arrow",
+//                32,
+//                16,
             Objective(
-                100,
-                100,
-                DestType.ITEM(ZeldaItem.WhiteSword, EntryType.Walk)
+                2.grid,
+                1.grid,
+                DestType.Item(ZeldaItem.WhiteSword, EntryType.Walk)
             ),
             exits = e(d)
         )
         objectives[11] = MapCellData(
             "lev5",
-            Objective(
-                100, 100, Dest.level(5)
-            ),
+            Objective(7.grid, 4.grid, Dest.level(5)),
             exits = e(d)
         )
         objectives[12] = MapCellData(
             "nowhereshow",
             Objective(
-                100, 100, DestType.SHOP()
+                100, 100, DestType.Shop()
             ),
             exits = e(d, r)
         )
         objectives[13] = MapCellData(
             "nowherepotion",
             Objective(
-                100, 100, DestType.WOMAN
+                100, 100, DestType.Woman
             ),
             exits = e(l, d)
         )
         objectives[14] = MapCellData(
             "letter",
+    //        val letterEntrance = FramePoint(80, 64)
             Objective(
-                100, 100, DestType.ITEM(ZeldaItem.Letter)
+                5.grid, 4.grid, DestType.Item(ZeldaItem.Letter)
             ),
             exits = e(d)
         )
         objectives[15] = MapCellData(
             "moneythroughwall",
-            Objective(
-                100, 100, DestType.SECRET_TO_EVERYBODY(100)
-            ),
+            //FramePoint(128, 64)
+            Objective(128, 64, Dest.Secrets.walk100),
             exits = e(d)
         )
     }
@@ -148,35 +155,35 @@ class MapBuilder {
         objectives[16] = MapCellData(
             "leftshowTop",
             Objective(
-                100, 100, DestType.SHOP()
+                100, 100, DestType.Shop()
             ),
             exits = e(u, r)
         )
         objectives[17] = MapCellData(
             "uselessnearshop",
             Objective(
-                100, 100, DestType.SHOP()
+                100, 100, DestType.Shop()
             ),
             exits = e(l, u)
         )
         objectives[18] = MapCellData(
             "placeshop",
             Objective(
-                100, 100, DestType.SHOP()
+                100, 100, DestType.Shop()
             ),
             exits = e(u, r)
         )
         objectives[19] = MapCellData(
             "placeshopsecret",
             Objective(
-                100, 100, DestType.SECRET_TO_EVERYBODY(30, EntryType.Bomb)
+                100, 100, DestType.SecretToEverybody(30, EntryType.Bomb)
             ),
             exits = e(l, r, u)
         )
         objectives[20] = MapCellData(
             "mttopsecret",
             Objective(
-                100, 100, DestType.SECRET_TO_EVERYBODY(20, EntryType.Bomb)
+                100, 100, DestType.SecretToEverybody(20, EntryType.Bomb)
             ),
             exits = e(l, r, d)
         )
@@ -187,14 +194,14 @@ class MapBuilder {
         objectives[21] = MapCellData(
             "mountainshop",
             Objective(
-                100, 100, DestType.SHOP()
+                100, 100, DestType.Shop()
             ),
             exits = e(l, r)
         )
         objectives[23] = MapCellData(
             "mountainstairriver",
             Objective(
-                100, 100, DestType.SHOP()
+                100, 100, DestType.Shop()
             ),
             exits = e(l, u, r, d) // can't go from r to l, unless have ladder
         )
@@ -229,7 +236,7 @@ class MapBuilder {
         )
         objectives[31] = MapCellData(
             "mountainnear100secret",
-            Objective(100, 100, DestType.MONEY_GAME),
+            Objective(100, 100, DestType.MoneyGame),
             exits = e(l, r, u)
         )
     }
@@ -241,12 +248,11 @@ class MapBuilder {
         )
         objectives[33] = MapCellData(
             "graveyardMagicSword",
-            Objective(100, 100, DestType.MONEY_GAME),
-            exits = e(l, d)
+            Objective(9.grid, 5.grid, DestType.Item(ZeldaItem.MagicSword, entry = EntryType.Push())),
         )
         objectives[34] = MapCellData(
             "lev6",
-            Objective(FramePoint(100, 100), Dest.level(6)),
+            Objective(InDest.centerLevel6, Dest.level(6)),
             exits = e(d)
         )
         objectives[35] = MapCellData(
@@ -254,35 +260,37 @@ class MapBuilder {
             Objective(FramePoint(100, 100), DestType.Travel),
             exits = e(d) // special
         )
+        // push down spot
+//        val powerBraceletEntrance = FramePoint(224, 48)
+//        val powerBraceletItem = FramePoint(224, 62)
         objectives[36] = MapCellData(
-            "lev6",
-            Objective(FramePoint(100, 100), Dest.level(6)),
-            exits = e(d)
+            "power bracelet",
+            Objective(14.grid, 4.grid, DestType.Item(ZeldaItem.PowerBracelet, entry = EntryType.Statue)),
         )
-        objectives[36] = CellBuilder().invoke {
-            aka("powerbracelet")
-            e(l,r,d)
-            this has DestType.ITEM(ZeldaItem.PowerBracelet, EntryType.Statue) at 100 a 100
-        }
+//        objectives[36] = CellBuilder().invoke {
+//            aka("powerbracelet")
+//            e(l,r,d)
+//            this has DestType.ITEM(ZeldaItem.PowerBracelet, EntryType.Statue) at 100 a 100
+//        }
         objectives[37] = CellBuilder().invoke {
             aka("powerbraceletRight")
             e(l)
-            this has DestType.SHOP(ShopType.B) at 100 a 100
+            this has DestType.Shop(ShopType.B) at 100 a 100
         }
         objectives[38] = CellBuilder().invoke {
             aka("mountainWalk")
             e(r,d)
-            this has DestType.SHOP(ShopType.C) at 100 a 100
+            this has DestType.Shop(ShopType.C) at 100 a 100
         }
         objectives[39] = CellBuilder().invoke {
             aka("downfromboulder")
             e(u,r) // special
-            this has DestType.SHOP(ShopType.Woman) at 100 a 100
+            this has DestType.Shop(ShopType.Woman) at 100 a 100
         }
         objectives[40] = CellBuilder().invoke {
             aka("forestneardesert")
             e(l, r, d)
-            this has DestType.SECRET_TO_EVERYBODY(30, EntryType.Fire) at 100 a 100
+            this has DestType.SecretToEverybody(30, EntryType.Fire(Direction.Right)) at 100 a 100
         }
         objectives[41] = CellBuilder().invoke {
             aka("grounddesert")
@@ -296,32 +304,35 @@ class MapBuilder {
             aka("grounddesert3")
             e(l, r, d)
         }
-        objectives[44] = CellBuilder().invoke {
-            aka("bombheartstone")
-            e(u, l, r, d)
-            this has DestType.ITEM(ZeldaItem.BombHeart, entry = EntryType.Bomb) at 100 a 100
-        }
+        objectives[44] = MapCellData(
+            "Bomb heart north",
+            Objective(FramePoint(144, 96), Dest.Secrets.bombHeartNorth, itemLoc = Objective.ItemLoc.Right)
+        )
+        //            ,
         objectives[45] = CellBuilder().invoke {
             aka("forestsecret")
-            e(u, l, r, d)
-            this has DestType.SECRET_TO_EVERYBODY(30, EntryType.Fire) at 100 a 100
+            this has Dest.Secrets.bombSecret30North at 80 a 16
         }
         objectives[46] = CellBuilder().invoke {
             aka("elbownearwater")
             e(l, d)
         }
+        objectives[47] = MapCellData(
+            "raftHeartEntry",
+            Objective(
+                InDest.centerRaftHeart, Dest.Heart.raftHeart, Objective.ItemLoc.Right
+            )
+        )
+
         objectives[47] = CellBuilder().invoke {
             aka("raftHeartEntry")
-            e(d)
-            this has DestType.ITEM(ZeldaItem.RaftHeartEntry, entry =
-                EntryType.Bomb) at 100 a 100
+            this has Dest.Heart.raftHeart at InDest.centerRaftHeart.x a InDest.centerRaftHeart.y
         }
     }
 
     fun addRow3(objectives: MutableMap<MapLoc, MapCellData>) {
         objectives[63] = MapCellData(
             "shorerafttoheart",
-            exits = ExitSet(Direction.Up)
         )
         objectives[62] = MapCellData(
             "elbowshorenearheart",
@@ -330,13 +341,12 @@ class MapBuilder {
         objectives[61] = MapCellData(
             "woodstwoguys",
             Objective(
-                FramePoint(100, 100), DestType.SECRET_TO_EVERYBODY
-                    (30, EntryType.Statue)
+                FramePoint(144, 64), Dest.Secrets.secretForest30NorthEast
             )
         )
         objectives[60] = MapCellData(
             "lev2",
-            Objective(FramePoint(100, 100), Dest.level(2)),
+            Objective(InDest.centerLevel, Dest.level(2)),
             exits = ExitSet(Direction.Down)
         )
         objectives[59] = MapCellData(
@@ -357,7 +367,7 @@ class MapBuilder {
         )
         objectives[55] = MapCellData(
             "lev1Entry",
-            Objective(FramePoint(112, 64), Dest.level(1)),
+            Objective(InDest.centerLevel, Dest.level(1)),
             exits = ExitSet(Direction.Right)
         )
         objectives[54] = MapCellData(
@@ -370,19 +380,37 @@ class MapBuilder {
         )
         objectives[52] = MapCellData(
             "blueringshop",
-            Objective(FramePoint(100, 100), DestType.SHOP(ShopType.BlueRing,
-                EntryType.Statue)),
-            exits = e(d)
+            Objective(FramePoint(4.grid, 4.grid), Dest.Shop.blueRing),
         )
     }
 
     fun addRow4(objectives: MutableMap<MapLoc, MapCellData>) {
-        objectives[73] = MapCellData(
+        objectives[69] = MapCellData(
+            "level4",
+            Objective(InDest.centerLevel3, Dest.level(4))
+        )
+        //
+        objectives[66] = MapCellData(
+            "lev7",
+            Objective(6.grid, 5.grid, Dest.level(7))
+        )
+        objectives[71] = MapCellData(
+            "fireHeart",
+            Objective(FramePoint(11.grid, 7.grid), Dest.Heart.fireHeart, itemLoc = Objective.ItemLoc.Right)
+        )
+        objectives[72] = MapCellData(
             "undergrounddudes",
-            Objective(
-                FramePoint(100, 100), DestType.SECRET_TO_EVERYBODY
-                    (30, EntryType.Fire)
-            )
+            Objective(FramePoint(13.grid, 2.grid), Dest.Secrets.fire30GreenSouth)
+        )
+        objectives[73] = MapCellData("near fary")
+        val shopCShieldLoc = Objective.ItemLoc.Right
+        objectives[77] = MapCellData(
+            "forest before 2",
+            Objective(FramePoint(13.grid, 6.grid), Dest.Shop.eastTreeShop, itemLoc = shopCShieldLoc)
+        )
+        objectives[78] = MapCellData(
+            "forest before 2 10 secret",
+            Objective(FramePoint(10.grid, 4.grid), Dest.Secrets.level2secret10)
         )
     }
 
@@ -390,31 +418,58 @@ class MapBuilder {
         objectives[88] = MapCellData(
             "boringForest",
         )
+        //
+        objectives[95] = MapCellData(
+            "ladderHeart",
+            Objective(FramePoint(12.grid, 5.grid), Dest.Heart.ladderHeart)
+        )
     }
 
     fun addRow6(objectives: MutableMap<MapLoc, MapCellData>) {
         objectives[96] = MapCellData(
             "after lost woods",
             Objective(
-                FramePoint(100, 100), DestType.SECRET_TO_EVERYBODY
-                    (20, EntryType.Fire)
+                FramePoint(100, 100), DestType.SecretToEverybody
+                    (20, EntryType.Fire())
             )
         )
+        objectives[98] = MapCellData(
+            "woods with secret",
+            Objective(FramePoint(8.grid, 2.grid), Dest.Secrets.fire100SouthBrown)
+        )
+        objectives[102] = MapCellData(
+            "candle shop",
+            Objective(FramePoint(7.grid, 1.grid), Dest.Shop.candleShopMid, Objective.ItemLoc.Right)
+        )
+        //        val candleShopEntrance = InGrid(7, 2).pt
         objectives[104] = MapCellData(
             "upForest",
             Objective(
-                FramePoint(100, 100), DestType.SECRET_TO_EVERYBODY
-                    (20, EntryType.Fire)
+                FramePoint(100, 100), DestType.SecretToEverybody
+                    (20, EntryType.Fire())
             )
+        )
+        objectives[107] = MapCellData(
+            "forest burn 100",
+            // need to check this
+            Objective(FramePoint(8.grid, 6.grid), Dest.Secrets.forest100South)
+        )
+        objectives[109] = MapCellData(
+            "lev 9",
+            Objective(10.grid, 2.grid, Dest.level(8))
         )
     }
 
     fun addRow7(objectives: MutableMap<MapLoc, MapCellData>) {
+        objectives[111] = MapCellData(
+            "arrow shop",
+            Objective(FramePoint(48, 16), Dest.Shop.arrowShop, itemLoc = Objective.ItemLoc.Right)
+        )
         objectives[112] = MapCellData(
                     "useless end has shop?",
                     Objective(
                         FramePoint(100, 100), DestType
-                            .SHOP()
+                            .Shop()
                     ),
                     exits = e(r)
                 )
@@ -422,8 +477,7 @@ class MapBuilder {
                 MapCellData(
                     "top bottom forest",
                     Objective(
-                        FramePoint(100, 100), DestType
-                            .SECRET_TO_EVERYBODY(30, EntryType.Bomb)
+                        FramePoint(100, 100), DestType.SecretToEverybody(30, EntryType.Bomb)
                     ),
                     exits = e(u, r)
                 )
@@ -441,61 +495,43 @@ class MapBuilder {
                 MapCellData(
                     "lev3",
                     Objective(
-                        FramePoint(100, 100), Dest.level(3)
+                        InDest.centerLevel3, Dest.level(3)
                     ),
                     exits = e(l)
                 )
         objectives[117] =
                 MapCellData(
                     "useless space",
-                    Objective(
-                        FramePoint(100, 100), DestType.MONEY_GAME
-                    ),
                     exits = e(u, r)
                 )
         objectives[118] =
                 MapCellData(
                     "moneygame1",
                     Objective(
-                        FramePoint(100, 100), DestType.MONEY_GAME
+                        FramePoint(100, 100), DestType.MoneyGame
                     ),
                     exits = e(l, u, r)
                 )
         objectives[119] =
                 MapCellData(
                     "start",
-                    Objective(
-                        FramePoint(100, 100), Dest.item(
-                            ZeldaItem
-                                .WoodenSword)
-                    ),
-                    exits = ExitSet(Direction.Up, Direction.Right)
+                    Objective(FramePoint(64, 17), Dest.item(ZeldaItem.WoodenSword))
                 )
         objectives[120] = MapCellData(
             "startRight",
-            Objective(FramePoint(100, 100), DestType.WOMAN),
+            Objective(FramePoint(100, 100), DestType.Woman),
             exits = ExitSet(Direction.Up, Direction.Right)
         )
         objectives[121] = MapCellData(
-            "lostwoods",
-            Objective(FramePoint(100, 100), DestType.WOMAN),
-            exits = ExitSetAll
+            "lostwoods travel spot",
         )
         objectives[122] = MapCellData(
-            "brown wood 100",
-            Objective(
-                FramePoint(100, 100), DestType.SECRET_TO_EVERYBODY
-                    (100, entry = EntryType.Fire)
-            ),
+            "stone nothing walk",
             exits = ExitSetAll
         )
-        objectives[122] = MapCellData(
-            "brown crossing",
-            Objective(
-                FramePoint(100, 100), DestType.SECRET_TO_EVERYBODY
-                    (100, entry = EntryType.Fire)
-            ),
-            exits = ExitSetAll
+        objectives[123] = MapCellData(
+            "bombHeartSouth",
+            Objective(FramePoint(9.grid, 1.grid), Dest.Secrets.bombHeartSouth, itemLoc = Objective.ItemLoc.Right),
         )
 
     }
@@ -532,7 +568,8 @@ class CellBuilder() {
     }
 
     fun build(): MapCellData {
-        return MapCellData(name, destTypes.map { it.build() }, exitSet)
+        // hack, there is probably only 1
+        return MapCellData(name, destTypes.map { it.build() }.firstOrNull() ?: Objective.empty, exitSet)
     }
 
     fun aka(aka: String): CellBuilder {

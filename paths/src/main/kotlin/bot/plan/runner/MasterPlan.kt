@@ -1,14 +1,26 @@
 package bot.plan.runner
 
 import bot.plan.action.Action
+import bot.plan.action.EndAction
+import bot.plan.action.MoveTo
 import bot.state.MapLocationState
 import util.d
 import util.i
 
 class MasterPlan(val segments: List<PlanSegment>) {
+    private var justRemoved: PlanStep = PlanStep(PlanSegment("", "", emptyList()), EndAction())
+
     private val giant = segments.flatMap { seg -> seg.plan.map { PlanStep(seg, it) } }.toMutableList().also {
-        d { " created plan with ${it.size} actions" }
+        d { " created plan with ${it.size} actions moves $numMoves" }
     }
+
+    // estimated time to complete
+
+    private val numMoves: Int
+        get() = if (giant.isNullOrEmpty()) 0 else giant.count {
+            true
+//            it.action is MoveTo
+        }
 
     fun log() {
         val first = giant.firstOrNull()
@@ -58,10 +70,15 @@ class MasterPlan(val segments: List<PlanSegment>) {
             giant[1].action
         }
 
-    fun pop(): Action =
-        giant.removeFirst().action.also {
+    fun pop(): Action {
+        justRemoved = giant.removeFirst()
+        return justRemoved.action.also {
             i { "--> switch to ${it.name}" }
         }
+    }
+
+    fun toStringCurrentPlanPhase(): String =
+        justRemoved.inSegment.toStringShort()
 }
 
 class EmptyAction : Action {
@@ -83,4 +100,7 @@ data class PlanSegment(
     override fun toString(): String {
         return plan.fold("") { R, t -> "$R $t " }
     }
+
+    fun toStringShort(): String =
+        "ph: $phase seg: $name" // #act: ${plan.size}
 }

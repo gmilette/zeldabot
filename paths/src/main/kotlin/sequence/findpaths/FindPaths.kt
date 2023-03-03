@@ -8,6 +8,7 @@ import org.jgrapht.alg.interfaces.ShortestPathAlgorithm.SingleSourcePaths
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath
 import org.jgrapht.graph.DefaultDirectedGraph
 import org.jgrapht.graph.DefaultEdge
+import util.d
 import java.io.File
 
 
@@ -80,6 +81,8 @@ class FindPaths {
             }
             this.close()
         }
+
+        d { " done "}
 
         // then I can read this into chunks of 256*?
 

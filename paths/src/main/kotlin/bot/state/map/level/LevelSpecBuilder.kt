@@ -1,5 +1,6 @@
 package bot.state.map.level
 
+import bot.plan.InLocations
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.ExitSet
@@ -14,9 +15,20 @@ class LevelSpecBuilder {
     val upDown = e(u, d)
     val eall = e(u, d, l, r)
 
-    val getItemLoc: MapLoc = 127
-    val getItemLoc3: MapLoc = 15
-    val getItemLoc4: MapLoc = 96
+    companion object {
+        val getItemLoc: MapLoc = 127
+        val getItemLoc3: MapLoc = 15
+        val getItemLoc4: MapLoc = 96
+        val getItemLoc5: MapLoc = 88
+        val getItemLoc6: MapLoc = 117
+        val getItemMove6: MapLoc = 8
+        val getItemLoc7: MapLoc = 74
+        val getMoveLoc: MapLoc = 123
+        val getItemLoc8: MapLoc = 111 // book
+        val getItemLoc8Key: MapLoc = 15
+        val getItemLoc8Go: MapLoc = 47
+        val getItemLoc5Item: MapLoc = InLocations.Level5.mapLocGetItem
+    }
 
     fun e(vararg dir: Direction): ExitSet {
         return ExitSet(*dir)
@@ -26,7 +38,7 @@ class LevelSpecBuilder {
 
     fun buildLevel1(): List<LevelSpec> {
         // .. build it
-        val start: MapLoc = 115
+        val start: MapLoc = LevelStartMapLoc.lev(1)
         val split = start.up.up.left.up.right
         val specs = mutableListOf<LevelSpec>(
             LevelSpec(start, eall, "start", LevelMapTemplateReader.Temp.lev_grid),
@@ -60,7 +72,7 @@ class LevelSpecBuilder {
     }
 
     fun buildLevel2(): List<LevelSpec> {
-        val start: MapLoc = 125
+        val start: MapLoc = LevelStartMapLoc.lev(2)
         val grid = start.up.right
         d { " grid: $grid next to boomerang ${start.up.up.up.right}"}
         val specs = mutableListOf(
@@ -89,12 +101,12 @@ class LevelSpecBuilder {
     }
 
     fun buildLevel3(): List<LevelSpec> {
-        val start: MapLoc = 124 //??
+        val start: MapLoc = LevelStartMapLoc.lev(3)
         val inStart = start.left.up.up
         val specs = mutableListOf(
             LevelSpec(start, e(l), "start", LevelMapTemplateReader.Temp.lev_grid),
             // key
-            LevelSpec(start.left, e(r, u), "fkey and squishy", LevelMapTemplateReader.Temp.lev_block4out),
+            LevelSpec(start.left, e(r, u), "fkey and squishy", LevelMapTemplateReader.Temp.lev_block4out2),
             LevelSpec(start.left.up, e(u, d), "key cross", LevelMapTemplateReader.Temp.lev_cross),
             //key
             LevelSpec(inStart, eall, "guys and bomb", LevelMapTemplateReader.Temp.lev_empty),
@@ -121,7 +133,7 @@ class LevelSpecBuilder {
     }
 
     fun buildLevel4(): List<LevelSpec> {
-        val start: MapLoc = 113 //??
+        val start: MapLoc = LevelStartMapLoc.lev(4)
         val laddercross = start.up.up.left.up.up
         val specs = mutableListOf(
             LevelSpec(start, e(l, u, d), "start", LevelMapTemplateReader.Temp.lev_grid),
@@ -154,23 +166,25 @@ class LevelSpecBuilder {
     }
 
     fun buildLevel5(): List<LevelSpec> {
-        val start: MapLoc = 113
+        val start: MapLoc = LevelStartMapLoc.lev(5)
         val watermaze = start.up.up.right
         val farup = watermaze.up.up.up
         val specs = mutableListOf(
             LevelSpec(start, e(r, u, d), "start", LevelMapTemplateReader.Temp.lev_grid),
-            LevelSpec(start.up, e(l, u, r), "mid river bomb left", LevelMapTemplateReader.Temp.lev_water_line),
+            LevelSpec(start.up, e(l, u, r), "mid river bomb left", LevelMapTemplateReader.Temp.lev_water_line_path, isHalfPassable = false),
             LevelSpec(start.up.left, e(l, u, r), "zombie bomb left", LevelMapTemplateReader.Temp.lev_block4mid),
             LevelSpec(start.up.left.left, e(u, r), "stairs down", LevelMapTemplateReader.Temp.lev_stairs_center),
 
+            LevelSpec(start.up.up.up, e(u, d, l, r), "circlepond", LevelMapTemplateReader.Temp.lev_water_round_center, isHalfPassable = false),
+
             LevelSpec(start.up.up, e(u, d, l, r), "dinos", LevelMapTemplateReader.Temp.lev_empty),
-            LevelSpec(watermaze, e(u, l), "maze", LevelMapTemplateReader.Temp.lev_water_maze),
+            LevelSpec(watermaze, e(u, l), "maze sq", LevelMapTemplateReader.Temp.lev_maze_path, isHalfPassable = false),
 
-            LevelSpec(watermaze.up, e(u, l), "zombie center", LevelMapTemplateReader.Temp.lev_water_center),
-            LevelSpec(watermaze.up.up, e(u, d), "maze 2", LevelMapTemplateReader.Temp.lev_water_maze),
-            LevelSpec(farup, e(l, d), "water center", LevelMapTemplateReader.Temp.lev_water_center),
+            LevelSpec(watermaze.up, e(u, l), "zombie center", LevelMapTemplateReader.Temp.lev_water_center_path, isHalfPassable = false),
+            LevelSpec(watermaze.up.up, e(u, d), "maze 2", LevelMapTemplateReader.Temp.lev_maze_path, isHalfPassable = false),
+            LevelSpec(farup, e(u, l, d), "water center", LevelMapTemplateReader.Temp.lev_water_center_path, isHalfPassable = false),
 
-            LevelSpec(farup.left, e(l, r), "water center", LevelMapTemplateReader.Temp.lev_water_circle),
+            LevelSpec(farup.left, e(l, r), "water center", LevelMapTemplateReader.Temp.lev_water_circle_path, isHalfPassable = false),
             LevelSpec(farup.left.left, e(l, r), "line bunnies", LevelMapTemplateReader.Temp.lev_triple_line),
             LevelSpec(farup.left.left.left, e(u, r, d), "whistle guy", LevelMapTemplateReader.Temp.lev_corner),
             LevelSpec(farup.left.left.left.up, e(d), "triforce", LevelMapTemplateReader.Temp.lev_triforce),
@@ -178,7 +192,11 @@ class LevelSpecBuilder {
             LevelSpec(farup.left.up.up, e(l, d), "get stuff", LevelMapTemplateReader.Temp.lev_stairs_center),
             LevelSpec(farup.left.up.up.left, e(r), "push spot", LevelMapTemplateReader.Temp.lev_block1mid),
 
-            LevelSpec(getItemLoc4, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
+//            LevelSpec(getItemLoc4, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
+            //LevelSpec(5, e(u), "", LevelMapTemplateReader.Temp.lev_getitem_move, isGetItem = true),
+            LevelSpec(getItemLoc5, e(u), "", LevelMapTemplateReader.Temp.lev_getitem_move, isGetItem = true),
+            LevelSpec(7, e(u), "", LevelMapTemplateReader.Temp.lev_getitem_move, isGetItem = true),
+            LevelSpec(getItemLoc5Item, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
         )
 
         log(specs, 5)
@@ -187,7 +205,7 @@ class LevelSpecBuilder {
     }
 
     fun buildLevel6(): List<LevelSpec> {
-        val start: MapLoc = 113
+        val start: MapLoc = LevelStartMapLoc.lev(6)
         val splitSpot = start.left.up.up.up.up.up.right
         val stairsRight = splitSpot.up.right.right.right.right
         val specs = mutableListOf(
@@ -201,8 +219,8 @@ class LevelSpecBuilder {
             LevelSpec(splitSpot, e(u, d), "split", LevelMapTemplateReader.Temp.lev_water_circle),
             LevelSpec(splitSpot.up, e(u, d, l, r), "split up", LevelMapTemplateReader.Temp.lev_water_line_right),
             LevelSpec(splitSpot.up.up, e(d), "two push", LevelMapTemplateReader.Temp.lev_block2center),
-            LevelSpec(splitSpot.down, e(u, r), "split down", LevelMapTemplateReader.Temp.lev_water_line_right),
-            LevelSpec(splitSpot.down.right, e(u, r), "split down", LevelMapTemplateReader.Temp.lev_block1mid),
+            LevelSpec(splitSpot.down, e(u, r), "split down", LevelMapTemplateReader.Temp.lev_water_line_right_path),
+            LevelSpec(splitSpot.down.right, e(l), "right ghost move", LevelMapTemplateReader.Temp.lev_block1mid),
 
             LevelSpec(stairsRight, e(d), "Stairs out", LevelMapTemplateReader.Temp.lev_stair_side),
             LevelSpec(stairsRight.down, e(u, l), "water after stairs", LevelMapTemplateReader.Temp.lev_water_line_right),
@@ -210,7 +228,8 @@ class LevelSpecBuilder {
             LevelSpec(stairsRight.down.left.up, e(d, u), "arrow guy boss", LevelMapTemplateReader.Temp.lev_corner_bottom4),
             LevelSpec(stairsRight.down.left.up.up, e(d), "lev 6 triforce", LevelMapTemplateReader.Temp.lev_triforce),
 
-            LevelSpec(getItemLoc4, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
+            LevelSpec(getItemLoc6, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
+            LevelSpec(getItemMove6, e(u), "", LevelMapTemplateReader.Temp.lev_getitem_move, isGetItem = true, isHalfPassable = false),
         )
 
         log(specs, 6)
@@ -219,30 +238,35 @@ class LevelSpecBuilder {
     }
 
     fun buildLevel7(): List<LevelSpec> {
-        val start: MapLoc = 113
+        val start: MapLoc = LevelStartMapLoc.lev(7)
         val grumble = start.up.up.up.up.left.up
         val specs = mutableListOf(
             LevelSpec(start, e(l, u, d), "start", LevelMapTemplateReader.Temp.lev_grid),
             LevelSpec(start.up, e(l, u, d, r), "bomb skip", LevelMapTemplateReader.Temp.lev_block2center),
             LevelSpec(start.up.up, e(l, u, d, r), "dudes with boomerange", LevelMapTemplateReader.Temp.lev_block4mid),
-            LevelSpec(start.up.up.up, e(u, d), "cross river", LevelMapTemplateReader.Temp.lev_water_line),
+            // gets stuck sometimes so set to true
+            LevelSpec(start.up.up.up, e(u, d), "cross river", LevelMapTemplateReader.Temp.lev_water_line_path, isHalfPassable = true), //
             LevelSpec(start.up.up.up.up, e(l, r, d), "whistle", LevelMapTemplateReader.Temp.lev_corner),
-            LevelSpec(start.up.up.up.up.left, e(l, r, d), "dudes before grumble", LevelMapTemplateReader.Temp.lev_grid_center),
-            LevelSpec(grumble, e(l, r, d), "grumble", LevelMapTemplateReader.Temp.lev_empty),
-            LevelSpec(grumble.up, e(l, r, d), "maze", LevelMapTemplateReader.Temp.lev_water_maze),
+            LevelSpec(start.up.up.up.up.left, e(u, r), "dudes before grumble", LevelMapTemplateReader.Temp.lev_grid_center),
+            LevelSpec(grumble, e(u, l, r, d), "grumble", LevelMapTemplateReader.Temp.lev_empty),
+            LevelSpec(grumble.up, e(l, r, d), "maze", LevelMapTemplateReader.Temp.lev_water_maze_path, isHalfPassable = false),
 
             LevelSpec(grumble.up.right, e(l, r), "dude bomb", LevelMapTemplateReader.Temp.lev_block4out2),
             LevelSpec(grumble.up.right.right, e(l, r), "red candle", LevelMapTemplateReader.Temp.lev_stairs_center),
             LevelSpec(grumble.up.right.right.right, e(l, r, u), "guys with bomb", LevelMapTemplateReader.Temp.lev_corner),
             LevelSpec(grumble.up.right.right.right.right, e(l, u), "whistle guy", LevelMapTemplateReader.Temp.lev_corner),
             LevelSpec(grumble.up.right.right.right.right.up, e(d, r), "block bomb right", LevelMapTemplateReader.Temp.lev_block2center),
-            LevelSpec(grumble.up.right.right.right.right.right, e(l), "u shape stair", LevelMapTemplateReader.Temp.lev_u),
+            LevelSpec(grumble.up.right.right.right.right.up.right, e(l), "u shape stair", LevelMapTemplateReader.Temp.lev_u),
 
             LevelSpec(grumble.right, e(l, r), "end stair", LevelMapTemplateReader.Temp.lev_stairs_center),
             LevelSpec(grumble.right.right, e(l, r), "dragon", LevelMapTemplateReader.Temp.lev_dragon_right),
             LevelSpec(grumble.right.right.right, e(l, r), "dragon", LevelMapTemplateReader.Temp.lev_triforce),
 
             LevelSpec(getItemLoc4, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
+            LevelSpec(getItemLoc7, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
+            LevelSpec(getItemLoc5, e(u), "", LevelMapTemplateReader.Temp.lev_getitem_move, isGetItem = true),
+
+            LevelSpec(getMoveLoc, e(u), "", LevelMapTemplateReader.Temp.lev_getitem_move, isGetItem = true),
         )
 
         log(specs, 7)
@@ -251,27 +275,33 @@ class LevelSpecBuilder {
     }
 
     fun buildLevel8(): List<LevelSpec> {
-        val start: MapLoc = 113
-        val masterbattle = start.up.up.up
+        val start: MapLoc = LevelStartMapLoc.lev(8)
+        val masterbattle = start.up.up.up.up
         val specs = mutableListOf(
             LevelSpec(start, e(l, u, d, r), "start", LevelMapTemplateReader.Temp.lev_grid),
-            LevelSpec(start.left, e(l, u, d), "bomb dude", LevelMapTemplateReader.Temp.lev_block2center),
-            LevelSpec(start.left.left, e(l, u, d), "stair to book", LevelMapTemplateReader.Temp.lev_stairs_center),
+            LevelSpec(start.left, e(l, r), "bomb dude", LevelMapTemplateReader.Temp.lev_block2center),
+            LevelSpec(start.left.left, e(l, r), "stair to book", LevelMapTemplateReader.Temp.lev_stairs_center),
 
             LevelSpec(start.up, e(l, u, d, r), "star dude", LevelMapTemplateReader.Temp.lev_empty),
             LevelSpec(start.up.up, e(l, u, d, r), "mixed battle", LevelMapTemplateReader.Temp.lev_corner),
+            LevelSpec(start.up.up.up, e(l, u, d, r), "mixed battle2", LevelMapTemplateReader.Temp.lev_corner),
             LevelSpec(masterbattle, e(u, d, r), "master battle", LevelMapTemplateReader.Temp.lev_block2center),
-            LevelSpec(masterbattle.up, e(l, u, d, r), "arrow guy", LevelMapTemplateReader.Temp.lev_corner),
-            LevelSpec(masterbattle.up.right, e(l), "key stairs", LevelMapTemplateReader.Temp.lev_stairs_center),
+            LevelSpec(masterbattle.up, e(l, u, d, r), "four bomb guy", LevelMapTemplateReader.Temp.lev_corner),
+            LevelSpec(masterbattle.up.up, e(l, u, d, r), "arrow guy", LevelMapTemplateReader.Temp.lev_corner),
+            LevelSpec(masterbattle.up.up.right, e(l), "key stairs", LevelMapTemplateReader.Temp.lev_stairs_center),
 
             LevelSpec(masterbattle.right, e(l), "stairs to boss", LevelMapTemplateReader.Temp.lev_stair_side),
 
             LevelSpec(masterbattle.left.left, e(u, d), "dragon", LevelMapTemplateReader.Temp.lev_dragon_top),
-            LevelSpec(masterbattle.left.down, e(u, l), "spiral bunnies", LevelMapTemplateReader.Temp.lev_spiral),
+            LevelSpec(masterbattle.left.left.down, e(u, l), "spiral bunnies", LevelMapTemplateReader.Temp.lev_spiral),
 
-            LevelSpec(masterbattle.left.up, e(u, d), "triforce", LevelMapTemplateReader.Temp.lev_triforce),
+            LevelSpec(masterbattle.left.left.up, e(u, d), "triforce", LevelMapTemplateReader.Temp.lev_triforce),
 
-            LevelSpec(getItemLoc4, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
+            LevelSpec(getItemLoc8, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
+            LevelSpec(getItemLoc8Key, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
+            LevelSpec(getItemLoc8Go, e(u), "", LevelMapTemplateReader.Temp.lev_getitem_move, isHalfPassable = false, isGetItem = true),
+//            LevelSpec(44, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
+            LevelSpec(28, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
         )
 
         log(specs, 8)
@@ -280,7 +310,7 @@ class LevelSpecBuilder {
     }
 
     fun buildLevel9(): List<LevelSpec> {
-        val start: MapLoc = 113
+        val start: MapLoc = LevelStartMapLoc.lev(9)
         val first = start.left.up.up.up.up.up.left
         val pathdown = first.right.right
 
@@ -332,12 +362,16 @@ class LevelSpecBuilder {
     }
 
     private fun log(specs: List<LevelSpec>, lev: Int) {
+        d { " LEVEL $lev **START"}
         for (spec in specs) {
             d { "$lev spec ${spec.loc}"}
         }
+        d { " LEVEL $lev **DONE"}
     }
 }
 
 data class LevelSpec(val loc: MapLoc, val exits: ExitSet,
                      val name: String = "",
-                     val template: LevelMapTemplateReader.Temp, val isGetItem: Boolean = false)
+                     val template: LevelMapTemplateReader.Temp,
+                     val isGetItem: Boolean = false,
+                     val isHalfPassable: Boolean = true)

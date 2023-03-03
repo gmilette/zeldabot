@@ -23,13 +23,7 @@ class PlanRunner(val masterPlan: MasterPlan) {
         // update plan
         // if actions are
         if (action.complete(state)) {
-            val time = (System.currentTimeMillis() - startedStep) / 1000
-            val totalTime = (System.currentTimeMillis() - started) / 1000
-            d { "*** advance time $time"}
-            logCompleted()
-            completedStep.add(StepCompleted(action, time, totalTime))
             advance()
-            startedStep = System.currentTimeMillis()
         }
 
         return action.nextStep(state)
@@ -40,17 +34,26 @@ class PlanRunner(val masterPlan: MasterPlan) {
             d { "$index, ${stepCompleted.time}, ${stepCompleted.totalTime}, ${stepCompleted.action.name}" }
         }
 
-        val csvWriter2 = CsvWriter()
-        csvWriter2.open(outputFile, false) {
-            completedStep.forEachIndexed { index, stepCompleted ->
-                writeRow(index, stepCompleted.time, stepCompleted.totalTime, stepCompleted.action.name)
-            }
-        }
+//        val csvWriter2 = CsvWriter()
+//        csvWriter2.open(outputFile, false) {
+//            completedStep.forEachIndexed { index, stepCompleted ->
+//                writeRow(index, stepCompleted.time, stepCompleted.totalTime, stepCompleted.action.name)
+//            }
+//        }
     }
 
-    private fun advance() {
+    /**
+     * advance to the next step
+     */
+    fun advance() {
+        val time = (System.currentTimeMillis() - startedStep) / 1000
+        val totalTime = (System.currentTimeMillis() - started) / 1000
+        d { "*** advance time $time"}
+        logCompleted()
+        completedStep.add(StepCompleted(action, time, totalTime))
         action = masterPlan.pop()
         action.reset()
+        startedStep = System.currentTimeMillis()
     }
 
     fun afterThis() = masterPlan.next()

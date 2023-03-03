@@ -19,10 +19,15 @@ class EnemyStateReasoner {
     val enemyPresenceHistory: MutableList<List<FramePoint>> = mutableListOf()
     var enemyHasMoved: MutableList<Boolean> = mutableListOf()
     var wasLoot: MutableList<Boolean> = mutableListOf()
+    var wasEverProjectile: MutableList<Boolean> = mutableListOf()
+
+    // need this high to kill the rhino
+    // but if it is stoo high, link just keeps attacking
+    private val histSize = 125
 
     fun add(enemyPoint: List<FramePoint>) {
         enemyLocationHistory.add(enemyPoint)
-        if (enemyLocationHistory.size > 75) {
+        if (enemyLocationHistory.size > histSize) {
             enemyLocationHistory.removeFirst()
         }
     }
@@ -32,7 +37,7 @@ class EnemyStateReasoner {
             initialData = enemyData
         }
         history.add(enemyData)
-        if (history.size > 75) {
+        if (history.size > histSize) {
             history.removeFirst()
         }
     }
@@ -47,6 +52,11 @@ class EnemyStateReasoner {
         )
         // 8 false
         enemyHasMoved = mutableListOf(
+            false, false, false, false,
+            false, false, false, false,
+            false, false, false, false
+        )
+        wasEverProjectile = mutableListOf(
             false, false, false, false,
             false, false, false, false,
             false, false, false, false
@@ -66,6 +76,27 @@ class EnemyStateReasoner {
 
         val first = history.first()[index]
         val last = history.last()[index]
+
+        val lastDropped = history.takeLast(10).map { it[index] }
+        val numDistinct = lastDropped.distinct()
+        // all distinct
+        val isAliveBecauseDroppedId = numDistinct.size == lastDropped.size && numDistinct.size > 5
+        if (isAliveBecauseDroppedId) {
+            d { " $index Alive because dropped id"}
+        }
+//        val last3 = history.takeLast(4)
+//        var prev: AgentData? = null
+//        var allSame = true
+//        for (agentData in last3[index]) {
+//            prev?.let { prevAgent ->
+//                if (prevAgent.droppedId != agentData.droppedId) {
+//                    allSame = false
+//                }
+//            }
+//            prev = agentData
+//        }
+//        val isAliveBecauseDroppedId = !allSame
+
         //all same
         val ptChanged = history.any {
             it[index].point != first.point
@@ -86,16 +117,37 @@ class EnemyStateReasoner {
         val statusChanged = history.any {
             it[index].status == first.status
         }
+        val wasProjectile = history.any {
+            it[index].projectileState == ProjectileState.Moving
+        }
 //        val wasAlive = hpChanged || animChanged || ptChanged || countdownChanged || presenceChanged
-        val wasAlive = ptChanged || presenceChanged || animChanged || countdownChanged
-//        d { "$wasAlive hp $hpChanged an $animChanged pt $ptChanged cd $countdownChanged pr $presenceChanged st: $statusChanged last hp " +
-//                "${last.hp} dropped " +
-//                "${last.droppedId} hasM ${enemyHasMoved[index]}" +
-//                " wasAlive $wasAlive" }
+        val wasAlive = ptChanged || presenceChanged || animChanged || countdownChanged || isAliveBecauseDroppedId
+        // never set it back to false
+        if (wasProjectile) {
+            wasEverProjectile[index] = true
+        }
 
-        enemyHasMoved[index] = wasAlive
+        val DEBUG = false
+        if (DEBUG) {
+            d {
+                "$wasAlive hp $hpChanged an $animChanged pt $ptChanged cd $countdownChanged pr $presenceChanged st: $statusChanged last hp " +
+                        "${last.hp} dropped " +
+                        "${last.droppedId} hasM ${enemyHasMoved[index]}" +
+                        " wasAlive $wasAlive" +
+                        " was loot ${wasLoot[index]}" +
+                        " proj state ${last.projectileState}" +
+                        " was projectile ${wasProjectile} " +
+                        " was ever ${wasEverProjectile[index]} " +
+                        " isAliveBecauseDroppedId $isAliveBecauseDroppedId"
+            }
+        }
 
-        // write this to a special log so I can see the history
+        // i dont think we want to change it
+        if (wasAlive) {
+            enemyHasMoved[index] = wasAlive
+        }
+
+                // write this to a special log so I can see the history
 
 //        Unknown,
 //        Alive,
@@ -105,10 +157,39 @@ class EnemyStateReasoner {
 //        Projectile
         return when {
             // nope it is a bat
-//            last.droppedId == 16 -> EnemyState.Projectile
-            last.droppedId == 128 || last.droppedId == 66 -> EnemyState.Projectile
-            // it's not a bat
-            last.droppedId != 2 && last.droppedId != 16 && last.droppedId != 3 && last.droppedId > 0 -> EnemyState.Loot // maybe track
+            // it is definately a projectile but also a bat
+            // is it a bat too?
+            //last.droppedId == 16 && last.isProjectileSlot -> EnemyState.Projectile
+            // works, but not always because projectile slot is used by bats probably
+//            last.isProjectileSlot -> EnemyState.Projectile
+            // TODO: projectiles can be offscreen, maybe that matters?
+//            last.projectileState == ProjectileState.Moving -> EnemyState.Projectile
+
+            // this was here, important for ghosts
+            isAliveBecauseDroppedId && !wasEverProjectile[index] -> EnemyState.Alive
+            // it could have changed to Gone
+            // this was the original
+//            wasProjectile && wasEverProjectile[index] -> EnemyState.Projectile
+            // looks like alive because it finds an id of 0
+            wasProjectile && wasEverProjectile[index] -> EnemyState.Projectile
+            // changing dropped id means, its alive
+            // do this before checking for loot
+            //last.droppedId == 128 || last.droppedId == 66 -> EnemyState.Projectile
+            // it's not a bat // 1 is for the
+            // 2 might be the traps
+            //|| last.droppedId == 2
+            // 2 might also mean ladder is deployed, i saw the ladder out and
+            // had a dropped item 2
+            // then when I stopped ladder deployment, it was no drapped item 2
+            // 34 is a heart
+            last.droppedId != 1 && last.droppedId != 2 && last.droppedId != 16 && last.droppedId != 3 && last.droppedId != 128 && last
+                .droppedId > 0 -> {
+                if (last.droppedId == 34) {
+                    d { " FOUND LOOT heart"}
+                }
+//                d { " FOUND LOOT ${last.droppedId}"}
+                EnemyState.Loot
+            } // maybe track
             // the initial value only
             // for sure it is dead
             enemyHasMoved[index] && (last.hp == 128) -> EnemyState.Dead
@@ -116,7 +197,8 @@ class EnemyStateReasoner {
             // my 5 measurements should show some change if the thing is still alive
             enemyHasMoved[index] && !wasAlive -> EnemyState.Dead
             // if it was loot dont make it alive again
-            wasAlive && !wasLoot[index] -> EnemyState.Alive
+            wasAlive && !wasLoot[index] && !wasEverProjectile[index] -> EnemyState.Alive
+//            wasAlive -> EnemyState.Alive
 //            wasAlive && countdownChanged -> EnemyState.Alive
             else -> EnemyState.NotSeen
         }.also {

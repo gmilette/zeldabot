@@ -61,26 +61,13 @@ class Hyrule {
 
 class MapCellData(
     val name: String = "",
-    val objectives: List<Objective> = emptyList(),
-    var exits: ExitSet = ExitSet(),
+    val objective: Objective = Objective.empty,
     // path parameters: if its a room with u shaped traps,
     // path planning better do full plans, if there are
     // no traps, short plan depth. maybe level of danger
     // if the map is cut off top from bottom,
+    val exits: ExitSet = ExitSet() // unused
 ) {
-    constructor(
-        name: String,
-        objective: Objective,
-        exits: ExitSet = ExitSet(),
-    ) : this(name, listOf(objective), exits)
-
-    constructor(
-        name: String,
-        objective: Objective,
-        objective2: Objective,
-        exits: ExitSet = ExitSet(),
-    ) : this(name, listOf(objective, objective2), exits)
-
     companion object {
         val empty = MapCellData("empty")
     }
@@ -160,15 +147,46 @@ class MapRoute() {
 }
 
 data class Objective(
+    // how to enter the location
     val point: FramePoint,
     val type: DestType,
+    // like which part of the shop to go to
+    val itemLoc: ItemLoc = ItemLoc.Center
 //    val requires: DestType.ITEM
 ) {
     constructor(x: Int, y: Int, type: DestType) : this(FramePoint(x, y), type)
+
+    companion object {
+        val empty = Objective(FramePoint(), DestType.None)
+    }
+
+//    val shopRightItem = FramePoint(152, 96) // 97 failed to get heart
+//    //        val selectHeart = FramePoint(152, 90) // still at location 44
+//    val centerItem = FramePoint(118, 88) // not 96
+//    val centerItemLetter = FramePoint(120, 88)
+//    val shopHeartItem = FramePoint(152, 96)
+//    val shopLeftItem = FramePoint(88, 88)
+
+    // if in a level
+    enum class ItemLoc(val point: FramePoint) {
+        None(FramePoint(0, 0)),
+        Enter(FramePoint(120, 100)),
+        Left(FramePoint(88, 88-2)),
+        Center(FramePoint(120, 88-2)),
+        Right(FramePoint(152, 96-2))
+    }
 }
+
 
 enum class Direction {
     Left, Right, Up, Down
+}
+
+fun Direction.opposite(): Direction = when (this) {
+    Direction.Left -> Direction.Right
+    Direction.Right -> Direction.Left
+    Direction.Up -> Direction.Down
+    Direction.Down -> Direction.Up
 }
 
 fun Direction.toGamePad(): GamePad = when (this) {
@@ -177,12 +195,12 @@ fun Direction.toGamePad(): GamePad = when (this) {
     Direction.Up -> GamePad.MoveUp
     Direction.Down -> GamePad.MoveDown
 }
-fun Direction.pointModifier(): (FramePoint) -> FramePoint {
+fun Direction.pointModifier(adjustment: Int = 1): (FramePoint) -> FramePoint {
     return when (this) {
-        Direction.Up -> { p -> FramePoint(p.x, p.y - 1) }
-        Direction.Down -> { p -> FramePoint(p.x, p.y + 1) }
-        Direction.Left -> { p -> FramePoint(p.x - 1, p.y) }
-        Direction.Right -> { p -> FramePoint(p.x + 1, p.y) }
+        Direction.Up -> { p -> FramePoint(p.x, p.y - adjustment) }
+        Direction.Down -> { p -> FramePoint(p.x, p.y + adjustment) }
+        Direction.Left -> { p -> FramePoint(p.x - adjustment, p.y) }
+        Direction.Right -> { p -> FramePoint(p.x + adjustment, p.y) }
     }
 }
 
@@ -195,7 +213,8 @@ class MapCell(
     val mapLoc: MapLoc,
     val mapData: MapCellData,
     val passable: Map2d<Boolean> = Map2d(emptyList()),
-    halfPassable: Boolean = true
+    halfPassable: Boolean = true,
+    isLevel: Boolean = false
 ) {
     override fun toString(): String {
         return "Map $mapLoc $point"
@@ -207,7 +226,7 @@ class MapCell(
     }
 
     val exits = mutableMapOf<Direction, MutableList<FramePoint>>()
-    val gstar: GStar = GStar(passable, halfPassable)
+    val gstar: GStar = GStar(passable, halfPassable, isLevel)
 
     val exitNames: String
         get() {
@@ -307,10 +326,15 @@ class MapCell(
                 if (debug) d { " left exit: $y" }
                 exits[Direction.Left]?.add(FramePoint(0, y))
             }
+            try {
             if (passable.get(MapConstants.MAX_X - 10, y)) {
                 if (debug) d { " right exit: $y" }
                 exits[Direction.Right]?.add(FramePoint(MapConstants.MAX_X, y))
             }
+            } catch (e: Exception) {
+//                d { " IGNORE "}
+            }
+
         }
     }
 
