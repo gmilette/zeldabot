@@ -41,7 +41,7 @@ repositories {
 }
 
 dependencies {
-    //implementation(compose.desktop.currentOs)
+//    implementation(compose.desktop.currentOs)
     implementation(compose.desktop.macos_arm64)
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.6.0")
     implementation("org.jgrapht:jgrapht-core:1.5.1")

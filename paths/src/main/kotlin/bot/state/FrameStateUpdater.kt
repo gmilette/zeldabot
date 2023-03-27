@@ -48,7 +48,6 @@ class FrameStateUpdater(
                 api.writeCPU(Addresses.hasSword, 0)
             }
         }
-
     }
 
     fun updateFrame(currentFrame: Int, currentGamePad: GamePad) {
@@ -89,6 +88,12 @@ class FrameStateUpdater(
             // it's dead
             val xAnimation = api.readCPU(Addresses.enemyAnimationOnOff[i])
             val xPresence = api.readCPU(Addresses.enemyPresence[i])
+
+            // can get what sprites are active
+            // and this will be an easy way to tell if there
+            // are any enemies alive, if I can filter out things
+            // that are not enemies
+//            api.readOAM()
 
             // type 15: i think it's the clock
             //  dropped item type 24 i think it's a bomb
@@ -277,7 +282,11 @@ class FrameStateUpdater(
 
 //        state.enemyReasoner.log()
         //enemies
-        val frame = FrameState(gameMode, reasonerEnemies, killedEnemyCount, link, subPoint,
+//        val theEnemies = reasonerEnemies
+        val oam = OamStateReasoner(api)
+        val theEnemies = oam.agents()
+        d { "! loot ----- ${oam.loot} " }
+        val frame = FrameState(gameMode, theEnemies, killedEnemyCount, link, subPoint,
             mapLoc, inventory, hasDungeonItem, tenth, level, clockActivated, swordUseCountdown)
 
         this.state.previousLocation = link.point

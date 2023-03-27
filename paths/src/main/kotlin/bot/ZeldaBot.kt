@@ -7,6 +7,8 @@ import bot.state.*
 import bot.state.map.Hyrule
 import bot.state.map.MapCell
 import bot.state.map.MapConstants
+import bot.state.map.level.LevelSpecBuilder
+import bot.state.map.level.LevelStartMapLoc
 import nintaco.api.API
 import nintaco.api.ApiSource
 import nintaco.api.Colors
@@ -85,7 +87,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 
     var frameStateUpdater: FrameStateUpdater = FrameStateUpdater(api, hyrule)
 
-    val plan = PlanRunner(PlanBuilder.makeMasterPlan(hyrule.mapCellsObject, hyrule.levelMap))
+    val plan = PlanRunner(PlanBuilder.makeMasterPlan(hyrule, hyrule.mapCellsObject, hyrule.levelMap))
 
     var previousLink: FramePoint = FramePoint()
     val collect = SkipLocationCollector()
@@ -176,34 +178,20 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 
             val alive = this.frameState.enemiesClosestToLink(EnemyState.Alive).size
             val dead = this.frameState.enemiesClosestToLink(EnemyState.Dead).size
+            val projectiles = this.frameState.enemiesClosestToLink(EnemyState.Projectile).size
+            val loot = this.frameState.enemiesClosestToLink(EnemyState.Loot).size
 //            val unknown = this.frameState.enemiesClosestToLink(EnemyState.Unknown).size
-            val killedCt = this.frameState.killedEnemyCount
-            val saw = this.numEnemiesSeen
             val tenth = this.frameState.tenth
-            val aliveT = " t: $tenth A: ${alive} d: $dead k ${killedCt} s $saw"
-
-
+            val aliveT = " t: $tenth A: ${alive} d: $dead p: $projectiles l: $loot"
 
             try {
-                frameState.enemies.filter { it.droppedId != 0 && it.droppedId != 128 }.firstOrNull()?.let { agent ->
-                    drawIt(agent.point, "#${agent.droppedId}")
-                } ?: run {
-                    drawIt(plan.target(), "$locCoordinates $link $aliveT")
-                }
-//                for (agent in frameState.enemies.filter { it.droppedId != 0 }) {
-//                    drawIt(agent.point, "#${agent.droppedId}")
-////                    val pt = agent.point.toScreenY
-////                    api.drawString("#${agent.droppedId}", pt.x, pt.y, false)
-//                }
+                drawIt(plan.target(), "$locCoordinates $link $aliveT")
             } catch (e: Exception) {
 
             }
         }
-//        drawMap(frameStateUpdater.state.mapCell)
-
         return nextGamePad
     }
-
 
     private var spriteX = 0
     private var spriteY = 8

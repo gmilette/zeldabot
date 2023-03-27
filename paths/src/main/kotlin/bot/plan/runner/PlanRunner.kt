@@ -2,13 +2,15 @@ package bot.plan.runner
 
 import bot.GamePad
 import bot.plan.action.Action
+import bot.plan.action.DoNothing
+import bot.plan.action.moveHistoryAttackAction
 import bot.state.FramePoint
 import bot.state.MapLocationState
 import com.github.doyaaaaaken.kotlincsv.client.CsvWriter
 import util.d
 
 class PlanRunner(val masterPlan: MasterPlan) {
-    var action = masterPlan.pop()
+    var action: Action
 
     val started = System.currentTimeMillis()
     var startedStep = System.currentTimeMillis()
@@ -18,6 +20,12 @@ class PlanRunner(val masterPlan: MasterPlan) {
     data class StepCompleted(val action: Action, val time: Long, val totalTime: Long)
     val completedStep = mutableListOf<StepCompleted>()
 
+    init {
+        action = masterPlan.skipToStart()
+    }
+
+    private fun withDefaultAction(action: Action) = moveHistoryAttackAction(action)
+
     // currently does this
     fun next(state: MapLocationState): GamePad {
         // update plan
@@ -26,7 +34,11 @@ class PlanRunner(val masterPlan: MasterPlan) {
             advance()
         }
 
-        return action.nextStep(state)
+        return try {
+            action.nextStep(state)
+        } catch (e: Exception) {
+            DoNothing().nextStep(state)
+        }
     }
 
     private fun logCompleted() {
@@ -51,7 +63,7 @@ class PlanRunner(val masterPlan: MasterPlan) {
         d { "*** advance time $time"}
         logCompleted()
         completedStep.add(StepCompleted(action, time, totalTime))
-        action = masterPlan.pop()
+        action = withDefaultAction(masterPlan.pop())
         action.reset()
         startedStep = System.currentTimeMillis()
     }

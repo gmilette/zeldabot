@@ -282,4 +282,9 @@ object Addresses {
       const val subX = 0x00FD // ?
       const val screenScrolling = 0x00e8 //$00=No, $08=Northbound, $04=Southbound, $01=Eastbound, $02=Westbound
    }
+
+   object Oam {
+      const val start = 0x0000
+   }
+
 }

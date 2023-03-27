@@ -122,6 +122,9 @@ class NeighborFinder(
                 false
             }
             else -> {
+                if (passable.empty) {
+                    d { " Passable empty "}
+                }
                 blockPassableHalf(point)
 //                return try {
 //                blockPassableHalf(point)

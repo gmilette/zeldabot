@@ -8,26 +8,6 @@ import bot.state.map.*
 import util.d
 import kotlin.random.Random
 
-// set of actions for a given map cell
-//class ActionPlan {
-//    private val actions: MutableList<Action> = mutableListOf()
-//
-//    init {
-//        push(MoveToNextScreen()) //lootOrKill
-////        push(lootOrKill)
-//    }
-//
-//    fun current(): Action =
-//        actions.first()
-//
-//    fun push(action: Action) {
-//        actions.add(action)
-//    }
-//
-//    fun pop(): Action =
-//        actions.removeLast()
-//}
-
 interface Action {
     fun reset() {
         // empty
@@ -53,66 +33,18 @@ class EndAction : Action {
 
     override fun nextStep(state: MapLocationState): GamePad {
         d { " DONE! " }
-        return GamePad.MoveUp
+        return GamePad.None
     }
 }
 
-class AlwaysMoveUp : Action {
+class DoNothing : Action {
     override fun complete(state: MapLocationState): Boolean =
         false
 
     override fun nextStep(state: MapLocationState): GamePad {
-        return GamePad.MoveUp
+        return GamePad.None
     }
 }
-
-//val killAllOrMoveToNext = DecisionAction(KillAll()) {
-//        state -> state.hasEnemies
-//}
-
-private fun MapLocationState.hasNearEnemy(threshold: Int = 32): Boolean =
-    frameState.enemies.any { it.state == EnemyState.Alive && frameState.link.point.distTo(it.point) < threshold }
-
-private val MapLocationState.hasEnemies: Boolean
-    get() = frameState.enemies.any { it.state == EnemyState.Alive }
-
-private val MapLocationState.numEnemies: Int
-    get() = frameState.enemies.count { it.state == EnemyState.Alive }
-
-private val MapLocationState.aliveEnemies: List<Agent>
-    get() = frameState.enemies.filter { it.state == EnemyState.Alive }
-
-//private val MapLocationState.numEnemiesBelowIndex: Int
-//    get() = frameState.enemies.cou { it.state == EnemyState.Alive }
-
-val middleGrids = listOf(FramePoint(7.grid, 5.grid),
-    FramePoint(8.grid, 5.grid),
-    FramePoint(9.grid, 5.grid),
-    FramePoint(8.grid, 4.grid),
-    FramePoint(8.grid, 6.grid),
-)
-
-private fun MapLocationState.numEnemiesAliveInCenter(): Int {
-    return frameState.enemies.filter { it.state == EnemyState.Alive } .count { agent ->
-        middleGrids.any { it.isInGrid(agent.point) }
-    }
-}
-
-private fun FramePoint.isInGrid(other: FramePoint) =
-    other.x in this.x..this.justRightEnd.x &&
-            other.y in this.y..this.justLeftBottom.y
-
-private val MapLocationState.hasAnyLoot: Boolean
-    get() = frameState.enemies.any { it.isLoot }
-
-private val MapLocationState.cleared: Boolean
-    get() = !hasEnemies && !hasAnyLoot
-
-private fun MapLocationState.clearedWithMin(min: Int): Boolean =
-    numEnemies <= min && !hasAnyLoot
-
-private fun MapLocationState.clearedWithMinIgnoreLoot(min: Int): Boolean =
-    numEnemies <= min
 
 class Optional(val action: Action, private val must: Boolean = true) : Action {
     override fun reset() {
@@ -131,40 +63,6 @@ class Optional(val action: Action, private val must: Boolean = true) : Action {
         true
 }
 
-class WaitUntilActive(val action: Action, private val waitTime: Int = 30) : Action {
-    private var stepsWaited = 0
-    override fun reset() {
-        stepsWaited = 0
-        action.reset()
-    }
-
-    override fun nextStep(state: MapLocationState): GamePad {
-        stepsWaited++
-        return action.nextStep(state)
-    }
-
-    override val name: String
-        get() = action.name
-
-    override fun target() = action.target()
-    override fun complete(state: MapLocationState): Boolean =
-        stepsWaited > waitTime && action.complete(state)
-}
-
-class Must(val action: Action, private val must: Boolean = true) : Action {
-    override fun reset() {
-        action.reset()
-    }
-
-    override fun nextStep(state: MapLocationState): GamePad {
-        return action.nextStep(state)
-    }
-
-    override fun target() = action.target()
-    override fun complete(state: MapLocationState): Boolean =
-        must && action.complete(state)
-}
-
 // after kill all, move to next screen
 val lootAndKill = DecisionAction(GetLoot(), KillAll()) { state ->
     state.frameState.enemies.any { it.isLoot }
@@ -173,10 +71,6 @@ val lootAndKill = DecisionAction(GetLoot(), KillAll()) { state ->
 val moveToKillAllInCenterSpot = DecisionAction(
     InsideNavAbout(FramePoint(5.grid, 5.grid), 2),
     KillInCenter()) { state ->
-    state.numEnemies <= state.numEnemiesAliveInCenter()
-}
-
-val killAllAndInCenter = DecisionAction(moveToKillAllInCenterSpot, KillAll()) { state ->
     state.numEnemies <= state.numEnemiesAliveInCenter()
 }
 
@@ -198,8 +92,6 @@ class KillInCenter : Action {
             }
         }
         frames++
-        // move up
-        // hit b
         return move
     }
 
@@ -214,6 +106,7 @@ object KillHandsLevel7Data {
     val attractFrom = FramePoint(2.grid-1, 6.grid)
 }
 
+// TODO: dropped id not used anymore
 val MapLocationState.handActive: Boolean
     get() = this.frameState.enemies.any { it.droppedId == 1 && it.state == EnemyState.Alive }
 
@@ -293,6 +186,47 @@ class KillHandsInLevel7 : Action {
     override val name: String
         get() = "killHandsInLevel7 $lastAction ${criteria.frameCount}"
 }
+
+class SwitchToItemConditionally(private val inventoryPosition: Int = Inventory.Selected.candle) : Action {
+    private val switchSequence = mutableListOf<Action>(
+        GoIn(2, GamePad.Start),
+        GoIn(30, GamePad.None),
+        SwitchToItem(inventoryPosition),
+        GoIn(100, GamePad.None),
+        GoIn(2, GamePad.Start),
+        GoIn(30, GamePad.None),
+    )
+
+    private val positionShoot = OrderedActionSequence(switchSequence)
+
+
+    override fun complete(state: MapLocationState): Boolean {
+        return positionShoot.finished() || startedWithItem
+    }
+
+    override fun target(): FramePoint {
+        return positionShoot.target()
+    }
+
+    private var firstStep = true
+    private var startedWithItem = false
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        d {"SwitchToItemConditionally"}
+        return if (firstStep && state.frameState.inventory.selectedItem == inventoryPosition) {
+            d {"Already have"}
+            startedWithItem = true
+            GamePad.None
+        } else {
+            firstStep = false
+            positionShoot.nextStep(state)
+        }
+    }
+
+    override val name: String
+        get() = "SwitchToItemConditionally ${inventoryPosition}"
+}
+
 
 // assume switched to arrow
 class KillArrowSpider : Action {
@@ -422,7 +356,7 @@ class GoIn(private val moves: Int = 5, private val dir: GamePad = GamePad.MoveUp
     }
 
     override val name: String
-        get() = "Go In $dir $moves"
+        get() = "Go In $dir ($movements of $moves)"
 }
 
 class GoDirection(private val dir: GamePad, private val moves: Int = 10) : Action {
@@ -479,46 +413,7 @@ class InsideNavShop(private val point: FramePoint) : Action {
     }
 
     override val name: String
-        get() = "InsideNavShop to ${point}"
-}
-
-class CrashAction : Action {
-    override fun complete(state: MapLocationState): Boolean = false
-
-    override fun nextStep(state: MapLocationState): GamePad {
-        throw RuntimeException("Fail")
-    }
-
-    override fun target(): FramePoint {
-        return FramePoint()
-    }
-
-    override fun path(): List<FramePoint> {
-        return emptyList()
-    }
-
-    override val name: String
-        get() = "crash"
-}
-
-class OpenMenu() : Action {
-    override fun complete(state: MapLocationState): Boolean = false
-
-    override fun nextStep(state: MapLocationState): GamePad {
-        return GamePad.Start
-    }
-
-    override fun target(): FramePoint {
-        return FramePoint()
-    }
-
-    override fun path(): List<FramePoint> {
-        return emptyList()
-    }
-
-    override val name: String
-        get() = "crash"
-
+        get() = "InsideNavShop to $point"
 }
 
 class SwitchToItem(private val inventoryPosition: Int = Inventory.Selected.candle) : Action {
@@ -607,12 +502,6 @@ class InsideNav(private val point: FramePoint) : Action {
     override val name: String
         get() = "Nav to ${point}"
 }
-
-class RepeatIfFail() {
-
-}
-
-// do moveTo(100,100) then moveDown(100) while !reached(pushPoint)
 
 class InsideNavAbout(private val point: FramePoint, about: Int, vertical: Int = 1, negVertical: Int = 0,
                      val shop: Boolean = false) : Action {
@@ -932,6 +821,67 @@ class ClockActivatedKillAll : Action {
     }
 }
 
+
+fun moveHistoryAttackAction(wrapped: Action) =
+    // really, if there are enemies attack, otherwise, move, or bomb
+    // if there are pancake enemies
+    MoveHistoryAction(wrapped, AlwaysAttack())
+
+private class SameCount {
+    var last: GamePad = GamePad.None
+    private var count: Int = 0
+
+    fun record(pad: GamePad): Int {
+        if (last == pad) {
+            count++
+        }
+        last = pad
+        return count
+    }
+
+    fun reset() {
+        count = 0
+    }
+}
+
+// default actions
+// if same x,y as enemy, attack
+// unstick
+
+class MoveHistoryAction(private val wrapped: Action, private val escapeAction: Action) : Action {
+    private val histSize = 250
+    private val same = SameCount()
+    private var escapeActionCt = 0
+    private val escapeActionTimes = 50
+
+    override fun complete(state: MapLocationState): Boolean =
+        wrapped.complete(state)
+
+    override fun nextStep(state: MapLocationState): GamePad =
+        when {
+            escapeActionCt > 0 -> {
+                d { " ESCAPE ACTION "}
+                val action = escapeAction.nextStep(state)
+                escapeActionCt--
+                action
+            }
+            else -> {
+                val nextStep = wrapped.nextStep(state)
+                val ct = same.record(nextStep)
+                d { " ESCAPE ACTION not same $nextStep + $ct last ${same.last}"}
+                if (ct >= histSize) {
+                    escapeActionCt = escapeActionTimes
+                    d { " ESCAPE ACTION RESET"}
+                    same.reset()
+                }
+                nextStep
+            }
+        }
+
+    override val name: String
+        get() = wrapped.name
+}
+
 class Unstick(private val wrapped: Action, private val howLong:Int = 5000) : Action {
     private var frames = 0
     private var randomMoves = 250
@@ -962,13 +912,6 @@ class Unstick(private val wrapped: Action, private val howLong:Int = 5000) : Act
     override val name: String
         get() = "Unstick for ${wrapped.name}"
 }
-
-// complete when link is at this square, otherwise route back to this square
-// this helps
-//class GetBackTo(val next: MapCell, val forceDirection: Direction? = null) : Action {
-//    private val routeTo = RouteTo(params = RouteTo.Param(considerLiveEnemies = false))
-//
-//}
 
 class MoveTo(val next: MapCell, val forceDirection: Direction? = null) : Action {
     private val routeTo = RouteTo(params = RouteTo.Param(considerLiveEnemies = false))
@@ -1006,10 +949,9 @@ class MoveTo(val next: MapCell, val forceDirection: Direction? = null) : Action 
     override fun nextStep(state: MapLocationState): GamePad {
         d { " DO MOVE TO cell ${next.mapLoc}" }
 
-        for (enemy in state.frameState.enemies) {
-            d { " enemy: $enemy" }
-        }
-
+//        for (enemy in state.frameState.enemies) {
+//            d { " enemy: $enemy" }
+//        }
 //        val current = state.hyrule.levelMap.cell(1, state.currentMapCell.mapLoc)
         val current = state.currentMapCell
         if (start == null) {
@@ -1083,7 +1025,8 @@ class ActionSequence(
 }
 
 class OrderedActionSequence(
-    private val actions: List<Action>
+    private val actions: List<Action>,
+    private val restartWhenDone: Boolean = true
 ): Action {
     private var lastComplete = -1
 
@@ -1098,9 +1041,15 @@ class OrderedActionSequence(
     }
 
     fun restart(): Action? {
-        stack = actions.toMutableList()
-        return pop()
+        return if (restartWhenDone) {
+            stack = actions.toMutableList()
+            pop()
+        } else {
+            null
+        }
     }
+
+    fun finished(): Boolean = stack.isEmpty()
 
     // never complete
     override fun complete(state: MapLocationState): Boolean =
@@ -1170,11 +1119,11 @@ class DecisionAction(
         get() = "${action1.name} or ${action2.name}"
 }
 
-class GetLoot : Action {
+class GetLoot(private val adjustInSideLevel: Boolean = false) : Action {
     private val routeTo = RouteTo()
 
     override fun complete(state: MapLocationState): Boolean =
-        state.hasAnyLoot
+        !state.hasAnyLoot
 
     // maybe I should
     private var target: FramePoint = FramePoint(0, 0)
@@ -1201,6 +1150,13 @@ class GetLoot : Action {
 
         val previousTarget = target
         target = loot.first().point
+
+        // the target cannot actually be beyond the bottom two
+        // lines that would be obsurd
+        // need this only for gannon I think
+        if (adjustInSideLevel && target.y > 8.grid) {
+            target = FramePoint(target.x, 8.grid)
+        }
 
         // untested, try to make it easier to navigate to the loot
         val targets = target.about()
@@ -1242,24 +1198,9 @@ class AlwaysAttack(useB: Boolean = false, private val freq: Int = 5) : Action {
         return move
     }
 
-        private var previousAttack = false
     override fun complete(state: MapLocationState): Boolean =
         false
 
-}
-
-class MoveInCircle : Action {
-    override fun complete(state: MapLocationState): Boolean =
-        false
-
-    override fun nextStep(state: MapLocationState): GamePad =
-        when (state.lastGamePad) {
-            GamePad.MoveRight -> GamePad.MoveUp
-            GamePad.MoveLeft -> GamePad.MoveDown
-            GamePad.MoveUp -> GamePad.MoveLeft
-            GamePad.MoveDown -> GamePad.MoveRight
-            else -> GamePad.None
-        }
 }
 
 class Wait(val howLong: Int) : Action {
@@ -1299,6 +1240,18 @@ private class KillAllCompleteCriteria {
         }
 }
 
+/**
+ * just use to mark where the plan should start
+ */
+class StartHereAction: Action {
+    companion object {
+        val name = "StartHereAction"
+    }
+    override fun complete(state: MapLocationState): Boolean {
+        return true
+    }
+}
+
 class KillAll(
     private val sameEnemyFor: Int = 60,
     private val useBombs: Boolean = false,
@@ -1310,6 +1263,7 @@ class KillAll(
     private val numEnemies: Int = -1,
     // do not try to kill the enemies in the center
     private val considerEnemiesInCenter: Boolean = false,
+    private val ifCantMoveAttack: Boolean = false
 ) :
     Action {
     private val routeTo = RouteTo()
@@ -1366,25 +1320,33 @@ class KillAll(
         val numEnemiesInCenter = state.numEnemiesAliveInCenter()
         d { " KILL ALL step ${state.currentMapCell.mapLoc} count $count wait $waitAfterAllKilled center: $numEnemiesInCenter" }
 
-        for (enemy in state.frameState.enemies) {
+        for (enemy in state.frameState.enemies.filter { it.state != EnemyState.Dead }) {
             d { " enemy: $enemy" }
         }
         criteria.update(state)
 
         count++
         when {
-            // release on last step
+            // reset on the last count
             pressACount == 1 -> {
                 pressACount = 0
+                // have to release for longer than 1
                 d { "Press A last time" }
-                return if (useBombs) GamePad.ReleaseB else GamePad.ReleaseA
+                return GamePad.None
             }
 
-            pressACount > 1 -> {
+            pressACount > 4 -> {
                 pressACount--
                 d { "Press A" }
                 return if (useBombs) GamePad.B else GamePad.A
             }
+
+            // release for a few steps
+            pressACount > 1 -> {
+                pressACount--
+                return if (useBombs) GamePad.ReleaseB else GamePad.ReleaseA
+            }
+
             // only for boss
             pressACount == 0 && waitAfterPressing > 0 -> {
                 d { "Press A WAIT" }
@@ -1404,9 +1366,9 @@ class KillAll(
                 // test
                 it.index >= numberLeftToBeDead
             }
-            aliveEnemies.forEach {
-                d { "alive enemy $it dist ${it.point.distTo(state.frameState.link.point)}" }
-            }
+//            aliveEnemies.forEach {
+//                d { "alive enemy $it dist ${it.point.distTo(state.frameState.link.point)}" }
+//            }
 
             if (killedAllEnemies(state)) {
                 waitAfterAllKilled--
@@ -1428,7 +1390,7 @@ class KillAll(
                             // is linked turned in the correct direction towards
                             // the enemy?
                             previousAttack = true
-                            pressACount = 3
+                            pressACount = 6
                             // for the rhino
                             if (waitAfterAttack) {
                                 waitAfterPressing = 60

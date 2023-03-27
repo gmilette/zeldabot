@@ -10,6 +10,8 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Checkbox
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
@@ -66,21 +68,43 @@ fun main() = application {
                 }) {
                 Text("START")
             }
-            Button(modifier = Modifier.align(Alignment.CenterHorizontally),
-                onClick = {
-                    model.skip()
-                }) {
-                Text("Skip")
-            }
             Row(
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                modifier = Modifier.align(Alignment.Start)
             ) {
                 Button(
+                    modifier = Modifier.padding(8.dp),
                     onClick = {
-                        model.unStick()
+                        model.forceDir(GamePad.A, num = 15)
                     }) {
-                    Text("Unstick")
+                    Text("  A ")
                 }
+                Button(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = {
+                        model.forceDir(GamePad.B, num = 15)
+                    }) {
+                    Text("  B ")
+                }
+                Button(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = {
+                        model.forceDir(GamePad.Start, 2)
+                    }) {
+                    Text("  S  ")
+                }
+                Button(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = {
+                        model.updateEnemies()
+                    }) {
+                    Text("  Update Enemies  ")
+                }
+
+            }
+
+            Row(
+                modifier = Modifier.align(Alignment.Start)
+            ) {
                 Button(
                     modifier = Modifier.padding(8.dp),
                     onClick = {
@@ -109,22 +133,6 @@ fun main() = application {
                     }) {
                     Text("  D  ")
                 }
-                Button(
-                    modifier = Modifier.padding(8.dp),
-                    onClick = {
-                        model.forceDir(GamePad.Start, 2)
-                    }) {
-                    Text("  S  ")
-                }
-
-                Button(
-                    modifier = Modifier.padding(8.dp),
-                    onClick = {
-                        model.updateEnemies()
-                    }) {
-                    Text("  Update Enemies  ")
-                }
-
             }
             Row(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -179,12 +187,14 @@ fun main() = application {
             }
 
             Row {
-                Column {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState())) {
                     Text("Enemies", fontSize = 20.sp)
                     state?.enemiesInfo?.let { enemies ->
                         if (enemies.isNotEmpty()) {
-                            enemies.forEachIndexed { index, enemy ->
-                                Text("$index: ${enemy.state.name} ${enemy.point} ${enemy.point.toG} id ${enemy.droppedId}")
+                            enemies.filter { it.state != EnemyState.Dead } .forEachIndexed { index, enemy ->
+                                Text("$index: storedIndex: ${enemy.index} ${enemy.state.name} ${enemy.point} ${enemy.point.toG} id ${enemy
+                                    .droppedId}")
                             }
                         }
                     }

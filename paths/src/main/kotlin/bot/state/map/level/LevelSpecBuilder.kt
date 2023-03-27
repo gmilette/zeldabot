@@ -27,6 +27,15 @@ class LevelSpecBuilder {
         val getItemLoc8: MapLoc = 111 // book
         val getItemLoc8Key: MapLoc = 15
         val getItemLoc8Go: MapLoc = 47
+        object Nine {
+            val travel1: MapLoc = 96
+            val travel2: MapLoc = 112
+            val travel3: MapLoc = 117
+            val travel4: MapLoc = 103
+            val travel5: MapLoc = 119
+            val redRing: MapLoc = 0
+            val silverArrow: MapLoc = 79
+        }
         val getItemLoc5Item: MapLoc = InLocations.Level5.mapLocGetItem
     }
 
@@ -311,21 +320,23 @@ class LevelSpecBuilder {
 
     fun buildLevel9(): List<LevelSpec> {
         val start: MapLoc = LevelStartMapLoc.lev(9)
-        val first = start.left.up.up.up.up.up.left
+//        val first = start.left.up.up.up.up.up.left
+        val first = start.left.up.up.up.up.up.up.left
         val pathdown = first.right.right
 
         val second = start.up.left.left.left
-        val neararrow = second.left.up.up.up.up
+        val arrowstair = second.left.left
+        val neararrow = 32 // 119 //second.left.up.up.up.up
         val stairbeforestair = second.up.up.up.up.up.up.right
         val specs = mutableListOf(
             LevelSpec(start, e(u, d), "start", LevelMapTemplateReader.Temp.lev_grid),
             LevelSpec(start.up, e(l, u), "triforce guy", LevelMapTemplateReader.Temp.lev_empty),
-            LevelSpec(start.up.left, e(u, d), "ghost water", LevelMapTemplateReader.Temp.lev_water_line),
-            LevelSpec(start.left.up, e(u, d), "first stair", LevelMapTemplateReader.Temp.lev_stairs_center),
+            LevelSpec(start.up.left, e(u, d), "ghost water", LevelMapTemplateReader.Temp.lev_water_line_path),
+            LevelSpec(start.up.left.up, e(u, d), "first stair", LevelMapTemplateReader.Temp.lev_stairs_center),
 
             LevelSpec(first, e(d, r), "spiral stair", LevelMapTemplateReader.Temp.lev_spiral),
-            LevelSpec(first.right, e(d, r), "ghost circle", LevelMapTemplateReader.Temp.lev_water_circle),
-            LevelSpec(pathdown, e(d, r), "circle enemy", LevelMapTemplateReader.Temp.lev_block2center),
+            LevelSpec(first.right, e(l, d, r), "ghost circle", LevelMapTemplateReader.Temp.lev_water_circle_path),
+            LevelSpec(pathdown, e(l, d, r, u), "circle enemy", LevelMapTemplateReader.Temp.lev_block2center),
             LevelSpec(pathdown.down, e(u, d, l, r), "four out bomb", LevelMapTemplateReader.Temp.lev_block4out),
             LevelSpec(pathdown.down.right, e(u, d, l), "two before", LevelMapTemplateReader.Temp.lev_block2center),
             LevelSpec(pathdown.down.right.up, e(u, d), "ghost blocks", LevelMapTemplateReader.Temp.lev_block4out2),
@@ -336,15 +347,19 @@ class LevelSpecBuilder {
 
             LevelSpec(second, e(l, u), "squishy stair", LevelMapTemplateReader.Temp.lev_stairs_center),
             LevelSpec(second.left, e(l, u), "dark place", LevelMapTemplateReader.Temp.lev_empty),
+            // 97
             LevelSpec(second.left.left, e(l, u), "stair to near arrow", LevelMapTemplateReader.Temp.lev_stairs_center),
 
             LevelSpec(neararrow, e(u), "near arrow stair bomb up", LevelMapTemplateReader.Temp.lev_stairs_center),
-            LevelSpec(neararrow, e(d), "elbow", LevelMapTemplateReader.Temp.lev_u),
+            LevelSpec(neararrow.up, e(d), "elbow", LevelMapTemplateReader.Temp.lev_u),
 
-            LevelSpec(second.left.left.up, e(l, d, u), "pancake", LevelMapTemplateReader.Temp.lev_cross),
-            LevelSpec(second.left.left.up.left, e(u, r), "pancake", LevelMapTemplateReader.Temp.lev_water_circle),
-            LevelSpec(second.left.left.up.left.up, e(u, d), "ghost maze", LevelMapTemplateReader.Temp.lev_water_maze),
-            LevelSpec(second.left.left.up.left.up.up, e(d, r), "stair to last stair", LevelMapTemplateReader.Temp.lev_stairs_center),
+            LevelSpec(arrowstair.up, e(l, d, u), "pancake", LevelMapTemplateReader.Temp.lev_cross),
+            LevelSpec(arrowstair.up.up, e(u, d), "walk past pancake", LevelMapTemplateReader.Temp.lev_empty),
+            LevelSpec(arrowstair.up.up.up, e(u, d, l), "pancake bomb", LevelMapTemplateReader.Temp.lev_empty),
+
+            LevelSpec(arrowstair.up.left, e(u, r), "pancake", LevelMapTemplateReader.Temp.lev_water_circle_path),
+            LevelSpec(arrowstair.up.left.up, e(u, d), "ghost maze", LevelMapTemplateReader.Temp.lev_water_maze_path),
+            LevelSpec(arrowstair.up.left.up.up, e(d, r), "stair to last stair", LevelMapTemplateReader.Temp.lev_stairs_center),
 
             LevelSpec(stairbeforestair, e(l), "bomb left", LevelMapTemplateReader.Temp.lev_stairs_center),
             LevelSpec(stairbeforestair.left, e(r), "last path stair", LevelMapTemplateReader.Temp.lev_stairs_center),
@@ -353,7 +368,21 @@ class LevelSpecBuilder {
             LevelSpec(second.left.up.up, e(u), "!!!!GANNON!!!!", LevelMapTemplateReader.Temp.lev_gannon),
             LevelSpec(second.left.up.up.up, e(u), "Princess", LevelMapTemplateReader.Temp.lev_princess),
 
-            LevelSpec(getItemLoc4, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
+            LevelSpec(Nine.travel1, e(u), "", LevelMapTemplateReader.Temp.lev_getitem_move, isHalfPassable = false, isGetItem = true),
+            LevelSpec(Nine.travel2, e(u), "", LevelMapTemplateReader.Temp.lev_getitem_move, isHalfPassable = false, isGetItem = true),
+            LevelSpec(Nine.travel3, e(u), "", LevelMapTemplateReader.Temp.lev_getitem_move, isHalfPassable = false, isGetItem = true),
+            LevelSpec(Nine.travel4, e(u), "", LevelMapTemplateReader.Temp.lev_getitem_move, isHalfPassable = false, isGetItem = true),
+            LevelSpec(Nine.travel5, e(u), "", LevelMapTemplateReader.Temp.lev_getitem_move, isHalfPassable = false, isGetItem = true),
+
+//            LevelSpec(6, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
+            LevelSpec(Nine.redRing, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
+            LevelSpec(Nine.silverArrow, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
+            LevelSpec(44, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
+            LevelSpec(88, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
+            LevelSpec(0, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
+            LevelSpec(0, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
+            LevelSpec(136, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
+            LevelSpec(40, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
         )
 
         log(specs, 9)

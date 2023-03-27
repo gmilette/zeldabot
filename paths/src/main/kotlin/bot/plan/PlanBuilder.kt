@@ -21,6 +21,7 @@ import sequence.*
 object InLocations {
     val topMiddleBombSpot = FramePoint(120, 32)
     val bombRight = FramePoint(13.grid - 5, 5.grid)
+    val bombLeft = FramePoint(2.grid + 5, 5.grid)
     val diamondLeftTopPush = FramePoint(96, 64 )
     val diamondLeftBottomPush = FramePoint(96, 96)
     val middleStair = FramePoint(128, 80) //8x5
@@ -90,6 +91,12 @@ object InLocations {
 
     object Level8 {
         val triforceHeart = FramePoint(2.grid, 8.grid)
+        val keySpot = FramePoint(8.grid, 5.grid)
+    }
+
+    object Level9 {
+        val moveUpBlock = FramePoint(6.grid, 5.grid)
+        val centerGannonAttack = FramePoint(7.grid, 5.grid)
     }
 
     object BombDirection {
@@ -100,8 +107,8 @@ object InLocations {
 }
 
 object PlanBuilder {
-    fun makeMasterPlan(mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
-        val plan = AnalysisPlanBuilder.MasterPlanOptimizer(Hyrule())
+    fun makeMasterPlan(hyrule: Hyrule, mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
+        val plan = AnalysisPlanBuilder.MasterPlanOptimizer(hyrule)
 
         val factory = SequenceFactory(mapData, levelData, plan)
 
@@ -135,7 +142,8 @@ object PlanBuilder {
 
 //            includeLevelPlan(levelPlan6(factory))
 //            includeLevelPlan(levelPlan7(factory))
-            includeLevelPlan(levelPlan8(factory))
+//            includeLevelPlan(levelPlan8(factory))
+            includeLevelPlan(levelPlan9(factory))
         }
     }
 
@@ -201,9 +209,9 @@ object PlanBuilder {
             obj(Dest.Secrets.level2secret10)
             // bait
             obj(Dest.Shop.eastTreeShop, itemLoc = Dest.Shop.ItemLocs.magicShield)
-//            obj(Dest.level(8))
+            obj(Dest.level(8))
             phase("level 9")
-//            obj(Dest.level(9))
+            obj(Dest.level(9))
             // junk
             left
             right
@@ -438,22 +446,6 @@ object PlanBuilder {
 
     private fun levelPlan4(factory: SequenceFactory): MasterPlan {
         val builder = factory.make("Destroy level 4")
-        if (false) {
-            return builder.lev(4).startAt(LevelStartMapLoc.lev(4))
-                .seg("go go go")
-                //key to left but dont bother
-                .kill2 // there will be 2 suns still running around
-                .seg("push")
-                .pushWait(InLocations.Level4.moveLeftOfTwo)
-                .goTo(InLocations.rightTop)
-                .startAt(96) //?
-                .go(InLocations.getItem)
-                .upTo(50) // ??
-                .left
-                .end
-                .build()
-        }
-
         // problems:
         // sometimes when move to push, zelda gets shifted to right
         // getting stuck on the ladder
@@ -736,56 +728,56 @@ object PlanBuilder {
         return builder {
             lev(8)
             startAt(LevelStartMapLoc.lev(8))
-//            seg("run past")
-//            left
-////            kill // 2 projectiles that are alive for brief moments
-//            left
-//            startAt(124) //state1
-//            seg("go get book")
-////            kill2
-////            pushInLevelMiddleStair(LevelSpecBuilder.getItemLoc8, upTo = 124)
-//            seg("get back to start")
-//            rightm
-//            rightm // at start
-//            seg("get to crossroads")
-//            up
-//            bomb(InLocations.topMiddleBombSpot)
-//            up
-//            startAt(94) // save3
-//            kill // arg projectiles are considered alive
-//            upm
-////            startAt(62)
-//            upm // master battle
-//            bomb(InLocations.topMiddleBombSpot)
-//            upm
-//            upm
-//            killArrowSpider // kill arrow guy
-//            rightm
-//            seg("get key")
-//            startAt(31) // save4
-//            killAllInCenter
-//            pushInLevelMiddleStair(LevelSpecBuilder.getItemLoc8Key, upTo = 31)
-//            seg("get back to master battle")
-//            left
-//            down
-//            down
-//            kill // master battle
-//            seg("take stair to end")
-//            rightm
+            seg("run past")
+            left
+            kill // 2 projectiles that are alive for brief moments
+            left
+            startAt(124) //state1
+            seg("go get book")
+            kill2
+            pushInLevelMiddleStair(LevelSpecBuilder.getItemLoc8, upTo = 124)
+            seg("get back to start")
+            rightm
+            rightm // at start
+            seg("get to crossroads")
+            up
+            "bomb".seg()
+            bomb(InLocations.topMiddleBombSpot)
+            up
+            startAt(94) // save3
+            kill
+            goTo(InLocations.Level8.keySpot)
+            upm
+//            startAt(62)
+            upm // master battle
+            bomb(InLocations.topMiddleBombSpot)
+            upm
+            upm
+            killArrowSpider // kill arrow guy
+            rightm
+            seg("get key")
+            startAt(31) // save4
+            killAllInCenter
+            pushInLevelMiddleStair(LevelSpecBuilder.getItemLoc8Key, upTo = 31)
+            seg("get back to master battle")
+            left
+            down
+            down
+            kill // master battle
+            seg("take stair to end")
+            rightm
 
-//            startAt(63)
-//            // ack need to work on this
-//            pushInLevelAnyBlock(inMapLoc = 62, //fake
-//                pushTarget = null,
-//                stairsTarget = InLocations.rightStairGrid,
-//                outLocation = InLocations.getOutLeft,
-//                upTo = 44,
-//                thenGo = GamePad.MoveRight
-//            )
-            // have to move to the exit somehow
-            //
-            startAt(76) //save4
-            goIn(GamePad.None, 50)
+            startAt(63)
+            pushInLevelAnyBlock(inMapLoc = 62, //fake
+                pushTarget = null,
+                stairsTarget = InLocations.rightStairGrid,
+                outLocation = InLocations.getOutLeft,
+                upTo = 76,
+                thenGo = GamePad.MoveRight
+            )
+//            startAt(76) //save4
+            // give time to enter so that switching to bomb works
+            goTo(FramePoint(11.grid, 2.grid))
             bomb(InLocations.topMiddleBombSpot)
             "kill dragon".seg()
             upm
@@ -796,12 +788,150 @@ object PlanBuilder {
         }
     }
 
+    private fun LocationSequenceBuilder.levelPlan9PhaseRedRing() {
+        this.add {
+            lev(9)
+            startAt(LevelStartMapLoc.lev(9))
+            upm
+            leftm
+            bomb(InLocations.topMiddleBombSpot)
+            upm // or else it will chase the suns
+//            left
+//             it's not 14
+            startAt(85) // save8
+            kill
+            pushInLevelMiddleStair(LevelSpecBuilder.Companion.Nine.travel1, upTo = 20, outLocation = InLocations.getOutLeft)
+
+            startAt(20) //save7
+            "spiral".seg()
+            //kill
+            rightp // kill the pancakes, getting quite stuck
+            rightm
+            "go down to ring".seg()
+            downm
+            startAt(38) //save6
+            // what if the bomb missed
+            bomb(InLocations.bombRight)
+            rightm
+            bomb(InLocations.topMiddleBombSpot)
+            // p? // need move but also have the kill
+//            startHere
+            upmp
+            bomb(InLocations.topMiddleBombSpot)
+            upm
+            "ring spot".seg()
+            kill // kill2
+            startAt(7) //save5
+            kill // kill3 // stuck here on the disappear ghost
+            pushInLevelMiddleStair(LevelSpecBuilder.getItemLoc8)
+        }
+    }
+
+    private fun LocationSequenceBuilder.levelPlan9PhaseSilverArrow() {
+        add {
+            downp // kill pancake
+            downm
+            leftm
+//            startAt(38) //save6
+            upm
+            "go in next room".seg()
+            upm
+            bomb(InLocations.bombLeft)
+            leftm
+            "kill travel 1".seg()
+            kill
+            startAt(5) //save3
+            pushInLevelAnyBlock(
+                inMapLoc = LevelSpecBuilder.Companion.Nine.travel2,
+                pushTarget = InLocations.Level9.moveUpBlock,
+                stairsTarget = InLocations.Level5.cornerStairs,
+                outLocation = InLocations.getOutLeft,
+                upTo = 99,
+                thenGo = GamePad.MoveRight
+            )
+
+            "travel to arrow".seg()
+            left
+            "past bats".seg()
+            leftm  //bats
+            "circle monster kill".seg()
+            kill
+            pushInLevelMiddleStair(LevelSpecBuilder.Companion.Nine.travel3, upTo = 32)
+            bomb(InLocations.topMiddleBombSpot)
+            upm
+            // save9
+            "acquire arrow".seg()
+            kill
+            "set the arrow".seg()
+            pushInLevelAnyBlock(
+                inMapLoc = LevelSpecBuilder.Companion.Nine.silverArrow,
+                pushTarget = InLocations.Level7.pushRight,
+                stairsTarget = InLocations.Level5.cornerStairsBefore,
+                directionFrom = Direction.Left,
+                position = FramePoint(3.grid, 5.grid),
+                thenGo = GamePad.MoveRight
+            )
+        }
+    }
+
+    private fun LocationSequenceBuilder.levelPlan9PhaseGannon() {
+        add {
+            "return to center".seg()
+            down
+            kill
+            "take stair back".seg()
+            pushInLevelMiddleStair(88, upTo = 97, outLocation = InLocations.getOutRight)
+            // save3
+            "get to push spot".seg()
+            "past first pancake".seg()
+            upmp // walk past
+            "past second pancake".seg()
+            startAt(65)
+            up
+//            upmp //5
+//            startHere
+            "bomb left ok".seg()
+            bomb(InLocations.bombLeft)
+            leftmp
+            kill //save6
+            "push to inbetween travel".seg()
+            pushInLevelAnyBlock(inMapLoc = LevelSpecBuilder.Companion.Nine.travel4,
+                pushTarget = InLocations.Level6.moveUp,
+                stairsTarget = InLocations.Level5.cornerStairs,
+                outLocation = InLocations.getOutRight,
+                upTo = 4
+            )
+            "get to final stair".seg() // save7
+            bomb(InLocations.bombLeft)
+            leftm
+            killp
+            pushInLevelMiddleStair(119, upTo = 82, outLocation = InLocations.getOutLeft)
+            "doorstep of gannon".seg()
+            kill
+            up
+            "seg kill gannon".seg()
+            switchToArrow()
+            goTo(InLocations.Level9.centerGannonAttack)
+            killG
+            lootInside
+            upm
+            "seg get princess".seg()
+            rescuePrincess()
+            peaceReturnsToHyrule()
+            // display some summary stats before ending
+//            booya
+            end
+        }
+    }
+
     private fun levelPlan9(factory: SequenceFactory): MasterPlan {
         val builder = factory.make("Get to level 9")
         return builder {
             lev(9)
-            startAt(LevelStartMapLoc.lev(9))
-            goTo(InLocations.Level2.triforce)
+            levelPlan9PhaseRedRing()
+            levelPlan9PhaseSilverArrow()
+            levelPlan9PhaseGannon()
+            end
         }
     }
 }

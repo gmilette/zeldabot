@@ -4,13 +4,16 @@ val emptyAgent = Agent(0, FramePoint(0, 0), Dir.Right, EnemyState.Unknown,  0,0)
 data class Agent(
     val index: Int = 0,
     val point: FramePoint,
-    val dir: Dir,
+    val dir: Dir = Dir.Down,
     val state: EnemyState = EnemyState.Unknown,
     val countDown: Int = 0,
     val hp: Int = 0,
     val projectileState: ProjectileState = ProjectileState.NotProjectile,
     val droppedId: Int = 0
 ) {
+    val tile = hp
+    val attribute = droppedId
+
     val isLoot: Boolean
         get() = state == EnemyState.Loot
 

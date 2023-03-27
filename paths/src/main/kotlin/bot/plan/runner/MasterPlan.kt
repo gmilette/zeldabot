@@ -3,6 +3,7 @@ package bot.plan.runner
 import bot.plan.action.Action
 import bot.plan.action.EndAction
 import bot.plan.action.MoveTo
+import bot.plan.action.StartHereAction
 import bot.state.MapLocationState
 import util.d
 import util.i
@@ -13,6 +14,28 @@ class MasterPlan(val segments: List<PlanSegment>) {
     private val giant = segments.flatMap { seg -> seg.plan.map { PlanStep(seg, it) } }.toMutableList().also {
         d { " created plan with ${it.size} actions moves $numMoves" }
     }
+
+    /**
+     * return the next action
+     */
+    fun skipToStart(): Action {
+        var ct = 0
+        return if (hasStartHere) {
+            var action = pop()
+            while (action !is StartHereAction) {
+                action = pop()
+                d { " skip ${action.name}"}
+                ct++
+            }
+            d { " advanced $ct steps"}
+            action
+        } else {
+            pop()
+        }
+    }
+
+    private val hasStartHere: Boolean
+        get() = giant.any { it.action is StartHereAction }
 
     // estimated time to complete
 

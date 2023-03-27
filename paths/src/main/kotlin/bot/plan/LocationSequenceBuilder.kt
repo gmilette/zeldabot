@@ -71,6 +71,10 @@ class LocationSequenceBuilder(
         return this
     }
 
+    fun add(other: LocationSequenceBuilder.() -> Unit) {
+        other()
+    }
+
     fun includeLevelPlan(other: MasterPlan): LocationSequenceBuilder {
         makeSegment()
         remember
@@ -116,6 +120,11 @@ class LocationSequenceBuilder(
             add(lastMapLoc.up)
             return this
         }
+    val upp: LocationSequenceBuilder
+        get() {
+            addp(lastMapLoc.up)
+            return this
+        }
     fun upTo(loc: MapLoc): LocationSequenceBuilder {
         val nextLoc = loc
         add(nextLoc, Unstick(MoveTo(mapCell(nextLoc), Direction.Up)))
@@ -124,6 +133,11 @@ class LocationSequenceBuilder(
     val loot: LocationSequenceBuilder
         get() {
             add(lastMapLoc, GetLoot())
+            return this
+        }
+    val lootInside: LocationSequenceBuilder
+        get() {
+            add(lastMapLoc, GetLoot(true))
             return this
         }
     val pickupDeadItem: LocationSequenceBuilder
@@ -171,15 +185,26 @@ class LocationSequenceBuilder(
             add(lastMapLoc, KillAll(useBombs = true, waitAfterAttack = true))
             return this
         }
+    val killG: LocationSequenceBuilder
+        get() {
+            add(lastMapLoc, KillGannon())
+            return this
+        }
     fun killUntil(leftDead: Int): LocationSequenceBuilder {
         add(lastMapLoc, KillAll(
             numberLeftToBeDead = leftDead
         ))
         return this
     }
+    val killp: LocationSequenceBuilder
+        get() {
+            add(lastMapLoc, moveHistoryAttackAction(KillAll()))
+            return this
+        }
     val kill: LocationSequenceBuilder
         get() {
-            add(lastMapLoc, KillAll())
+            add(lastMapLoc, moveHistoryAttackAction(KillAll()))
+//            add(lastMapLoc, KillAll())
             return this
         }
 //    fun kill(maxEnemies: Int): LocationSequenceBuilder {
@@ -201,6 +226,10 @@ class LocationSequenceBuilder(
             add(lastMapLoc, KillAll(numberLeftToBeDead = 3))
             return this
         }
+    val startHere: Unit
+        get() {
+            add(lastMapLoc, StartHereAction())
+        }
     val upLootThenMove: LocationSequenceBuilder
         get() {
             val nextLoc = lastMapLoc.up
@@ -219,9 +248,28 @@ class LocationSequenceBuilder(
             add(nextLoc, Unstick(MoveTo(mapCell(nextLoc))))
             return this
         }
+    val upmp: LocationSequenceBuilder
+        get() {
+            // don't try to fight
+            val nextLoc = lastMapLoc.up
+            add(nextLoc, moveHistoryAttackAction(MoveTo(mapCell(nextLoc))))
+            return this
+        }
     val down: LocationSequenceBuilder
         get() {
             add(lastMapLoc.down)
+            return this
+        }
+    val downp: LocationSequenceBuilder
+        get() {
+            val nextLoc = lastMapLoc.down
+            add(nextLoc, moveHistoryAttackAction(MoveTo(mapCell(nextLoc))))
+            return this
+        }
+    val downm: LocationSequenceBuilder
+        get() {
+            val nextLoc = lastMapLoc.down
+            add(nextLoc, Unstick(MoveTo(mapCell(nextLoc))))
             return this
         }
     val inLevel: LocationSequenceBuilder
@@ -255,6 +303,12 @@ class LocationSequenceBuilder(
             add(nextLoc, Unstick(MoveTo(mapCell(nextLoc))))
             return this
         }
+    val leftmp: LocationSequenceBuilder
+        get() {
+            val nextLoc = lastMapLoc.left
+            add(nextLoc, moveHistoryAttackAction(MoveTo(mapCell(nextLoc))))
+            return this
+        }
     val rightKillForKey: LocationSequenceBuilder
         get() {
             val nextLoc = lastMapLoc.right
@@ -265,6 +319,11 @@ class LocationSequenceBuilder(
     val right: LocationSequenceBuilder
         get() {
             add(lastMapLoc.right)
+            return this
+        }
+    val rightp: LocationSequenceBuilder
+        get() {
+            addp(lastMapLoc.right)
             return this
         }
     val rightk: LocationSequenceBuilder
@@ -497,11 +556,12 @@ class LocationSequenceBuilder(
     }
 
     fun switchToCandle() {
-        switchToItem(Inventory.Selected.candle)
+        plan.add(SwitchToItemConditionally(Inventory.Selected.candle))
     }
 
     fun switchToBomb() {
-        switchToItem(Inventory.Selected.bomb)
+        plan.add(SwitchToItemConditionally(Inventory.Selected.bomb))
+//        switchToItem(Inventory.Selected.bomb)
         // extra wait??
 //        goIn(GamePad.None, 15)
     }
@@ -511,11 +571,11 @@ class LocationSequenceBuilder(
     }
 
     fun switchToWhistle() {
-        switchToItem(Inventory.Selected.whistle)
+        plan.add(SwitchToItemConditionally(Inventory.Selected.whistle))
     }
 
     fun switchToBait() {
-        switchToItem(Inventory.Selected.bait)
+        plan.add(SwitchToItemConditionally(Inventory.Selected.bait))
     }
 
     fun useItem() {
@@ -607,6 +667,17 @@ class LocationSequenceBuilder(
         return this
     }
 
+    fun rescuePrincess() {
+        goIn(GamePad.MoveUp, 15)
+        goIn(GamePad.A, 10)
+        goIn(GamePad.None, 10)
+        goIn(GamePad.MoveUp, 150)
+    }
+
+    fun peaceReturnsToHyrule() {
+        goIn(GamePad.None, 1200)
+    }
+
     fun bomb(target: FramePoint, switch: Boolean = true): LocationSequenceBuilder {
         // TODO: only do this conditionally somehow
         if (switch) {
@@ -632,6 +703,13 @@ class LocationSequenceBuilder(
 
     private fun add(nextLoc: MapLoc) {
         add(nextLoc, opportunityKillOrMove(mapCell(nextLoc)))
+    }
+
+    private fun addp(nextLoc: MapLoc) {
+        add(nextLoc, moveHistoryAttackAction(opportunityKillOrMove(mapCell(nextLoc))))
+//        add(nextLoc, UnstickP(opportunityKillOrMove(mapCell(nextLoc)),
+//            unstickAction = GamePad.A,
+//            howLong = 1000))
     }
 
     private fun addKill(nextLoc: MapLoc) {

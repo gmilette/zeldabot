@@ -1,8 +1,11 @@
 # Compiled Lua sources
 luac.out
 
-build/**
+build/kotlin/**
 
+build/.*
+build/**
+*.lock
 # luarocks build files
 *.src.rock
 *.zip
