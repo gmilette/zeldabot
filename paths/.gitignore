@@ -3,6 +3,8 @@ luac.out
 
 build/kotlin/**
 
+skips.csv
+
 build/.*
 build/**
 *.lock

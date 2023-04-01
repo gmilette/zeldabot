@@ -34,6 +34,8 @@ data class SpriteData(
             4, 6, 8, // link // 0
             0, 2, // facing left link
             88, 10, // mor elink
+            90, // brown link small shield
+            20, 22, // i think link or maybe movable block
             (0x80).toInt(), // link sword
             (0x82).toInt(), // link sword
             84, // link i think
@@ -49,18 +51,33 @@ data class SpriteData(
             116, // bomb
             52, // bomb
             48, // swirly thing
+            112, // bomb smoke
+            114, // i think bomb smoke
 
             //164, // not sure, that is a pancake
-            160
+            160,
+            ladder,
+            wizard,
+            flame1,
+            flame2
         )
         val projectiles = setOf(
             124, 126, // ghost attack
             144, 142, // sun
             40, 68, // ganons
+            (0x44).toInt(), // fire from go to next room
+            fire,
             (0x96).toInt() // trap
         )
 
         val loot = setOf(
+            clockTile,
+            silverArrow,
+            redring,
+            brownBoomerang,
+            bow,
+            map,
+            bigHeart,
             50,
             243, // heart
             (0x2E).toInt(),
@@ -72,13 +89,25 @@ data class SpriteData(
     }
 }
 
-val ladder =(0x76).toInt()
+val fire = (0x5e).toInt()
+val ladder =(0x76).toInt() //118
 
 // final triforce
 val triforceTile = (0xF4).toInt()
 val triforceTile2 = (0xF2).toInt()
 val triforceDirt = (0xEC).toInt() // 236
 val triforceDirt2 = (0xFA).toInt()
+
+val clockTile = (0x66).toInt()
+val silverArrow = (0x28).toInt()
+val redring = (0x46).toInt()
+val brownBoomerang = (0x36).toInt()
+val bow = (0x2A).toInt()
+val map = (0x4C).toInt()
+val bigHeart = (0x68).toInt() //104
+val wizard = (0x98).toInt() // 152
+val flame1 = (0x5C).toInt() //92
+val flame2 = (0x5E).toInt() //94
 
 enum class Tile(id: Int) {
     Gem(50),
@@ -110,6 +139,9 @@ class OamStateReasoner(
         (0x9C).toInt() to "bat",
         (0x9A).toInt() to "bat",
         170 to "squshy", // left and right
+        246 to "rhino",
+        244 to "rhino",
+//        226 to "rhino head",
         124 to "ghostripple",
         126 to "ghostripple",
         142 to "sun", // attrib 1

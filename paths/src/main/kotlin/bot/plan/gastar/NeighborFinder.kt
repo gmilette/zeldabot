@@ -22,9 +22,59 @@ class NeighborFinder(
      */
     private val isLevel: Boolean = false
 ) {
-    fun neighbors(point: FramePoint): List<FramePoint> {
+
+    private val horizontal: List<Direction> = listOf(Direction.Left, Direction.Right)
+    private val vertical: List<Direction> = listOf(Direction.Up, Direction.Down)
+
+    private fun okDirections(from: FramePoint, last: Direction? = null, dist: Int): List<Direction> {
+        val all = Direction.values().toList().shuffled()
+        if (last == null) return all
+        if (true) return all
+        // wrong, you still cannot to left or right
+
+        val dirs = when (last) {
+            Direction.Left,
+            Direction.Right -> {
+                if (from.onHighwayX || dist > 1) {
+                    all
+                } else {
+//                    val corner = corner(from, last)
+//                    if (corner != null) {
+//                        d { " CORNERy $corner"}
+//                    }
+                    horizontal.shuffled()
+                }
+            }
+            Direction.Up,
+            Direction.Down -> {
+                if (from.onHighwayY || dist > 1) {
+                    all
+                } else {
+                    // if corner add
+//                    val corner = corner(from, last)
+//                    if (corner != null) {
+//                        d { " CORNER $corner"}
+//                    }
+//                    corner?.let {
+//                        vertical + it.direction!!
+//                    } ?: vertical
+                    vertical.shuffled()
+                }
+            }
+        }
+        return dirs
+    }
+
+    // need to know the previous point
+    fun neighbors(point: FramePoint, direction: Direction? = null, dist: Int = 1): List<FramePoint> {
         val neigh = mutableListOf<FramePoint>()
-        for (direction in Direction.values()) {
+
+        val validDirections = okDirections(point, direction, dist)
+        if (GStar.DEBUG) {
+            d { " valid directions ${validDirections.size} = $validDirections" }
+        }
+
+        for (direction in validDirections) {
             //val next = SkipLocations.getNext(point, direction)
             val next = direction.pointModifier()(point)
 //                if (next.distTo(this) > 1) {

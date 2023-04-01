@@ -16,25 +16,26 @@ class LevelSpecBuilder {
     val eall = e(u, d, l, r)
 
     companion object {
-        val getItemLoc: MapLoc = 127
-        val getItemLoc3: MapLoc = 15
-        val getItemLoc4: MapLoc = 96
-        val getItemLoc5: MapLoc = 88
-        val getItemLoc6: MapLoc = 117
-        val getItemMove6: MapLoc = 8
-        val getItemLoc7: MapLoc = 74
-        val getMoveLoc: MapLoc = 123
-        val getItemLoc8: MapLoc = 111 // book
-        val getItemLoc8Key: MapLoc = 15
-        val getItemLoc8Go: MapLoc = 47
+        const val DEBUG = false
+        const val getItemLoc: MapLoc = 127
+        const val getItemLoc3: MapLoc = 15
+        const val getItemLoc4: MapLoc = 96
+        const val getItemLoc5: MapLoc = 88
+        const val getItemLoc6: MapLoc = 117
+        const val getItemMove6: MapLoc = 8
+        const val getItemLoc7: MapLoc = 74
+        const val getMoveLoc: MapLoc = 123
+        const val getItemLoc8: MapLoc = 111 // book
+        const val getItemLoc8Key: MapLoc = 15
+        const val getItemLoc8Go: MapLoc = 47
         object Nine {
-            val travel1: MapLoc = 96
-            val travel2: MapLoc = 112
-            val travel3: MapLoc = 117
-            val travel4: MapLoc = 103
-            val travel5: MapLoc = 119
-            val redRing: MapLoc = 0
-            val silverArrow: MapLoc = 79
+            const val travel1: MapLoc = 96
+            const val travel2: MapLoc = 112
+            const val travel3: MapLoc = 117
+            const val travel4: MapLoc = 103
+            const val travel5: MapLoc = 119
+            const val redRing: MapLoc = 0
+            const val silverArrow: MapLoc = 79
         }
         val getItemLoc5Item: MapLoc = InLocations.Level5.mapLocGetItem
     }
@@ -74,16 +75,15 @@ class LevelSpecBuilder {
             LevelSpec(getItemLoc, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
         )
 
-        for (spec in specs) {
-            d { "1 spec ${spec.loc} exits: ${spec.exits}"}
-        }
+        log(specs, 1)
+
         return specs
     }
 
     fun buildLevel2(): List<LevelSpec> {
         val start: MapLoc = LevelStartMapLoc.lev(2)
         val grid = start.up.right
-        d { " grid: $grid next to boomerang ${start.up.up.up.right}"}
+
         val specs = mutableListOf(
             LevelSpec(start, e(u, d, r), "start", LevelMapTemplateReader.Temp.lev_grid),
             // key
@@ -103,9 +103,8 @@ class LevelSpecBuilder {
             LevelSpec(grid.up.up.up.up.up.up.left, e(r), "triforce", LevelMapTemplateReader.Temp.lev_triforce),
         )
 
-        for (spec in specs) {
-            d { "2 spec ${spec.loc}"}
-        }
+        log(specs, 2)
+
         return specs
     }
 
@@ -132,12 +131,7 @@ class LevelSpecBuilder {
             LevelSpec(getItemLoc3, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
        )
 
-        d { "3 spec ${inStart}"}
-        d { "3 spec ${inStart.left}"}
-
-        for (spec in specs) {
-            d { "3 spec ${spec.loc}"}
-        }
+        log(specs, 3)
         return specs
     }
 
@@ -168,9 +162,7 @@ class LevelSpecBuilder {
             LevelSpec(getItemLoc4, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
         )
 
-        for (spec in specs) {
-            d { "4 spec ${spec.loc}"}
-        }
+        log(specs, 4)
         return specs
     }
 
@@ -345,7 +337,7 @@ class LevelSpecBuilder {
             LevelSpec(pathdown.up, e(d, l), "go to next room", LevelMapTemplateReader.Temp.lev_empty),
             LevelSpec(pathdown.up.left, e(r), "ghost kill stairs", LevelMapTemplateReader.Temp.lev_block2center),
 
-            LevelSpec(second, e(l, u), "squishy stair", LevelMapTemplateReader.Temp.lev_stairs_center),
+            LevelSpec(second, e(l, u), "squishy stair", LevelMapTemplateReader.Temp.lev_stair_side),
             LevelSpec(second.left, e(l, u), "dark place", LevelMapTemplateReader.Temp.lev_empty),
             // 97
             LevelSpec(second.left.left, e(l, u), "stair to near arrow", LevelMapTemplateReader.Temp.lev_stairs_center),
@@ -354,7 +346,7 @@ class LevelSpecBuilder {
             LevelSpec(neararrow.up, e(d), "elbow", LevelMapTemplateReader.Temp.lev_u),
 
             LevelSpec(arrowstair.up, e(l, d, u), "pancake", LevelMapTemplateReader.Temp.lev_cross),
-            LevelSpec(arrowstair.up.up, e(u, d), "walk past pancake", LevelMapTemplateReader.Temp.lev_empty),
+            LevelSpec(arrowstair.up.up, e(l, u, d), "walk past pancake", LevelMapTemplateReader.Temp.lev_empty),
             LevelSpec(arrowstair.up.up.up, e(u, d, l), "pancake bomb", LevelMapTemplateReader.Temp.lev_empty),
 
             LevelSpec(arrowstair.up.left, e(u, r), "pancake", LevelMapTemplateReader.Temp.lev_water_circle_path),
@@ -391,11 +383,13 @@ class LevelSpecBuilder {
     }
 
     private fun log(specs: List<LevelSpec>, lev: Int) {
-        d { " LEVEL $lev **START"}
-        for (spec in specs) {
-            d { "$lev spec ${spec.loc}"}
+        if (DEBUG) {
+            d { " LEVEL $lev **START" }
+            for (spec in specs) {
+                d { "$lev spec ${spec.loc}" }
+            }
+            d { " LEVEL $lev **DONE" }
         }
-        d { " LEVEL $lev **DONE"}
     }
 }
 

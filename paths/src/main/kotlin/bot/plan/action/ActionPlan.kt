@@ -100,12 +100,6 @@ class KillInCenter : Action {
 }
 
 
-object KillHandsLevel7Data {
-    val safe = FramePoint(3.grid, 6.grid)
-    val attackFrom = FramePoint(3.grid, 6.grid)
-    val attractFrom = FramePoint(2.grid-1, 6.grid)
-}
-
 // TODO: dropped id not used anymore
 val MapLocationState.handActive: Boolean
     get() = this.frameState.enemies.any { it.droppedId == 1 && it.state == EnemyState.Alive }
@@ -131,60 +125,6 @@ class DeadForAWhile(private val limit: Int = 450, val completeCriteria: (MapLoca
     fun seenEnemy() {
         frameCount = 0
     }
-}
-class KillHandsInLevel7 : Action {
-    private val safe = ActionSequence(InsideNavAbout(KillHandsLevel7Data.safe, 4), still)
-    private val positionAttack = ActionSequence(InsideNavAbout(KillHandsLevel7Data.attackFrom, 0),
-        GoIn(5, GamePad.MoveLeft, reset = true), AlwaysAttack())
-    private val attract = ActionSequence(InsideNavAbout(KillHandsLevel7Data.attractFrom, 0), GoIn(5, GamePad.MoveLeft, reset = true), still)
-
-    private var lastAction = ""
-    private var lastTarget = FramePoint(0, 0)
-
-    private val criteria = DeadForAWhile {
-        lastAction != "SAFE" && it.clearedWithMinIgnoreLoot(3)
-    }
-
-    // need to wait to make sure they are killed maybe
-    override fun complete(state: MapLocationState): Boolean = criteria(state)
-
-    private val MapLocationState.handActive: Boolean
-        get() = this.frameState.enemies.any { it.droppedId == 1 && it.state == EnemyState.Alive }
-
-    override fun target(): FramePoint {
-        return super.target()
-    }
-
-    override fun nextStep(state: MapLocationState): GamePad {
-        d {"KillHandsInLevel7 has hands ${state.handActive}"}
-        criteria.nextStep(state)
-
-        return when {
-            !state.frameState.canUseSword -> safe.nextStep(state).also {
-                d {" --> SAFE"}
-                lastAction = "SAFE"
-                lastTarget = KillHandsLevel7Data.safe
-            }
-            state.handActive -> positionAttack.nextStep(state).also {
-                d {" --> ATTACK"}
-                lastAction = "ATTACK"
-                criteria.seenEnemy()
-                lastTarget = KillHandsLevel7Data.attackFrom
-            }
-            !state.handActive -> attract.nextStep(state).also {
-                d {" --> ATTRACT"}
-                lastAction = "ATTRACT"
-                lastTarget = KillHandsLevel7Data.attractFrom
-            }
-            else -> GamePad.randomDirection().also {
-                d {" --> RANDOM"}
-                lastTarget = FramePoint()
-            }
-        }
-    }
-
-    override val name: String
-        get() = "killHandsInLevel7 $lastAction ${criteria.frameCount}"
 }
 
 class SwitchToItemConditionally(private val inventoryPosition: Int = Inventory.Selected.candle) : Action {
@@ -287,14 +227,9 @@ class KillArrowSpider : Action {
     }
 
     override val name: String
-        get() = "killHandsInLevel7KillArrowSpider ${criteria.frameCount}"
+        get() = "KillArrowSpider ${criteria.frameCount}"
 }
 
-//.also {
-//    d { " num enumes " +
-//            "${state.frameState.enemies.filter { it.state == EnemyState.Alive }.size}"
-//    }
-//WaitUntilActive(
 val clockActivatedKillAllOrKill = DecisionAction(ClockActivatedKillAll(), KillAll()) { state ->
     state.frameState.clockActivated
 }
@@ -691,12 +626,12 @@ private class RouteTo(val params: Param = Param()) {
             // of if the expected point is not where we should be
             // need to re route
             val avoid = state.aliveEnemies.map { it.point }
-            route = FrameRoute(NavUtil.routeToAvoidingObstacle(mapCell, linkPt, to, avoid))
+            route = FrameRoute(NavUtil.routeToAvoidingObstacle(mapCell, linkPt, to, state.previousMove.from, avoid))
             d { " ${state.currentMapCell.mapLoc} new plan! because ($why)" }
             route?.next5()
             nextPoint = route?.popOrEmpty() ?: FramePoint() // skip first point because it is the current location
             nextPoint = route?.popOrEmpty() ?: FramePoint()
-            d { " next is ${nextPoint}" }
+            d { " next is $nextPoint" }
             route?.next5()
             planCount = 0
         }
@@ -834,6 +769,9 @@ private class SameCount {
     fun record(pad: GamePad): Int {
         if (last == pad) {
             count++
+        } else {
+            // need it?
+            reset()
         }
         last = pad
         return count
@@ -857,26 +795,39 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
     override fun complete(state: MapLocationState): Boolean =
         wrapped.complete(state)
 
-    override fun nextStep(state: MapLocationState): GamePad =
-        when {
+    override fun nextStep(state: MapLocationState): GamePad {
+        d { "MoveHistoryAction" }
+        return when {
             escapeActionCt > 0 -> {
-                d { " ESCAPE ACTION "}
+                d { " ESCAPE ACTION " }
                 val action = escapeAction.nextStep(state)
                 escapeActionCt--
                 action
             }
+
+            state.link in state.aliveEnemies.map { it.point } -> {
+                escapeActionCt = escapeActionTimes
+                d { " ESCAPE ACTION SAME ENEMY" }
+                same.reset()
+                wrapped.nextStep(state)
+            }
+
             else -> {
                 val nextStep = wrapped.nextStep(state)
                 val ct = same.record(nextStep)
-                d { " ESCAPE ACTION not same $nextStep + $ct last ${same.last}"}
+                d { " ESCAPE ACTION not same $nextStep + $ct last ${same.last}" }
                 if (ct >= histSize) {
                     escapeActionCt = escapeActionTimes
-                    d { " ESCAPE ACTION RESET"}
+                    d { " ESCAPE ACTION RESET" }
                     same.reset()
                 }
                 nextStep
             }
+        }.also {
+            val inIt = state.link in state.aliveEnemies.map { it.point }
+            d { " link at ${state.link} $inIt" }
         }
+    }
 
     override val name: String
         get() = wrapped.name

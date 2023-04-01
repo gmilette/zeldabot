@@ -16,6 +16,7 @@ class GStar(
         private val DEBUG_DIR = false
         val DEBUG_ONE = false
         val MAX_ITER = 100000
+        val LIMIT_ITERATIONS = false
         val doSkip = true
     }
 
@@ -27,7 +28,9 @@ class GStar(
 
     // this really helps keep zelda on track, it's a little strict though walking half way
     // is also acceptable
-    val initialMap: Map2d<Int> = passable.mapXy { x,y -> if (x % 16 == 0 || y % 16 == 0) 1 else 1000 }
+    // the game is constantly trying to make link travel on one of these paths
+    private val highwayDivisor = 8
+    private val initialMap: Map2d<Int> = passable.mapXy { x,y -> if (x % highwayDivisor == 0 || y % highwayDivisor == 0) 1 else 1000 }
     // f values
     private var costsF: Map2d<Int> = initialMap.copy()
 
@@ -60,8 +63,8 @@ class GStar(
         avoid.clear()
     }
 
-    fun route(start: FramePoint, target: FramePoint): List<FramePoint> {
-        return route(start, listOf(target))
+    fun route(start: FramePoint, beforeStart: FramePoint? = null, target: FramePoint): List<FramePoint> {
+        return route(start, listOf(target), beforeStart)
     }
 
     private fun setEnemyCosts(enemies: List<FramePoint> = emptyList()) {
@@ -71,7 +74,7 @@ class GStar(
         }
     }
 
-    fun route(start: FramePoint, targets: List<FramePoint>, enemies: List<FramePoint> = emptyList()): List<FramePoint> {
+    fun route(start: FramePoint, targets: List<FramePoint>, pointBeforeStart: FramePoint? = null, enemies: List<FramePoint> = emptyList()): List<FramePoint> {
 //        setEnemyCosts(enemies)
 
         val closedList = mutableSetOf<FramePoint>()
@@ -94,7 +97,8 @@ class GStar(
         var point = FramePoint(0, 0)
         openList.add(start)
         iterCount = 0
-        while (true && iterCount < MAX_ITER) {
+//        while (true && iterCount < MAX_ITER) {
+        while (iterCount < MAX_ITER) {
             iterCount++
             if (DEBUG) {
                 d { " ****** ITERATION $iterCount open ${openList.size} ****** "}
@@ -107,6 +111,7 @@ class GStar(
 //                            "${distanceToGoal[it]}" }
                 }
             }
+            // 6.5%
             point = openList.poll() ?: break
 
             if (DEBUG) {
@@ -124,36 +129,51 @@ class GStar(
 
             closedList.add(point)
 
-            (neighborFinder.neighbors(point) - closedList - avoid).shuffled().forEach {
+            // I think this is it
+            val previousPoint = if (iterCount == 1 && pointBeforeStart != null) pointBeforeStart else cameFrom[point]
+            val dir = previousPoint?.let {
+                directionToDir(it, point)
+            } ?: null
+            val dist = previousPoint?.let { prev ->
+                pointBeforeStart?.let { st ->
+                    prev.distTo(pointBeforeStart)
+                }
+            } ?: null
+            if (DEBUG) {
+                d { "from prev=$previousPoint to $point ${if (point.onHighway) "*" else ""} dir $dir"}
+            }
+
+            val neighbors = (neighborFinder.neighbors(point, dir, dist ?: 0) - closedList - avoid).shuffled()
+            for (toPoint in neighbors) {
                 // no need to check passable already did
 //                if (passable.get(it)) { // WTF removing causes infinite loop
 //                if (passableFrom(point, it)) {
                     // raw cost of this cell
-                    val cost = costsF.get(it)
+                    val cost = costsF.get(toPoint)
                     // add to the cost of the point
                     val parentCost = costFromStart[point] ?: 99999
                     // route to get to this point including parent
                     val pathCost = cost + parentCost
 
-                    val costToGoal = it.minDistToAny(target)
+                    val costToGoal = toPoint.minDistToAny(target)
                     val totalCost = costToGoal + pathCost
 
                     if (DEBUG) {
                         d {
-                            " neighbor cost ${it.x} ${it.y} ${it.direction ?: "n"} = $totalCost parent " +
+                            " neighbor cost ${toPoint.x} ${toPoint.y} ${toPoint.direction ?: "n"} = $totalCost parent " +
                                     "$parentCost toGoal = $costToGoal"
                         }
                     }
                 // bunch of changes...
-                    val costS = costFromStart.getOrDefault(it, Int.MAX_VALUE)
+                    val costS = costFromStart.getOrDefault(toPoint, Int.MAX_VALUE)
 //                d {" cost: $cost $costS"}
                     if (cost < costS) {
-                        distanceToGoal[it] = costToGoal
-                        costFromStart[it] = pathCost
-                        totalCosts[it] = totalCost
-                        cameFrom[it] = point
-                        if (!openList.contains(it)) {
-                            openList.add(it)
+                        distanceToGoal[toPoint] = costToGoal
+                        costFromStart[toPoint] = pathCost
+                        totalCosts[toPoint] = totalCost
+                        cameFrom[toPoint] = point
+                        if (!openList.contains(toPoint)) {
+                            openList.add(toPoint)
                         }
                     }
 //                } else {
@@ -254,7 +274,7 @@ class GStar(
 //            }
             if (DEBUG) {
                 d {
-                    it.fold("") { sum, e -> "$sum -> ${e.x},${e.y}" }
+                    it.fold("") { sum, e -> "$sum -> ${e.x},${e.y}${if (e.onHighway) "*" else ""} " }
                         .toString()
                 }
             }

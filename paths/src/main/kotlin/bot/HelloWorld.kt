@@ -82,7 +82,7 @@ class HelloWorld {
         private const val SPRITE_SIZE = 32
         @JvmStatic
         fun main(args: Array<String>) {
-            ApiSource.initRemoteAPI("localhost", 9999)
+//            ApiSource.initRemoteAPI("localhost", 9999)
             HelloWorld().launch()
         }
     }

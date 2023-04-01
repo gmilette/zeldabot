@@ -3,6 +3,8 @@ package bot.state
 import bot.GamePad
 import bot.state.map.Direction
 import bot.state.map.MapConstants
+import nintaco.api.API
+import nintaco.api.ApiSource
 import sequence.ZeldaItem
 import sequence.zeldaItemsRequired
 import util.d
@@ -24,6 +26,13 @@ enum class EnemyState {
 
 enum class Dir {
     Up, Down, Left, Right, Unknown
+}
+
+class LazyFrameState(val api: API) {
+    val gameMode: Int by lazy { api.readCPU(Addresses.gameMode) }
+    val tenth: Int by lazy { api.readCPU(Addresses.tenthEnemyCount) }
+
+    // a delegate which just identifies the address and lazy loads it
 }
 
 data class FrameState(
@@ -64,7 +73,7 @@ data class FrameState(
     /**
      * if the enemy has dropped the dungeon item, like the skeleton holding the key
      */
-    val inventory: Inventory = Inventory(0, 0, 0, 0, emptySet()),
+    val inventory: Inventory = Inventory(),
     val hasDungeonItem: Boolean = false,
     val tenth: Int = 0,
     val level: Int = 0,
@@ -98,12 +107,15 @@ data class FrameState(
 }
 
 data class Inventory(
-    val selectedItem: Int,
-    val numBombs: Int,
-    val numKeys: Int,
-    val numRupees: Int,
-    val items: Set<ZeldaItem>
+    val api: API = ApiSource.getAPI()
 ) {
+    val selectedItem by lazy { api.readCPU(Addresses.selectedItem) }
+    val numBombs by lazy { api.readCPU(Addresses.numBombs) }
+    val numRupees by lazy { api.readCPU(Addresses.numRupees) }
+    val numKeys by lazy { api.readCPU(Addresses.numKeys) }
+    val items: Set<ZeldaItem> by lazy {
+        InventoryReader.readInventory(api)
+    }
     val percentComplete: Float
         get() = items.size.toFloat() / zeldaItemsRequired.size.toFloat()
 
@@ -177,6 +189,20 @@ data class FramePoint(val x: Int = 0, val y: Int = 0, val direction: Direction? 
         return "($x, $y)"
     }
 }
+
+val FramePoint.onHighway
+    get() = x % 8 == 0 || y % 8 == 0
+
+val FramePoint.onHighwayX
+    get() = x % 8 == 0
+
+val FramePoint.onHighwayXNear
+    get() = (x+1) % 8 == 0 || (x-1) % 8 == 0
+val FramePoint.onHighwayY
+    get() = y % 8 == 0
+
+val FramePoint.onHighwayYNear
+    get() = (y+1) % 8 == 0 || (y-1) % 8 == 0
 
 val FramePoint.toG: FramePoint
     get() = FramePoint(x / 16, y / 16)

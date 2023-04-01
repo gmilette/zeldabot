@@ -35,7 +35,7 @@ class MapLocationState(
         emptyAgent,
         Undefined,
         119,
-        Inventory(0, 0, 0, 0, emptySet()),
+        Inventory(),
         false,
         0,
         0,

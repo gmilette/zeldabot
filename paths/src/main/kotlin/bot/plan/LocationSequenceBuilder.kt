@@ -1,5 +1,6 @@
 package bot.plan
 
+import KillHandsInLevel7
 import bot.GamePad
 import bot.plan.action.*
 import bot.plan.runner.MasterPlan
@@ -201,10 +202,15 @@ class LocationSequenceBuilder(
             add(lastMapLoc, moveHistoryAttackAction(KillAll()))
             return this
         }
+    val killAndLoot: LocationSequenceBuilder
+        get() {
+            add(lastMapLoc, KillAll())
+            add(lastMapLoc, GetLoot())
+            return this
+        }
     val kill: LocationSequenceBuilder
         get() {
             add(lastMapLoc, moveHistoryAttackAction(KillAll()))
-//            add(lastMapLoc, KillAll())
             return this
         }
 //    fun kill(maxEnemies: Int): LocationSequenceBuilder {
@@ -342,7 +348,7 @@ class LocationSequenceBuilder(
 
     // context
     fun pushInLevelMiddleStair(inMapLoc: MapLoc = 88, upTo: MapLoc = lastMapLoc, outLocation: FramePoint = InLocations.getItem) {
-        seg("push and go in upTo $upTo loc $outLocation")
+//        seg("push and go in upTo $upTo loc $outLocation")
         goTo(FramePoint(3.grid, 8.grid))
         pushThenGoTo(InLocations.diamondLeftBottomPush, InLocations.middleStair)
         startAt(inMapLoc)

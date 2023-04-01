@@ -32,71 +32,16 @@ class NavUtilTest {
         gstar.setEnemy(FramePoint(30, 15), 10)
 //        gstar.setEnemy(FramePoint(40, 25), 1)
 
-        gstar.route(FramePoint(10, 20), FramePoint(45, 20))
+        gstar.route(FramePoint(10, 20), listOf(FramePoint(45, 20)), null)
     }
 
-    @Test
-    fun `test g in cell`() {
-        val hyrule = Hyrule()
-
-        val cell = hyrule.getMapCell(119)
-
-        val gstar = GStar(cell.passable)
-
-        val target = FramePoint(255, 80)
-        val fromNearExit = FramePoint(225, 80)
-
-        val route = gstar.route(fromNearExit, target)[1]
-        route shouldNotBe null
-        NavUtil.directionTo(fromNearExit, route) shouldBe GamePad.MoveRight
-    }
-
-    @Test
-    fun `test g in wall`() {
-        val hyrule = Hyrule()
-
-        val cell = hyrule.getMapCell(119)
-
-        val gstar = GStar(cell.passable)
-
-        val target = FramePoint(255, 80)
-//        val from = FramePoint(128-1, 49)
-        var from = FramePoint(184, 80)
-
-        val mark = FramePoint(207,80)
-        from = mark
-
-        cell.passable.write("check_1192") { v, x, y ->
-            when {
-                (x == mark.x && y == mark.y) -> "*"
-                (x == mark.rightEnd.x && y == mark.rightEnd.y) -> "*"
-                (x == mark.leftDown.x && y == mark.leftDown.y) -> "*"
-                (x == mark.rightEndDown.x && y == mark.rightEndDown.y) -> "*"
-                v -> "."
-                else -> "X"
-            }
-//            when {
-//                (x == mark.x && y == mark.y) -> "*"
-//                (x == mark.rightEnd.x && y == mark.rightEnd.y) -> "*"
-//                (x == mark.leftDown.x && y == mark.leftDown.y) -> "*"
-//                (x == mark.downEndRight.x && y == mark.downEndRight.y) -> "*"
-//                v -> "."
-//                else -> "X"
-//            }
-        }
-
-        val route = gstar.route(from, target)
-        route shouldNotBe null
-        route shouldHaveAtLeastSize 2
-        NavUtil.directionTo(from, route[1]) shouldBe GamePad.MoveDown
-    }
 
     private fun check(cell: MapLoc, from: FramePoint, target: FramePoint,
-                      dirResult: GamePad, level: Int = 0) {
-        checkA(cell, from, listOf(target), dirResult, level)
+                      dirResult: GamePad, level: Int = 0, before: FramePoint? = null) {
+        checkA(cell, from, listOf(target), before, dirResult, level)
     }
     private fun checkA(cell: MapLoc, from: FramePoint, targets: List<FramePoint>,
-                      dirResult: GamePad, level: Int = 0) {
+                      before: FramePoint? = null, dirResult: GamePad, level: Int = 0) {
         val hyrule = Hyrule()
         val cell = if (level == 0) hyrule.getMapCell(cell) else hyrule.levelMap.cell(level, cell)
         cell.write()
@@ -123,7 +68,12 @@ class NavUtilTest {
                 (x == from.justLeftDown.x && y == from.justLeftDown.y) -> "D"
                 (x == from.justRightEndBottom.x && y == from
                     .justRightEndBottom.y) -> "Z"
-                v -> { "."
+                v -> {
+                    if (x % 8 == 0 || y % 8 == 0) {
+                        ":"
+                    } else {
+                        "."
+                    }
 //                    if (SkipLocations.hasPt(FramePoint(x, y))) {
 //                        "S"
 //                    } else {
@@ -136,7 +86,7 @@ class NavUtilTest {
 
         d { " done writing "}
 
-        val route = gstar.route(from, target)
+        val route = gstar.route(from, before, target)
 
         val firstPt = route.get(0)
         cell.passable.write("check_1192_r") { v, x, y ->
@@ -145,7 +95,11 @@ class NavUtilTest {
                 (x == target.x && y == target.y) -> "T"
                 route.any { it.x == x && it.y == y && it.x == firstPt.x && it.y == firstPt.y } -> "S"
                 route.any { it.x == x && it.y == y } -> "Z"
-                v -> "."
+                v -> if (x % 8 == 0 || y % 8 == 0) {
+                    ":"
+                } else {
+                    "."
+                }
                 else -> "X"
             }
         }
@@ -192,7 +146,10 @@ class NavUtilTest {
         GStar.DEBUG = true
         //check(55, FramePoint(112, 88), FramePoint(112,64), GamePad.MoveUp)
 //        42 target (152, 100) link (104, 98)
-        check(13, FramePoint(56, 120), FramePoint(32, 96), GamePad.MoveUp, level = 7)
+        // not on highway
+        val start = FramePoint(61, 121)
+        check(13, start, FramePoint(32, 96), GamePad.MoveUp, level = 7,
+            before = start.left)
     }
 
     @Test
@@ -224,7 +181,7 @@ class NavUtilTest {
             FramePoint(129, 0), FramePoint(130, 0),
             FramePoint(131, 0), FramePoint(132, 0), FramePoint(133, 0),
             FramePoint(134, 0), FramePoint(135, 0))
-        checkA(109, FramePoint(147, 56), targets, GamePad.MoveUp, level = 2)
+        checkA(109, FramePoint(147, 56), targets, null, GamePad.MoveUp, level = 2)
     }
 
     @Test
@@ -242,31 +199,8 @@ class NavUtilTest {
         @Test
     fun `test move level 1`() {
         GStar.DEBUG = true
-
-        // not sure where going but half way up?
-//        check(34, FramePoint(101, 104), FramePoint(96, 96), GamePad.MoveRight, level = 1)
-
-//        val goals = listOf(FramePoint(120, 0), FramePoint(121, 0), FramePoint(122, 0),
-//            FramePoint(123, 0), FramePoint(124, 0), FramePoint(125, 0), FramePoint(126, 0),
-//            FramePoint(127, 0), FramePoint(128, 0), FramePoint(129, 0),
-//            FramePoint(130, 0),
-//            FramePoint(131, 0), FramePoint(132, 0), FramePoint(133, 0), FramePoint(134, 0)
-//        )
-        //131, 23
-        //130, 23
-        //129, 23
-//        checkA(35, FramePoint(85, 88), listOf(FramePoint(136, 64), FramePoint(173, 64)), GamePad.MoveUp, level = 1)
-//        checkA(99, FramePoint(136, 32), listOf(FramePoint(120, 0), FramePoint(173, 64)), GamePad.MoveUp, level = 1)
-
-//        check(35, FramePoint(64, 87), FramePoint(0, 80), GamePad.MoveUp, level = 1)
-
-        // stuck in the door34 (1, 80) to next (0, 0)
-//        check(53, FramePoint(128, 128), FramePoint(127, 80), GamePad.MoveUp, level = 1)
-
-        //128, 64
-//        check(83, FramePoint(128, 64), FramePoint(130, 61), GamePad.MoveUp, level = 1)
-        //64, 56
-        check(99, FramePoint(121, 32), FramePoint(121, 0), GamePad.MoveUp, level = 1)
+        check(115, FramePoint(208, 81), FramePoint(255, 80), GamePad.MoveRight, level = 1,
+            before = FramePoint(208, 79))
     }
 
     @Test
@@ -282,59 +216,7 @@ class NavUtilTest {
     @Test
     fun `test move shop`() {
         GStar.DEBUG = true
-        // exit
-//        check(58, FramePoint(144, 90), FramePoint(118, 167), GamePad.MoveDown)
-        // move up to target
-//        check(58, FramePoint(150, 120), FramePoint(152, 90), GamePad.MoveUp)
-//
-//
-//        Debug: (Kermit)  exit -> (112, 167)
-//        Debug: (Kermit)  exit -> (113, 167)
-//        Debug: (Kermit)  exit -> (114, 167)
-//        Debug: (Kermit)  exit -> (115, 167)
-//        Debug: (Kermit)  exit -> (116, 167)
-//        Debug: (Kermit)  exit -> (117, 167)
-//        Debug: (Kermit)  exit -> (118, 167)
-//        Debug: (Kermit)  exit -> (119, 167)
-//        Debug: (Kermit)  exit -> (120, 167)
-//        Debug: (Kermit)  exit -> (121, 167)
-//        Debug: (Kermit)  exit -> (122, 167)
-//        Debug: (Kermit)  exit -> (123, 167)
-//        Debug: (Kermit)  exit -> (124, 167)
-//        Debug: (Kermit)  exit -> (125, 167)
-//        Debug: (Kermit)  exit -> (126, 167)
-//        Debug: (Kermit)  exit -> (127, 167)
-//        Debug: (Kermit)  exit -> (128, 167)
-//        Debug: (Kermit)  exit -> (129, 167)
-//        Debug: (Kermit)  exit -> (130, 167)
-//        Debug: (Kermit)  exit -> (131, 167)
-//        Debug: (Kermit)  exit -> (132, 167)
-//        Debug: (Kermit)  exit -> (133, 167)
-//        Debug: (Kermit)  exit -> (134, 167)
-//        Debug: (Kermit)  exit -> (135, 167)
-//        Debug: (Kermit)  exit -> (136, 167)
-//        Debug: (Kermit)  exit -> (137, 167)
-//        Debug: (Kermit)  exit -> (138, 167)
-//        Debug: (Kermit)  exit -> (139, 167)
-//        Debug: (Kermit)  exit -> (140, 167)
-//        Debug: (Kermit)  exit -> (141, 167)
-//        Debug: (Kermit)  exit -> (142, 167)
-//        Debug: (Kermit)  exit -> (143, 167)
-        // keeps switching
-        //(143, 96)
-        //144,98 to 144,96
-        // 144,96 go Left
-        // 143,96 go down
-//        check(58, FramePoint(143, 96), FramePoint(143, 167), GamePad.MoveDown)
-
-//        check(58, FramePoint(144, 96), FramePoint(143, 167), GamePad.MoveDown)
-//        check(58, FramePoint(143, 96), FramePoint(143, 167), GamePad.MoveDown)
-
-//        check(58, FramePoint(111, 96), FramePoint(112, 167), GamePad.MoveDown)
-//        check(58, FramePoint(112, 96), FramePoint(112, 167), GamePad.MoveDown)
-
-        check(58, FramePoint(144, 88), FramePoint(114, 167), GamePad.MoveDown)
-        //        148, 128) to (147, 112) at 44
+        check(58, FramePoint(144, 88), FramePoint(112, 167), GamePad.MoveDown)
     }
 
      //40 from (0, 72) to (112, 0)

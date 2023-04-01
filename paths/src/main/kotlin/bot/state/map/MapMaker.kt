@@ -9,8 +9,6 @@ import util.d
 
 object MapMaker {
     fun createMapCells(data: Map<MapLoc, MapCellData>): Map<MapLoc, MapCell> {
-        d { " read map cells 4" }
-
         val emptyMapData = MapCellData("unknown", Objective.empty)
 
         // now read in mapTile2

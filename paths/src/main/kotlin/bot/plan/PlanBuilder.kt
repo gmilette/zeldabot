@@ -1,6 +1,7 @@
 package bot.plan
 
 import bot.GamePad
+import bot.plan.action.GoIn
 import bot.plan.runner.MasterPlan
 import bot.state.FramePoint
 import bot.state.MapLoc
@@ -43,12 +44,12 @@ object InLocations {
         val start: MapLoc = 119
     }
     object Level1 {
-        val key114 = FramePoint(160, 128)
-        val key83 = FramePoint(128, 50)
+        val key114 = FramePoint(10.grid, 8.grid)
+        val key83 = FramePoint(8.grid, 3.grid)
 
         // hands level1, prob same as key114
         val key69 = FramePoint(164, 128)
-        val boomerang68 = FramePoint(128, 56)
+        val boomerang68 = FramePoint(8.grid, 56) //3.5??
     }
 
     object Level2 {
@@ -113,8 +114,8 @@ object PlanBuilder {
         val factory = SequenceFactory(mapData, levelData, plan)
 
 //        return levelTour(factory)
-//        return real(factory)
-        return part(factory)
+        return real(factory)
+//        return part(factory)
     }
 
     private fun levelTour(factory: SequenceFactory): MasterPlan {
@@ -133,6 +134,9 @@ object PlanBuilder {
         val builder = factory.make("begin!")
         return builder {
             startAt(InLocations.Overworld.start)
+//            obj(Dest.item(ZeldaItem.WoodenSword))
+//            obj(Dest.level(1))
+            includeLevelPlan(levelPlan1(factory))
 //            obj(Dest.level(3))
 //            includeLevelPlan(levelPlan3(factory))
 //            obj(Dest.level(4))
@@ -143,7 +147,7 @@ object PlanBuilder {
 //            includeLevelPlan(levelPlan6(factory))
 //            includeLevelPlan(levelPlan7(factory))
 //            includeLevelPlan(levelPlan8(factory))
-            includeLevelPlan(levelPlan9(factory))
+//            includeLevelPlan(levelPlan9(factory))
         }
     }
 
@@ -152,7 +156,6 @@ object PlanBuilder {
         return builder {
             startAt(InLocations.Overworld.start)
             phase("Opening sequence")
-//            bombThenGoIn(FramePoint(64, 17))
             obj(Dest.item(ZeldaItem.WoodenSword))
             obj(Dest.level(2))
             includeLevelPlan(levelPlan2(factory))
@@ -176,8 +179,8 @@ object PlanBuilder {
             includeLevelPlan(levelPlan3(factory))
             obj(Dest.Secrets.fire100SouthBrown)
             obj(Dest.Shop.blueRing, position = true)
-//            obj(Dest.level(4))
-//            includeLevelPlan(levelPlan4(factory))
+            obj(Dest.level(4))
+            includeLevelPlan(levelPlan4(factory))
 
             phase("grab hearts")
             obj(Dest.Secrets.fire30GreenSouth)
@@ -186,11 +189,14 @@ object PlanBuilder {
             obj(Dest.Secrets.forest100South)
             obj(Dest.Shop.arrowShop)
             obj(Dest.Heart.ladderHeart)
+            // exit the heart area
+            goIn(GamePad.MoveLeft, 200)
             obj(Dest.Heart.raftHeart, itemLoc = Objective.ItemLoc.Right)
 
-//            phase("level 5 and 6")
-//            obj(Dest.level(5))
-//            includeLevelPlan(levelPlan5(factory))
+            phase("level 5")
+            obj(Dest.level(5))
+            includeLevelPlan(levelPlan5(factory))
+            phase("gear for level 6")
 //
             obj(ZeldaItem.PowerBracelet, itemLoc = Objective.ItemLoc.None)
 //            // make up and objective to walk to high up
@@ -199,19 +205,24 @@ object PlanBuilder {
 //            // hard to get into position when its passable, maybe position it
             obj(ZeldaItem.MagicSword)
 //
+            phase("level 6")
             obj(Dest.level(6))
-//
-//            phase("level 7")
+            includeLevelPlan(levelPlan6(factory))
+
+            phase("level 7")
             obj(Dest.Shop.blueRing, itemLoc = Dest.Shop.ItemLocs.bait, position = true)
             obj(Dest.level(7))
-            phase("level 8 and grab shield")
+
+            phase("Gear for level 8")
             // TODO: also get a potion
             obj(Dest.Secrets.level2secret10)
             // bait
             obj(Dest.Shop.eastTreeShop, itemLoc = Dest.Shop.ItemLocs.magicShield)
+            phase("level 8")
             obj(Dest.level(8))
             phase("level 9")
             obj(Dest.level(9))
+
             // junk
             left
             right
@@ -299,8 +310,8 @@ object PlanBuilder {
             .seg("grab key")
             .left
             .goIn(GamePad.MoveLeft, 30)
-            .kill
-            .go(InLocations.Level1.key114)
+            .kill //164, 192
+            .goTo(InLocations.Level1.key114)
             .right
             .seg("grab from skeleton")
             .right
@@ -313,22 +324,25 @@ object PlanBuilder {
             .goIn(GamePad.MoveUp, 30)
             .seg("get key from skeletons")
             .kill // these skeletons provide a key
-            .goAbout(InLocations.Level1.key83, 4, 2, true)
+            .goTo(InLocations.Level1.key83)
             .seg("Bomb and move")
             .bomb(InLocations.topMiddleBombSpot)
             .seg("go up")
             .up // 67
-            .up // 51
+            .upm // 51
             .seg("grab key from zig")
             .pickupDeadItem
             .seg("get key from boomerang guys")
             .up //35
             .goIn(GamePad.MoveUp, 30)
             .kill
-            .goAbout(InLocations.Level1.key83, 4, 2, true)
+            .goTo(InLocations.Level1.key83)
+            // get around a hard corner
+            .goTo(FramePoint(7.grid, 2.grid))
+            .goTo(FramePoint(3.grid, 2.grid))
             .seg("get arrow")
-            .left
-            .pushThenGoTo(InLocations.diamondLeftBottomPush, InLocations.diamondLeftTopPush)
+            .leftm
+            .pushThenGoTo(InLocations.diamondLeftBottomPush) //InLocations.diamondLeftTopPush)
             .startAt(127)
             .go(InLocations.getItem)
             .upTo(34) // eh
@@ -650,7 +664,7 @@ object PlanBuilder {
             upm
             upm
             seg("past water")
-            kill2
+            kill //2
             up
             leftm
             up
@@ -804,7 +818,6 @@ object PlanBuilder {
 
             startAt(20) //save7
             "spiral".seg()
-            //kill
             rightp // kill the pancakes, getting quite stuck
             rightm
             "go down to ring".seg()
@@ -820,8 +833,7 @@ object PlanBuilder {
             bomb(InLocations.topMiddleBombSpot)
             upm
             "ring spot".seg()
-            kill // kill2
-            startAt(7) //save5
+//            startAt(7) //save5
             kill // kill3 // stuck here on the disappear ghost
             pushInLevelMiddleStair(LevelSpecBuilder.getItemLoc8)
         }
@@ -838,9 +850,10 @@ object PlanBuilder {
             upm
             bomb(InLocations.bombLeft)
             leftm
+            GoIn(5, GamePad.MoveLeft)
             "kill travel 1".seg()
             kill
-            startAt(5) //save3
+//            startAt(5) //save3
             pushInLevelAnyBlock(
                 inMapLoc = LevelSpecBuilder.Companion.Nine.travel2,
                 pushTarget = InLocations.Level9.moveUpBlock,
@@ -856,7 +869,8 @@ object PlanBuilder {
             leftm  //bats
             "circle monster kill".seg()
             kill
-            pushInLevelMiddleStair(LevelSpecBuilder.Companion.Nine.travel3, upTo = 32)
+            "to in stair".seg()
+            pushInLevelMiddleStair(LevelSpecBuilder.Companion.Nine.travel3, upTo = 32, outLocation = InLocations.getOutLeft)
             bomb(InLocations.topMiddleBombSpot)
             upm
             // save9
@@ -881,19 +895,15 @@ object PlanBuilder {
             kill
             "take stair back".seg()
             pushInLevelMiddleStair(88, upTo = 97, outLocation = InLocations.getOutRight)
-            // save3
-            "get to push spot".seg()
+            upm
             "past first pancake".seg()
-            upmp // walk past
+            upm
             "past second pancake".seg()
-            startAt(65)
-            up
-//            upmp //5
-//            startHere
+            upm
             "bomb left ok".seg()
             bomb(InLocations.bombLeft)
-            leftmp
-            kill //save6
+            leftm
+            kill
             "push to inbetween travel".seg()
             pushInLevelAnyBlock(inMapLoc = LevelSpecBuilder.Companion.Nine.travel4,
                 pushTarget = InLocations.Level6.moveUp,
@@ -904,7 +914,7 @@ object PlanBuilder {
             "get to final stair".seg() // save7
             bomb(InLocations.bombLeft)
             leftm
-            killp
+            kill
             pushInLevelMiddleStair(119, upTo = 82, outLocation = InLocations.getOutLeft)
             "doorstep of gannon".seg()
             kill

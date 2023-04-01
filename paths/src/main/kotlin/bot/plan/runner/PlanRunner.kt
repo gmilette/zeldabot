@@ -21,7 +21,7 @@ class PlanRunner(val masterPlan: MasterPlan) {
     val completedStep = mutableListOf<StepCompleted>()
 
     init {
-        action = masterPlan.skipToStart()
+        action = withDefaultAction(masterPlan.skipToStart())
     }
 
     private fun withDefaultAction(action: Action) = moveHistoryAttackAction(action)

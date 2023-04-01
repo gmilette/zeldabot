@@ -1,6 +1,7 @@
 package bot
 
 import bot.plan.PlanBuilder
+import bot.plan.gastar.SkipLocationCollector
 import bot.plan.runner.PlanRunner
 import bot.plan.gastar.SkipPathDb
 import bot.state.*
@@ -127,13 +128,12 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             return GamePad.None
         }
 
-        refillIfOut()
-
-        frameStateUpdater.setSword(ZeldaItem.MagicSword)
-        frameStateUpdater.setLadderAndRaft(ZeldaBot.hasLadder)
-        frameStateUpdater.setRedCandle()
-        frameStateUpdater.setHaveWhistle()
-        frameStateUpdater.setBait()
+//        refillIfOut()
+//        frameStateUpdater.setSword(ZeldaItem.MagicSword)
+//        frameStateUpdater.setLadderAndRaft(ZeldaBot.hasLadder)
+//        frameStateUpdater.setRedCandle()
+//        frameStateUpdater.setHaveWhistle()
+//        frameStateUpdater.setBait()
         if (frameStateUpdater.state.frameState.clockActivated) {
             frameStateUpdater.deactivateClock()
         }
@@ -264,7 +264,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                 frameStateUpdater.state.previousMove
             )
         }
-        d { " action: ${frameStateUpdater.state.frameState.link.point} -> $currentGamePad"}
+        d { " action: ${frameStateUpdater.state.frameState.link.point} from ${frameStateUpdater.state.previousGamePad} -> $currentGamePad"}
 //        d { " selecting item ${frameStateUpdater.state.frameState.inventory.selectedItem}"}
 
         val act = doAct && !collectSkip //currentFrame % 3 == 0
@@ -330,6 +330,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         var doAct = true
         var unstick = 0
         var forcedDirection = GamePad.None
+
         @JvmStatic
         fun startIt(monitor: ZeldaMonitor): ZeldaBot {
             ApiSource.initRemoteAPI("localhost", 9999)
@@ -348,7 +349,14 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 
         @JvmStatic
         fun main(args: Array<String>) {
-            ApiSource.initRemoteAPI("localhost", 9999)
+            println("API enabled GREG kotlin")
+            println("START")
+            if (args.isNotEmpty()) {
+                System.out.println("start remote")
+                ApiSource.initRemoteAPI("localhost", 9999)
+            } else {
+                System.out.println("start local")
+            }
             ZeldaBot(NoOp()).launch()
         }
     }

@@ -12,6 +12,8 @@ class FrameStateUpdater(
     private val api: API,
     private val hyrule: Hyrule
 ) {
+    val yAdjustFactor = 61
+
     fun getLinkX() = api.readCPU(Addresses.linkX)
     fun getLinkY() = api.readCPU(Addresses.linkY)
     fun getLink() = FramePoint(getLinkX(), getLinkY())
@@ -50,8 +52,10 @@ class FrameStateUpdater(
         }
     }
 
+    // idea:
+    // lazy load ALL state!
+
     fun updateFrame(currentFrame: Int, currentGamePad: GamePad) {
-        val yAdjustFactor = 61
         val previous = state.frameState
         state.lastGamePad = currentGamePad
         //        https://datacrystal.romhacking.net/wiki/The_Legend_of_Zelda:RAM_map
@@ -65,11 +69,65 @@ class FrameStateUpdater(
         val tenth = api.readCPU(Addresses.tenthEnemyCount)
 
         val killedEnemyCount = api.readCPU(Addresses.Ram.killedEnemyCount)
-//        val screenOptions = api.readRAM(Addresses.screenOptions)
         // works
         // turns into 1 is candle used
         val candleUsed = api.readCPU(Addresses.Ram.candleUsed)
+        val dungeonItem = api.readCPU(Addresses.dungeonFloorItem)
+        val swordUseCountdown = api.readCPU(Addresses.swordUseCountdown)
 
+//        val screenOptions = api.readRAM(Addresses.screenOptions)
+//        val subY = api.readCPU(Addresses.ZeroPage.subY)
+//        val subX = api.readCPU(Addresses.ZeroPage.subX)
+//        val subPoint = FramePoint(subY, subX)
+        val mapLoc = api.readCPU(Addresses.ZeroPage.mapLoc)
+
+        val gameMode = api.readCPU(Addresses.gameMode)
+        val level = api.readCPU(Addresses.level)
+
+        state.currentMapCell = if (level == MapConstants.overworld) {
+            hyrule.getMapCell(mapLoc)
+        } else {
+            state.hyrule.levelMap.cellOrEmpty(level, mapLoc)
+        }
+
+        val previousNow = state.previousMove
+        state.previousMove = PreviousMove(
+            previous = state.previousMove.copy(previous = null), // TODO: previousNow.copy()),
+            from = state.previousLocation,
+            // assumes the
+            to = state.previousLocation.adjustBy(state.lastGamePad),
+            actual = link.point,
+            move = state.lastGamePad,
+            triedToMove = state.lastGamePad.isMoveAction())
+        // reset to prevent infinite memory being allocated
+        previousNow.previous = null
+
+        val hasDungeonItem = dungeonItem == 255
+
+        // EXPERIMENTS
+        // it works
+        val clockActivated = api.readCpuB(Addresses.clockActivated)
+        if (clockActivated) {
+            d { "!!! clock activated !!!"}
+        }
+
+        //$08=North, $04=South, $01=East, $02=West
+        //could try to remember how link last moved and that will be the
+        // direction
+
+        val oam = OamStateReasoner(api)
+        val theEnemies = oam.agents()
+        d { "! loot ----- ${oam.loot} " }
+        val frame = FrameState(gameMode, theEnemies, killedEnemyCount, link, FramePoint(),
+            mapLoc, Inventory(api), hasDungeonItem, tenth, level, clockActivated, swordUseCountdown)
+
+        this.state.previousLocation = link.point
+
+        state.framesOnScreen++
+        state.frameState = frame
+    }
+
+    private fun getEnemyInfoForReasoner() {
         val enemyData = mutableListOf<AgentData>()
         val enemies = mutableListOf<Agent>()
         for (i in Addresses.ememiesX.indices) {
@@ -120,7 +178,7 @@ class FrameStateUpdater(
             val isLoot = droppedId != 2 && droppedId > 0
             val enemyStateCalc = state.enemyReasoner.enemyState(i)
             val wasAlive = state.enemyReasoner.wasAlive(i)
-                // doesn't always reset to 0
+            // doesn't always reset to 0
 //            val enemyState = if (xStatus == 0 && wasAlive(i)) EnemyState.Alive else EnemyState.Dead // a number of different dead states
             val enemy = Agent(i, pt, dir, enemyStateCalc, countDown, xHp, projectileState, droppedId)
             enemies.add(enemy)
@@ -144,6 +202,7 @@ class FrameStateUpdater(
             enemyData.add(data)
         }
         state.enemyReasoner.addData(enemyData)
+        // since not using reasoner dont not do it
         val reasonerEnemies = mutableListOf<Agent>()
         for (i in Addresses.ememiesX.indices) {
             val stateCalc = state.enemyReasoner.makeState(i)
@@ -158,145 +217,19 @@ class FrameStateUpdater(
         val enemyX = Addresses.ememiesX.map { api.readCPU(it) }
         val enemyY = Addresses.ememiesY.map { api.readCPU(it) - yAdjustFactor}
         val enemyPoint = enemyX.zip(enemyY).map { FramePoint(it.first, it.second) }
-//        val enemyDirs = Addresses.ememyDir.map { mapDir(api.readCPU(it)) }
-//        val enemyDirs = emptyList<Dir>()
-//        val droppedItems = Addresses.dropItemType.map { api.readCPU(it) }
-//        val droppedEnemyItems = Addresses.dropEnemyItem.map { api.readCPU(it) }
-//        val countdowns = Addresses.enemyCountdowns.map { api.readCPU(it) }
-        val dungeonItem = api.readCPU(Addresses.dungeonFloorItem)
-//        val dungeonTypeOfItem = api.readCPU(Addresses.dungeonTypeOfItem)
-//        d {" INFO: $dungeonItem $dungeonTypeOfItem"}
-//        for (droppedItem in droppedItems) {
-//            d { " dropped $droppedItem"}
-//        }
-//        for (enemyItem in droppedEnemyItems) {
-//            d { " droppedenemyItem $enemyItem"}
-//        }
-        // 142 no key [moves around]
-        // 109 key dropped [I wonder if this is a location or something
-        // 255 got it
-
-        // dungeon item is 93 after key
-        // turns to 255
-
-        //15 big coin
-        //24 coin
-        //33 clock
-
-        val swordUseCountdown = api.readCPU(Addresses.swordUseCountdown)
-
-        val subY = api.readCPU(Addresses.ZeroPage.subY)
-        val subX = api.readCPU(Addresses.ZeroPage.subX)
-        val mapLoc = api.readCPU(Addresses.ZeroPage.mapLoc)
-        val subPoint = FramePoint(subY, subX)
-
-        val gameMode = api.readCPU(Addresses.gameMode)
-        val level = api.readCPU(Addresses.level)
-
-        state.currentMapCell = if (level == MapConstants.overworld) {
-            hyrule.getMapCell(mapLoc)
-        } else {
-            val a = state.hyrule.levelMap.cellOrEmpty(level, mapLoc)
-            d { "GGG cell is $a lev $level map $mapLoc" }
-            state.hyrule.levelMap.cellOrEmpty(level, mapLoc)
-        }
-
         state.enemyReasoner.add(enemyPoint)
 
-        val previousNow = state.previousMove
-        state.previousMove = PreviousMove(
-            previous = state.previousMove.copy(previous = null), // TODO: previousNow.copy()),
-            from = state.previousLocation,
-            // assumes the
-            to = state.previousLocation.adjustBy(state.lastGamePad),
-            actual = link.point,
-            move = state.lastGamePad,
-            triedToMove = state.lastGamePad.isMoveAction())
-        // reset to prevent infinite memory being allocated
-        previousNow.previous = null
-
-        val selectedItem = api.readCPU(Addresses.selectedItem)
-        // inventory
-        val numBombs = api.readCPU(Addresses.numBombs)
-        val numRupees = api.readCPU(Addresses.numRupees)
-        val numKeys = api.readCPU(Addresses.numKeys)
-        val items = mutableSetOf<ZeldaItem>()
-        when (api.readCPU(Addresses.hasSword)) {
-            1 -> items.add(ZeldaItem.WoodenSword)
-            2 -> items.add(ZeldaItem.WhiteSword)
-            3 -> items.add(ZeldaItem.MagicSword)
-            else -> {}
-        }
-        val candleStatus = api.readCPU(Addresses.hasCandle)
-        when (candleStatus) {
-            1 -> items.add(ZeldaItem.RedCandle)
-            2 -> items.add(ZeldaItem.BlueCandle)
-        }
-        if (api.readCpuB(Addresses.hasBow)) items.add(ZeldaItem.Bow)
-        if (api.readCpuB(Addresses.hasBook)) items.add(ZeldaItem.BookOfMagic)
-        if (api.readCpuB(Addresses.hasBoomerang)) items.add(ZeldaItem.Boomerang)
-        if (api.readCpuB(Addresses.hasFood)) items.add(ZeldaItem.Food)
-        if (api.readCpuB(Addresses.hasBracelet)) items.add(ZeldaItem.PowerBracelet)
-        if (api.readCpuB(Addresses.hasLadder)) items.add(ZeldaItem.Ladder)
-        if (api.readCpuB(Addresses.hasLetter)) items.add(ZeldaItem.Letter)
-        if (api.readCpuB(Addresses.hasMagicBoomerang)) items.add(ZeldaItem.MagicalBoomerang)
-        when (api.readCPU(Addresses.hasArrow)) {
-            1 -> items.add(ZeldaItem.Arrow)
-            2 -> items.add(ZeldaItem.SilverArrow)
-            else -> {}
-        }
-        when (api.readCPU(Addresses.hasPotion)) {
-            1 -> items.add(ZeldaItem.Potion)
-            2 -> items.add(ZeldaItem.SecondPotion)
-            else -> {}
-        }
-        if (api.readCpuB(Addresses.hasPotion)) items.add(ZeldaItem.Potion)
-        if (api.readCpuB(Addresses.hasRaft)) items.add(ZeldaItem.Raft)
-        when (api.readCPU(Addresses.hasRing)) {
-            1 -> items.add(ZeldaItem.BlueRing)
-            2 -> items.add(ZeldaItem.RedRing)
-            else -> {}
-        } // todo
-        if (api.readCpuB(Addresses.hasShield)) items.add(ZeldaItem.MagicShield)
-        if (api.readCpuB(Addresses.hasWhistle)) items.add(ZeldaItem.Whistle)
-        if (api.readCpuB(Addresses.hasRod)) items.add(ZeldaItem.Wand)
-        val inventory = Inventory(selectedItem, numBombs, numKeys, numRupees, items)
-        val hasDungeonItem = dungeonItem == 255
-
-        // EXPERIMENTS
-        // it works
-        val clockActivated = api.readCpuB(Addresses.clockActivated)
-        if (clockActivated) {
-            d { "!!! clock activated !!!"}
-        }
-        // not sure
-        val enemiesKilledAlt = api.readCPU(Addresses.enemiesKilledAlt)
-        val enemiesKilledWithoutTakingDamage = api.readCPU(Addresses.enemiesKilledWithoutTakingDamage)
-//        d { " !!! enemiesKilledAlt $enemiesKilledAlt enemiesKilledWithoutTakingDamage $enemiesKilledWithoutTakingDamage"}
-
-        // END EXPERIMENTS
-
-        //$08=North, $04=South, $01=East, $02=West
-        //could try to remember how link last moved and that will be the
-        // direction
-
-//        state.enemyReasoner.log()
+        //        state.enemyReasoner.log()
         //enemies
 //        val theEnemies = reasonerEnemies
-        val oam = OamStateReasoner(api)
-        val theEnemies = oam.agents()
-        d { "! loot ----- ${oam.loot} " }
-        val frame = FrameState(gameMode, theEnemies, killedEnemyCount, link, subPoint,
-            mapLoc, inventory, hasDungeonItem, tenth, level, clockActivated, swordUseCountdown)
 
-        this.state.previousLocation = link.point
-
-        state.framesOnScreen++
-        state.frameState = frame
+//        val enemiesKilledAlt = api.readCPU(Addresses.enemiesKilledAlt)
+//        val enemiesKilledWithoutTakingDamage = api.readCPU(Addresses.enemiesKilledWithoutTakingDamage)
+//        d { " !!! enemiesKilledAlt $enemiesKilledAlt enemiesKilledWithoutTakingDamage $enemiesKilledWithoutTakingDamage"}
     }
 
     // $00=False, $01=True
-    private fun API.readCpuB(address: Int): Boolean =
+    fun API.readCpuB(address: Int): Boolean =
         api.readCPU(address) != 0
 
     private fun mapDir(dir: Int): Dir {

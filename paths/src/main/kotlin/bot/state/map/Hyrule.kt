@@ -179,8 +179,9 @@ data class Objective(
 
 
 enum class Direction {
-    Left, Right, Up, Down
+    Left, Right, Up, Down;
 }
+
 
 fun Direction.opposite(): Direction = when (this) {
     Direction.Left -> Direction.Right
