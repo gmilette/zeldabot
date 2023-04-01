@@ -1,4 +1,4 @@
-package bot
+package bot.state
 
 import nintaco.api.GamepadButtons
 import kotlin.random.Random
@@ -36,5 +36,4 @@ val GamePad.moveActions: MutableSet<GamePad>
     get() = mutableSetOf(GamePad.MoveRight, GamePad.MoveUp, GamePad.MoveLeft, GamePad.MoveDown)
 
 fun GamePad.isMoveAction(): Boolean =
-    this == GamePad.MoveRight || this == GamePad.MoveLeft || this == GamePad
-        .MoveUp || this == GamePad.MoveDown
+    this == GamePad.MoveRight || this == GamePad.MoveLeft || this == GamePad.MoveUp || this == GamePad.MoveDown

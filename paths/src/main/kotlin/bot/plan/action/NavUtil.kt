@@ -1,11 +1,9 @@
 package bot.plan.action
 
-import bot.*
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapCell
 import bot.state.map.MapConstants
-import bot.state.map.MapRoute
 import util.d
 import kotlin.math.abs
 import kotlin.random.Random

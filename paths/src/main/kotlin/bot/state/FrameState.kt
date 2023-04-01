@@ -1,6 +1,5 @@
 package bot.state
 
-import bot.GamePad
 import bot.state.map.Direction
 import bot.state.map.MapConstants
 import nintaco.api.API
@@ -13,15 +12,12 @@ import kotlin.math.abs
 typealias MapLoc = Int
 
 enum class EnemyState {
-    // might be alive or dead
     Unknown,
     Alive,
-    Dead, // was alive before but now is dead
-//    ProbablyDead,
+    Dead,
     NotSeen,
     Loot,
     Projectile,
-    InactiveProjectile
 }
 
 enum class Dir {
@@ -29,30 +25,14 @@ enum class Dir {
 }
 
 class LazyFrameState(val api: API) {
-    val gameMode: Int by lazy { api.readCPU(Addresses.gameMode) }
-    val tenth: Int by lazy { api.readCPU(Addresses.tenthEnemyCount) }
 
     // a delegate which just identifies the address and lazy loads it
 }
 
-data class FrameState(
-    /**
-     *  0=Title/transitory    1=Selection Screen
-    5=Normal              6=Preparing Scroll
-    7=Scrolling           4=Finishing Scroll;
-    E=Registration        F=Elimination
-     */
-    val gameMode: Int = 5,
-    val enemies: List<Agent> = emptyList(),
-    val killedEnemyCount: Int = 0,
-    val link: Agent = Agent(0, FramePoint(0, 0), Dir.Right),
-//    val link: FramePoint = Undefined,
-//    val linkDir: Dir = Dir.Unknown,
-//    val enemies: List<FramePoint> = emptyList(),
-//    val ememyState: List<EnemyState> = emptyList(),
-//    val ememyCountdowns: List<Int> = emptyList(),
-//    val enemyDirs: List<Dir> = emptyList(),
-    val subPoint: FramePoint = Undefined, // might not be frame point
+class FrameState(
+    val api: API,
+    val enemies: List<Agent>,
+    val level: Int,
     // // Value equals map x location + 0x10 * map y location, that's hex
     // so y location * 16 + x
     // each screen has unique id.
@@ -64,22 +44,21 @@ data class FrameState(
     // going up means subtracting 16, down means adding 16
     // y = floor(mapLoc / 16)
     // x = (mapLoc % 16) * 16
-    val mapLoc: MapLoc = 119,
-    // check this, and if it exists, then go to the enemy x,y location to
-    // collect it
-//    val droppedItems: List<Int> = emptyList(),
-    // has to have all the locations on the map
-//    val map.
-    /**
-     * if the enemy has dropped the dungeon item, like the skeleton holding the key
-     */
-    val inventory: Inventory = Inventory(),
-    val hasDungeonItem: Boolean = false,
-    val tenth: Int = 0,
-    val level: Int = 0,
-    val clockActivated: Boolean,
-    val swordUseCountdown: Int
+    val mapLoc: MapLoc,
+    val link: Agent,
+    val inventory: Inventory = Inventory(api)
 ) {
+    /**
+     *  0=Title/transitory    1=Selection Screen
+    5=Normal              6=Preparing Scroll
+    7=Scrolling           4=Finishing Scroll;
+    E=Registration        F=Elimination
+     */
+    val gameMode: Int by lazy { api.readCPU(Addresses.gameMode) }
+    val tenth: Int by lazy { api.readCPU(Addresses.tenthEnemyCount) }
+    val clockActivated: Boolean by lazy { api.readCpuB(Addresses.clockActivated) }
+    val swordUseCountdown: Int by lazy { api.readCPU(Addresses.swordUseCountdown) }
+
     val canUseSword: Boolean = swordUseCountdown == 0
     val isScrolling: Boolean
         get() = gameMode == 7 || gameMode == 6 || gameMode == 4
@@ -105,6 +84,9 @@ data class FrameState(
     val enemiesSorted: List<Agent>
         get() = enemies.sortedBy { it.point.distTo(link.point) }
 }
+
+private fun API.readCpuB(address: Int): Boolean =
+    readCPU(address) != 0
 
 data class Inventory(
     val api: API = ApiSource.getAPI()
@@ -173,7 +155,7 @@ data class MapCellPoint(val x: Int, val y: Int) {
 
 fun MapCellPoint.toFrame() = FramePoint(this.x, this.y)
 
-data class FramePoint(val x: Int = 0, val y: Int = 0, val direction: Direction? = null) : Graph.Vertex {
+data class FramePoint(val x: Int = 0, val y: Int = 0, val direction: Direction? = null) {
     constructor(x: Int = 0, y: Int = 0) : this(x, y, null)
 
     override fun equals(other: Any?): Boolean {
@@ -190,6 +172,21 @@ data class FramePoint(val x: Int = 0, val y: Int = 0, val direction: Direction? 
     }
 }
 
+fun FramePoint.directionToDir(to: FramePoint): Direction {
+    return when {
+        this.x == to.x -> {
+            if (this.y < to.y) Direction.Down else Direction.Up
+        }
+
+        this.y == to.y -> {
+            if (this.x < to.x) Direction.Right else Direction.Left
+        }
+
+        else -> Direction.Left
+    }
+}
+
+
 val FramePoint.onHighway
     get() = x % 8 == 0 || y % 8 == 0
 
@@ -197,12 +194,12 @@ val FramePoint.onHighwayX
     get() = x % 8 == 0
 
 val FramePoint.onHighwayXNear
-    get() = (x+1) % 8 == 0 || (x-1) % 8 == 0
+    get() = (x + 1) % 8 == 0 || (x - 1) % 8 == 0
 val FramePoint.onHighwayY
     get() = y % 8 == 0
 
 val FramePoint.onHighwayYNear
-    get() = (y+1) % 8 == 0 || (y-1) % 8 == 0
+    get() = (y + 1) % 8 == 0 || (y - 1) % 8 == 0
 
 val FramePoint.toG: FramePoint
     get() = FramePoint(x / 16, y / 16)

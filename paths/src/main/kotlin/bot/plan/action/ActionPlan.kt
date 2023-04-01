@@ -1,6 +1,6 @@
 package bot.plan.action
 
-import bot.GamePad
+import bot.state.GamePad
 import bot.plan.action.NavUtil.directionToDir
 import bot.plan.gastar.FrameRoute
 import bot.state.*

@@ -1,7 +1,7 @@
 package bot.plan
 
 import KillHandsInLevel7
-import bot.GamePad
+import bot.state.GamePad
 import bot.plan.action.*
 import bot.plan.runner.MasterPlan
 import bot.plan.runner.PlanSegment
@@ -23,7 +23,6 @@ class LocationSequenceBuilder(
     private var segment: String = ""
     private var plan = mutableListOf<Action>()
     private var lastMapLoc = 0
-    private val builder = this
     private val OVERWORLD_LEVEL = 0
     private var level: Int = OVERWORLD_LEVEL
     private var segments = mutableListOf<PlanSegment>()
@@ -213,10 +212,6 @@ class LocationSequenceBuilder(
             add(lastMapLoc, moveHistoryAttackAction(KillAll()))
             return this
         }
-//    fun kill(maxEnemies: Int): LocationSequenceBuilder {
-//            add(lastMapLoc, KillAll())
-//            return this
-//        }
     val kill2: LocationSequenceBuilder
         get() {
             add(lastMapLoc, KillAll(numberLeftToBeDead = 2))
@@ -227,25 +222,9 @@ class LocationSequenceBuilder(
             add(lastMapLoc, KillAll(numberLeftToBeDead = 1))
             return this
         }
-    val kill3: LocationSequenceBuilder
-        get() {
-            add(lastMapLoc, KillAll(numberLeftToBeDead = 3))
-            return this
-        }
     val startHere: Unit
         get() {
             add(lastMapLoc, StartHereAction())
-        }
-    val upLootThenMove: LocationSequenceBuilder
-        get() {
-            val nextLoc = lastMapLoc.up
-            add(nextLoc, lootThenMove(mapCell(nextLoc)))
-            return this
-        }
-    val upk: LocationSequenceBuilder
-        get() {
-            addKill(lastMapLoc.up)
-            return this
         }
     val upm: LocationSequenceBuilder
         get() {
@@ -313,13 +292,6 @@ class LocationSequenceBuilder(
         get() {
             val nextLoc = lastMapLoc.left
             add(nextLoc, moveHistoryAttackAction(MoveTo(mapCell(nextLoc))))
-            return this
-        }
-    val rightKillForKey: LocationSequenceBuilder
-        get() {
-            val nextLoc = lastMapLoc.right
-            // todo: can stop after get a key
-            add(nextLoc, killThenLootThenMove(mapCell(nextLoc)))
             return this
         }
     val right: LocationSequenceBuilder

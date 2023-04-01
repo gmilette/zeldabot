@@ -1,10 +1,12 @@
 package bot.state
 
-val emptyAgent = Agent(0, FramePoint(0, 0), Dir.Right, EnemyState.Unknown,  0,0)
+import bot.state.map.Direction
+
+val emptyAgent = Agent(0, FramePoint(0, 0), Direction.Down, EnemyState.Unknown,  0,0)
 data class Agent(
     val index: Int = 0,
     val point: FramePoint,
-    val dir: Dir = Dir.Down,
+    val dir: Direction = Direction.Down,
     val state: EnemyState = EnemyState.Unknown,
     val countDown: Int = 0,
     val hp: Int = 0,
@@ -28,7 +30,7 @@ data class Agent(
 // everything I can track about the enemy so far
 data class AgentData(
     val point: FramePoint,
-    val dir: Dir,
+    val dir: Direction,
     val countDown: Int = 0,
     val status: Int = 0,
     val hp: Int = 0,

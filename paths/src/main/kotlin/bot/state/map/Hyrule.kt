@@ -1,6 +1,6 @@
 package bot.state.map
 
-import bot.GamePad
+import bot.state.GamePad
 import bot.plan.action.NavUtil
 import bot.plan.gastar.GStar
 import bot.state.*

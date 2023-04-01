@@ -1,12 +1,11 @@
 package bot.plan.runner
 
-import bot.GamePad
+import bot.state.GamePad
 import bot.plan.action.Action
 import bot.plan.action.DoNothing
 import bot.plan.action.moveHistoryAttackAction
 import bot.state.FramePoint
 import bot.state.MapLocationState
-import com.github.doyaaaaaken.kotlincsv.client.CsvWriter
 import util.d
 
 class PlanRunner(val masterPlan: MasterPlan) {

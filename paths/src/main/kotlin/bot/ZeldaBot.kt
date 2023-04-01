@@ -8,13 +8,10 @@ import bot.state.*
 import bot.state.map.Hyrule
 import bot.state.map.MapCell
 import bot.state.map.MapConstants
-import bot.state.map.level.LevelSpecBuilder
-import bot.state.map.level.LevelStartMapLoc
 import nintaco.api.API
 import nintaco.api.ApiSource
 import nintaco.api.Colors
 import nintaco.api.GamepadButtons
-import sequence.ZeldaItem
 import util.d
 
 class ZeldaBot(private val monitor: ZeldaMonitor) {
@@ -128,6 +125,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             return GamePad.None
         }
 
+        fillBombs()
 //        refillIfOut()
 //        frameStateUpdater.setSword(ZeldaItem.MagicSword)
 //        frameStateUpdater.setLadderAndRaft(ZeldaBot.hasLadder)
@@ -180,12 +178,11 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             val dead = this.frameState.enemiesClosestToLink(EnemyState.Dead).size
             val projectiles = this.frameState.enemiesClosestToLink(EnemyState.Projectile).size
             val loot = this.frameState.enemiesClosestToLink(EnemyState.Loot).size
-//            val unknown = this.frameState.enemiesClosestToLink(EnemyState.Unknown).size
             val tenth = this.frameState.tenth
-            val aliveT = " t: $tenth A: ${alive} d: $dead p: $projectiles l: $loot"
+            val aliveT = " t: $tenth A: $alive d: $dead p: $projectiles l: $loot"
 
             try {
-                drawIt(plan.target(), "$locCoordinates $link $aliveT")
+                drawIt(plan.target(), "$locCoordinates \n $link $aliveT")
             } catch (e: Exception) {
 
             }
@@ -229,14 +226,18 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     }
 
     private fun refillIfOut() {
-        if (frameStateUpdater.state.frameState.inventory.numBombs <= 2) {
-            api.writeCPU(Addresses.numBombs, 8)
-        }
+        fillBombs()
         if (frameStateUpdater.state.frameState.inventory.numKeys == 0) {
             api.writeCPU(Addresses.numKeys, 2)
         }
         if (frameStateUpdater.state.frameState.inventory.numRupees < 250) {
             api.writeCPU(Addresses.numRupees, 252)
+        }
+    }
+
+    private fun fillBombs() {
+        if (frameStateUpdater.state.frameState.inventory.numBombs <= 2) {
+            api.writeCPU(Addresses.numBombs, 8)
         }
     }
 

@@ -36,20 +36,6 @@ class FrameRoute(val path: List<FramePoint>) {
         return point
     }
 
-    // ahh this is junk
-    fun nextPointLinkIsOn(link: FramePoint): FramePoint? {
-        // is it one of the first 5 points on the route
-        // if it is not the first start consuming the route
-        repeat(defaultLookAhead) {
-            val next = pathStack.getOrNull(it)
-            if ((next != null) && (next == link)) {
-                return pop()
-            }
-        }
-
-        return null
-    }
-
     fun pop(): FramePoint? = pathStack.removeFirstOrNull().also {
         lastPopped = it
     }
@@ -64,5 +50,4 @@ class FrameRoute(val path: List<FramePoint>) {
             d { " : $framePoint"}
         }
     }
-
 }

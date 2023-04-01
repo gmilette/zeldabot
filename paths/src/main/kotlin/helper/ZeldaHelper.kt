@@ -1,7 +1,7 @@
 package helper
 
 import bot.state.Addresses
-import bot.GamePad
+import bot.state.GamePad
 import bot.plan.PlanBuilder
 
 import bot.state.*

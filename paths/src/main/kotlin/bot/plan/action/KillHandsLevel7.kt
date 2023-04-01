@@ -1,4 +1,4 @@
-import bot.GamePad
+import bot.state.GamePad
 import bot.plan.action.*
 import bot.state.EnemyState
 import bot.state.FramePoint

@@ -1,14 +1,13 @@
 package bot.state
 
-import bot.GamePad
 import bot.plan.action.PreviousMove
 import bot.state.map.Hyrule
 import bot.state.map.MapCell
+import nintaco.api.ApiSource
 
 class MapLocationState(
-    //
     var hyrule: Hyrule,
-//    val mapLoc: MapLoc,
+
     var enemyReasoner: EnemyStateReasoner = EnemyStateReasoner(),
 
     var lastGamePad: GamePad = GamePad.MoveUp,
@@ -22,25 +21,16 @@ class MapLocationState(
         triedToMove = true
     ),
 
-    // remember for next interation
-    // tried to get from prev to goal
+    // remember for next interaction
     var previousLocation: FramePoint = FramePoint(),
     var previousGamePad: GamePad = GamePad.None,
 
     // the last known framestate
-    var frameState: FrameState = FrameState(
-        5,
+    var frameState: FrameState = FrameState(ApiSource.getAPI(),
         emptyList(),
         0,
-        emptyAgent,
-        Undefined,
-        119,
-        Inventory(),
-        false,
         0,
-        0,
-        false,
-        0
+        emptyAgent
     ),
 
     var framesOnScreen: Int = 0,

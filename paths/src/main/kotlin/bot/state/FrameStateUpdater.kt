@@ -1,7 +1,7 @@
 package bot.state
 
-import bot.*
 import bot.plan.action.PreviousMove
+import bot.state.map.Direction
 import bot.state.map.Hyrule
 import bot.state.map.MapConstants
 import nintaco.api.API
@@ -52,36 +52,21 @@ class FrameStateUpdater(
         }
     }
 
-    // idea:
-    // lazy load ALL state!
-
     fun updateFrame(currentFrame: Int, currentGamePad: GamePad) {
         val previous = state.frameState
         state.lastGamePad = currentGamePad
         //        https://datacrystal.romhacking.net/wiki/The_Legend_of_Zelda:RAM_map
+
         val linkX = api.readCPU(Addresses.linkX)
         val linkY = api.readCPU(Addresses.linkY) - yAdjustFactor
         val linkPoint = FramePoint(linkX, linkY)
-        val linkDir = mapDir(Addresses.linkDir)
-        val linkDir2 = Addresses.moveDir
-        d { " Link direction $linkDir2"}
-        val link = Agent(0, linkPoint, linkDir)
-        val tenth = api.readCPU(Addresses.tenthEnemyCount)
+        val calculatedDir = previous.link.point.directionToDir(linkPoint)
+        val link = Agent(0, linkPoint, calculatedDir)
 
-        val killedEnemyCount = api.readCPU(Addresses.Ram.killedEnemyCount)
         // works
         // turns into 1 is candle used
-        val candleUsed = api.readCPU(Addresses.Ram.candleUsed)
-        val dungeonItem = api.readCPU(Addresses.dungeonFloorItem)
-        val swordUseCountdown = api.readCPU(Addresses.swordUseCountdown)
-
-//        val screenOptions = api.readRAM(Addresses.screenOptions)
-//        val subY = api.readCPU(Addresses.ZeroPage.subY)
-//        val subX = api.readCPU(Addresses.ZeroPage.subX)
-//        val subPoint = FramePoint(subY, subX)
+//        val candleUsed = api.readCPU(Addresses.Ram.candleUsed)
         val mapLoc = api.readCPU(Addresses.ZeroPage.mapLoc)
-
-        val gameMode = api.readCPU(Addresses.gameMode)
         val level = api.readCPU(Addresses.level)
 
         state.currentMapCell = if (level == MapConstants.overworld) {
@@ -94,7 +79,6 @@ class FrameStateUpdater(
         state.previousMove = PreviousMove(
             previous = state.previousMove.copy(previous = null), // TODO: previousNow.copy()),
             from = state.previousLocation,
-            // assumes the
             to = state.previousLocation.adjustBy(state.lastGamePad),
             actual = link.point,
             move = state.lastGamePad,
@@ -102,24 +86,9 @@ class FrameStateUpdater(
         // reset to prevent infinite memory being allocated
         previousNow.previous = null
 
-        val hasDungeonItem = dungeonItem == 255
-
-        // EXPERIMENTS
-        // it works
-        val clockActivated = api.readCpuB(Addresses.clockActivated)
-        if (clockActivated) {
-            d { "!!! clock activated !!!"}
-        }
-
-        //$08=North, $04=South, $01=East, $02=West
-        //could try to remember how link last moved and that will be the
-        // direction
-
         val oam = OamStateReasoner(api)
         val theEnemies = oam.agents()
-        d { "! loot ----- ${oam.loot} " }
-        val frame = FrameState(gameMode, theEnemies, killedEnemyCount, link, FramePoint(),
-            mapLoc, Inventory(api), hasDungeonItem, tenth, level, clockActivated, swordUseCountdown)
+        val frame = FrameState(api, theEnemies, level, mapLoc, link)
 
         this.state.previousLocation = link.point
 
@@ -232,7 +201,7 @@ class FrameStateUpdater(
     fun API.readCpuB(address: Int): Boolean =
         api.readCPU(address) != 0
 
-    private fun mapDir(dir: Int): Dir {
+    private fun mapDir(dir: Int): Direction {
         val read = api.readCPU(dir) shr 4
 //        d { "read $read" }
         // not sure what this notation means but
@@ -245,19 +214,19 @@ class FrameStateUpdater(
         val f4 = getBit(read, 4)
 //        d {"f1 $f1 f2 $f2 f3 $f3 f $f4" }
         return if (f3 == 1) {
-            Dir.Right
+            Direction.Right
         }
         else if (f1 == 1) {
-            Dir.Up
+            Direction.Up
         }
         else if (read == 64) {
-            Dir.Down
+            Direction.Down
         }
         else if (read == 8) {
-            Dir.Up
+            Direction.Up
         }
         else {
-            Dir.Unknown
+            Direction.Up
         }
     }
 }

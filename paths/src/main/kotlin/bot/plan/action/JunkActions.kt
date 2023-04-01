@@ -1,11 +1,8 @@
-import bot.GamePad
+import bot.state.GamePad
 import bot.plan.action.*
-import bot.plan.action.NavUtil.directionToDir
-import bot.plan.gastar.FrameRoute
 import bot.state.*
-import bot.state.map.*
 import util.d
-import kotlin.random.Random
+
 class MoveHistoryActionQueue(private val wrapped: Action, private val escapeAction: () -> GamePad) : Action {
     private val histSize = 75
 

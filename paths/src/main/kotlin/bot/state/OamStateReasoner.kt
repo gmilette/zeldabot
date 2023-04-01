@@ -3,6 +3,114 @@ package bot.state
 import nintaco.api.API
 import util.d
 
+class OamStateReasoner(
+    private val api: API
+) {
+    // SpriteData(index=17, point=(160, 120), tile=164, attribute=66)
+    val pancake = 164
+    val tileMap = mapOf(
+        // 122
+        // 188
+        // 190
+        (0xD6) to "gannon",
+        (0xD4) to "gannon",
+        (0xD2) to "gannon",
+        (0xE6) to "gannon",
+        (0xE4) to "gannon",
+        (0xE2) to "gannon",
+        (0xE0) to "gannon",
+        (0xD0) to "gannon",
+        164 to "pancake",
+        (0x96).toInt() to "trap",
+        (0xF8).toInt() to "circleenemycenter",
+        (0xFA).toInt() to "circleenemycenter",
+        (0xFC).toInt() to "circleenemy",
+        (0x9C).toInt() to "bat",
+        (0x9A).toInt() to "bat",
+        170 to "squshy", // left and right
+        246 to "rhino",
+        244 to "rhino",
+//        226 to "rhino head",
+        124 to "ghostripple",
+        126 to "ghostripple",
+        142 to "sun", // attrib 1
+        144 to "sun", // attrib 65, atrib 67 whiteish color
+        184 to "blueghostright", // back attrib 65 // might be different for left facing ghost
+        186 to "blueghostright" // right, attrib 1
+    )
+
+    private val sprites: List<SpriteData> = readOam()
+
+    val alive: List<SpriteData>
+        get() {
+            return sprites.filter { !it.hidden }
+        }
+
+    val loot: List<SpriteData>
+        get() {
+            return sprites.filter { it.isLoot }
+        }
+
+    val allDead: Boolean
+        get() = alive.isEmpty()
+
+    fun agents(): List<Agent> =
+        sprites.map {
+            Agent(index = it.tile, point = it.point, state = it.toState(), hp = it.tile, droppedId = it.attribute)
+        }
+
+    private fun combine() {
+        val xMap = sprites.associateBy { it.point.x }
+        // if any of the sprites dont have a match
+        sprites.filter { xMap.containsKey(it.point.x + 8) }
+    }
+
+    private fun SpriteData.toState(): EnemyState =
+        when {
+            this.hidden -> EnemyState.Dead
+            isLoot -> EnemyState.Loot
+            isProjectile -> EnemyState.Projectile
+            else -> EnemyState.Alive
+        }
+
+    // this isn't real
+    // 21: SpriteData(index=21, point=(74, 23), tile=62, attribute=0, hidden=false)
+    // there are always 2 sprites on for each enemy
+    // one is at x, other is at x+8, same attribute
+    // to translate to current coordinates
+    // use the lower x value
+    // then subtract 61 from the y, value
+
+    private fun readOam(at: Int): SpriteData {
+        val x = api.readOAM(at + 0x0003)
+        val y = api.readOAM(at)
+        val tile = api.readOAM(at + 0x0001)
+        val attrib = api.readOAM(at + 0x0002)
+        return SpriteData(at / 4, FramePoint(x, y - 61), tile, attrib)
+    }
+
+    private fun readOam(): List<SpriteData> {
+        val sprites = (0..63).map {
+            readOam(0x0001 * (it * 4))
+        }
+        // Y coord
+        // Tile
+        // Attribute
+        // X coord
+        d { " sprites" }
+        sprites.forEachIndexed { index, sprite ->
+            d { "$index: $sprite" }
+        }
+
+        d { " sprites** alive ** ${sprites.filter { !it.hidden }.size}" }
+        // ahh there are twice as many sprites because each sprite is two big
+        sprites.filter { !it.hidden }.forEachIndexed { index, sprite ->
+            d { "$index: $sprite" }
+        }
+
+        return sprites
+    }
+}
 fun Agent.isGannonTriforce(): Boolean =
     tile == triforceTile
 
@@ -114,138 +222,3 @@ enum class Tile(id: Int) {
     Key((0x2E).toInt())
 }
 
-class OamStateReasoner(
-    private val api: API
-) {
-    // SpriteData(index=17, point=(160, 120), tile=164, attribute=66)
-    val pancake = 164
-    val tileMap = mapOf(
-        // 122
-        // 188
-        // 190
-        (0xD6) to "gannon",
-        (0xD4) to "gannon",
-        (0xD2) to "gannon",
-        (0xE6) to "gannon",
-        (0xE4) to "gannon",
-        (0xE2) to "gannon",
-        (0xE0) to "gannon",
-        (0xD0) to "gannon",
-        164 to "pancake",
-        (0x96).toInt() to "trap",
-        (0xF8).toInt() to "circleenemycenter",
-        (0xFA).toInt() to "circleenemycenter",
-        (0xFC).toInt() to "circleenemy",
-        (0x9C).toInt() to "bat",
-        (0x9A).toInt() to "bat",
-        170 to "squshy", // left and right
-        246 to "rhino",
-        244 to "rhino",
-//        226 to "rhino head",
-        124 to "ghostripple",
-        126 to "ghostripple",
-        142 to "sun", // attrib 1
-        144 to "sun", // attrib 65, atrib 67 whiteish color
-        184 to "blueghostright", // back attrib 65 // might be different for left facing ghost
-        186 to "blueghostright" // right, attrib 1
-    )
-
-    private val sprites: List<SpriteData> = readOam()
-
-    val alive: List<SpriteData>
-        get() {
-            return sprites.filter { !it.hidden }
-        }
-
-    val loot: List<SpriteData>
-        get() {
-            return sprites.filter { it.isLoot }
-        }
-
-    val allDead: Boolean
-        get() = alive.isEmpty()
-
-    fun agents(): List<Agent> =
-        sprites.map {
-            Agent(index = it.tile, point = it.point, state = it.toState(), hp = it.tile, droppedId = it.attribute)
-        }
-
-    private fun combine() {
-        val xMap = sprites.associateBy { it.point.x }
-        // if any of the sprites dont have a match
-        sprites.filter { xMap.containsKey(it.point.x + 8) }
-    }
-
-    private fun SpriteData.toState(): EnemyState =
-        when {
-            this.hidden -> EnemyState.Dead
-            isLoot -> EnemyState.Loot
-            isProjectile -> EnemyState.Projectile
-            else -> EnemyState.Alive
-        }
-
-    //    || tile = 12
-//    || tile == 14 // link,
-//    || tile = 180
-//    || tile = 34
-//    || tile = 62 // that blinking thing
-//    || attribute == 0  // it's part of link tool bar
-//    || attribute == 3 // link
-//    || (attribute > 60 && attribute < 70) // it's link
-
-    // this isn't real
-    // 21: SpriteData(index=21, point=(74, 23), tile=62, attribute=0, hidden=false)
-
-    fun read() {
-        // there are always 2 sprites on for each enemy
-        // one is at x, other is at x+8, same attribute
-        // to translate to current coordinates
-        // use the lower x value
-        // then subtract 61 from the y, value
-    }
-
-    private fun readOam(at: Int): SpriteData {
-        val x = api.readOAM(at + 0x0003)
-        val y = api.readOAM(at)
-        val tile = api.readOAM(at + 0x0001)
-        val attrib = api.readOAM(at + 0x0002)
-        return SpriteData(at/4, FramePoint(x, y - 61), tile, attrib)
-    }
-
-    private fun readOam(): List<SpriteData> {
-        val numSprites = 64
-        val sprites = (0..63).map {
-            readOam(0x0001 * (it*4))
-        }
-//        //api.readOAM(Addresses.Oam.start)
-//        val oams1 = (0..63).map {
-//            api.readOAM(Addresses.Oam.start + (0x0001 * it))
-//        }
-//        val oams2 = (16..31).map {
-//            api.readOAM(Addresses.Oam.start + (0x0001 * (it)))
-//        }
-//        val oams3 = (32..47).map {
-//            api.readOAM(Addresses.Oam.start + (0x0001 * (it)))
-//        }
-//        val oams4 = (48..63).map {
-//            api.readOAM(Addresses.Oam.start + (0x0001 * (it)))
-//        }
-        // Y coord
-        // Tile
-        // Attribute
-        // X coord
-        d { " sprites"}
-        sprites.forEachIndexed { index, sprite ->
-            d { "$index: $sprite"}
-        }
-
-        d { " sprites** alive ** ${sprites.filter { !it.hidden }.size}"}
-        // ahh there are twice as many sprites because each sprite is two big
-        sprites.filter { !it.hidden }.forEachIndexed { index, sprite ->
-            d { "$index: $sprite"}
-        }
-
-        return sprites
-    }
-
-}

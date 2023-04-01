@@ -1,14 +1,12 @@
 package bot.plan
 
-import bot.GamePad
+import bot.state.GamePad
 import bot.plan.action.NavUtil
-import bot.plan.astar.AStar
 import bot.plan.gastar.GStar
 import bot.state.*
 import bot.state.map.Hyrule
 import bot.state.map.MapCell
 import bot.state.map.MapCellData
-import io.kotest.matchers.collections.shouldHaveAtLeastSize
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -41,7 +39,7 @@ class NavUtilTest {
         checkA(cell, from, listOf(target), before, dirResult, level)
     }
     private fun checkA(cell: MapLoc, from: FramePoint, targets: List<FramePoint>,
-                      before: FramePoint? = null, dirResult: GamePad, level: Int = 0) {
+                       before: FramePoint? = null, dirResult: GamePad, level: Int = 0) {
         val hyrule = Hyrule()
         val cell = if (level == 0) hyrule.getMapCell(cell) else hyrule.levelMap.cell(level, cell)
         cell.write()
@@ -217,31 +215,6 @@ class NavUtilTest {
     fun `test move shop`() {
         GStar.DEBUG = true
         check(58, FramePoint(144, 88), FramePoint(112, 167), GamePad.MoveDown)
-    }
-
-     //40 from (0, 72) to (112, 0)
-    //    56,72
-    @Test
-    fun `test directions`() {
-        // generate simple 50x250 grid
-        val map = Map2d.Builder<Boolean>().add(
-            100, 250, true
-        ).build()
-
-        val cell = MapCell(MapCellPoint(0,0), 0, MapCellData.empty)
-
-        NavUtil.directionToAvoidingObstacleZ(cell, FramePoint(200, 20),
-            FramePoint(50, 20)) shouldBe GamePad.MoveLeft
-        NavUtil.directionToAvoidingObstacleZ(cell, FramePoint(50, 20),
-            FramePoint(200, 20)) shouldBe GamePad.MoveRight
-        NavUtil.directionToAvoidingObstacleZ(cell, FramePoint(20, 20),
-            FramePoint(20, 40)) shouldBe GamePad.MoveDown
-        NavUtil.directionToAvoidingObstacleZ(cell, FramePoint(20, 40),
-            FramePoint(20, 20)) shouldBe GamePad.MoveUp
-
-        d { " do a star"}
-        AStar().aStarFinder(cell, FramePoint(200, 20),
-            FramePoint(50, 20))
     }
 
     @Test

@@ -15,7 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Checkbox
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import bot.GamePad
+import bot.state.GamePad
 import bot.ZeldaBot
 import bot.plan.runner.PlanRunner
 import bot.state.*
@@ -23,7 +23,6 @@ import bot.state.map.MapConstants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import util.Map2d
 import util.d
 
 fun main() = application {
@@ -32,7 +31,6 @@ fun main() = application {
         state = WindowState(width = 800.dp, height = 500.dp),
         title = "Zelda"
     ) {
-        d { " compose " }
         val model = remember { ZeldaModel() }
 
         val state = model.plan.value
@@ -180,9 +178,9 @@ fun main() = application {
                 state?.state?.frameState?.let {
                     val alive = it.enemiesClosestToLink(EnemyState.Alive).size
                     val dead = it.enemiesClosestToLink(EnemyState.Dead).size
-                    val unknown = it.enemiesClosestToLink(EnemyState.Unknown).size
-                    Text("Alive: ${alive} dead: $dead unknown ${unknown}", modifier = Modifier.padding(12.dp))
-                    Text("Killed: ${it.killedEnemyCount} of ${state.state.numEnemiesSeen}", modifier = Modifier.padding(12.dp))
+                    val loot = it.enemiesClosestToLink(EnemyState.Loot).size
+                    val proj = it.enemiesClosestToLink(EnemyState.Projectile).size
+                    Text("Alive: $alive dead: $dead loot $loot $proj", modifier = Modifier.padding(12.dp))
                 }
             }
 

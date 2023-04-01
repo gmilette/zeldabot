@@ -12,6 +12,9 @@ import org.jgrapht.graph.DefaultEdge
 import util.d
 
 class AnalysisPlanBuilder() {
+    companion object {
+        const val DEBUG = false
+    }
     fun build(may: Hyrule) {
         // levels 1-9
     }
@@ -195,33 +198,43 @@ class AnalysisPlanBuilder() {
 
             makePatterns()
 
-            d { " Num vertext: ${graph.vertexSet().size} " }
+            if (DEBUG) {
+                d { " Num vertext: ${graph.vertexSet().size} " }
+            }
 
             hyrule.mapCells.forEach {
                 if (it.hasExit(Direction.Down)) {
                     val near = hyrule.near(it, Direction.Down)
-                    d { " add ${it.mapLoc} -> ${near?.mapLoc}" }
+                    if (DEBUG) {
+                        d { " add ${it.mapLoc} -> ${near?.mapLoc}" }
+                    }
                     if (near != null) {
                         graph.addEdge(it, near)
                     }
                 }
                 if (it.hasExit(Direction.Up)) {
                     val near = hyrule.near(it, Direction.Up)
-                    d { " add ${it.mapLoc} -> ${near?.mapLoc}" }
+                    if (DEBUG) {
+                        d { " add ${it.mapLoc} -> ${near?.mapLoc}" }
+                    }
                     if (near != null) {
                         graph.addEdge(it, near)
                     }
                 }
                 if (it.hasExit(Direction.Left)) {
                     val near = hyrule.near(it, Direction.Left)
-                    d { " add ${it.mapLoc} -> ${near?.mapLoc}" }
+                    if (DEBUG) {
+                        d { " add ${it.mapLoc} -> ${near?.mapLoc}" }
+                    }
                     if (near != null) {
                         graph.addEdge(it, near)
                     }
                 }
                 if (it.hasExit(Direction.Right)) {
                     val near = hyrule.near(it, Direction.Right)
-                    d { " add ${it.mapLoc} -> ${near?.mapLoc}" }
+                    if (DEBUG) {
+                        d { " add ${it.mapLoc} -> ${near?.mapLoc}" }
+                    }
                     if (near != null) {
                         graph.addEdge(it, near)
                     }

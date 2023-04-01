@@ -1,6 +1,6 @@
 package bot.plan
 
-import bot.GamePad
+import bot.state.GamePad
 import bot.plan.action.GoIn
 import bot.plan.runner.MasterPlan
 import bot.state.FramePoint
