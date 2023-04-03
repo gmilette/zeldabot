@@ -1,6 +1,7 @@
 package bot
 
 import bot.plan.PlanBuilder
+import bot.plan.ZeldaPlan
 import bot.plan.gastar.SkipLocationCollector
 import bot.plan.runner.PlanRunner
 import bot.plan.gastar.SkipPathDb
@@ -27,7 +28,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         api.run()
 
         // run at 400% always for now
-        api.setSpeed(400)
+//        api.setSpeed(400)
 
 //        api.isPaused = true
 //        api.stepToNextFrame()
@@ -85,7 +86,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 
     var frameStateUpdater: FrameStateUpdater = FrameStateUpdater(api, hyrule)
 
-    val plan = PlanRunner(PlanBuilder.makeMasterPlan(hyrule, hyrule.mapCellsObject, hyrule.levelMap))
+    val plan = PlanRunner(ZeldaPlan.makeMasterPlan(hyrule, hyrule.mapCellsObject, hyrule.levelMap))
 
     var previousLink: FramePoint = FramePoint()
     val collect = SkipLocationCollector()
@@ -125,17 +126,17 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             return GamePad.None
         }
 
-        fillBombs()
-//        refillIfOut()
+//        fillBombs()
+        refillIfOut()
 //        frameStateUpdater.setSword(ZeldaItem.MagicSword)
 //        frameStateUpdater.setLadderAndRaft(ZeldaBot.hasLadder)
 //        frameStateUpdater.setRedCandle()
 //        frameStateUpdater.setHaveWhistle()
 //        frameStateUpdater.setBait()
+//        frameStateUpdater.setLetter()
         if (frameStateUpdater.state.frameState.clockActivated) {
             frameStateUpdater.deactivateClock()
         }
-
         // always do
         val nextGamePad = if (false && frameStateUpdater.state.previousMove.skipped) { // && Random.nextBoolean()) {
             api.addStopListener {  }
@@ -182,11 +183,12 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             val aliveT = " t: $tenth A: $alive d: $dead p: $projectiles l: $loot"
 
             try {
-                drawIt(plan.target(), "$locCoordinates \n $link $aliveT")
+                drawIt(plan.target(), "$locCoordinates $link $aliveT")
             } catch (e: Exception) {
 
             }
         }
+//        if (true) return GamePad.None
         return nextGamePad
     }
 
@@ -230,13 +232,13 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         if (frameStateUpdater.state.frameState.inventory.numKeys == 0) {
             api.writeCPU(Addresses.numKeys, 2)
         }
-        if (frameStateUpdater.state.frameState.inventory.numRupees < 250) {
+        if (frameStateUpdater.state.frameState.inventory.numRupees!! < 250) {
             api.writeCPU(Addresses.numRupees, 252)
         }
     }
 
     private fun fillBombs() {
-        if (frameStateUpdater.state.frameState.inventory.numBombs <= 2) {
+        if (frameStateUpdater.state.frameState.inventory.numBombs!! <= 2) {
             api.writeCPU(Addresses.numBombs, 8)
         }
     }

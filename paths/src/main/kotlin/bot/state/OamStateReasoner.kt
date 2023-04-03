@@ -6,6 +6,7 @@ import util.d
 class OamStateReasoner(
     private val api: API
 ) {
+    val DEBUG = false
     // SpriteData(index=17, point=(160, 120), tile=164, attribute=66)
     val pancake = 164
     val tileMap = mapOf(
@@ -97,9 +98,11 @@ class OamStateReasoner(
         // Tile
         // Attribute
         // X coord
-        d { " sprites" }
-        sprites.forEachIndexed { index, sprite ->
-            d { "$index: $sprite" }
+        if (DEBUG) {
+            d { " sprites" }
+            sprites.forEachIndexed { index, sprite ->
+                d { "$index: $sprite" }
+            }
         }
 
         d { " sprites** alive ** ${sprites.filter { !it.hidden }.size}" }
@@ -167,7 +170,8 @@ data class SpriteData(
             ladder,
             wizard,
             flame1,
-            flame2
+            flame2,
+//            oldWoman
         )
         val projectiles = setOf(
             124, 126, // ghost attack
@@ -216,6 +220,8 @@ val bigHeart = (0x68).toInt() //104
 val wizard = (0x98).toInt() // 152
 val flame1 = (0x5C).toInt() //92
 val flame2 = (0x5E).toInt() //94
+val oldWoman = (0x9a).toInt()
+val potion = (0x99).toInt() //?
 
 enum class Tile(id: Int) {
     Gem(50),

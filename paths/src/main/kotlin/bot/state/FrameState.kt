@@ -30,7 +30,7 @@ class LazyFrameState(val api: API) {
 }
 
 class FrameState(
-    val api: API,
+    val api: API = ApiSource.getAPI(),
     val enemies: List<Agent>,
     val level: Int,
     // // Value equals map x location + 0x10 * map y location, that's hex
@@ -54,10 +54,10 @@ class FrameState(
     7=Scrolling           4=Finishing Scroll;
     E=Registration        F=Elimination
      */
-    val gameMode: Int by lazy { api.readCPU(Addresses.gameMode) }
+    private val gameMode: Int by lazy { api.readCPU(Addresses.gameMode) }
     val tenth: Int by lazy { api.readCPU(Addresses.tenthEnemyCount) }
     val clockActivated: Boolean by lazy { api.readCpuB(Addresses.clockActivated) }
-    val swordUseCountdown: Int by lazy { api.readCPU(Addresses.swordUseCountdown) }
+    private val swordUseCountdown: Int by lazy { api.readCPU(Addresses.swordUseCountdown) }
 
     val canUseSword: Boolean = swordUseCountdown == 0
     val isScrolling: Boolean
@@ -95,9 +95,11 @@ data class Inventory(
     val numBombs by lazy { api.readCPU(Addresses.numBombs) }
     val numRupees by lazy { api.readCPU(Addresses.numRupees) }
     val numKeys by lazy { api.readCPU(Addresses.numKeys) }
-    val items: Set<ZeldaItem> by lazy {
-        InventoryReader.readInventory(api)
-    }
+    val items: Set<ZeldaItem> by lazy { InventoryReader.readInventory(api) }
+
+    val hasPotion: Boolean
+        get() = items.contains(ZeldaItem.Potion) || items.contains(ZeldaItem.SecondPotion)
+
     val percentComplete: Float
         get() = items.size.toFloat() / zeldaItemsRequired.size.toFloat()
 

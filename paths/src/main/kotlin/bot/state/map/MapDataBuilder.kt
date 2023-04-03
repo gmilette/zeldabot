@@ -61,7 +61,7 @@ class MapBuilder {
             "topleftrock",
             Objective(
                 FramePoint(100, 100), DestType.SecretToEverybody
-                    (20, EntryType.Walk)
+                    (20, EntryType.Walk())
             ),
             exits = e(l, d, r)
         )
@@ -112,7 +112,7 @@ class MapBuilder {
             Objective(
                 2.grid,
                 1.grid,
-                DestType.Item(ZeldaItem.WhiteSword, EntryType.Walk)
+                DestType.Item(ZeldaItem.WhiteSword, EntryType.Walk())
             ),
             exits = e(d)
         )
@@ -285,7 +285,7 @@ class MapBuilder {
         objectives[39] = CellBuilder().invoke {
             aka("downfromboulder")
             e(u,r) // special
-            this has DestType.Shop(ShopType.Woman) at 100 a 100
+            this has DestType.Shop(ShopType.Potion) at 100 a 100
         }
         objectives[40] = CellBuilder().invoke {
             aka("forestneardesert")
@@ -403,6 +403,11 @@ class MapBuilder {
             Objective(FramePoint(13.grid, 2.grid), Dest.Secrets.fire30GreenSouth)
         )
         objectives[73] = MapCellData("near fary")
+        objectives[75] = MapCellData(
+            "tree with fairy",
+            Objective(FramePoint(2.grid, 8.grid), Dest.Shop.potionShopForest)
+        )
+
         val shopCShieldLoc = Objective.ItemLoc.Right
         objectives[77] = MapCellData(
             "forest before 2",
@@ -436,6 +441,10 @@ class MapBuilder {
         objectives[98] = MapCellData(
             "woods with secret",
             Objective(FramePoint(8.grid, 2.grid), Dest.Secrets.fire100SouthBrown)
+        )
+        objectives[100] = MapCellData(
+            "potion shop",
+            Objective(FramePoint(7.grid, 1.grid), Dest.Shop.potionShopWest)
         )
         objectives[102] = MapCellData(
             "candle shop",

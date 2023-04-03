@@ -47,17 +47,21 @@ object Dest {
 
     object Heart {
         val fireHeart = DestType.Heart(entry = EntryType.Fire(from = Direction.Up))
-        val raftHeart = DestType.Heart(entry = EntryType.Walk)
+        val raftHeart = DestType.Heart(entry = EntryType.Walk())
         val ladderHeart = DestType.Heart(entry = EntryType.WalkIn)
     }
 
     object Shop {
         val blueRing = DestType.Shop(ShopType.BlueRing, EntryType.Statue)
-        val candleShopMid = DestType.Shop(ShopType.C, EntryType.Walk)
-        val arrowShop = DestType.Shop(ShopType.B, EntryType.Walk)
+        val candleShopMid = DestType.Shop(ShopType.C, EntryType.Walk())
+        val arrowShop = DestType.Shop(ShopType.B, EntryType.Walk())
         val eastTreeShop = DestType.Shop(ShopType.C, EntryType.Fire(from = Direction.Left))
+        val potionShopForest = DestType.Shop(ShopType.Potion, EntryType.Fire(from = Direction.Left))
+        val potionShopWest = DestType.Shop(ShopType.Potion, EntryType.Walk())
 
         object ItemLocs {
+            val redPotion = Objective.ItemLoc.Right
+            val bluePotion = Objective.ItemLoc.Left
             val magicShield = Objective.ItemLoc.Left
             val bait = Objective.ItemLoc.Right
 //            val candle = Objective.ItemLoc.Right
@@ -69,31 +73,31 @@ object Dest {
 //    2nd Potion
 }
 
-sealed class DestType(val entry: EntryType = EntryType.Walk, val name: String = "") {
+sealed class DestType(val entry: EntryType = EntryType.Walk(), val name: String = "") {
     object None: DestType(name = "none")
-    class Level(val which: Int, entry: EntryType = EntryType.Walk) :
+    class Level(val which: Int, entry: EntryType = EntryType.Walk()) :
         DestType(entry, "level $which")
-    class Item(val item: ZeldaItem, entry: EntryType = EntryType.Walk)
+    class Item(val item: ZeldaItem, entry: EntryType = EntryType.Walk())
         : DestType(entry, "item ${item.name} by ${entry.name}")
-    class Shop(val shopType: ShopType = ShopType.C, entry: EntryType = EntryType.Walk) : DestType(entry,
+    class Shop(val shopType: ShopType = ShopType.C, entry: EntryType = EntryType.Walk()) : DestType(entry,
         name = "Shop ${shopType.name}")
     object Woman : DestType()
     object MoneyGame : DestType()
     object Fairy : DestType()
     object Travel : DestType()
-    class Heart(entry: EntryType = EntryType.Walk) : DestType(entry, "heart by ${entry.name}")
+    class Heart(entry: EntryType = EntryType.Walk()) : DestType(entry, "heart by ${entry.name}")
     class SecretToEverybody(
         val rupees: Int = -1,
-        entry: EntryType = EntryType.Walk,
+        entry: EntryType = EntryType.Walk(),
     ) : DestType(entry, "secret_$rupees by ${entry.name}")
 }
 
 enum class ShopType {
-    A, B, C, Woman, BlueRing
+    A, B, C, Potion, BlueRing
 }
 
 sealed class EntryType(val name: String) {
-    object Walk: EntryType("walk")
+    data class Walk(val requireLetter: Boolean = false): EntryType("walk")
     object WalkIn: EntryType("walkIn")
     object Bomb: EntryType("bomb")
     data class Fire(val from: Direction = Direction.Down): EntryType("fire from $from")

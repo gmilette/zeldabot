@@ -3,6 +3,7 @@ package helper
 import bot.state.Addresses
 import bot.state.GamePad
 import bot.plan.PlanBuilder
+import bot.plan.ZeldaPlan
 
 import bot.state.*
 import bot.plan.runner.PlanRunner
@@ -69,7 +70,7 @@ class ZeldaHelper(private val monitor: ZeldaMonitor) {
 
     var frameStateUpdater: FrameStateUpdater = FrameStateUpdater(api, hyrule)
 
-    val plan = PlanRunner(PlanBuilder.makeMasterPlan(hyrule, hyrule.mapCellsObject, hyrule.levelMap))
+    val plan = PlanRunner(ZeldaPlan.makeMasterPlan(hyrule, hyrule.mapCellsObject, hyrule.levelMap))
 
     private var spriteX = 0
     private var spriteY = 8

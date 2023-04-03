@@ -2,6 +2,7 @@ package bot.plan
 
 import bot.state.GamePad
 import bot.plan.action.GoIn
+import bot.plan.action.ShowLetterConditionally
 import bot.plan.runner.MasterPlan
 import bot.state.FramePoint
 import bot.state.MapLoc
@@ -107,18 +108,18 @@ object InLocations {
 
 }
 
-object PlanBuilder {
+object ZeldaPlan {
     fun makeMasterPlan(hyrule: Hyrule, mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
         val plan = AnalysisPlanBuilder.MasterPlanOptimizer(hyrule)
 
-        val factory = SequenceFactory(mapData, levelData, plan)
+        val factory = PlanInputs(mapData, levelData, plan)
 
 //        return levelTour(factory)
         return real(factory)
 //        return part(factory)
     }
 
-    private fun levelTour(factory: SequenceFactory): MasterPlan {
+    private fun levelTour(factory: PlanInputs): MasterPlan {
         val builder = factory.make("tour of levels")
         return builder {
             startAt(InLocations.Overworld.start)
@@ -130,7 +131,7 @@ object PlanBuilder {
         }
     }
 
-    private fun part(factory: SequenceFactory): MasterPlan {
+    private fun part(factory: PlanInputs): MasterPlan {
         val builder = factory.make("begin!")
         return builder {
             startAt(InLocations.Overworld.start)
@@ -151,11 +152,13 @@ object PlanBuilder {
         }
     }
 
-    private fun real(factory: SequenceFactory): MasterPlan {
+    private fun real(factory: PlanInputs): MasterPlan {
         val builder = factory.make("begin!")
         return builder {
             startAt(InLocations.Overworld.start)
             phase("Opening sequence")
+
+            obj(Dest.Shop.potionShopWest, itemLoc = Dest.Shop.ItemLocs.redPotion)
             obj(Dest.item(ZeldaItem.WoodenSword))
             obj(Dest.level(2))
             includeLevelPlan(levelPlan2(factory))
@@ -216,8 +219,7 @@ object PlanBuilder {
             phase("Gear for level 8")
             // TODO: also get a potion
             obj(Dest.Secrets.level2secret10)
-            // bait
-            obj(Dest.Shop.eastTreeShop, itemLoc = Dest.Shop.ItemLocs.magicShield)
+            obj(Dest.Shop.potionShopWest, itemLoc = Dest.Shop.ItemLocs.redPotion)
             phase("level 8")
             obj(Dest.level(8))
             phase("level 9")
@@ -232,7 +234,7 @@ object PlanBuilder {
     }
 
     fun levelPlanDebug(
-        factory: SequenceFactory, optimizer: AnalysisPlanBuilder.MasterPlanOptimizer, level:
+        factory: PlanInputs, optimizer: AnalysisPlanBuilder.MasterPlanOptimizer, level:
         Int
     ): MasterPlan {
         // shared prob
@@ -259,7 +261,7 @@ object PlanBuilder {
         }
     }
 
-    private fun levelPlan(factory: SequenceFactory, level: Int): MasterPlan {
+    private fun levelPlan(factory: PlanInputs, level: Int): MasterPlan {
         return when (level) {
             1 -> {
                 levelPlan1(factory)
@@ -303,7 +305,7 @@ object PlanBuilder {
         }
     }
 
-    private fun levelPlan1(factory: SequenceFactory): MasterPlan {
+    private fun levelPlan1(factory: PlanInputs): MasterPlan {
         val downPoint = FramePoint(120, 90)
         val builder = factory.make("Destroy level 1")
         return builder.inLevel.startAt(LevelStartMapLoc.lev(1))
@@ -367,7 +369,7 @@ object PlanBuilder {
     }
 
 
-    private fun levelPlan2(factory: SequenceFactory): MasterPlan {
+    private fun levelPlan2(factory: PlanInputs): MasterPlan {
         val builder = factory.make("Destroy level 2")
 
         return builder.lev(2).startAt(LevelStartMapLoc.lev(2))
@@ -418,7 +420,7 @@ object PlanBuilder {
             .build()
     }
 
-    private fun levelPlan3(factory: SequenceFactory): MasterPlan {
+    private fun levelPlan3(factory: PlanInputs): MasterPlan {
         val builder = factory.make("Destroy level 3")
         // open questions: fighting the trap guys
         return builder.lev(3).startAt(LevelStartMapLoc.lev(3))
@@ -458,7 +460,7 @@ object PlanBuilder {
 
     }
 
-    private fun levelPlan4(factory: SequenceFactory): MasterPlan {
+    private fun levelPlan4(factory: PlanInputs): MasterPlan {
         val builder = factory.make("Destroy level 4")
         // problems:
         // sometimes when move to push, zelda gets shifted to right
@@ -509,7 +511,7 @@ object PlanBuilder {
             .build()
     }
 
-    private fun levelPlan5(factory: SequenceFactory): MasterPlan {
+    private fun levelPlan5(factory: PlanInputs): MasterPlan {
         val builder = factory.make("Get to level 1")
         return builder {
             lev(5)
@@ -573,7 +575,7 @@ object PlanBuilder {
         }
     }
 
-    private fun levelPlan6(factory: SequenceFactory): MasterPlan {
+    private fun levelPlan6(factory: PlanInputs): MasterPlan {
         val builder = factory.make("Get to level 6")
         return builder {
             lev(6)
@@ -654,7 +656,7 @@ object PlanBuilder {
         }
     }
 
-    private fun levelPlan7(factory: SequenceFactory): MasterPlan {
+    private fun levelPlan7(factory: PlanInputs): MasterPlan {
         val builder = factory.make("Get to level 7")
         return builder {
             lev(7)
@@ -737,7 +739,7 @@ object PlanBuilder {
         }
     }
 
-    private fun levelPlan8(factory: SequenceFactory): MasterPlan {
+    private fun levelPlan8(factory: PlanInputs): MasterPlan {
         val builder = factory.make("Get to level 8")
         return builder {
             lev(8)
@@ -802,7 +804,7 @@ object PlanBuilder {
         }
     }
 
-    private fun LocationSequenceBuilder.levelPlan9PhaseRedRing() {
+    private fun PlanBuilder.levelPlan9PhaseRedRing() {
         this.add {
             lev(9)
             startAt(LevelStartMapLoc.lev(9))
@@ -839,7 +841,7 @@ object PlanBuilder {
         }
     }
 
-    private fun LocationSequenceBuilder.levelPlan9PhaseSilverArrow() {
+    private fun PlanBuilder.levelPlan9PhaseSilverArrow() {
         add {
             downp // kill pancake
             downm
@@ -888,7 +890,7 @@ object PlanBuilder {
         }
     }
 
-    private fun LocationSequenceBuilder.levelPlan9PhaseGannon() {
+    private fun PlanBuilder.levelPlan9PhaseGannon() {
         add {
             "return to center".seg()
             down
@@ -934,7 +936,7 @@ object PlanBuilder {
         }
     }
 
-    private fun levelPlan9(factory: SequenceFactory): MasterPlan {
+    private fun levelPlan9(factory: PlanInputs): MasterPlan {
         val builder = factory.make("Get to level 9")
         return builder {
             lev(9)

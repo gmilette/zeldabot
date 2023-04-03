@@ -29,6 +29,10 @@ class FrameStateUpdater(
         api.writeCPU(Addresses.hasFood, 1)
     }
 
+    fun setLetter() {
+        api.writeCPU(Addresses.hasLetter, 1)
+    }
+
     fun deactivateClock() {
         api.writeCPU(Addresses.clockActivated, 0)
     }

@@ -127,47 +127,6 @@ class DeadForAWhile(private val limit: Int = 450, val completeCriteria: (MapLoca
     }
 }
 
-class SwitchToItemConditionally(private val inventoryPosition: Int = Inventory.Selected.candle) : Action {
-    private val switchSequence = mutableListOf<Action>(
-        GoIn(2, GamePad.Start),
-        GoIn(30, GamePad.None),
-        SwitchToItem(inventoryPosition),
-        GoIn(100, GamePad.None),
-        GoIn(2, GamePad.Start),
-        GoIn(30, GamePad.None),
-    )
-
-    private val positionShoot = OrderedActionSequence(switchSequence)
-
-
-    override fun complete(state: MapLocationState): Boolean {
-        return positionShoot.finished() || startedWithItem
-    }
-
-    override fun target(): FramePoint {
-        return positionShoot.target()
-    }
-
-    private var firstStep = true
-    private var startedWithItem = false
-
-    override fun nextStep(state: MapLocationState): GamePad {
-        d {"SwitchToItemConditionally"}
-        return if (firstStep && state.frameState.inventory.selectedItem == inventoryPosition) {
-            d {"Already have"}
-            startedWithItem = true
-            GamePad.None
-        } else {
-            firstStep = false
-            positionShoot.nextStep(state)
-        }
-    }
-
-    override val name: String
-        get() = "SwitchToItemConditionally ${inventoryPosition}"
-}
-
-
 // assume switched to arrow
 class KillArrowSpider : Action {
     object KillArrowSpiderData {
@@ -392,30 +351,6 @@ class SwitchToItem(private val inventoryPosition: Int = Inventory.Selected.candl
     override val name: String
         get() = "SwitchToItem to ${inventoryPosition}"
 }
-
-class UseItem : Action {
-    private var used = 0
-    override fun complete(state: MapLocationState): Boolean =
-        used > 5
-
-    override fun nextStep(state: MapLocationState): GamePad {
-        return GamePad.B.also {
-            used++
-        }
-    }
-
-    override fun target(): FramePoint {
-        return FramePoint()
-    }
-
-    override fun path(): List<FramePoint> {
-        return emptyList()
-    }
-
-    override val name: String
-        get() = "Use item $used"
-}
-
 
 // move to this location then complete
 class InsideNav(private val point: FramePoint) : Action {
@@ -985,7 +920,12 @@ class OrderedActionSequence(
 //    private var stack = action
     private var stack = actions.toMutableList()
 
-    private var currentAction: Action? = null
+    var currentAction: Action? = null
+
+    val done: Boolean
+        get() = stack.isEmpty()
+    val tasksLeft: Int
+        get() = stack.size
 
     private fun pop(): Action? = stack.removeFirstOrNull().also {
         currentAction = it
