@@ -127,7 +127,8 @@ class PlanBuilder(
         }
     fun upTo(loc: MapLoc): PlanBuilder {
         val nextLoc = loc
-        add(nextLoc, Unstick(MoveTo(lastMapLoc, mapCell(nextLoc), Direction.Up)))
+//        add(nextLoc, Unstick(MoveTo(lastMapLoc, mapCell(nextLoc), Direction.Up)))
+        add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc), Direction.Up))
         return this
     }
     val loot: PlanBuilder
@@ -243,7 +244,8 @@ class PlanBuilder(
         get() {
             // don't try to fight
             val nextLoc = lastMapLoc.up
-            add(nextLoc, Unstick(MoveTo(lastMapLoc, mapCell(nextLoc))))
+//            add(nextLoc, Unstick(MoveTo(lastMapLoc, mapCell(nextLoc))))
+            add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc)))
             return this
         }
     val upmp: PlanBuilder
@@ -267,7 +269,8 @@ class PlanBuilder(
     val downm: PlanBuilder
         get() {
             val nextLoc = lastMapLoc.down
-            add(nextLoc, Unstick(MoveTo(lastMapLoc, mapCell(nextLoc))))
+//            add(nextLoc, Unstick(MoveTo(lastMapLoc, mapCell(nextLoc))))
+            add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc)))
             return this
         }
     val inLevel: PlanBuilder
@@ -298,7 +301,8 @@ class PlanBuilder(
     val leftm: PlanBuilder
         get() {
             val nextLoc = lastMapLoc.left
-            add(nextLoc, Unstick(MoveTo(lastMapLoc, mapCell(nextLoc))))
+//            add(nextLoc, Unstick(MoveTo(lastMapLoc, mapCell(nextLoc))))
+            add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc)))
             return this
         }
     val leftmp: PlanBuilder
@@ -326,7 +330,8 @@ class PlanBuilder(
         get() {
             // don't try to fight
             val nextLoc = lastMapLoc.right
-            add(nextLoc, Unstick(MoveTo(lastMapLoc, mapCell(nextLoc))))
+//            add(nextLoc, Unstick(MoveTo(lastMapLoc, mapCell(nextLoc))))
+            add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc)))
             return this
         }
 
@@ -704,7 +709,7 @@ class PlanBuilder(
         }
         // wait a little longer
         goIn(GamePad.None, 10)
-        add(lastMapLoc, Unstick(Bomb(target)))
+        add(lastMapLoc, Bomb(target))
         return this
     }
 
@@ -721,11 +726,13 @@ class PlanBuilder(
         }
 
     private fun add(nextLoc: MapLoc) {
-        add(nextLoc, opportunityKillOrMove(mapCell(nextLoc)))
+//        add(nextLoc, opportunityKillOrMove(mapCell(nextLoc)))
+        add(nextLoc, MoveTo(nextLoc, mapCell(nextLoc)))
     }
 
     private fun addp(nextLoc: MapLoc) {
-        add(nextLoc, moveHistoryAttackAction(opportunityKillOrMove(mapCell(nextLoc))))
+        add(nextLoc, MoveTo(nextLoc, mapCell(nextLoc)))
+//        add(nextLoc, moveHistoryAttackAction(opportunityKillOrMove(mapCell(nextLoc))))
 //        add(nextLoc, UnstickP(opportunityKillOrMove(mapCell(nextLoc)),
 //            unstickAction = GamePad.A,
 //            howLong = 1000))

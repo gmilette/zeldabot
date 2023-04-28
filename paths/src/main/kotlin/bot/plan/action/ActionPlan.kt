@@ -931,7 +931,7 @@ class ActionSequence(
     override fun nextStep(state: MapLocationState): GamePad {
         val action = actions.firstOrNull { !it.complete(state) }
         d { " DO --> ${action?.name}" }
-        return action?.nextStep(state) ?: GamePad.randomDirection()
+        return action?.nextStep(state) ?: GamePad.randomDirection(state.link)
     }
 
     override val name: String
@@ -982,7 +982,7 @@ class OrderedActionSequence(
     override fun path(): List<FramePoint> = path
 
     override fun nextStep(state: MapLocationState): GamePad {
-        val current = currentAction ?: pop() ?: restart() ?: return GamePad.randomDirection()
+        val current = currentAction ?: pop() ?: restart() ?: return GamePad.randomDirection(state.link)
         if (current.complete(state)) {
             pop()
             // recur
@@ -1109,7 +1109,7 @@ class AlwaysAttack(useB: Boolean = false, private val freq: Int = 5, private val
         } else {
             when {
                 frames % 10 < freq -> gameAction
-                else -> if (otherwiseRandom) GamePad.randomDirection() else GamePad.None
+                else -> if (otherwiseRandom) GamePad.randomDirection(state.link) else GamePad.None
             }
         }
         frames++

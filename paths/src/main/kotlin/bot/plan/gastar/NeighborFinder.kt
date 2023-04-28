@@ -61,6 +61,7 @@ class NeighborFinder(
                     vertical
                 }
             }
+            Direction.None -> all
         }
         return dirs
     }

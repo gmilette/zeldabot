@@ -1,16 +1,13 @@
 package bot.plan
 
-import bot.state.GamePad
 import bot.plan.action.GoIn
 import bot.plan.action.ShowLetterConditionally
 import bot.plan.runner.MasterPlan
-import bot.state.FramePoint
-import bot.state.MapLoc
+import bot.state.*
 import bot.state.map.*
 import bot.state.map.level.LevelMapCellsLookup
 import bot.state.map.level.LevelSpecBuilder
 import bot.state.map.level.LevelStartMapLoc
-import bot.state.up
 import sequence.*
 
 // master plan
@@ -201,25 +198,32 @@ object ZeldaPlan {
         return builder {
             startAt(InLocations.Overworld.start)
             phase("Opening sequence")
-            obj(Dest.item(ZeldaItem.WoodenSword))
-            obj(Dest.level(2))
-            includeLevelPlan(levelPlan2(factory))
-            // position by routing
-            val sec:MapLoc = 61
-            routeTo(sec.up)
-            obj(Dest.Secrets.secretForest30NorthEast)
-            obj(Dest.Secrets.bombSecret30North)
-            obj(ZeldaItem.Letter)
-            obj(Dest.Secrets.walk100)
-            obj(Dest.Secrets.bombHeartNorth)
-            obj(ZeldaItem.WhiteSword)
-            obj(Dest.level(1))
-            includeLevelPlan(levelPlan1(factory))
-            obj(Dest.Shop.candleShopMid)
+//            obj(Dest.item(ZeldaItem.WoodenSword))
+//            obj(Dest.level(2))
+//            includeLevelPlan(levelPlan2(factory))
+//            // position by routing
+//            val sec:MapLoc = 61
+//            routeTo(sec.up)
+//            obj(Dest.Secrets.secretForest30NorthEast)
+//            obj(Dest.Secrets.bombSecret30North)
+//            obj(ZeldaItem.Letter)
+//            obj(Dest.Secrets.walk100)
+//            obj(Dest.Secrets.bombHeartNorth)
+//            obj(ZeldaItem.WhiteSword)
+//            obj(Dest.level(1))
+//            includeLevelPlan(levelPlan1(factory))
+//            obj(Dest.Shop.candleShopMid)
             obj(Dest.level(3))
             includeLevelPlan(levelPlan3(factory))
             obj(Dest.Secrets.fire100SouthBrown)
+            // testing this
+            val forest: MapLoc = 98
+            routeTo(forest.down)
+            routeTo(forest.down.right)
+
             obj(Dest.Shop.blueRing, position = true)
+            // avoid accidentally going back in
+            goIn(GamePad.MoveDown, 50) // test it
 //             position place right before level 4
 //             go to the right so when link goes up, it will be the right way
             routeTo(102)
@@ -412,6 +416,7 @@ object ZeldaPlan {
             // not going to work well because dragon is inside non movable spaces?
             // just walk up to
 //            kill
+            // it's bad, just
             killLev1Dragon // aim for the head
             right // triforce
             goIn(GamePad.MoveRight, 20)

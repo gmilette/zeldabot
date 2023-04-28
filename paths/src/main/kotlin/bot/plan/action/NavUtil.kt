@@ -126,17 +126,18 @@ object NavUtil {
 
     fun randomDir(from: FramePoint = FramePoint(100, 100)): GamePad {
         d { " random dir "}
-        val dir = Random.nextInt(4)
-        return when  {
-            dir == 0 && from.x > 3 -> GamePad.MoveLeft
-            dir == 1 && from.x < MapConstants.MAX_X - 3 -> GamePad.MoveRight
-            dir == 2 && from.y > 3 -> GamePad.MoveUp
-            dir == 3 && from.y < MapConstants.MAX_Y - 3 -> GamePad.MoveDown
-            else -> {
-                d { " no movement "}
-                GamePad.None
-            }
-        }
+        return GamePad.randomDirection(from)
+//        val dir = Random.nextInt(4)
+//        return when  {
+//            dir == 0 && from.x > 3 -> GamePad.MoveLeft
+//            dir == 1 && from.x < MapConstants.MAX_X - 3 -> GamePad.MoveRight
+//            dir == 2 && from.y > 3 -> GamePad.MoveUp
+//            dir == 3 && from.y < MapConstants.MAX_Y - 3 -> GamePad.MoveDown
+//            else -> {
+//                d { " no movement "}
+//                GamePad.None
+//            }
+//        }
     }
 
     fun directionToAvoidingObstacleM(mapCell: MapCell, from: FramePoint, to:

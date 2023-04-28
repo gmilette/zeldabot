@@ -1,5 +1,6 @@
 package bot.state
 
+import bot.state.map.MapConstants
 import nintaco.api.GamepadButtons
 import kotlin.random.Random
 
@@ -8,6 +9,24 @@ enum class GamePad {
     A, B, Select, Start, ReleaseA, ReleaseB;
 
     companion object {
+        fun randomDirection(from: FramePoint): GamePad {
+            val possible = mutableListOf<GamePad>()
+            if (from.x > MapConstants.oneGrid + 2) {
+                possible.add(MoveLeft)
+            }
+            if (from.y > MapConstants.oneGrid + 2) {
+                possible.add(MoveUp)
+            }
+            if (from.y < MapConstants.MAX_Y - MapConstants.oneGrid - 2) {
+                possible.add(MoveDown)
+            }
+            if (from.x < MapConstants.MAX_X - MapConstants.oneGrid - 2) {
+                possible.add(MoveRight)
+            }
+            possible.shuffle()
+            return possible.firstOrNull() ?: None
+        }
+
         fun randomDirection() =
             when (Random.nextInt(4)) {
                 1 -> MoveUp

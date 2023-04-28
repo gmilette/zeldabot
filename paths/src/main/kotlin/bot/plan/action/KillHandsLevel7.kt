@@ -52,7 +52,7 @@ class KillHandsInLevel7 : Action {
                 lastAction = "ATTRACT"
                 lastTarget = KillHandsLevel7Data.attractFrom
             }
-            else -> GamePad.randomDirection().also {
+            else -> GamePad.randomDirection(state.link).also {
                 d {" --> RANDOM"}
                 lastTarget = FramePoint()
             }
