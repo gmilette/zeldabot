@@ -2,6 +2,7 @@ package bot.state
 
 import nintaco.api.API
 import sequence.ZeldaItem
+import util.d
 
 object InventoryReader {
     fun readInventory(api: API): Set<ZeldaItem> {
@@ -44,6 +45,7 @@ object InventoryReader {
         if (api.readCpuB(Addresses.hasShield)) items.add(ZeldaItem.MagicShield)
         if (api.readCpuB(Addresses.hasWhistle)) items.add(ZeldaItem.Whistle)
         if (api.readCpuB(Addresses.hasRod)) items.add(ZeldaItem.Wand)
+        d { " items in inventory: $items"}
         return items
     }
 

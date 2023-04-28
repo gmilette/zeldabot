@@ -37,6 +37,7 @@ fun main() = application {
         var count = remember { mutableStateOf(0) }
         var showMap = remember { mutableStateOf(false) }
         val act = remember { mutableStateOf(true) }
+        val ladder = remember { mutableStateOf(true) }
 
         Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
             Text(
@@ -59,13 +60,6 @@ fun main() = application {
                 text = "Action (n2): ${state?.planRunner?.afterAfterThis()?.name ?: ""}",
                 fontSize = 20.sp,
             )
-            Button(modifier = Modifier.align(Alignment.CenterHorizontally),
-                onClick = {
-                    count.value = count.value + 1
-                    model.start()
-                }) {
-                Text("START")
-            }
             Row(
                 modifier = Modifier.align(Alignment.Start)
             ) {
@@ -95,7 +89,7 @@ fun main() = application {
                     onClick = {
                         model.updateEnemies()
                     }) {
-                    Text("  Update Enemies  ")
+                    Text("  Update  ")
                 }
 
             }
@@ -132,26 +126,20 @@ fun main() = application {
                     Text("  D  ")
                 }
             }
-            Row(
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                Row(
-                ) {
-                    Text("Ladder")
-                    Checkbox(
-                        checked = act.value,
-                        onCheckedChange = {
-                            act.value = it
-                            model.ladder(it)
-                        }
-                    )
-                }
-            }
 
             Row(
                 modifier = Modifier.align(Alignment.Start)
             ) {
                 Row {
+                    Text("Ladder")
+                    Checkbox(
+                        checked = ladder.value,
+                        onCheckedChange = {
+                            ladder.value = it
+                            model.ladder(it)
+                        }
+                    )
+
                     Text("Act")
                     Checkbox(
                         checked = act.value,
@@ -336,7 +324,7 @@ class ZeldaModel : ZeldaBot.ZeldaMonitor {
     }
 
     fun unStick() {
-        ZeldaBot.unstick += 100
+        ZeldaBot.unstick += 25
     }
 
     fun forceDir(forcedDirection: GamePad, num: Int = 100) {

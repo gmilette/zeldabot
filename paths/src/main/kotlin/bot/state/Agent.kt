@@ -6,7 +6,7 @@ val emptyAgent = Agent(0, FramePoint(0, 0), Direction.Down, EnemyState.Unknown, 
 data class Agent(
     val index: Int = 0,
     val point: FramePoint,
-    val dir: Direction = Direction.Down,
+    val dir: Direction = Direction.None,
     val state: EnemyState = EnemyState.Unknown,
     val countDown: Int = 0,
     val hp: Int = 0,

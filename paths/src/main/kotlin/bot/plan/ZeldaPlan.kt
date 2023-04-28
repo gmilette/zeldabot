@@ -30,7 +30,7 @@ object InLocations {
     val getItem = FramePoint(135, 80) // right side
     val getOutRight = FramePoint(12.grid, 2.grid) // right side
     val getOutLeft = FramePoint(3.grid, 1.grid) // right side
-    val rightStair = FramePoint(209, 81)
+    val rightStair = FramePoint(209, 80)
     val rightStairGrid = FramePoint(13.grid, 5.grid)
     val rightTop = FramePoint(208, 32) //todo
 
@@ -50,7 +50,7 @@ object InLocations {
 
         // hands level1, prob same as key114
         val key69 = FramePoint(164, 128)
-        val boomerang68 = FramePoint(8.grid, 56) //3.5??
+        val boomerang68 = FramePoint(8.grid, 3.grid) //try grid // 3.5?? //56
     }
 
     object Level2 {
@@ -115,7 +115,9 @@ object ZeldaPlan {
         val factory = PlanInputs(mapData, levelData, plan)
 
 //        return levelTour(factory)
+//        return bombTour(factory)
         return real(factory)
+//        return realNoStuff(factory)
 //        return part(factory)
     }
 
@@ -131,10 +133,22 @@ object ZeldaPlan {
         }
     }
 
-    private fun part(factory: PlanInputs): MasterPlan {
+    private fun bombTour(factory: PlanInputs): MasterPlan {
         val builder = factory.make("begin!")
         return builder {
             startAt(InLocations.Overworld.start)
+            obj(Dest.item(ZeldaItem.WoodenSword))
+            obj(Dest.Secrets.bombHeartNorth)
+            obj(Dest.Secrets.bombSecret30North)
+            // just something for link to do
+            obj(ZeldaItem.PowerBracelet, itemLoc = Objective.ItemLoc.None)
+        }
+    }
+
+    private fun part(factory: PlanInputs): MasterPlan {
+        val builder = factory.make("begin!")
+        return builder {
+//            startAt(InLocations.Overworld.start)
 //            obj(Dest.item(ZeldaItem.WoodenSword))
 //            obj(Dest.level(1))
             includeLevelPlan(levelPlan1(factory))
@@ -152,21 +166,45 @@ object ZeldaPlan {
         }
     }
 
+    private fun realNoStuff(factory: PlanInputs): MasterPlan {
+        val builder = factory.make("begin!")
+        return builder {
+            startAt(InLocations.Overworld.start)
+            phase("Opening sequence")
+            obj(Dest.Secrets.walk100)
+            obj(ZeldaItem.WhiteSword)
+            obj(Dest.Shop.candleShopMid)
+            obj(Dest.Secrets.fire100SouthBrown)
+
+            phase("grab hearts")
+            obj(Dest.Secrets.fire30GreenSouth)
+            obj(Dest.Heart.fireHeart)
+            obj(Dest.Heart.ladderHeart)
+
+            obj(ZeldaItem.PowerBracelet, itemLoc = Objective.ItemLoc.None)
+            obj(ZeldaItem.MagicSword)
+//
+            phase("Gear for level 8")
+            // TODO: also get a potion
+            obj(Dest.Secrets.level2secret10)
+            obj(Dest.Shop.potionShopWest, itemLoc = Dest.Shop.ItemLocs.redPotion)
+            left
+            right
+            right
+            end
+        }
+    }
+
+
     private fun real(factory: PlanInputs): MasterPlan {
         val builder = factory.make("begin!")
         return builder {
             startAt(InLocations.Overworld.start)
             phase("Opening sequence")
-
-            obj(Dest.Shop.potionShopWest, itemLoc = Dest.Shop.ItemLocs.redPotion)
             obj(Dest.item(ZeldaItem.WoodenSword))
             obj(Dest.level(2))
             includeLevelPlan(levelPlan2(factory))
-            // 14
-            // position point for statues!
-//            goAbout(FramePoint(7.grid, 2.grid), 4, 2, true)
-            // skip for now
-            // position link to get the secret
+            // position by routing
             val sec:MapLoc = 61
             routeTo(sec.up)
             obj(Dest.Secrets.secretForest30NorthEast)
@@ -182,6 +220,9 @@ object ZeldaPlan {
             includeLevelPlan(levelPlan3(factory))
             obj(Dest.Secrets.fire100SouthBrown)
             obj(Dest.Shop.blueRing, position = true)
+//             position place right before level 4
+//             go to the right so when link goes up, it will be the right way
+            routeTo(102)
             obj(Dest.level(4))
             includeLevelPlan(levelPlan4(factory))
 
@@ -197,6 +238,7 @@ object ZeldaPlan {
             obj(Dest.Heart.raftHeart, itemLoc = Objective.ItemLoc.Right)
 
             phase("level 5")
+            routeTo(83) // position so we don't go through the 100 secret forest and get stuck
             obj(Dest.level(5))
             includeLevelPlan(levelPlan5(factory))
             phase("gear for level 6")
@@ -306,158 +348,175 @@ object ZeldaPlan {
     }
 
     private fun levelPlan1(factory: PlanInputs): MasterPlan {
-        val downPoint = FramePoint(120, 90)
         val builder = factory.make("Destroy level 1")
-        return builder.inLevel.startAt(LevelStartMapLoc.lev(1))
-            .seg("grab key")
-            .left
-            .goIn(GamePad.MoveLeft, 30)
-            .kill //164, 192
-            .goTo(InLocations.Level1.key114)
-            .right
-            .seg("grab from skeleton")
-            .right
-            .goIn(GamePad.MoveRight, 20)
-            .pickupDeadItem
-            .seg("move to arrow")
-            .left // first rooms
-            .up //99
-            .up //83
-            .goIn(GamePad.MoveUp, 30)
-            .seg("get key from skeletons")
-            .kill // these skeletons provide a key
-            .goTo(InLocations.Level1.key83)
-            .seg("Bomb and move")
-            .bomb(InLocations.topMiddleBombSpot)
-            .seg("go up")
-            .up // 67
-            .upm // 51
-            .seg("grab key from zig")
-            .pickupDeadItem
-            .seg("get key from boomerang guys")
-            .up //35
-            .goIn(GamePad.MoveUp, 30)
-            .kill
-            .goTo(InLocations.Level1.key83)
+        return builder {
+            inLevel
+            startAt(LevelStartMapLoc.lev(1))
+            seg("grab key")
+            left
+            goIn(GamePad.MoveLeft, 30)
+            kill //164, 192
+            goTo(InLocations.Level1.key114)
+            right
+            seg("grab from skeleton")
+            right
+            goIn(GamePad.MoveRight, 20)
+            // need kill until loot
+            killAndLoot
+//            pickupDeadItem
+            seg("move to arrow")
+            left // first rooms
+            up //99
+            up //83
+            goIn(GamePad.MoveUp, 30)
+            seg("get key from skeletons")
+            kill // these skeletons provide a key
+            goTo(InLocations.Level1.key83)
+            seg("Bomb and move")
+            bomb(InLocations.topMiddleBombSpot)
+            seg("go up")
+            up // 67
+            upm // 51
+            seg("grab key from zig")
+            killAndLoot
+//            pickupDeadItem
+            seg("get key from boomerang guys")
+            up //35
+            goIn(GamePad.MoveUp, 30)
+            kill
+            goTo(InLocations.Level1.key83)
             // get around a hard corner
-            .goTo(FramePoint(7.grid, 2.grid))
-            .goTo(FramePoint(3.grid, 2.grid))
-            .seg("get arrow")
-            .leftm
-            .pushThenGoTo(InLocations.diamondLeftBottomPush) //InLocations.diamondLeftTopPush)
-            .startAt(127)
-            .go(InLocations.getItem)
-            .upTo(34) // eh
-            .seg("snag boomerang")
-            .rightm // don't attack
-            .down.down // at 67 now
-            .right // boomerang
-            .goIn(GamePad.MoveRight, 30)
-            .kill
-            .goAbout(InLocations.Level1.boomerang68, 4, 2, true)
-            .seg("destroy dragon")
-            .right //69 hand grabby
+            goTo(FramePoint(7.grid, 2.grid))
+            goTo(FramePoint(3.grid, 2.grid))
+            seg("get arrow")
+            leftm
+            pushThenGoTo(InLocations.diamondLeftBottomPush) //InLocations.diamondLeftTopPush)
+            startAt(127)
+            go(InLocations.getItem)
+            upTo(34) // eh
+            seg("snag boomerang")
+            rightm // don't attack
+            down.down // at 67 now
+            right // boomerang
+            goIn(GamePad.MoveRight, 30)
+            kill
+            // extra vertical and horizontal is not good
+//            goAbout(InLocations.Level1.boomerang68, 4, 2, true)
+            goAbout(InLocations.Level1.boomerang68, 1, 1, true, ignoreProjectiles = true)
+            seg("get past hand grabby")
+            right //69 hand grabby
             // should do but too risky for now
 //                .go(InLocations.Level1.key114)
-            .up
-            .kill
-            .right // triforce
-            .goIn(GamePad.MoveRight, 20)
-            .seg("get the triforce")
-            .goAbout(downPoint, 4)
-            .build()
+            up
+            seg("destroy dragon")
+            // not going to work well because dragon is inside non movable spaces?
+            // just walk up to
+//            kill
+            killLev1Dragon // aim for the head
+            right // triforce
+            goIn(GamePad.MoveRight, 20)
+            seg("get the triforce")
+            goTo(InLocations.Level2.triforce)
+        }
     }
 
 
     private fun levelPlan2(factory: PlanInputs): MasterPlan {
         val builder = factory.make("Destroy level 2")
 
-        return builder.lev(2).startAt(LevelStartMapLoc.lev(2))
-            .seg("gather 3 keys")
-            .right
-            .kill
-            .goTo(InLocations.Level2.keyMid)
-            .up // nothing here
-            .seg("gather key 2")
-            .left
-            .kill
-            .seg("gather key 3")
-            .left
+        return builder {
+            lev(2)
+            startAt(LevelStartMapLoc.lev(2))
+            seg("gather 3 keys")
+            right
+            kill
+            goTo(InLocations.Level2.keyMid)
+            up // nothing here
+            seg("gather key 2")
+            left
+            kill
+            seg("gather key 3")
+            left
             // opportunity kill
-            .goTo(InLocations.Level2.keyMid)
-            .right
-            .right // grid room
-            .seg("sprint up from grid")
+            goTo(InLocations.Level2.keyMid)
+            right
+            right // grid room
+            seg("sprint up from grid")
             // right is nothing
-            .up // need to be able to kill
-            .seg("go get blue boomerang")
-            .upm // which upm
-            .right
-            .kill
-            .goTo(InLocations.Level2.keyMid)
-            .left
-            .seg("resume sprint")
-            .up // skip squishy snake
+            up // need to be able to kill
+            seg("go get blue boomerang")
+            upm // which upm
+            right
+            kill
+            // the boomerang is a projectile! do not avoid it
+            goAbout(InLocations.Level2.keyMid, 1, 1, true, ignoreProjectiles = true)
+//            goTo(InLocations.Level2.keyMid)
+            left
+            seg("resume sprint")
+            up // skip squishy snake
             // skip getting key from squishy guy
 //            .kill
 //            .goTo(InLocations.Level2.keyMid)
-            .upm
-            .kill
-            .seg("bomb room")
-            .goTo(InLocations.Level2.keyMid)
-            .up
-            .kill // blocked before going // allow bombs
-            .goTo(InLocations.Level2.bombItemRight)
-            .up
-            .seg("kill boss")
-            .killR // need special strategy for thse guys
-            .wait
-            .goTo(InLocations.Level2.heartMid)
-            .seg("get the trigorce")
-            .left
-            .goIn(GamePad.MoveLeft, 30)
-            .goTo(InLocations.Level2.triforce)
-            .build()
+            upm
+            kill
+            seg("bomb room")
+            goTo(InLocations.Level2.keyMid)
+            up
+            kill // blocked before going // allow bombs
+            goTo(InLocations.Level2.bombItemRight)
+            up
+            seg("kill boss")
+            killR
+            wait
+            goTo(InLocations.Level2.heartMid)
+            seg("get the trigorce")
+            left
+            goIn(GamePad.MoveLeft, 30)
+            goTo(InLocations.Level2.triforce)
+        }
     }
 
     private fun levelPlan3(factory: PlanInputs): MasterPlan {
         val builder = factory.make("Destroy level 3")
-        // open questions: fighting the trap guys
-        return builder.lev(3).startAt(LevelStartMapLoc.lev(3))
-            .seg("grab key")
-            .leftm
-            .goTo(InLocations.Level2.keyMid) //confirm
-            .seg("walk round corner")
-            .up // skip key
-            .up
-            .left
-            .seg("past the compasS")
-            .left
-            .goIn(GamePad.MoveLeft, 30)
-            .seg("fight swords")
-            .kill
-            .down
-            .seg("get raft")
-            .goTo(InLocations.rightStair)
-            .startAt(15)
-            .go(InLocations.getItem)
-            .upTo(105) // ??
-            .seg("get to boss")
-            .upm
-            .right
-            .rightm // option to get key up, but skip
-            .bomb(InLocations.BombDirection.right) // right bomb
-            .right
-            .upm
-            .bomb(InLocations.BombDirection.right) // right bomb
-            .right
-            .seg("kill boss")
-            .kill // need special strategy for the 4monster
-            .up
-            .goTo(InLocations.Level2.triforce)
-            .go(InLocations.Level3.heartMid)
-            .build()
-
+        return builder {
+            lev(3)
+            startAt(LevelStartMapLoc.lev(3))
+            seg("grab key")
+            leftm
+            goTo(InLocations.Level2.keyMid) //confirm
+            seg("walk round corner")
+            up // skip key
+            up
+            left
+            seg("past the compasS")
+            left
+            goIn(GamePad.MoveLeft, 30)
+            seg("fight swords")
+            kill
+            down
+            seg("get raft")
+            goTo(InLocations.rightStair)
+            startAt(15)
+            go(InLocations.getItem)
+            upTo(105)
+            seg("get to back to center")
+//            startHere
+            upm
+            right
+            rightm
+            seg("get to boss")
+            upm // option to get key up, but skip
+            rightm
+            seg("BOMB RIGHT")
+            bomb(InLocations.BombDirection.right) // right bomb
+            right
+            seg("kill boss")
+            kill // need special strategy for the 4monster
+            goTo(InLocations.Level5.triforceHeart) // where is triforce heart???
+            up
+            goTo(InLocations.Level2.triforce)
+            go(InLocations.Level3.heartMid)
+        }
     }
 
     private fun levelPlan4(factory: PlanInputs): MasterPlan {
@@ -466,49 +525,50 @@ object ZeldaPlan {
         // sometimes when move to push, zelda gets shifted to right
         // getting stuck on the ladder
         // get stuck in middle of maze
-
-        return builder.lev(4).startAt(113)
-            .seg("go go go")
+        return builder {
+            lev(4)
+            startAt(113)
+            seg("go go go")
             //key to left but dont bother
-            .up
-            .up // no get it because it is in the middle of the room
-            .goTo(InLocations.Level4.batKey)
-            .leftm
-            .up
-            .goTo(InLocations.Level4.squishyKey)
-            .up // get key? kill squishies?
-            .seg("go get ladder")
-            .rightm
-            .kill
-            .right
-            .kill2 // there will be 2 suns still running around
-            .seg("push")
-            .pushWait(InLocations.Level4.moveLeftOfTwo)
-            .goTo(InLocations.rightTop)
-            .startAt(96)
-            .go(InLocations.getItem)
-            .upTo(50)
-            .leftm
-            .leftm
-            .seg("get past 4 monster")
-            .up
-            .up
-            .bomb(InLocations.BombDirection.right) // right bomb
-            .seg("get to the dragon")
-            .right
+            up
+            up // no get it because it is in the middle of the room
+            goTo(InLocations.Level4.batKey)
+            leftm
+            up
+            goTo(InLocations.Level4.squishyKey)
+            up // get key? kill squishies?
+            seg("go get ladder")
+            rightm
+            kill
+            right
+            kill // there will be 2 suns still running around
+            seg("push")
+            pushWait(InLocations.Level4.moveLeftOfTwo)
+            goTo(InLocations.rightTop)
+            startAt(96)
+            go(InLocations.getItem)
+            upTo(50)
+            leftm
+            leftm
+            seg("get past 4 monster")
+            up
+            up
+            bomb(InLocations.BombDirection.right) // right bomb
+            seg("get to the dragon")
+            right
             //skip key that is up
-            .bomb(InLocations.BombDirection.right) // right bomb
-            .right
-            .killb
-            .pushWait(InLocations.Level4.moveLeftOfTwo)
-            .right
-            .seg("fight dragon")
-            .kill // dragon
+            bomb(InLocations.BombDirection.right) // right bomb
+            right
+            killb
+            pushWait(InLocations.Level4.moveLeftOfTwo)
+            right
+            seg("fight dragon")
+            killLev4Dragon // dragon
             //get heart
-            .goTo(InLocations.Level4.triforceHeart)
-            .up
-            .goTo(InLocations.Level2.triforce)
-            .build()
+            goTo(InLocations.Level4.triforceHeart)
+            up
+            goTo(InLocations.Level2.triforce)
+        }
     }
 
     private fun levelPlan5(factory: PlanInputs): MasterPlan {
@@ -519,6 +579,7 @@ object ZeldaPlan {
             seg("move to level 5")
             up
             bomb(InLocations.BombDirection.left)
+            seg("left 2")
             left
             bomb(InLocations.BombDirection.left)
             left
@@ -627,7 +688,7 @@ object ZeldaPlan {
             right
             startAt(58)//save6
             seg("center move stair")
-            kill1
+            kill
 //            pushInLevelAnyBlock(inMapLoc = LevelSpecBuilder.getItemMove6,
 //                pushTarget = InLocations.Level6.moveUpSingle,
 //                stairsTarget = InLocations.Level5.cornerStairs
@@ -750,7 +811,7 @@ object ZeldaPlan {
             left
             startAt(124) //state1
             seg("go get book")
-            kill2
+            kill
             pushInLevelMiddleStair(LevelSpecBuilder.getItemLoc8, upTo = 124)
             seg("get back to start")
             rightm

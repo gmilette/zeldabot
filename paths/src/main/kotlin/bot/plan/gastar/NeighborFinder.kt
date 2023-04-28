@@ -2,11 +2,11 @@ package bot.plan.gastar
 
 import bot.state.*
 import bot.state.map.Direction
+import bot.state.map.horizontal
 import bot.state.map.pointModifier
 import bot.state.map.vertical
 import util.Map2d
 import util.d
-import java.lang.Exception
 
 // list of passible nodes
 //    private val FramePoint.neighbors
@@ -27,7 +27,7 @@ class NeighborFinder(
     private val vertical: List<Direction> = listOf(Direction.Up, Direction.Down)
 
     private fun okDirections(from: FramePoint, last: Direction? = null, dist: Int): List<Direction> {
-        val all = Direction.values().toList().shuffled()
+        val all = Direction.values().toList()
         if (last == null) return all
         if (true) return all
         // wrong, you still cannot to left or right
@@ -42,7 +42,7 @@ class NeighborFinder(
 //                    if (corner != null) {
 //                        d { " CORNERy $corner"}
 //                    }
-                    horizontal.shuffled()
+                    horizontal
                 }
             }
             Direction.Up,
@@ -58,7 +58,7 @@ class NeighborFinder(
 //                    corner?.let {
 //                        vertical + it.direction!!
 //                    } ?: vertical
-                    vertical.shuffled()
+                    vertical
                 }
             }
         }
@@ -81,22 +81,76 @@ class NeighborFinder(
 //                    d { "skip loc" }
 //                }
             if (GStar.DEBUG) {
-                d { " test $next $direction" }
+                d { " test passable $next $direction ${next.onHighwayYAlmost}" }
                 d { "rb ${passable.get(next.justRightEndBottom)}"}
                 d { "re ${passable.get(next.justRightEnd)}"}
                 d { "lb ${passable.get(next.justLeftBottom)}"}
                 d { "l ${passable.get(next)}"}
             }
 //            logPassable(next)
-            if (passableAndWithin(next)) {
+            if (passableAndWithin(next)) { // || next.isCorner
 //                d { " passable! ${neigh.size}"}
                 neigh.add(next)
-            } else {
+                // but also add an additional neighbor for using the corner
+                // then gstar will selection it randomly
+                if (next.onHighwayYAlmost && direction.horizontal) {
+                    // it's going to go down, but the direction is right/left
+                    val realMoveTo = point.down.addDirection(direction)
+                    //d { " onHighwayYAlmost point $point $direction real: $realMoveTo" }
+                    neigh.add(realMoveTo)
+                }
+
+                if (next.onHighwayYAlmostBeyond && direction.horizontal) {
+                    // 104, 113 -> if  here you went one to low, and you want to go back up, you could go right to go up
+                    // 104, 112
+                    val realMoveTo = point.up.addDirection(direction)
+                    neigh.add(realMoveTo)
+                }
+
+                if (next.onHighwayXAlmost && direction.vertical) {
+                    // the way up is blocked, it can go up, but link is actually going to
+                    // go right instead to get around it and get on the highway
+//                // it's going to go right, but the direction is up/down
+                    val realMoveTo = point.right.addDirection(direction)
+                    //d { " onHighwayYAlmost point $point $direction real: $realMoveTo" }
+                    neigh.add(realMoveTo)
+                }
+                if (next.onHighwayXAlmostBeyond && direction.vertical) {
+                    // copy and paste
+                    val realMoveTo = point.left.addDirection(direction)
+                    neigh.add(realMoveTo)
+                }
+                // do left too
+            } else if (next.onHighwayYAlmost && direction.horizontal) {
+                // it's going to go down, but the direction is right/left
+                val realMoveTo = point.down.addDirection(direction)
+                //d { " onHighwayYAlmost point $point $direction real: $realMoveTo" }
+                neigh.add(realMoveTo)
+                // like when
+            } else if (next.onHighwayYAlmostBeyond && direction.horizontal) {
+                // 104, 113 -> if  here you went one to low, and you want to go back up, you could go right to go up
+                // 104, 112
+                val realMoveTo = point.up.addDirection(direction)
+//                d { " onHighwayYAlmostBeyond point $point $direction real: $realMoveTo" }
+                neigh.add(realMoveTo)
+            } else if (next.onHighwayXAlmost && direction.vertical) {
+                // the way up is blocked, it can go up, but link is actually going to
+                // go right instead to get around it and get on the highway
+//                // it's going to go right, but the direction is up/down
+                val realMoveTo = point.right.addDirection(direction)
+                //d { " onHighwayYAlmost point $point $direction real: $realMoveTo" }
+                neigh.add(realMoveTo)
+            } else if (next.onHighwayXAlmostBeyond && direction.vertical) {
+                // copy and paste
+                val realMoveTo = point.left.addDirection(direction)
+                neigh.add(realMoveTo)
+            }
+            else {
 //                d { " passable NOT"}
                 // going from 143 to 144
                 // check corners
                 val corner = corner(point, direction)
-                if (corner != null) {
+                if (GStar.DO_CORNERS && corner != null) {
                     if (GStar.DEBUG) {
                         d { " add corner $corner $direction" }
                     }
@@ -118,26 +172,46 @@ class NeighborFinder(
         d { "bottom left ${passable.get(point.justLeftBottom)}"}
     }
 
+    private fun onHighwayAndWithin(point: FramePoint) =
+        point.onHighway && point.within()
+
     private fun passableAndWithin(point: FramePoint) =
         blockPassableMeta(point) && point.within()
         //blockPassable(point) && point.within()
 //        blockPassableHalf(point) && point.within()
 
     fun corner(point: FramePoint, direction: Direction): FramePoint? {
+        // direction point is going
         val modifier = direction.pointModifier()
         return if (direction.vertical) {
             // try left right
             framePoint(point, Direction.Right.pointModifier(), modifier) ?:
             framePoint(point, Direction.Left.pointModifier(), modifier)
         } else {
-            // horizontal
             framePoint(point, Direction.Up.pointModifier(), modifier) ?:
             framePoint(point, Direction.Down.pointModifier(), modifier)
             null
         }
     }
 
-    private fun framePoint(point: FramePoint, horizModifier: (FramePoint) -> FramePoint, modifier: (FramePoint) -> FramePoint):
+    private fun framePoint(point: FramePoint, dirModifier: (FramePoint) -> FramePoint, modifier: (FramePoint) -> FramePoint):
+            FramePoint? {
+        val h2 = dirModifier(dirModifier(point))
+        val hDir = modifier(h2)
+        return if (passableAndWithin(hDir)) {
+            h2
+        } else {
+            val h1 = dirModifier(point)
+            val hDir1 = modifier(h1)
+            if (passableAndWithin(hDir1)) {
+                h1
+            } else {
+                null
+            }
+        }
+    }
+
+    private fun framePointo(point: FramePoint, horizModifier: (FramePoint) -> FramePoint, modifier: (FramePoint) -> FramePoint):
             FramePoint? {
         val h2 = horizModifier(horizModifier(point))
         val hDir = modifier(h2)
@@ -159,7 +233,8 @@ class NeighborFinder(
         // todo: add more logic here
 //        d { " passable $point ${passable.get(point)} $halfPassable"}
         return when {
-            !halfPassable -> {
+            // if the point
+            !halfPassable || (point.x > 208 && isLevel) -> {
                 blockPassable(point)
             }
             // check point end end
@@ -189,7 +264,7 @@ class NeighborFinder(
     /**
      * top
      */
-    fun blockPassable(point: FramePoint): Boolean {
+    private fun blockPassable(point: FramePoint): Boolean {
         return passable.get(point) && passable.get(point.justRightEndBottom)
                 && passable.get(point.justRightEnd)
                 && passable.get(point.justLeftBottom)

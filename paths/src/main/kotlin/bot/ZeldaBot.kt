@@ -13,6 +13,7 @@ import nintaco.api.API
 import nintaco.api.ApiSource
 import nintaco.api.Colors
 import nintaco.api.GamepadButtons
+import sequence.ZeldaItem
 import util.d
 
 class ZeldaBot(private val monitor: ZeldaMonitor) {
@@ -96,6 +97,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         plan.advance()
     }
 
+    var setEquipmentCt = 200
+
     private fun getAction(currentFrame: Int, currentGamePad: GamePad): GamePad {
         frameStateUpdater.updateFrame(currentFrame, currentGamePad)
         if (collectSkip) {
@@ -128,40 +131,23 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 
 //        fillBombs()
         refillIfOut()
-//        frameStateUpdater.setSword(ZeldaItem.MagicSword)
-//        frameStateUpdater.setLadderAndRaft(ZeldaBot.hasLadder)
-//        frameStateUpdater.setRedCandle()
-//        frameStateUpdater.setHaveWhistle()
-//        frameStateUpdater.setBait()
-//        frameStateUpdater.setLetter()
+        if (setEquipmentCt > 0) {
+            d { " Set equip"}
+            frameStateUpdater.setSword(ZeldaItem.MagicSword)
+            frameStateUpdater.setLadderAndRaft(false)
+            frameStateUpdater.setRedCandle()
+            frameStateUpdater.setHaveWhistle()
+            frameStateUpdater.setBait()
+            frameStateUpdater.setLetter()
+            setEquipmentCt--
+        }
         if (frameStateUpdater.state.frameState.clockActivated) {
             frameStateUpdater.deactivateClock()
         }
-        // always do
-        val nextGamePad = if (false && frameStateUpdater.state.previousMove.skipped) { // && Random.nextBoolean()) {
-            api.addStopListener {  }
-            // this actually helped
-            d { " !!skipped keep going "}
-            // but do not exit
-            val dirs = mutableListOf<GamePad>()
-            val link = frameStateUpdater.state.frameState.link.point
-            if (link.x > 50) {
-                dirs.add(GamePad.MoveLeft)
-            }
-            if (link.x < MapConstants.MAX_X - 50) {
-                dirs.add(GamePad.MoveRight)
-            }
-            if (link.y > 20) {
-                dirs.add(GamePad.MoveUp)
-            }
-            if (link.y < MapConstants.MAX_Y - 50) {
-                dirs.add(GamePad.MoveDown)
-            }
-            dirs.shuffle()
-            dirs.firstOrNull() ?: GamePad.MoveRight
-        } else {
-            plan.next(frameStateUpdater.state)
-        }
+
+//        plan.next(frameStateUpdater.state)
+
+        val nextGamePad = plan.next(frameStateUpdater.state)
 
         frameStateUpdater.state.previousGamePad = nextGamePad
 
@@ -174,16 +160,10 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                     " target ${plan.target()} " + "link " +
                     "${frameState.link.point} +" +
                     " prev ${previousMove}"}
-
-            val alive = this.frameState.enemiesClosestToLink(EnemyState.Alive).size
-            val dead = this.frameState.enemiesClosestToLink(EnemyState.Dead).size
-            val projectiles = this.frameState.enemiesClosestToLink(EnemyState.Projectile).size
-            val loot = this.frameState.enemiesClosestToLink(EnemyState.Loot).size
             val tenth = this.frameState.tenth
-            val aliveT = " t: $tenth A: $alive d: $dead p: $projectiles l: $loot"
-
+            val dir = this.frameState.link.dir.name.first()
             try {
-                drawIt(plan.target(), "$locCoordinates $link $aliveT")
+                drawIt(plan.target(), "$locCoordinates $link t: $tenth d: $dir")
             } catch (e: Exception) {
 
             }
@@ -247,9 +227,9 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 
     private fun renderFinished() {
         val currentFrame = api.frameCount
-        if (collectSkip) {
-            currentGamePad = getAction(currentFrame, currentGamePad)
-        }
+//        if (collectSkip) {
+//            currentGamePad = getAction(currentFrame, currentGamePad)
+//        }
 
         d { "execute ### $currentFrame"}
         monitor.update(frameStateUpdater.state, plan)
@@ -258,20 +238,19 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             // just make link invincible 2 hearts
             api.writeCPU(Addresses.heartContainers, 0xCC)
         }
-//        return
-        currentGamePad = getAction(currentFrame, currentGamePad)
-        if (doAct) {
-            skipDb.save(
-                frameStateUpdater.state.frameState.level,
-                frameStateUpdater.state.currentMapCell.mapLoc,
-                frameStateUpdater.state.previousMove
-            )
-        }
-        d { " action: ${frameStateUpdater.state.frameState.link.point} from ${frameStateUpdater.state.previousGamePad} -> $currentGamePad"}
-//        d { " selecting item ${frameStateUpdater.state.frameState.inventory.selectedItem}"}
 
         val act = doAct && !collectSkip //currentFrame % 3 == 0
         if (act) {
+            currentGamePad = getAction(currentFrame, currentGamePad)
+            if (doAct) {
+                skipDb.save(
+                    frameStateUpdater.state.frameState.level,
+                    frameStateUpdater.state.currentMapCell.mapLoc,
+                    frameStateUpdater.state.previousMove
+                )
+            }
+            d { " action: at ${frameStateUpdater.state.frameState.link.point} do -> $currentGamePad previous ${frameStateUpdater.state.previousMove.move}"}
+
             //  how many times does it press the key? //maybe it should
             //  release after press once?
 //            d { "press $currentGamePad" }
@@ -308,19 +287,9 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                 GamePad.ReleaseB -> api.writeGamepad(0, GamepadButtons.B, false)
                 else -> {}
             }
-//            if (untilFrame <= currentFrame) {
-//                currentGamePad = getAction(currentFrame, currentGamePad)
-//                d { " action: ${frameStateUpdater.state.frameState.link.point} -> $currentGamePad"}
-//                untilFrame = currentFrame + pressTime
-//            }
         } else {
+            d { " no action"}
             currentGamePad = getAction(currentFrame, currentGamePad)
-//            val toRelease = mutableSetOf<GamePad>(GamePad.MoveRight, GamePad.MoveUp, GamePad.MoveLeft, GamePad.MoveDown)
-//            toRelease.forEach { api.writeGamepad(0, it.toGamepadButton, false) }
-//            api.writeGamepad(0, GamePad.MoveRight.toGamepadButton, false)
-//            api.writeGamepad(0, GamePad.MoveLeft.toGamepadButton, false)
-//            api.writeGamepad(0, GamePad.MoveUp.toGamepadButton, false)
-//            api.writeGamepad(0, GamePad.MoveDown.toGamepadButton, false)
         }
     }
 
@@ -329,7 +298,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         private const val SPRITE_ID = 123
         private const val SPRITE_ID_2 = 456
         private const val SPRITE_SIZE = 2
-        var hasLadder = true
+        var hasLadder = false
         var doAct = true
         var unstick = 0
         var forcedDirection = GamePad.None

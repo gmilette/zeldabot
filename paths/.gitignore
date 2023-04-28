@@ -3,6 +3,7 @@ luac.out
 
 build/kotlin/**
 
+skips/**
 skips.csv
 
 build/.*

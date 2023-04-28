@@ -122,11 +122,11 @@ class LevelSpecBuilder {
             LevelSpec(inStart.left.left, e(u,d,r), "sword", LevelMapTemplateReader.Temp.lev_blockside2),
             LevelSpec(inStart.left.left.down, e(u,d,r), "stair to raft", LevelMapTemplateReader.Temp.lev_stair_side),
             LevelSpec(inStart.left.left.up, e(d,r), "free key with suns", LevelMapTemplateReader.Temp.lev_empty),
-            LevelSpec(inStart, eall, "u with squishy and key", LevelMapTemplateReader.Temp.lev_u),
-            LevelSpec(inStart.right, e(l,u,r), "swordpass through", LevelMapTemplateReader.Temp.lev_empty),
-            LevelSpec(inStart.right.up, e(l,u,r), "squishbomb", LevelMapTemplateReader.Temp.lev_corner),
-            LevelSpec(inStart.right.up.right, e(l,d,u), "boss", LevelMapTemplateReader.Temp.lev_empty),
-            LevelSpec(inStart.right.up.right.up, e(l,d,u), "boss", LevelMapTemplateReader.Temp.lev_triforce),
+            LevelSpec(inStart.up, eall, "u with squishy and key", LevelMapTemplateReader.Temp.lev_u),
+            LevelSpec(inStart.up.right, e(l,u,r), "swordpass through", LevelMapTemplateReader.Temp.lev_empty),
+//            LevelSpec(inStart.up.right.up, e(l,u,r), "squishbomb", LevelMapTemplateReader.Temp.lev_corner),
+            LevelSpec(inStart.up.right.right, e(l,d,u), "boss", LevelMapTemplateReader.Temp.lev_empty),
+            LevelSpec(inStart.up.right.right.up, e(l,d,u), "boss", LevelMapTemplateReader.Temp.lev_triforce),
 
             LevelSpec(getItemLoc3, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
        )
@@ -148,10 +148,10 @@ class LevelSpecBuilder {
             LevelSpec(start.up.up.left.up, e(d, u), "squish key", LevelMapTemplateReader.Temp.lev_water_center),
             LevelSpec(laddercross, e(d, r, u), "ladder cross", LevelMapTemplateReader.Temp.lev_water_center),
 
-            LevelSpec(laddercross.right, e(l, r, u), "beast maze", LevelMapTemplateReader.Temp.lev_maze),
+            LevelSpec(laddercross.right, e(l, r, u), "beast maze", LevelMapTemplateReader.Temp.lev_maze, isHalfPassable = false),
             LevelSpec(laddercross.right.right, e(l, r, u), "ladder entry", LevelMapTemplateReader.Temp.lev_block2center),
 
-            LevelSpec(laddercross.up, e(u, r), "beasts", LevelMapTemplateReader.Temp.lev_water_center),
+            LevelSpec(laddercross.up, e(u, r), "beasts", LevelMapTemplateReader.Temp.lev_water_center_path),
             LevelSpec(laddercross.up.up, e(u, r), "fourmonster", LevelMapTemplateReader.Temp.lev_corner_bottom4),
             LevelSpec(laddercross.up.up.right, e(u, d, l, r), "money", LevelMapTemplateReader.Temp.lev_empty),
             //LevelSpec(laddercross.up.up.right.up, e(d, l, r), "money up batkey", LevelMapTemplateReader.Temp.lev_water_maze),
@@ -172,14 +172,16 @@ class LevelSpecBuilder {
         val farup = watermaze.up.up.up
         val specs = mutableListOf(
             LevelSpec(start, e(r, u, d), "start", LevelMapTemplateReader.Temp.lev_grid),
-            LevelSpec(start.up, e(l, u, r), "mid river bomb left", LevelMapTemplateReader.Temp.lev_water_line_path, isHalfPassable = false),
+            LevelSpec(start.up, e(l, u, r, d), "mid river bomb left", LevelMapTemplateReader.Temp.lev_water_line_path, isHalfPassable = false),
             LevelSpec(start.up.left, e(l, u, r), "zombie bomb left", LevelMapTemplateReader.Temp.lev_block4mid),
             LevelSpec(start.up.left.left, e(u, r), "stairs down", LevelMapTemplateReader.Temp.lev_stairs_center),
 
             LevelSpec(start.up.up.up, e(u, d, l, r), "circlepond", LevelMapTemplateReader.Temp.lev_water_round_center, isHalfPassable = false),
 
             LevelSpec(start.up.up, e(u, d, l, r), "dinos", LevelMapTemplateReader.Temp.lev_empty),
-            LevelSpec(watermaze, e(u, l), "maze sq", LevelMapTemplateReader.Temp.lev_maze_path, isHalfPassable = false),
+            // i think we remove the past??
+//            LevelSpec(watermaze, e(u, l), "maze sq", LevelMapTemplateReader.Temp.lev_maze_path, isHalfPassable = false),
+            LevelSpec(watermaze, e(u, l), "maze sq", LevelMapTemplateReader.Temp.lev_maze, isHalfPassable = false),
 
             LevelSpec(watermaze.up, e(u, l), "zombie center", LevelMapTemplateReader.Temp.lev_water_center_path, isHalfPassable = false),
             LevelSpec(watermaze.up.up, e(u, d), "maze 2", LevelMapTemplateReader.Temp.lev_maze_path, isHalfPassable = false),
@@ -246,7 +248,7 @@ class LevelSpecBuilder {
             LevelSpec(start.up, e(l, u, d, r), "bomb skip", LevelMapTemplateReader.Temp.lev_block2center),
             LevelSpec(start.up.up, e(l, u, d, r), "dudes with boomerange", LevelMapTemplateReader.Temp.lev_block4mid),
             // gets stuck sometimes so set to true
-            LevelSpec(start.up.up.up, e(u, d), "cross river", LevelMapTemplateReader.Temp.lev_water_line_path, isHalfPassable = true), //
+            LevelSpec(start.up.up.up, e(u, d), "cross river", LevelMapTemplateReader.Temp.lev_water_line_path, isHalfPassable = false), // i think should be false not true //
             LevelSpec(start.up.up.up.up, e(l, r, d), "whistle", LevelMapTemplateReader.Temp.lev_corner),
             LevelSpec(start.up.up.up.up.left, e(u, r), "dudes before grumble", LevelMapTemplateReader.Temp.lev_grid_center),
             LevelSpec(grumble, e(u, l, r, d), "grumble", LevelMapTemplateReader.Temp.lev_empty),

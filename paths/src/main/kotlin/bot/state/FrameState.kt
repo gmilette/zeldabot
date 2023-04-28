@@ -1,5 +1,6 @@
 package bot.state
 
+import bot.plan.InLocations
 import bot.state.map.Direction
 import bot.state.map.MapConstants
 import nintaco.api.API
@@ -46,6 +47,7 @@ class FrameState(
     // x = (mapLoc % 16) * 16
     val mapLoc: MapLoc,
     val link: Agent,
+    val ladder: Agent?,
     val inventory: Inventory = Inventory(api)
 ) {
     /**
@@ -58,6 +60,8 @@ class FrameState(
     val tenth: Int by lazy { api.readCPU(Addresses.tenthEnemyCount) }
     val clockActivated: Boolean by lazy { api.readCpuB(Addresses.clockActivated) }
     private val swordUseCountdown: Int by lazy { api.readCPU(Addresses.swordUseCountdown) }
+
+    val isLevel = level != MapConstants.overworld
 
     val canUseSword: Boolean = swordUseCountdown == 0
     val isScrolling: Boolean
@@ -119,7 +123,8 @@ data class Inventory(
         val candle = 4
         val whistle = 5
         val bait = 6 //?
-        val potionletter = 7
+        val potion = 7
+        val letter = 15
         val wand = 8 //?
     }
 }
@@ -189,6 +194,33 @@ fun FramePoint.directionToDir(to: FramePoint): Direction {
 }
 
 
+// maybe have to actually do the top right, not top left
+val FramePoint.isTopRightCorner: Boolean
+    get() =
+        onHighwayX && onHighwayYJust
+
+// ?? not sure
+val FramePoint.isCorner: Boolean
+    get() =
+        onHighwayX && onHighwayY
+val FramePoint.onHighwayYJust
+    get() = this.down.onHighwayY
+
+// one higher than the highway
+val FramePoint.onHighwayYAlmost
+    get() = y.notOnEdge && (y + 1) % 8 == 0
+
+val FramePoint.onHighwayYAlmostBeyond
+    get() = y.notOnEdge && (y - 1) % 8 == 0
+
+val FramePoint.onHighwayXAlmost
+    get() = x.notOnEdge && (x + 1) % 8 == 0
+
+val FramePoint.onHighwayXAlmostBeyond
+    get() = x.notOnEdge && (x - 1) % 8 == 0
+
+val Int.notOnEdge: Boolean
+    get() = this in 20..230
 val FramePoint.onHighway
     get() = x % 8 == 0 || y % 8 == 0
 

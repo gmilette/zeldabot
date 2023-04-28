@@ -1,6 +1,7 @@
 package bot.plan.gastar
 
 import bot.state.FramePoint
+import bot.state.isTopRightCorner
 import util.d
 import kotlin.math.min
 
@@ -47,7 +48,24 @@ class FrameRoute(val path: List<FramePoint>) {
             return
         }
         for (framePoint in pathStack.subList(0, min(5, pathStack.size-1))) {
-            d { " : $framePoint"}
+            d { " : $framePoint ${framePoint.isTopRightCorner}"}
         }
+    }
+
+    fun adjustCorner() {
+        val first5 = pathStack.subList(0, min(5, pathStack.size-1))
+        if (first5.size < 2) return
+        val corner = first5[1]
+        if (!corner.isTopRightCorner) return
+        d { "is CORNER $corner" }
+
+//        first5.set(1)
+//        : (208, 82) false
+//        Debug: (Kermit)  : (208, 81) true
+//        Debug: (Kermit)  : (208, 80) false
+//        Debug: (Kermit)  : (209, 80) false
+//        Debug: (Kermit)  : (210, 80) false
+//        Debug: (Kermit) CORNER (208, 81)
+//        Debug: (Kermit)  next is (208, 81)
     }
 }

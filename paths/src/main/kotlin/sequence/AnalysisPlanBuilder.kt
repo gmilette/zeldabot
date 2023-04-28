@@ -261,6 +261,7 @@ class AnalysisPlanBuilder() {
 //            remove(98, 97, graph) // through 100 secret
             remove(85, 86, graph) // can't go through to level 4 from here
             remove(85, 84, graph) // can't go through to water
+            remove(98, 82, graph) // can't go up through 100 secret because you could be on wrong side
 
             // yes can do
 //            remove(85, 69, graph) // can't go up through this water

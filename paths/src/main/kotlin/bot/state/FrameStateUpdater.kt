@@ -14,8 +14,8 @@ class FrameStateUpdater(
 ) {
     val yAdjustFactor = 61
 
-    fun getLinkX() = api.readCPU(Addresses.linkX)
-    fun getLinkY() = api.readCPU(Addresses.linkY)
+    private fun getLinkX() = api.readCPU(Addresses.linkX)
+    private fun getLinkY() = api.readCPU(Addresses.linkY)
     fun getLink() = FramePoint(getLinkX(), getLinkY())
     var state: MapLocationState = MapLocationState(hyrule = hyrule)
 
@@ -64,8 +64,7 @@ class FrameStateUpdater(
         val linkX = api.readCPU(Addresses.linkX)
         val linkY = api.readCPU(Addresses.linkY) - yAdjustFactor
         val linkPoint = FramePoint(linkX, linkY)
-        val calculatedDir = previous.link.point.directionToDir(linkPoint)
-        val link = Agent(0, linkPoint, calculatedDir)
+//        val calculatedDir = previous.link.point.directionToDir(linkPoint)
 
         // works
         // turns into 1 is candle used
@@ -84,7 +83,7 @@ class FrameStateUpdater(
             previous = state.previousMove.copy(previous = null), // TODO: previousNow.copy()),
             from = state.previousLocation,
             to = state.previousLocation.adjustBy(state.lastGamePad),
-            actual = link.point,
+            actual = linkPoint,
             move = state.lastGamePad,
             triedToMove = state.lastGamePad.isMoveAction())
         // reset to prevent infinite memory being allocated
@@ -92,7 +91,14 @@ class FrameStateUpdater(
 
         val oam = OamStateReasoner(api)
         val theEnemies = oam.agents()
-        val frame = FrameState(api, theEnemies, level, mapLoc, link)
+        val linkDir = oam.direction
+        val ladder = oam.ladderSprite
+        val link = Agent(0, linkPoint, linkDir)
+        if (ladder != null) {
+            d { " ladder at ${ladder.point}"}
+        }
+        d { " link directon $linkDir"}
+        val frame = FrameState(api, theEnemies, level, mapLoc, link, ladder)
 
         this.state.previousLocation = link.point
 
@@ -107,7 +113,7 @@ class FrameStateUpdater(
             val x = api.readCPU(Addresses.ememiesX[i])
             val y = api.readCPU(Addresses.ememiesY[i]) - yAdjustFactor
             val pt = FramePoint(x, y)
-            val dir = mapDir(api.readCPU(Addresses.ememyDir[i]))
+            val dir = Direction.None
 
             val xStatus = api.readCPU(Addresses.enemyStatus[i])
             // we know if the xHP is 128 then the enemy must be dead
@@ -200,44 +206,8 @@ class FrameStateUpdater(
 //        val enemiesKilledWithoutTakingDamage = api.readCPU(Addresses.enemiesKilledWithoutTakingDamage)
 //        d { " !!! enemiesKilledAlt $enemiesKilledAlt enemiesKilledWithoutTakingDamage $enemiesKilledWithoutTakingDamage"}
     }
-
-    // $00=False, $01=True
-    fun API.readCpuB(address: Int): Boolean =
-        api.readCPU(address) != 0
-
-    private fun mapDir(dir: Int): Direction {
-        val read = api.readCPU(dir) shr 4
-//        d { "read $read" }
-        // not sure what this notation means but
-        // this could be bits
-        // $08=North, $04=South, $01=East, $02=West
-        // I think i need to ignore the higher bits
-        val f1 = getBit(read, 1)
-        val f2 = getBit(read, 2)
-        val f3 = getBit(read, 3)
-        val f4 = getBit(read, 4)
-//        d {"f1 $f1 f2 $f2 f3 $f3 f $f4" }
-        return if (f3 == 1) {
-            Direction.Right
-        }
-        else if (f1 == 1) {
-            Direction.Up
-        }
-        else if (read == 64) {
-            Direction.Down
-        }
-        else if (read == 8) {
-            Direction.Up
-        }
-        else {
-            Direction.Up
-        }
-    }
 }
 
-fun getBit(value: Int, position: Int): Int {
-    return (value shr position) and 1;
-}
 
 fun droppedItemMap(dropped: Int): DroppedItem =
     DroppedItem.values().find { it.num == dropped } ?: DroppedItem.Unknown

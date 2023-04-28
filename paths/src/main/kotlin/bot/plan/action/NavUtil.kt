@@ -113,25 +113,16 @@ data class PreviousMove(
     val movedNear: Boolean = from.distTo(actual) < 3
     val dir: Direction
         get() = from.dirTo(to)
+
+    val dirActual: Direction
+        get() = from.dirTo(actual)
 }
 
 object NavUtil {
 
-    fun moveTowardsRoute(mapCell: MapCell, link: FramePoint, target:
-    FramePoint
-    ): GamePad {
-
-//        val next = mapCell.path(link, target).firstOrNull() ?:
-//            return ZeldaBot.GamePad.MoveRight
-//
-//        return directionTo(link, next)
-        return GamePad.MoveLeft
-    }
-
-    fun directionToAvoidingObstacleM(mapCell: MapCell, from: FramePoint, to:
-    FramePoint): GamePad {
-        return manhattanPathFinder(mapCell, from, to) ?: randomDir()
-    }
+    fun routeToAvoidingObstacle(mapCell: MapCell, from: FramePoint, to: List<FramePoint>, before: FramePoint? = null, avoid: List<FramePoint> = emptyList(),
+                                forcePassable: List<FramePoint> = emptyList()):
+            List<FramePoint> = mapCell.gstar.route(from, to, before, avoid, forcePassable)
 
     fun randomDir(from: FramePoint = FramePoint(100, 100)): GamePad {
         d { " random dir "}
@@ -148,6 +139,11 @@ object NavUtil {
         }
     }
 
+    fun directionToAvoidingObstacleM(mapCell: MapCell, from: FramePoint, to:
+    FramePoint): GamePad {
+        return manhattanPathFinder(mapCell, from, to) ?: randomDir()
+    }
+
     fun manhattanPathFinder(mapCell: MapCell, from: FramePoint, to:
         FramePoint): GamePad? {
         val path = mutableListOf<FramePoint>()
@@ -159,7 +155,7 @@ object NavUtil {
         while (dist > 5 && tries < limit) {
             tries++
             dist = current.distTo(to)
-            val dir = directionToAvoidingObstacleZZ(mapCell, current, to)
+            val dir = directionToAvoidingObstacleManhat(mapCell, current, to)
             d { "go $dir $dist" }
             current = when {
                 dir == GamePad.MoveUp && !current.isTop -> current.up
@@ -181,82 +177,7 @@ object NavUtil {
         }
     }
 
-    /// !!!! develop this one
-    fun directionToAvoidingObstacleZ(mapCell: MapCell, from: FramePoint, to:
-        FramePoint): GamePad {
-        val canGoUpOrDown = mapCell.passable.get(from.up) ||
-                mapCell.passable.get(from.down)
-
-        val canGoRorL = mapCell.passable.get(from.left) ||
-                mapCell.passable.get(from.right)
-
-        val closerToY = (abs(from.x - to.x) > abs(from.y - to.y))
-        val closeToX = abs(from.x - to.x) < 16
-        val closeToY = abs(from.y - to.y) < 16
-        d { " action: $closerToY upd $canGoUpOrDown rl $canGoRorL " }
-        return when {
-            //            dist < 18 -> {
-//                whenClose()
-//            }
-            closerToY && canGoRorL -> {
-                if (from.x < to.x) GamePad.MoveRight else GamePad.MoveLeft
-            }
-            canGoUpOrDown -> { // closer to y
-                // if within range
-                if (from.y < to.y) GamePad.MoveDown else GamePad.MoveUp
-            }
-            else -> {
-                d { " default action " }
-                GamePad.None
-//                when {
-//                    mapCell.passable.get(from.down) -> ZeldaBot.GamePad.MoveDown
-//                    mapCell.passable.get(from.up) -> ZeldaBot.GamePad.MoveUp
-//                    mapCell.passable.get(from.right) -> ZeldaBot.GamePad
-//                        .MoveRight
-//                    else -> ZeldaBot.GamePad.MoveLeft
-//                }
-            }
-        }
-    }
-
-    fun directionToAvoidingObstacle(mapCell: MapCell, from: FramePoint, to: FramePoint):
-            GamePad {
-        return directionToAvoidingObstacleR(mapCell, from, listOf(to))
-//        return directionToAvoidingObstacleM(mapCell, from, to)
-    }
-
-    fun directionToAvoidingObstacle(mapCell: MapCell, from: FramePoint, to: List<FramePoint>):
-            GamePad {
-        return directionToAvoidingObstacleR(mapCell, from, to)
-//        return directionToAvoidingObstacleM(mapCell, from, to)
-    }
-
-    fun routeToAvoidingObstacle(mapCell: MapCell, from: FramePoint, to: List<FramePoint>, before: FramePoint? = null, avoid: List<FramePoint> = emptyList()):
-            List<FramePoint> = mapCell.gstar.route(from, to, before, avoid)
-
-    fun directionToAvoidingObstacleR(mapCell: MapCell, from: FramePoint, to:
-        List<FramePoint>):
-            GamePad {
-        val route = mapCell.gstar.route(from, to)
-//        d { " loc: ${mapCell.mapLoc} route size ${route.size} "}
-        if (route.size < 2) return randomDir()
-
-//        val nextPoint = mapCell.gstar.route(from, to)[1]
-        val nextPoint = route[1]
-        return if (nextPoint == null) {
-            randomDir()
-        } else {
-            directionTo(from, nextPoint)
-        }.also {
-            d { " next point $nextPoint dist ${from.distTo(nextPoint)} dir: $it"}
-        }
-    }
-
-    // test case
-    // map 103
-    // link: FramePoint(x=176, y=128)
-
-    fun directionToAvoidingObstacleZZ(mapCell: MapCell, from: FramePoint, to:
+    private fun directionToAvoidingObstacleManhat(mapCell: MapCell, from: FramePoint, to:
     FramePoint):
             GamePad {
 
@@ -279,25 +200,6 @@ object NavUtil {
 
     fun directionTo(from: FramePoint, to: FramePoint): GamePad {
         return directionToDist(from, to)
-//        return when {
-//            // TODO: Redo this
-//            from.x == to.x -> {
-//                if (from.y < to.y) GamePad.MoveDown else GamePad.MoveUp
-//            }
-//            from.y == to.y -> {
-//                if (from.x < to.x) GamePad.MoveRight else GamePad.MoveLeft
-//            }
-//            else -> {
-//                // it could be a corner
-//                d { " default direction to x ${abs(from.x - to.x)} y ${abs(from.y - to.y)}" }
-////                if (abs(from.x - to.x) == 2 && abs(from.y - to.y) == 1) {
-////                    d { " default direction to DOWN corner " }
-////                    GamePad.MoveDown
-////                }
-//                NavUtil.randomDir()
-////                GamePad.MoveLeft
-//            }
-//        }
     }
 
     fun directionToDist(from: FramePoint, to: FramePoint): GamePad {
@@ -311,16 +213,6 @@ object NavUtil {
             else ->
                 if (from.x < to.x) GamePad.MoveRight else GamePad.MoveLeft
             }
-//            else -> {
-//                // it could be a corner
-//                d { " default direction to x ${abs(from.x - to.x)} y ${abs(from.y - to.y)}" }
-////                if (abs(from.x - to.x) == 2 && abs(from.y - to.y) == 1) {
-////                    d { " default direction to DOWN corner " }
-////                    GamePad.MoveDown
-////                }
-//                NavUtil.randomDir()
-////                GamePad.MoveLeft
-//            }
         }
 
     fun directionToDir(from: FramePoint, to: FramePoint): Direction {
@@ -343,7 +235,7 @@ object NavUtil {
             to - this == -16 -> Direction.Up
             else -> {
                 d { " default maploc direction to " }
-                Direction.Left
+                Direction.None
             }
         }
     }

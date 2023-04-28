@@ -30,6 +30,7 @@ class MapLocationState(
         emptyList(),
         0,
         0,
+        emptyAgent,
         emptyAgent
     ),
 

@@ -6,6 +6,7 @@ import bot.plan.gastar.FrameRoute
 import bot.state.*
 import bot.state.map.*
 import util.d
+import util.w
 import kotlin.random.Random
 
 interface Action {
@@ -25,6 +26,11 @@ interface Action {
 
     val name: String
         get() = this.javaClass.simpleName
+}
+
+interface MapAwareAction: Action {
+    val from: MapLoc
+    val to: MapLoc
 }
 
 class EndAction : Action {
@@ -70,7 +76,8 @@ val lootAndKill = DecisionAction(GetLoot(), KillAll()) { state ->
 
 val moveToKillAllInCenterSpot = DecisionAction(
     InsideNavAbout(FramePoint(5.grid, 5.grid), 2),
-    KillInCenter()) { state ->
+    KillInCenter()
+) { state ->
     state.numEnemies <= state.numEnemiesAliveInCenter()
 }
 
@@ -114,7 +121,7 @@ class DeadForAWhile(private val limit: Int = 450, val completeCriteria: (MapLoca
     }
 
     fun nextStep(state: MapLocationState) {
-        d { "DEAD for a while $frameCount"}
+        d { "DEAD for a while $frameCount" }
         if (completeCriteria(state)) {
             frameCount++
         } else {
@@ -134,15 +141,18 @@ class KillArrowSpider : Action {
         val attackAreaLeftSideMiddleVertical = FramePoint(8.grid, 7.grid)
         val attackAreaLeftSideMiddleVerticalBottom = FramePoint(8.grid, 8.grid)
     }
+
     // go in attack area
     // move up, then shoot
     private val positionShootO = ActionSequence(
         // todo: if at top of the grid, move to bottom first
         // but this works well enough
-        InsideNavAbout(KillArrowSpiderData.attackAreaLeftSideMiddleVertical,
+        InsideNavAbout(
+            KillArrowSpiderData.attackAreaLeftSideMiddleVertical,
             MapConstants.oneGrid / 2, // stay in middle
             vertical = MapConstants.oneGrid,
-            negVertical = MapConstants.oneGrid),
+            negVertical = MapConstants.oneGrid
+        ),
         GoIn(3, GamePad.MoveUp, reset = true),
 //        GoIn(3, GamePad.B, reset = true),
 //        GoIn(3, GamePad.None, reset = true),
@@ -151,10 +161,12 @@ class KillArrowSpider : Action {
 
     // more debugging
     private val positionShootActions = mutableListOf<Action>(
-        InsideNavAbout(KillArrowSpiderData.attackAreaLeftSideMiddleVerticalBottom,
+        InsideNavAbout(
+            KillArrowSpiderData.attackAreaLeftSideMiddleVerticalBottom,
             MapConstants.oneGrid / 2, // stay in middle
             vertical = 4,
-            negVertical = 4)
+            negVertical = 4
+        )
     ).also { list ->
         repeat(5) {
             list.add(GoIn(3, GamePad.MoveUp, reset = true))
@@ -176,7 +188,7 @@ class KillArrowSpider : Action {
     }
 
     override fun nextStep(state: MapLocationState): GamePad {
-        d {"KillArrowSpider"}
+        d { "KillArrowSpider" }
         criteria.nextStep(state)
 
         // if I can detect the nose open then, I can dodge while that is happening
@@ -199,20 +211,14 @@ val lootOrKill = DecisionAction(Optional(GetLoot()), Optional(KillAll())) { stat
 
 fun opportunityKillOrMove(next: MapCell): Action =
     // if it is close kill all will go kill it
-    DecisionAction(lootOrKill, MoveTo(next)) { state ->
+    DecisionAction(lootOrKill, MoveTo(0, next)) { state ->
         !state.cleared && state.hasEnemies && state.hasNearEnemy()
     }
 
 fun killThenLootThenMove(next: MapCell): Action =
     // if it is close kill all will go kill it
-    DecisionAction(lootAndKill, MoveTo(next)) { state ->
+    DecisionAction(lootAndKill, MoveTo(0, next)) { state ->
         !state.cleared && state.hasEnemies
-    }
-
-fun lootThenMove(next: MapCell): Action =
-    // if it is close kill all will go kill it
-    DecisionAction(GetLoot(), MoveTo(next)) { state ->
-        state.hasAnyLoot
     }
 
 class AlwaysDo(private val dir: GamePad = GamePad.MoveUp) : Action {
@@ -226,8 +232,10 @@ class AlwaysDo(private val dir: GamePad = GamePad.MoveUp) : Action {
     override val name: String
         get() = "AlwaysDo $dir"
 }
+
 // assume lined up at the entrance, so link just has to go up
-class GoIn(private val moves: Int = 5, private val dir: GamePad = GamePad.MoveUp, private val reset: Boolean = false) : Action {
+class GoIn(private val moves: Int = 5, private val dir: GamePad = GamePad.MoveUp, private val reset: Boolean = false) :
+    Action {
     private var movements = 0
 
     override fun complete(state: MapLocationState): Boolean {
@@ -282,34 +290,6 @@ fun FramePoint.toLineOf(length: Int = 8): List<FramePoint> {
     return pts
 }
 
-// move to this location then complete
-class InsideNavShop(private val point: FramePoint) : Action {
-    private val routeTo = RouteTo.hardlyReplan()
-
-    private val extendedPoint = point.toLineOf(10)
-    override fun complete(state: MapLocationState): Boolean =
-        // until inventory changed.. how do I know?
-        extendedPoint.contains(state.frameState.link.point)
-
-    override fun nextStep(state: MapLocationState): GamePad {
-        // need to specify mapcell
-        return routeTo.routeTo(state, extendedPoint, overrideMapCell = state.hyrule.shopMapCell)
-        // use the shop map cell
-//        return NavUtil.directionToAvoidingObstacle(state.hyrule.shopMapCell, state.frameState.link.point, extendedPoint)
-    }
-
-    override fun target(): FramePoint {
-        return point
-    }
-
-    override fun path(): List<FramePoint> {
-        return routeTo.route?.path ?: emptyList()
-    }
-
-    override val name: String
-        get() = "InsideNavShop to $point"
-}
-
 class SwitchToItem(private val inventoryPosition: Int = Inventory.Selected.candle) : Action {
 
     private var pressCountdown = 0
@@ -329,15 +309,19 @@ class SwitchToItem(private val inventoryPosition: Int = Inventory.Selected.candl
         }
 
     override fun nextStep(state: MapLocationState): GamePad {
-        d { " selecting item selected=${selectedItem(state)} state=${state.frameState.inventory
-            .selectedItem}"}
+        d {
+            " selecting item selected=${selectedItem(state)} state=${
+                state.frameState.inventory
+                    .selectedItem
+            }"
+        }
         // this is weird, link cannot just keep pressing left for right, it has to
         // press none inbetween sometimes. Whatever this works
         return if (selectedItem(state) || Random.nextBoolean()) {
-                GamePad.None
-            } else {
-                directionToSelection(state)
-            }
+            GamePad.None
+        } else {
+            directionToSelection(state)
+        }
     }
 
     override fun target(): FramePoint {
@@ -370,12 +354,14 @@ class InsideNav(private val point: FramePoint) : Action {
     override fun path(): List<FramePoint> = routeTo.route?.path ?: emptyList()
 
     override val name: String
-        get() = "Nav to ${point}"
+        get() = "Nav to inside ${point}"
 }
 
-class InsideNavAbout(private val point: FramePoint, about: Int, vertical: Int = 1, negVertical: Int = 0,
-                     val shop: Boolean = false) : Action {
-    private val routeTo = RouteTo.hardlyReplan()
+class InsideNavAbout(
+    private val point: FramePoint, about: Int, vertical: Int = 1, negVertical: Int = 0,
+    val shop: Boolean = false, private val ignoreProjectiles: Boolean = false
+) : Action {
+    private val routeTo = RouteTo.hardlyReplan(dodgeEnemies = !shop, ignoreProjectiles)
     private val points: List<FramePoint>
 
     init {
@@ -407,10 +393,10 @@ class InsideNavAbout(private val point: FramePoint, about: Int, vertical: Int = 
     override fun path(): List<FramePoint> = routeTo.route?.path ?: emptyList()
 
     override val name: String
-        get() = "Nav to ${point}"
+        get() = "Nav to about ${point}"
 }
 
-class Bomb(private val target: FramePoint) : Action {
+open class Bomb(private val target: FramePoint) : Action {
     private val routeTo = RouteTo()
     private val stretchedTarget: List<FramePoint> = target.toLineOf(3)
     private var triedToDeployBomb = false
@@ -435,23 +421,42 @@ class Bomb(private val target: FramePoint) : Action {
             (triedToDeployBomb && !state.usedABomb) -> GamePad.B
             else -> {
                 routeTo.routeTo(state, stretchedTarget)
-                // changed from this
-//                navTo(state, stretchedTarget)
             }
         }
     }
-
     override val name: String
         get() = "Bomb $target $triedToDeployBomb"
 }
+    class Bomb2(private val target: FramePoint) : Bomb(target) {
+        private var sawBombClose = false
+        private val stretchedTarget: List<FramePoint> = target.toLineOf(3)
+//        private val routeTo = RouteTo()
+//        private val attack = AlwaysAttack(useB = true)
+//        private var usedBombCt = 0
 
-fun navTo(state: MapLocationState, to: FramePoint): GamePad =
-    navTo(state, listOf(to))
+        override fun complete(state: MapLocationState): Boolean =
+            sawBombClose //super.complete(state) &&
 
-fun navTo(state: MapLocationState, to: List<FramePoint>): GamePad =
-    NavUtil.directionToAvoidingObstacle(state.currentMapCell, state.frameState.link.point, to).also {
-        d { " **go** $it (from ${state.frameState.link.point} to ${to} at ${state.currentMapCell.mapLoc}" }
-    }
+        override fun nextStep(state: MapLocationState): GamePad {
+//            if (usedBombCt < 5 && state.frameState.link.point.minDistToAny(stretchedTarget) < 10) {
+//                attack.nextStep(state)
+//                usedBombCt++
+//            }
+            // once detected, no need to check more
+            if (!sawBombClose) {
+                val bomb = state.frameState.enemies.firstOrNull { it.tile == bomb && it.y > 0 }
+                bomb?.let {
+                    sawBombClose = (it.point.distTo(target) < MapConstants.oneGridPoint5)
+                    d { " saw bomb! dist = ${it.point.distTo(target)} CLOSE!=$sawBombClose bomb = $it" }
+                }
+            }
+
+            return super.nextStep(state)
+        }
+
+        override val name: String
+        get() = "Bomb2 $target"
+}
 
 class ExitShop() : Action {
     private val routeTo = RouteTo.hardlyReplan()
@@ -471,37 +476,78 @@ class ExitShop() : Action {
         val dir = Direction.Down
         val link = state.frameState.link.point
         val exits = current.exitsFor(dir) ?: return NavUtil.randomDir(link)
-        d { " try to exit shop ${state.currentMapCell.mapLoc} ${current.mapLoc} ${exits.firstOrNull()}" }
-//        exits.forEach {
-//            d { " exit -> $it"}
-//        }
         return routeTo.routeTo(state, exits, overrideMapCell = current)
-//        return NavUtil.directionToAvoidingObstacle(current, link, exits)
     }
 }
 
 
 private class RouteTo(val params: Param = Param()) {
     companion object {
-        fun hardlyReplan() = RouteTo(RouteTo.Param(planCountMax = 100))
+        fun hardlyReplan(dodgeEnemies: Boolean = true, ignoreProjectiles: Boolean = false) = RouteTo(
+            RouteTo.Param(
+                planCountMax = 100,
+                dodgeEnemies = dodgeEnemies,
+                ignoreProjectiles = ignoreProjectiles
+            )
+        )
     }
 
     data class Param(
         var planCountMax: Int = 20,
         // not used
-        val considerLiveEnemies: Boolean = true
+        val considerLiveEnemies: Boolean = true,
+        val dodgeEnemies: Boolean = true, // always dodge I think, unless i'm in a shop or something
+        val ignoreProjectiles: Boolean = false
     )
 
     var route: FrameRoute? = null
         private set
     private var planCount = 0
 
-    fun routeTo(state: MapLocationState, to: List<FramePoint>, forceNewI: Boolean = false, overrideMapCell: MapCell? = null):
+    private val attack = AlwaysAttack()
+
+    fun routeTo(
+        state: MapLocationState,
+        to: List<FramePoint>,
+        forceNewI: Boolean = false,
+        overrideMapCell: MapCell? = null
+    ): GamePad {
+        return attackOrRoute(state, to, forceNewI, overrideMapCell)
+    }
+
+    private fun attackOrRoute(
+        state: MapLocationState,
+        to: List<FramePoint>,
+        forceNewI: Boolean = false,
+        overrideMapCell: MapCell? = null
+    ): GamePad {
+        // is this direction correct?
+        // i tried dirActual
+
+        return if (params.dodgeEnemies && AttackAction.shouldAttack(state) &&
+                state.frameState.canUseSword
+        ) {
+            d { " prev ${state.previousMove.dirActual} ATTACK" }
+            attack.nextStep(state)
+        } else {
+            attack.reset()
+            d { " prev ${state.previousMove.dirActual} NO ATTACK" }
+            doRouteTo(state, to, forceNewI, overrideMapCell)
+        }
+    }
+
+    private fun doRouteTo(
+        state: MapLocationState,
+        to: List<FramePoint>,
+        forceNewI: Boolean = false,
+        overrideMapCell: MapCell? = null
+    ):
             GamePad {
         d { " DO routeTo TO ${to.size} first ${to.firstOrNull()?.toG} currently at ${state.currentMapCell.mapLoc}" }
         var forceNew = forceNewI
         if (to.isEmpty()) {
             d { " no where to go " }
+            // dont do this because it could cause link to go off scren
 //            throw RuntimeException("no where to bo")
             return NavUtil.randomDir(state.link)
         }
@@ -516,7 +562,14 @@ private class RouteTo(val params: Param = Param()) {
                 d { " CLOSE!! left" }
                 return GamePad.MoveLeft
             }
-            // could handle down and right
+            if (to.first().x >= MapConstants.MAX_X - 2) {
+                d { " CLOSE!! right" }
+                return GamePad.MoveRight
+            }
+            if (to.first().y >= MapConstants.MAX_Y - 2) {
+                d { " CLOSE!! down" }
+                return GamePad.MoveDown
+            }
         }
 
         val skippedButIsOnRoute = (state.previousMove.skipped && route?.isOn(linkPt, 5) != null)
@@ -525,27 +578,49 @@ private class RouteTo(val params: Param = Param()) {
         }
 
         // getting me suck: && params.planCountMax != 1000
-        if (!state.hasEnemies && params.planCountMax != 1000) {
+        if (!state.hasEnemiesOrLoot && params.planCountMax != 1000) {
             d { " NO alive enemies, no need to replan just go" }
             // make a plan now though
             forceNew = true
             params.planCountMax = 1000
         } else {
-//            d { " oops there are alive enemies, keep it" }
-//            for (enemy in state.frameState.enemies) {
-//                d { " ememy: $enemy" }
-//            }
+            d { " alive enemies, keep re planning" }
             params.planCountMax = 20
         }
 
         var nextPoint: FramePoint = route?.pop() ?: FramePoint()
         val routeSize = route?.path?.size ?: 0
 
+        val linkPoints = listOf(linkPt, linkPt.justRightEnd, linkPt.justRightEndBottom, linkPt.justLeftDown)
+        val enemiesNear = state.aliveOrProjectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid }
+        val projectilesNear = state.projectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid }
+        val ladder = state.frameState.ladder
+
+        var avoid = if (params.dodgeEnemies) {
+            when {
+                (enemiesNear.size > 1) -> enemiesNear
+                // one projectile
+                projectilesNear.isNotEmpty() -> projectilesNear
+                else -> emptyList()
+            }
+        } else {
+            emptyList()
+        }
+
+        if (params.ignoreProjectiles) {
+            avoid = avoid.filter { it.state != EnemyState.Projectile }
+        }
+
+        d { " enemies near ${enemiesNear.size} projectiles ${projectilesNear.size} avoid: ${avoid.size}" }
+//        val avoid = emptyList<FramePoint>()
+
+
         if (forceNew ||
             route == null || // reset
             routeSize <= 2 ||
             planCount >= params.planCountMax || // could have gotten off track
-            !state.previousMove.movedNear // got hit
+            !state.previousMove.movedNear || // got hit
+            enemiesNear.isNotEmpty()
         ) {
             val why = when {
                 !state.previousMove.movedNear -> "got hit"
@@ -554,16 +629,25 @@ private class RouteTo(val params: Param = Param()) {
                 forceNew -> "force new ${params.planCountMax}"
                 routeSize <= 2 -> " 2 sized route"
                 !skippedButIsOnRoute -> "skipped and not on route"
+                enemiesNear.isNotEmpty() -> "nearby enemies, replan"
                 else -> "I donno"
             }
 
             val mapCell = overrideMapCell ?: state.currentMapCell
             // of if the expected point is not where we should be
             // need to re route
-            val avoid = state.aliveEnemies.map { it.point }
-            route = FrameRoute(NavUtil.routeToAvoidingObstacle(mapCell, linkPt, to, state.previousMove.from, avoid))
+            route = FrameRoute(
+                NavUtil.routeToAvoidingObstacle(
+                    mapCell,
+                    linkPt,
+                    to,
+                    state.previousMove.from,
+                    avoid.map { it.point },
+                    ladder?.let { listOf(it.point) } ?: emptyList())
+            )
             d { " ${state.currentMapCell.mapLoc} new plan! because ($why)" }
             route?.next5()
+//            route?.adjustCorner()
             nextPoint = route?.popOrEmpty() ?: FramePoint() // skip first point because it is the current location
             nextPoint = route?.popOrEmpty() ?: FramePoint()
             d { " next is $nextPoint" }
@@ -581,14 +665,17 @@ private class RouteTo(val params: Param = Param()) {
             GamePad.MoveLeft
         } else if (nextPoint == FramePoint(0, 0) && linkPt.y == 0) {
             GamePad.MoveUp
-        } else if (nextPoint.direction != null) {
-            nextPoint.direction?.toGamePad() ?: GamePad.MoveUp
         } else {
-            // change everywher
-            NavUtil.directionToDist(linkPt, nextPoint)
+            // it's the wrong point
+            nextPoint.direction?.toGamePad() ?: NavUtil.directionToDist(linkPt, nextPoint)
         }.also {
-            d { " next point $nextPoint dir: $it" }
+            d { " next point $nextPoint dir: $it ${if (nextPoint.direction != null) "HAS DIR ${nextPoint.direction}" else ""}" }
         }
+        //        } else if (nextPoint.direction != null) {
+//            nextPoint.direction?.toGamePad() ?: GamePad.MoveUp
+//        } else {
+//            NavUtil.directionToDist(linkPt, nextPoint)
+
     }
 }
 
@@ -616,7 +703,7 @@ class PickupDroppedDungeonItemAndKill : Action {
 
     // need to visit all the enemy locations until it is done
     override fun nextStep(state: MapLocationState): GamePad {
-        d { " keys needed $keysNeeded keysHave = ${state.frameState.inventory.numKeys}"}
+        d { " keys needed $keysNeeded keysHave = ${state.frameState.inventory.numKeys}" }
         if (keysNeeded == -1) {
             keysNeeded = state.frameState.inventory.numKeys + 1
         }
@@ -691,84 +778,20 @@ class ClockActivatedKillAll : Action {
     }
 }
 
-
-fun moveHistoryAttackAction(wrapped: Action) =
-    // really, if there are enemies attack, otherwise, move, or bomb
-    // if there are pancake enemies
-    MoveHistoryAction(wrapped, AlwaysAttack())
-
-private class SameCount {
-    var last: GamePad = GamePad.None
-    private var count: Int = 0
-
-    fun record(pad: GamePad): Int {
-        if (last == pad) {
-            count++
-        } else {
-            // need it?
-            reset()
-        }
-        last = pad
-        return count
-    }
-
-    fun reset() {
-        count = 0
-    }
-}
-
-// default actions
-// if same x,y as enemy, attack
-// unstick
-
-class MoveHistoryAction(private val wrapped: Action, private val escapeAction: Action) : Action {
-    private val histSize = 250
-    private val same = SameCount()
-    private var escapeActionCt = 0
-    private val escapeActionTimes = 50
-
+class ModifyMap : Action {
     override fun complete(state: MapLocationState): Boolean =
-        wrapped.complete(state)
+        false
 
     override fun nextStep(state: MapLocationState): GamePad {
-        d { "MoveHistoryAction" }
-        return when {
-            escapeActionCt > 0 -> {
-                d { " ESCAPE ACTION " }
-                val action = escapeAction.nextStep(state)
-                escapeActionCt--
-                action
-            }
-
-            state.link in state.aliveEnemies.map { it.point } -> {
-                escapeActionCt = escapeActionTimes
-                d { " ESCAPE ACTION SAME ENEMY" }
-                same.reset()
-                wrapped.nextStep(state)
-            }
-
-            else -> {
-                val nextStep = wrapped.nextStep(state)
-                val ct = same.record(nextStep)
-                d { " ESCAPE ACTION not same $nextStep + $ct last ${same.last}" }
-                if (ct >= histSize) {
-                    escapeActionCt = escapeActionTimes
-                    d { " ESCAPE ACTION RESET" }
-                    same.reset()
-                }
-                nextStep
-            }
-        }.also {
-            val inIt = state.link in state.aliveEnemies.map { it.point }
-            d { " link at ${state.link} $inIt" }
-        }
+        return GamePad.None
     }
 
     override val name: String
-        get() = wrapped.name
+        get() = "ModifyMap"
 }
 
-class Unstick(private val wrapped: Action, private val howLong:Int = 5000) : Action {
+
+class Unstick(private val wrapped: Action, private val howLong: Int = 5000) : Action {
     private var frames = 0
     private var randomMoves = 250
     private var randomMovesCt = 250
@@ -783,11 +806,13 @@ class Unstick(private val wrapped: Action, private val howLong:Int = 5000) : Act
                 frames = 0
                 NavUtil.randomDir(state.link)
             }
+
             (frames > howLong) -> {
-                d { " UNSTICK!!"}
+                d { " UNSTICK!!" }
                 randomMovesCt--
                 NavUtil.randomDir(state.link)
             }
+
             else -> {
                 randomMovesCt = randomMoves
                 wrapped.nextStep(state)
@@ -799,12 +824,15 @@ class Unstick(private val wrapped: Action, private val howLong:Int = 5000) : Act
         get() = "Unstick for ${wrapped.name}"
 }
 
-class MoveTo(val next: MapCell, val forceDirection: Direction? = null) : Action {
+class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val forceDirection: Direction? = null) : MapAwareAction {
     private val routeTo = RouteTo(params = RouteTo.Param(considerLiveEnemies = false))
 
     init {
         next.gstar.clearAvoid()
     }
+
+    override val from: MapLoc = fromLoc
+    override val to: MapLoc = next.mapLoc
 
     override fun reset() {
         next.gstar.clearAvoid()
@@ -854,23 +882,23 @@ class MoveTo(val next: MapCell, val forceDirection: Direction? = null) : Action 
 //            !isInCurrent -> current.mapLoc.directionToDir(start!!.mapLoc)
 //            else -> forceDirection ?: current.mapLoc.directionToDir(next.mapLoc)
 //        }
-        dir = forceDirection ?: current.mapLoc.directionToDir(next.mapLoc)
 
+        // always assume on current need this? for the state.frameState.isLevel &&
+//        val isInCurrent = current.mapLoc == start?.mapLoc //|| (current.mapLoc != (start?.mapLoc ?: 0))
+        val isInCurrent = state.frameState.isLevel || current.mapLoc == from //|| (current.mapLoc != (start?.mapLoc ?: 0))
+        // need a little routing alg
+        dir = when {
+            !isInCurrent -> current.mapLoc.directionToDir(fromLoc)
+            else -> forceDirection ?: current.mapLoc.directionToDir(next.mapLoc)
+        }
 
-//        val exit = state.currentMapCell.exitFor(dir) ?: return NavUtil.randomDir(linkPt)
-//        val exit = when (dir) {
-//            Direction.Left -> exitA // keep
-//            Direction.Right -> exitA // keep
-//            Direction.Down -> exitA //.up
-//            Direction.Up -> exitA //.down
-//        }
+        if (isInCurrent) {
+            d { " ON THE RIGHT ROUTE on ${current.mapLoc} but should be on ${fromLoc} or start ${start?.mapLoc} go $dir"}
+        } else {
+            d { " ON THE WRONG ROUTE on ${current.mapLoc} but should be on ${fromLoc} or start ${start?.mapLoc} go $dir"}
+        }
+//        dir = forceDirection ?: current.mapLoc.directionToDir(next.mapLoc)
 
-//        d { "exits "}
-//        exits.forEach {
-//            d { " exit -> $it ${linkPt.distTo(it)}"}
-//        }
-
-//        goingTo = exits.firstOrNull() ?: FramePoint(0, 0)
 
         if (state.currentMapCell.exitsFor(dir) == null) {
             d { " default move " }
@@ -881,12 +909,12 @@ class MoveTo(val next: MapCell, val forceDirection: Direction? = null) : Action 
     }
 
     override val name: String
-        get() = "Move to ${this.next.mapLoc} ${dir ?: ""}"
+        get() = "Move from ${this.fromLoc} to ${this.next.mapLoc} ${dir ?: ""}"
 }
 
 class ActionSequence(
     private vararg val actions: Action
-): Action {
+) : Action {
     // never complete
     override fun complete(state: MapLocationState): Boolean =
         false
@@ -902,7 +930,7 @@ class ActionSequence(
 
     override fun nextStep(state: MapLocationState): GamePad {
         val action = actions.firstOrNull { !it.complete(state) }
-        d { " DO --> ${action?.name}"}
+        d { " DO --> ${action?.name}" }
         return action?.nextStep(state) ?: GamePad.randomDirection()
     }
 
@@ -913,10 +941,10 @@ class ActionSequence(
 class OrderedActionSequence(
     private val actions: List<Action>,
     private val restartWhenDone: Boolean = true
-): Action {
+) : Action {
     private var lastComplete = -1
 
-  // keep popping the stack
+    // keep popping the stack
 //    private var stack = action
     private var stack = actions.toMutableList()
 
@@ -940,8 +968,6 @@ class OrderedActionSequence(
         }
     }
 
-    fun finished(): Boolean = stack.isEmpty()
-
     // never complete
     override fun complete(state: MapLocationState): Boolean =
         false
@@ -962,7 +988,7 @@ class OrderedActionSequence(
             // recur
             return nextStep(state)
         }
-        d { " DO --> ${current.name}"}
+        d { " DO --> ${current.name}" }
         return current.nextStep(state)
     }
 
@@ -973,7 +999,7 @@ class OrderedActionSequence(
 class DecisionAction(
     private val action1: Action,
     private val action2: Action, // also use only action 2 for complete
-    private val completeIf: (state: MapLocationState) -> Boolean = {false},
+    private val completeIf: (state: MapLocationState) -> Boolean = { false },
     private val chooseAction1: (state: MapLocationState) -> Boolean,
 ) : Action {
     override fun complete(state: MapLocationState): Boolean =
@@ -1071,22 +1097,27 @@ fun FramePoint.about(horizontal: Int = 4, vertical: Int = 2): List<FramePoint> {
     return targets
 }
 
-class AlwaysAttack(useB: Boolean = false, private val freq: Int = 5) : Action {
+class AlwaysAttack(useB: Boolean = false, private val freq: Int = 5, private val otherwiseRandom: Boolean = false) :
+    Action {
     private var frames = 0
     private val gameAction = if (useB) GamePad.B else GamePad.A
 
     override fun nextStep(state: MapLocationState): GamePad {
-        d { " dir ${state.frameState.link.dir}"}
-        val move = if (frames < 10) {
+        // just always do it
+        val move = if (frames < 0) {
             GamePad.None
         } else {
             when {
                 frames % 10 < freq -> gameAction
-                else -> GamePad.None
+                else -> if (otherwiseRandom) GamePad.randomDirection() else GamePad.None
             }
         }
         frames++
         return move
+    }
+
+    override fun reset() {
+        frames = 10
     }
 
     override fun complete(state: MapLocationState): Boolean =
@@ -1134,10 +1165,11 @@ private class KillAllCompleteCriteria {
 /**
  * just use to mark where the plan should start
  */
-class StartHereAction: Action {
+class StartHereAction : Action {
     companion object {
         val name = "StartHereAction"
     }
+
     override fun complete(state: MapLocationState): Boolean {
         return true
     }
@@ -1154,10 +1186,12 @@ class KillAll(
     private val numEnemies: Int = -1,
     // do not try to kill the enemies in the center
     private val considerEnemiesInCenter: Boolean = false,
-    private val ifCantMoveAttack: Boolean = false
+    private val ifCantMoveAttack: Boolean = false,
+    private var needLongWait: Boolean = false,
+    private val targetOnly: List<Int> = listOf()
 ) :
     Action {
-    private val routeTo = RouteTo()
+    private val routeTo = RouteTo(RouteTo.Param(dodgeEnemies = true))
     private val criteria = KillAllCompleteCriteria()
 
     private var sameEnemyCount = 0
@@ -1197,6 +1231,7 @@ class KillAll(
         return state.clearedWithMinIgnoreLoot(numberLeftToBeDead)
     }
 
+
     override fun complete(state: MapLocationState): Boolean =
 //        criteria.complete(state)
         (waitAfterAllKilled <= 0 && count > 33 && killedAllEnemies(state)).also {
@@ -1209,7 +1244,8 @@ class KillAll(
 
     override fun nextStep(state: MapLocationState): GamePad {
         val numEnemiesInCenter = state.numEnemiesAliveInCenter()
-        d { " KILL ALL step ${state.currentMapCell.mapLoc} count $count wait $waitAfterAllKilled center: $numEnemiesInCenter" }
+        needLongWait = state.longWait.isNotEmpty()
+        d { " KILL ALL step ${state.currentMapCell.mapLoc} count $count wait $waitAfterAllKilled center: $numEnemiesInCenter needLong $needLongWait" }
 
         for (enemy in state.frameState.enemies.filter { it.state != EnemyState.Dead }) {
             d { " enemy: $enemy" }
@@ -1253,9 +1289,13 @@ class KillAll(
         } else {
             // maybe we want to kill closest
             // find the alive enemies
-            val aliveEnemies = state.frameState.enemiesClosestToLink().filter {
+            var aliveEnemies = state.frameState.enemiesClosestToLink().filter {
                 // test
                 it.index >= numberLeftToBeDead
+            }
+            if (targetOnly.isNotEmpty()) {
+                d { " target only ${targetOnly}"}
+                aliveEnemies = aliveEnemies.filter { targetOnly.contains(it.tile) }
             }
 //            aliveEnemies.forEach {
 //                d { "alive enemy $it dist ${it.point.distTo(state.frameState.link.point)}" }
@@ -1267,7 +1307,7 @@ class KillAll(
 //                NavUtil.randomDir(state.link)
             } else {
                 // 110 too low for bats
-                waitAfterAllKilled = 250
+                waitAfterAllKilled = if (needLongWait) 250 else 50
                 val firstEnemyOrNull = aliveEnemies.firstOrNull()
                 // handle the null?? need to test
                 firstEnemyOrNull?.let { firstEnemy ->
@@ -1277,7 +1317,7 @@ class KillAll(
                     val dist = firstEnemy.point.distTo(link.point)
                     //d { " go find $firstEnemy from $link distance: $dist"}
                     when {
-                        dist < 18 && state.frameState.canUseSword -> {
+                        dist < 24 && state.frameState.canUseSword && AttackAction.shouldAttack(state) -> {
                             // is linked turned in the correct direction towards
                             // the enemy?
                             previousAttack = true

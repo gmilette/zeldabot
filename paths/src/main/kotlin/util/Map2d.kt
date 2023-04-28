@@ -1,6 +1,7 @@
 package util
 
 import bot.state.FramePoint
+import bot.state.distTo
 import bot.state.map.MapConstants
 import com.github.doyaaaaaken.kotlincsv.client.CsvWriter
 
@@ -16,6 +17,7 @@ class Map2d<T>(
     fun copy(): Map2d<T> {
         return this.map { it }
     }
+
     class Builder<T>(
         private val buildMap: MutableList<MutableList<T>> = mutableListOf()
     ) {
@@ -49,11 +51,24 @@ class Map2d<T>(
         return Map2d(map.mapIndexed{ x, r -> r.mapIndexed { y, c -> transform(x, y) }.toMutableList() })
     }
 
-    fun modify(point: FramePoint, size: Int = 16, how: (T) -> T) {
+    fun modify(link: FramePoint, point: FramePoint, size: Int = 16, how: (Int, T) -> T) {
         for (y in point.y..point.y + size) {
             for (x in point.x..point.x + size) {
                 try {
-                    val newVal = how(map[y][x])
+                    val dist = link.distTo(FramePoint(x,y))
+                    val newVal = how(dist, map[y][x])
+                    map[y][x] = newVal
+                } catch (e: IndexOutOfBoundsException) {
+                    // just ignore this for now
+                }
+            }
+        }
+    }
+
+    fun modifyTo(point: FramePoint, size: Int = 16, newVal: T) {
+        for (y in point.y..point.y + size) {
+            for (x in point.x..point.x + size) {
+                try {
                     map[y][x] = newVal
                 } catch (e: IndexOutOfBoundsException) {
                     // just ignore this for now

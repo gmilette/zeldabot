@@ -43,11 +43,12 @@ class Hyrule {
                 Direction.Down -> map[from.mapLoc.down]
                 Direction.Left -> map[from.mapLoc.left]
                 Direction.Right -> map[from.mapLoc.right]
+                Direction.None -> map[from.mapLoc]
             }
-            if (next == null) {
-                return null
+            return if (next == null) {
+                null
             } else {
-                return if (next.mapLoc < 0 || next.mapLoc > 127) null else next
+                if (next.mapLoc < 0 || next.mapLoc > 127) null else next
             }
         } catch (a: ArrayIndexOutOfBoundsException) {
             return null
@@ -179,7 +180,7 @@ data class Objective(
 
 
 enum class Direction {
-    Left, Right, Up, Down;
+    Left, Right, Up, Down, None;
 }
 
 
@@ -188,6 +189,7 @@ fun Direction.opposite(): Direction = when (this) {
     Direction.Right -> Direction.Left
     Direction.Up -> Direction.Down
     Direction.Down -> Direction.Up
+    Direction.None -> Direction.None
 }
 
 fun Direction.toGamePad(): GamePad = when (this) {
@@ -195,6 +197,7 @@ fun Direction.toGamePad(): GamePad = when (this) {
     Direction.Right -> GamePad.MoveRight
     Direction.Up -> GamePad.MoveUp
     Direction.Down -> GamePad.MoveDown
+    Direction.None -> GamePad.None
 }
 fun Direction.pointModifier(adjustment: Int = 1): (FramePoint) -> FramePoint {
     return when (this) {
@@ -202,12 +205,15 @@ fun Direction.pointModifier(adjustment: Int = 1): (FramePoint) -> FramePoint {
         Direction.Down -> { p -> FramePoint(p.x, p.y + adjustment) }
         Direction.Left -> { p -> FramePoint(p.x - adjustment, p.y) }
         Direction.Right -> { p -> FramePoint(p.x + adjustment, p.y) }
+        Direction.None -> { p -> FramePoint(p.x, p.y) }
     }
 }
 
 val Direction.vertical: Boolean
     get() = this == Direction.Up || this == Direction.Down
 
+val Direction.horizontal: Boolean
+    get() = this == Direction.Left || this == Direction.Right
 
 class MapCell(
     val point: MapCellPoint,

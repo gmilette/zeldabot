@@ -18,7 +18,7 @@ class SwitchToItemConditionally(private val inventoryPosition: Int = Inventory.S
 
 
     override fun complete(state: MapLocationState): Boolean {
-        return positionShoot.finished() || startedWithItem
+        return positionShoot.done || startedWithItem
     }
 
     override fun target(): FramePoint {
@@ -103,19 +103,18 @@ private val FrameState.hasPotion
 // any time enter shop add this action just in case
 class ShowLetterConditionally : Action {
     private val switchSequence = mutableListOf(
-        GoIn(150, GamePad.MoveUp),
+        GoIn(120, GamePad.MoveUp),
         GoIn(50, GamePad.None),
-        WaitForPotionOrOldWoman(),
-//        WaitForOldWoman(),
+//        WaitForPotionOrOldWoman(),
+        WaitForOldWoman(),
 //        SwitchToItem(Inventory.Selected.potionletter),
-//        SwitchToItemConditionally(Inventory.Selected.potionletter),
+        SwitchToItemConditionally(Inventory.Selected.letter),
 //        GoIn(50, GamePad.None),
         UseItem(),
         // wait for the lady to display the potions
+        // need these both for some reason
         GoIn(250, GamePad.None),
         GoIn(100, GamePad.None),
-//        UseItem(),
-//        GoIn(10, GamePad.None),
     )
 
     private var frameCt = 0
@@ -123,8 +122,9 @@ class ShowLetterConditionally : Action {
     private val sequence = OrderedActionSequence(switchSequence, restartWhenDone = false)
 
     override fun complete(state: MapLocationState): Boolean {
-        // if there is a potion in the inventory skip
-        return (sequence.done) //(state.frameState.inventory.hasPotion) ||
+        // if there is a potion in the inventory skip,
+        // if there is just a letter then we need to show it I think
+        return (sequence.done) || (state.frameState.inventory.hasPotion)
     }
 
     override fun target(): FramePoint {

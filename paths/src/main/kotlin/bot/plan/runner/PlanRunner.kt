@@ -3,6 +3,7 @@ package bot.plan.runner
 import bot.state.GamePad
 import bot.plan.action.Action
 import bot.plan.action.DoNothing
+import bot.plan.action.MapAwareAction
 import bot.plan.action.moveHistoryAttackAction
 import bot.state.FramePoint
 import bot.state.MapLocationState
@@ -31,6 +32,12 @@ class PlanRunner(val masterPlan: MasterPlan) {
         // if actions are
         if (action.complete(state)) {
             advance()
+        }
+
+        (action as? MapAwareAction)?.let { act ->
+            if (state.currentMapCell.mapLoc != act.from) {
+                d { " !!! should be moving to ${act.to} from ${act.from} but is at ${state.currentMapCell.mapLoc}"}
+            }
         }
 
         return try {

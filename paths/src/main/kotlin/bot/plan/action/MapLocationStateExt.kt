@@ -22,11 +22,23 @@ fun MapLocationState.hasNearEnemy(threshold: Int = 32): Boolean =
 val MapLocationState.hasEnemies: Boolean
     get() = frameState.enemies.any { it.state == EnemyState.Alive }
 
+val MapLocationState.hasEnemiesOrLoot: Boolean
+    get() = frameState.enemies.any { it.state == EnemyState.Loot || it.state == EnemyState.Alive }
+
 val MapLocationState.numEnemies: Int
     get() = frameState.enemies.count { it.state == EnemyState.Alive }
 
 val MapLocationState.aliveEnemies: List<Agent>
     get() = frameState.enemies.filter { it.state == EnemyState.Alive }
+
+val MapLocationState.projectile: List<Agent>
+    get() = frameState.enemies.filter { it.state == EnemyState.Projectile }
+
+val MapLocationState.longWait: List<Agent>
+    get() = frameState.enemies.filter { longWaitEnemies.contains(it.tile)}
+
+val MapLocationState.aliveOrProjectile: List<Agent>
+    get() = frameState.enemies.filter { it.state == EnemyState.Alive || it.state == EnemyState.Projectile }
 
 val middleGrids = listOf(
     FramePoint(7.grid, 5.grid),

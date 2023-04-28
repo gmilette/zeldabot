@@ -1,13 +1,15 @@
 package bot.plan.gastar
 
+import bot.plan.action.isInGrid
 import bot.state.*
 import bot.state.map.Direction
+import bot.state.map.MapConstants
 import util.Map2d
 import util.d
 import java.util.*
 
 class GStar(
-    private val passable: Map2d<Boolean>,
+    private var passable: Map2d<Boolean>,
     halfPassable: Boolean = true,
     isLevel: Boolean = false
 ) {
@@ -15,9 +17,12 @@ class GStar(
         var DEBUG = false
         private val DEBUG_DIR = false
         val DEBUG_ONE = false
-        val MAX_ITER = 100000
+        val MAX_ITER = 10000
+        val SHORT_ITER = 1000
         val LIMIT_ITERATIONS = false
-        val doSkip = true
+        val DO_CORNERS = true
+        val DO_ADJUST = false
+        val DO_MAKE_CORNERS = false
     }
 
     private var iterCount = 0
@@ -30,8 +35,13 @@ class GStar(
     // is also acceptable
     // the game is constantly trying to make link travel on one of these paths
     private val highwayDivisor = 8
-    private val initialMap: Map2d<Int> = passable.mapXy { x,y -> if (x % highwayDivisor == 0 || y % highwayDivisor == 0) 1 else 1000 }
+
+    // try x,y
+    private val initialMap: Map2d<Int> =
+        passable.mapXy { y, x -> if (x % highwayDivisor == 0 || y % highwayDivisor == 0) 1 else 1000 }
+
     // f values
+    private val initialPassable = passable
     private var costsF: Map2d<Int> = initialMap.copy()
 
     private val neighborFinder = NeighborFinder(passable, halfPassable, isLevel)
@@ -40,19 +50,33 @@ class GStar(
         costsF = initialMap.copy()
     }
 
+    fun resetPassable() {
+        passable = initialPassable.copy()
+    }
+
     val ENEMY_COST = 1000
 
-    fun setEnemy(point: FramePoint, size: Int = 16) {
-        costsF.modify(point, size) {
-            it + 100
+    fun setEnemy(from: FramePoint, point: FramePoint, size: Int = 16) {
+        // make cost relative to the distance??? so it's not all the same badness
+        costsF.modify(
+            from,
+            FramePoint(point.x - MapConstants.oneGrid, point.y - MapConstants.oneGrid),
+            size
+        ) { dist, current ->
+            current + (100 * (MapConstants.twoGrid - dist)) // the closer the higher
         }
-        // then add some cost to points around it
-        costsF.modify(point, size*2) {
-            it + 50
+        // the actual enemy should have very very high cost
+        costsF.modify(from, point, MapConstants.oneGrid) { dist, current ->
+            current + 100000
         }
-        costsF.modify(point, size*3) {
-            it + 25
-        }
+
+        //        // then add some cost to points around it
+//        costsF.modify(point, size*2) {
+//            it + 50
+//        }
+//        costsF.modify(point, size*3) {
+//            it + 25
+//        }
     }
 
     val totalCosts = mutableMapOf<FramePoint, Int>()
@@ -67,15 +91,43 @@ class GStar(
         return route(start, listOf(target), beforeStart)
     }
 
-    private fun setEnemyCosts(enemies: List<FramePoint> = emptyList()) {
+    private fun setEnemyCosts(from: FramePoint, enemies: List<FramePoint> = emptyList()) {
         reset()
         for (enemy in enemies) {
-            setEnemy(enemy)
+            setEnemy(from, enemy)
         }
     }
 
-    fun route(start: FramePoint, targets: List<FramePoint>, pointBeforeStart: FramePoint? = null, enemies: List<FramePoint> = emptyList()): List<FramePoint> {
-//        setEnemyCosts(enemies)
+    private fun setForcePassable(passableSpot: List<FramePoint> = emptyList()) {
+        resetPassable()
+        for (spot in passableSpot) {
+            // make it slighly
+            passable.modifyTo(spot, MapConstants.oneGrid, true)
+        }
+    }
+
+    fun route(
+        start: FramePoint,
+        targets: List<FramePoint>,
+        pointBeforeStart: FramePoint? = null,
+        enemies: List<FramePoint> = emptyList(),
+        forcePassable: List<FramePoint> = emptyList()
+    ): List<FramePoint> {
+        val nearEnemies = enemies.isNotEmpty()
+        val maxIter = if (nearEnemies) SHORT_ITER else MAX_ITER
+        // only if inside a radius
+        setEnemyCosts(start, enemies)
+        setForcePassable(forcePassable)
+        if (forcePassable.isNotEmpty()) {
+            d {" force passable "}
+            passable.write("forcePassable.csv") { v, x, y ->
+                when {
+                    v -> "."
+                    forcePassable[0].isInGrid(FramePoint(x, y)) -> "L"
+                    else -> "X"
+                }
+            }
+        }
 
         val closedList = mutableSetOf<FramePoint>()
         val cameFrom = mutableMapOf<FramePoint, FramePoint>()
@@ -86,8 +138,13 @@ class GStar(
             //Compares 2 Node objects stored in the PriorityQueue and Reorders the Queue according to the object which has the lowest fValue
 //            val cell1Val = totalCosts[cell1] ?: 0
 //            val cell2Val = totalCosts[cell2] ?: 0
-            val cell1Val = distanceToGoal[cell1] ?: 0
-            val cell2Val = distanceToGoal[cell2] ?: 0
+            // distance that makes link just go straight into death, ignoring cost why?
+//            val cell1Val = distanceToGoal[cell1] ?: 0
+//            val cell2Val = distanceToGoal[cell2] ?: 0
+
+            val cell1Val = (totalCosts[cell1] ?: 0) + (distanceToGoal[cell1] ?: 0)
+            val cell2Val = (totalCosts[cell2] ?: 0) + (distanceToGoal[cell2] ?: 0)
+
 //            d { "sort ${cell1} ${cell2} $cell1Val $cell2Val"}
             if (cell1Val < cell2Val) -1 else if (cell1Val > cell2Val) 1 else 0
         }
@@ -98,17 +155,19 @@ class GStar(
         openList.add(start)
         iterCount = 0
 //        while (true && iterCount < MAX_ITER) {
-        while (iterCount < MAX_ITER) {
+        while (iterCount < maxIter) {
             iterCount++
             if (DEBUG) {
-                d { " ****** ITERATION $iterCount open ${openList.size} ****** "}
+                d { " ****** ITERATION $iterCount open ${openList.size} ****** " }
             }
             if (DEBUG) {
                 openList.forEach {
-//                    d { " open: ${it.x}, ${it.y} cost ${totalCosts[it]} to " +
-//                            "goal" +
-//                            " " +
-//                            "${distanceToGoal[it]}" }
+                    d {
+                        " open: ${it.x}, ${it.y} cost ${totalCosts[it]} to " +
+                                "goal" +
+                                " " +
+                                "${distanceToGoal[it]}"
+                    }
                 }
             }
             // 6.5%
@@ -140,7 +199,7 @@ class GStar(
                 }
             } ?: null
             if (DEBUG) {
-                d { "from prev=$previousPoint to $point ${if (point.onHighway) "*" else ""} dir $dir"}
+                d { "from prev=$previousPoint to $point ${if (point.onHighway) "*" else ""} dir $dir" }
             }
 
             val neighbors = (neighborFinder.neighbors(point, dir, dist ?: 0) - closedList - avoid).shuffled()
@@ -148,34 +207,34 @@ class GStar(
                 // no need to check passable already did
 //                if (passable.get(it)) { // WTF removing causes infinite loop
 //                if (passableFrom(point, it)) {
-                    // raw cost of this cell
-                    val cost = costsF.get(toPoint)
-                    // add to the cost of the point
-                    val parentCost = costFromStart[point] ?: 99999
-                    // route to get to this point including parent
-                    val pathCost = cost + parentCost
+                // raw cost of this cell
+                val cost = costsF.get(toPoint)
+                // add to the cost of the point
+                val parentCost = costFromStart[point] ?: 99999
+                // route to get to this point including parent
+                val pathCost = cost + parentCost
 
-                    val costToGoal = toPoint.minDistToAny(target)
-                    val totalCost = costToGoal + pathCost
+                val costToGoal = toPoint.minDistToAny(target)
+                val totalCost = costToGoal + pathCost
 
-                    if (DEBUG) {
-                        d {
-                            " neighbor cost ${toPoint.x} ${toPoint.y} ${toPoint.direction ?: "n"} = $totalCost parent " +
-                                    "$parentCost toGoal = $costToGoal"
-                        }
+                if (DEBUG) {
+                    d {
+                        " neighbor cost ${toPoint.x} ${toPoint.y} ${toPoint.direction ?: "n"} = $totalCost parent " +
+                                "$parentCost toGoal = $costToGoal"
                     }
+                }
                 // bunch of changes...
-                    val costS = costFromStart.getOrDefault(toPoint, Int.MAX_VALUE)
+                val costS = costFromStart.getOrDefault(toPoint, Int.MAX_VALUE)
 //                d {" cost: $cost $costS"}
-                    if (cost < costS) {
-                        distanceToGoal[toPoint] = costToGoal
-                        costFromStart[toPoint] = pathCost
-                        totalCosts[toPoint] = totalCost
-                        cameFrom[toPoint] = point
-                        if (!openList.contains(toPoint)) {
-                            openList.add(toPoint)
-                        }
+                if (cost < costS) {
+                    distanceToGoal[toPoint] = costToGoal
+                    costFromStart[toPoint] = pathCost
+                    totalCosts[toPoint] = totalCost
+                    cameFrom[toPoint] = point
+                    if (!openList.contains(toPoint)) {
+                        openList.add(toPoint)
                     }
+                }
 //                } else {
 //                    if (DEBUG) {
 //                        d { " not passible $it" }
@@ -189,7 +248,7 @@ class GStar(
         }
 
         if (DEBUG) {
-            d { " ****** DONE $iterCount ****** "}
+            d { " ****** DONE $iterCount ****** " }
         }
         // todo: actually should pick the best path so far..
         return generatePath(target, cameFrom, point)
@@ -206,9 +265,11 @@ class GStar(
             // just the to
             Direction.Down -> passable.get(from.downEnd)
                     && passable.get(from.downEndRight)
+
             Direction.Up -> {
                 passable.get(from.upEnd) && passable.get(from.upEndRight)
             }
+            Direction.None -> true //
         }
         //* Can't go down if y + 16, is impassible
         //* can't go right if x + 16 is impassible
@@ -222,15 +283,19 @@ class GStar(
             from.x == to.x -> {
                 if (from.y < to.y) Direction.Down else Direction.Up
             }
+
             from.y == to.y -> {
                 if (from.x < to.x) Direction.Right else Direction.Left
             }
+
             else -> Direction.Left
         }
     }
 
-    private fun generatePath(targets: List<FramePoint>, cameFrom: Map<FramePoint,
-            FramePoint>, lastExplored: FramePoint): List<FramePoint> {
+    private fun generatePath(
+        targets: List<FramePoint>, cameFrom: Map<FramePoint,
+                FramePoint>, lastExplored: FramePoint
+    ): List<FramePoint> {
         val target = targets.firstOrNull { cameFrom.containsKey(it) }
 //        var current = target
         var current = target ?: lastExplored
@@ -246,14 +311,14 @@ class GStar(
         }
         if (DEBUG) {
             if (!cameFrom.containsKey(target)) {
-                d { "no target use $lastExplored looked for $target"}
+                d { "no target use $lastExplored looked for $target" }
 
                 cameFrom.forEach { t, u ->
-                    d { " $t -> $u"}
+                    d { " $t -> $u" }
                 }
-                d { " targets "}
+                d { " targets " }
                 for (target in targets) {
-                    d {" targ $target" }
+                    d { " targ $target" }
                 }
             }
             d { " start " }
@@ -262,8 +327,12 @@ class GStar(
             }
             d { " end " }
         }
+        val pathAdjusted = path.toMutableList()
+        if (DO_ADJUST) {
+            adjustCorner(pathAdjusted)
+        }
 
-        return path.toList().also {
+        return pathAdjusted.also {
             // this doesn't work well
 //            if (it.size > 2) {
 //                d { " avoid ${avoid}"}
@@ -274,10 +343,23 @@ class GStar(
 //            }
             if (DEBUG) {
                 d {
-                    it.fold("") { sum, e -> "$sum -> ${e.x},${e.y}${if (e.onHighway) "*" else ""} " }
+                    it.fold("") { sum, e -> "$sum -> ${e.x},${e.y}${if (e.onHighway) "*" else ""}${if (e.isTopRightCorner) "C" else ""} ${e.direction ?: ""}" }
                         .toString()
                 }
             }
         }
     }
+}
+
+//-> 128,119*C  -> 128,120*  -> 129,120*  -> 130,120*  -> 131,120*  -> 132,120*
+fun adjustCorner(path: MutableList<FramePoint>) {
+    if (path.size < 2) return
+    val corner = path[0]
+    if (!corner.isTopRightCorner) return
+    d { "THE CORNER $corner" }
+    for (pt in path.take(5)) {
+        d { " was pt $pt" }
+    }
+    path.set(1, path[0].right)
+    path.set(2, path[0].right.right)
 }

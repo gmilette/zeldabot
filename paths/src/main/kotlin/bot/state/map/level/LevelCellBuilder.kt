@@ -1,9 +1,13 @@
 package bot.state.map.level
 
+import bot.plan.gastar.GStar
+import bot.state.FramePoint
 import bot.state.MapCellPoint
 import bot.state.MapLoc
+import bot.state.isTopRightCorner
 import bot.state.map.*
 import util.Map2d
+import util.d
 
 class LevelCellBuilder {
     companion object {
@@ -193,6 +197,18 @@ class LevelCellBuilder {
 //                }
             rowCt++
         }
-        return Map2d(longRows.toList())
+        val passMap = Map2d(longRows.toList())
+//> 128,119*C  -> 128,120*  -> 129,120*  -> 1
+        return if (GStar.DO_MAKE_CORNERS) {
+            passMap.mapXy { y, x ->
+                val pt = FramePoint(x, y)
+                when {
+                    passMap.get(pt) -> true
+                    else -> pt.isTopRightCorner
+                }
+            }
+        } else {
+            passMap
+        }
     }
 }

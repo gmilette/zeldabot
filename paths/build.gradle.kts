@@ -19,7 +19,9 @@ buildscript {
 }
 
 plugins {
-//    kotlin("jvm") version "1.6.10"
+//    id("org.jetbrains.kotlinx.dataframe")
+    //    kotlin("jvm") version "1.6.10"
+//    id("org.jetbrains.kotlinx.dataframe") version "0.10.0"
     val kotlinVersion = "1.7.10"
     kotlin("jvm") version kotlinVersion
     kotlin("kapt") version kotlinVersion
@@ -40,7 +42,10 @@ repositories {
     google()
 }
 
+kotlin.sourceSets.getByName("main").kotlin.srcDir("build/generated/ksp/main/kotlin/")
+
 dependencies {
+    implementation("org.jetbrains.kotlinx:dataframe:0.10.0")
 //    implementation(compose.desktop.currentOs)
     implementation(compose.desktop.macos_arm64)
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.6.0")

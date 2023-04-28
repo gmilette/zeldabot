@@ -7,6 +7,7 @@ import bot.state.*
 import bot.state.map.Hyrule
 import bot.state.map.MapCell
 import bot.state.map.MapCellData
+import bot.state.map.MapConstants
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -14,23 +15,26 @@ import org.junit.Ignore
 import org.junit.Test
 import util.Map2d
 import util.d
+import kotlin.math.min
 
 class NavUtilTest {
-    @Ignore
+    //@Ignore
     @Test
     fun `test g`() {
+        GStar.DEBUG = true
         val map = Map2d.Builder<Boolean>().add(
             100, 100, true
         ).build()
 
         val cell = MapCell(MapCellPoint(0,0), 0, MapCellData.empty)
 
+        val from = FramePoint(10, 24)
         val gstar = GStar(map)
-        gstar.setEnemy(FramePoint(20, 20), 10)
-        gstar.setEnemy(FramePoint(30, 15), 10)
+        gstar.setEnemy(from, FramePoint(20, 24), 10)
+//        gstar.setEnemy(from, FramePoint(30, 15), 10)
 //        gstar.setEnemy(FramePoint(40, 25), 1)
 
-        gstar.route(FramePoint(10, 20), listOf(FramePoint(45, 20)), null)
+        val route = gstar.route(from, listOf(FramePoint(45, 24)), null)
     }
 
 
@@ -45,9 +49,9 @@ class NavUtilTest {
         cell.write()
 
         val pass = cell.passable.get(107 ,10)
-        d { " pass $pass"}
+        d { " pass $pass level $level"}
 
-        val gstar = GStar(cell.passable)
+        val gstar = GStar(cell.passable, halfPassable = true, isLevel = level != 0)
 
         val target = targets.get(0)
 
@@ -93,6 +97,7 @@ class NavUtilTest {
                 (x == target.x && y == target.y) -> "T"
                 route.any { it.x == x && it.y == y && it.x == firstPt.x && it.y == firstPt.y } -> "S"
                 route.any { it.x == x && it.y == y } -> "Z"
+                FramePoint(x, y).isTopRightCorner -> "C"
                 v -> if (x % 8 == 0 || y % 8 == 0) {
                     ":"
                 } else {
@@ -106,6 +111,24 @@ class NavUtilTest {
         route.size shouldBeGreaterThan 1
 //        d { " Route: $firstPt then ${route[1]} c ${cell.passable.get(FramePoint(122, 79).justRightEnd)}"}
         NavUtil.directionTo(from, route[1]) shouldBe dirResult
+    }
+
+    fun adjustCorner(first5: MutableList<FramePoint>) {
+        if (first5.size < 2) return
+        val corner = first5[0]
+        if (!corner.isTopRightCorner) return
+        d { "THE CORNER $corner" }
+        first5.set(1, first5[0].right)
+        first5.set(2, first5[0].right.right)
+
+//        first5.set(1)
+//        : (208, 82) false
+//        Debug: (Kermit)  : (208, 81) true
+//        Debug: (Kermit)  : (208, 80) false
+//        Debug: (Kermit)  : (209, 80) false
+//        Debug: (Kermit)  : (210, 80) false
+//        Debug: (Kermit) CORNER (208, 81)
+//        Debug: (Kermit)  next is (208, 81)
     }
 
     @Test
@@ -147,6 +170,41 @@ class NavUtilTest {
         // not on highway
         val start = FramePoint(61, 121)
         check(13, start, FramePoint(32, 96), GamePad.MoveUp, level = 7,
+            before = start.left)
+    }
+
+    @Test
+    fun `test move 3`() {
+        GStar.DEBUG = true
+        val start = FramePoint(48, 74)
+        check(13, start, FramePoint(32, 96), GamePad.MoveUp, level = 7,
+            before = start.left)
+    }
+
+    @Test
+    fun `test move 1 corner`() {
+        GStar.DEBUG = true
+//        val start = FramePoint(160 - MapConstants.twoGrid, 119)
+        val start = FramePoint(208, 120)
+        check(115, start, FramePoint(255, 120), GamePad.MoveUp, level = 1,
+            before = start.left)
+    }
+
+    @Test
+    fun `test move 2 corner`() {
+        GStar.DEBUG = true
+//        val start = FramePoint(160 - MapConstants.twoGrid, 119)
+        val start = FramePoint(208, 75) // higher up
+        check(114, start, FramePoint(250, 80), GamePad.MoveUp, level = 1,
+            before = start.left)
+    }
+
+    @Test
+    fun `test move 3 corner`() {
+        GStar.DEBUG = true
+//        val start = FramePoint(160 - MapConstants.twoGrid, 119)
+        val start = FramePoint(136, 61) // higher up
+        check(68, start, FramePoint(128, 48), GamePad.MoveUp, level = 1,
             before = start.left)
     }
 
