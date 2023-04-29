@@ -23,8 +23,8 @@ import util.d
 object LinkDirection { //14,16 attrib 01
     private val down = setOf(0x16, 0x14, 0x5A, 0x08, 0x5A, 0x58, 0x0A) //5A, attribute 00 is down
     private val up = setOf(0x0C, 0x0E, 0x18, 0x1A)
-    private val right = setOf((0x06).toInt(), (0x04).toInt()) // attribute 00, could be 02 with attrib 00
-    private val left = setOf((0x02).toInt(), (0x00).toInt(), (0x10).toInt(), (0x12).toInt()) // attribute 40
+    private val right = setOf((0x02).toInt(), (0x00).toInt(), (0x06).toInt(), (0x04).toInt()) // attribute 00, could be 02 with attrib 00
+    private val left = setOf((0x02).toInt(), (0x00).toInt(), (0x10).toInt(), (0x12).toInt()) // attribute 40 or 43
 
     private val downInt = down.map { it.toInt() }
     private val upInt = up.map { it.toInt() }
@@ -52,7 +52,7 @@ object LinkDirection { //14,16 attrib 01
             upInt.contains(tile) -> Direction.Up
             leftInt.contains(tile) ||
                 rightInt.contains(tile) -> {
-                if (attribute == 40 || attribute == 64) Direction.Left else Direction.Right
+                if (attribute == 40 || attribute == 64 || attribute == 43) Direction.Left else Direction.Right
             }
             else -> Direction.None
 //                .also {

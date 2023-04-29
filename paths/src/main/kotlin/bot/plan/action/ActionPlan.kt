@@ -359,7 +359,7 @@ class InsideNav(private val point: FramePoint) : Action {
 
 class InsideNavAbout(
     private val point: FramePoint, about: Int, vertical: Int = 1, negVertical: Int = 0,
-    val shop: Boolean = false, private val ignoreProjectiles: Boolean = false
+    val shop: Boolean = false, ignoreProjectiles: Boolean = false, private val makePassable: FramePoint? = null
 ) : Action {
     private val routeTo = RouteTo.hardlyReplan(dodgeEnemies = !shop, ignoreProjectiles)
     private val points: List<FramePoint>
@@ -384,7 +384,8 @@ class InsideNavAbout(
 //        }
 
     override fun nextStep(state: MapLocationState): GamePad =
-        routeTo.routeTo(state, points, overrideMapCell = if (shop) state.hyrule.shopMapCell else null)
+        routeTo.routeTo(state, points, overrideMapCell = if (shop) state.hyrule.shopMapCell else null,
+            makePassable = makePassable)
 
     override fun target(): FramePoint {
         return point
@@ -487,7 +488,7 @@ private class RouteTo(val params: Param = Param()) {
             RouteTo.Param(
                 planCountMax = 100,
                 dodgeEnemies = dodgeEnemies,
-                ignoreProjectiles = ignoreProjectiles
+                ignoreProjectiles = ignoreProjectiles,
             )
         )
     }
@@ -497,7 +498,7 @@ private class RouteTo(val params: Param = Param()) {
         // not used
         val considerLiveEnemies: Boolean = true,
         val dodgeEnemies: Boolean = true, // always dodge I think, unless i'm in a shop or something
-        val ignoreProjectiles: Boolean = false
+        val ignoreProjectiles: Boolean = false,
     )
 
     var route: FrameRoute? = null
@@ -510,19 +511,22 @@ private class RouteTo(val params: Param = Param()) {
         state: MapLocationState,
         to: List<FramePoint>,
         forceNewI: Boolean = false,
-        overrideMapCell: MapCell? = null
+        overrideMapCell: MapCell? = null,
+        makePassable: FramePoint? = null
     ): GamePad {
-        return attackOrRoute(state, to, forceNewI, overrideMapCell)
+        return attackOrRoute(state, to, forceNewI, overrideMapCell, makePassable)
     }
 
     private fun attackOrRoute(
         state: MapLocationState,
         to: List<FramePoint>,
         forceNewI: Boolean = false,
-        overrideMapCell: MapCell? = null
+        overrideMapCell: MapCell? = null,
+        makePassable: FramePoint? = null
     ): GamePad {
         // is this direction correct?
         // i tried dirActual
+        d { " route To with make passable $makePassable"}
 
         return if (params.dodgeEnemies && AttackAction.shouldAttack(state) &&
                 state.frameState.canUseSword
@@ -532,7 +536,7 @@ private class RouteTo(val params: Param = Param()) {
         } else {
             attack.reset()
             d { " prev ${state.previousMove.dirActual} NO ATTACK" }
-            doRouteTo(state, to, forceNewI, overrideMapCell)
+            doRouteTo(state, to, forceNewI, overrideMapCell, makePassable)
         }
     }
 
@@ -540,7 +544,8 @@ private class RouteTo(val params: Param = Param()) {
         state: MapLocationState,
         to: List<FramePoint>,
         forceNewI: Boolean = false,
-        overrideMapCell: MapCell? = null
+        overrideMapCell: MapCell? = null,
+        makePassable: FramePoint? = null
     ):
             GamePad {
         d { " DO routeTo TO ${to.size} first ${to.firstOrNull()?.toG} currently at ${state.currentMapCell.mapLoc}" }
@@ -633,6 +638,14 @@ private class RouteTo(val params: Param = Param()) {
                 else -> "I donno"
             }
 
+            val passable = mutableListOf<FramePoint>()
+            if (ladder != null) {
+                passable.add(ladder.point)
+            }
+            if (makePassable != null) {
+                passable.add(makePassable)
+            }
+
             val mapCell = overrideMapCell ?: state.currentMapCell
             // of if the expected point is not where we should be
             // need to re route
@@ -643,7 +656,7 @@ private class RouteTo(val params: Param = Param()) {
                     to,
                     state.previousMove.from,
                     avoid.map { it.point },
-                    ladder?.let { listOf(it.point) } ?: emptyList())
+                    passable)
             )
             d { " ${state.currentMapCell.mapLoc} new plan! because ($why)" }
             route?.next5()

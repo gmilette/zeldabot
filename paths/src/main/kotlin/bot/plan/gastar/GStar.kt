@@ -9,7 +9,7 @@ import util.d
 import java.util.*
 
 class GStar(
-    private var passable: Map2d<Boolean>,
+    var passable: Map2d<Boolean>,
     halfPassable: Boolean = true,
     isLevel: Boolean = false
 ) {
@@ -17,7 +17,7 @@ class GStar(
         var DEBUG = false
         private val DEBUG_DIR = false
         val DEBUG_ONE = false
-        val MAX_ITER = 10000
+        val MAX_ITER = 100000
         val SHORT_ITER = 1000
         val LIMIT_ITERATIONS = false
         val DO_CORNERS = true
@@ -52,6 +52,7 @@ class GStar(
 
     fun resetPassable() {
         passable = initialPassable.copy()
+        neighborFinder.passable = passable
     }
 
     val ENEMY_COST = 1000
@@ -87,8 +88,9 @@ class GStar(
         avoid.clear()
     }
 
-    fun route(start: FramePoint, beforeStart: FramePoint? = null, target: FramePoint): List<FramePoint> {
-        return route(start, listOf(target), beforeStart)
+    fun route(start: FramePoint, beforeStart: FramePoint? = null, target: FramePoint, makePassable: List<FramePoint> = emptyList()): List<FramePoint> {
+        return route(start, listOf(target), pointBeforeStart = beforeStart, enemies = emptyList(),
+            forcePassable = makePassable)
     }
 
     private fun setEnemyCosts(from: FramePoint, enemies: List<FramePoint> = emptyList()) {
@@ -99,10 +101,16 @@ class GStar(
     }
 
     private fun setForcePassable(passableSpot: List<FramePoint> = emptyList()) {
-        resetPassable()
-        for (spot in passableSpot) {
-            // make it slighly
-            passable.modifyTo(spot, MapConstants.oneGrid, true)
+        if (passableSpot.isNotEmpty()) {
+            d {" force passable $passableSpot"}
+            resetPassable()
+            for (spot in passableSpot) {
+                // make it slighly
+                passable.modifyTo(spot, MapConstants.oneGrid, true)
+            }
+        } else {
+            d {" force passable RESET"}
+            resetPassable()
         }
     }
 
@@ -118,16 +126,16 @@ class GStar(
         // only if inside a radius
         setEnemyCosts(start, enemies)
         setForcePassable(forcePassable)
-        if (forcePassable.isNotEmpty()) {
-            d {" force passable "}
-            passable.write("forcePassable.csv") { v, x, y ->
-                when {
-                    v -> "."
-                    forcePassable[0].isInGrid(FramePoint(x, y)) -> "L"
-                    else -> "X"
-                }
-            }
-        }
+//        if (forcePassable.isNotEmpty()) {
+//            d {" force passable "}
+//            passable.write("forcePassable.csv") { v, x, y ->
+//                when {
+//                    v -> "."
+//                    forcePassable[0].isInGrid(FramePoint(x, y)) -> "L"
+//                    else -> "X"
+//                }
+//            }
+//        }
 
         val closedList = mutableSetOf<FramePoint>()
         val cameFrom = mutableMapOf<FramePoint, FramePoint>()

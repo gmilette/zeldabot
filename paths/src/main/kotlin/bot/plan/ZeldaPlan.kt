@@ -198,23 +198,28 @@ object ZeldaPlan {
         return builder {
             startAt(InLocations.Overworld.start)
             phase("Opening sequence")
-//            obj(Dest.item(ZeldaItem.WoodenSword))
-//            obj(Dest.level(2))
-//            includeLevelPlan(levelPlan2(factory))
-//            // position by routing
-//            val sec:MapLoc = 61
-//            routeTo(sec.up)
-//            obj(Dest.Secrets.secretForest30NorthEast)
-//            obj(Dest.Secrets.bombSecret30North)
-//            obj(ZeldaItem.Letter)
-//            obj(Dest.Secrets.walk100)
-//            obj(Dest.Secrets.bombHeartNorth)
-//            obj(ZeldaItem.WhiteSword)
-//            obj(Dest.level(1))
-//            includeLevelPlan(levelPlan1(factory))
-//            obj(Dest.Shop.candleShopMid)
+            obj(Dest.item(ZeldaItem.WoodenSword))
+            obj(Dest.level(2))
+            includeLevelPlan(levelPlan2(factory))
+            // position by routing
+            val sec:MapLoc = 61
+            routeTo(sec.up)
+            obj(Dest.Secrets.secretForest30NorthEast)
+            obj(Dest.Secrets.bombSecret30North)
+            obj(ZeldaItem.Letter)
+            obj(Dest.Secrets.walk100)
+            obj(Dest.Secrets.bombHeartNorth)
+            obj(ZeldaItem.WhiteSword)
+            obj(Dest.level(1))
+            includeLevelPlan(levelPlan1(factory))
+            obj(Dest.Shop.candleShopMid)
             obj(Dest.level(3))
             includeLevelPlan(levelPlan3(factory))
+            // prob dont need this tweek
+            val forestD: MapLoc = 114
+            val forestD2: MapLoc = 99 + 16
+            routeTo(forestD2)
+            routeTo(forestD)
             obj(Dest.Secrets.fire100SouthBrown)
             // testing this
             val forest: MapLoc = 98
@@ -223,7 +228,7 @@ object ZeldaPlan {
 
             obj(Dest.Shop.blueRing, position = true)
             // avoid accidentally going back in
-            goIn(GamePad.MoveDown, 50) // test it
+            goIn(GamePad.MoveRight, 25) // test it
 //             position place right before level 4
 //             go to the right so when link goes up, it will be the right way
             routeTo(102)

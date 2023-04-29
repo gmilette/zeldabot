@@ -39,11 +39,11 @@ class NavUtilTest {
 
 
     private fun check(cell: MapLoc, from: FramePoint, target: FramePoint,
-                      dirResult: GamePad, level: Int = 0, before: FramePoint? = null) {
-        checkA(cell, from, listOf(target), before, dirResult, level)
+                      dirResult: GamePad, level: Int = 0, before: FramePoint? = null, makePassable: FramePoint? = null) {
+        checkA(cell, from, listOf(target), before, dirResult, level, makePassable = makePassable)
     }
     private fun checkA(cell: MapLoc, from: FramePoint, targets: List<FramePoint>,
-                       before: FramePoint? = null, dirResult: GamePad, level: Int = 0) {
+                       before: FramePoint? = null, dirResult: GamePad, level: Int = 0, makePassable: FramePoint? = null) {
         val hyrule = Hyrule()
         val cell = if (level == 0) hyrule.getMapCell(cell) else hyrule.levelMap.cell(level, cell)
         cell.write()
@@ -88,10 +88,30 @@ class NavUtilTest {
 
         d { " done writing "}
 
-        val route = gstar.route(from, before, target)
+        val passable = mutableListOf<FramePoint>()
+        if (makePassable != null) {
+            passable.add(makePassable)
+        }
+        val route = gstar.route(from, before, target, passable)
 
         val firstPt = route.get(0)
         cell.passable.write("check_1192_r") { v, x, y ->
+            val pt = FramePoint(x, y)
+            when {
+                (x == target.x && y == target.y) -> "T"
+                route.any { it.x == x && it.y == y && it.x == firstPt.x && it.y == firstPt.y } -> "S"
+                route.any { it.x == x && it.y == y } -> "Z"
+                FramePoint(x, y).isTopRightCorner -> "C"
+                v -> if (x % 8 == 0 || y % 8 == 0) {
+                    ":"
+                } else {
+                    "."
+                }
+                else -> "X"
+            }
+        }
+
+        gstar.passable.write("check_1192_rgstar") { v, x, y ->
             val pt = FramePoint(x, y)
             when {
                 (x == target.x && y == target.y) -> "T"
@@ -199,6 +219,7 @@ class NavUtilTest {
             before = start.left)
     }
 
+
     @Test
     fun `test move 3 corner`() {
         GStar.DEBUG = true
@@ -206,6 +227,18 @@ class NavUtilTest {
         val start = FramePoint(136, 61) // higher up
         check(68, start, FramePoint(128, 48), GamePad.MoveUp, level = 1,
             before = start.left)
+    }
+
+    @Test
+    fun `test make passable)`() {
+        GStar.DEBUG = true
+        //passable 128, 32)
+        val passable = FramePoint(128, 32)
+
+//        val start = FramePoint(160 - MapConstants.twoGrid, 119)
+        val start = FramePoint(104, 46)
+        check(98, start, FramePoint(128, 32), GamePad.MoveUp,
+            before = start.left, makePassable = passable)
     }
 
     @Test

@@ -489,9 +489,9 @@ class PlanBuilder(
         return this
     }
 
-    fun goTo(to: FramePoint): PlanBuilder {
+    fun goTo(to: FramePoint, makePassable: FramePoint? = null): PlanBuilder {
         // was 4,2
-        goAbout(to, 2, 1, true)
+        goAbout(to, 2, 1, true, makePassable = makePassable)
         return this
     }
 
@@ -622,7 +622,7 @@ class PlanBuilder(
         goIn(GamePad.None, 75)
 //        val nextTo = from.pointModifier(6)(to.down2)
         // modified the map for this
-        goTo(to)
+        goTo(to, to) // that should be passable now
         // maybe just keep trying to get to a location in center of the push
         goIn(opposite.toGamePad(), 16)
         goGetItem(itemLoc)
@@ -657,9 +657,9 @@ class PlanBuilder(
         return this
     }
 
-    fun goAbout(to: FramePoint, horizontal: Int, vertical: Int = 1, negVertical: Boolean = false, ignoreProjectiles: Boolean = false): PlanBuilder {
+    fun goAbout(to: FramePoint, horizontal: Int, vertical: Int = 1, negVertical: Boolean = false, ignoreProjectiles: Boolean = false, makePassable: FramePoint? = null): PlanBuilder {
         add(lastMapLoc, InsideNavAbout(to, horizontal, vertical, negVertical = if (negVertical) 1 else 0,
-            ignoreProjectiles = ignoreProjectiles))
+            ignoreProjectiles = ignoreProjectiles, makePassable = makePassable))
         return this
     }
 

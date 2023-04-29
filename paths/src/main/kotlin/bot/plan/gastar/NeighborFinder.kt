@@ -15,7 +15,7 @@ import util.d
 //                    passible.maxY && passible.get(it) }
 
 class NeighborFinder(
-    private val passable: Map2d<Boolean>,
+    var passable: Map2d<Boolean>,
     private val halfPassable: Boolean = true,
     /**
      * inside the level, link cannot move halfway into any part of the top two grids

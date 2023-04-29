@@ -151,7 +151,7 @@ class LevelSpecBuilder {
             LevelSpec(laddercross.right, e(l, r, u), "beast maze", LevelMapTemplateReader.Temp.lev_maze, isHalfPassable = false),
             LevelSpec(laddercross.right.right, e(l, r, u), "ladder entry", LevelMapTemplateReader.Temp.lev_block2center),
 
-            LevelSpec(laddercross.up, e(u, r), "beasts", LevelMapTemplateReader.Temp.lev_water_center_path),
+            LevelSpec(laddercross.up, e(u, r, d), "beasts", LevelMapTemplateReader.Temp.lev_water_center_path),
             LevelSpec(laddercross.up.up, e(u, r), "fourmonster", LevelMapTemplateReader.Temp.lev_corner_bottom4),
             LevelSpec(laddercross.up.up.right, e(u, d, l, r), "money", LevelMapTemplateReader.Temp.lev_empty),
             //LevelSpec(laddercross.up.up.right.up, e(d, l, r), "money up batkey", LevelMapTemplateReader.Temp.lev_water_maze),
