@@ -202,74 +202,91 @@ fun main() = application {
 
 @Composable
 private fun HyruleMap(state: MapLocationState, plan: PlanRunner) {
-    val link = state.link
-    val path: List<FramePoint> = emptyList()
-    val enemies: List<Agent> = state.frameState.enemiesSorted.filter { it.state == EnemyState.Alive }
-    val projectiles: List<Agent> = state.frameState.enemiesSorted.filter { it.state == EnemyState.Projectile }
+    try {
+        val link = state.link
+        val path: List<FramePoint> = emptyList()
+        val enemies: List<Agent> = state.frameState.enemiesSorted.filter { it.state == EnemyState.Alive }
+        val projectiles: List<Agent> = state.frameState.enemiesSorted.filter { it.state == EnemyState.Projectile }
 
-    val v = 2
-    Canvas(
-        modifier = Modifier.width((MapConstants.MAX_X.toFloat()*v).dp)
-            .height((MapConstants.MAX_Y.toFloat()*v).dp )
-    ) {
-        drawIntoCanvas { canvas ->
-            val paint = Paint()
-            paint.color = Color.Black
-            val linkPathPaint = Paint()
-            linkPathPaint.color = Color.Blue
-            val targetPaint = Paint()
-            targetPaint.color = Color.Cyan
-            val passablePaint = Paint()
-            passablePaint.color = Color.LightGray
-            val notPassable = Paint()
-            notPassable.color = Color.Gray
-            val enemyPaint = Paint()
-            enemyPaint.color = Color.Red
-            val projPaint = Paint()
-            projPaint.color = Color.Magenta
+        val v = 2
+        Canvas(
+            modifier = Modifier.width((MapConstants.MAX_X.toFloat() * v).dp)
+                .height((MapConstants.MAX_Y.toFloat() * v).dp)
+        ) {
+            drawIntoCanvas { canvas ->
+                val paint = Paint()
+                paint.color = Color.Black
+                val linkPathPaint = Paint()
+                linkPathPaint.color = Color.Blue
+                val targetPaint = Paint()
+                targetPaint.color = Color.Cyan
+                val passablePaint = Paint()
+                passablePaint.color = Color.LightGray
+                val notPassable = Paint()
+                notPassable.color = Color.Gray
+                val enemyPaint = Paint()
+                enemyPaint.color = Color.Red
+                val projPaint = Paint()
+                projPaint.color = Color.Magenta
 //            canvas.drawRect(0f, 0f, MapConstants.MAX_X.toFloat()*(v+1), MapConstants.MAX_Y.toFloat()*(v+1), paint)
 
 //            d { " draw map cell"}
 //            //for
-            val passable = state.currentMapCell.passable
+                val passable = state.currentMapCell.passable
 
 ////            canvas.drawRect(x.toFloat(),y.toFloat(),x+v.toFloat(),y+v.toFloat(), passablePaint)
-            for (x in 0..255) {
-                val xa = x*v
+                for (x in 0..255) {
+                    val xa = x * v
 //                for (y in 0..167) {
                     for (y in 0..167) {
 //                val pt = point.toScreenY
-                    val ya = y*v
-                    if (passable.get(x, y)) {
-                        canvas.drawRect(xa.toFloat(),ya.toFloat(),(xa+1)*v.toFloat(),(ya+1)*v.toFloat(), passablePaint)
-                    } else {
-                        canvas.drawRect(xa.toFloat(),ya.toFloat(),(xa+1)*v.toFloat(),(ya+1)*v.toFloat(), notPassable)
+                        val ya = y * v
+                        if (passable.get(x, y)) {
+                            canvas.drawRect(
+                                xa.toFloat(),
+                                ya.toFloat(),
+                                (xa + 1) * v.toFloat(),
+                                (ya + 1) * v.toFloat(),
+                                passablePaint
+                            )
+                        } else {
+                            canvas.drawRect(
+                                xa.toFloat(),
+                                ya.toFloat(),
+                                (xa + 1) * v.toFloat(),
+                                (ya + 1) * v.toFloat(),
+                                notPassable
+                            )
+                        }
                     }
                 }
-            }
-            drawPoint(canvas, v, link, paint)
-            // draw path: linkPathPaint
-            for (enemy in enemies) {
-                drawGridPoint(canvas, v, enemy.point, enemyPaint)
-            }
-            for (pro in projectiles) {
-                drawGridPoint(canvas, v, pro.point, projPaint)
-            }
-
-            drawPoint(canvas, v, plan.target(), targetPaint)
-
-            val path = Path()
-            val linkPath = plan.path()
-            if (linkPath.isNotEmpty()) {
-                d { " draw path ${linkPath.size}"}
-                path.moveTo(linkPath[0].x.toFloat()*v, linkPath[0].y.toFloat()*v)
-                for (pt in linkPath) {
-                    path.lineTo(pt.x.toFloat()*v, pt.y.toFloat()*v)
+                drawPoint(canvas, v, link, paint)
+                // draw path: linkPathPaint
+                for (enemy in enemies) {
+                    drawGridPoint(canvas, v, enemy.point, enemyPaint)
                 }
-                canvas.drawPath(path, linkPathPaint)
+                for (pro in projectiles) {
+                    drawGridPoint(canvas, v, pro.point, projPaint)
+                }
+
+                drawPoint(canvas, v, plan.target(), targetPaint)
+
+                val path = Path()
+                val linkPath = plan.path()
+                if (linkPath.isNotEmpty()) {
+                    d { " draw path ${linkPath.size}" }
+                    path.moveTo(linkPath[0].x.toFloat() * v, linkPath[0].y.toFloat() * v)
+                    for (pt in linkPath) {
+                        path.lineTo(pt.x.toFloat() * v, pt.y.toFloat() * v)
+                    }
+                    canvas.drawPath(path, linkPathPaint)
+                }
+                // top is les than bottom
             }
-            // top is les than bottom
         }
+    }
+    catch (e: Exception) {
+        util.e { " map drawing crashed ${e}"}
     }
 }
 

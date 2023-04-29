@@ -246,11 +246,14 @@ object ZeldaPlan {
             goIn(GamePad.MoveLeft, 200)
             obj(Dest.Heart.raftHeart, itemLoc = Objective.ItemLoc.Right)
 
+            // after this link just went left, where is he going?
+
             phase("level 5")
-            routeTo(83) // position so we don't go through the 100 secret forest and get stuck
             obj(Dest.level(5))
             includeLevelPlan(levelPlan5(factory))
             phase("gear for level 6")
+            // i think this is not needed,  maybe it's after level5?
+//            routeTo(83) // position so we don't go through the 100 secret forest and get stuck
 //
             obj(ZeldaItem.PowerBracelet, itemLoc = Objective.ItemLoc.None)
 //            // make up and objective to walk to high up
