@@ -202,7 +202,6 @@ fun main() = application {
 
 @Composable
 private fun HyruleMap(state: MapLocationState, plan: PlanRunner) {
-    try {
         val link = state.link
         val path: List<FramePoint> = emptyList()
         val enemies: List<Agent> = state.frameState.enemiesSorted.filter { it.state == EnemyState.Alive }
@@ -234,32 +233,34 @@ private fun HyruleMap(state: MapLocationState, plan: PlanRunner) {
 //            //for
                 val passable = state.currentMapCell.passable
 
-////            canvas.drawRect(x.toFloat(),y.toFloat(),x+v.toFloat(),y+v.toFloat(), passablePaint)
-                for (x in 0..255) {
-                    val xa = x * v
-//                for (y in 0..167) {
-                    for (y in 0..167) {
-//                val pt = point.toScreenY
-                        val ya = y * v
-                        if (passable.get(x, y)) {
-                            canvas.drawRect(
-                                xa.toFloat(),
-                                ya.toFloat(),
-                                (xa + 1) * v.toFloat(),
-                                (ya + 1) * v.toFloat(),
-                                passablePaint
-                            )
-                        } else {
-                            canvas.drawRect(
-                                xa.toFloat(),
-                                ya.toFloat(),
-                                (xa + 1) * v.toFloat(),
-                                (ya + 1) * v.toFloat(),
-                                notPassable
-                            )
+                try {
+                    for (x in 0..255) {
+                        val xa = x * v
+                        for (y in 0..167) {
+                            val ya = y * v
+                            if (passable.get(x, y)) {
+                                canvas.drawRect(
+                                    xa.toFloat(),
+                                    ya.toFloat(),
+                                    (xa + 1) * v.toFloat(),
+                                    (ya + 1) * v.toFloat(),
+                                    passablePaint
+                                )
+                            } else {
+                                canvas.drawRect(
+                                    xa.toFloat(),
+                                    ya.toFloat(),
+                                    (xa + 1) * v.toFloat(),
+                                    (ya + 1) * v.toFloat(),
+                                    notPassable
+                                )
+                            }
                         }
                     }
+                } catch (e: Exception) {
+                    util.e { " map drawing crashed $e" }
                 }
+
                 drawPoint(canvas, v, link, paint)
                 // draw path: linkPathPaint
                 for (enemy in enemies) {
@@ -284,10 +285,6 @@ private fun HyruleMap(state: MapLocationState, plan: PlanRunner) {
                 // top is les than bottom
             }
         }
-    }
-    catch (e: Exception) {
-        util.e { " map drawing crashed ${e}"}
-    }
 }
 
 private fun drawPoint(canvas: Canvas, v: Int, pt: FramePoint, paint: Paint) {

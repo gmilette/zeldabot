@@ -20,6 +20,7 @@ import sequence.*
 object InLocations {
     val topMiddleBombSpot = FramePoint(120, 32)
     val bombRight = FramePoint(13.grid - 5, 5.grid)
+    val bombRightExactly = FramePoint(13.grid, 5.grid)
     val bombLeft = FramePoint(2.grid + 5, 5.grid)
     val diamondLeftTopPush = FramePoint(96, 64 )
     val diamondLeftBottomPush = FramePoint(96, 96)
@@ -113,9 +114,9 @@ object ZeldaPlan {
 
 //        return levelTour(factory)
 //        return bombTour(factory)
-        return real(factory)
+//        return real(factory)
 //        return realNoStuff(factory)
-//        return part(factory)
+        return part(factory)
     }
 
     private fun levelTour(factory: PlanInputs): MasterPlan {
@@ -148,7 +149,7 @@ object ZeldaPlan {
 //            startAt(InLocations.Overworld.start)
 //            obj(Dest.item(ZeldaItem.WoodenSword))
 //            obj(Dest.level(1))
-            includeLevelPlan(levelPlan1(factory))
+//            includeLevelPlan(levelPlan1(factory))
 //            obj(Dest.level(3))
 //            includeLevelPlan(levelPlan3(factory))
 //            obj(Dest.level(4))
@@ -157,7 +158,7 @@ object ZeldaPlan {
 //            includeLevelPlan(levelPlan5(factory))
 
 //            includeLevelPlan(levelPlan6(factory))
-//            includeLevelPlan(levelPlan7(factory))
+            includeLevelPlan(levelPlan7(factory))
 //            includeLevelPlan(levelPlan8(factory))
 //            includeLevelPlan(levelPlan9(factory))
         }
@@ -661,7 +662,7 @@ object ZeldaPlan {
             upm // skip
             seg("squishies")
             up // todo grab key in center
-            seg("past traps")
+            seg("kill bats")
             // have to kill them to go up
             kill // can't there too many fireballs, just move on
             // get key after kill
@@ -672,19 +673,19 @@ object ZeldaPlan {
             // failed, ghosts do not move therefore, we dont know
             // when they are killed
             // ghosts, have their id's cycle
-            killUntil(1) // there is the suns so
+            kill //            killUntil(1) // there is the suns so
             pushJust(InLocations.Level6.moveUp)
             upm // 38
-            startAt(40) // state9
-            kill // just to make sure the bomb is successful
-            bomb(InLocations.bombRight)
-            seg("go up to get want")
+            // maybe
+            killUntil(3) // leave some alive, just do some damage so bomb is successful
+//            kill // just to make sure the bomb is successful
+            bomb(InLocations.bombRightExactly) // there is a block near the bomb spot
+            seg("go up to get wand")
             right // 39
             up
             up
             seg("get want")
-            startAt(9) //save8
-            kill
+            kill // 9
 //            pushJust(InLocations.Level6.moveUp)
             // 117
 //            goTo(InLocations.Level5.cornerStairs)
@@ -782,6 +783,7 @@ object ZeldaPlan {
             bomb(InLocations.bombRight)
             right
             seg("Kill hands")
+            startHere
             startAt(13)
             killHandsInLevel7
 //            kill3

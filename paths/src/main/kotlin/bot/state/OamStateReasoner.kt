@@ -265,8 +265,8 @@ data class SpriteData(
 //            rhinoTail, // but it also the dragon's head
 //            rhinoMid,
             // keep for now, but I have to make link not attack sometimes
-            secretEverybodyMonsterOrCircleEnemyLeft,
-            secretEverybodyMonsterOrCircleEnemyRight
+//            secretEverybodyMonsterOrCircleEnemyLeft,
+//            secretEverybodyMonsterOrCircleEnemyRight
         )
         val projectiles = setOf(
             124, 126, // ghost attack
@@ -314,6 +314,11 @@ data class SpriteData(
     }
 }
 
+//val grabbyHands = 142
+val grabbyHands = (0xAE).toInt() //158
+val grabbyHands2 = (0xAC).toInt()
+
+val ghost = (0xBC).toInt()
 val bombSmoke = 112
 val circleEnemy = (0xC8).toInt() // attribute 42 and 2
 val monsterCloud = (0x70).toInt()

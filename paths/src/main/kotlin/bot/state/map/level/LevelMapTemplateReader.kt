@@ -24,6 +24,7 @@ class LevelMapTemplateReader {
         lev_maze,
         lev_maze_path,
         lev_stairs_center,
+        lev_stairs_center_blocked,
         lev_triforce,
         lev_getitem,
         lev_getitem_move,

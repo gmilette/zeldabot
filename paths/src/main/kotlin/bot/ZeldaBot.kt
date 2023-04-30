@@ -134,7 +134,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         if (setEquipmentCt > 0) {
             d { " Set equip"}
             frameStateUpdater.setSword(ZeldaItem.MagicSword)
-            frameStateUpdater.setLadderAndRaft(false)
+            frameStateUpdater.setLadderAndRaft(true)
             frameStateUpdater.setRedCandle()
             frameStateUpdater.setHaveWhistle()
             frameStateUpdater.setBait()

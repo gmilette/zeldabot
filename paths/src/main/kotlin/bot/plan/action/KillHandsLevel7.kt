@@ -1,31 +1,29 @@
-import bot.state.GamePad
 import bot.plan.action.*
-import bot.state.EnemyState
-import bot.state.FramePoint
-import bot.state.MapLocationState
+import bot.state.*
 import bot.state.map.grid
 import util.d
 
 class KillHandsInLevel7 : Action {
-    private val safe = ActionSequence(InsideNavAbout(KillHandsLevel7Data.safe, 4), still)
+    private val safe = ActionSequence(InsideNavAbout(KillHandsLevel7Data.safe, 4, ignoreProjectiles = true), still)
     private val positionAttack = ActionSequence(
         InsideNavAbout(KillHandsLevel7Data.attackFrom, 0),
         GoIn(5, GamePad.MoveLeft, reset = true), AlwaysAttack()
     )
-    private val attract = ActionSequence(InsideNavAbout(KillHandsLevel7Data.attractFrom, 0), GoIn(5, GamePad.MoveLeft, reset = true), still)
+    private val attract = ActionSequence(InsideNavAbout(KillHandsLevel7Data.attractFrom, 0, ignoreProjectiles = true), GoIn(5, GamePad.MoveLeft, reset = true), still)
 
     private var lastAction = ""
     private var lastTarget = FramePoint(0, 0)
 
     private val criteria = DeadForAWhile {
-        lastAction != "SAFE" && it.clearedWithMinIgnoreLoot(3)
+        lastAction != "SAFE" && it.clearedWithMinIgnoreLoot(0) // leave no enemies
     }
 
     // need to wait to make sure they are killed maybe
     override fun complete(state: MapLocationState): Boolean = criteria(state)
 
+    // was droppedId == 1
     private val MapLocationState.handActive: Boolean
-        get() = this.frameState.enemies.any { it.droppedId == 1 && it.state == EnemyState.Alive }
+        get() = this.frameState.enemies.any { it.tile == grabbyHands && it.state == EnemyState.Alive }
 
     override fun target(): FramePoint {
         return super.target()
@@ -66,5 +64,5 @@ class KillHandsInLevel7 : Action {
 object KillHandsLevel7Data {
     val safe = FramePoint(3.grid, 6.grid)
     val attackFrom = FramePoint(3.grid, 6.grid)
-    val attractFrom = FramePoint(2.grid-1, 6.grid)
+    val attractFrom = FramePoint(2.grid, 6.grid) //-1?
 }

@@ -460,7 +460,7 @@ open class Bomb(private val target: FramePoint) : Action {
 }
 
 class ExitShop() : Action {
-    private val routeTo = RouteTo.hardlyReplan()
+    private val routeTo = RouteTo.hardlyReplan(dodgeEnemies = false)
     override fun complete(state: MapLocationState): Boolean =
         (state.hyrule.shopMapCell.exitsFor(Direction.Down)?.contains(state.frameState.link.point.down7) == true).also {
             if (it) {
@@ -1302,10 +1302,12 @@ class KillAll(
         } else {
             // maybe we want to kill closest
             // find the alive enemies
-            var aliveEnemies = state.frameState.enemiesClosestToLink().filter {
-                // test
-                it.index >= numberLeftToBeDead
-            }
+            // no need to do this anymore
+//            var aliveEnemies = state.frameState.enemiesClosestToLink().filter {
+//                // test
+//                it.index >= numberLeftToBeDead
+//            }
+            var aliveEnemies = state.frameState.enemiesClosestToLink()
             if (targetOnly.isNotEmpty()) {
                 d { " target only ${targetOnly}"}
                 aliveEnemies = aliveEnemies.filter { targetOnly.contains(it.tile) }
