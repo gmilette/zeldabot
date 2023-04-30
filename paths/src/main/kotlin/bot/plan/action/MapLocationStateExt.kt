@@ -35,7 +35,7 @@ val MapLocationState.projectile: List<Agent>
     get() = frameState.enemies.filter { it.state == EnemyState.Projectile }
 
 val MapLocationState.longWait: List<Agent>
-    get() = frameState.enemies.filter { longWaitEnemies.contains(it.tile)}
+    get() = frameState.enemies.filter { TileInfo.longWaitEnemies.contains(it.tile)}
 
 val MapLocationState.aliveOrProjectile: List<Agent>
     get() = frameState.enemies.filter { it.state == EnemyState.Alive || it.state == EnemyState.Projectile }

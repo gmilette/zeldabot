@@ -314,6 +314,14 @@ data class SpriteData(
     }
 }
 
+object TileInfo {
+    val longWaitEnemies = setOf(
+        184, 186, // ghost
+        ghost,
+        rhinoHeadDown, rhinoHeadDown2, rhinoHead, rhinoHead2
+    )
+}
+
 //val grabbyHands = 142
 val grabbyHands = (0xAE).toInt() //158
 val grabbyHands2 = (0xAC).toInt()
@@ -401,11 +409,6 @@ val rhinoHead2 = (0xE0).toInt()
 
 val rhinoTail = (0xDC).toInt()
 val rhinoMid = (0xDE).toInt()
-
-val longWaitEnemies = setOf(
-    184, 186, // ghost
-    rhinoHeadDown, rhinoHeadDown2, rhinoHead, rhinoHead2
-)
 
 // enemies
 // https://www.computerarcheology.com/NES/Zelda/Bank3.html
