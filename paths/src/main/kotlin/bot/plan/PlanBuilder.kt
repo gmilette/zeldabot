@@ -387,8 +387,8 @@ class PlanBuilder(
                 }
             }
         }
-        // go to stairs
-        add(lastMapLoc, InsideNav(stairsTarget))
+        // go to stairs, maybe not always ignore projectiles
+        add(lastMapLoc, InsideNav(stairsTarget, ignoreProjectiles = true))
         if (thenGo != GamePad.None) {
             goIn(thenGo, 15)
         }

@@ -159,8 +159,8 @@ object ZeldaPlan {
 
 //            includeLevelPlan(levelPlan6(factory))
 //            includeLevelPlan(levelPlan7(factory))
-            includeLevelPlan(levelPlan8(factory))
-//            includeLevelPlan(levelPlan9(factory))
+//            includeLevelPlan(levelPlan8(factory))
+            includeLevelPlan(levelPlan9(factory))
         }
     }
 
@@ -961,7 +961,7 @@ object ZeldaPlan {
                 stairsTarget = InLocations.Level5.cornerStairsBefore,
                 directionFrom = Direction.Left,
                 position = FramePoint(3.grid, 5.grid),
-                thenGo = GamePad.MoveRight
+                thenGo = GamePad.MoveRight,
             )
         }
     }

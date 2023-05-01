@@ -337,8 +337,8 @@ class SwitchToItem(private val inventoryPosition: Int = Inventory.Selected.candl
 }
 
 // move to this location then complete
-class InsideNav(private val point: FramePoint) : Action {
-    private val routeTo = RouteTo.hardlyReplan()
+class InsideNav(private val point: FramePoint, ignoreProjectiles: Boolean = false) : Action {
+    private val routeTo = RouteTo.hardlyReplan(ignoreProjectiles = ignoreProjectiles)
     override fun complete(state: MapLocationState): Boolean =
         state.frameState.link.point == point
 
