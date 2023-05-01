@@ -158,8 +158,8 @@ object ZeldaPlan {
 //            includeLevelPlan(levelPlan5(factory))
 
 //            includeLevelPlan(levelPlan6(factory))
-            includeLevelPlan(levelPlan7(factory))
-//            includeLevelPlan(levelPlan8(factory))
+//            includeLevelPlan(levelPlan7(factory))
+            includeLevelPlan(levelPlan8(factory))
 //            includeLevelPlan(levelPlan9(factory))
         }
     }
@@ -808,7 +808,7 @@ object ZeldaPlan {
             bomb(InLocations.bombRight)
             seg("dragon")
             rightm
-            kill
+            killLev1Dragon // aim for the head
             goTo(InLocations.Level7.triforceHeart)
             right
             goTo(InLocations.Level2.triforce)
@@ -873,7 +873,7 @@ object ZeldaPlan {
             bomb(InLocations.topMiddleBombSpot)
             "kill dragon".seg()
             upm
-            kill
+            killLev4Dragon // dragon
             goTo(InLocations.Level8.triforceHeart)
             up
             goTo(InLocations.Level2.triforce)

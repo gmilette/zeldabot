@@ -259,7 +259,8 @@ class LevelSpecBuilder {
             LevelSpec(grumble.up.right.right.right, e(l, r, u), "guys with bomb", LevelMapTemplateReader.Temp.lev_corner),
             LevelSpec(grumble.up.right.right.right.right, e(l, u), "whistle guy", LevelMapTemplateReader.Temp.lev_corner),
             LevelSpec(grumble.up.right.right.right.right.up, e(d, r), "block bomb right", LevelMapTemplateReader.Temp.lev_block2center),
-            LevelSpec(grumble.up.right.right.right.right.up.right, e(l), "u shape stair", LevelMapTemplateReader.Temp.lev_u),
+            // purposely do not show a left exit to encourage link not to exit the level
+            LevelSpec(grumble.up.right.right.right.right.up.right, e(r), "u shape stair", LevelMapTemplateReader.Temp.lev_u),
 
             LevelSpec(grumble.right, e(l, r), "end stair", LevelMapTemplateReader.Temp.lev_stairs_center),
             LevelSpec(grumble.right.right, e(l, r), "dragon", LevelMapTemplateReader.Temp.lev_dragon_right),
@@ -291,7 +292,7 @@ class LevelSpecBuilder {
             LevelSpec(masterbattle, e(u, d, r), "master battle", LevelMapTemplateReader.Temp.lev_block2center),
             LevelSpec(masterbattle.up, e(l, u, d, r), "four bomb guy", LevelMapTemplateReader.Temp.lev_corner),
             LevelSpec(masterbattle.up.up, e(l, u, d, r), "arrow guy", LevelMapTemplateReader.Temp.lev_corner),
-            LevelSpec(masterbattle.up.up.right, e(l), "key stairs", LevelMapTemplateReader.Temp.lev_stairs_center),
+            LevelSpec(masterbattle.up.up.right, e(l), "key stairs", LevelMapTemplateReader.Temp.lev_stairs_center_blocked),
 
             LevelSpec(masterbattle.right, e(l), "stairs to boss", LevelMapTemplateReader.Temp.lev_stair_side),
 

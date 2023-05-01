@@ -23,7 +23,7 @@ class KillHandsInLevel7 : Action {
 
     // was droppedId == 1
     private val MapLocationState.handActive: Boolean
-        get() = this.frameState.enemies.any { it.tile == grabbyHands && it.state == EnemyState.Alive }
+        get() = this.frameState.enemies.any { (it.tile == grabbyHands || it.tile == grabbyHands2)  && it.state == EnemyState.Alive }
 
     override fun target(): FramePoint {
         return super.target()
@@ -32,6 +32,8 @@ class KillHandsInLevel7 : Action {
     override fun nextStep(state: MapLocationState): GamePad {
         d {"KillHandsInLevel7 has hands ${state.handActive}"}
         criteria.nextStep(state)
+
+        state.frameState.logAliveEnemies()
 
         return when {
             !state.frameState.canUseSword -> safe.nextStep(state).also {

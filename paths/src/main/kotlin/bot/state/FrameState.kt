@@ -85,6 +85,13 @@ class FrameState(
         }
     }
 
+    fun logAliveEnemies() {
+        d { " remaining enemies: ${enemies.size}" }
+        for (enemy in enemiesSorted.filter { it.state == EnemyState.Alive }) {
+            d { " remaining enemy $enemy" }
+        }
+    }
+
     val enemiesSorted: List<Agent>
         get() = enemies.sortedBy { it.point.distTo(link.point) }
 }

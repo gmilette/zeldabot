@@ -21,7 +21,7 @@ import util.d
 //96, // link again
 
 object LinkDirection { //14,16 attrib 01
-    private val down = setOf(0x16, 0x14, 0x5A, 0x08, 0x5A, 0x58, 0x0A) //5A, attribute 00 is down
+    private val down = setOf(0x16, 0x14, 0x5A, 0x08, 0x5A, 0x58, 0x0A, 0x60) //5A, attribute 00 is down. 60, attribute 00, 08 attribute 40
     private val up = setOf(0x0C, 0x0E, 0x18, 0x1A)
     private val right = setOf((0x02).toInt(), (0x00).toInt(), (0x06).toInt(), (0x04).toInt()) // attribute 00, could be 02 with attrib 00
     private val left = setOf((0x02).toInt(), (0x00).toInt(), (0x10).toInt(), (0x12).toInt()) // attribute 40 or 43
@@ -290,6 +290,7 @@ data class SpriteData(
 //            brownBoomerang,
             bow,
             map,
+            masterKey,
             raft,
             bigHeart,
             fairy,
@@ -320,11 +321,14 @@ object TileInfo {
         ghost,
         rhinoHeadDown, rhinoHeadDown2, rhinoHead, rhinoHead2
     )
+
+    const val oldWoman = (0x9a).toInt()
+
 }
 
 //val grabbyHands = 142
 val grabbyHands = (0xAE).toInt() //158
-val grabbyHands2 = (0xAC).toInt()
+val grabbyHands2 = (0xAC).toInt() // 172
 
 val ghost = (0xBC).toInt()
 val bombSmoke = 112
@@ -377,9 +381,10 @@ val fairy2 = (0x52).toInt()
 val wizard = (0x98).toInt() // 152
 val flame1 = (0x5C).toInt() //92
 val flame2 = (0x5E).toInt() //94
-val oldWoman = (0x9a).toInt()
-val potion = (0x99).toInt() //?
+const val oldWoman = (0x9a).toInt()
+const val potion = (0x99).toInt() //?
 val whistle = (0x24).toInt()
+val masterKey = (0x2C).toInt()
 
 val secretEverybodyMonsterOrCircleEnemyLeft = 250 // fa
 val secretEverybodyMonsterOrCircleEnemyRight = 248 // f8
