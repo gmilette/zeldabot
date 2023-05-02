@@ -114,9 +114,9 @@ object ZeldaPlan {
 
 //        return levelTour(factory)
 //        return bombTour(factory)
-//        return real(factory)
+        return real(factory)
 //        return realNoStuff(factory)
-        return part(factory)
+//        return part(factory)
     }
 
     private fun levelTour(factory: PlanInputs): MasterPlan {
