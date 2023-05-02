@@ -243,11 +243,11 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         if (act) {
             currentGamePad = getAction(currentFrame, currentGamePad)
             if (doAct) {
-                skipDb.save(
-                    frameStateUpdater.state.frameState.level,
-                    frameStateUpdater.state.currentMapCell.mapLoc,
-                    frameStateUpdater.state.previousMove
-                )
+//                skipDb.save(
+//                    frameStateUpdater.state.frameState.level,
+//                    frameStateUpdater.state.currentMapCell.mapLoc,
+//                    frameStateUpdater.state.previousMove
+//                )
             }
             d { " action: at ${frameStateUpdater.state.frameState.link.point} do -> $currentGamePad previous ${frameStateUpdater.state.previousMove.move}"}
 

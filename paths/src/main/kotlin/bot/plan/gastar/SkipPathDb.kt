@@ -16,7 +16,7 @@ class SkipPathDb {
     private var previousMove2: PreviousMove? = null
     private var previousMove3: PreviousMove? = null
 
-    private val filename = "../skips${File.separator}skips.csv"
+    private val filename = "../../skips${File.separator}skips.csv"
 
     init {
         // only if this thing is empty do that
@@ -35,7 +35,7 @@ class SkipPathDb {
             }
         }
     }
-    // https://github.com/Kotlin/dataframe
+
     fun save(level: Int, mapLoc: MapLoc, previous: PreviousMove) {
         if (previousMove == null || previousMove2 == null || previousMove3 == null ) {
             // rotate

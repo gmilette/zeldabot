@@ -215,10 +215,10 @@ val FramePoint.onHighwayYJust
 
 // one higher than the highway
 val FramePoint.onHighwayYAlmost
-    get() = y.notOnEdge && (y + 1) % 8 == 0
+    get() = y.notOnEdgeY && (y + 1) % 8 == 0
 
 val FramePoint.onHighwayYAlmostBeyond
-    get() = y.notOnEdge && (y - 1) % 8 == 0
+    get() = y.notOnEdgeY && (y - 1) % 8 == 0
 
 val FramePoint.onHighwayXAlmost
     get() = x.notOnEdge && (x + 1) % 8 == 0
@@ -226,8 +226,11 @@ val FramePoint.onHighwayXAlmost
 val FramePoint.onHighwayXAlmostBeyond
     get() = x.notOnEdge && (x - 1) % 8 == 0
 
+val Int.notOnEdgeY: Boolean
+    get() = this in (MapConstants.oneGrid + 4) ..(MapConstants.MAX_Y - MapConstants.oneGrid)
+
 val Int.notOnEdge: Boolean
-    get() = this in 20..230
+    get() = this in (MapConstants.oneGrid + 4)..(MapConstants.MAX_X - MapConstants.oneGrid)
 val FramePoint.onHighway
     get() = x % 8 == 0 || y % 8 == 0
 

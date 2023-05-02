@@ -61,6 +61,7 @@ object InLocations {
 
     object Level3 {
         val heartMid = FramePoint(128, 88)
+        val triforce = FramePoint(7.grid, 6.grid) // get the middle of the triangle at the top
     }
 
     object Level4 {
@@ -528,7 +529,7 @@ object ZeldaPlan {
             kill // need special strategy for the 4monster
             goTo(InLocations.Level5.triforceHeart) // where is triforce heart???
             up
-            goTo(InLocations.Level2.triforce)
+            goTo(InLocations.Level3.triforce)
             go(InLocations.Level3.heartMid)
         }
     }

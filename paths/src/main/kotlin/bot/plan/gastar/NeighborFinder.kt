@@ -96,60 +96,77 @@ class NeighborFinder(
                 // then gstar will selection it randomly
                 if (next.onHighwayYAlmost && direction.horizontal) {
                     // it's going to go down, but the direction is right/left
-                    val realMoveTo = point.down.addDirection(direction)
-                    //d { " onHighwayYAlmost point $point $direction real: $realMoveTo" }
-                    neigh.add(realMoveTo)
+                    // don't add it if the point it outside
+                    if (point.down.within()) {
+                        val realMoveTo = point.down.addDirection(direction)
+                        //d { " onHighwayYAlmost point $point $direction real: $realMoveTo" }
+                        neigh.add(realMoveTo)
+                    }
                 }
 
                 if (next.onHighwayYAlmostBeyond && direction.horizontal) {
                     // 104, 113 -> if  here you went one to low, and you want to go back up, you could go right to go up
                     // 104, 112
-                    val realMoveTo = point.up.addDirection(direction)
-                    neigh.add(realMoveTo)
+                    if (point.up.within()) {
+                        val realMoveTo = point.up.addDirection(direction)
+                        neigh.add(realMoveTo)
+                    }
                 }
 
                 if (next.onHighwayXAlmost && direction.vertical) {
                     // the way up is blocked, it can go up, but link is actually going to
                     // go right instead to get around it and get on the highway
 //                // it's going to go right, but the direction is up/down
-                    val realMoveTo = point.right.addDirection(direction)
-                    //d { " onHighwayYAlmost point $point $direction real: $realMoveTo" }
-                    neigh.add(realMoveTo)
+                    if (point.right.within()) {
+                        val realMoveTo = point.right.addDirection(direction)
+                        //d { " onHighwayYAlmost point $point $direction real: $realMoveTo" }
+                        neigh.add(realMoveTo)
+                    }
                 }
                 if (next.onHighwayXAlmostBeyond && direction.vertical) {
                     // copy and paste
-                    val realMoveTo = point.left.addDirection(direction)
-                    neigh.add(realMoveTo)
+                    if (point.left.within()) {
+                        val realMoveTo = point.left.addDirection(direction)
+                        neigh.add(realMoveTo)
+                    }
                 }
                 // do left too
             } else if (next.onHighwayYAlmost && direction.horizontal) {
                 // it's going to go down, but the direction is right/left
-                val realMoveTo = point.down.addDirection(direction)
-                //d { " onHighwayYAlmost point $point $direction real: $realMoveTo" }
-                neigh.add(realMoveTo)
+                if (point.down.within()) {
+                    val realMoveTo = point.down.addDirection(direction)
+                    //d { " onHighwayYAlmost point $point $direction real: $realMoveTo" }
+                    neigh.add(realMoveTo)
+                }
                 // like when
             } else if (next.onHighwayYAlmostBeyond && direction.horizontal) {
                 // 104, 113 -> if  here you went one to low, and you want to go back up, you could go right to go up
                 // 104, 112
-                val realMoveTo = point.up.addDirection(direction)
+                if (point.up.within()) {
+                    val realMoveTo = point.up.addDirection(direction)
 //                d { " onHighwayYAlmostBeyond point $point $direction real: $realMoveTo" }
-                neigh.add(realMoveTo)
+                    neigh.add(realMoveTo)
+                }
             } else if (next.onHighwayXAlmost && direction.vertical) {
                 // the way up is blocked, it can go up, but link is actually going to
                 // go right instead to get around it and get on the highway
 //                // it's going to go right, but the direction is up/down
-                val realMoveTo = point.right.addDirection(direction)
-                //d { " onHighwayYAlmost point $point $direction real: $realMoveTo" }
-                neigh.add(realMoveTo)
+                if (point.right.within()) {
+                    val realMoveTo = point.right.addDirection(direction)
+                    //d { " onHighwayYAlmost point $point $direction real: $realMoveTo" }
+                    neigh.add(realMoveTo)
+                }
             } else if (next.onHighwayXAlmostBeyond && direction.vertical) {
                 // copy and paste
-                val realMoveTo = point.left.addDirection(direction)
-                neigh.add(realMoveTo)
+                if (point.left.within()) {
+                    val realMoveTo = point.left.addDirection(direction)
+                    neigh.add(realMoveTo)
+                }
             }
             else {
 //                d { " passable NOT"}
                 // going from 143 to 144
-                // check corners
+                 // check corners
                 val corner = corner(point, direction)
                 if (GStar.DO_CORNERS && corner != null) {
                     if (GStar.DEBUG) {
