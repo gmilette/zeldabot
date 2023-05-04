@@ -280,7 +280,7 @@ class AnalysisPlanBuilder() {
             remove(39, 38, graph) // crossing a river, lazy, I could just add to map too
 
             remove(109, 110, graph) // dont get stuck trying to pass through level 8 tree
-            remove(75, 76, graph) // split area in blue forest where the potion is, dont try to go left
+            remove(75, 74, graph) // split area in blue forest where the potion is, dont try to go left
 
 //            shortestPath = DijkstraShortestPath(graph)
             shortestPath = FloydWarshallShortestPaths(graph)

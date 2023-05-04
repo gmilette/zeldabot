@@ -35,12 +35,12 @@ object LinkDirection { //14,16 attrib 01
         val linkMatch = sprites.firstOrNull { it.toDir() != Direction.None }
         val dir = linkMatch?.toDir()
         d { "link match $linkMatch $dir"}
-        if (linkMatch == null) {
-            d { " sprites link!" }
-            sprites.forEachIndexed { index, sprite ->
-                d { "$index: $sprite ${LinkDirection.dirFor(sprite)}" }
-            }
-        }
+//        if (linkMatch == null) {
+//            d { " sprites link!" }
+//            sprites.forEachIndexed { index, sprite ->
+//                d { "$index: $sprite ${LinkDirection.dirFor(sprite)}" }
+//            }
+//        }
         return dir ?: Direction.None
     }
 
