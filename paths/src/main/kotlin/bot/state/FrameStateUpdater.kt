@@ -33,6 +33,12 @@ class FrameStateUpdater(
         api.writeCPU(Addresses.hasLetter, 1)
     }
 
+    fun setArrow() {
+        api.writeCPU(Addresses.hasBow, 1)
+        // silver arrow of course, let's be luxurious
+        api.writeCPU(Addresses.hasArrow, 2)
+    }
+
     fun deactivateClock() {
         api.writeCPU(Addresses.clockActivated, 0)
     }

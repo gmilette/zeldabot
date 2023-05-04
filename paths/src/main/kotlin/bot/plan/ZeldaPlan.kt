@@ -274,9 +274,11 @@ object ZeldaPlan {
 //            includeLevelPlan(levelPlan7(factory))
 
             phase("Gear for level 8")
-            // TODO: also get a potion
-            obj(Dest.Secrets.level2secret10)
-            obj(Dest.Shop.potionShopWest, itemLoc = Dest.Shop.ItemLocs.redPotion)
+//            obj(Dest.Shop.potionShopWest, itemLoc = Dest.Shop.ItemLocs.redPotion)
+
+            // is the 10 secret necessary, eh
+//            routeTo(78-16)
+//            obj(Dest.Secrets.level2secret10)
             phase("level 8")
             obj(Dest.level(8))
             includeLevelPlan(levelPlan8(factory))

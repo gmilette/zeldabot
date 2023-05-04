@@ -12,7 +12,7 @@ object Dest {
         DestType.Level(5),
         DestType.Level(6),
         DestType.Level(7, entry = EntryType.WhistleWalk),
-        DestType.Level(8, entry = EntryType.Fire(from = Direction.Right)),
+        DestType.Level(8, entry = EntryType.Fire(from = Direction.Left)),
         DestType.Level(9, EntryType.Bomb)
     )
 
