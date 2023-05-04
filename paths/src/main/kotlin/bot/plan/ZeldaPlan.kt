@@ -200,77 +200,78 @@ object ZeldaPlan {
         return builder {
             startAt(InLocations.Overworld.start)
             phase("Opening sequence")
-            obj(Dest.item(ZeldaItem.WoodenSword))
-            obj(Dest.level(2))
-            includeLevelPlan(levelPlan2(factory))
-            // position by routing
-            val sec:MapLoc = 61
-            routeTo(sec.up)
-            obj(Dest.Secrets.secretForest30NorthEast)
-            obj(Dest.Secrets.bombSecret30North)
-            obj(ZeldaItem.Letter)
-            obj(Dest.Secrets.walk100)
-            obj(Dest.Secrets.bombHeartNorth)
-            obj(ZeldaItem.WhiteSword)
-            obj(Dest.level(1))
-            includeLevelPlan(levelPlan1(factory))
-            obj(Dest.Shop.candleShopMid)
-            obj(Dest.level(3))
-            includeLevelPlan(levelPlan3(factory))
-            // prob dont need this tweek
-            val forestD: MapLoc = 114
-            val forestD2: MapLoc = 99 + 16
-            routeTo(forestD2)
-            routeTo(forestD)
-            obj(Dest.Secrets.fire100SouthBrown)
-            // testing this
-            val forest: MapLoc = 98
-            routeTo(forest.down)
-            routeTo(forest.down.right)
-
-            obj(Dest.Shop.blueRing, position = true)
-            // avoid accidentally going back in
-            goIn(GamePad.MoveRight, 25) // test it
-//             position place right before level 4
-//             go to the right so when link goes up, it will be the right way
-            routeTo(102)
-            obj(Dest.level(4))
-            includeLevelPlan(levelPlan4(factory))
-
-            phase("grab hearts")
-            obj(Dest.Secrets.fire30GreenSouth)
-            obj(Dest.Heart.fireHeart)
-            obj(Dest.Secrets.bombHeartSouth)
-            obj(Dest.Secrets.forest100South)
-            obj(Dest.Shop.arrowShop)
-            obj(Dest.Heart.ladderHeart)
-            // exit the heart area
-            goIn(GamePad.MoveLeft, 200)
-            obj(Dest.Heart.raftHeart, itemLoc = Objective.ItemLoc.Right)
-
-            // after this link just went left, where is he going?
-
-            phase("level 5")
-            obj(Dest.level(5))
-            includeLevelPlan(levelPlan5(factory))
-            phase("gear for level 6")
-            // i think this is not needed,  maybe it's after level5?
-//            routeTo(83) // position so we don't go through the 100 secret forest and get stuck
+//            obj(Dest.item(ZeldaItem.WoodenSword))
+//            obj(Dest.level(2))
+//            includeLevelPlan(levelPlan2(factory))
+//            // position by routing
+//            val sec:MapLoc = 61
+//            routeTo(sec.up)
+//            obj(Dest.Secrets.secretForest30NorthEast)
+//            obj(Dest.Secrets.bombSecret30North)
+//            obj(ZeldaItem.Letter)
+//            obj(Dest.Secrets.walk100)
+//            obj(Dest.Secrets.bombHeartNorth)
+//            obj(ZeldaItem.WhiteSword)
+//            obj(Dest.level(1))
+//            includeLevelPlan(levelPlan1(factory))
+//            obj(Dest.Shop.candleShopMid)
+//            obj(Dest.level(3))
+//            includeLevelPlan(levelPlan3(factory))
+//            // prob dont need this tweek
+//            val forestD: MapLoc = 114
+//            val forestD2: MapLoc = 99 + 16
+//            routeTo(forestD2)
+//            routeTo(forestD)
+//            obj(Dest.Secrets.fire100SouthBrown)
+//            // testing this
+//            val forest: MapLoc = 98
+//            routeTo(forest.down)
+//            routeTo(forest.down.right)
 //
-            obj(ZeldaItem.PowerBracelet, itemLoc = Objective.ItemLoc.None)
-//            // make up and objective to walk to high up
-////            routeTo(32)
-            goToAtPoint(33, FramePoint(11.grid, 3.grid))
-//            // hard to get into position when its passable, maybe position it
-            obj(ZeldaItem.MagicSword)
+//            obj(Dest.Shop.blueRing, position = true)
+//            // avoid accidentally going back in
+//            goIn(GamePad.MoveRight, 25) // test it
+////             position place right before level 4
+////             go to the right so when link goes up, it will be the right way
+//            routeTo(102)
+//            obj(Dest.level(4))
+//            includeLevelPlan(levelPlan4(factory))
 //
-            phase("level 6")
-            obj(Dest.level(6))
-            includeLevelPlan(levelPlan6(factory))
+//            phase("grab hearts")
+//            obj(Dest.Secrets.fire30GreenSouth)
+//            obj(Dest.Heart.fireHeart)
+//            obj(Dest.Secrets.bombHeartSouth)
+//            obj(Dest.Secrets.forest100South)
+//            obj(Dest.Shop.arrowShop)
+//            obj(Dest.Heart.ladderHeart)
+//            // exit the heart area
+//            goIn(GamePad.MoveLeft, 200)
+//            obj(Dest.Heart.raftHeart, itemLoc = Objective.ItemLoc.Right)
+//
+//            // after this link just went left, where is he going?
+//
+//            phase("level 5")
+//            obj(Dest.level(5))
+//            includeLevelPlan(levelPlan5(factory))
+//            phase("gear for level 6")
+//            // i think this is not needed,  maybe it's after level5?
+////            routeTo(83) // position so we don't go through the 100 secret forest and get stuck
+////
+//            obj(ZeldaItem.PowerBracelet, itemLoc = Objective.ItemLoc.None)
+////            // make up and objective to walk to high up
+//////            routeTo(32)
+//            goToAtPoint(33, FramePoint(11.grid, 3.grid))
+////            // hard to get into position when its passable, maybe position it
+//            obj(ZeldaItem.MagicSword)
+////
+//            phase("level 6")
+//            obj(Dest.level(6))
+//            includeLevelPlan(levelPlan6(factory))
 
             phase("level 7")
-            obj(Dest.Shop.blueRing, itemLoc = Dest.Shop.ItemLocs.bait, position = true)
-            obj(Dest.level(7))
+            //obj(Dest.Shop.blueRing, itemLoc = Dest.Shop.ItemLocs.bait, position = true)
+//            obj(Dest.level(7))
+//            includeLevelPlan(levelPlan7(factory))
 
             phase("Gear for level 8")
             // TODO: also get a potion
@@ -278,8 +279,10 @@ object ZeldaPlan {
             obj(Dest.Shop.potionShopWest, itemLoc = Dest.Shop.ItemLocs.redPotion)
             phase("level 8")
             obj(Dest.level(8))
+            includeLevelPlan(levelPlan8(factory))
             phase("level 9")
             obj(Dest.level(9))
+            includeLevelPlan(levelPlan9(factory))
 
             // junk
             left
@@ -784,7 +787,6 @@ object ZeldaPlan {
             bomb(InLocations.bombRight)
             right
             seg("Kill hands")
-            startHere
             startAt(13)
             killHandsInLevel7
 //            kill3

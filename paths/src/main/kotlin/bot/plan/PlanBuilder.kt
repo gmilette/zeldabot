@@ -168,10 +168,12 @@ class PlanBuilder(
         }
     val killAllInCenter: PlanBuilder
         get() {
+            // need to redo this so that link moves back to the position
             add(lastMapLoc, KillAll(considerEnemiesInCenter = true))
             goTo(FramePoint(3.grid, 8.grid))
 //            goTo(FramePoint(7.grid, 7.grid)) // second to bottom
             goTo(FramePoint(8.grid, 8.grid)) // bottom center
+            // shoot with arrows?
             add(lastMapLoc, KillInCenter())
             return this
         }
@@ -439,7 +441,7 @@ class PlanBuilder(
                 is EntryType.Fire -> burnFromGo(point, this.type.entry.from, itemLocPoint)
                 is EntryType.Push -> pushDownGetItem(point, itemLocPoint)
                 is EntryType.Statue -> pushDownGetItem(point, itemLocPoint, position)
-                is EntryType.WhistleWalk -> whistleThenGo(point, itemLocPoint)
+                is EntryType.WhistleWalk -> whistleThenGo(point)
                 // other types not supported yet
                 else -> {}
             }
@@ -505,7 +507,8 @@ class PlanBuilder(
         return this
     }
 
-    fun whistleThenGo(entrance: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem): PlanBuilder {
+    // do whistle then move
+    private fun whistleThenGo(entrance: FramePoint): PlanBuilder {
         goIn(GamePad.MoveUp, 20)
         useWhistle()
         // wait until whistle sounds
@@ -513,11 +516,10 @@ class PlanBuilder(
         goIn(GamePad.None, 100)
         go(entrance)
         goIn(GamePad.MoveUp, 5)
-        goGetItem(itemLoc)
         return this
     }
 
-    fun useWhistle() {
+    private fun useWhistle() {
         switchToWhistle()
         goIn(GamePad.None, 100)
         plan.add(UseItem())

@@ -262,7 +262,7 @@ class LevelSpecBuilder {
             // purposely do not show a left exit to encourage link not to exit the level
             LevelSpec(grumble.up.right.right.right.right.up.right, e(r), "u shape stair", LevelMapTemplateReader.Temp.lev_u),
 
-            LevelSpec(grumble.right, e(l, r), "end stair", LevelMapTemplateReader.Temp.lev_stairs_center),
+            LevelSpec(grumble.right, e(l, r), "end stair", LevelMapTemplateReader.Temp.lev_stairs_center_blocked),
             LevelSpec(grumble.right.right, e(l, r), "dragon", LevelMapTemplateReader.Temp.lev_dragon_right),
             LevelSpec(grumble.right.right.right, e(l, r), "dragon", LevelMapTemplateReader.Temp.lev_triforce),
 

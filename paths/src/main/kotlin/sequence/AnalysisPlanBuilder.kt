@@ -263,6 +263,10 @@ class AnalysisPlanBuilder() {
             remove(85, 84, graph) // can't go through to water
             remove(98, 82, graph) // can't go up through 100 secret because you could be on wrong side
 
+            remove(98, 99, graph) // can't go through the secret hole and to the right, approach from the bottom
+
+            // go through green forest spot
+            remove(108, 109, graph)
             // yes can do
 //            remove(85, 69, graph) // can't go up through this water
 
