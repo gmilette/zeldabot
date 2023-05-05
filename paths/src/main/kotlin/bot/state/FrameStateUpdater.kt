@@ -29,7 +29,6 @@ class FrameStateUpdater(
     }
 
     fun setBait() {
-        d { " !! deactivate clock "}
         api.writeCPU(Addresses.hasFood, 1)
     }
 

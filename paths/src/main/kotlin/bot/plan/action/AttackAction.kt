@@ -1,7 +1,6 @@
 package bot.plan.action
 
 import bot.state.FramePoint
-import bot.state.FrameState
 import bot.state.MapLocationState
 import bot.state.map.Direction
 import bot.state.map.MapConstants
@@ -13,12 +12,16 @@ object AttackAction {
         shouldAttack(
             state.frameState.link.dir, // ?: state.previousMove.dirActual,
             state.link,
-            state.aliveEnemies.map { it.point })
+            state.aliveEnemies.map { it.point }).also {
+//            state.aliveEnemies.forEach {
+//                d { " enemy: $it" }
+//            }
+        }
 
     private fun shouldAttack(from: Direction, link: FramePoint, enemiesClose: List<FramePoint>, dist: Int = MapConstants.oneGrid): Boolean {
         val attackDirectionGrid = from.pointModifier(dist - 1)(link) // -1 otherwise the sword is just out of reach
 
-        d { "should attack dir = $from link = $link dirGrid = $attackDirectionGrid" }
+        d { "should attack dir = $from link = $link dirGrid = $attackDirectionGrid numEnemies ${enemiesClose.size}" }
 
         // if it is on top of link ALWAYS attack, if it is in the direction link is facing, also attack
 //        return enemiesClose.any { it.isInGrid(link) || it.isInGrid(attackDirectionGrid) }

@@ -257,6 +257,8 @@ data class SpriteData(
             wizard,
             flame1,
             flame2,
+            triforceDirt,
+            triforceDirt2,
 //            oldWoman
 //            dragonFeet,
 //            dragonFeet2,
@@ -281,6 +283,10 @@ data class SpriteData(
             dragon4FlamingHead,
             circleEnemy
         )
+
+        // gannon stuff
+        // pile: EC, EA
+        // triforce: F2, F4
 
         val loot = setOf(
             compass,
@@ -307,7 +313,7 @@ data class SpriteData(
             116, // bomb
             bomb, // bomb
             triforceNormal,
-//            triforceDirt,
+//            triforceDirt, // why?
 //            triforceDirt2,
             triforceTile,
             triforceTile2
@@ -356,8 +362,9 @@ val triforceNormal = (0x6E).toInt()
 // final triforce
 val triforceTile = (0xF4).toInt()
 val triforceTile2 = (0xF2).toInt()
-val triforceDirt = (0xEC).toInt() // 236
-val triforceDirt2 = (0xFA).toInt()
+val triforceDirt = (0xEC).toInt() // attrib 03 //236
+val triforceDirt2 = (0xFA).toInt() // also circle enemy center
+val triforceDirt3 = (0xEA).toInt() // attrib 03
 
 // added from online
 // https://www.computerarcheology.com/NES/Zelda/Bank2.html
