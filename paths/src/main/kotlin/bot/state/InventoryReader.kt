@@ -5,8 +5,6 @@ import sequence.ZeldaItem
 import util.d
 
 object InventoryReader {
-
-
     fun readInventory(api: API): Set<ZeldaItem> {
         val items = mutableSetOf<ZeldaItem>()
         when (api.readCPU(Addresses.hasSword)) {

@@ -140,6 +140,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             frameStateUpdater.setBait()
             frameStateUpdater.setLetter()
             frameStateUpdater.setArrow()
+            frameStateUpdater.fillTriforce()
             setEquipmentCt--
         }
         if (frameStateUpdater.state.frameState.clockActivated) {

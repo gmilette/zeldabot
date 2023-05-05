@@ -110,36 +110,32 @@ class KillInCenter : Action {
     object KillInCenterLocations {
         // should be the middle of the attack area
         val position = FramePoint(3.grid, 8.grid)
-        val attackFrom = FramePoint(8.grid, 7.grid)
+        val attackFrom = FramePoint(8.grid, 8.grid)
     }
 
     // more debugging
     private val positionShootActions = mutableListOf<Action>(
         InsideNavAbout(
-            KillInCenterLocations.position,
+            KillInCenterLocations.attackFrom,
             2,
             vertical = 2,
             negVertical = 2
         ),
+        GoIn(2, GamePad.MoveUp),
         AlwaysAttack()
     )
 
     private val positionShoot = OrderedActionSequence(positionShootActions)
 
-    private val criteria = DeadForAWhile(limit = 200) {
-        it.clearedWithMinIgnoreLoot(0)
-    }
-
-    override fun complete(state: MapLocationState): Boolean = criteria(state)
+    override fun complete(state: MapLocationState): Boolean =
+        state.numEnemiesAliveInCenter() == 0
 
     override fun target(): FramePoint {
         return positionShoot.target()
     }
 
     override fun nextStep(state: MapLocationState): GamePad {
-        d { "KillArrowSpider" }
-        criteria.nextStep(state)
-
+        d { "KillInCenter" }
         // if I can detect the nose open then, I can dodge while that is happening
         // otherwise, just relentlessly attack
 
@@ -147,7 +143,7 @@ class KillInCenter : Action {
     }
 
     override val name: String
-        get() = "KillArrowSpider ${criteria.frameCount}"
+        get() = "KillInCenter"
 }
 
 

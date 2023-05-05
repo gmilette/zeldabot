@@ -853,7 +853,8 @@ object ZeldaPlan {
             killArrowSpider // kill arrow guy
             rightm
             seg("get key")
-            startAt(31) // save4
+            startHere
+            startAt(31) // save2
             killAllInCenter
             pushInLevelMiddleStair(LevelSpecBuilder.getItemLoc8Key, upTo = 31)
             seg("get back to master battle")

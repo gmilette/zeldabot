@@ -19,6 +19,10 @@ class FrameStateUpdater(
     fun getLink() = FramePoint(getLinkX(), getLinkY())
     var state: MapLocationState = MapLocationState(hyrule = hyrule)
 
+    fun fillTriforce() {
+        api.writeCPU(Addresses.triforce, 255)
+    }
+
     fun setLadderAndRaft(enable: Boolean) {
         api.writeCPU(Addresses.hasLadder, enable.intTrue)
         api.writeCPU(Addresses.hasRaft, enable.intTrue)

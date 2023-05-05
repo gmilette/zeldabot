@@ -11,6 +11,7 @@ object Addresses {
    const val gameMode = 0x0012 // Game Mode
    const val level = 0x0010 // level 0 overworld
 
+   const val triforce = 0x0671
    const val heart1 = 0x0650
    const val heart1Full = 0x0651
    const val heart2 = 0x0652
