@@ -18,12 +18,7 @@ object Dest {
 
     fun level(number: Int) = levels[number - 1]
 
-    class Items {
-        val heartBomb = DestType.Item(ZeldaItem.BombHeart)
-        val secret20Bomb = DestType.Item(ZeldaItem.BombHeart)
-    }
-
-    val itemLookup = mutableMapOf<ZeldaItem, DestType>().also { map ->
+    private val itemLookup = mutableMapOf<ZeldaItem, DestType>().also { map ->
         ZeldaItem.values().forEach {
             map[it] = DestType.Item(it)
         }

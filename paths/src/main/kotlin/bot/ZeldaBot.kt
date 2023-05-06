@@ -30,7 +30,6 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 
         // run at 400% always for now
 //        api.setSpeed(400)
-
 //        api.isPaused = true
 //        api.stepToNextFrame()
     }

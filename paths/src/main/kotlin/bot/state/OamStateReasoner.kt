@@ -326,6 +326,7 @@ object TileInfo {
         184, 186, // ghost
         ghost,
         rhinoHeadDown, rhinoHeadDown2, rhinoHead, rhinoHead2,
+        bat,
         254, 248 // the circle monster because I dont know why im stuck here
     )
 
@@ -386,7 +387,7 @@ val fairy = (0x50).toInt()
 val fairy2 = (0x52).toInt()
 val wizard = (0x98).toInt() // 152
 val flame1 = (0x5C).toInt() //92
-val flame2 = (0x5E).toInt() //94
+const val flame2 = (0x5E).toInt() //94
 const val oldWoman = (0x9a).toInt()
 const val potion = (0x99).toInt() //?
 val whistle = (0x24).toInt()
@@ -430,9 +431,43 @@ val spinCircleEnemy = (0xC8).toInt() // attribute 42 and 2
 // enemies
 // https://www.computerarcheology.com/NES/Zelda/Bank3.html
 
+//Gem(50),
+//Key((0x2E).toInt())
+
 //x96 rhino butt
-enum class Tile(id: Int) {
-    Gem(50),
-    Key((0x2E).toInt())
+sealed class Tile(id: Int, attribute: Int? = null) {
+    class Loot(id: Int): Tile(id)
 }
+
+val loot = setOf(
+    Tile.Loot(compass),
+    clockTile,
+    silverArrow,
+    redring,
+//            brownBoomerang,
+    bow,
+    map,
+    masterKey,
+    raft,
+    bigHeart,
+    fairy,
+    fairy2,
+    magicBook,
+    rod,
+    powerBracelet,
+    whistle,
+    candle,
+    120, // not sure maybe something on triforce level , 78
+    50,
+    243, // heart
+    key, //key
+    116, // bomb
+    bomb, // bomb
+    triforceNormal,
+//            triforceDirt, // why?
+//            triforceDirt2,
+    triforceTile,
+    triforceTile2
+)
+
 

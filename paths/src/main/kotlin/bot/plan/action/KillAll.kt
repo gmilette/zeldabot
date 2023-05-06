@@ -116,16 +116,9 @@ class KillAll(
             waitAfterAllKilled--
             return GamePad.None // just wait
         } else {
-            // maybe we want to kill closest
-            // find the alive enemies
-            // no need to do this anymore
-//            var aliveEnemies = state.frameState.enemiesClosestToLink().filter {
-//                // test
-//                it.index >= numberLeftToBeDead
-//            }
             var aliveEnemies = state.frameState.enemiesClosestToLink()
             if (targetOnly.isNotEmpty()) {
-                d { " target only ${targetOnly}" }
+                d { " target only $targetOnly" }
                 aliveEnemies = aliveEnemies.filter { targetOnly.contains(it.tile) }
             }
 //            aliveEnemies.forEach {
@@ -135,7 +128,6 @@ class KillAll(
             if (killedAllEnemies(state)) {
                 waitAfterAllKilled--
                 return GamePad.None // just wait
-//                NavUtil.randomDir(state.link)
             } else {
                 // 110 too low for bats
                 waitAfterAllKilled = if (needLongWait) 250 else 50
