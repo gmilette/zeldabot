@@ -325,11 +325,11 @@ object TileInfo {
     val longWaitEnemies = setOf(
         184, 186, // ghost
         ghost,
-        rhinoHeadDown, rhinoHeadDown2, rhinoHead, rhinoHead2
+        rhinoHeadDown, rhinoHeadDown2, rhinoHead, rhinoHead2,
+        254, 248 // the circle monster because I dont know why im stuck here
     )
 
     const val oldWoman = (0x9a).toInt()
-
 }
 
 //val grabbyHands = 142
@@ -421,6 +421,11 @@ val rhinoHead2 = (0xE0).toInt()
 
 val rhinoTail = (0xDC).toInt()
 val rhinoMid = (0xDE).toInt()
+
+val circleMonster = (0xFC).toInt()
+val circleMonster2 = (0xFE).toInt()
+val circleMonsterCenter = (0xFA).toInt()
+val circleMonsterCenter2 = (0xF8).toInt()
 
 // enemies
 // https://www.computerarcheology.com/NES/Zelda/Bank3.html
