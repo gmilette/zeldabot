@@ -23,11 +23,14 @@ class PlanBuilder(
     private var segment: String = ""
     private var plan = mutableListOf<Action>()
     private var lastMapLoc = 0
-    private val OVERWORLD_LEVEL = 0
     private var level: Int = OVERWORLD_LEVEL
     private var segments = mutableListOf<PlanSegment>()
 
     private var rememberLoc: MapLoc = 0
+
+    companion object {
+        private const val OVERWORLD_LEVEL = 0
+    }
 
     operator fun invoke(block: PlanBuilder.() -> Unit): MasterPlan {
         this.block()
@@ -41,12 +44,11 @@ class PlanBuilder(
         }
     }
 
-    fun routeTo(loc: MapLoc, name: String = "", opp: Boolean = false): PlanBuilder {
+    private fun routeTo(loc: MapLoc, name: String = "", opp: Boolean = false): PlanBuilder {
         //d { " path from $lastMapLoc to $loc"}
         val path = optimizer.findPath(lastMapLoc, loc) ?: return this
-        var last = lastMapLoc
         for (mapCell in optimizer.correct(path.vertexList)) {
-            if (mapCell.mapLoc != lastMapLoc) {  //  && mapCell.mapLoc != loc
+            if (mapCell.mapLoc != lastMapLoc) {
                 if (opp) {
                     add(mapCell.mapLoc, opportunityKillOrMove(mapCell))
                 } else {
@@ -54,7 +56,6 @@ class PlanBuilder(
                 }
 //                d { " routeTo $name $last to ${mapCell.mapLoc}"}
 //                    add(mapCell.mapLoc, opportunityKillOrMove(mapCell))
-                last = mapCell.mapLoc
             }
         }
         return this
@@ -98,12 +99,12 @@ class PlanBuilder(
         segment = name
         return this
     }
-    val remember: PlanBuilder
+    private val remember: PlanBuilder
         get() {
             rememberLoc = lastMapLoc
             return this
         }
-    val recall: PlanBuilder
+    private val recall: PlanBuilder
         get() {
             lastMapLoc = rememberLoc
             rememberLoc = 0
@@ -120,14 +121,7 @@ class PlanBuilder(
             add(lastMapLoc.up)
             return this
         }
-    val upp: PlanBuilder
-        get() {
-            addp(lastMapLoc.up)
-            return this
-        }
-    fun upTo(loc: MapLoc): PlanBuilder {
-        val nextLoc = loc
-//        add(nextLoc, Unstick(MoveTo(lastMapLoc, mapCell(nextLoc), Direction.Up)))
+    fun upTo(nextLoc: MapLoc): PlanBuilder {
         add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc), Direction.Up))
         return this
     }
@@ -182,7 +176,7 @@ class PlanBuilder(
             add(lastMapLoc, KillAll(useBombs = true, waitAfterAttack = false))
             return this
         }
-    val killR: PlanBuilder
+    val killLevel2Rhino: PlanBuilder
         get() {
             switchToBomb()
             add(lastMapLoc, KillAll(useBombs = true, waitAfterAttack = true))
@@ -199,11 +193,6 @@ class PlanBuilder(
         ))
         return this
     }
-    val killp: PlanBuilder
-        get() {
-            add(lastMapLoc, moveHistoryAttackAction(KillAll()))
-            return this
-        }
     val killAndLoot: PlanBuilder
         get() {
             add(lastMapLoc, KillAll())
@@ -212,31 +201,19 @@ class PlanBuilder(
         }
     val kill: PlanBuilder
         get() {
-            add(lastMapLoc, moveHistoryAttackAction(KillAll(needLongWait = false, targetOnly = listOf())))
+            add(lastMapLoc, KillAll(needLongWait = false, targetOnly = listOf()))
             return this
         }
     val killLev4Dragon: PlanBuilder
         get() {
-            add(lastMapLoc, moveHistoryAttackAction(KillAll(needLongWait = false, targetOnly = listOf(dragon4Head))))
+            add(lastMapLoc, KillAll(needLongWait = false, targetOnly = listOf(dragon4Head)))
             return this
         }
-
     val killLev1Dragon: PlanBuilder
         get() {
             add(lastMapLoc, moveHistoryAttackAction(KillAll(needLongWait = false, targetOnly = listOf(dragonHead, dragonNeck))))
             return this
         }
-
-    //    val kill2: PlanBuilder
-//        get() {
-//            add(lastMapLoc, KillAll(numberLeftToBeDead = 2))
-//            return this
-//        }
-//    val kill1: PlanBuilder
-//        get() {
-//            add(lastMapLoc, KillAll(numberLeftToBeDead = 1))
-//            return this
-//        }
     val startHere: PlanBuilder
         get() {
             add(lastMapLoc, StartHereAction())
@@ -246,15 +223,7 @@ class PlanBuilder(
         get() {
             // don't try to fight
             val nextLoc = lastMapLoc.up
-//            add(nextLoc, Unstick(MoveTo(lastMapLoc, mapCell(nextLoc))))
             add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc)))
-            return this
-        }
-    val upmp: PlanBuilder
-        get() {
-            // don't try to fight
-            val nextLoc = lastMapLoc.up
-            add(nextLoc, moveHistoryAttackAction(MoveTo(lastMapLoc, mapCell(nextLoc))))
             return this
         }
     val down: PlanBuilder
@@ -262,16 +231,9 @@ class PlanBuilder(
             add(lastMapLoc.down)
             return this
         }
-    val downp: PlanBuilder
-        get() {
-            val nextLoc = lastMapLoc.down
-            add(nextLoc, moveHistoryAttackAction(MoveTo(lastMapLoc, mapCell(nextLoc))))
-            return this
-        }
     val downm: PlanBuilder
         get() {
             val nextLoc = lastMapLoc.down
-//            add(nextLoc, Unstick(MoveTo(lastMapLoc, mapCell(nextLoc))))
             add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc)))
             return this
         }
@@ -294,45 +256,19 @@ class PlanBuilder(
             add(lastMapLoc.left)
             return this
         }
-    val leftLoot: PlanBuilder
-        get() {
-            val nextLoc = lastMapLoc.left
-            add(nextLoc, GetLoot())
-            return this
-        }
     val leftm: PlanBuilder
         get() {
             val nextLoc = lastMapLoc.left
-//            add(nextLoc, Unstick(MoveTo(lastMapLoc, mapCell(nextLoc))))
             add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc)))
-            return this
-        }
-    val leftmp: PlanBuilder
-        get() {
-            val nextLoc = lastMapLoc.left
-            add(nextLoc, moveHistoryAttackAction(MoveTo(lastMapLoc, mapCell(nextLoc))))
             return this
         }
     val right: Unit
         get() {
             add(lastMapLoc.right)
         }
-    val rightp: PlanBuilder
-        get() {
-            addp(lastMapLoc.right)
-            return this
-        }
-    val rightk: PlanBuilder
-        get() {
-            lootKill()
-            add(lastMapLoc.right)
-            return this
-        }
     val rightm: PlanBuilder
         get() {
-            // don't try to fight
             val nextLoc = lastMapLoc.right
-//            add(nextLoc, Unstick(MoveTo(lastMapLoc, mapCell(nextLoc))))
             add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc)))
             return this
         }
@@ -404,11 +340,6 @@ class PlanBuilder(
         // set the segment
         seg("get ${item.name}")
         captureObjective(mapData.findObjective(item), itemLoc)
-    }
-
-    fun goToAtPoint(loc: MapLoc, point: FramePoint) {
-        routeTo(loc)
-        goTo(point)
     }
 
     fun obj(dest: DestType, opp: Boolean = false, itemLoc: Objective.ItemLoc? = null, position: Boolean =
@@ -486,7 +417,7 @@ class PlanBuilder(
         return this
     }
 
-    fun showLetterIfRequired(): PlanBuilder {
+    private fun showLetterIfRequired(): PlanBuilder {
         add(lastMapLoc, ShowLetterConditionally())
         return this
     }
@@ -497,7 +428,7 @@ class PlanBuilder(
         return this
     }
 
-    fun bombThenGoIn(entrance: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem): PlanBuilder {
+    private fun bombThenGoIn(entrance: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem): PlanBuilder {
         bomb(entrance.copy(y = entrance.y + 8))
         go(entrance)
         goIn(GamePad.MoveUp, 5)
@@ -525,16 +456,7 @@ class PlanBuilder(
         plan.add(UseItem())
     }
 
-    fun testSwitch() {
-        goIn(GamePad.Start, 25)
-        goIn(GamePad.None, 100)
-        plan.add(SwitchToItem(Inventory.Selected.bomb))
-        goIn(GamePad.None, 10)
-        goIn(GamePad.Start, 25)
-        goIn(GamePad.None, 10)
-    }
-
-    fun goInGetCenterItem(to: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, showLetter: Boolean = false): PlanBuilder {
+    private fun goInGetCenterItem(to: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, showLetter: Boolean = false): PlanBuilder {
         goTo(to)
         goIn(GamePad.MoveUp, 5)
         if (showLetter) {
@@ -555,7 +477,7 @@ class PlanBuilder(
         }
     }
 
-    fun switchToItem(item: Int) {
+    private fun switchToItem(item: Int) {
         // todo: skip this if the current inventory has it
         toggleMenu()
         plan.add(SwitchToItem(item))
@@ -568,14 +490,13 @@ class PlanBuilder(
         goIn(GamePad.None, 30) // then more waiting
     }
 
-    fun switchToCandle() {
+    private fun switchToCandle() {
         plan.add(SwitchToItemConditionally(Inventory.Selected.candle))
     }
 
-    fun switchToBomb() {
+    private fun switchToBomb() {
         plan.add(SwitchToItemConditionally(Inventory.Selected.bomb))
 //        switchToItem(Inventory.Selected.bomb)
-        // extra wait??
 //        goIn(GamePad.None, 15)
     }
 
@@ -631,7 +552,7 @@ class PlanBuilder(
         return this
     }
 
-    fun pushDownGetItem(to: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, position: Boolean = false):
+    private fun pushDownGetItem(to: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, position: Boolean = false):
             PlanBuilder {
         if (position) {
             goTo(to.upOneGrid.justRightEnd)
@@ -671,7 +592,7 @@ class PlanBuilder(
         return this
     }
 
-    fun exitShop(): PlanBuilder {
+    private fun exitShop(): PlanBuilder {
         add(lastMapLoc, ExitShop())
         add(lastMapLoc, GoIn(10, GamePad.MoveDown))
         return this
@@ -687,12 +608,6 @@ class PlanBuilder(
         return this
     }
 
-    fun getSecret(): PlanBuilder {
-        val secretMoneyLocation: FramePoint = FramePoint(100, 100)
-        add(lastMapLoc, InsideNav(secretMoneyLocation))
-        return this
-    }
-
     fun rescuePrincess() {
         goIn(GamePad.MoveUp, 15)
         goIn(GamePad.A, 10)
@@ -705,7 +620,6 @@ class PlanBuilder(
     }
 
     fun bomb(target: FramePoint, switch: Boolean = true): PlanBuilder {
-        // TODO: only do this conditionally somehow
         if (switch) {
             switchToBomb()
         }
@@ -730,18 +644,6 @@ class PlanBuilder(
     private fun add(nextLoc: MapLoc) {
 //        add(nextLoc, opportunityKillOrMove(mapCell(nextLoc)))
         add(nextLoc, MoveTo(nextLoc, mapCell(nextLoc)))
-    }
-
-    private fun addp(nextLoc: MapLoc) {
-        add(nextLoc, MoveTo(nextLoc, mapCell(nextLoc)))
-//        add(nextLoc, moveHistoryAttackAction(opportunityKillOrMove(mapCell(nextLoc))))
-//        add(nextLoc, UnstickP(opportunityKillOrMove(mapCell(nextLoc)),
-//            unstickAction = GamePad.A,
-//            howLong = 1000))
-    }
-
-    private fun addKill(nextLoc: MapLoc) {
-        add(nextLoc, killThenLootThenMove(mapCell(nextLoc)))
     }
 
     private fun add(loc: MapLoc, action: Action): PlanBuilder {

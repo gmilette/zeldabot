@@ -6,6 +6,8 @@ import bot.state.MapLocationState
 import util.d
 import util.w
 
+// try to detect when link is stuck and then get unstuck
+
 fun moveHistoryAttackAction(wrapped: Action) =
 // really, if there are enemies attack, otherwise, move, or bomb
 // if there are pancake enemies

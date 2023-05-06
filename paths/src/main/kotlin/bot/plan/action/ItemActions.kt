@@ -67,19 +67,6 @@ class UseItem(private val usedTimes: Int = 5) : Action {
         get() = "Use item $used"
 }
 
-class WaitForPotionOrOldWoman : Action {
-    override fun complete(state: MapLocationState): Boolean {
-        return (state.frameState.hasOldWoman || state.frameState.hasPotion)
-    }
-
-    override fun nextStep(state: MapLocationState): GamePad {
-        return GamePad.None
-    }
-
-    override val name: String
-        get() = "WaitForPotionOrOldWoman"
-}
-
 class WaitForOldWoman : Action {
     override fun complete(state: MapLocationState): Boolean {
         return state.frameState.hasOldWoman

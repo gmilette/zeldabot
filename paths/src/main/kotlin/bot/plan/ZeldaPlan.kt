@@ -1,7 +1,6 @@
 package bot.plan
 
 import bot.plan.action.GoIn
-import bot.plan.action.ShowLetterConditionally
 import bot.plan.runner.MasterPlan
 import bot.state.*
 import bot.state.map.*
@@ -115,9 +114,9 @@ object ZeldaPlan {
 
 //        return levelTour(factory)
 //        return bombTour(factory)
-        return real(factory)
+//        return real(factory)
 //        return realNoStuff(factory)
-//        return part(factory)
+        return part(factory)
     }
 
     private fun levelTour(factory: PlanInputs): MasterPlan {
@@ -161,6 +160,7 @@ object ZeldaPlan {
 //            includeLevelPlan(levelPlan6(factory))
 //            includeLevelPlan(levelPlan7(factory))
 //            includeLevelPlan(levelPlan8(factory))
+//            obj(Dest.level(9))
             includeLevelPlan(levelPlan9(factory))
         }
     }
@@ -486,7 +486,7 @@ object ZeldaPlan {
             goTo(InLocations.Level2.bombItemRight)
             up
             seg("kill boss")
-            killR
+            killLevel2Rhino
             wait
             goTo(InLocations.Level2.heartMid)
             seg("get the trigorce")
@@ -579,7 +579,7 @@ object ZeldaPlan {
             //skip key that is up
             bomb(InLocations.BombDirection.right) // right bomb
             right
-            killb
+            kill
             pushWait(InLocations.Level4.moveLeftOfTwo)
             right
             seg("fight dragon")
@@ -853,7 +853,6 @@ object ZeldaPlan {
             killArrowSpider // kill arrow guy
             rightm
             seg("get key")
-            startHere
             startAt(31) // save2
             killAllInCenter
             pushInLevelMiddleStair(LevelSpecBuilder.getItemLoc8Key, upTo = 31)
@@ -902,7 +901,7 @@ object ZeldaPlan {
 
             startAt(20) //save7
             "spiral".seg()
-            rightp // kill the pancakes, getting quite stuck
+            right // kill the pancakes, getting quite stuck
             rightm
             "go down to ring".seg()
             downm
@@ -911,21 +910,20 @@ object ZeldaPlan {
             bomb(InLocations.bombRight)
             rightm
             bomb(InLocations.topMiddleBombSpot)
-            // p? // need move but also have the kill
 //            startHere
-            upmp
+            upm
             bomb(InLocations.topMiddleBombSpot)
             upm
             "ring spot".seg()
 //            startAt(7) //save5
-            kill // kill3 // stuck here on the disappear ghost
+            kill // stuck here on the disappear ghost
             pushInLevelMiddleStair(LevelSpecBuilder.getItemLoc8)
         }
     }
 
     private fun PlanBuilder.levelPlan9PhaseSilverArrow() {
         add {
-            downp // kill pancake
+            down // kill pancake
             downm
             leftm
 //            startAt(38) //save6

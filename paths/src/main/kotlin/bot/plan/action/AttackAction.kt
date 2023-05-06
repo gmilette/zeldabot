@@ -10,7 +10,7 @@ import util.d
 object AttackAction {
     fun shouldAttack(state: MapLocationState) =
         shouldAttack(
-            state.frameState.link.dir, // ?: state.previousMove.dirActual,
+            state.frameState.link.dir,
             state.link,
             state.aliveEnemies.map { it.point }).also {
 //            state.aliveEnemies.forEach {

@@ -15,24 +15,6 @@ class KillArrowSpider : Action {
         val attackAreaLeftSideMiddleVerticalBottom = FramePoint(8.grid, 8.grid)
     }
 
-    // go in attack area
-    // move up, then shoot
-    private val positionShootO = ActionSequence(
-        // todo: if at top of the grid, move to bottom first
-        // but this works well enough
-        InsideNavAbout(
-            KillArrowSpiderData.attackAreaLeftSideMiddleVertical,
-            MapConstants.oneGrid / 2, // stay in middle
-            vertical = MapConstants.oneGrid,
-            negVertical = MapConstants.oneGrid
-        ),
-        GoIn(3, GamePad.MoveUp, reset = true),
-//        GoIn(3, GamePad.B, reset = true),
-//        GoIn(3, GamePad.None, reset = true),
-        AlwaysAttack(useB = true, 5)
-    )
-
-    // more debugging
     private val positionShootActions = mutableListOf<Action>(
         InsideNavAbout(
             KillArrowSpiderData.attackAreaLeftSideMiddleVerticalBottom,
