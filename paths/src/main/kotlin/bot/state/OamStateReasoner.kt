@@ -208,7 +208,7 @@ data class SpriteData(
     val attribute: Int
     // or > 239
 ) {
-    val hidden: Boolean = point.y >= 248 || attribute == 32 || notEnemy.contains(tile)
+    val hidden: Boolean = point.y >= 248 || attribute == 32 || ignore.contains(tile)
             //|| point.y < 60  dont need that because the y coordinate is adjusted
             //|| projectiles.contains(tile) //|| loot.contains(tile) // should be separate
             || ( (tile == 248 || tile == 250) && point.y == 187) // spinny guy
@@ -224,7 +224,7 @@ data class SpriteData(
     // it doesn't solve the pancake problem
 
     companion object {
-        val notEnemy = setOf(
+        val ignore = setOf(
             18, 16, // link shield shite
             12, 14, // facing up link
             4, 6, 8, // link // 0
@@ -281,7 +281,7 @@ data class SpriteData(
             (0x96).toInt(), // trap,
             boulder, boulder2, boulder3, boulder4,
             dragon4FlamingHead,
-            circleEnemy
+            spinCircleEnemy
         )
 
         // gannon stuff
@@ -338,7 +338,6 @@ val grabbyHands2 = (0xAC).toInt() // 172
 
 val ghost = (0xBC).toInt()
 val bombSmoke = 112
-val circleEnemy = (0xC8).toInt() // attribute 42 and 2
 val monsterCloud = (0x70).toInt()
 val bomb = 52
 val key = (0x2E).toInt() //key
@@ -426,6 +425,7 @@ val circleMonster = (0xFC).toInt()
 val circleMonster2 = (0xFE).toInt()
 val circleMonsterCenter = (0xFA).toInt()
 val circleMonsterCenter2 = (0xF8).toInt()
+val spinCircleEnemy = (0xC8).toInt() // attribute 42 and 2
 
 // enemies
 // https://www.computerarcheology.com/NES/Zelda/Bank3.html
