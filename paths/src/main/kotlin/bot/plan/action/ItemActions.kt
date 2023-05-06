@@ -3,6 +3,54 @@ package bot.plan.action
 import bot.state.*
 import sequence.ZeldaItem
 import util.d
+import kotlin.random.Random
+
+
+class SwitchToItem(private val inventoryPosition: Int = Inventory.Selected.candle) : Action {
+
+    private var pressCountdown = 0
+    private var last: GamePad = GamePad.None
+
+    override fun complete(state: MapLocationState): Boolean =
+        selectedItem(state)// && pressCountdown <= 0
+
+    private fun selectedItem(state: MapLocationState): Boolean =
+        state.frameState.inventory.selectedItem == inventoryPosition // how does this map
+
+    private fun directionToSelection(state: MapLocationState): GamePad =
+        if (state.frameState.inventory.selectedItem < inventoryPosition) {
+            GamePad.MoveRight
+        } else {
+            GamePad.MoveLeft
+        }
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        d {
+            " selecting item selected=${selectedItem(state)} state=${
+                state.frameState.inventory
+                    .selectedItem
+            }"
+        }
+        // this is weird, link cannot just keep pressing left for right, it has to
+        // press none inbetween sometimes. Whatever this works
+        return if (selectedItem(state) || Random.nextBoolean()) {
+            GamePad.None
+        } else {
+            directionToSelection(state)
+        }
+    }
+
+    override fun target(): FramePoint {
+        return FramePoint()
+    }
+
+    override fun path(): List<FramePoint> {
+        return emptyList()
+    }
+
+    override val name: String
+        get() = "SwitchToItem to ${inventoryPosition}"
+}
 
 class SwitchToItemConditionally(private val inventoryPosition: Int = Inventory.Selected.candle) : Action {
     private val switchSequence = mutableListOf(

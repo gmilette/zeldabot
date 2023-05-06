@@ -373,8 +373,6 @@ class PlanBuilder(
                 is EntryType.Push -> pushDownGetItem(point, itemLocPoint)
                 is EntryType.Statue -> pushDownGetItem(point, itemLocPoint, position)
                 is EntryType.WhistleWalk -> whistleThenGo(point)
-                // other types not supported yet
-                else -> {}
             }
         }
     }

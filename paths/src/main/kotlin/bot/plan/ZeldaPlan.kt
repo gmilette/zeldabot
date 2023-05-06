@@ -294,34 +294,6 @@ object ZeldaPlan {
         }
     }
 
-    fun levelPlanDebug(
-        factory: PlanInputs, optimizer: AnalysisPlanBuilder.MasterPlanOptimizer, level:
-        Int
-    ): MasterPlan {
-        // shared prob
-        val downPoint = FramePoint(120, 90)
-        val pushPoint = FramePoint()
-        return if (level == 1) {
-            val builder = factory.make("Destroy level 1")
-//            builder.inLevel.startAt(34)
-//                .push(InLocations.diamondLeftBottomPush, InLocations.diamondLeftTopPush)
-//                .startAt(127)
-//                .go(InLocations.getItem)
-//                .upTo(34) // eh
-//                .end // more junk
-//                .build()
-
-            builder.inLevel.startAt(127)
-                .go(InLocations.getItem)
-                .upTo(34) // eh
-                .end // more junk
-                .build()
-
-        } else {
-            MasterPlan(emptyList())
-        }
-    }
-
     private fun levelPlan(factory: PlanInputs, level: Int): MasterPlan {
         return when (level) {
             1 -> {
