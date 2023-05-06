@@ -354,7 +354,9 @@ class LevelSpecBuilder {
 
             LevelSpec(arrowstair.up.left, e(u, r), "pancake", LevelMapTemplateReader.Temp.lev_water_circle_path),
             LevelSpec(arrowstair.up.left.up, e(u, d), "ghost maze", LevelMapTemplateReader.Temp.lev_water_maze_path),
-            LevelSpec(arrowstair.up.left.up.up, e(d, r), "stair to last stair", LevelMapTemplateReader.Temp.lev_stairs_center),
+            // this could be just a middle two pattern
+            // lev_block2center NOT lev_stairs_center
+            LevelSpec(arrowstair.up.left.up.up, e(d, r), "stair to last stair", LevelMapTemplateReader.Temp.lev_block2center),
 
             LevelSpec(stairbeforestair, e(l), "bomb left", LevelMapTemplateReader.Temp.lev_stairs_center),
             LevelSpec(stairbeforestair.left, e(r), "last path stair", LevelMapTemplateReader.Temp.lev_stairs_center),
