@@ -207,7 +207,7 @@ class RouteTo(val params: Param = Param()) {
         // i tried dirActual
         d { " route To with make passable $makePassable"}
 
-        return if (params.dodgeEnemies && AttackAction.shouldAttack(state) &&
+        return if (params.dodgeEnemies && AttackActionDecider.shouldAttack(state) &&
             state.frameState.canUseSword
         ) {
             d { " prev ${state.previousMove.dirActual} ATTACK" }

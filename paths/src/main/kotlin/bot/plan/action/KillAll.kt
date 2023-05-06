@@ -5,18 +5,22 @@ import bot.state.map.grid
 import util.d
 
 class KillAll(
+    /**
+     * keep going after the current enemy for at least 60 frames before switching to another
+     */
     private val sameEnemyFor: Int = 60,
     private val useBombs: Boolean = false,
     private val waitAfterAttack: Boolean = false,
     private val numberLeftToBeDead: Int = 0,
-    /**
-     * everything else is a potential projectile
-     */
-    private val numEnemies: Int = -1,
     // do not try to kill the enemies in the center
     private val considerEnemiesInCenter: Boolean = false,
-    private val ifCantMoveAttack: Boolean = false,
+    /**
+     * how long to wait after all enemies dead to assume all is dead
+     */
     private var needLongWait: Boolean = false,
+    /**
+     * only target these tiles
+     */
     private val targetOnly: List<Int> = listOf()
 ) :
     Action {
@@ -29,7 +33,7 @@ class KillAll(
     private var pressACount = 0
     private var target: FramePoint = FramePoint(0, 0)
 
-    private var count = 0
+    private var frameCount = 0
     private var waitAfterPressing = 0
 
     // just be sure everything is dead and not just slow to move
@@ -50,7 +54,6 @@ class KillAll(
 
     private fun killedAllEnemies(state: MapLocationState): Boolean {
         return state.clearedWithMinIgnoreLoot(numberLeftToBeDead + centerEnemies(state))
-//        return state.clearedWithMin(numberLeftToBeDead)
     }
 
     private fun centerEnemies(state: MapLocationState): Int =
@@ -60,12 +63,11 @@ class KillAll(
         return state.clearedWithMinIgnoreLoot(numberLeftToBeDead)
     }
 
-
     override fun complete(state: MapLocationState): Boolean =
 //        criteria.complete(state)
-        (waitAfterAllKilled <= 0 && count > 33 && killedAllEnemies(state)).also {
+        (waitAfterAllKilled <= 0 && frameCount > 33 && killedAllEnemies(state)).also {
             d { " kill all complete $it ${state.numEnemies} or ${numberLeftToBeDead}" }
-            d { "result $it ${state.clearedWithMin(numberLeftToBeDead)} ct $count wait $waitAfterAllKilled" }
+            d { "result $it ${state.clearedWithMin(numberLeftToBeDead)} ct $frameCount wait $waitAfterAllKilled" }
             state.frameState.enemies.filter { it.state == EnemyState.Alive }.forEach {
                 d { "enemy $it dist ${it.point.distTo(state.link)}" }
             }
@@ -74,14 +76,14 @@ class KillAll(
     override fun nextStep(state: MapLocationState): GamePad {
         val numEnemiesInCenter = state.numEnemiesAliveInCenter()
         needLongWait = state.longWait.isNotEmpty()
-        d { " KILL ALL step ${state.currentMapCell.mapLoc} count $count wait $waitAfterAllKilled center: $numEnemiesInCenter needLong $needLongWait" }
+        d { " KILL ALL step ${state.currentMapCell.mapLoc} count $frameCount wait $waitAfterAllKilled center: $numEnemiesInCenter needLong $needLongWait" }
 
         for (enemy in state.frameState.enemies.filter { it.state != EnemyState.Dead }) {
             d { " enemy: $enemy" }
         }
         criteria.update(state)
 
-        count++
+        frameCount++
         when {
             // reset on the last count
             pressACount == 1 -> {
@@ -140,7 +142,7 @@ class KillAll(
                     val dist = firstEnemy.point.distTo(link.point)
                     //d { " go find $firstEnemy from $link distance: $dist"}
                     when {
-                        dist < 24 && state.frameState.canUseSword && AttackAction.shouldAttack(state) -> {
+                        dist < 24 && state.frameState.canUseSword && AttackActionDecider.shouldAttack(state) -> {
                             // is linked turned in the correct direction towards
                             // the enemy?
                             previousAttack = true
@@ -154,12 +156,19 @@ class KillAll(
 
                         else -> {
                             // changed enemies
-                            sameEnemyCount++
-                            val sameEnemyForTooLong = sameEnemyCount > sameEnemyFor
-                            if (sameEnemyForTooLong) {
-                                sameEnemyCount = 0
-                            }
-                            val forceNew = previousTarget != target && sameEnemyForTooLong
+                            // why is this here?
+                            // guess, don't keep switching target?
+                            // I dont like this, it could lead to chasing the wrong target
+                            // remove
+//                            sameEnemyCount++
+//                            val sameEnemyForTooLong = sameEnemyCount > sameEnemyFor
+//                            if (sameEnemyForTooLong) {
+//                                sameEnemyCount = 0
+//                            }
+//                            val forceNew = previousTarget != target && sameEnemyForTooLong
+
+                            // force a new route if this has changed targets
+                            val forceNew = previousTarget != target
                             routeTo.routeTo(state, listOf(target), forceNew)
                         }
                     }
@@ -192,8 +201,7 @@ class KillAllCompleteCriteria {
         }
 }
 
-
-// TODO:
+@Deprecated("unused")
 class ClockActivatedKillAll : Action {
     private val routeTo = RouteTo()
     private val criteria = KillAllCompleteCriteria()

@@ -7,7 +7,7 @@ import bot.state.map.MapConstants
 import bot.state.map.pointModifier
 import util.d
 
-object AttackAction {
+object AttackActionDecider {
     fun shouldAttack(state: MapLocationState) =
         shouldAttack(
             state.frameState.link.dir,
