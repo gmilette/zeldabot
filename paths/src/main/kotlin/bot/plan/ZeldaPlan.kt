@@ -977,6 +977,7 @@ object ZeldaPlan {
             switchToArrow()
             goTo(InLocations.Level9.centerGannonAttack)
             killG
+            startHere
             lootInside
             upm
             "seg get princess".seg()

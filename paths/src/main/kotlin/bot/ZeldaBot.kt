@@ -24,7 +24,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         d { " master plan ${plan.masterPlan.toStringAll()}"}
         val loadZelda: String by RunOnceLambda {
             d { " load zelda"}
-            api.quickLoadState(8)
+//            api.quickLoadState(8)
             "done"
         }
         val setSpeed: String by RunOnceLambda {

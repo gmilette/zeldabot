@@ -316,7 +316,7 @@ val bat = (0x9A).toInt()
 
 val boulder = (0x90).toInt()
 val boulder2 = (0x92).toInt()
-val boulder3 = (0xEA).toInt()
+val boulder3 = (0xEA).toInt() // it is also triforce part sooo...
 val boulder4 = (0xE8).toInt()
 val arrowTipShotByEnemy = (0x88).toInt()
 val arrowButtShotByEnemy = (0x86).toInt()

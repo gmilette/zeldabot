@@ -417,7 +417,8 @@ class PickupDroppedDungeonItemAndKill : Action {
 }
 
 class GetLoot(private val adjustInSideLevel: Boolean = false) : Action {
-    private val routeTo = RouteTo()
+    // gannon triforce pieces are sometimes projectiles
+    private val routeTo = RouteTo(RouteTo.Param(ignoreProjectiles = true))
 
     override fun complete(state: MapLocationState): Boolean =
         !state.hasAnyLoot

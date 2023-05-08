@@ -296,6 +296,9 @@ class RouteTo(val params: Param = Param()) {
         }
 
         d { " enemies near ${enemiesNear.size} projectiles ${projectilesNear.size} avoid: ${avoid.size}" }
+        for (agent in enemiesNear) {
+            d { " enemy $agent"}
+        }
 //        val avoid = emptyList<FramePoint>()
 
 
