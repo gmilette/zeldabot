@@ -74,38 +74,6 @@ class OamStateReasoner(
     }
 
     val DEBUG = false
-    // SpriteData(index=17, point=(160, 120), tile=164, attribute=66)
-    val pancake = 164
-    val tileMap = mapOf(
-        // 122
-        // 188
-        // 190
-        (0xD6) to "gannon",
-        (0xD4) to "gannon",
-        (0xD2) to "gannon",
-        (0xE6) to "gannon",
-        (0xE4) to "gannon",
-        (0xE2) to "gannon",
-        (0xE0) to "gannon",
-        (0xD0) to "gannon",
-        164 to "pancake",
-        (0x96).toInt() to "trap",
-        (0xF8).toInt() to "circleenemycenter",
-        (0xFA).toInt() to "circleenemycenter",
-        (0xFC).toInt() to "circleenemy",
-        (0x9C).toInt() to "bat",
-        (0x9A).toInt() to "bat",
-        170 to "squshy", // left and right
-        246 to "rhino",
-        244 to "rhino",
-//        226 to "rhino head",
-        124 to "ghostripple",
-        126 to "ghostripple",
-        142 to "sun", // attrib 1
-        144 to "sun", // attrib 65, atrib 67 whiteish color
-        184 to "blueghostright", // back attrib 65 // might be different for left facing ghost
-        186 to "blueghostright" // right, attrib 1
-    )
 
     val alive: List<SpriteData>
         get() {
@@ -437,37 +405,19 @@ val spinCircleEnemy = (0xC8).toInt() // attribute 42 and 2
 //x96 rhino butt
 sealed class Tile(id: Int, attribute: Int? = null) {
     class Loot(id: Int): Tile(id)
+    class Enemy(id: Int): Tile(id)
+    class Projectile(id: Int): Tile(id)
+    class Ignore(id: Int): Tile(id)
 }
 
-val loot = setOf(
-    Tile.Loot(compass),
-    clockTile,
-    silverArrow,
-    redring,
-//            brownBoomerang,
-    bow,
-    map,
-    masterKey,
-    raft,
-    bigHeart,
-    fairy,
-    fairy2,
-    magicBook,
-    rod,
-    powerBracelet,
-    whistle,
-    candle,
-    120, // not sure maybe something on triforce level , 78
-    50,
-    243, // heart
-    key, //key
-    116, // bomb
-    bomb, // bomb
-    triforceNormal,
-//            triforceDirt, // why?
-//            triforceDirt2,
-    triforceTile,
-    triforceTile2
-)
+object Tiles {
+    // ignore
 
+    // monsters
+
+    // projectiles
+
+
+    val compass = Tile.Loot(0x6A)
+}
 

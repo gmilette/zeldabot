@@ -201,7 +201,7 @@ class PlanBuilder(
         }
     val kill: PlanBuilder
         get() {
-            add(lastMapLoc, KillAll(needLongWait = false, targetOnly = listOf()))
+            add(lastMapLoc, KillAll(needLongWait = false))
             return this
         }
     val killLev4Dragon: PlanBuilder

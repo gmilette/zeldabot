@@ -14,6 +14,7 @@ import nintaco.api.ApiSource
 import nintaco.api.Colors
 import nintaco.api.GamepadButtons
 import sequence.ZeldaItem
+import util.RunOnceLambda
 import util.d
 
 class ZeldaBot(private val monitor: ZeldaMonitor) {
@@ -21,13 +22,35 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 
     fun launch() {
         d { " master plan ${plan.masterPlan.toStringAll()}"}
-        api.addFrameListener { renderFinished() }
+        val loadZelda: String by RunOnceLambda {
+            d { " load zelda"}
+            api.quickLoadState(8)
+            "done"
+        }
+        val setSpeed: String by RunOnceLambda {
+            api.setSpeed(400)
+            "done"
+        }
+        api.addFrameListener { renderFinished()
+            loadZelda
+        }
         api.addStatusListener { message: String -> statusChanged(message) }
-        api.addActivateListener { apiEnabled() }
+        api.addActivateListener {
+            apiEnabled()
+            setSpeed
+        }
         api.addDeactivateListener { apiDisabled() }
         api.addStopListener { dispose() }
         api.run()
 
+//        d { " load zeldaaaa"}
+//        api.open(zelda2)
+//        val t = Thread( {
+//            api.run()
+//        })
+//        t.start()
+//        d { " load zeldaaaa2"}
+//        api.open(zelda2)
         // run at 400% always for now
 //        api.setSpeed(400)
 //        api.isPaused = true
