@@ -2,13 +2,15 @@ package util
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-class RunOnceLambda<T>(private val initializer: () -> T) : ReadOnlyProperty<Any?, T> {
-    private var value: T? = null
+class RunOnceLambda(private val initializer: () -> Unit) : ReadOnlyProperty<Any?, String> {
+    private var value: String? = null
+    private val valueSet: String = "VALUE_SET"
 
-    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
+    override fun getValue(thisRef: Any?, property: KProperty<*>): String {
         if (value == null) {
-            value = initializer()
+            initializer()
+            value = valueSet
         }
-        return value!!
+        return value ?: ""
     }
 }

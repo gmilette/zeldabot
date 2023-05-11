@@ -5,7 +5,10 @@ import bot.plan.action.NavUtil.directionToDir
 import bot.plan.gastar.FrameRoute
 import bot.state.*
 import bot.state.map.*
+import nintaco.api.API
+import nintaco.api.ApiSource
 import util.d
+import util.i
 import util.w
 import kotlin.random.Random
 
@@ -486,9 +489,16 @@ class Wait(val howLong: Int) : Action {
 /**
  * just use to mark where the plan should start
  */
-class StartHereAction : Action {
+class StartHereAction(private val saveSlot: Int? = null) : Action {
     companion object {
         val name = "StartHereAction"
+    }
+
+    fun restoreSaveSlot() {
+        saveSlot?.let {
+            i { " load save slot $saveSlot"}
+            ApiSource.getAPI().quickLoadState(saveSlot)
+        }
     }
 
     override fun complete(state: MapLocationState): Boolean {

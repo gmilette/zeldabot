@@ -22,14 +22,13 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 
     fun launch() {
         d { " master plan ${plan.masterPlan.toStringAll()}"}
-        val loadZelda: String by RunOnceLambda {
+        val loadZelda by RunOnceLambda {
             d { " load zelda"}
-//            api.quickLoadState(8)
-            "done"
+            api.quickLoadState(1)
         }
-        val setSpeed: String by RunOnceLambda {
+        val setSpeed by RunOnceLambda {
+            d { " set speed"}
             api.setSpeed(400)
-            "done"
         }
         api.addFrameListener { renderFinished()
             loadZelda
@@ -156,7 +155,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         if (setEquipmentCt > 0) {
             d { " Set equip"}
             frameStateUpdater.setSword(ZeldaItem.MagicSword)
-            frameStateUpdater.setLadderAndRaft(true)
+            frameStateUpdater.setLadderAndRaft(false)
             frameStateUpdater.setRedCandle()
             frameStateUpdater.setHaveWhistle()
             frameStateUpdater.setBait()
