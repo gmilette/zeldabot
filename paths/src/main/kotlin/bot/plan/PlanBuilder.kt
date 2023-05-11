@@ -44,7 +44,7 @@ class PlanBuilder(
         }
     }
 
-    private fun routeTo(loc: MapLoc, name: String = "", opp: Boolean = false): PlanBuilder {
+    fun routeTo(loc: MapLoc, name: String = "", opp: Boolean = false): PlanBuilder {
         //d { " path from $lastMapLoc to $loc"}
         val path = optimizer.findPath(lastMapLoc, loc) ?: return this
         for (mapCell in optimizer.correct(path.vertexList)) {
@@ -422,7 +422,8 @@ class PlanBuilder(
 
     fun goTo(to: FramePoint, makePassable: FramePoint? = null): PlanBuilder {
         // was 4,2
-        goAbout(to, 2, 1, true, makePassable = makePassable)
+        // made false so link can get into a stair
+        goAbout(to, 2, 1, false, makePassable = makePassable)
         return this
     }
 
@@ -604,6 +605,11 @@ class PlanBuilder(
     fun goIn(dir: GamePad = GamePad.MoveUp, num: Int): PlanBuilder {
         add(lastMapLoc, GoIn(num, dir))
         return this
+    }
+
+    fun goToAtPoint(loc: MapLoc, point: FramePoint) {
+        routeTo(loc)
+        goTo(point)
     }
 
     fun rescuePrincess() {
