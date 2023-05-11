@@ -119,6 +119,8 @@ class KillAll(
             return GamePad.None // just wait
         } else {
             var aliveEnemies = state.frameState.enemiesClosestToLink()
+            aliveEnemies = aliveEnemies.filter { state.currentMapCell.passable.get(it.point) }
+            // need special handling, cant route into center
             if (targetOnly.isNotEmpty()) {
                 d { " target only $targetOnly" }
                 aliveEnemies = aliveEnemies.filter { targetOnly.contains(it.tile) }
