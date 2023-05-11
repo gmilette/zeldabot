@@ -56,7 +56,7 @@ class FrameState(
     7=Scrolling           4=Finishing Scroll;
     E=Registration        F=Elimination
      */
-    private val gameMode: Int by lazy { api.readCPU(Addresses.gameMode) }
+    val gameMode: Int by lazy { api.readCPU(Addresses.gameMode) }
     val tenth: Int by lazy { api.readCPU(Addresses.tenthEnemyCount) }
     val clockActivated: Boolean by lazy { api.readCpuB(Addresses.clockActivated) }
     private val swordUseCountdown: Int by lazy { api.readCPU(Addresses.swordUseCountdown) }

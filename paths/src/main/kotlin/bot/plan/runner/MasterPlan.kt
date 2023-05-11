@@ -5,6 +5,7 @@ import bot.plan.action.EndAction
 import bot.plan.action.MoveTo
 import bot.plan.action.StartHereAction
 import bot.state.MapLocationState
+import nintaco.api.API
 import util.d
 import util.i
 
@@ -27,6 +28,7 @@ class MasterPlan(val segments: List<PlanSegment>) {
                 d { " skip ${action.name}"}
                 ct++
             }
+            (action as? StartHereAction)?.restoreSaveSlot()
             d { " advanced $ct steps"}
             action
         } else {

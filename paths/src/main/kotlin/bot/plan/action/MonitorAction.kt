@@ -1,8 +1,11 @@
 package bot.plan.action
 
+import bot.plan.action.NavUtil.directionToDir
 import bot.state.FramePoint
 import bot.state.GamePad
+import bot.state.MapLoc
 import bot.state.MapLocationState
+import bot.state.map.MapCell
 import util.d
 import util.w
 
@@ -12,7 +15,7 @@ fun moveHistoryAttackAction(wrapped: Action) =
 // really, if there are enemies attack, otherwise, move, or bomb
 // if there are pancake enemies
     // hopefully adding some random moves here will also help link get unstuck
-    MoveHistoryAction(wrapped, AlwaysAttack(otherwiseRandom = true))
+    StayInCurrentMapCell(MoveHistoryAction(wrapped, AlwaysAttack(otherwiseRandom = true)))
 
 
 private class SameCount {
@@ -173,6 +176,73 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
         }.also {
             val inIt = state.link in state.aliveEnemies.map { it.point }
             d { " link at ${state.link} $inIt" }
+        }
+    }
+
+    override val name: String
+        get() = wrapped.name
+}
+
+class StayInCurrentMapCell(private val wrapped: Action) : Action {
+    private val routeTo = RouteTo(params = RouteTo.Param(considerLiveEnemies = false))
+
+    private var initialMapCell: MapCell? = null
+
+    private var frameCt = 0
+
+    override fun complete(state: MapLocationState): Boolean =
+        wrapped.complete(state)
+//        initialMapCell == null ||
+//                (state.frameState.isDoneScrolling && initialMapCell?.mapLoc == state.currentMapCell.mapLoc)
+
+    private fun onCorrectMap(state: MapLocationState): Boolean {
+        val current = state.currentMapCell
+        val fromLoc = initialMapCell?.mapLoc ?: return true
+        val isInCurrent = current.mapLoc == fromLoc
+        // need a little routing alg
+//        val dir = when {
+//            !isInCurrent -> current.mapLoc.directionToDir(fromLoc)
+//        }
+
+        if (isInCurrent) {
+            d { " STAY-> ON THE RIGHT ROUTE on ${current.mapLoc} == $fromLoc"}
+        } else {
+            d { " STAY-> ON THE WRONG ROUTE on ${current.mapLoc} but should be on $fromLoc"}
+            // go in this direction
+        }
+
+        return isInCurrent
+    }
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        frameCt++
+        d { "StayInCurrentMapCell ${state.frameState.isDoneScrolling} ${initialMapCell != null}" }
+        if (initialMapCell == null && !state.frameState.isScrolling && frameCt > 200) {
+            initialMapCell = state.currentMapCell
+            d { "StayInCurrentMapCell set to ${state.currentMapCell.mapLoc}" }
+        }
+
+        // don't do any of this if the screen is scrolling
+        if (state.frameState.isScrolling) {
+            return wrapped.nextStep(state)
+        }
+
+        val isInCurrent = onCorrectMap(state)
+
+        return if (isInCurrent) {
+            wrapped.nextStep(state)
+        } else {
+            val fromLoc = initialMapCell?.mapLoc ?: 0
+            d { " should be at $fromLoc"}
+            val dir = state.currentMapCell.mapLoc.directionToDir(fromLoc)
+
+            val exits = state.currentMapCell.exitsFor(dir)
+            if (exits == null) {
+                d { " default move " }
+                GamePad.None
+            } else {
+                routeTo.routeTo(state, exits)
+            }
         }
     }
 

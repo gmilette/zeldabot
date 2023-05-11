@@ -134,7 +134,10 @@ class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val forceDirection: Dir
 
         // always assume on current need this? for the state.frameState.isLevel &&
 //        val isInCurrent = current.mapLoc == start?.mapLoc //|| (current.mapLoc != (start?.mapLoc ?: 0))
+
+        // do it for levels too
         val isInCurrent = state.frameState.isLevel || current.mapLoc == from //|| (current.mapLoc != (start?.mapLoc ?: 0))
+//        val isInCurrent = current.mapLoc == from //|| (current.mapLoc != (start?.mapLoc ?: 0))
         // need a little routing alg
         dir = when {
             !isInCurrent -> current.mapLoc.directionToDir(fromLoc)
