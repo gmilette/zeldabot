@@ -122,6 +122,7 @@ class GStar(
     ): List<FramePoint> {
         val nearEnemies = enemies.isNotEmpty()
         val maxIter = if (nearEnemies) SHORT_ITER else MAX_ITER
+        d {"Plan: iter = $maxIter"}
         // only if inside a radius
         setEnemyCosts(start, enemies)
         setForcePassable(forcePassable)

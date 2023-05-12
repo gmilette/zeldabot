@@ -1,5 +1,6 @@
 package bot.state.map.level
 
+import bot.state.map.Direction
 import java.lang.RuntimeException
 
 object LevelStartMapLoc {

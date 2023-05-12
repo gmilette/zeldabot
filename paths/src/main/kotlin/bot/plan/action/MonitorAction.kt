@@ -3,7 +3,6 @@ package bot.plan.action
 import bot.plan.action.NavUtil.directionToDir
 import bot.state.FramePoint
 import bot.state.GamePad
-import bot.state.MapLoc
 import bot.state.MapLocationState
 import bot.state.map.MapCell
 import util.d
@@ -183,10 +182,34 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
         get() = wrapped.name
 }
 
+class ReBombIfNecessary(private val wrapped: Action): Action {
+    private var frameCt = 0
+    private var attack = AlwaysAttack(useB = true)
+
+    override fun complete(state: MapLocationState): Boolean =
+        wrapped.complete(state)
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        frameCt++
+
+        return if (frameCt > 1000) {
+            d { "REBOMB!!!" }
+            if (frameCt > 1100) {
+                frameCt = 0
+                d { "ah well restart" }
+            }
+            attack.nextStep(state)
+        } else {
+            wrapped.nextStep(state)
+        }
+    }
+}
+
 class StayInCurrentMapCell(private val wrapped: Action) : Action {
     private val routeTo = RouteTo(params = RouteTo.Param(considerLiveEnemies = false))
 
     private var initialMapCell: MapCell? = null
+    private var initialLevel: Int = -1
 
     private var frameCt = 0
 
@@ -219,11 +242,14 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
         d { "StayInCurrentMapCell ${state.frameState.isDoneScrolling} ${initialMapCell != null}" }
         if (initialMapCell == null && !state.frameState.isScrolling && frameCt > 200) {
             initialMapCell = state.currentMapCell
-            d { "StayInCurrentMapCell set to ${state.currentMapCell.mapLoc}" }
+            d { "StayInCurrentMapCell set to ${state.currentMapCell.mapLoc} level = $initialLevel" }
+            initialLevel = state.frameState.level
         }
 
         // don't do any of this if the screen is scrolling
-        if (state.frameState.isScrolling) {
+        if (state.frameState.isScrolling || state.currentMapCell.mapLoc == 0 ||
+            // never switch between level and no
+            state.frameState.level != initialLevel) {
             return wrapped.nextStep(state)
         }
 

@@ -170,8 +170,11 @@ class KillAll(
 //                            val forceNew = previousTarget != target && sameEnemyForTooLong
 
                             // force a new route if this has changed targets
-                            val forceNew = previousTarget != target
-                            routeTo.routeTo(state, listOf(target), forceNew)
+                            val forceNew = previousTarget.oneStr != target.oneStr
+                            d { "Plan: target changed was $previousTarget now ${target}"}
+                            // can't tell if the target has changed
+                            // handle replanning when just close, this might be fine
+                            routeTo.routeTo(state, listOf(target), false)
                         }
                     }
                 } ?: GamePad.None

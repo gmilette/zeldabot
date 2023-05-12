@@ -114,9 +114,9 @@ object ZeldaPlan {
 
 //        return levelTour(factory)
 //        return bombTour(factory)
-        return real(factory)
+//        return real(factory)
 //        return realNoStuff(factory)
-//        return part(factory)
+        return part(factory)
     }
 
     private fun levelTour(factory: PlanInputs): MasterPlan {
@@ -159,9 +159,9 @@ object ZeldaPlan {
 
 //            includeLevelPlan(levelPlan6(factory))
 //            includeLevelPlan(levelPlan7(factory))
-//            includeLevelPlan(levelPlan8(factory))
+            includeLevelPlan(levelPlan8(factory))
 //            obj(Dest.level(9))
-            includeLevelPlan(levelPlan9(factory))
+//            includeLevelPlan(levelPlan9(factory))
         }
     }
 
@@ -281,7 +281,7 @@ object ZeldaPlan {
 //            obj(Dest.Secrets.level2secret10)
             phase("level 8")
             obj(Dest.level(8))
-            includeLevelPlan(levelPlan8(factory))
+            includeLevelPlan(levelPlan8(factory), Direction.Left)
             phase("level 9")
             obj(Dest.level(9))
             includeLevelPlan(levelPlan9(factory))
@@ -409,6 +409,8 @@ object ZeldaPlan {
             goIn(GamePad.MoveRight, 20)
             seg("get the triforce")
             goTo(InLocations.Level2.triforce)
+            // missed it once
+            goIn(GamePad.MoveUp, 5)
         }
     }
 
@@ -461,7 +463,7 @@ object ZeldaPlan {
             killLevel2Rhino
             wait
             goTo(InLocations.Level2.heartMid)
-            seg("get the trigorce")
+            seg("get the triforce")
             left
             goIn(GamePad.MoveLeft, 30)
             goTo(InLocations.Level2.triforce)
@@ -504,10 +506,12 @@ object ZeldaPlan {
             right
             seg("kill boss")
             kill // need special strategy for the 4monster
-            goTo(InLocations.Level5.triforceHeart) // where is triforce heart???
+//            goTo(InLocations.Level5.triforceHeart) // where is triforce heart???
+            go(InLocations.Level3.heartMid)
+            // missed it once
             up
             goTo(InLocations.Level3.triforce)
-            go(InLocations.Level3.heartMid)
+            goIn(GamePad.MoveUp, 5)
         }
     }
 
@@ -560,6 +564,7 @@ object ZeldaPlan {
             goTo(InLocations.Level4.triforceHeart)
             up
             goTo(InLocations.Level2.triforce)
+            goIn(GamePad.MoveUp, 5)
         }
     }
 
@@ -625,6 +630,7 @@ object ZeldaPlan {
             goTo(InLocations.Level5.triforceHeart)
             up
             goTo(InLocations.Level2.triforce)
+            goIn(GamePad.MoveUp, 5)
         }
     }
 
@@ -706,6 +712,7 @@ object ZeldaPlan {
             goTo(InLocations.Level6.triforceHeart)
             up
             goTo(InLocations.Level2.triforce)
+            goIn(GamePad.MoveUp, 5)
         }
     }
 
@@ -789,6 +796,7 @@ object ZeldaPlan {
             goTo(InLocations.Level7.triforceHeart)
             right
             goTo(InLocations.Level2.triforce)
+            goIn(GamePad.MoveUp, 5)
         }
     }
 
@@ -854,6 +862,7 @@ object ZeldaPlan {
             goTo(InLocations.Level8.triforceHeart)
             up
             goTo(InLocations.Level2.triforce)
+            goIn(GamePad.MoveUp, 5)
         }
     }
 

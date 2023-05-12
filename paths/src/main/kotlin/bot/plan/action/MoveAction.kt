@@ -299,9 +299,9 @@ class RouteTo(val params: Param = Param()) {
         }
 
         d { " enemies near ${enemiesNear.size} projectiles ${projectilesNear.size} avoid: ${avoid.size}" }
-        for (agent in enemiesNear) {
-            d { " enemy $agent"}
-        }
+//        for (agent in enemiesNear) {
+//            d { " enemy $agent"}
+//        }
 //        val avoid = emptyList<FramePoint>()
 
 
@@ -313,10 +313,10 @@ class RouteTo(val params: Param = Param()) {
             enemiesNear.isNotEmpty()
         ) {
             val why = when {
+                forceNew -> "force new $planCount of ${params.planCountMax}"
                 !state.previousMove.movedNear -> "got hit"
                 planCount >= params.planCountMax -> "old plan"
                 route == null -> "no plan"
-                forceNew -> "force new ${params.planCountMax}"
                 routeSize <= 2 -> " 2 sized route"
                 !skippedButIsOnRoute -> "skipped and not on route"
                 enemiesNear.isNotEmpty() -> "nearby enemies, replan"
@@ -343,7 +343,7 @@ class RouteTo(val params: Param = Param()) {
                     avoid.map { it.point },
                     passable)
             )
-            d { " ${state.currentMapCell.mapLoc} new plan! because ($why)" }
+            d { " Plan: ${state.currentMapCell.mapLoc} new plan! because ($why)" }
             route?.next5()
 //            route?.adjustCorner()
             nextPoint = route?.popOrEmpty() ?: FramePoint() // skip first point because it is the current location
@@ -351,6 +351,8 @@ class RouteTo(val params: Param = Param()) {
             d { " next is $nextPoint" }
             route?.next5()
             planCount = 0
+        } else {
+            d { " Plan: same plan ct $planCount"}
         }
 
         planCount++

@@ -8,6 +8,7 @@ import bot.plan.runner.PlanSegment
 import bot.state.*
 import bot.state.map.*
 import bot.state.map.level.LevelMapCellsLookup
+import bot.state.map.level.LevelStartMapLoc
 import sequence.AnalysisPlanBuilder
 import sequence.DestType
 import sequence.EntryType
@@ -76,10 +77,14 @@ class PlanBuilder(
         other()
     }
 
-    fun includeLevelPlan(other: MasterPlan): PlanBuilder {
+    fun includeLevelPlan(other: MasterPlan, exitDirection: Direction = Direction.Down): PlanBuilder {
         makeSegment()
         remember
         segments.addAll(other.segments)
+        // exit the level so dont accidently go back in
+        // have to wait for the triforce animation
+        goIn(GamePad.None, 500)
+        goIn(exitDirection.toGamePad(), 20)
         recall
         return this
     }
@@ -429,7 +434,9 @@ class PlanBuilder(
 
     private fun bombThenGoIn(entrance: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem): PlanBuilder {
         bomb(entrance.copy(y = entrance.y + 8))
-        go(entrance)
+//        go(entrance)
+        add(lastMapLoc, ReBombIfNecessary(InsideNav(entrance)))
+
         goIn(GamePad.MoveUp, 5)
 
         goGetItem(itemLoc)
@@ -468,6 +475,8 @@ class PlanBuilder(
 
     private fun goGetItem(itemLoc: FramePoint = InLocations.Overworld.centerItem) {
         if (itemLoc != Objective.ItemLoc.None.point) {
+            // start by moving in
+            goIn(GamePad.MoveUp, 20)
             goShop(itemLoc)
             if (itemLoc != Objective.ItemLoc.Enter.point) {
                 exitShop()

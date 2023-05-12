@@ -176,7 +176,10 @@ data class SpriteData(
     val attribute: Int
     // or > 239
 ) {
-    val hidden: Boolean = point.y >= 248 || attribute == 32 || ignore.contains(tile)
+    val tilePair = tile to attribute
+
+    val hidden: Boolean = point.y >= 248 || attribute == 32 || ignore.contains(tile) ||
+            ignorePairs.contains(tilePair) // does this work?
             //|| point.y < 60  dont need that because the y coordinate is adjusted
             //|| projectiles.contains(tile) //|| loot.contains(tile) // should be separate
             || ( (tile == 248 || tile == 250) && point.y == 187) // spinny guy
@@ -225,7 +228,10 @@ data class SpriteData(
             wizard,
             flame1,
             flame2,
-            triforceDirt,
+            dragon4Body,
+            dragon4BodyFoot,
+            dragon4BodySpine,
+//            triforceDirt,
             triforceDirt2,
 //            oldWoman
 //            dragonFeet,
@@ -255,6 +261,10 @@ data class SpriteData(
         // gannon stuff
         // pile: EC, EA
         // triforce: F2, F4
+        
+        val ignorePairs = setOf(
+            triforceDirtPair
+        )
 
         val loot = setOf(
             compass,
@@ -317,7 +327,8 @@ val bat = (0x9A).toInt()
 val boulder = (0x90).toInt()
 val boulder2 = (0x92).toInt()
 val boulder3 = (0xEA).toInt() // it is also triforce part sooo...
-val boulder4 = (0xE8).toInt()
+val boulder4 = (0xE8).toInt() // also part of circle enemy
+val boulder4Pair = (0xE8).toInt() to (0x00).toInt() //??
 val arrowTipShotByEnemy = (0x88).toInt()
 val arrowButtShotByEnemy = (0x86).toInt()
 
@@ -330,9 +341,12 @@ val triforceNormal = (0x6E).toInt()
 // final triforce
 val triforceTile = (0xF4).toInt()
 val triforceTile2 = (0xF2).toInt()
-val triforceDirt = (0xEC).toInt() // attrib 03 //236
+val triforceDirt = (0xEC).toInt() // attrib 03 //236 // also part of fourMonster
 val triforceDirt2 = (0xFA).toInt() // also circle enemy center
 val triforceDirt3 = (0xEA).toInt() // attrib 03
+
+// verify
+val triforceDirtPair = (0xEC).toInt() to (0x03)// attrib 03 //236 // also part of fourMonster
 
 // added from online
 // https://www.computerarcheology.com/NES/Zelda/Bank2.html
@@ -375,17 +389,23 @@ val dragonNeck = (0xC4).toInt()
 //val dragonBody = (0xC2).toInt()
 
 val dragon4Head = (0xDC).toInt()
-val dragon4Body = (0xD4).toInt()
+val dragon4Body = (0xD4).toInt() // attrib 3
 val dragon4BodyWingRight = (0xD2).toInt()
 val dragon4BodyWingLeft = (0xD8).toInt()
-val dragon4BodyFoot = (0xD0).toInt()
+val dragon4BodyFoot = (0xD0).toInt() // attrib 3
 val dragon4BodySide = (0xD6).toInt()
-val dragon4BodySpine = (0xC6).toInt()
+val dragon4BodySpine = (0xC6).toInt() // attribute 3
 val dragon4FlamingHead = (0xDE).toInt()
 val rhinoHeadDown = (0xF4).toInt()
 val rhinoHeadDown2 = (0xF6).toInt()
 val rhinoHead = (0xE2).toInt()
 val rhinoHead2 = (0xE0).toInt()
+
+val fourMonster = (0xE2).toInt() to (0x41).toInt()
+val fourMonster2 = (0xE0).toInt() to (0x41).toInt()
+val fourMonsterBody = (0xEC).toInt() to (0x41).toInt()
+val fourMonster3 = (0xE8).toInt() to (0xC1).toInt() //??
+val fourMonster5 = (0xE8).toInt() to (0x81).toInt() //??
 
 val rhinoTail = (0xDC).toInt()
 val rhinoMid = (0xDE).toInt()
