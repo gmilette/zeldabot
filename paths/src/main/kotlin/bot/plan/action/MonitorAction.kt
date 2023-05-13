@@ -213,34 +213,19 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
 
     private var frameCt = 0
 
+    companion object {
+        private const val FRAMES_BEFORE_SET_INITIAL = 300
+    }
+
     override fun complete(state: MapLocationState): Boolean =
         wrapped.complete(state)
 //        initialMapCell == null ||
 //                (state.frameState.isDoneScrolling && initialMapCell?.mapLoc == state.currentMapCell.mapLoc)
 
-    private fun onCorrectMap(state: MapLocationState): Boolean {
-        val current = state.currentMapCell
-        val fromLoc = initialMapCell?.mapLoc ?: return true
-        val isInCurrent = current.mapLoc == fromLoc
-        // need a little routing alg
-//        val dir = when {
-//            !isInCurrent -> current.mapLoc.directionToDir(fromLoc)
-//        }
-
-        if (isInCurrent) {
-            d { " STAY-> ON THE RIGHT ROUTE on ${current.mapLoc} == $fromLoc"}
-        } else {
-            d { " STAY-> ON THE WRONG ROUTE on ${current.mapLoc} but should be on $fromLoc"}
-            // go in this direction
-        }
-
-        return isInCurrent
-    }
-
     override fun nextStep(state: MapLocationState): GamePad {
         frameCt++
         d { "StayInCurrentMapCell ${state.frameState.isDoneScrolling} ${initialMapCell != null}" }
-        if (initialMapCell == null && !state.frameState.isScrolling && frameCt > 200) {
+        if (initialMapCell == null && !state.frameState.isScrolling && frameCt > FRAMES_BEFORE_SET_INITIAL) {
             initialMapCell = state.currentMapCell
             d { "StayInCurrentMapCell set to ${state.currentMapCell.mapLoc} level = $initialLevel" }
             initialLevel = state.frameState.level
@@ -270,6 +255,20 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
                 routeTo.routeTo(state, exits)
             }
         }
+    }
+
+    private fun onCorrectMap(state: MapLocationState): Boolean {
+        val current = state.currentMapCell
+        val fromLoc = initialMapCell?.mapLoc ?: return true
+        val isInCurrent = current.mapLoc == fromLoc
+        if (isInCurrent) {
+            d { " STAY-> ON THE RIGHT ROUTE on ${current.mapLoc} == $fromLoc"}
+        } else {
+            d { " STAY-> ON THE WRONG ROUTE on ${current.mapLoc} but should be on $fromLoc"}
+            // go in this direction
+        }
+
+        return isInCurrent
     }
 
     override val name: String
