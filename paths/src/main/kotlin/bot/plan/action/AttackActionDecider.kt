@@ -8,6 +8,9 @@ import bot.state.map.toGamePad
 import util.d
 
 object AttackActionDecider {
+    // how close to get to enemies before engaging the dodge
+    private const val dodgeBuffer = 3
+
     fun shouldAttack(state: MapLocationState) =
         shouldAttack(
             state.frameState.link.dir,
@@ -20,7 +23,7 @@ object AttackActionDecider {
 
     fun shouldDodge(state: MapLocationState): GamePad {
         val link = state.link
-        val enemies = state.aliveEnemies.map { it.point } .filter { it.isInGrid(link, 6) }
+        val enemies = state.aliveEnemies.map { it.point } .filter { it.isInGrid(link, dodgeBuffer) }
         if (enemies.isEmpty()) return GamePad.None
 
         // but some directions you cannot move in! depending on what the previous
