@@ -23,6 +23,7 @@ object AttackActionDecider {
 
     fun shouldDodge(state: MapLocationState): GamePad {
         val link = state.link
+        // if it is a small projectile, then we only need to avoid a half grid
         val enemies = state.aliveEnemies.map { it.point } .filter { it.isInGrid(link, dodgeBuffer) }
         if (enemies.isEmpty()) return GamePad.None
 

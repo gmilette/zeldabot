@@ -62,7 +62,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     }
 
     private fun apiEnabled() {
-        d { "Let's begin apiEnabled" }
+        d { "apiEnabled" }
         val sprite = IntArray(SPRITE_SIZE * SPRITE_SIZE)
         for (y in 0 until SPRITE_SIZE) {
             val Y = y - SPRITE_SIZE / 2 + 0.5
@@ -236,6 +236,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         if (frameStateUpdater.state.frameState.inventory.numKeys == 0) {
             api.writeCPU(Addresses.numKeys, 2)
         }
+
         if (frameStateUpdater.state.frameState.inventory.numRupees!! < 250) {
             api.writeCPU(Addresses.numRupees, 252)
         }

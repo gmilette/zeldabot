@@ -96,14 +96,27 @@ class OamStateReasoner(
 
     private fun combine(toCombine: List<SpriteData>): List<SpriteData> {
         val xMap = toCombine.associateBy { it.point.x }
-        // if any of the sprites dont have a match
 
-        // can delete
-        return sprites.filter {
-            val matched = xMap[it.point.x - 8]
-            d { "! delete $matched, copy of $it" }
-            matched?.tile == it.tile
+        // can delete, because there is a sprite 8pxs to left that is the same
+        val toDelete = toCombine
+            // keep all the projectiles because most are just small
+//            .filter { !SpriteData.projectiles.contains(it.tile) }
+            .filter {
+                val matched = xMap[it.point.x - 8]
+                val delete = matched?.tile == it.tile
+                if (delete) {
+                    d { "! delete ${matched?.point}, copy of ${it.point}" }
+                }
+                delete
         }
+
+        val mutable = toCombine.toMutableList()
+        for (spriteData in toDelete) {
+            d { "! remove $spriteData" }
+            mutable.remove(spriteData)
+        }
+
+        return mutable
     }
 
     private fun SpriteData.toState(): EnemyState =
@@ -254,14 +267,22 @@ data class SpriteData(
         val projectiles = setOf(
             124, 126, // ghost attack
             144, 142, // sun
-            40, 68, // ganons
+            40, orbProjectile, // ganons
             arrowTipShotByEnemy,
-            (0x44).toInt(), // fire from go to next room, also projectiles flying around from ship guy
             fire,
             brownBoomerang, // but it is also an item to be gotten, not avoided, oy!
             (0x96).toInt(), // trap,
             boulder, boulder2, boulder3, boulder4,
             dragon4FlamingHead,
+            spinCircleEnemy
+        )
+
+        val largeProjectiles = setOf(
+            124, 126, // ghost attack
+            144, 142, // sun
+            fire,
+            (0x96).toInt(), // trap,
+            boulder, boulder2, boulder3, boulder4,
             spinCircleEnemy
         )
 
@@ -318,6 +339,7 @@ object TileInfo {
     const val oldWoman = (0x9a).toInt()
 }
 
+val orbProjectile = (0x44).toInt() // fire from go to next room, also projectiles flying around from ship guy
 //val grabbyHands = 142
 val grabbyHands = (0xAE).toInt() //158
 val grabbyHands2 = (0xAC).toInt() // 172
