@@ -94,10 +94,16 @@ class OamStateReasoner(
     private fun SpriteData.toAgent(): Agent =
         Agent(index = tile, point = point, state = toState(), hp =tile, droppedId = attribute)
 
-    private fun combine() {
-        val xMap = sprites.associateBy { it.point.x }
+    private fun combine(toCombine: List<SpriteData>): List<SpriteData> {
+        val xMap = toCombine.associateBy { it.point.x }
         // if any of the sprites dont have a match
-        sprites.filter { xMap.containsKey(it.point.x + 8) }
+
+        // can delete
+        return sprites.filter {
+            val matched = xMap[it.point.x - 8]
+            d { "! delete $matched, copy of $it" }
+            matched?.tile == it.tile
+        }
     }
 
     private fun SpriteData.toState(): EnemyState =
@@ -125,9 +131,10 @@ class OamStateReasoner(
     }
 
     private fun readOam(): List<SpriteData> {
-        val sprites = (0..63).map {
+        val spritesRaw = (0..63).map {
             readOam(0x0001 * (it * 4))
         }
+        val sprites = combine(spritesRaw)
         // Y coord
         // Tile
         // Attribute
