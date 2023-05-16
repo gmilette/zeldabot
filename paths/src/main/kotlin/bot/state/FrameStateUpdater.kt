@@ -67,6 +67,9 @@ class FrameStateUpdater(
 
     fun updateFrame(currentFrame: Int, currentGamePad: GamePad) {
         val previous = state.frameState
+
+        this.state.previousLocation = previous.link.point
+
         state.lastGamePad = currentGamePad
         //        https://datacrystal.romhacking.net/wiki/The_Legend_of_Zelda:RAM_map
 
@@ -108,8 +111,6 @@ class FrameStateUpdater(
         }
         d { " link directon $linkDir"}
         val frame = FrameState(api, theEnemies, level, mapLoc, link, ladder)
-
-        this.state.previousLocation = link.point
 
         state.framesOnScreen++
         state.frameState = frame

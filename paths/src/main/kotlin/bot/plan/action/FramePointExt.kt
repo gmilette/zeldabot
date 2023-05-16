@@ -1,12 +1,14 @@
 package bot.plan.action
 
-import bot.state.FramePoint
-import bot.state.justLeftBottom
-import bot.state.justRightEnd
+import bot.state.*
 
-fun FramePoint.isInGrid(other: FramePoint) =
-    other.x in this.x..this.justRightEnd.x &&
-            other.y in this.y..this.justLeftBottom.y
+fun FramePoint.distToSquare(other: FramePoint) = squarePts().minOf { it.distTo(other) }
+
+fun FramePoint.squarePts() = listOf(this, this.justRightEnd, this.justLeftBottom, this.justLeftDown)
+
+fun FramePoint.isInGrid(other: FramePoint, buffer: Int = 0) =
+    other.x in (this.x - buffer)..(this.justRightEnd.x + buffer) &&
+            other.y in (this.y - buffer)..(this.justLeftBottom.y + buffer)
 
 fun FramePoint.toLineOf(length: Int = 8): List<FramePoint> {
     val pts = mutableListOf<FramePoint>()

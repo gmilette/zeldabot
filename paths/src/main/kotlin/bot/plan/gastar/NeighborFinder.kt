@@ -23,8 +23,8 @@ class NeighborFinder(
     private val isLevel: Boolean = false
 ) {
 
-    private val horizontal: List<Direction> = listOf(Direction.Left, Direction.Right)
-    private val vertical: List<Direction> = listOf(Direction.Up, Direction.Down)
+    private val horizontal: List<Direction> = Direction.horizontal
+    private val vertical: List<Direction> = Direction.vertical
 
     private fun okDirections(from: FramePoint, last: Direction? = null, dist: Int): List<Direction> {
         val all = Direction.values().toList()

@@ -210,15 +210,26 @@ class RouteTo(val params: Param = Param()) {
         // i tried dirActual
         d { " route To with make passable $makePassable"}
 
-        return if (params.dodgeEnemies && AttackActionDecider.shouldAttack(state) &&
-            state.frameState.canUseSword
+        return if (params.dodgeEnemies && AttackActionDecider.shouldAttack(state) && state.frameState.canUseSword
         ) {
             d { " prev ${state.previousMove.dirActual} ATTACK" }
             attack.nextStep(state)
         } else {
-            attack.reset()
-            d { " prev ${state.previousMove.dirActual} NO ATTACK" }
-            doRouteTo(state, to, forceNewI, overrideMapCell, makePassable)
+            if (params.dodgeEnemies) {
+                val pad = AttackActionDecider.shouldDodge(state)
+                if (pad != GamePad.None) {
+                    d { " DODGE!" }
+                    pad
+                } else {
+                    attack.reset()
+                    d { " prev ${state.previousMove.dirActual} NO ATTACK" }
+                    doRouteTo(state, to, forceNewI, overrideMapCell, makePassable)
+                }
+            } else {
+                attack.reset()
+                d { " prev ${state.previousMove.dirActual} NO ATTACK" }
+                doRouteTo(state, to, forceNewI, overrideMapCell, makePassable)
+            }
         }
     }
 

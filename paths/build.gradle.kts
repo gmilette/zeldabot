@@ -71,6 +71,20 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "11"
 }
 
+tasks.withType<Jar> {
+
+    // required so that this app will run inside of nintaco
+    val include = setOf("kotlin-runtime-1.7.10.jar",
+        "kotlin-stdlib-1.7.10.jar")
+
+    println("run jar")
+
+    configurations.runtimeClasspath.get()
+        .filter { it.name in include }
+        .map { zipTree(it) }
+        .also { from(it) }
+}
+
 //application {
 //    mainClass.set("HelloWorld")
 //}

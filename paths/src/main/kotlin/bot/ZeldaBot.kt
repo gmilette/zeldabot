@@ -21,6 +21,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     private val api: API = ApiSource.getAPI()
 
     fun launch() {
+//        val zeldaPath =
         d { " master plan ${plan.masterPlan.toStringAll()}"}
         val loadZelda by RunOnceLambda {
             d { " load zelda"}
@@ -186,7 +187,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             val tenth = this.frameState.tenth
             val dir = this.frameState.link.dir.name.first()
             try {
-                drawIt(plan.target(), "$locCoordinates $link t: $tenth d: $dir")
+                drawIt(plan.target(), "$locCoordinates $link t: $tenth")
             } catch (e: Exception) {
 
             }
@@ -350,6 +351,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                 System.out.println("start remote")
                 ApiSource.initRemoteAPI("localhost", 9999)
             } else {
+                ApiSource.initRemoteAPI("localhost", 9999)
                 System.out.println("start local")
             }
             ZeldaBot(NoOp()).launch()
