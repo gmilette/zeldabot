@@ -70,23 +70,21 @@ class NeighborFinder(
     fun neighbors(point: FramePoint, direction: Direction? = null, dist: Int = 1): List<FramePoint> {
         val neigh = mutableListOf<FramePoint>()
 
-        val validDirections = okDirections(point, direction, dist).toMutableList()
-        if (GStar.DEBUG) {
-            d { " valid directions ${validDirections.size} = $validDirections" }
-        }
+//        var validDirections = okDirections(point, direction, dist)
+//        if (GStar.DEBUG) {
+//            d { " valid directions ${validDirections.size} = $validDirections" }
+//        }
 
         // only go up down when you are close to the exit
         // y > 150
         // y < 5
         // x > 240
-        if (point.y > 150 || point.y < 5) {
-            validDirections.remove(Direction.Left)
-            validDirections.remove(Direction.Right)
-        }
-
-        if (point.x > 240 || point.x < 5) {
-            validDirections.remove(Direction.Up)
-            validDirections.remove(Direction.Down)
+        val validDirections = if (point.y > 150 || point.y < 5) {
+            Direction.vertical
+        } else if (point.x > 240 || point.x < 5) {
+            Direction.horizontal
+        } else {
+            Direction.values().toList()
         }
 
         for (direction in validDirections) {
