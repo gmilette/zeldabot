@@ -103,7 +103,7 @@ class OamStateReasoner(
 //            .filter { !SpriteData.projectiles.contains(it.tile) }
             .filter {
                 val matched = xMap[it.point.x - 8]
-                val delete = matched?.tile == it.tile
+                val delete = matched?.tile == it.tile && matched.point.y == it.point.y
                 if (delete) {
                     d { "! delete ${matched?.point}, copy of ${it.point}" }
                 }
@@ -147,20 +147,10 @@ class OamStateReasoner(
         val spritesRaw = (0..63).map {
             readOam(0x0001 * (it * 4))
         }
-        val sprites = combine(spritesRaw)
-        // Y coord
-        // Tile
-        // Attribute
-        // X coord
-        if (DEBUG) {
-            d { " sprites" }
-            sprites.forEachIndexed { index, sprite ->
-                d { "$index: $sprite ${LinkDirection.dirFor(sprite)}" }
-            }
-        }
-        direction = LinkDirection.direction(sprites)
 
-        val ladders = sprites.filter { it.tile == ladder }
+        direction = LinkDirection.direction(spritesRaw)
+
+        val ladders = spritesRaw.filter { it.tile == ladder }
         ladderSprite = if (ladders.isNotEmpty()) {
             val sp = if (ladders.size == 1) {
                 ladders.first()
@@ -176,14 +166,20 @@ class OamStateReasoner(
             null
         }
 
-
-        d { " sprites** alive ** ${sprites.filter { !it.hidden }.size} dir ${direction}" }
+        d { " sprites** alive ** ${spritesRaw.filter { !it.hidden }.size} dir ${direction}" }
         // ahh there are twice as many sprites because each sprite is two big
-        sprites.filter { !it.hidden }.forEachIndexed { index, sprite ->
+        spritesRaw.filter { !it.hidden }.forEachIndexed { index, sprite ->
             d { "$index: $sprite" }
         }
 
-        return sprites
+        if (DEBUG) {
+            d { " sprites" }
+            spritesRaw.forEachIndexed { index, sprite ->
+                d { "$index: $sprite ${LinkDirection.dirFor(sprite)}" }
+            }
+        }
+
+        return combine(spritesRaw)
     }
 }
 fun Agent.isGannonTriforce(): Boolean =
