@@ -48,7 +48,7 @@ object AttackActionDecider {
         return when (dir) {
             Direction.Left,
             Direction.Right -> {
-                if (from.onHighwayX) {
+                if (from.onHighwayY) {
                     all
                 } else {
                     Direction.horizontal
@@ -56,7 +56,7 @@ object AttackActionDecider {
             }
             Direction.Up,
             Direction.Down -> {
-                if (from.onHighwayY) {
+                if (from.onHighwayX) {
                     all
                 } else {
                     Direction.vertical
