@@ -3,15 +3,13 @@ package bot.plan.runner
 import bot.state.GamePad
 import bot.plan.action.Action
 import bot.plan.action.DoNothing
-import bot.plan.action.MapAwareAction
 import bot.plan.action.moveHistoryAttackAction
 import bot.state.FramePoint
 import bot.state.MapLocationState
-import util.d
 
 class PlanRunner(val masterPlan: MasterPlan) {
     var action: Action
-    private val runLog = RunLog()
+    private val runLog = RunActionLog()
 
     init {
         action = withDefaultAction(masterPlan.skipToStart())

@@ -107,6 +107,7 @@ object InLocations {
 }
 
 object ZeldaPlan {
+    // maybe just request a certain phase?
     fun makeMasterPlan(hyrule: Hyrule, mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
         val plan = AnalysisPlanBuilder.MasterPlanOptimizer(hyrule)
 
@@ -415,7 +416,7 @@ object ZeldaPlan {
     }
 
 
-    private fun levelPlan2(factory: PlanInputs): MasterPlan {
+    fun levelPlan2(factory: PlanInputs): MasterPlan {
         val builder = factory.make("Destroy level 2")
 
         return builder {

@@ -4,7 +4,7 @@ import bot.plan.action.Action
 import bot.state.MapLocationState
 import util.d
 
-class RunLog {
+class RunActionLog {
 
     val started = System.currentTimeMillis()
     var startedStep = System.currentTimeMillis()
