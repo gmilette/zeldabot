@@ -159,6 +159,26 @@ fun main() = application {
                         }
                     )
                 }
+
+                Row {
+                    Text("+Key")
+                    Checkbox(
+                        checked = showMap.value,
+                        onCheckedChange = {
+                            model.addKey()
+                        }
+                    )
+                }
+
+                Row {
+                    Text("+Rupee")
+                    Checkbox(
+                        checked = showMap.value,
+                        onCheckedChange = {
+                            model.addRupee()
+                        }
+                    )
+                }
             }
 
             Row {
@@ -337,10 +357,6 @@ class ZeldaModel : ZeldaBot.ZeldaMonitor {
         bot?.skip()
     }
 
-    fun unStick() {
-        ZeldaBot.unstick += 25
-    }
-
     fun forceDir(forcedDirection: GamePad, num: Int = 100) {
         ZeldaBot.unstick += num
         ZeldaBot.forcedDirection = forcedDirection
@@ -352,6 +368,14 @@ class ZeldaModel : ZeldaBot.ZeldaMonitor {
 
     fun changeAct(act: Boolean) {
         ZeldaBot.doAct = act
+    }
+
+    fun addKey() {
+        ZeldaBot.addKey = true
+    }
+
+    fun addRupee() {
+        ZeldaBot.addRupee = true
     }
 
     fun ladder(act: Boolean) {

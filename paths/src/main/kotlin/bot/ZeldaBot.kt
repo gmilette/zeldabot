@@ -119,7 +119,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         plan.advance()
     }
 
-    var setEquipmentCt = 200
+    private var setEquipmentCt = 200
 
     private fun getAction(currentFrame: Int, currentGamePad: GamePad): GamePad {
         frameStateUpdater.updateFrame(currentFrame, currentGamePad)
@@ -151,6 +151,14 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             return GamePad.None
         }
 
+        if (addKey) {
+            frameStateUpdater.addKey()
+            addKey = false
+        }
+        if (addRupee) {
+            frameStateUpdater.addRupee()
+            addRupee = false
+        }
 //        fillBombs()
         refillIfOut()
         if (setEquipmentCt > 0) {
@@ -233,12 +241,15 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 
     private fun refillIfOut() {
         fillBombs()
-        if (frameStateUpdater.state.frameState.inventory.numKeys == 0) {
-            api.writeCPU(Addresses.numKeys, 2)
-        }
 
         if (frameStateUpdater.state.frameState.inventory.numRupees!! < 250) {
             api.writeCPU(Addresses.numRupees, 252)
+        }
+    }
+
+    private fun refillKeys() {
+        if (frameStateUpdater.state.frameState.inventory.numKeys == 0) {
+            api.writeCPU(Addresses.numKeys, 2)
         }
     }
 
@@ -260,7 +271,6 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         monitor.update(frameStateUpdater.state, plan)
 
         if (frameStateUpdater.state.currentMapCell.mapLoc != 55) {
-            // just make link invincible 2 hearts
             api.writeCPU(Addresses.heartContainers, 0xCC)
         }
 
@@ -325,6 +335,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         private const val SPRITE_SIZE = 2
         var hasLadder = false
         var doAct = true
+        var addKey = false
+        var addRupee = false
         var unstick = 0
         var forcedDirection = GamePad.None
 

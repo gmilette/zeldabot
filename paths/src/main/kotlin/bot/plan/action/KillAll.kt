@@ -144,7 +144,7 @@ class KillAll(
                     val dist = firstEnemy.point.distTo(link.point)
                     //d { " go find $firstEnemy from $link distance: $dist"}
                     when {
-                        dist < 24 && state.frameState.canUseSword && AttackActionDecider.shouldAttack(state) -> {
+                        state.frameState.canUseSword && AttackActionDecider.shouldAttack(state) -> {
                             // is linked turned in the correct direction towards
                             // the enemy?
                             previousAttack = true

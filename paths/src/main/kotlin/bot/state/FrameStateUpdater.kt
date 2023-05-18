@@ -7,6 +7,7 @@ import bot.state.map.MapConstants
 import nintaco.api.API
 import sequence.ZeldaItem
 import util.d
+import kotlin.math.max
 
 class FrameStateUpdater(
     private val api: API,
@@ -52,6 +53,17 @@ class FrameStateUpdater(
 
     fun setHaveWhistle() {
         api.writeCPU(Addresses.hasWhistle, 1)
+    }
+
+    fun addKey() {
+        val current = state.frameState.inventory.numKeys
+        api.writeCPU(Addresses.numKeys, current + 1)
+    }
+
+    fun addRupee() {
+        val current = state.frameState.inventory.numRupees
+        val plus100 = max(252, current + 100)
+        api.writeCPU(Addresses.numRupees, plus100)
     }
 
     fun setSword(item: ZeldaItem) {

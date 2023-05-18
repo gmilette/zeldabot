@@ -29,8 +29,8 @@ object AttackActionDecider {
 
         // but some directions you cannot move in! depending on what the previous
         // movement was
-        val dir = directionToDir(state.previousLocation, link)
-        val validDirs = validDir(dir, state.previousLocation)
+        val dirTo = directionToDir(state.previousLocation, link)
+        val validDirs = validDir(dirTo, state.previousLocation)
 
         val preferredDirection = Direction.values().filter { validDirs.contains(it) }.maxBy { dir ->
             val moved = dir.pointModifier()(link)
@@ -86,7 +86,6 @@ object AttackActionDecider {
         d { "should attack dir = $from link = $link dirGrid = $attackDirectionGrid numEnemies ${enemiesClose.size}" }
 
         // if it is on top of link ALWAYS attack, if it is in the direction link is facing, also attack
-//        return enemiesClose.any { it.isInGrid(link) || it.isInGrid(attackDirectionGrid) }
         return enemiesClose.any { link.isInGrid(it) || attackDirectionGrid.isInGrid(it) }
     }
 }
