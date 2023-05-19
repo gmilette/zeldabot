@@ -5,6 +5,7 @@ import bot.plan.ZeldaPlan
 import bot.plan.gastar.SkipLocationCollector
 import bot.plan.runner.PlanRunner
 import bot.plan.gastar.SkipPathDb
+import bot.plan.runner.MasterPlan
 import bot.state.*
 import bot.state.map.Hyrule
 import bot.state.map.MapCell
@@ -21,11 +22,14 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     private val api: API = ApiSource.getAPI()
 
     fun launch() {
-//        val zeldaPath =
+        // what is the relative dir?
+        val root = "../Nintaco_bin_2020-05-01/states/"
+//        val root = "/Users/greg/dev/zelda/Nintaco_bin_2020-05-01/states/"
         d { " master plan ${plan.masterPlan.toStringAll()}"}
         val loadZelda by RunOnceLambda {
             d { " load zelda"}
-            api.quickLoadState(1)
+//            api.quickLoadState(1)
+            api.loadState("$root/${plan.startPath}")
         }
         val setSpeed by RunOnceLambda {
             d { " set speed"}
@@ -109,15 +113,14 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 
     var frameStateUpdater: FrameStateUpdater = FrameStateUpdater(api, hyrule)
 
-    val plan = PlanRunner(ZeldaPlan.makeMasterPlan(hyrule, hyrule.mapCellsObject, hyrule.levelMap))
+    fun makePlan(): MasterPlan {
+        return ZeldaPlan.makeMasterPlan(hyrule, hyrule.mapCellsObject, hyrule.levelMap)
+    }
+
+    val plan = PlanRunner(::makePlan, api)
 
     var previousLink: FramePoint = FramePoint()
     val collect = SkipLocationCollector()
-
-    fun skip() {
-        d { " ** SKIP"}
-        plan.advance()
-    }
 
     private var setEquipmentCt = 200
 

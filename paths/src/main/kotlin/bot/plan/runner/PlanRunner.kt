@@ -6,13 +6,35 @@ import bot.plan.action.DoNothing
 import bot.plan.action.moveHistoryAttackAction
 import bot.state.FramePoint
 import bot.state.MapLocationState
+import nintaco.api.API
+import util.d
 
-class PlanRunner(val masterPlan: MasterPlan) {
-    var action: Action
-    private val runLog = RunActionLog()
+class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
+    lateinit var action: Action
+    private lateinit var runLog: RunActionLog
+    lateinit var masterPlan: MasterPlan
+    lateinit var startPath: String
 
     init {
+        run { lev2 }
+    }
+
+    private fun rerun() {
+        run(load = true) { lev2 }
+    }
+
+    private fun run(load: Boolean = false, select: Experiments.() -> Experiment) {
+        val experiments = Experiments(makePlan())
+        val ex = experiments.select()
+        masterPlan = ex.plan
+        startPath = ex.startSave
         action = withDefaultAction(masterPlan.skipToStart())
+        runLog = RunActionLog(ex.name)
+        if (load) {
+            d { "reload" }
+            val root = "../Nintaco_bin_2020-05-01/states/"
+            api.loadState("$root/${startPath}")
+        }
     }
 
     private fun withDefaultAction(action: Action) = moveHistoryAttackAction(action)
@@ -23,7 +45,7 @@ class PlanRunner(val masterPlan: MasterPlan) {
         // if actions are
         if (action.complete(state)) {
             runLog.advance(action, state)
-            advance()
+            advance(state)
         }
 
         return try {
@@ -37,9 +59,16 @@ class PlanRunner(val masterPlan: MasterPlan) {
     /**
      * advance to the next step
      */
-    fun advance() {
-        action = withDefaultAction(masterPlan.pop())
-        action.reset()
+    fun advance(state: MapLocationState) {
+        if (masterPlan.complete) {
+            d { " complete "}
+            runLog.logFinalComplete(state)
+            rerun()
+            // record final
+        } else {
+            action = withDefaultAction(masterPlan.pop())
+            action.reset()
+        }
     }
 
     fun afterThis() = masterPlan.next()

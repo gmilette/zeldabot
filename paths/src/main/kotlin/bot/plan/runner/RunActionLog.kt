@@ -2,42 +2,59 @@ package bot.plan.runner
 
 import bot.plan.action.Action
 import bot.state.MapLocationState
+import com.github.doyaaaaaken.kotlincsv.client.CsvWriter
 import util.d
 
-class RunActionLog {
+class RunActionLog(private val fileNameRoot: String) {
 
+    private val SAVE = true
     val started = System.currentTimeMillis()
     var startedStep = System.currentTimeMillis()
 
-    val outputFile = "1_wood_sword_${(Math.random()*10000).toInt()}.csv"
+    val outputFile = "${fileNameRoot}_${System.currentTimeMillis()}.csv"
+    val outputFileAll = "experiments.csv"
 
     // bombs used
     // time
     // damage taken
-    data class StepCompleted(val action: Action, val time: Long, val totalTime: Long, val numBombs: Int)
+    data class StepCompleted(val action: String, val time: Long, val totalTime: Long, val numBombs: Int)
     val completedStep = mutableListOf<StepCompleted>()
 
-    private fun logCompleted() {
+    fun logCompleted() {
         completedStep.forEachIndexed { index, stepCompleted ->
             stepCompleted.apply {
-                d { "$index, $time, $totalTime, ${action.name} $numBombs" }
+                d { "$index, $time, $totalTime, ${action} $numBombs" }
             }
         }
 
-//        val csvWriter2 = CsvWriter()
-//        csvWriter2.open(outputFile, false) {
-//            completedStep.forEachIndexed { index, stepCompleted ->
-//                writeRow(index, stepCompleted.time, stepCompleted.totalTime, stepCompleted.action.name)
-//            }
-//        }
+        if (SAVE) {
+            val csvWriter2 = CsvWriter()
+            csvWriter2.open(outputFile, false) {
+                completedStep.forEachIndexed { index, stepCompleted ->
+                    writeRow(index, stepCompleted.time, stepCompleted.totalTime, stepCompleted.action)
+                }
+            }
+        }
+    }
+
+    fun logFinalComplete(state: MapLocationState) {
+        val stepCompleted = calculateStep(fileNameRoot, state)
+        val csvWriter2 = CsvWriter()
+        csvWriter2.open(outputFileAll, true) {
+            writeRow(0, stepCompleted.time, stepCompleted.totalTime, stepCompleted.action)
+        }
     }
 
     fun advance(action: Action, state: MapLocationState) {
+        d { "*** advance time"}
+        logCompleted()
+        completedStep.add(calculateStep(action.name, state))
+        startedStep = System.currentTimeMillis()
+    }
+
+    private fun calculateStep(name: String, state: MapLocationState): StepCompleted {
         val time = (System.currentTimeMillis() - startedStep) / 1000
         val totalTime = (System.currentTimeMillis() - started) / 1000
-        d { "*** advance time $time"}
-        logCompleted()
-        completedStep.add(StepCompleted(action, time, totalTime, state.frameState.inventory.numBombs))
-        startedStep = System.currentTimeMillis()
+        return StepCompleted(name.replace("\"", ""), time, totalTime, state.frameState.inventory.numBombs)
     }
 }

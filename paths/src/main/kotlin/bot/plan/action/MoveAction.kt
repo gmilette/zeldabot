@@ -28,7 +28,7 @@ class InsideNav(private val point: FramePoint, ignoreProjectiles: Boolean = fals
     override fun path(): List<FramePoint> = routeTo.route?.path ?: emptyList()
 
     override val name: String
-        get() = "Nav to inside ${point}"
+        get() = "Nav to inside $point"
 }
 
 class InsideNavAbout(
@@ -70,7 +70,7 @@ class InsideNavAbout(
     override fun path(): List<FramePoint> = routeTo.route?.path ?: emptyList()
 
     override val name: String
-        get() = "Nav to about ${point}"
+        get() = "Nav to about $point"
 }
 
 class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val forceDirection: Direction? = null) : MapAwareAction {

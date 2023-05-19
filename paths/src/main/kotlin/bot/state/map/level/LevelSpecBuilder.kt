@@ -94,7 +94,7 @@ class LevelSpecBuilder {
             LevelSpec(grid, eall, "gridguys", LevelMapTemplateReader.Temp.lev_grid_center),
             LevelSpec(grid.up, e(u,d,r), "not", LevelMapTemplateReader.Temp.lev_block4out2),
             LevelSpec(grid.up.up, e(u,d,r), "lockback", LevelMapTemplateReader.Temp.lev_block4mid),
-            LevelSpec(grid.up.up.right, eall, "boomerangkill", LevelMapTemplateReader.Temp.lev_grid_center),
+            LevelSpec(grid.up.up.right, eall, "boomerangkill", LevelMapTemplateReader.Temp.lev_corner),
             LevelSpec(grid.up.up.up, e(u,d,r), "sand", LevelMapTemplateReader.Temp.lev_empty),
             LevelSpec(grid.up.up.up.up, e(u,d,r), "blocked need to kill", LevelMapTemplateReader.Temp.lev_blockside2),
 //            LevelSpec(grid.up.up.up.up, e(u,d,r), "blocked need to kill", LevelMapTemplateReader.Temp.lev_blockcenter),

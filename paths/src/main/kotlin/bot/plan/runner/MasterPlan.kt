@@ -16,6 +16,9 @@ class MasterPlan(val segments: List<PlanSegment>) {
         d { " created plan with ${it.size} actions moves $numMoves" }
     }
 
+    val complete: Boolean
+        get() = giant.isEmpty()
+
     fun getPlanPhase(phaseName: String): MasterPlan =
         MasterPlan(segments.filter { it.phase == phaseName })
 

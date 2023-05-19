@@ -160,24 +160,20 @@ fun main() = application {
                     )
                 }
 
-                Row {
-                    Text("+Key")
-                    Checkbox(
-                        checked = showMap.value,
-                        onCheckedChange = {
-                            model.addKey()
-                        }
-                    )
+                Button(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = {
+                        model.addKey()
+                    }) {
+                    Text("  +Key  ")
                 }
 
-                Row {
-                    Text("+Rupee")
-                    Checkbox(
-                        checked = showMap.value,
-                        onCheckedChange = {
-                            model.addRupee()
-                        }
-                    )
+                Button(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = {
+                        model.addRupee()
+                    }) {
+                    Text("  +Rupee  ")
                 }
             }
 
