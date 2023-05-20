@@ -22,19 +22,24 @@ class RunActionLog(private val fileNameRoot: String) {
     private var stepHits = 0
     private var stepDamage = 0
 
-    val outputFile = "${fileNameRoot}_${System.currentTimeMillis()}.csv"
-    val outputFileAll = "experiments.csv"
+    private val experimentRoot = "../zexperiment/"
+
+    val outputFile = "$experimentRoot${fileNameRoot}_${System.currentTimeMillis()}.csv"
+    val outputFileAll = "${experimentRoot}experiments.csv"
 
     // bombs used
     // time
     // damage taken
-    data class StepCompleted(val action: String,
-                             val time: Long,
-                             val totalTime: Long,
-                             val numBombs: Int,
-                            val numFrames: Int = 0,
+    data class StepCompleted(
+        val action: String,
+        val time: Long,
+        val totalTime: Long,
+        val numBombs: Int,
+        val numFrames: Int = 0,
         val hits: Int = 0,
-        val damage: Int = 0)
+        val damage: Int = 0
+    )
+
     val completedStep = mutableListOf<StepCompleted>()
 
     fun frameCompleted(state: MapLocationState) {
@@ -74,7 +79,15 @@ class RunActionLog(private val fileNameRoot: String) {
         val stepCompleted = calculateStep(fileNameRoot, state, totalFrames, totalHits, totalDamage)
         val csvWriter2 = CsvWriter()
         csvWriter2.open(outputFileAll, true) {
-            writeRow(now(), stepCompleted.action, outputFile, stepCompleted.totalTime, totalFrames, totalHits, totalDamage)
+            writeRow(
+                now(),
+                stepCompleted.action,
+                outputFile,
+                stepCompleted.totalTime,
+                totalFrames,
+                totalHits,
+                totalDamage
+            )
         }
     }
 
@@ -95,7 +108,7 @@ class RunActionLog(private val fileNameRoot: String) {
     }
 
     fun advance(action: Action, state: MapLocationState) {
-        d { "*** advance time"}
+        d { "*** advance time" }
         logCompleted()
         completedStep.add(calculateStep(action.name, state, framesForStep, stepHits, stepDamage))
         startedStep = System.currentTimeMillis()
@@ -104,9 +117,23 @@ class RunActionLog(private val fileNameRoot: String) {
         stepHits = 0
     }
 
-    private fun calculateStep(name: String, state: MapLocationState, frameCt: Int, hits: Int, damage: Int): StepCompleted {
+    private fun calculateStep(
+        name: String,
+        state: MapLocationState,
+        frameCt: Int,
+        hits: Int,
+        damage: Int
+    ): StepCompleted {
         val time = (System.currentTimeMillis() - startedStep) / 1000
         val totalTime = (System.currentTimeMillis() - started) / 1000
-        return StepCompleted(name.replace("\"n", "N"), time, totalTime, state.frameState.inventory.numBombs, frameCt, hits = hits, damage = damage)
+        return StepCompleted(
+            name.replace("\"n", "N"),
+            time,
+            totalTime,
+            state.frameState.inventory.numBombs,
+            frameCt,
+            hits = hits,
+            damage = damage
+        )
     }
 }
