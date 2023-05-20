@@ -5,6 +5,9 @@ import bot.state.MapLocationState
 import com.github.doyaaaaaken.kotlincsv.client.CsvWriter
 import util.d
 import java.io.File
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.util.*
 
 class RunActionLog(private val fileNameRoot: String) {
 
@@ -71,15 +74,22 @@ class RunActionLog(private val fileNameRoot: String) {
         val stepCompleted = calculateStep(fileNameRoot, state, totalFrames, totalHits, totalDamage)
         val csvWriter2 = CsvWriter()
         csvWriter2.open(outputFileAll, true) {
-            writeRow(stepCompleted.action, outputFile, stepCompleted.totalTime, totalFrames, totalHits, totalDamage)
+            writeRow(now(), stepCompleted.action, outputFile, stepCompleted.totalTime, totalFrames, totalHits, totalDamage)
         }
+    }
+
+    private fun now(): String {
+        val time = Calendar.getInstance().time
+        val formatter = SimpleDateFormat("yyyy_MM_dd_HH_mm")
+        val date = formatter.format(time)
+        return date
     }
 
     private fun writeFinalHeader() {
         val csvWriter2 = CsvWriter()
         if (!File(outputFileAll).exists()) {
             csvWriter2.open(outputFileAll, true) {
-                writeRow("action", "file", "totalTime", "totalFrames", "totalHits", "totalDamage")
+                writeRow("date", "action", "file", "totalTime", "totalFrames", "totalHits", "totalDamage")
             }
         }
     }

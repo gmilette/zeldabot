@@ -19,7 +19,7 @@ class FrameStateUpdater(
     private fun getLinkY() = api.readCPU(Addresses.linkY)
     fun getLink() = FramePoint(getLinkX(), getLinkY())
     var state: MapLocationState = MapLocationState(hyrule = hyrule)
-    
+
     fun fillTriforce() {
         api.writeCPU(Addresses.triforce, 255)
     }
