@@ -166,7 +166,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         refillIfOut()
         if (setEquipmentCt > 0) {
             d { " Set equip"}
-            frameStateUpdater.setSword(ZeldaItem.MagicSword)
+//            frameStateUpdater.setSword(ZeldaItem.MagicSword)
             frameStateUpdater.setLadderAndRaft(false)
             frameStateUpdater.setRedCandle()
             frameStateUpdater.setHaveWhistle()

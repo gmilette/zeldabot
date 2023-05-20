@@ -19,7 +19,7 @@ class FrameStateUpdater(
     private fun getLinkY() = api.readCPU(Addresses.linkY)
     fun getLink() = FramePoint(getLinkX(), getLinkY())
     var state: MapLocationState = MapLocationState(hyrule = hyrule)
-
+    
     fun fillTriforce() {
         api.writeCPU(Addresses.triforce, 255)
     }
@@ -81,6 +81,7 @@ class FrameStateUpdater(
         val previous = state.frameState
 
         this.state.previousLocation = previous.link.point
+        this.state.previousHeart = previous.inventory.hearts
 
         state.lastGamePad = currentGamePad
         //        https://datacrystal.romhacking.net/wiki/The_Legend_of_Zelda:RAM_map

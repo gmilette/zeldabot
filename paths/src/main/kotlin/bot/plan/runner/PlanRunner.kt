@@ -4,9 +4,11 @@ import bot.state.GamePad
 import bot.plan.action.Action
 import bot.plan.action.DoNothing
 import bot.plan.action.moveHistoryAttackAction
+import bot.state.Addresses
 import bot.state.FramePoint
 import bot.state.MapLocationState
 import nintaco.api.API
+import sequence.ZeldaItem
 import util.d
 
 class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
@@ -16,16 +18,17 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     lateinit var startPath: String
 
     init {
-        run { lev2 }
+        run { lev2w }
     }
 
     private fun rerun() {
-        run(load = true) { lev2 }
+        run(load = true) { lev2w }
     }
 
     private fun run(load: Boolean = false, select: Experiments.() -> Experiment) {
         val experiments = Experiments(makePlan())
         val ex = experiments.select()
+        setSword(ex.sword)
         masterPlan = ex.plan
         startPath = ex.startSave
         action = withDefaultAction(masterPlan.skipToStart())
@@ -37,10 +40,22 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
         }
     }
 
+    fun setSword(item: ZeldaItem) {
+        when (item) {
+            ZeldaItem.WoodenSword -> api.writeCPU(Addresses.hasSword, 1)
+            ZeldaItem.WhiteSword -> api.writeCPU(Addresses.hasSword, 2)
+            ZeldaItem.MagicSword -> api.writeCPU(Addresses.hasSword, 3)
+            else -> {
+                api.writeCPU(Addresses.hasSword, 0)
+            }
+        }
+    }
+
     private fun withDefaultAction(action: Action) = moveHistoryAttackAction(action)
 
     // currently does this
     fun next(state: MapLocationState): GamePad {
+        runLog.frameCompleted(state)
         // update plan
         // if actions are
         if (action.complete(state)) {
@@ -62,7 +77,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     fun advance(state: MapLocationState) {
         if (masterPlan.complete) {
             d { " complete "}
-            runLog.logFinalComplete(state)
+            runLog.logFinalComplete(state )
             rerun()
             // record final
         } else {
