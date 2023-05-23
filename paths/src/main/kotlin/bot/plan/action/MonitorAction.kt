@@ -4,6 +4,8 @@ import bot.plan.action.NavUtil.directionToDir
 import bot.state.FramePoint
 import bot.state.GamePad
 import bot.state.MapLocationState
+import bot.state.distTo
+import bot.state.map.Direction
 import bot.state.map.MapCell
 import util.d
 import util.w
@@ -245,15 +247,25 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
         } else {
             val fromLoc = initialMapCell?.mapLoc ?: 0
             d { " should be at $fromLoc"}
-            val dir = state.currentMapCell.mapLoc.directionToDir(fromLoc)
-
-            val exits = state.currentMapCell.exitsFor(dir)
-            if (exits == null) {
-                d { " default move " }
-                GamePad.None
-            } else {
-                routeTo.routeTo(state, exits)
-            }
+//            var dir = state.currentMapCell.mapLoc.directionToDir(fromLoc)
+//
+//            // this should handle the case where link accidentally moves into
+//            // stair
+//            if (dir == Direction.None) {
+//                // the only way to go is up and out I think, there isn't a way to warp
+//                // somewhere else
+//                dir = Direction.Up
+//            }
+//
+//            // either the selected exit or just go to any exit, which is probably the closest
+//            // actually maybe just always go to the closest exit!
+//            val exits = state.currentMapCell.exitsFor(dir) ?: state.currentMapCell.allExits()
+            val exits = state.currentMapCell.allExits()
+            // what is the nearest point
+            // waste of computation just for debug but why not
+            d { " closest to ${exits.minOf { it.distTo(state.link) }}"}
+            // maybe add parameter for NO attacking while moving, so link doesn't get lou
+            routeTo.routeTo(state, exits)
         }
     }
 

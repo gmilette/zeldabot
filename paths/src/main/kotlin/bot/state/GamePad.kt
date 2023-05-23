@@ -8,6 +8,9 @@ enum class GamePad {
     None, MoveRight, MoveLeft, MoveDown, MoveUp,
     A, B, Select, Start, ReleaseA, ReleaseB;
 
+    val isDirection: Boolean
+        get() = this == MoveUp || this == MoveDown || this == MoveLeft || this == MoveRight
+
     companion object {
         fun randomDirection(from: FramePoint): GamePad {
             val possible = mutableListOf<GamePad>()

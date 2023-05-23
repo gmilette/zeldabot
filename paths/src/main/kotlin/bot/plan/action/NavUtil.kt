@@ -235,7 +235,7 @@ object NavUtil {
             to - this == 16 -> Direction.Down
             to - this == -16 -> Direction.Up
             else -> {
-                d { " default maploc direction to " }
+                d { " warped far from original location distance: ${this - to}" }
                 Direction.None
             }
         }

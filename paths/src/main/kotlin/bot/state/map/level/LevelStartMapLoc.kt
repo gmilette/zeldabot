@@ -1,8 +1,5 @@
 package bot.state.map.level
 
-import bot.state.map.Direction
-import java.lang.RuntimeException
-
 object LevelStartMapLoc {
     fun lev(level: Int) = when (level) {
         1 -> 115
@@ -17,4 +14,6 @@ object LevelStartMapLoc {
         else -> 0
 //        else -> throw RuntimeException("not specified yet for level $level")
     }
+
+    fun phase(level: Int) = "Beat Level $level"
 }

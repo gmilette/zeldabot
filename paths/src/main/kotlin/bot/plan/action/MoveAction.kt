@@ -73,6 +73,10 @@ class InsideNavAbout(
         get() = "Nav to about $point"
 }
 
+class MoveToThenGoIn() {
+
+}
+
 class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val forceDirection: Direction? = null) : MapAwareAction {
     private val routeTo = RouteTo(params = RouteTo.Param(considerLiveEnemies = false))
 
@@ -216,7 +220,7 @@ class RouteTo(val params: Param = Param()) {
             attack.nextStep(state)
         } else {
             if (params.dodgeEnemies) {
-                val pad = AttackActionDecider.shouldDodge(state)
+                val pad = AttackActionDecider.shouldDodgeDepending(state)
                 if (pad != GamePad.None) {
                     d { " DODGE!" }
                     pad

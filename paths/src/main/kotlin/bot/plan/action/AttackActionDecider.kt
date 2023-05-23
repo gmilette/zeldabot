@@ -21,6 +21,15 @@ object AttackActionDecider {
 //            }
         }
 
+    fun shouldDodgeDepending(state: MapLocationState): GamePad {
+        // if it is ball projectile, going diagonal dodge all directions
+        // if it is normal one-direction monster and that monster is facing link and in front of, retreat
+        // if it is blockable one-direction projectile, and not facing it, face it (like an arrow)
+          // if you have magic shield, you can block more
+        // fast monster: attack at 2+ out
+        return GamePad.None
+    }
+
     fun shouldDodge(state: MapLocationState): GamePad {
         val link = state.link
         // if it is a small projectile, then we only need to avoid a half grid

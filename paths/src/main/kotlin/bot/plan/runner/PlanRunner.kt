@@ -18,17 +18,16 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     lateinit var startPath: String
 
     init {
-        run { lev2w }
+        run { all }
     }
 
     private fun rerun() {
-        run(load = true) { lev2w }
+        run(load = true) { all }
     }
 
     private fun run(load: Boolean = false, select: Experiments.() -> Experiment) {
         val experiments = Experiments(makePlan())
         val ex = experiments.select()
-        setSword(ex.sword)
         masterPlan = ex.plan
         startPath = ex.startSave
         action = withDefaultAction(masterPlan.skipToStart())
@@ -38,6 +37,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
             val root = "../Nintaco_bin_2020-05-01/states/"
             api.loadState("$root/${startPath}")
         }
+        setSword(ex.sword)
     }
 
     fun setSword(item: ZeldaItem) {

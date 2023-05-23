@@ -570,7 +570,7 @@ object ZeldaPlan {
     }
 
     private fun levelPlan5(factory: PlanInputs): MasterPlan {
-        val builder = factory.make("Get to level 1")
+        val builder = factory.make("Get to level 5")
         return builder {
             lev(5)
             startAt(LevelStartMapLoc.lev(5))

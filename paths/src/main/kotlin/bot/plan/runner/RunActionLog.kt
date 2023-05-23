@@ -1,12 +1,12 @@
 package bot.plan.runner
 
 import bot.plan.action.Action
+import bot.state.GamePad
 import bot.state.MapLocationState
 import com.github.doyaaaaaken.kotlincsv.client.CsvWriter
 import util.d
 import java.io.File
 import java.text.SimpleDateFormat
-import java.time.LocalDate
 import java.util.*
 
 class RunActionLog(private val fileNameRoot: String) {
@@ -22,9 +22,18 @@ class RunActionLog(private val fileNameRoot: String) {
     private var stepHits = 0
     private var stepDamage = 0
 
-    private val experimentRoot = "../zexperiment/"
+    private var directionCt = mutableMapOf<GamePad, DataCount>()
 
-    val outputFile = "$experimentRoot${fileNameRoot}_${System.currentTimeMillis()}.csv"
+    init {
+        for (gamePad in GamePad.values()) {
+            directionCt[gamePad] = DataCount()
+        }
+    }
+
+    private val experimentRoot = "../../zexperiment/"
+
+    val outputFileName = "${fileNameRoot}_${System.currentTimeMillis()}"
+    val outputFile = "$experimentRoot${outputFileName}.csv"
     val outputFileAll = "${experimentRoot}experiments.csv"
 
     // bombs used
@@ -43,6 +52,8 @@ class RunActionLog(private val fileNameRoot: String) {
     val completedStep = mutableListOf<StepCompleted>()
 
     fun frameCompleted(state: MapLocationState) {
+        directionCt[state.previousGamePad]?.inc()
+
         framesForStep++
         totalFrames++
         if (state.previousHeart > 0 && (state.previousHeart > state.frameState.inventory.hearts)) {
@@ -60,7 +71,6 @@ class RunActionLog(private val fileNameRoot: String) {
                 d { "$index, $time, $totalTime, $action, $numBombs, $hits, $damage" }
             }
         }
-
         if (SAVE) {
             val csvWriter2 = CsvWriter()
             csvWriter2.open(outputFile, false) {
@@ -82,7 +92,7 @@ class RunActionLog(private val fileNameRoot: String) {
             writeRow(
                 now(),
                 stepCompleted.action,
-                outputFile,
+                outputFileName,
                 stepCompleted.totalTime,
                 totalFrames,
                 totalHits,
@@ -115,6 +125,9 @@ class RunActionLog(private val fileNameRoot: String) {
         framesForStep = 0
         stepDamage = 0
         stepHits = 0
+        for (dataCount in directionCt.values) {
+            dataCount.actionDone()
+        }
     }
 
     private fun calculateStep(
@@ -135,5 +148,20 @@ class RunActionLog(private val fileNameRoot: String) {
             hits = hits,
             damage = damage
         )
+    }
+}
+
+data class DataCount(
+    // maybe a name?
+    var total: Int = 0,
+    var perStep: Int = 0) {
+
+    fun inc() {
+        perStep++
+        total++
+    }
+
+    fun actionDone() {
+        perStep = 0
     }
 }

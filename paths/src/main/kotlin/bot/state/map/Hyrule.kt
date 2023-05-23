@@ -277,6 +277,10 @@ class MapCell(
         return exits[dir]
     }
 
+    fun firstExit(): List<FramePoint>? = exits.values.firstOrNull()
+
+    fun allExits(): List<FramePoint> = exits.values.flatten()
+
     val costImpassible = 99999.0
     val costPassable = 1.0
     // impassible = 99999
