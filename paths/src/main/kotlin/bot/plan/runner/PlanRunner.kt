@@ -1,5 +1,6 @@
 package bot.plan.runner
 
+import bot.ZeldaBot
 import bot.state.GamePad
 import bot.plan.action.Action
 import bot.plan.action.DoNothing
@@ -17,17 +18,23 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     lateinit var masterPlan: MasterPlan
     lateinit var startPath: String
 
+//    private val target = "afterLev4"
+//    private val target = "afterForest30"
+    private val target = "all"
+
     init {
-        run { all }
+        run(name = target)
     }
 
     private fun rerun() {
-        run(load = true) { all }
+        run(load = true, name = target)
     }
 
-    private fun run(load: Boolean = false, select: Experiments.() -> Experiment) {
+    private fun run(load: Boolean = false, name: String) {
         val experiments = Experiments(makePlan())
-        val ex = experiments.select()
+        val ex = experiments.ex(name)
+        d { "  run experiment ${ex.name}"}
+        ZeldaBot.addEquipment = ex.addEquipment
         masterPlan = ex.plan
         startPath = ex.startSave
         action = withDefaultAction(masterPlan.skipToStart())
@@ -41,6 +48,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     }
 
     fun setSword(item: ZeldaItem) {
+        d  { " SET SWORD $item"}
         when (item) {
             ZeldaItem.WoodenSword -> api.writeCPU(Addresses.hasSword, 1)
             ZeldaItem.WhiteSword -> api.writeCPU(Addresses.hasSword, 2)

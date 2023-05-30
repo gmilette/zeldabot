@@ -19,8 +19,13 @@ class MasterPlan(val segments: List<PlanSegment>) {
     val complete: Boolean
         get() = giant.isEmpty()
 
-    fun getPlanPhase(phaseName: String): MasterPlan =
-        MasterPlan(segments.filter { it.phase == phaseName })
+    fun getPlanPhase(phaseName: String, segment: String? = null): MasterPlan =
+        MasterPlan(segments.filter { segment == null || it.name == segment}.filter { it.phase == phaseName })
+
+    fun getPlanAfter(phaseName: String): MasterPlan {
+        val index = segments.indexOfFirst { it.phase == phaseName }
+        return MasterPlan(segments.subList(index, segments.size))
+    }
 
     /**
      * return the next action

@@ -16,6 +16,7 @@ fun moveHistoryAttackAction(wrapped: Action) =
 // really, if there are enemies attack, otherwise, move, or bomb
 // if there are pancake enemies
     // hopefully adding some random moves here will also help link get unstuck
+    //MoveHistoryAction(wrapped, AlwaysAttack(otherwiseRandom = true))
     StayInCurrentMapCell(MoveHistoryAction(wrapped, AlwaysAttack(otherwiseRandom = true)))
 
 
@@ -194,9 +195,10 @@ class ReBombIfNecessary(private val wrapped: Action): Action {
     override fun nextStep(state: MapLocationState): GamePad {
         frameCt++
 
-        return if (frameCt > 1000) {
+        // it worked! it took a while though at 1000
+        return if (frameCt > 600) {
             d { "REBOMB!!!" }
-            if (frameCt > 1100) {
+            if (frameCt > 700) {
                 frameCt = 0
                 d { "ah well restart" }
             }
@@ -214,6 +216,7 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
     private var initialLevel: Int = -1
 
     private var frameCt = 0
+    private var frameCtAfterScene = 0
 
     companion object {
         private const val FRAMES_BEFORE_SET_INITIAL = 300
@@ -225,6 +228,7 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
 //                (state.frameState.isDoneScrolling && initialMapCell?.mapLoc == state.currentMapCell.mapLoc)
 
     override fun nextStep(state: MapLocationState): GamePad {
+        if (true) return wrapped.nextStep(state)
         frameCt++
         d { "StayInCurrentMapCell ${state.frameState.isDoneScrolling} ${initialMapCell != null}" }
         if (initialMapCell == null && !state.frameState.isScrolling && frameCt > FRAMES_BEFORE_SET_INITIAL) {
@@ -234,11 +238,15 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
         }
 
         // don't do any of this if the screen is scrolling
+        // if it is scrolling just reset the framect after the scene
         if (state.frameState.isScrolling || state.currentMapCell.mapLoc == 0 ||
             // never switch between level and no
             state.frameState.level != initialLevel) {
+            frameCtAfterScene = 0
             return wrapped.nextStep(state)
         }
+
+        frameCtAfterScene++
 
         val isInCurrent = onCorrectMap(state)
 
@@ -273,10 +281,10 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
         val current = state.currentMapCell
         val fromLoc = initialMapCell?.mapLoc ?: return true
         val isInCurrent = current.mapLoc == fromLoc
-        if (isInCurrent) {
-            d { " STAY-> ON THE RIGHT ROUTE on ${current.mapLoc} == $fromLoc"}
+        if (isInCurrent || frameCtAfterScene < 100) {
+            d { " STAY-> ON THE RIGHT ROUTE on ${current.mapLoc} == $fromLoc frames=$frameCt sc=$frameCtAfterScene wrapped = ${wrapped.name}"}
         } else {
-            d { " STAY-> ON THE WRONG ROUTE on ${current.mapLoc} but should be on $fromLoc"}
+            d { " STAY-> ON THE WRONG ROUTE on ${current.mapLoc} but should be on $fromLoc frames=$frameCt sc=$frameCtAfterScene wrapped = ${wrapped.name}"}
             // go in this direction
         }
 

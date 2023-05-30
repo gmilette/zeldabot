@@ -16,7 +16,7 @@ class GStar(
         var DEBUG = false
         private val DEBUG_DIR = false
         val DEBUG_ONE = false
-        val MAX_ITER = 100000
+        val MAX_ITER = 10000
         val SHORT_ITER = 100
         val LIMIT_ITERATIONS = false
         val DO_CORNERS = true

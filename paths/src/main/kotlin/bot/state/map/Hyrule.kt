@@ -185,6 +185,8 @@ enum class Direction {
     companion object {
         val horizontal: List<Direction> = listOf(Direction.Left, Direction.Right)
         val vertical: List<Direction> = listOf(Direction.Up, Direction.Down)
+        val all: List<Direction>
+            get() = Direction.values().toList()
     }
 }
 

@@ -3,12 +3,48 @@ package bot.plan.action
 import bot.plan.action.NavUtil.directionToDir
 import bot.plan.gastar.FrameRoute
 import bot.state.*
-import bot.state.map.Direction
-import bot.state.map.MapCell
-import bot.state.map.MapConstants
-import bot.state.map.toGamePad
+import bot.state.map.*
 import util.d
 
+
+//val navUntil = CompleteIfAction(InsideNav()), completeIf = { state ->
+//    // first action is one
+//)
+
+class CompleteIfAction(
+    private val action: Action,
+    private val completeIf: (state: MapLocationState) -> Boolean = { false },
+) : Action {
+    override fun complete(state: MapLocationState): Boolean =
+        completeIf(state) || (action.complete(state))
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        return action.nextStep(state)
+    }
+
+    override val name: String
+        get() = action.name
+}
+
+class CompleteIfMapChanges(private val wrapped: Action) : Action {
+    private var initialMapLoc: MapLoc = -1;
+
+    private fun changedMapLoc(state: MapLocationState): Boolean =
+        initialMapLoc > 0 && state.frameState.mapLoc != initialMapLoc
+
+    override fun complete(state: MapLocationState): Boolean =
+        changedMapLoc(state) || wrapped.complete(state)
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        if (initialMapLoc == -1) {
+            initialMapLoc = state.frameState.mapLoc
+        }
+        return wrapped.nextStep(state)
+    }
+
+    override val name: String
+        get() = "Until Change ${wrapped.name}"
+}
 
 // move to this location then complete
 class InsideNav(private val point: FramePoint, ignoreProjectiles: Boolean = false) : Action {
@@ -73,10 +109,6 @@ class InsideNavAbout(
         get() = "Nav to about $point"
 }
 
-class MoveToThenGoIn() {
-
-}
-
 class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val forceDirection: Direction? = null) : MapAwareAction {
     private val routeTo = RouteTo(params = RouteTo.Param(considerLiveEnemies = false))
 
@@ -87,16 +119,32 @@ class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val forceDirection: Dir
     override val from: MapLoc = fromLoc
     override val to: MapLoc = next.mapLoc
 
+    private var arrived = false
+    private var movedIn = 0
+    private var previousDir: Direction = Direction.None
+    private var arrivedDir: Direction = Direction.None
+
     override fun reset() {
         next.gstar.clearAvoid()
         route = null
     }
 
     override fun complete(state: MapLocationState): Boolean =
-        (state.frameState.mapLoc == next.mapLoc).also {
+        (arrived && movedIn >= 5).also {
             if (it) route = null
 //            d { " Move to complete $it"}
         }
+
+    private fun checkArrived(state: MapLocationState, dir: Direction) {
+        if (!arrived) {
+            arrived = state.frameState.mapLoc == next.mapLoc
+            if (arrived) {
+                movedIn = 0
+                arrivedDir = dir
+                d { " arrived! $arrived dir $arrivedDir"}
+            }
+        }
+    }
 
     override fun target(): FramePoint {
         return super.target()
@@ -114,8 +162,7 @@ class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val forceDirection: Dir
     private var start: MapCell? = null
 
     override fun nextStep(state: MapLocationState): GamePad {
-        d { " DO MOVE TO cell ${next.mapLoc}" }
-
+        d { " DO MOVE TO cell ${next.mapLoc} arrived=${arrived} $movedIn" }
 //        for (enemy in state.frameState.enemies) {
 //            d { " enemy: $enemy" }
 //        }
@@ -143,17 +190,20 @@ class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val forceDirection: Dir
         val isInCurrent = state.frameState.isLevel || current.mapLoc == from //|| (current.mapLoc != (start?.mapLoc ?: 0))
 //        val isInCurrent = current.mapLoc == from //|| (current.mapLoc != (start?.mapLoc ?: 0))
         // need a little routing alg
-        dir = when {
-            !isInCurrent -> current.mapLoc.directionToDir(fromLoc)
-            else -> forceDirection ?: current.mapLoc.directionToDir(next.mapLoc)
-        }
+        previousDir = dir
 
-        if (isInCurrent) {
-            d { " ON THE RIGHT ROUTE on ${current.mapLoc} but should be on ${fromLoc} or start ${start?.mapLoc} go $dir"}
-        } else {
-            d { " ON THE WRONG ROUTE on ${current.mapLoc} but should be on ${fromLoc} or start ${start?.mapLoc} go $dir"}
-        }
-//        dir = forceDirection ?: current.mapLoc.directionToDir(next.mapLoc)
+        // use this to retrace
+//        dir = when {
+//            !isInCurrent -> current.mapLoc.directionToDir(fromLoc)
+//            else -> forceDirection ?: current.mapLoc.directionToDir(next.mapLoc)
+//        }
+//
+//        if (isInCurrent) {
+//            d { " ON THE RIGHT ROUTE on ${current.mapLoc} but should be on ${fromLoc} or start ${start?.mapLoc} go $dir"}
+//        } else {
+//            d { " ON THE WRONG ROUTE on ${current.mapLoc} but should be on ${fromLoc} or start ${start?.mapLoc} go $dir"}
+//        }
+        dir = forceDirection ?: current.mapLoc.directionToDir(next.mapLoc)
 
 
         if (state.currentMapCell.exitsFor(dir) == null) {
@@ -161,11 +211,18 @@ class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val forceDirection: Dir
         }
         val exits = state.currentMapCell.exitsFor(dir) ?: return NavUtil.randomDir()
 
-        return routeTo.routeTo(state, exits)
+        checkArrived(state, previousDir)
+
+        return if (!arrived) {
+            routeTo.routeTo(state, exits)
+        } else {
+            movedIn++
+            arrivedDir.toGamePad()
+        }
     }
 
     override val name: String
-        get() = "Move from ${this.fromLoc} to ${this.next.mapLoc} $dir"
+        get() = "Move from ${this.fromLoc} to ${this.next.mapLoc} $dir $movedIn"
 }
 
 class RouteTo(val params: Param = Param()) {
@@ -280,14 +337,22 @@ class RouteTo(val params: Param = Param()) {
         }
 
         // getting me suck: && params.planCountMax != 1000
+        // there are no enemies so it just keeps forcing replanning
+        // make a new boolean force new ONCE
         if (!state.hasEnemiesOrLoot && params.planCountMax != 1000) {
-            d { " NO alive enemies, no need to replan just go" }
+            d { " NO alive enemies, no need to replan just go plan count max: ${params.planCountMax}" }
             // make a plan now though
             forceNew = true
             params.planCountMax = 1000
         } else {
             d { " alive enemies, keep re planning" }
-            params.planCountMax = 20
+            // don't reset this if there are no more enemies
+            // otherwise this gets into a loop, reset to 20, then force replan
+            // set to 1000, then reset
+            // TODO needs test
+            if (state.hasEnemiesOrLoot && params.planCountMax != 1000) {
+                params.planCountMax = 20
+            }
         }
 
         var nextPoint: FramePoint = route?.pop() ?: FramePoint()

@@ -103,7 +103,11 @@ object InLocations {
         val right = FramePoint(200, 92) //?
         val left = FramePoint(2.grid + 2, 5.grid) //?
     }
+}
 
+object Phases {
+    val grabHearts = "grab hearts"
+    val forest30 = "forest 30"
 }
 
 object ZeldaPlan {
@@ -176,7 +180,7 @@ object ZeldaPlan {
             obj(Dest.Shop.candleShopMid)
             obj(Dest.Secrets.fire100SouthBrown)
 
-            phase("grab hearts")
+            phase(Phases.grabHearts)
             obj(Dest.Secrets.fire30GreenSouth)
             obj(Dest.Heart.fireHeart)
             obj(Dest.Heart.ladderHeart)
@@ -207,7 +211,9 @@ object ZeldaPlan {
             // position by routing
             val sec:MapLoc = 61
             routeTo(sec.up)
+            phase(Phases.forest30)
             obj(Dest.Secrets.secretForest30NorthEast)
+            phase(Phases.forest30 + "_end")
             obj(Dest.Secrets.bombSecret30North)
             obj(ZeldaItem.Letter)
             obj(Dest.Secrets.walk100)

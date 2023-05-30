@@ -164,10 +164,10 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         }
 //        fillBombs()
         refillIfOut()
-        if (setEquipmentCt > 0) {
+        if (setEquipmentCt > 0 && addEquipment) {
             d { " Set equip"}
 //            frameStateUpdater.setSword(ZeldaItem.MagicSword)
-            frameStateUpdater.setLadderAndRaft(false)
+            frameStateUpdater.setLadderAndRaft(true)
             frameStateUpdater.setRedCandle()
             frameStateUpdater.setHaveWhistle()
             frameStateUpdater.setBait()
@@ -342,6 +342,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         var addRupee = false
         var unstick = 0
         var forcedDirection = GamePad.None
+        var addEquipment: Boolean = false
 
         @JvmStatic
         fun startIt(monitor: ZeldaMonitor): ZeldaBot {

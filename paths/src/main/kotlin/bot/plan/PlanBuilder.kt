@@ -216,7 +216,7 @@ class PlanBuilder(
         }
     val killLev1Dragon: PlanBuilder
         get() {
-            add(lastMapLoc, moveHistoryAttackAction(KillAll(needLongWait = false, targetOnly = listOf(dragonHead, dragonNeck))))
+            add(lastMapLoc, KillAll(needLongWait = false, targetOnly = listOf(dragonHead, dragonNeck)))
             return this
         }
     val startHere: PlanBuilder
@@ -370,6 +370,7 @@ class PlanBuilder(
                 // for levels you dont need to get an item
                 // if item loc is n
                 is EntryType.Walk -> {
+                    // need special parameter for walk in
                     goInGetCenterItem(point, itemLocPoint, this.type.entry.requireLetter)
                 }
                 EntryType.WalkIn -> goTo(point)
@@ -432,6 +433,11 @@ class PlanBuilder(
         return this
     }
 
+    fun goToOrMapChanges(to: FramePoint, makePassable: FramePoint? = null): PlanBuilder {
+        add(lastMapLoc, CompleteIfMapChanges(InsideNavAbout(to, 2, 1, negVertical = 0, makePassable = makePassable)))
+        return this
+    }
+
     private fun bombThenGoIn(entrance: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem): PlanBuilder {
         bomb(entrance.copy(y = entrance.y + 8))
 //        go(entrance)
@@ -464,7 +470,11 @@ class PlanBuilder(
 
     private fun goInGetCenterItem(to: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, showLetter: Boolean = false): PlanBuilder {
         goTo(to)
-        goIn(GamePad.MoveUp, 5)
+        // todo: only if this isn't a level
+        // 300 needed for wooden sword, and stuff from the map, white sword
+        // depends on the objective actually
+        // wait until the
+        goIn(GamePad.MoveUp, 5) // time to change scenes and for talk
         if (showLetter) {
             d { " LETTER REQUIRED "}
             showLetterIfRequired()
@@ -553,7 +563,8 @@ class PlanBuilder(
         goIn(GamePad.None, 75)
 //        val nextTo = from.pointModifier(6)(to.down2)
         // modified the map for this
-        goTo(to, to) // that should be passable now
+//        goTo(to, to) // that should be passable now
+        goToOrMapChanges(to, to) // that should be passable now
         // maybe just keep trying to get to a location in center of the push
         goIn(opposite.toGamePad(), 16)
         goGetItem(itemLoc)
@@ -574,7 +585,8 @@ class PlanBuilder(
         // wait for it to move
         goIn(GamePad.None, 75)
 
-        goTo(to)
+//        goTo(to)
+        goToOrMapChanges(to)
 
         // do a few random movements in case link narrowly missed the entrance
         repeat(10) {
