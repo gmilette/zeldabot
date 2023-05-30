@@ -237,7 +237,31 @@ class AlwaysDo(private val dir: GamePad = GamePad.MoveUp) : Action {
         get() = "AlwaysDo $dir"
 }
 
-// assume lined up at the entrance, so link just has to go up
+class GoInConsume(private val moves: Int = 5, private val dir: GamePad = GamePad.MoveUp) :
+    Action {
+    private var movements = 0
+
+    override fun complete(state: MapLocationState): Boolean =
+        movements >= moves
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        if (state.previousLocation != state.link) {
+            d { " --> Moved"}
+            movements++
+        } else {
+            d { " --> Moved not effective "}
+        }
+        return dir
+    }
+
+    override fun target(): FramePoint {
+        return FramePoint()
+    }
+
+    override val name: String
+        get() = "Go In Consume $dir ($movements of $moves)"
+}
+
 class GoIn(private val moves: Int = 5, private val dir: GamePad = GamePad.MoveUp, private val reset: Boolean = false) :
     Action {
     private var movements = 0

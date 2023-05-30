@@ -55,12 +55,15 @@ object InLocations {
         val keyMid = FramePoint(128, 88)
         val keyMidDown = FramePoint(128, 81)
         val bombItemRight = FramePoint(208, 43)
-        val triforce = FramePoint(120, 88) // get the middle of the triangle at the top
+//        val triforce = FramePoint(120, 88) // get the middle of the triangle at the top
+        val triforce = FramePoint(128, 88) // get the middle of the triangle at the top
     }
 
     object Level3 {
         val heartMid = FramePoint(128, 88)
+        // requires then moving up
         val triforce = FramePoint(7.grid, 6.grid) // get the middle of the triangle at the top
+//        val triforce = FramePoint(8.grid, 88) // get the middle of the triangle at the top
     }
 
     object Level4 {
@@ -108,6 +111,7 @@ object InLocations {
 object Phases {
     val grabHearts = "grab hearts"
     val forest30 = "forest 30"
+    val level7 = "level 7"
 }
 
 object ZeldaPlan {
@@ -275,8 +279,8 @@ object ZeldaPlan {
             obj(Dest.level(6))
             includeLevelPlan(levelPlan6(factory))
 
-            phase("level 7")
-            //obj(Dest.Shop.blueRing, itemLoc = Dest.Shop.ItemLocs.bait, position = true)
+            phase(Phases.level7)
+            obj(Dest.Shop.blueRing, itemLoc = Dest.Shop.ItemLocs.bait, position = true)
             obj(Dest.level(7))
             includeLevelPlan(levelPlan7(factory))
 
@@ -472,8 +476,11 @@ object ZeldaPlan {
             goTo(InLocations.Level2.heartMid)
             seg("get the triforce")
             left
-            goIn(GamePad.MoveLeft, 30)
+            goIn(GamePad.MoveLeft, 20)
             goTo(InLocations.Level2.triforce)
+            // in case link goes to the left of it
+            goIn(GamePad.MoveRight, 4)
+            goIn(GamePad.MoveLeft, 8)
         }
     }
 

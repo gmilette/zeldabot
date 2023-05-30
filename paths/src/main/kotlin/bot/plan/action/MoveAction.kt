@@ -349,10 +349,11 @@ class RouteTo(val params: Param = Param()) {
             // don't reset this if there are no more enemies
             // otherwise this gets into a loop, reset to 20, then force replan
             // set to 1000, then reset
-            // TODO needs test
-            if (state.hasEnemiesOrLoot && params.planCountMax != 1000) {
-                params.planCountMax = 20
-            }
+            // TODO needs test, it breaks shop
+//            if (state.hasEnemiesOrLoot && params.planCountMax != 1000) {
+//                params.planCountMax = 20
+//            }
+            params.planCountMax = 20
         }
 
         var nextPoint: FramePoint = route?.pop() ?: FramePoint()

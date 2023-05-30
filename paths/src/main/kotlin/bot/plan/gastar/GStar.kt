@@ -65,18 +65,23 @@ class GStar(
         ) { dist, current ->
             current + (100 * (MapConstants.twoGrid - dist)) // the closer the higher
         }
+
         // the actual enemy should have very very high cost
         costsF.modify(from, point, MapConstants.oneGrid) { dist, current ->
             current + 100000
         }
+    }
 
-        //        // then add some cost to points around it
-//        costsF.modify(point, size*2) {
-//            it + 50
-//        }
-//        costsF.modify(point, size*3) {
-//            it + 25
-//        }
+    fun setEnemyBig(from: FramePoint, point: FramePoint, size: Int = 16) {
+        // TODO: some enemies are smaller than 16!
+        costsF.modify(from, point.upLeftOneGridALittleLess, MapConstants.twoGrid) { dist, current ->
+            current + 10000
+        }
+
+        // actual enemy higher cost then around the enemy
+        costsF.modify(from, point, MapConstants.oneGrid) { dist, current ->
+            current + 100000
+        }
     }
 
     val totalCosts = mutableMapOf<FramePoint, Int>()
@@ -95,7 +100,7 @@ class GStar(
     private fun setEnemyCosts(from: FramePoint, enemies: List<FramePoint> = emptyList()) {
         reset()
         for (enemy in enemies) {
-            setEnemy(from, enemy)
+            setEnemyBig(from, enemy)
         }
     }
 
@@ -212,11 +217,9 @@ class GStar(
 
             val neighbors = (neighborFinder.neighbors(point, dir, dist ?: 0) - closedList - avoid).shuffled()
             for (toPoint in neighbors) {
-                // no need to check passable already did
-//                if (passable.get(it)) { // WTF removing causes infinite loop
-//                if (passableFrom(point, it)) {
                 // raw cost of this cell
                 val cost = costsF.get(toPoint)
+                //val cost = getQuadCost(toPoint)
                 // add to the cost of the point
                 val parentCost = costFromStart[point] ?: 99999
                 // route to get to this point including parent
@@ -261,6 +264,9 @@ class GStar(
         // todo: actually should pick the best path so far..
         return generatePath(target, cameFrom, point)
     }
+
+    private fun getQuadCost(point: FramePoint): Int =
+        costsF.get(point) + costsF.get(point.justRightEnd) + costsF.get(point.justLeftDown) + costsF.get(point.justRightEndBottom)
 
     private fun passableFrom(from: FramePoint, to: FramePoint): Boolean {
         // which direction is it

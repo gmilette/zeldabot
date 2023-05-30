@@ -70,7 +70,7 @@ class LevelSpecBuilder {
             LevelSpec(split.right.right, e(l, u), "", LevelMapTemplateReader.Temp.lev_grid_center),
 
             LevelSpec(split.right.right.up, e(d, r), "", LevelMapTemplateReader.Temp.lev_dragon_right),
-            LevelSpec(split.right.right.up.right, e(l), "", LevelMapTemplateReader.Temp.lev_triforce),
+            LevelSpec(split.right.right.up.right, e(l, d), "", LevelMapTemplateReader.Temp.lev_triforce),
 
             LevelSpec(getItemLoc, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
         )
@@ -100,7 +100,7 @@ class LevelSpecBuilder {
 //            LevelSpec(grid.up.up.up.up, e(u,d,r), "blocked need to kill", LevelMapTemplateReader.Temp.lev_blockcenter),
             LevelSpec(grid.up.up.up.up.up, e(u,d,r), "enddrid", LevelMapTemplateReader.Temp.lev_grid_center),
             LevelSpec(grid.up.up.up.up.up.up, e(d,l), "boss", LevelMapTemplateReader.Temp.lev_empty), //?
-            LevelSpec(grid.up.up.up.up.up.up.left, e(r), "triforce", LevelMapTemplateReader.Temp.lev_triforce),
+            LevelSpec(grid.up.up.up.up.up.up.left, e(r, d), "triforce", LevelMapTemplateReader.Temp.lev_triforce),
         )
 
         log(specs, 2)
@@ -157,7 +157,7 @@ class LevelSpecBuilder {
             //LevelSpec(laddercross.up.up.right.up, e(d, l, r), "money up batkey", LevelMapTemplateReader.Temp.lev_water_maze),
             LevelSpec(laddercross.up.up.right.right, e(u, d, l, r), "before dragon", LevelMapTemplateReader.Temp.lev_block2center),
             LevelSpec(laddercross.up.up.right.right.right, e(l, u), "dragon", LevelMapTemplateReader.Temp.lev_dragon_top),
-            LevelSpec(laddercross.up.up.right.right.right.up, e(l, u), "triforce 4", LevelMapTemplateReader.Temp.lev_triforce),
+            LevelSpec(laddercross.up.up.right.right.right.up, e(l, u, d), "triforce 4", LevelMapTemplateReader.Temp.lev_triforce),
 
             LevelSpec(getItemLoc4, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
         )
@@ -264,7 +264,7 @@ class LevelSpecBuilder {
 
             LevelSpec(grumble.right, e(l, r), "end stair", LevelMapTemplateReader.Temp.lev_stairs_center_blocked),
             LevelSpec(grumble.right.right, e(l, r), "dragon", LevelMapTemplateReader.Temp.lev_dragon_right),
-            LevelSpec(grumble.right.right.right, e(l, r), "dragon", LevelMapTemplateReader.Temp.lev_triforce),
+            LevelSpec(grumble.right.right.right, e(l, r, d), "dragon", LevelMapTemplateReader.Temp.lev_triforce),
 
             LevelSpec(getItemLoc4, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
             LevelSpec(getItemLoc7, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),

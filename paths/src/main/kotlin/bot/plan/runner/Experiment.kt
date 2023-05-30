@@ -16,7 +16,8 @@ class Experiments(masterPlan: MasterPlan) {
             Experiment("level2", "level2.save", masterPlan.getPlanPhase("Destroy level 2", null), sword = ZeldaItem.MagicSword),
             Experiment("level1", "lev1_start.save", masterPlan.getPlanPhase("Destroy level 1", null)),
             Experiment("afterLev4", "level4_beat.save", masterPlan.getPlanAfter(Phases.grabHearts)),
-            Experiment("afterForest30", "forest_30.save", masterPlan.getPlanPhase(Phases.forest30, null))
+            Experiment("afterForest30", "forest_30.save", masterPlan.getPlanPhase(Phases.forest30, null)),
+            Experiment("level7", "level6_done.save", masterPlan.getPlanAfter(Phases.level7), sword = ZeldaItem.MagicSword, addEquipment = true),
         ).associateBy { it.name }
     }
 
@@ -28,7 +29,9 @@ data class Experiment(
     val startSave: String,
     val plan: MasterPlan,
     val sword: ZeldaItem = ZeldaItem.MagicSword,
-    val addEquipment: Boolean = false
+    val addEquipment: Boolean = false,
+    val startAt: Int = 52
+    // startAt
 )
 
 object MakeExperiment {

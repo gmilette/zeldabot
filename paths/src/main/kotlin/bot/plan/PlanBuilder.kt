@@ -470,11 +470,8 @@ class PlanBuilder(
 
     private fun goInGetCenterItem(to: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, showLetter: Boolean = false): PlanBuilder {
         goTo(to)
-        // todo: only if this isn't a level
-        // 300 needed for wooden sword, and stuff from the map, white sword
-        // depends on the objective actually
-        // wait until the
-        goIn(GamePad.MoveUp, 5) // time to change scenes and for talk
+        // move in the door
+        goIn(GamePad.MoveUp, 5)
         if (showLetter) {
             d { " LETTER REQUIRED "}
             showLetterIfRequired()
@@ -485,8 +482,10 @@ class PlanBuilder(
 
     private fun goGetItem(itemLoc: FramePoint = InLocations.Overworld.centerItem) {
         if (itemLoc != Objective.ItemLoc.None.point) {
-            // start by moving in
-            goIn(GamePad.MoveUp, 20)
+            // walking down stairs, plus a few steps in
+            // too much for bait
+            goInConsume(GamePad.MoveUp, 15)
+
             goShop(itemLoc)
             if (itemLoc != Objective.ItemLoc.Enter.point) {
                 exitShop()
@@ -625,6 +624,11 @@ class PlanBuilder(
 
     fun goIn(dir: GamePad = GamePad.MoveUp, num: Int): PlanBuilder {
         add(lastMapLoc, GoIn(num, dir))
+        return this
+    }
+
+    fun goInConsume(dir: GamePad = GamePad.MoveUp, num: Int): PlanBuilder {
+        add(lastMapLoc, GoInConsume(num, dir))
         return this
     }
 

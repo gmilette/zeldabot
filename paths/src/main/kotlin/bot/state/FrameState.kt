@@ -313,6 +313,10 @@ val FramePoint.upEndRight
     get() = FramePoint(x + 16, y + 8 - 1)
 val FramePoint.upOneGrid
     get() = FramePoint(x, y - 16)
+val FramePoint.upLeftOneGrid
+    get() = FramePoint(x - 16, y - 16)
+val FramePoint.upLeftOneGridALittleLess
+    get() = FramePoint(x - 15, y - 16) // get within sword range, hopefully don't get hit
 val FramePoint.up
     get() = FramePoint(x, y - 1)
 val FramePoint.up2

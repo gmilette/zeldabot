@@ -104,7 +104,7 @@ class OamStateReasoner(
             .filter {
                 val matched = xMap[it.point.x - 8]
                 val delete = matched?.tile == it.tile && matched.point.y == it.point.y
-                if (delete) {
+                if (DEBUG && delete) {
                     d { "! delete ${matched?.point}, copy of ${it.point}" }
                 }
                 delete
@@ -112,7 +112,9 @@ class OamStateReasoner(
 
         val mutable = toCombine.toMutableList()
         for (spriteData in toDelete) {
-            d { "! remove $spriteData" }
+            if (DEBUG) {
+                d { "! remove $spriteData" }
+            }
             mutable.remove(spriteData)
         }
 
