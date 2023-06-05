@@ -20,9 +20,14 @@ import util.d
 //32, // link's sword
 //96, // link again
 
+// attribute 42 is hit, I think
+
 object LinkDirection { //14,16 attrib 01
+    private val damagedAttribute = setOf(41, 42, 43)
+
     private val down = setOf(0x16, 0x14, 0x5A, 0x08, 0x5A, 0x58, 0x0A, 0x60) //5A, attribute 00 is down. 60, attribute 00, 08 attribute 40
-    private val up = setOf(0x0C, 0x0E, 0x18, 0x1A)
+    private val up = setOf(0x0C, 0x0E, 0x18, 0x1A) //43 was hit (dark color), //41 was hit light color
+    //42 is hit
     private val right = setOf((0x02).toInt(), (0x00).toInt(), (0x06).toInt(), (0x04).toInt()) // attribute 00, could be 02 with attrib 00
     private val left = setOf((0x02).toInt(), (0x00).toInt(), (0x10).toInt(), (0x12).toInt()) // attribute 40 or 43
 
@@ -31,17 +36,20 @@ object LinkDirection { //14,16 attrib 01
     private val rightInt = right.map { it.toInt() }
     private val leftInt = left.map { it.toInt() }
 
-    fun direction(sprites: List<SpriteData>): Direction {
+    data class DirectionDamage(val direction: Direction, val damaged: Boolean)
+
+    fun direction(sprites: List<SpriteData>): DirectionDamage {
         val linkMatch = sprites.firstOrNull { it.toDir() != Direction.None }
         val dir = linkMatch?.toDir()
-        d { "link match $linkMatch $dir"}
+        val isDamaged = damagedAttribute.contains(linkMatch?.attribute)
+        d { "link match $linkMatch $dir damaged $isDamaged"}
 //        if (linkMatch == null) {
 //            d { " sprites link!" }
 //            sprites.forEachIndexed { index, sprite ->
 //                d { "$index: $sprite ${LinkDirection.dirFor(sprite)}" }
 //            }
 //        }
-        return dir ?: Direction.None
+        return DirectionDamage((dir ?: Direction.None), isDamaged)
     }
 
     fun dirFor(data: SpriteData): Direction = data.toDir()
@@ -68,6 +76,7 @@ class OamStateReasoner(
 
     var ladderSprite: Agent? = null
     var direction: Direction = Direction.None
+    var damaged: Boolean = false
 
     init {
         sprites = readOam()
@@ -150,7 +159,9 @@ class OamStateReasoner(
             readOam(0x0001 * (it * 4))
         }
 
-        direction = LinkDirection.direction(spritesRaw)
+        val dirDamage = LinkDirection.direction(spritesRaw)
+        direction = dirDamage.direction
+        damaged = dirDamage.damaged
 
         val ladders = spritesRaw.filter { it.tile == ladder }
         ladderSprite = if (ladders.isNotEmpty()) {

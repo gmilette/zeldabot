@@ -1,6 +1,7 @@
 package bot.plan.runner
 
 import bot.plan.action.Action
+import bot.state.Addresses
 import bot.state.GamePad
 import bot.state.MapLocationState
 import com.github.doyaaaaaken.kotlincsv.client.CsvWriter
@@ -56,6 +57,8 @@ class RunActionLog(private val fileNameRoot: String) {
 
         framesForStep++
         totalFrames++
+        d { " previous heart ${state.previousHeart} current heart ${state.frameState.inventory.hearts}"}
+
         if (state.previousHeart > 0 && (state.previousHeart > state.frameState.inventory.hearts)) {
             totalHits++
             val damage = state.previousHeart - state.frameState.inventory.hearts

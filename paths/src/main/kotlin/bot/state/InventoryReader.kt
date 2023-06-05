@@ -4,7 +4,13 @@ import nintaco.api.API
 import sequence.ZeldaItem
 import util.d
 
+class InventoryItems(api: API) {
+    val hasRing by lazy { api.readCPU(api.readCPU(Addresses.hasRing)) }
+}
+
 object InventoryReader {
+//    val sword by lazy { api.readCPU(Addresses.hasSword) }
+
     fun readInventory(api: API): Set<ZeldaItem> {
         val items = mutableSetOf<ZeldaItem>()
         when (api.readCPU(Addresses.hasSword)) {

@@ -12,13 +12,23 @@ object Addresses {
    const val level = 0x0010 // level 0 overworld
 
    const val triforce = 0x0671
+
+   //Low Nibble = how many hearts are filled. High Nybble = No. of heart containers - 1
+   //                                    Ex: $22 = 3 Heart Containers with all 3 filled
+   //$FF = Full.
    const val heart1 = 0x0650
    const val heart1Full = 0x0651
    const val heart2 = 0x0652
    const val heart2Full = 0x0653
    const val heart3 = 0x0654
    const val heart3Full = 0x0655
+   //C8, C7, C6(6 full hearts), C1(2 full hearts), c0 (1 heart full or 0.5)
    const val heartContainers = 0x066F
+   //$00 = empty, $01 to $7F = half full, $80 to $FF = full.
+   // empty: FD, 7E, FC (yes it is indeed full), FB, FA, F9, F4(2 full hearts), F3(1 heart)
+   // BA
+   // half: 7D, 7C, 7B, 7A, 79, 74 (1.5 hearts), 73, only 0.5 hearts
+   const val heartContainersHalf = 0x0670
 
       // relative to each screen which is maybe 240 x 240?
    const val linkX = 0x0070

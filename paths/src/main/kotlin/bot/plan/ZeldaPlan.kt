@@ -112,6 +112,7 @@ object Phases {
     val grabHearts = "grab hearts"
     val forest30 = "forest 30"
     val level7 = "level 7"
+    val level9 = "level 7"
 }
 
 object ZeldaPlan {
@@ -1013,7 +1014,7 @@ object ZeldaPlan {
     }
 
     private fun levelPlan9(factory: PlanInputs): MasterPlan {
-        val builder = factory.make("Get to level 9")
+        val builder = factory.make(Phases.level9)
         return builder {
             lev(9)
             levelPlan9PhaseRedRing()

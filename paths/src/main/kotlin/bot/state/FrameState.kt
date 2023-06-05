@@ -107,7 +107,10 @@ data class Inventory(
     val numRupees by lazy { api.readCPU(Addresses.numRupees) }
     val numKeys by lazy { api.readCPU(Addresses.numKeys) }
     val hearts by lazy { api.readCPU(Addresses.heartContainers) }
+    val damage by lazy { api.readCPU(Addresses.heartContainersHalf) }
 
+    val inventoryItems = InventoryItems(api)
+    val heartCalc = HeartsStateCalculator(this)
     val items: Set<ZeldaItem> by lazy { InventoryReader.readInventory(api) }
 
     val hasPotion: Boolean

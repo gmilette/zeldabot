@@ -174,6 +174,10 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             frameStateUpdater.setLetter()
             frameStateUpdater.setArrow()
             frameStateUpdater.fillTriforce()
+//            frameStateUpdater.setRing(ZeldaItem.RedRing)
+
+            // fill hearts
+//            api.writeCPU(Addresses.heartContainers, 0xCC) // 13 hearts all full
             setEquipmentCt--
         }
         if (frameStateUpdater.state.frameState.clockActivated) {
@@ -273,9 +277,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         d { "execute ### $currentFrame"}
         monitor.update(frameStateUpdater.state, plan)
 
-        if (frameStateUpdater.state.currentMapCell.mapLoc != 55) {
-            api.writeCPU(Addresses.heartContainers, 0xCC)
-        }
+        // fill hearts
+//        api.writeCPU(Addresses.heartContainers, 0xCC) // 13 hearts all full
 
         val act = doAct && !collectSkip //currentFrame % 3 == 0
         if (act) {

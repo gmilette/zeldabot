@@ -24,6 +24,16 @@ class FrameStateUpdater(
         api.writeCPU(Addresses.triforce, 255)
     }
 
+    fun setRing(item: ZeldaItem) {
+        val ringId = when (item) {
+            ZeldaItem.BlueRing -> 1
+            ZeldaItem.RedRing -> 2
+            else -> 0
+        }
+        // doesnt change visual but affects damage
+        api.writeCPU(Addresses.hasRing, ringId)
+    }
+
     fun setLadderAndRaft(enable: Boolean) {
         api.writeCPU(Addresses.hasLadder, enable.intTrue)
         api.writeCPU(Addresses.hasRaft, enable.intTrue)
@@ -122,8 +132,9 @@ class FrameStateUpdater(
         if (ladder != null) {
             d { " ladder at ${ladder.point}"}
         }
-        d { " link directon $linkDir"}
         val frame = FrameState(api, theEnemies, level, mapLoc, link, ladder)
+
+        frame.inventory.heartCalc.calc()
 
         state.framesOnScreen++
         state.frameState = frame
