@@ -24,6 +24,11 @@ class FrameStateUpdater(
         api.writeCPU(Addresses.triforce, 255)
     }
 
+    fun fillHearts() {
+        api.writeCPU(Addresses.heartContainers, 0xCC) // 13 hearts all full
+        api.writeCPU(Addresses.heartContainersHalf, 0xFF) // make the half heart full too
+    }
+
     fun setRing(item: ZeldaItem) {
         val ringId = when (item) {
             ZeldaItem.BlueRing -> 1
@@ -91,7 +96,7 @@ class FrameStateUpdater(
         val previous = state.frameState
 
         this.state.previousLocation = previous.link.point
-        this.state.previousHeart = previous.inventory.hearts
+        this.state.previousHeart = previous.inventory.heartCalc.lifeInHearts()
 
         state.lastGamePad = currentGamePad
         //        https://datacrystal.romhacking.net/wiki/The_Legend_of_Zelda:RAM_map
@@ -128,7 +133,8 @@ class FrameStateUpdater(
         val theEnemies = oam.agents()
         val linkDir = oam.direction
         val ladder = oam.ladderSprite
-        val link = Agent(0, linkPoint, linkDir)
+        val damagedTile = if (oam.damaged) LinkDirection.damagedAttribute.last() else 0
+        val link = Agent(0, linkPoint, linkDir, hp = damagedTile)
         if (ladder != null) {
             d { " ladder at ${ladder.point}"}
         }

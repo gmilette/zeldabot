@@ -176,8 +176,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             frameStateUpdater.fillTriforce()
 //            frameStateUpdater.setRing(ZeldaItem.RedRing)
 
-            // fill hearts
-//            api.writeCPU(Addresses.heartContainers, 0xCC) // 13 hearts all full
+            frameStateUpdater.fillHearts()
             setEquipmentCt--
         }
         if (frameStateUpdater.state.frameState.clockActivated) {
@@ -278,7 +277,11 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         monitor.update(frameStateUpdater.state, plan)
 
         // fill hearts
-//        api.writeCPU(Addresses.heartContainers, 0xCC) // 13 hearts all full
+        // not reliable enough
+        if (frameStateUpdater.state.frameState.inventory.heartCalc.lifeInHearts() <= 2) {
+            d { "fill hearts" }
+            frameStateUpdater.fillHearts()
+        }
 
         val act = doAct && !collectSkip //currentFrame % 3 == 0
         if (act) {

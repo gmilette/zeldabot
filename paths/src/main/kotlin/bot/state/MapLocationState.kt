@@ -23,7 +23,7 @@ class MapLocationState(
 
     // remember for next interaction
     var previousLocation: FramePoint = FramePoint(),
-    var previousHeart: Int = -1,
+    var previousHeart: Double = -1.0,
     var previousGamePad: GamePad = GamePad.None,
 
     // the last known framestate

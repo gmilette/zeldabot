@@ -19,8 +19,8 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     lateinit var startPath: String
 
 //    private val target = "afterLev4"
-    private val target = "level7"
-//    private val target = "all"
+//    private val target = "level7"
+    private val target = "all"
 
     init {
         run(name = target)

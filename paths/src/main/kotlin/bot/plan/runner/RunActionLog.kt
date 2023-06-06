@@ -1,7 +1,6 @@
 package bot.plan.runner
 
 import bot.plan.action.Action
-import bot.state.Addresses
 import bot.state.GamePad
 import bot.state.MapLocationState
 import com.github.doyaaaaaken.kotlincsv.client.CsvWriter
@@ -19,9 +18,9 @@ class RunActionLog(private val fileNameRoot: String) {
     private var totalFrames = 0
 
     private var totalHits = 0
-    private var totalDamage = 0
+    private var totalDamage = 0.0
     private var stepHits = 0
-    private var stepDamage = 0
+    private var stepDamage = 0.0
 
     private var directionCt = mutableMapOf<GamePad, DataCount>()
 
@@ -36,6 +35,7 @@ class RunActionLog(private val fileNameRoot: String) {
     val outputFileName = "${fileNameRoot}_${System.currentTimeMillis()}"
     val outputFile = "$experimentRoot${outputFileName}.csv"
     val outputFileAll = "${experimentRoot}experiments.csv"
+    val heartLog = "${experimentRoot}heartLog_${System.currentTimeMillis()}.txt"
 
     // bombs used
     // time
@@ -47,7 +47,7 @@ class RunActionLog(private val fileNameRoot: String) {
         val numBombs: Int,
         val numFrames: Int = 0,
         val hits: Int = 0,
-        val damage: Int = 0
+        val damage: Double = 0.0
     )
 
     val completedStep = mutableListOf<StepCompleted>()
@@ -57,11 +57,28 @@ class RunActionLog(private val fileNameRoot: String) {
 
         framesForStep++
         totalFrames++
-        d { " previous heart ${state.previousHeart} current heart ${state.frameState.inventory.hearts}"}
 
-        if (state.previousHeart > 0 && (state.previousHeart > state.frameState.inventory.hearts)) {
+        // always decreases, but isn't always exactly accurate for some reason
+        val currentHeart = state.frameState.inventory.heartCalc.lifeInHearts()
+        val previousHeart = state.previousHeart
+        d { " previous heart $previousHeart current heart $currentHeart"}
+        // should just check if
+
+        if (state.previousHeart > 0 && (previousHeart > currentHeart)) {
+            val csvWriter2 = CsvWriter()
+            // damage, hearts, damageIn, life, life2, damage number
+            csvWriter2.open(heartLog, true) {
+                writeRow(
+                    state.frameState.inventory.damage.toString(16),
+                    state.frameState.inventory.hearts.toString(16),
+                    state.frameState.inventory.heartCalc.damageInHearts(),
+                    state.frameState.inventory.heartCalc.lifeInHearts(),
+                    state.frameState.inventory.heartCalc.lifeInHearts2(),
+                    state.frameState.inventory.heartCalc.damageNumber() // also could use this to track hits
+                )
+            }
             totalHits++
-            val damage = state.previousHeart - state.frameState.inventory.hearts
+            val damage = previousHeart - currentHeart
             totalDamage += damage
             stepHits++
             stepDamage += damage
@@ -126,7 +143,7 @@ class RunActionLog(private val fileNameRoot: String) {
         completedStep.add(calculateStep(action.name, state, framesForStep, stepHits, stepDamage))
         startedStep = System.currentTimeMillis()
         framesForStep = 0
-        stepDamage = 0
+        stepDamage = 0.0
         stepHits = 0
         for (dataCount in directionCt.values) {
             dataCount.actionDone()
@@ -138,7 +155,7 @@ class RunActionLog(private val fileNameRoot: String) {
         state: MapLocationState,
         frameCt: Int,
         hits: Int,
-        damage: Int
+        damage: Double
     ): StepCompleted {
         val time = (System.currentTimeMillis() - startedStep) / 1000
         val totalTime = (System.currentTimeMillis() - started) / 1000

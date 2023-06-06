@@ -23,7 +23,7 @@ import util.d
 // attribute 42 is hit, I think
 
 object LinkDirection { //14,16 attrib 01
-    private val damagedAttribute = setOf(41, 42, 43)
+    val damagedAttribute = setOf(41, 42, 43)
 
     private val down = setOf(0x16, 0x14, 0x5A, 0x08, 0x5A, 0x58, 0x0A, 0x60) //5A, attribute 00 is down. 60, attribute 00, 08 attribute 40
     private val up = setOf(0x0C, 0x0E, 0x18, 0x1A) //43 was hit (dark color), //41 was hit light color
@@ -101,7 +101,7 @@ class OamStateReasoner(
         sprites.map { it.toAgent() }
 
     private fun SpriteData.toAgent(): Agent =
-        Agent(index = tile, point = point, state = toState(), hp =tile, droppedId = attribute)
+        Agent(index = tile, point = point, state = toState(), hp = tile, droppedId = attribute)
 
     private fun combine(toCombine: List<SpriteData>): List<SpriteData> {
         val xMap = toCombine.associateBy { it.point.x }
