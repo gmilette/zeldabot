@@ -192,7 +192,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         d { plan.toString() }
         with (frameStateUpdater.state) {
             val currentCell = currentMapCell
-            val locCoordinates = "${frameState.level}: ${frameState.mapLoc} : ${currentCell.mapData.name}"
+            val locCoordinates = "${frameState.level}: ${frameState.mapLoc} : ${currentCell.mapData.name.take(10)}"
             d { "current --> " +
                     "$locCoordinates " +
                     " target ${plan.target()} " + "link " +

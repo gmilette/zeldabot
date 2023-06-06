@@ -160,7 +160,7 @@ class RunActionLog(private val fileNameRoot: String) {
         val time = (System.currentTimeMillis() - startedStep) / 1000
         val totalTime = (System.currentTimeMillis() - started) / 1000
         return StepCompleted(
-            name.replace("\"n", "N"),
+            name.replace("\"", ""),
             time,
             totalTime,
             state.frameState.inventory.numBombs,
