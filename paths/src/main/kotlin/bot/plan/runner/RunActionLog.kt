@@ -21,6 +21,9 @@ class RunActionLog(private val fileNameRoot: String) {
     private var totalDamage = 0.0
     private var stepHits = 0
     private var stepDamage = 0.0
+    private val bombsUsed = DataCount()
+
+    private val dataCounts = listOf(bombsUsed)
 
     private var directionCt = mutableMapOf<GamePad, DataCount>()
 
@@ -44,7 +47,7 @@ class RunActionLog(private val fileNameRoot: String) {
         val action: String,
         val time: Long,
         val totalTime: Long,
-        val numBombs: Int,
+        val bombsUsed: Int,
         val numFrames: Int = 0,
         val hits: Int = 0,
         val damage: Double = 0.0
@@ -57,7 +60,12 @@ class RunActionLog(private val fileNameRoot: String) {
 
         framesForStep++
         totalFrames++
-
+        
+        setHearts(state)
+        setBombs(state)
+    }
+    
+    private fun setHearts(state: MapLocationState) {
         // always decreases, but isn't always exactly accurate for some reason
         val currentHeart = state.frameState.inventory.heartCalc.lifeInHearts()
         val previousHeart = state.previousHeart
@@ -84,20 +92,28 @@ class RunActionLog(private val fileNameRoot: String) {
             stepDamage += damage
         }
     }
+    
+    private fun setBombs(state: MapLocationState) {
+        val numBombs = state.frameState.inventory.numBombs
+        val previousNumBombs = state.previousNumBombs
+        if (numBombs < previousNumBombs) {
+            bombsUsed.inc()
+        }
+    }
 
-    fun logCompleted() {
+    private fun logCompletedStep() {
         completedStep.forEachIndexed { index, stepCompleted ->
             stepCompleted.apply {
-                d { "$index, $time, $totalTime, $action, $numBombs, $hits, $damage" }
+                d { "$index, $time, $totalTime, $action, $bombsUsed, $hits, $damage" }
             }
         }
         if (SAVE) {
             val csvWriter2 = CsvWriter()
             csvWriter2.open(outputFile, false) {
-                writeRow("index", "time", "totalTime", "action", "numBombs", "hits", "damage")
+                writeRow("index", "time", "totalTime", "action", "bombsUsed", "hits", "damage")
                 completedStep.forEachIndexed { index, stepCompleted ->
                     stepCompleted.apply {
-                        writeRow(index, time, totalTime, numFrames, action, numBombs, hits, damage)
+                        writeRow(index, time, totalTime, numFrames, action, bombsUsed, hits, damage)
                     }
                 }
             }
@@ -139,12 +155,15 @@ class RunActionLog(private val fileNameRoot: String) {
 
     fun advance(action: Action, state: MapLocationState) {
         d { "*** advance time" }
-        logCompleted()
+        logCompletedStep()
         completedStep.add(calculateStep(action.name, state, framesForStep, stepHits, stepDamage))
         startedStep = System.currentTimeMillis()
         framesForStep = 0
         stepDamage = 0.0
         stepHits = 0
+        for (dataCount in dataCounts) {
+            dataCount.actionDone()
+        }
         for (dataCount in directionCt.values) {
             dataCount.actionDone()
         }
@@ -163,7 +182,7 @@ class RunActionLog(private val fileNameRoot: String) {
             name.replace("\"", ""),
             time,
             totalTime,
-            state.frameState.inventory.numBombs,
+            bombsUsed.perStep,
             frameCt,
             hits = hits,
             damage = damage

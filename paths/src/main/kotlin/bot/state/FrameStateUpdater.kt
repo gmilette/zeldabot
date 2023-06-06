@@ -4,6 +4,7 @@ import bot.plan.action.PreviousMove
 import bot.state.map.Direction
 import bot.state.map.Hyrule
 import bot.state.map.MapConstants
+import bot.state.map.horizontal
 import nintaco.api.API
 import sequence.ZeldaItem
 import util.d
@@ -97,6 +98,7 @@ class FrameStateUpdater(
 
         this.state.previousLocation = previous.link.point
         this.state.previousHeart = previous.inventory.heartCalc.lifeInHearts()
+        this.state.previousNumBombs = previous.inventory.numBombs
 
         state.lastGamePad = currentGamePad
         //        https://datacrystal.romhacking.net/wiki/The_Legend_of_Zelda:RAM_map
@@ -118,6 +120,18 @@ class FrameStateUpdater(
             state.hyrule.levelMap.cellOrEmpty(level, mapLoc)
         }
 
+        val oam = OamStateReasoner(api)
+        val theEnemies = oam.agents()
+        val linkDir = oam.direction
+        val ladder = oam.ladderSprite
+        val damagedTile = if (oam.damaged) LinkDirection.damagedAttribute.last() else 0
+        val link = Agent(0, linkPoint, linkDir, hp = damagedTile)
+        val ladderHorizontal = state.previousMove.dir.horizontal
+        // and if it is horizontal, then make above and below not passable
+        if (ladder != null) {
+            d { " ladder at ${ladder.point} directionHorizontal: $ladderHorizontal"}
+        }
+
         val previousNow = state.previousMove
         state.previousMove = PreviousMove(
             previous = state.previousMove.copy(previous = null), // TODO: previousNow.copy()),
@@ -129,15 +143,6 @@ class FrameStateUpdater(
         // reset to prevent infinite memory being allocated
         previousNow.previous = null
 
-        val oam = OamStateReasoner(api)
-        val theEnemies = oam.agents()
-        val linkDir = oam.direction
-        val ladder = oam.ladderSprite
-        val damagedTile = if (oam.damaged) LinkDirection.damagedAttribute.last() else 0
-        val link = Agent(0, linkPoint, linkDir, hp = damagedTile)
-        if (ladder != null) {
-            d { " ladder at ${ladder.point}"}
-        }
         val frame = FrameState(api, theEnemies, level, mapLoc, link, ladder)
 
         frame.inventory.heartCalc.calc()
