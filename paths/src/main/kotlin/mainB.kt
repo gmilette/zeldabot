@@ -36,7 +36,8 @@ fun main() = application {
         val state = model.plan.value
         var count = remember { mutableStateOf(0) }
         var showMap = remember { mutableStateOf(false) }
-        val act = remember { mutableStateOf(true) }
+        val act = remember { mutableStateOf(ZeldaBot.doAct) }
+        val draw = remember { mutableStateOf(ZeldaBot.draw) }
         val ladder = remember { mutableStateOf(true) }
 
         Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
@@ -146,6 +147,14 @@ fun main() = application {
                         onCheckedChange = {
                             act.value = it
                             model.changeAct(it)
+                        }
+                    )
+                    Text("Draw")
+                    Checkbox(
+                        checked = draw.value,
+                        onCheckedChange = {
+                            draw.value = it
+                            model.changeDraw(it)
                         }
                     )
                 }
@@ -364,6 +373,10 @@ class ZeldaModel : ZeldaBot.ZeldaMonitor {
 
     fun changeAct(act: Boolean) {
         ZeldaBot.doAct = act
+    }
+
+    fun changeDraw(draw: Boolean) {
+        ZeldaBot.draw = draw
     }
 
     fun addKey() {

@@ -25,17 +25,18 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         // what is the relative dir?
         val root = "../Nintaco_bin_2020-05-01/states/"
 //        val root = "/Users/greg/dev/zelda/Nintaco_bin_2020-05-01/states/"
-        d { " master plan ${plan.masterPlan.toStringAll()}"}
+        d { " master plan ${plan.masterPlan.toStringAll()}" }
         val loadZelda by RunOnceLambda {
-            d { " load zelda"}
+            d { " load zelda" }
 //            api.quickLoadState(1)
             api.loadState("$root/${plan.startPath}")
         }
         val setSpeed by RunOnceLambda {
-            d { " set speed"}
+            d { " set speed" }
             api.setSpeed(400)
         }
-        api.addFrameListener { renderFinished()
+        api.addFrameListener {
+            renderFinished()
             loadZelda
         }
         api.addStatusListener { message: String -> statusChanged(message) }
@@ -80,7 +81,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         api.createSprite(
             SPRITE_ID,
             SPRITE_SIZE,
-            SPRITE_SIZE, sprite)
+            SPRITE_SIZE, sprite
+        )
         strWidth = api.getStringWidth(STRING, false)
         strX = 0 //(256 - strWidth) / 2
         strY = (240 - 8) - 40  /// 2 // interesting that's size
@@ -88,7 +90,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         api.createSprite(
             SPRITE_ID,
             SPRITE_SIZE,
-            SPRITE_SIZE, sprite)
+            SPRITE_SIZE, sprite
+        )
 
     }
 
@@ -132,7 +135,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             val link = frameStateUpdater.getLink()
             collect.collect(link, previousLink)
             previousLink = link
-            d { collect.toString()}
+            d { collect.toString() }
             return GamePad.None
         }
         if (unstick > 0) {
@@ -147,7 +150,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         // filters..
 
         if (frameStateUpdater.state.frameState.isDoneScrolling) {
-            d {" * clear history"}
+            d { " * clear history" }
             frameStateUpdater.state.clearHistory()
             // then skip action on this frame
             return GamePad.None
@@ -167,7 +170,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 //        fillBombs()
         refillIfOut()
         if (setEquipmentCt > 0 && addEquipment) {
-            d { " Set equip"}
+            d { " Set equip" }
 //            frameStateUpdater.setSword(ZeldaItem.MagicSword)
             frameStateUpdater.setLadderAndRaft(true)
             frameStateUpdater.setRedCandle()
@@ -192,21 +195,25 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         frameStateUpdater.state.previousGamePad = nextGamePad
 
         d { plan.toString() }
-        with (frameStateUpdater.state) {
-            val currentCell = currentMapCell
-            val locCoordinates = "${frameState.level}: ${frameState.mapLoc} : ${currentCell.mapData.name.take(10)}"
-            d { "current --> " +
-                    "$locCoordinates " +
-                    " target ${plan.target()} " + "link " +
-                    "${frameState.link.point} +" +
-                    " prev ${previousMove}"}
-            val tenth = this.frameState.tenth
-            val dir = this.frameState.link.dir.name.first()
-            val damage = this.frameState.inventory.heartCalc.damageNumber()
-            try {
-                drawIt(plan.target(), "$locCoordinates $link t: $tenth d: $damage")
-            } catch (e: Exception) {
+        if (ZeldaBot.draw) {
+            with(frameStateUpdater.state) {
+                val currentCell = currentMapCell
+                val locCoordinates = "${frameState.level}: ${frameState.mapLoc} : ${currentCell.mapData.name.take(10)}"
+                d {
+                    "current --> " +
+                            "$locCoordinates " +
+                            " target ${plan.target()} " + "link " +
+                            "${frameState.link.point} +" +
+                            " prev ${previousMove}"
+                }
+                val tenth = this.frameState.tenth
+                val dir = this.frameState.link.dir.name.first()
+                val damage = this.frameState.inventory.heartCalc.damageNumber()
+                try {
+                    drawIt(plan.target(), "$locCoordinates $link t: $tenth d: $damage")
+                } catch (e: Exception) {
 
+                }
             }
         }
         return nextGamePad
@@ -270,7 +277,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     private fun renderFinished() {
         val currentFrame = api.frameCount
 
-        d { "execute ### $currentFrame"}
+        d { "execute ### $currentFrame" }
         monitor.update(frameStateUpdater.state, plan)
 
         // fill hearts
@@ -280,13 +287,13 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             d { "fill hearts $life" }
             frameStateUpdater.fillHearts()
         } else {
-            d { "fill hearts $life"}
+            d { "fill hearts $life" }
         }
 
         val act = doAct && !collectSkip //currentFrame % 3 == 0
         if (act) {
             currentGamePad = getAction(currentFrame, currentGamePad)
-            d { " action: at ${frameStateUpdater.state.frameState.link.point} do -> $currentGamePad previous ${frameStateUpdater.state.previousMove.move}"}
+            d { " action: at ${frameStateUpdater.state.frameState.link.point} do -> $currentGamePad previous ${frameStateUpdater.state.previousMove.move}" }
 
             val toRelease = mutableSetOf(GamePad.MoveRight, GamePad.MoveUp, GamePad.MoveLeft, GamePad.MoveDown)
             toRelease.forEach { api.writeGamepad(0, it.toGamepadButton, false) }
@@ -296,17 +303,20 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                     GamepadButtons.Right,
                     true
                 )
+
                 GamePad.MoveLeft -> api.writeGamepad(
                     0,
                     GamepadButtons.Left,
                     true
                 )
+
                 GamePad.MoveUp -> api.writeGamepad(0, GamepadButtons.Up, true)
                 GamePad.MoveDown -> api.writeGamepad(
                     0,
                     GamepadButtons.Down,
                     true
                 )
+
                 GamePad.A -> api.writeGamepad(0, GamepadButtons.A, true)
                 GamePad.B -> api.writeGamepad(0, GamepadButtons.B, true)
                 GamePad.Select -> api.writeGamepad(
@@ -314,13 +324,14 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                     GamepadButtons.Select,
                     true
                 )
+
                 GamePad.Start -> api.writeGamepad(0, GamepadButtons.Start, true)
                 GamePad.ReleaseA -> api.writeGamepad(0, GamepadButtons.A, false)
                 GamePad.ReleaseB -> api.writeGamepad(0, GamepadButtons.B, false)
                 else -> {}
             }
         } else {
-            d { " no action"}
+            d { " no action" }
             currentGamePad = getAction(currentFrame, currentGamePad)
         }
     }
@@ -332,6 +343,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         private const val SPRITE_SIZE = 2
         var hasLadder = false
         var doAct = true
+        var draw = true
         var addKey = false
         var addRupee = false
         var unstick = 0
@@ -373,7 +385,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         fun update(state: MapLocationState, plan: PlanRunner)
     }
 
-    class NoOp: ZeldaMonitor {
+    class NoOp : ZeldaMonitor {
         override fun update(state: MapLocationState, plan: PlanRunner) {
             // todo
         }
