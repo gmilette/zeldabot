@@ -4,6 +4,10 @@ import bot.plan.Phases
 import sequence.ZeldaItem
 
 class Experiments(masterPlan: MasterPlan) {
+    companion object {
+        const val current = "level2rhino"
+    }
+
     private val experiments: Map<String, Experiment>
 
     private val default = Experiment("all", "start_nothing.save", masterPlan, sword = ZeldaItem.MagicSword)
@@ -11,6 +15,7 @@ class Experiments(masterPlan: MasterPlan) {
     init {
         experiments = listOf(
             Experiment("all", "start_nothing.save", masterPlan, sword = ZeldaItem.MagicSword, addEquipment = false),
+            Experiment("level2rhino", "lev2_14_boss.save", masterPlan.getPlanPhase("Destroy level 2", Phases.Segment.lev2Boss), sword = ZeldaItem.WoodenSword, addEquipment = true),
             Experiment("level2w", "level2.save", masterPlan.getPlanPhase("Destroy level 2", null), sword = ZeldaItem.WoodenSword, addEquipment = true),
             Experiment("level5start", "level2.save", masterPlan.getPlanPhase("Destroy level 5", null), sword = ZeldaItem.WoodenSword),
             Experiment("level2", "level2.save", masterPlan.getPlanPhase("Destroy level 2", null), sword = ZeldaItem.MagicSword),

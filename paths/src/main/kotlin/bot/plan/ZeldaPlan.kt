@@ -113,6 +113,10 @@ object Phases {
     val forest30 = "forest 30"
     val level7 = "level 7"
     val level9 = "level 7"
+
+    object Segment {
+        val lev2Boss = "kill boss"
+    }
 }
 
 object ZeldaPlan {
@@ -471,11 +475,11 @@ object ZeldaPlan {
             kill // blocked before going // allow bombs
             goTo(InLocations.Level2.bombItemRight)
             up
-            seg("kill boss")
+            seg(Phases.Segment.lev2Boss)
             killLevel2Rhino
+            seg("get the triforce")
             wait
             goTo(InLocations.Level2.heartMid)
-            seg("get the triforce")
             left
             goIn(GamePad.MoveLeft, 20)
             goTo(InLocations.Level2.triforce)

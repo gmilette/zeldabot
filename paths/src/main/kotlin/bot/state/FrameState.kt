@@ -48,8 +48,12 @@ class FrameState(
     val mapLoc: MapLoc,
     val link: Agent,
     val ladder: Agent?,
-    val inventory: Inventory = Inventory(api)
+    val inventory: Inventory = Inventory(api),
 ) {
+    val numBombs: Int = inventory.numBombs
+    val life: Double = inventory.heartCalc.lifeInHearts()
+    val damageNumber: Int = inventory.heartCalc.damageNumber()
+
     /**
      *  0=Title/transitory    1=Selection Screen
     5=Normal              6=Preparing Scroll

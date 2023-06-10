@@ -20,7 +20,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 
 //    private val target = "afterLev4"
 //    private val target = "level7"
-    private val target = "all"
+    private val target = Experiments.current
 
     init {
         run(name = target)

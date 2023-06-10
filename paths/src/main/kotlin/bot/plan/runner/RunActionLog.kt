@@ -71,8 +71,10 @@ class RunActionLog(private val fileNameRoot: String) {
         val previousHeart = state.previousHeart
         d { " previous heart $previousHeart current heart $currentHeart"}
         // should just check if
+        val currentDamage = state.frameState.damageNumber
+        val previousDamage = state.previousDamageNumber
 
-        if (state.previousHeart > 0 && (previousHeart > currentHeart)) {
+        if (previousDamage > 0 && (previousDamage > currentDamage)) {
             val csvWriter2 = CsvWriter()
             // damage, hearts, damageIn, life, life2, damage number
             csvWriter2.open(heartLog, true) {
@@ -82,7 +84,7 @@ class RunActionLog(private val fileNameRoot: String) {
                     state.frameState.inventory.heartCalc.damageInHearts(),
                     state.frameState.inventory.heartCalc.lifeInHearts(),
                     state.frameState.inventory.heartCalc.lifeInHearts2(),
-                    state.frameState.inventory.heartCalc.damageNumber() // also could use this to track hits
+                    state.frameState.inventory.heartCalc.damageNumber()
                 )
             }
             totalHits++
@@ -132,7 +134,8 @@ class RunActionLog(private val fileNameRoot: String) {
                 stepCompleted.totalTime,
                 totalFrames,
                 totalHits,
-                totalDamage
+                totalDamage,
+                bombsUsed.total
             )
         }
     }
@@ -148,7 +151,7 @@ class RunActionLog(private val fileNameRoot: String) {
         val csvWriter2 = CsvWriter()
         if (!File(outputFileAll).exists()) {
             csvWriter2.open(outputFileAll, true) {
-                writeRow("date", "action", "file", "totalTime", "totalFrames", "totalHits", "totalDamage")
+                writeRow("date", "action", "file", "totalTime", "totalFrames", "totalHits", "totalDamage", "bombsUsed")
             }
         }
     }

@@ -114,6 +114,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     var frameStateUpdater: FrameStateUpdater = FrameStateUpdater(api, hyrule)
 
     fun makePlan(): MasterPlan {
+        // make sure to reset any state here
+        frameStateUpdater.reset()
         return ZeldaPlan.makeMasterPlan(hyrule, hyrule.mapCellsObject, hyrule.levelMap)
     }
 
@@ -265,42 +267,28 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         }
     }
 
-    private val skipDb = SkipPathDb()
-
     private fun renderFinished() {
         val currentFrame = api.frameCount
-//        if (collectSkip) {
-//            currentGamePad = getAction(currentFrame, currentGamePad)
-//        }
 
         d { "execute ### $currentFrame"}
         monitor.update(frameStateUpdater.state, plan)
 
         // fill hearts
         // not reliable enough
-        if (frameStateUpdater.state.frameState.inventory.heartCalc.lifeInHearts() <= 2) {
-            d { "fill hearts" }
+        val life = frameStateUpdater.state.frameState.inventory.heartCalc.lifeInHearts2()
+        if (life <= 2.5) {
+            d { "fill hearts $life" }
             frameStateUpdater.fillHearts()
+        } else {
+            d { "fill hearts $life"}
         }
 
         val act = doAct && !collectSkip //currentFrame % 3 == 0
         if (act) {
             currentGamePad = getAction(currentFrame, currentGamePad)
-            if (doAct) {
-//                skipDb.save(
-//                    frameStateUpdater.state.frameState.level,
-//                    frameStateUpdater.state.currentMapCell.mapLoc,
-//                    frameStateUpdater.state.previousMove
-//                )
-            }
             d { " action: at ${frameStateUpdater.state.frameState.link.point} do -> $currentGamePad previous ${frameStateUpdater.state.previousMove.move}"}
 
-            //  how many times does it press the key? //maybe it should
-            //  release after press once?
-//            d { "press $currentGamePad" }
-            // add a or b?
-            // this didn't help
-            val toRelease = mutableSetOf<GamePad>(GamePad.MoveRight, GamePad.MoveUp, GamePad.MoveLeft, GamePad.MoveDown)
+            val toRelease = mutableSetOf(GamePad.MoveRight, GamePad.MoveUp, GamePad.MoveLeft, GamePad.MoveDown)
             toRelease.forEach { api.writeGamepad(0, it.toGamepadButton, false) }
             when (currentGamePad) {
                 GamePad.MoveRight -> api.writeGamepad(

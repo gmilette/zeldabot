@@ -45,6 +45,7 @@ class HeartsStateCalculator(private val inventory: Inventory) {
     fun lifeInHearts2(): Double {
         val full = heartContainersFull().toDouble()
         val damage = damageDecimal()
+        d { " full: $full decimal $damage"}
         return full + damage
     }
 
@@ -108,11 +109,13 @@ class HeartsStateCalculator(private val inventory: Inventory) {
         inventory.hearts.secondNibble() + 1
 
     private fun Int.firstNibble(): Int {
+        if (this < 0) return 0
         val full = this.toString(16).first().toString()
         return Integer.parseInt(full, 16)
     }
 
     private fun Int.secondNibble(): Int {
+        if (this < 0) return 0
         val full = this.toString(16).last().toString()
         return Integer.parseInt(full, 16)
     }

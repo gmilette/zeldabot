@@ -21,6 +21,11 @@ class FrameStateUpdater(
     fun getLink() = FramePoint(getLinkX(), getLinkY())
     var state: MapLocationState = MapLocationState(hyrule = hyrule)
 
+    fun reset() {
+        d { "RESET State"}
+        state = MapLocationState(hyrule)
+    }
+
     fun fillTriforce() {
         api.writeCPU(Addresses.triforce, 255)
     }
@@ -96,9 +101,12 @@ class FrameStateUpdater(
     fun updateFrame(currentFrame: Int, currentGamePad: GamePad) {
         val previous = state.frameState
 
-        this.state.previousLocation = previous.link.point
-        this.state.previousHeart = previous.inventory.heartCalc.lifeInHearts()
-        this.state.previousNumBombs = previous.inventory.numBombs
+        if (currentFrame > 10) {
+            this.state.previousLocation = previous.link.point
+            this.state.previousHeart = previous.life
+            this.state.previousDamageNumber = previous.damageNumber
+            this.state.previousNumBombs = previous.numBombs
+        }
 
         state.lastGamePad = currentGamePad
         //        https://datacrystal.romhacking.net/wiki/The_Legend_of_Zelda:RAM_map
@@ -144,8 +152,6 @@ class FrameStateUpdater(
         previousNow.previous = null
 
         val frame = FrameState(api, theEnemies, level, mapLoc, link, ladder)
-
-        frame.inventory.heartCalc.calc()
 
         state.framesOnScreen++
         state.frameState = frame
