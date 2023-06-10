@@ -202,13 +202,13 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                     " prev ${previousMove}"}
             val tenth = this.frameState.tenth
             val dir = this.frameState.link.dir.name.first()
+            val damage = this.frameState.inventory.heartCalc.damageNumber()
             try {
-                drawIt(plan.target(), "$locCoordinates $link t: $tenth")
+                drawIt(plan.target(), "$locCoordinates $link t: $tenth d: $damage")
             } catch (e: Exception) {
 
             }
         }
-//        if (true) return GamePad.None
         return nextGamePad
     }
 
