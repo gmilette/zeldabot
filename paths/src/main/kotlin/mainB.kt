@@ -355,11 +355,6 @@ class ZeldaModel : ZeldaBot.ZeldaMonitor {
         scope.launch {
             bot = ZeldaBot.startIt(monitor)
         }
-//        plan.value = ShowState("Starting...", 0, MapLocationState())
-    }
-
-    fun skip() {
-        bot?.skip()
     }
 
     fun forceDir(forcedDirection: GamePad, num: Int = 100) {

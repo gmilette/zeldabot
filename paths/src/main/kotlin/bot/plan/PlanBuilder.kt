@@ -183,9 +183,12 @@ class PlanBuilder(
         }
     val killLevel2Rhino: PlanBuilder
         get() {
-            switchToBomb()
             add(lastMapLoc, KillAll(useBombs = true, waitAfterAttack = true))
             return this
+        }
+    val switchToBomb: Unit
+        get() {
+            switchToBomb()
         }
     val killG: PlanBuilder
         get() {
