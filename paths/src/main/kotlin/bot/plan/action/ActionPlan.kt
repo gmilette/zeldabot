@@ -152,8 +152,9 @@ class ActionSequence(
     override fun path(): List<FramePoint> = path
 
     override fun nextStep(state: MapLocationState): GamePad {
+        d { " DO --> next step" }
         val action = actions.firstOrNull { !it.complete(state) }
-        d { " DO --> ${action?.name}" }
+        d { " DO --> ${action?.name ?: "no action"}" }
         return action?.nextStep(state) ?: GamePad.randomDirection(state.link)
     }
 

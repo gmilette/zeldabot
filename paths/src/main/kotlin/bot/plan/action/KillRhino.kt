@@ -1,19 +1,48 @@
 package bot.plan.action
 
 import bot.state.*
-import bot.state.map.Direction
-import bot.state.map.MapConstants
-import bot.state.map.grid
+import bot.state.map.*
 import util.d
 
-// assume switched to arrow
-class KillRhino(waitFrames: Int) : Action {
-//    private val attract = ActionSequence(InsideNavAbout(KillHandsLevel7Data.attractFrom, 0, ignoreProjectiles = true), GoIn(5, GamePad.MoveLeft, reset = true), still)
-    val attackBomb = AlwaysAttack(useB = true)
-    val wait = GoIn(waitFrames, GamePad.None)
-    val attackSword = AlwaysAttack()
+data class RhinoStrategyParameters(
+    val waitFrames: Int = 50,
+    // how many grids ahead of the rhino to target
+    val targetGridsAhead: Int = 0,
+    // how many grids above or below to target
+    val targetGridAboveBelow: Int = 0,
+    // maybe a strategy to target any within the range specified by the above parameters
+    val targetAllWithin: Boolean = false
+) {
+    fun getTargetGrid(from: FramePoint, direction: Direction?): FramePoint? {
+        if (direction == null) return null
+        val adjusted = direction.pointModifier(MapConstants.oneGrid * targetGridsAhead)
+        val adjustAboveBelow = direction.opposite().pointModifier(MapConstants.oneGrid * targetGridAboveBelow)
+        return if (from.isInLevelMap) adjusted(from) else null
+    }
+}
 
-    val eatingBombTile = setOf(
+// assume switched to arrow
+class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParameters()) : Action {
+    private val navToTarget = NavToTarget { state ->
+        state.rhino()?.let {
+            params.getTargetGrid(it.point, state.rhinoDir())
+        }
+    }
+    private val attackBomb = AlwaysAttack(useB = true)
+    private val wait = GoIn(params.waitFrames, GamePad.None)
+    private val attackBomb2 = AlwaysAttack(useB = true)
+    private val attackSword = AlwaysAttack()
+
+    private val actions =
+        ActionSequence(
+            navToTarget,
+            attackBomb,
+            wait,
+            attackBomb2,
+            attackSword
+        )
+
+    private val eatingBombTile = setOf(
         // attrib 03, and 43
         0xFE,
         // attrib 43
@@ -22,9 +51,9 @@ class KillRhino(waitFrames: Int) : Action {
         0xF2
     )
 
-    val rhinoHeadLeftUp = 0xFA
-    val rhinoHeadLeftDown = 0xF6
-    val head = setOf(rhinoHead, rhinoHeadLeftUp, rhinoHeadLeftDown)
+    private val rhinoHeadLeftUp = 0xFA
+    private val rhinoHeadLeftDown = 0xF6
+    private val head = setOf(rhinoHead, rhinoHeadLeftUp, rhinoHeadLeftDown)
 
     private val one = -1
     // add the blow up directions too
@@ -74,6 +103,10 @@ class KillRhino(waitFrames: Int) : Action {
     private fun MapLocationState.rhinoDir(): Direction? =
         frameState.enemies.firstNotNullOfOrNull{ findDir(it.tile, it.attribute) }
 
+    private fun MapLocationState.rhino(): Agent? =
+        frameState.enemies.firstOrNull { head.contains(it.tile) }
+
+    // maybe more than 200?
     private val criteria = DeadForAWhile(limit = 200) {
         it.clearedWithMinIgnoreLoot(0)
     }
@@ -87,17 +120,17 @@ class KillRhino(waitFrames: Int) : Action {
     override fun nextStep(state: MapLocationState): GamePad {
         val isEatingBomb = state.isEatingBomb()
         val dir = state.rhinoDir()
-        d { "Kill Rhino eating $isEatingBomb dir = $dir" }
+        val where = state.rhino()
+        d { "Kill Rhino eating $isEatingBomb dir = $dir where = ${where?.point ?: ""}"}
         criteria.nextStep(state)
-
         // if I can detect the nose open then, I can dodge while that is happening
         // otherwise, just relentlessly attack
-
-        return GamePad.None
+        d { "ACTION" }
+        return actions.nextStep(state)
     }
 
     override val name: String
-        get() = "KillArrowSpider ${criteria.frameCount}"
+        get() = "KillRhino ${criteria.frameCount}"
 }
 class KillAll2(
     /**

@@ -459,3 +459,32 @@ class RouteTo(val params: Param = Param()) {
 
     }
 }
+
+class NavToTarget(val targetSelector: (MapLocationState) -> FramePoint?) : Action {
+    private val routeTo = RouteTo(RouteTo.Param(ignoreProjectiles = false))
+
+    private var targets = listOf<FramePoint>()
+    private var target = FramePoint()
+
+    override fun complete(state: MapLocationState): Boolean =
+        state.link.minDistToAny(targets) < 2
+
+    override fun path(): List<FramePoint> = routeTo.route?.path ?: emptyList()
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        val previousTarget = target
+
+        target = targetSelector(state) ?: return GamePad.None
+        targets = target.about()
+
+        val forceNew = previousTarget != target
+
+        d { " move to spot $target" }
+        return routeTo.routeTo(state, targets, forceNew)
+    }
+
+    override fun target() = target
+
+    override val name: String
+        get() = "Nav to Target ${target.oneStr}"
+}

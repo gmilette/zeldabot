@@ -300,6 +300,8 @@ fun FramePoint.adjustBy(pad: GamePad) =
 val FramePoint.toScreenY
     get() = FramePoint(x, y + 61)
 
+val FramePoint.isInLevelMap
+    get() = y > 0 && y < (MapConstants.MAX_Y - MapConstants.twoGrid) && x > 0 && x < MapConstants.MAX_X - (MapConstants.MAX_Y - MapConstants.twoGrid)
 val FramePoint.isTop
     get() = y == 0
 val FramePoint.isBottom
