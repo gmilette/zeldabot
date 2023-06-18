@@ -89,7 +89,7 @@ object AttackActionDecider {
         }
     }
 
-    private fun shouldAttack(from: Direction, link: FramePoint, enemiesClose: List<FramePoint>, dist: Int = MapConstants.oneGrid): Boolean {
+    fun shouldAttack(from: Direction, link: FramePoint, enemiesClose: List<FramePoint>, dist: Int = MapConstants.oneGrid): Boolean {
         val attackDirectionGrid = from.pointModifier(dist - 1)(link) // -1 otherwise the sword is just out of reach
 
         d { "should attack dir = $from link = $link dirGrid = $attackDirectionGrid numEnemies ${enemiesClose.size}" }

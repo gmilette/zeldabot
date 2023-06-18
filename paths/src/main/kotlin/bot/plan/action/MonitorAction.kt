@@ -142,11 +142,15 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
     private val escapeActionTimes = 50
     private val cycleDetector = CycleDetector()
 
+    override fun target(): FramePoint {
+        return wrapped.target()
+    }
+
     override fun complete(state: MapLocationState): Boolean =
         wrapped.complete(state)
 
     override fun nextStep(state: MapLocationState): GamePad {
-        d { "MoveHistoryAction" }
+//        d { "MoveHistoryAction" }
         return when {
             escapeActionCt > 0 -> {
                 d { " ESCAPE ACTION " }
@@ -157,7 +161,7 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
 
             state.link in state.aliveEnemies.map { it.point } -> {
                 escapeActionCt = escapeActionTimes
-                d { " ESCAPE ACTION SAME ENEMY" }
+                d { " ESCAPE ACTION reset" }
                 same.reset()
                 wrapped.nextStep(state)
             }
@@ -167,7 +171,7 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
                 val ct = same.record(nextStep)
                 // keep saving link's location
                 cycleDetector.save(state.link)
-                d { " ESCAPE ACTION not same $nextStep + $ct last ${same.last}" }
+//                d { " ESCAPE ACTION not same $nextStep + $ct last ${same.last}" }
                 if (ct >= histSize) {
                     escapeActionCt = escapeActionTimes
                     d { " ESCAPE ACTION RESET" }
@@ -175,10 +179,10 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
                 }
                 nextStep
             }
-        }.also {
-            val inIt = state.link in state.aliveEnemies.map { it.point }
-            d { " link at ${state.link} $inIt" }
-        }
+        }//.also {
+//            val inIt = state.link in state.aliveEnemies.map { it.point }
+//            d { " link at ${state.link} $inIt" }
+//        }
     }
 
     override val name: String
@@ -221,6 +225,9 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
     companion object {
         private const val FRAMES_BEFORE_SET_INITIAL = 300
     }
+
+    override fun target(): FramePoint =
+        wrapped.target()
 
     override fun complete(state: MapLocationState): Boolean =
         wrapped.complete(state)

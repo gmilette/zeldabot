@@ -125,6 +125,10 @@ class KillAll(
                 d { " target only $targetOnly" }
                 aliveEnemies = aliveEnemies.filter { targetOnly.contains(it.tile) }
             }
+
+            // for rhino, adjust target location
+            // action
+
 //            aliveEnemies.forEach {
 //                d { "alive enemy $it dist ${it.point.distTo(state.frameState.link.point)}" }
 //            }
@@ -256,6 +260,31 @@ class ClockActivatedKillAll : Action {
         }
     }
 }
+
+class AttackOnce(useB: Boolean = false, private val freq: Int = 5) :
+    Action {
+    private var frames = 0
+    private val gameAction = if (useB) GamePad.B else GamePad.A
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        // just always do it
+        val move = if (frames < 0) {
+            GamePad.None
+        } else {
+            when {
+                frames % 10 < freq -> gameAction
+                else -> GamePad.None
+            }
+        }
+        frames++
+        return move
+    }
+
+    override fun complete(state: MapLocationState): Boolean =
+        frames >= 10
+
+}
+
 
 class AlwaysAttack(useB: Boolean = false, private val freq: Int = 5, private val otherwiseRandom: Boolean = false) :
     Action {

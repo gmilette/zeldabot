@@ -202,9 +202,9 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                 d {
                     "current --> " +
                             "$locCoordinates " +
+//                            " current action: ${plan.action?.name ?: ""} "
                             " target ${plan.target()} " + "link " +
-                            "${frameState.link.point} +" +
-                            " prev ${previousMove}"
+                            "${frameState.link.point}"
                 }
                 val tenth = this.frameState.tenth
                 val dir = this.frameState.link.dir.name.first()
@@ -212,7 +212,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                 try {
                     drawIt(plan.target(), "$locCoordinates $link t: $tenth d: $damage")
                 } catch (e: Exception) {
-
+                    d { "ERROR $e"}
                 }
             }
         }

@@ -5,7 +5,7 @@ import bot.state.map.*
 import util.d
 
 data class RhinoStrategyParameters(
-    val waitFrames: Int = 50,
+    val waitFrames: Int = 100,
     // how many grids ahead of the rhino to target
     val targetGridsAhead: Int = 0,
     // how many grids above or below to target
@@ -25,13 +25,29 @@ data class RhinoStrategyParameters(
 class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParameters()) : Action {
     private val navToTarget = NavToTarget { state ->
         state.rhino()?.let {
-            params.getTargetGrid(it.point, state.rhinoDir())
+            d { " rhino location ${it.point}"}
+            it.point
+//            params.getTargetGrid(it.point, state.rhinoDir())
         }
     }
-    private val attackBomb = AlwaysAttack(useB = true)
+    private val attackBomb = AttackOnce(useB = true)
     private val wait = GoIn(params.waitFrames, GamePad.None)
-    private val attackBomb2 = AlwaysAttack(useB = true)
+    private val attackBomb2 = AttackOnce(useB = true)
     private val attackSword = AlwaysAttack()
+
+    // if moving
+    //  NavToTarget
+    // else
+    //  Bomb, wait, Bomb, sword
+
+
+    // if not in range, (nav)
+    // if hits = 0, bomb
+    // if detect eat, (hits for bomb 0)++ // only add once
+    // if hits = 1 + near + #frames < X, wait
+    // if done waiting + still in range, bomb
+    // if bomb == 2, sword until dead
+
 
     private val actions =
         ActionSequence(
@@ -114,7 +130,7 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
     override fun complete(state: MapLocationState): Boolean = criteria(state)
 
     override fun target(): FramePoint {
-        return FramePoint()
+        return actions.target()
     }
 
     override fun nextStep(state: MapLocationState): GamePad {
@@ -130,7 +146,7 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
     }
 
     override val name: String
-        get() = "KillRhino ${criteria.frameCount}"
+        get() = "KillRhino ${criteria.frameCount} ${actions.stepName}"
 }
 class KillAll2(
     /**

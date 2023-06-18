@@ -138,6 +138,8 @@ class DecisionAction(
 class ActionSequence(
     private vararg val actions: Action
 ) : Action {
+    var stepName: String = ""
+    var currentAction: Action? = null
     // never complete
     override fun complete(state: MapLocationState): Boolean =
         false
@@ -146,7 +148,7 @@ class ActionSequence(
     private var path: List<FramePoint> = emptyList()
 
     override fun target(): FramePoint {
-        return target
+        return currentAction?.target() ?: FramePoint()
     }
 
     override fun path(): List<FramePoint> = path
@@ -154,7 +156,9 @@ class ActionSequence(
     override fun nextStep(state: MapLocationState): GamePad {
         d { " DO --> next step" }
         val action = actions.firstOrNull { !it.complete(state) }
-        d { " DO --> ${action?.name ?: "no action"}" }
+        currentAction = action
+        stepName = action?.name ?: "none"
+        d { " DO --> $stepName" }
         return action?.nextStep(state) ?: GamePad.randomDirection(state.link)
     }
 

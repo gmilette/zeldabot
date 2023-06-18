@@ -45,7 +45,7 @@ class HeartsStateCalculator(private val inventory: Inventory) {
     fun lifeInHearts2(): Double {
         val full = heartContainersFull().toDouble()
         val damage = damageDecimal()
-        d { " full: $full decimal $damage"}
+//        d { " full: $full decimal $damage"}
         return full + damage
     }
 
@@ -56,7 +56,7 @@ class HeartsStateCalculator(private val inventory: Inventory) {
         val half = inventory.damage
 
         val fraction = half.firstNibble()
-        d { " fraction = $fraction"}
+//        d { " fraction = $fraction"}
 
         val decimal = when (fraction) {
             13 -> 0.875
@@ -74,11 +74,11 @@ class HeartsStateCalculator(private val inventory: Inventory) {
     fun damageInHearts(): Double {
         val half = inventory.damage
         val heartContain = inventory.hearts
-        d { " half hex = ${half.toString(16)} container = ${heartContain.toString(16)}"}
+//        d { " half hex = ${half.toString(16)} container = ${heartContain.toString(16)}"}
 
         val whole = half.secondNibble()
         val fraction = half.firstNibble()
-        d { " whole = $whole fraction = $fraction"}
+//        d { " whole = $whole fraction = $fraction"}
 
         val halfHeartShowing = fraction <= 7
         val decimal = when (fraction) {

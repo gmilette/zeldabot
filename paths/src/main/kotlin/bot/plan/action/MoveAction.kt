@@ -467,7 +467,14 @@ class NavToTarget(val targetSelector: (MapLocationState) -> FramePoint?) : Actio
     private var target = FramePoint()
 
     override fun complete(state: MapLocationState): Boolean =
-        state.link.minDistToAny(targets) < 2
+        targets.isNotEmpty() && AttackActionDecider.shouldAttack(
+            from = state.frameState.link.dir,
+            state.link,
+            targets).also { "completed NavToTarget $it"}
+//        // this mean
+//        val shouldAttack =
+//
+//        state.link.minDistToAny(targets) < MapConstants.oneGrid
 
     override fun path(): List<FramePoint> = routeTo.route?.path ?: emptyList()
 
@@ -480,7 +487,10 @@ class NavToTarget(val targetSelector: (MapLocationState) -> FramePoint?) : Actio
         val forceNew = previousTarget != target
 
         d { " move to spot $target" }
-        return routeTo.routeTo(state, targets, forceNew)
+        return routeTo.routeTo(state, targets, true).also {
+            d { " Move to $it"}
+        }
+//        return routeTo.routeTo(state, targets, forceNew)
     }
 
     override fun target() = target

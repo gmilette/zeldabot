@@ -13,7 +13,7 @@ import sequence.ZeldaItem
 import util.d
 
 class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
-    lateinit var action: Action
+    var action: Action? = null
     private lateinit var runLog: RunActionLog
     lateinit var masterPlan: MasterPlan
     lateinit var startPath: String
@@ -63,6 +63,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 
     // currently does this
     fun next(state: MapLocationState): GamePad {
+        val action = action ?: return GamePad.None
         runLog.frameCompleted(state)
         // update plan
         // if actions are
@@ -90,7 +91,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
             // record final
         } else {
             action = withDefaultAction(masterPlan.pop())
-            action.reset()
+            action?.reset()
         }
     }
 
@@ -99,7 +100,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     fun afterAfterThis() = masterPlan.nextAfter()
 
     fun target(): FramePoint {
-        return action.target()
+        return action?.target() ?: FramePoint(1,1)
     }
 
     fun path(): List<FramePoint> {
@@ -107,6 +108,6 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     }
 
     override fun toString(): String {
-        return "*** ${action.name}: Plan: $masterPlan"
+        return "*** ${action?.name ?: ""}: Plan: $masterPlan"
     }
 }
