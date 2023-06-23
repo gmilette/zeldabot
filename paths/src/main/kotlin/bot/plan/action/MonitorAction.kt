@@ -53,6 +53,38 @@ class MoveBuffer(val size: Int = 2) {
         }
     }
 
+    fun allSame(): Boolean =
+        buffer.distinct().size == size
+
+    fun compare(other: MoveBuffer): Boolean =
+        other.buffer == buffer // also check that they are all not same
+//        if (other.buffer.size != buffer.size) {
+//            false
+//        } else {
+//            var allEqual = true
+//            buffer.forEachIndexed { index, _ ->
+//                allEqual = allEqual && other.buffer[index] == buffer[index]
+//            }
+//            allEqual
+//        }
+}
+
+class PrevBuffer<T>(val size: Int = 2) {
+    val buffer = mutableListOf<T>()
+
+    val isFull: Boolean
+        get() = buffer.size == size
+
+    fun add(pt: T) {
+        buffer.add(pt)
+        if (buffer.size > size) {
+            buffer.removeFirst()
+        }
+    }
+
+    fun allSame(): Boolean =
+        buffer.distinct().size == size
+
     fun compare(other: MoveBuffer): Boolean =
         other.buffer == buffer // also check that they are all not same
 //        if (other.buffer.size != buffer.size) {
