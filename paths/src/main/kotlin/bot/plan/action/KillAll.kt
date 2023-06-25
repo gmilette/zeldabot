@@ -27,6 +27,8 @@ class KillAll(
     private val routeTo = RouteTo(RouteTo.Param(dodgeEnemies = true))
     private val criteria = KillAllCompleteCriteria()
 
+    private var rhinoState = ZeroState()
+
     private var sameEnemyCount = 0
 
     private var previousAttack = false

@@ -22,9 +22,80 @@ data class RhinoStrategyParameters(
     }
 }
 
-class RhinoStateTracker() {
+interface RhinoState {
+    fun eat(): RhinoState = this
 
+    fun stopped(): RhinoState = this
+
+    fun moved(): RhinoState = this
+
+    val name: String
+        get() = this.javaClass.simpleName
 }
+
+class Default: RhinoState {
+    override fun eat(): RhinoState = this
+
+    // is stopped moving, but not eating
+    override fun stopped(): RhinoState = this
+
+    override fun moved(): RhinoState = this
+}
+
+class ZeroState : RhinoState {
+    override fun eat() = Eating()
+
+    // if dropped the bomb in the right spot
+    override fun stopped(): RhinoState = Stopped(this)
+}
+
+class Eating(private val then: RhinoState = OneState()) : RhinoState {
+    // if was eating, and link didn't bomb right spot
+    override fun moved(): RhinoState = then
+}
+
+// attack with sword
+class Stopped(private val was: RhinoState): RhinoState {
+    override fun moved(): RhinoState = was
+}
+
+class OneState : RhinoState {
+    // dead!
+    override fun eat() = TwoState()
+
+    // rarer, escaped the first bombing, and link has well-placed bomb
+    override fun stopped(): RhinoState = Stopped(this)
+}
+
+// wait for rhino to die, sword to help it along, don't sword if eating
+class TwoState : RhinoState
+
+// add min wait time between bomb1 and bomb2
+// Zero: Bomb, (bomb)
+// Eating: Bomb (after wait), but do not bomb more than twice
+// One: Bomb (Bomb)
+// Two: Sword (Head)
+// Stopped: Sword (Head)
+
+fun bombHead(state: RhinoState, isEating: Boolean) =
+    weaponFor(state, isEating) == GamePad.A
+
+fun weaponFor(state: RhinoState, isEating: Boolean): GamePad =
+    when (state) {
+        is Eating,
+        is OneState,
+        is ZeroState -> GamePad.B
+        is TwoState -> if (isEating) GamePad.None else GamePad.A
+        is Stopped -> GamePad.A
+        else -> GamePad.None
+    }
+
+// link action
+//Zero/One: BombTarget, Bomb wait Bomb
+// then OneState or Stopped
+//Eating: ()
+////TwoState: Sword
+//Stopped, TwoState: HeadTarget -> Sword
 
 // rhino logging
 
@@ -220,14 +291,40 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
 
     private var prevPoint: FramePoint? = null
 
+    val stateTracker = RhinoStateTracker()
+
+    inner class RhinoStateTracker() {
+        var rhinoState: RhinoState = ZeroState()
+
+        fun update(eating: Boolean, moved: Boolean) {
+            if (eating) {
+                rhinoState = rhinoState.eat()
+            }
+            rhinoState = when {
+                eating -> rhinoState.eat()
+                moved -> rhinoState.moved()
+                else -> rhinoState.stopped()
+            }
+        }
+    }
+
+    private val moveBuffer = MoveBuffer(6)
+
     override fun nextStep(state: MapLocationState): GamePad {
         val isEatingBomb = state.isEatingBomb() // reliable
         val dir = state.rhinoDir()
         val where = state.rhino()
 
         // reliable for movement
-        val moved = where != null && prevPoint != null && prevPoint != where.point
-        d { "Kill Rhino eating $isEatingBomb dir = $dir where = ${where?.point ?: ""}"}
+        // look at 3 because it stays at same point for more than 1
+//        val moved = where != null && prevPoint != null && prevPoint != where.point
+        where?.let {
+            moveBuffer.add(it.point)
+        }
+        val moved = !moveBuffer.isFull || !moveBuffer.allSame()
+
+        stateTracker.update(isEatingBomb, moved)
+        d { "Kill Rhino state ${stateTracker.rhinoState} eating $isEatingBomb dir = $dir where = ${where?.point ?: ""}"}
         rhinoLog.write(
             where?.tile?.toString(16) ?: "noti",
             if (isEatingBomb) "eat" else "noe",
@@ -235,7 +332,8 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
             where?.point?.oneStr ?: "non_pts",
             if (moved) "moved" else "nomove",
             if (isStationary(where?.point)) "stationary" else "notstation",
-            if (isBlinking(where != null)) "blink" else "nobli"
+            if (isBlinking(where != null)) "blink" else "nobli",
+            stateTracker.rhinoState.javaClass.simpleName
         )
         criteria.nextStep(state)
         // if I can detect the nose open then, I can dodge while that is happening
@@ -251,22 +349,12 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
     }
 
     override val name: String
-        get() = "KillRhino ${criteria.frameCount} ${actions.stepName}"
+        get() = "KillRhino ${stateTracker.rhinoState.name} ${criteria.frameCount} ${actions.stepName}"
 }
 class KillAll2(
-    /**
-     * keep going after the current enemy for at least 60 frames before switching to another
-     */
-    private val sameEnemyFor: Int = 60,
     private val useBombs: Boolean = false,
     private val waitAfterAttack: Boolean = false,
     private val numberLeftToBeDead: Int = 0,
-    // do not try to kill the enemies in the center
-    private val considerEnemiesInCenter: Boolean = false,
-    /**
-     * how long to wait after all enemies dead to assume all is dead
-     */
-    private var needLongWait: Boolean = false,
     /**
      * only target these tiles
      */
@@ -305,8 +393,7 @@ class KillAll2(
         return state.clearedWithMinIgnoreLoot(numberLeftToBeDead + centerEnemies(state))
     }
 
-    private fun centerEnemies(state: MapLocationState): Int =
-        if (considerEnemiesInCenter) state.numEnemiesAliveInCenter() else 0
+    private fun centerEnemies(state: MapLocationState): Int = 0
 
     private fun killedAllEnemiesIgnoreLoot(state: MapLocationState): Boolean {
         return state.clearedWithMinIgnoreLoot(numberLeftToBeDead)
@@ -323,9 +410,7 @@ class KillAll2(
         }
 
     override fun nextStep(state: MapLocationState): GamePad {
-        val numEnemiesInCenter = state.numEnemiesAliveInCenter()
-        needLongWait = state.longWait.isNotEmpty()
-        d { " KILL ALL step ${state.currentMapCell.mapLoc} count $frameCount wait $waitAfterAllKilled center: $numEnemiesInCenter needLong $needLongWait" }
+        d { " KILL ALL step ${state.currentMapCell.mapLoc} count $frameCount wait $waitAfterAllKilled" }
 
         for (enemy in state.frameState.enemies.filter { it.state != EnemyState.Dead }) {
             d { " enemy: $enemy" }
@@ -383,7 +468,7 @@ class KillAll2(
                 return GamePad.None // just wait
             } else {
                 // 110 too low for bats
-                waitAfterAllKilled = if (needLongWait) 250 else 50
+                waitAfterAllKilled = 250
                 val firstEnemyOrNull = aliveEnemies.firstOrNull()
                 // handle the null?? need to test
                 firstEnemyOrNull?.let { firstEnemy ->

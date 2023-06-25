@@ -2,6 +2,7 @@ package bot
 
 import bot.plan.PlanBuilder
 import bot.plan.ZeldaPlan
+import bot.plan.action.KillRhino
 import bot.plan.gastar.SkipLocationCollector
 import bot.plan.runner.PlanRunner
 import bot.plan.gastar.SkipPathDb
@@ -209,8 +210,9 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                 val tenth = this.frameState.tenth
                 val dir = this.frameState.link.dir.name.first()
                 val damage = this.frameState.inventory.heartCalc.damageNumber()
+                val st = plan.action?.name?.first() ?: ""
                 try {
-                    drawIt(plan.target(), "$locCoordinates $link t: $tenth d: $damage")
+                    drawIt(plan.target(), "$locCoordinates $link $st t: $tenth d: $damage")
                 } catch (e: Exception) {
                     d { "ERROR $e"}
                 }
