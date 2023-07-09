@@ -54,6 +54,9 @@ class MoveBuffer(val size: Int = 2) {
     }
 
     fun allSame(): Boolean =
+        buffer.distinct().size == 1
+
+    fun allDifferent(): Boolean =
         buffer.distinct().size == size
 
     fun compare(other: MoveBuffer): Boolean =
@@ -67,6 +70,14 @@ class MoveBuffer(val size: Int = 2) {
 //            }
 //            allEqual
 //        }
+
+    override fun toString(): String {
+        var moves = ""
+        for (framePoint in buffer) {
+            moves = "$moves, ${framePoint.oneStr}"
+        }
+        return moves
+    }
 }
 
 class PrevBuffer<T>(val size: Int = 2) {
@@ -178,6 +189,9 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
         return wrapped.target()
     }
 
+    override fun path(): List<FramePoint> =
+        wrapped.path()
+
     override fun complete(state: MapLocationState): Boolean =
         wrapped.complete(state)
 
@@ -260,6 +274,9 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
 
     override fun target(): FramePoint =
         wrapped.target()
+
+    override fun path(): List<FramePoint> =
+        wrapped.path()
 
     override fun complete(state: MapLocationState): Boolean =
         wrapped.complete(state)

@@ -104,7 +104,8 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     }
 
     fun path(): List<FramePoint> {
-        return listOf()
+        d { " path for action ${action?.name ?: ""}"}
+        return action?.path() ?: emptyList()
     }
 
     override fun toString(): String {

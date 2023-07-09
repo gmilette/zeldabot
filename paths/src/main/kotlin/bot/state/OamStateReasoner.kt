@@ -340,7 +340,7 @@ object TileInfo {
     val longWaitEnemies = setOf(
         184, 186, // ghost
         ghost,
-        rhinoHeadDown, rhinoHeadDown2, rhinoHead, rhinoHead2,
+        rhinoHeadDown, rhinoHeadDown2, rhinoHeadMouthOpen, rhinoHead2,
         bat,
         254, 248 // the circle monster because I dont know why im stuck here
     )
@@ -436,7 +436,8 @@ val dragon4BodySpine = (0xC6).toInt() // attribute 3
 val dragon4FlamingHead = (0xDE).toInt()
 val rhinoHeadDown = (0xF4).toInt()
 val rhinoHeadDown2 = (0xF6).toInt()
-val rhinoHead = (0xE2).toInt()
+val rhinoHeadMouthOpen = (0xE2).toInt()
+val rhinoHeadMouthClosed = (0xEA).toInt()
 val rhinoHead2 = (0xE0).toInt()
 
 val fourMonster = (0xE2).toInt() to (0x41).toInt()

@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import bot.state.GamePad
 import bot.ZeldaBot
+import bot.plan.runner.EmptyAction
 import bot.plan.runner.PlanRunner
 import bot.state.*
 import bot.state.map.MapConstants
@@ -24,6 +25,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import util.d
+import java.awt.Toolkit
 
 fun main() = application {
     Window(
@@ -204,7 +206,7 @@ fun main() = application {
                     state?.enemiesInfo?.let { enemies ->
                         if (enemies.isNotEmpty()) {
                             enemies.filter { it.state != EnemyState.Dead } .forEachIndexed { index, enemy ->
-                                Text("$index: storedIndex: ${enemy.index} ${enemy.state.name} ${enemy.point} ${enemy.point.toG} id ${enemy
+                                Text("$index: kind: ${enemy.index} (${enemy.index.toString(16)}) ${enemy.state.name} ${enemy.point} ${enemy.point.toG} id ${enemy
                                     .droppedId}")
                             }
                         }
@@ -241,6 +243,8 @@ private fun HyruleMap(state: MapLocationState, plan: PlanRunner) {
                 val paint = Paint()
                 paint.color = Color.Black
                 val linkPathPaint = Paint()
+                linkPathPaint.style = PaintingStyle.Stroke
+                linkPathPaint.strokeWidth = 2.0f
                 linkPathPaint.color = Color.Blue
                 val targetPaint = Paint()
                 targetPaint.color = Color.Cyan
@@ -288,6 +292,7 @@ private fun HyruleMap(state: MapLocationState, plan: PlanRunner) {
 
                 drawPoint(canvas, v, link, paint)
                 // draw path: linkPathPaint
+                d { " draw ${enemies.size} enemies"}
                 for (enemy in enemies) {
                     drawGridPoint(canvas, v, enemy.point, enemyPaint)
                 }
@@ -306,6 +311,9 @@ private fun HyruleMap(state: MapLocationState, plan: PlanRunner) {
                         path.lineTo(pt.x.toFloat() * v, pt.y.toFloat() * v)
                     }
                     canvas.drawPath(path, linkPathPaint)
+                } else {
+                    d { " draw no path "}
+                    //        Toolkit.getDefaultToolkit().beep()
                 }
                 // top is les than bottom
             }
@@ -341,7 +349,7 @@ class ZeldaModel : ZeldaBot.ZeldaMonitor {
             updateEnemiesOnNext = false
         }
         plan.value = ShowState(
-            currentAction = planRunner.action.name,
+            currentAction = planRunner.action?.name ?: "",
             mapLoc = state.frameState.mapLoc,
             state = state,
             stateSnapshot = stateSnapshot,

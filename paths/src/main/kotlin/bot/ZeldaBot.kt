@@ -212,7 +212,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                 val damage = this.frameState.inventory.heartCalc.damageNumber()
                 val st = plan.action?.name?.first() ?: ""
                 try {
-                    drawIt(plan.target(), "$locCoordinates $link $st t: $tenth d: $damage")
+                    drawIt(plan.target(), plan.path(), "$locCoordinates $link $st t: $tenth d: $damage")
                 } catch (e: Exception) {
                     d { "ERROR $e"}
                 }
@@ -240,11 +240,25 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         }
     }
 
-    private fun drawIt(point: FramePoint, text: String) {
+    private fun drawIt(point: FramePoint, path: List<FramePoint>, text: String) {
         val pt = point.toScreenY
         api.drawSprite(SPRITE_ID, pt.x, pt.y)
         api.color = Colors.DARK_BLUE
         api.fillRect(strX - 1, strY - 1, strWidth + 2, 9)
+
+        if (path.isNotEmpty()) {
+            api.color = Colors.ORANGE
+            val screenPath = path.map { it.toScreenY }
+            var prev: FramePoint = screenPath.first()
+            for (pathPt in screenPath) {
+                api.drawLine(prev.x, prev.y, pathPt.x, pathPt.y)
+                prev = pathPt
+            }
+        }
+
+        // todo: draw dots on enemies, one color for projectile, one for enemy
+        // draw the grid of cost function?
+
 //        api.setColor(Colors.BLUE)
 //        api.drawRect(strX - 2, strY - 2, strWidth + 3, 10)
         api.color = Colors.WHITE

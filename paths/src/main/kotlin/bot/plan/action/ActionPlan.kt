@@ -1,16 +1,11 @@
 package bot.plan.action
 
 import bot.state.GamePad
-import bot.plan.action.NavUtil.directionToDir
-import bot.plan.gastar.FrameRoute
 import bot.state.*
 import bot.state.map.*
-import nintaco.api.API
 import nintaco.api.ApiSource
 import util.d
 import util.i
-import util.w
-import kotlin.random.Random
 
 interface Action {
     fun reset() {
@@ -25,7 +20,10 @@ interface Action {
 
     fun target() = FramePoint(0, 0)
 
-    fun path(): List<FramePoint> = emptyList()
+    fun path(): List<FramePoint> {
+        d { " default no path"}
+        return emptyList()
+    }
 
     val name: String
         get() = this.javaClass.simpleName
@@ -41,6 +39,7 @@ class OrderedActionSequence(
     private val restartWhenDone: Boolean = true
 ) : Action {
     private var lastComplete = -1
+    var stepName: String = ""
 
     // keep popping the stack
 //    private var stack = action
@@ -77,8 +76,10 @@ class OrderedActionSequence(
         return target
     }
 
-    override fun path(): List<FramePoint> = path
-
+    override fun path(): List<FramePoint> {
+        d { " current action ${currentAction?.name ?: ""}"}
+        return currentAction?.path() ?: emptyList()
+    }
     override fun nextStep(state: MapLocationState): GamePad {
         val current = currentAction ?: pop() ?: restart() ?: return GamePad.randomDirection(state.link)
         if (current.complete(state)) {
@@ -87,6 +88,7 @@ class OrderedActionSequence(
             return nextStep(state)
         }
         d { " DO --> ${current.name}" }
+        stepName = current.name
         return current.nextStep(state)
     }
 
@@ -145,13 +147,16 @@ class ActionSequence(
         false
 
     private var target: FramePoint = actions.first().target()
-    private var path: List<FramePoint> = emptyList()
+    private var path: List<FramePoint> = actions.first().path()
 
     override fun target(): FramePoint {
         return currentAction?.target() ?: FramePoint()
     }
 
-    override fun path(): List<FramePoint> = path
+    override fun path(): List<FramePoint> {
+        d { " current action ${currentAction?.name ?: ""}"}
+        return currentAction?.path() ?: emptyList()
+    }
 
     override fun nextStep(state: MapLocationState): GamePad {
         d { " DO --> next step" }
@@ -159,7 +164,7 @@ class ActionSequence(
         currentAction = action
         stepName = action?.name ?: "none"
         d { " DO --> $stepName" }
-        return action?.nextStep(state) ?: GamePad.randomDirection(state.link)
+        return action?.nextStep(state) ?: GamePad.None // GamePad.randomDirection(state.link)
     }
 
     override val name: String
@@ -492,7 +497,7 @@ class GetLoot(private val adjustInSideLevel: Boolean = false) : Action {
         val targets = target.about()
 
         d { " get loot $target" }
-        return routeTo.routeTo(state, targets, forceNewI = previousTarget != target)
+        return routeTo.routeTo(state, targets, forceNew = previousTarget != target)
     }
 
     override fun target() = target

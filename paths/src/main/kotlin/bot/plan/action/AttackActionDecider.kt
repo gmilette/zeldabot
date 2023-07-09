@@ -16,9 +16,9 @@ object AttackActionDecider {
             state.frameState.link.dir,
             state.link,
             state.aliveEnemies.map { it.point }).also {
-//            state.aliveEnemies.forEach {
-//                d { " enemy: $it" }
-//            }
+            state.aliveEnemies.forEach {
+                d { " enemy: $it" }
+            }
         }
 
     fun shouldDodgeDepending(state: MapLocationState): GamePad {
@@ -92,9 +92,9 @@ object AttackActionDecider {
     fun shouldAttack(from: Direction, link: FramePoint, enemiesClose: List<FramePoint>, dist: Int = MapConstants.oneGrid): Boolean {
         val attackDirectionGrid = from.pointModifier(dist - 1)(link) // -1 otherwise the sword is just out of reach
 
-        d { "should attack dir = $from link = $link dirGrid = $attackDirectionGrid numEnemies ${enemiesClose.size}" }
-
         // if it is on top of link ALWAYS attack, if it is in the direction link is facing, also attack
-        return enemiesClose.any { link.isInGrid(it) || attackDirectionGrid.isInGrid(it) }
+        return enemiesClose.any { link.isInGrid(it) || attackDirectionGrid.isInGrid(it) }.also {
+            d { "should attack $it dir = $from link = $link dirGrid = $attackDirectionGrid numEnemies ${enemiesClose.size}" }
+        }
     }
 }

@@ -102,19 +102,16 @@ class GStar(
         for (enemy in enemies) {
             setEnemyBig(from, enemy)
         }
+        setForcePassable(enemies, setTo = false)
     }
 
-    private fun setForcePassable(passableSpot: List<FramePoint> = emptyList()) {
+    private fun setForcePassable(passableSpot: List<FramePoint> = emptyList(), setTo: Boolean = true) {
         if (passableSpot.isNotEmpty()) {
-            d {" force passable $passableSpot"}
-            resetPassable()
+            d { " force passable $passableSpot" }
             for (spot in passableSpot) {
                 // make it slighly
-                passable.modifyTo(spot, MapConstants.oneGrid, true)
+                passable.modifyTo(spot, MapConstants.oneGrid, setTo)
             }
-        } else {
-            d {" force passable RESET"}
-            resetPassable()
         }
     }
 
@@ -128,6 +125,7 @@ class GStar(
         val nearEnemies = enemies.isNotEmpty()
         val maxIter = if (nearEnemies) SHORT_ITER else MAX_ITER
         d {"Plan: iter = $maxIter"}
+        resetPassable()
         // only if inside a radius
         setEnemyCosts(start, enemies)
         setForcePassable(forcePassable)
