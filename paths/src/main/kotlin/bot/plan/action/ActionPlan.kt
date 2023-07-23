@@ -1,5 +1,6 @@
 package bot.plan.action
 
+import bot.plan.gastar.GStar
 import bot.state.GamePad
 import bot.state.*
 import bot.state.map.*
@@ -24,6 +25,8 @@ interface Action {
         d { " default no path"}
         return emptyList()
     }
+
+    fun gstar(): GStar? = null
 
     val name: String
         get() = this.javaClass.simpleName
@@ -117,6 +120,8 @@ class DecisionAction(
 
     override fun path(): List<FramePoint> = path
 
+    override fun gstar(): GStar? = action1.gstar()
+
     override fun nextStep(state: MapLocationState): GamePad {
         val choose1 = chooseAction1(state)
         val action: Action
@@ -157,6 +162,8 @@ class ActionSequence(
         d { " current action ${currentAction?.name ?: ""}"}
         return currentAction?.path() ?: emptyList()
     }
+
+    override fun gstar(): GStar? = currentAction?.gstar()
 
     override fun nextStep(state: MapLocationState): GamePad {
         d { " DO --> next step" }

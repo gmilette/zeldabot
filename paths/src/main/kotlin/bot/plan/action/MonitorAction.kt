@@ -1,6 +1,7 @@
 package bot.plan.action
 
 import bot.plan.action.NavUtil.directionToDir
+import bot.plan.gastar.GStar
 import bot.state.FramePoint
 import bot.state.GamePad
 import bot.state.MapLocationState
@@ -192,6 +193,8 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
     override fun path(): List<FramePoint> =
         wrapped.path()
 
+    override fun gstar(): GStar? = wrapped.gstar()
+
     override fun complete(state: MapLocationState): Boolean =
         wrapped.complete(state)
 
@@ -277,6 +280,8 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
 
     override fun path(): List<FramePoint> =
         wrapped.path()
+
+    override fun gstar(): GStar? = wrapped.gstar()
 
     override fun complete(state: MapLocationState): Boolean =
         wrapped.complete(state)

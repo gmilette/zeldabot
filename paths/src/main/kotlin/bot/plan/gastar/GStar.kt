@@ -16,12 +16,17 @@ class GStar(
         var DEBUG = false
         private val DEBUG_DIR = false
         val DEBUG_ONE = false
-        val MAX_ITER = 10000
-        val SHORT_ITER = 100
+        val MAX_ITER = 100000
+        val SHORT_ITER = MAX_ITER // 5000 // not sure if i should use
         val LIMIT_ITERATIONS = false
         val DO_CORNERS = true
         val DO_ADJUST = false
         val DO_MAKE_CORNERS = false
+
+        val nearEnemyCost = 10000
+        val onEnemyCost = 100000
+        val MaxCostAvoidEnemy = onEnemyCost
+        val MaxCostAvoidEnemyNear = nearEnemyCost
     }
 
     private var iterCount = 0
@@ -41,7 +46,7 @@ class GStar(
 
     // f values
     private val initialPassable = passable
-    private var costsF: Map2d<Int> = initialMap.copy()
+    var costsF: Map2d<Int> = initialMap.copy()
 
     private val neighborFinder = NeighborFinder(passable, halfPassable, isLevel)
 
@@ -68,19 +73,20 @@ class GStar(
 
         // the actual enemy should have very very high cost
         costsF.modify(from, point, MapConstants.oneGrid) { dist, current ->
-            current + 100000
+            current + onEnemyCost
         }
     }
 
     fun setEnemyBig(from: FramePoint, point: FramePoint, size: Int = 16) {
         // TODO: some enemies are smaller than 16!
-        costsF.modify(from, point.upLeftOneGridALittleLess, MapConstants.twoGrid) { dist, current ->
-            current + 10000
+        // why a little less?
+        costsF.modify(from, point.upLeftOneGrid, MapConstants.twoGrid) { dist, current ->
+            current + nearEnemyCost
         }
 
         // actual enemy higher cost then around the enemy
         costsF.modify(from, point, MapConstants.oneGrid) { dist, current ->
-            current + 100000
+            current + onEnemyCost
         }
     }
 
@@ -97,12 +103,14 @@ class GStar(
             forcePassable = makePassable)
     }
 
-    private fun setEnemyCosts(from: FramePoint, enemies: List<FramePoint> = emptyList()) {
+    fun setEnemyCosts(from: FramePoint, enemies: List<FramePoint> = emptyList()) {
         reset()
         for (enemy in enemies) {
+            d { " set enemy cost for $enemy"}
             setEnemyBig(from, enemy)
         }
-        setForcePassable(enemies, setTo = false)
+        ///???
+//        setForcePassable(enemies, setTo = false)
     }
 
     private fun setForcePassable(passableSpot: List<FramePoint> = emptyList(), setTo: Boolean = true) {
@@ -115,16 +123,26 @@ class GStar(
         }
     }
 
+    // if link cannot get to the target, instantly return an empty route.
+    // like if they do not fit
+    // if the cost of the path exceeds a maximum, also just dodge and wait
+    // instead link should dodge
+    // if the created route doesn't actually go to the target, just return an empty one
+
+    // could return a RouteResult with boolean "found target"
+
+
     fun route(
         start: FramePoint,
         targets: List<FramePoint>,
         pointBeforeStart: FramePoint? = null,
         enemies: List<FramePoint> = emptyList(),
-        forcePassable: List<FramePoint> = emptyList()
+        forcePassable: List<FramePoint> = emptyList(),
+        maximumCost: Int = MaxCostAvoidEnemyNear
     ): List<FramePoint> {
         val nearEnemies = enemies.isNotEmpty()
         val maxIter = if (nearEnemies) SHORT_ITER else MAX_ITER
-        d {"Plan: iter = $maxIter"}
+        d {"Plan: iter = $maxIter enemies ${enemies.size}"}
         resetPassable()
         // only if inside a radius
         setEnemyCosts(start, enemies)
@@ -232,10 +250,9 @@ class GStar(
                                 "$parentCost toGoal = $costToGoal"
                     }
                 }
-                // bunch of changes...
                 val costS = costFromStart.getOrDefault(toPoint, Int.MAX_VALUE)
 //                d {" cost: $cost $costS"}
-                if (cost < costS) {
+                if (cost < costS && cost < maximumCost) {
                     distanceToGoal[toPoint] = costToGoal
                     costFromStart[toPoint] = pathCost
                     totalCosts[toPoint] = totalCost
@@ -309,7 +326,8 @@ class GStar(
                 FramePoint>, lastExplored: FramePoint
     ): List<FramePoint> {
         val target = targets.firstOrNull { cameFrom.containsKey(it) }
-//        var current = target
+
+        // last explored is a problem
         var current = target ?: lastExplored
 
         val path = mutableListOf(current)

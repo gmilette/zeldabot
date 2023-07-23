@@ -5,6 +5,7 @@ import bot.state.GamePad
 import bot.plan.action.Action
 import bot.plan.action.DoNothing
 import bot.plan.action.moveHistoryAttackAction
+import bot.plan.gastar.GStar
 import bot.state.Addresses
 import bot.state.FramePoint
 import bot.state.MapLocationState

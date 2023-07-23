@@ -23,6 +23,7 @@ class Hyrule {
         get() = getMapCell(58)
 
     init {
+        d { " Create Hyrule "}
         val mapData = MapBuilder().build()
         map = MapMaker.createMapCells(mapData)
     }

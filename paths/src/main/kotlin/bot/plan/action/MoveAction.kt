@@ -328,7 +328,7 @@ private fun doRouteTo(
     overrideMapCell: MapCell? = null,
     makePassable: FramePoint? = null
 ): GamePad {
-    d { " DO routeTo TO ${to.size} first ${to.firstOrNull()?.toG} currently at ${state.currentMapCell.mapLoc}" }
+    d { " DO routeTo TO ${to.size} first ${to.firstOrNull()} currently at ${state.currentMapCell.mapLoc}" }
     var forceNew = forceNewI
     if (to.isEmpty()) {
         d { " no where to go " }
@@ -386,13 +386,18 @@ private fun doRouteTo(
     val routeSize = route?.path?.size ?: 0
 
     val linkPoints = listOf(linkPt, linkPt.justRightEnd, linkPt.justRightEndBottom, linkPt.justLeftDown)
-    val enemiesNear = state.aliveOrProjectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid }
-    val projectilesNear = state.projectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid }
+    // it's ignoring the rhino!!
+    val enemiesNear = state.aliveOrProjectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid * 5 }
+    val projectilesNear = state.projectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid * 5 }
     val ladder = state.frameState.ladder
 
     var avoid = if (params.dodgeEnemies) {
         when {
-            (enemiesNear.size > 1) -> enemiesNear
+            enemiesNear.isNotEmpty() -> enemiesNear
+            // I can see why I set this to > 1, in the case of there being an enemy
+            // we should just boldly move towards it because when we get close
+            // we will attack, but it's not always the case, at least for rhino
+//            (enemiesNear.size > 1) -> enemiesNear
             // one projectile
             projectilesNear.isNotEmpty() -> projectilesNear
             else -> emptyList()
@@ -406,9 +411,9 @@ private fun doRouteTo(
     }
 
     d { " enemies near ${enemiesNear.size} projectiles ${projectilesNear.size} avoid: ${avoid.size}" }
-//        for (agent in enemiesNear) {
-//            d { " enemy $agent"}
-//        }
+        for (agent in enemiesNear) {
+            d { " enemy $agent"}
+        }
 //        val avoid = emptyList<FramePoint>()
 
 
@@ -453,7 +458,7 @@ private fun doRouteTo(
             )
         )
         d { " Plan: ${state.currentMapCell.mapLoc} new plan! because ($why)" }
-        route?.next5()
+        route?.next15()
 //            route?.adjustCorner()
         nextPoint = route?.popOrEmpty() ?: FramePoint() // skip first point because it is the current location
         nextPoint = route?.popOrEmpty() ?: FramePoint()

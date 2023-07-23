@@ -1,12 +1,11 @@
 package bot.plan.action
 
+import bot.plan.gastar.GStar
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapCell
-import bot.state.map.MapConstants
 import util.d
 import kotlin.math.abs
-import kotlin.random.Random
 
 class MoveTowardsUtil() {
     private var directions: MutableList<GamePad> = mutableListOf()
@@ -120,9 +119,10 @@ data class PreviousMove(
 
 object NavUtil {
 
-    fun routeToAvoidingObstacle(mapCell: MapCell, from: FramePoint, to: List<FramePoint>, before: FramePoint? = null, avoid: List<FramePoint> = emptyList(),
+    fun routeToAvoidingObstacle(mapCell: MapCell, from: FramePoint, to: List<FramePoint>, before: FramePoint? = null,
+                                enemies: List<FramePoint> = emptyList(),
                                 forcePassable: List<FramePoint> = emptyList()):
-            List<FramePoint> = mapCell.gstar.route(from, to, before, avoid, forcePassable)
+            List<FramePoint> = mapCell.gstar.route(from, to, before, enemies, forcePassable, Int.MAX_VALUE)
 
     fun randomDir(from: FramePoint = FramePoint(100, 100)): GamePad {
         d { " random dir "}

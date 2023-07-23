@@ -1,5 +1,6 @@
 package bot.state
 
+import bot.state.map.grid
 import io.kotest.matchers.shouldBe
 import org.junit.Test
 
@@ -7,7 +8,7 @@ import org.junit.Test
 class FrameStateKtTest{
     @Test
     fun `test in map`() {
-        val pt = FramePoint(104, 64)
+        val pt = FramePoint(12.grid, 128)
         pt.isInLevelMap shouldBe true
     }
 

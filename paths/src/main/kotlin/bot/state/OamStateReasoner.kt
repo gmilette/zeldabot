@@ -437,6 +437,8 @@ val dragon4FlamingHead = (0xDE).toInt()
 val rhinoHeadDown = (0xF4).toInt()
 val rhinoHeadDown2 = (0xF6).toInt()
 val rhinoHeadMouthOpen = (0xE2).toInt()
+val rhinoHeadHeadWithMouthOpen = (0xE0).toInt()
+val rhinoHeadHeadWithMouthClosed = (0xE8).toInt()
 val rhinoHeadMouthClosed = (0xEA).toInt()
 val rhinoHead2 = (0xE0).toInt()
 

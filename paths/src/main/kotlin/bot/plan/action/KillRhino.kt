@@ -8,7 +8,7 @@ import util.d
 data class RhinoStrategyParameters(
     val waitFrames: Int = 100,
     // how many grids ahead of the rhino to target
-    val targetGridsAhead: Int = 1,
+    val targetGridsAhead: Int = 2,
     // how many grids above or below to target
     val targetGridAboveBelow: Int = 0,
     // maybe a strategy to target any within the range specified by the above parameters
@@ -43,6 +43,8 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
             // if doing two bomb timing
             val target = if (stateTracker.rhinoState is Stopped) {
                 // it's too close for the two bomb timing
+                // attack target
+                d { " attack stopped rhino at ${it.point}"}
                 it.point
             } else {
                 params.getTargetGrid(it.point, state.rhinoDir())
@@ -76,12 +78,14 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
     //val rhinoHead = (0xE2).toInt() // mouth open
     //val rhinoHead2 = (0xE0).toInt()
     // rhinoHeadMouthClosed
+
+    // these are the mouth parts
     // rhinoHeadMouthOpen // 0xE2
     // rhinoHeadMouthClosed = 0xEA
 
     // either mouth is fine
     // for up down, pick the most left
-    private val head = setOf(rhinoHeadMouthOpen, rhinoHeadMouthClosed, rhinoHeadLeftUp, rhinoHeadLeftUp2, rhinoHeadLeftDown, rhinoHeadLeftDown2)
+    private val head = setOf(rhinoHeadHeadWithMouthOpen, rhinoHeadHeadWithMouthClosed, rhinoHeadLeftUp, rhinoHeadLeftUp2, rhinoHeadLeftDown, rhinoHeadLeftDown2)
     // dont use, just use dir
 //    private val head = setOf(rhinoHead, rhinoHead2, rhinoHeadLeftUp, rhinoHeadLeftUp2, rhinoHeadLeftDown, rhinoHeadLeftDown2)
 
@@ -93,6 +97,7 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
 //        0x34 to Direction.Down,
         rhinoHeadLeftDown2 to mapOf(one to Direction.Down),
         rhinoHeadLeftDown to mapOf(one to Direction.Down),
+        //rhinoHeadHeadWithMouthClosed with attrib 03 is right
         0xE0 to mapOf (0x03 to Direction.Right, 0x43 to Direction.Left), // 03
         0xE2 to mapOf (0x03 to Direction.Right, 0x43 to Direction.Left), // 03
         // necessary?
@@ -206,14 +211,11 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
         get() = "KillRhino ${stateTracker.rhinoState.name} ${criteria.frameCount} ${navToTarget.name} " // ${actions.stepName}
 }
 
-private val attackA = AlwaysAttack()
-private val attackB = AlwaysAttack(useB = true)
-
 class NavToTarget(
     val waitBetweenAttacks: Int = 60,
     val targetSelector: (MapLocationState) -> FramePoint?,
                   val weaponSelectorUseB: (MapLocationState) -> Boolean) : Action {
-    private val routeTo = RouteTo(RouteTo.Param(ignoreProjectiles = false, dodgeEnemies = false))
+    private val routeTo = RouteTo(RouteTo.Param(ignoreProjectiles = false, dodgeEnemies = true))
 
     private var waitCt = 0
 
@@ -254,17 +256,14 @@ class NavToTarget(
                     GamePad.None
                 } else {
                     waitCt = waitBetweenAttacks
-                    if (weaponSelectorUseB(state)) {
-                        GamePad.B
-//                        attackB.nextStep(state)
-                    } else {
-//                        attackA.nextStep(state)
-                        GamePad.A
-                    }
+                    GamePad.None
+//                    if (weaponSelectorUseB(state)) {
+//                        GamePad.B
+//                    } else {
+//                        GamePad.A
+//                    }
                 }
             } else {
-                attackA.reset()
-                attackB.reset()
                 // why force new, only if the target is different
                 routeTo.routeTo(state, targets, forceNew = forceNew, useB = useB).also {
                     d { " Move to $it" }
@@ -318,14 +317,6 @@ class NavToTarget(
 // if bomb == 2, sword until dead
 // rhino logging
 interface RhinoState {
-    fun notEating(): RhinoState? = null
-
-    fun eat(): RhinoState = this
-
-    fun stopped(): RhinoState = this
-
-    fun moved(): RhinoState = this
-
     fun transition(eating: Boolean, moving: Boolean): RhinoState = this
 
     val name: String
@@ -333,26 +324,12 @@ interface RhinoState {
 }
 
 class Default: RhinoState {
-    override fun notEating(): RhinoState = this
-
-    override fun eat(): RhinoState = this
-
-    // is stopped moving, but not eating
-    override fun stopped(): RhinoState = this
-
-    override fun moved(): RhinoState = this
-
     // new transition state that is for when the rhino is gone
     // you can go from one state to death
     override fun transition(eating: Boolean, moving: Boolean): RhinoState = this
 }
 
 class ZeroState : RhinoState {
-    override fun eat() = Eating()
-
-    // if dropped the bomb in the right spot
-    override fun stopped(): RhinoState = Stopped(this)
-
     override fun transition(eating: Boolean, moving: Boolean): RhinoState {
         return when {
             eating -> Eating()
@@ -371,33 +348,20 @@ class Eating(private val then: RhinoState = OneState()) : RhinoState {
         }
     }
 
-    // if was eating, and link didn't bomb right spot
-    override fun moved(): RhinoState = then
-
-    override fun notEating() = then
-
     override val name: String
         get() = "${this.javaClass.simpleName} then ${then.name}"
 }
 
-// don't add more bombs
-class EatingTwo() : RhinoState {
-}
 
 // attack with sword
 class Stopped(private val was: RhinoState): RhinoState {
     override fun transition(eating: Boolean, moving: Boolean): RhinoState {
         return when {
-            eating -> was.eat()
+            eating -> was.transition(eating = true, moving = moving) //??
             moving -> was
             else -> this
         }
     }
-
-    override fun moved(): RhinoState = was
-
-    // whatever should happen after the state it was
-    override fun eat() = was.eat()
 
     override val name: String
         get() = "${this.javaClass.simpleName} was ${was.name}"
@@ -411,16 +375,25 @@ class OneState : RhinoState {
             else -> this
         }
     }
-
-    // dead!
-    override fun eat() = TwoState()
-
-    // rarer, escaped the first bombing, and link has well-placed bomb
-    override fun stopped(): RhinoState = Stopped(this)
+//
+//    // dead!
+//    override fun eat() = TwoState()
+//
+//    // rarer, escaped the first bombing, and link has well-placed bomb
+//    override fun stopped(): RhinoState = Stopped(this)
 }
 
 // wait for rhino to die, sword to help it along, don't sword if eating
-class TwoState : RhinoState
+class TwoState : RhinoState {
+    override fun transition(eating: Boolean, moving: Boolean): RhinoState {
+        return when {
+            eating -> TwoState()
+            // shouldn't move in two state
+            moving -> OneState()
+            else -> this
+        }
+    }
+}
 
 // add min wait time between bomb1 and bomb2
 // Zero: Bomb, (bomb)

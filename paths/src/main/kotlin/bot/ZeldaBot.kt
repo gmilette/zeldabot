@@ -15,7 +15,9 @@ import nintaco.api.API
 import nintaco.api.ApiSource
 import nintaco.api.Colors
 import nintaco.api.GamepadButtons
+import org.jetbrains.skia.Color
 import sequence.ZeldaItem
+import util.Map2d
 import util.RunOnceLambda
 import util.d
 
@@ -216,10 +218,29 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                 } catch (e: Exception) {
                     d { "ERROR $e"}
                 }
+
+                // draws the right look but the colors are wrong
+                val mapCell = this.hyrule.getMapCell(this.frameState.mapLoc)
+                try {
+                    mapCell.gstar.setEnemyCosts(this.link, listOf(this.rhino()?.point ?: FramePoint()))
+                    drawCosts(mapCell.gstar.costsF.copy())
+                } catch (e: Exception) {
+                    d { "ERROR $e"}
+                }
             }
         }
         return nextGamePad
     }
+
+    private val rhinoHeadLeftUp = 0xFA // foot up
+    private val rhinoHeadLeftUp2 = 0xFC // foot down
+    private val rhinoHeadLeftDown = 0xF6 // foot up
+    private val rhinoHeadLeftDown2 = 0xF4 // foot down
+    private val head = setOf(rhinoHeadHeadWithMouthOpen, rhinoHeadHeadWithMouthClosed, rhinoHeadLeftUp, rhinoHeadLeftUp2, rhinoHeadLeftDown, rhinoHeadLeftDown2)
+
+    private fun MapLocationState.rhino(): Agent? =
+        // pick the left most head
+        frameState.enemies.filter { it.y != 187 && head.contains(it.tile) }.minByOrNull { it.x }
 
     private var spriteX = 0
     private var spriteY = 8
@@ -235,6 +256,24 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 //                val pt = point.toScreenY
                 if (cell.passable.get(x, y)) {
                     api.drawSprite(SPRITE_ID, x, y + 61)
+                }
+            }
+        }
+    }
+
+    private fun drawCosts(map: Map2d<Int>) {
+        // with enemies
+        map.map.forEachIndexed { y, row ->
+            row.forEachIndexed { x, v ->
+                val color = when {
+                    v > 100000 -> Colors.MAGENTA
+                    v > 9000 && (y % 16 % 2 == 0) -> Colors.RED
+//                    v > 900 -> Colors.YELLOW // everything is yellow
+                    else -> -1
+                }
+                if (color != -1) {
+                    api.color = color
+                    api.drawOval(x, y + 61, 1, 1)
                 }
             }
         }

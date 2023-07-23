@@ -39,11 +39,14 @@ class NavUtilTest {
 
 
     private fun check(cell: MapLoc, from: FramePoint, target: FramePoint,
-                      dirResult: GamePad, level: Int = 0, before: FramePoint? = null, makePassable: FramePoint? = null) {
-        checkA(cell, from, listOf(target), before, dirResult, level, makePassable = makePassable)
+                      dirResult: GamePad, level: Int = 0, before: FramePoint? = null, makePassable: FramePoint? = null,
+                      enemies: List<FramePoint> = emptyList()
+    ) {
+        checkA(cell, from, listOf(target), before, dirResult, level, makePassable = makePassable, enemies = enemies)
     }
     private fun checkA(cell: MapLoc, from: FramePoint, targets: List<FramePoint>,
-                       before: FramePoint? = null, dirResult: GamePad, level: Int = 0, makePassable: FramePoint? = null) {
+                       before: FramePoint? = null, dirResult: GamePad, level: Int = 0, makePassable: FramePoint? = null,
+                       enemies: List<FramePoint> = emptyList()) {
         val hyrule = Hyrule()
         val cell = if (level == 0) hyrule.getMapCell(cell) else hyrule.levelMap.cell(level, cell)
         cell.write()
@@ -92,7 +95,12 @@ class NavUtilTest {
         if (makePassable != null) {
             passable.add(makePassable)
         }
-        val route = gstar.route(from, before, target, passable)
+
+        val route = gstar.route(start = from,
+            listOf(target),
+            pointBeforeStart = before,
+            enemies = enemies,
+            forcePassable = passable)
 
         val firstPt = route.get(0)
         cell.passable.write("check_1192_r") { v, x, y ->
@@ -123,6 +131,25 @@ class NavUtilTest {
                 } else {
                     "."
                 }
+                else -> "X"
+            }
+        }
+
+        gstar.costsF.write("check_1192_rgstar_costs") { v, x, y ->
+            val pt = FramePoint(x, y)
+            when {
+                (x == target.x && y == target.y) -> "T"
+                route.any { it.x == x && it.y == y && it.x == firstPt.x && it.y == firstPt.y } -> "S"
+                route.any { it.x == x && it.y == y } -> "Z"
+                FramePoint(x, y).isTopRightCorner -> "C"
+                !gstar.passable.get(x, y) -> "X"
+                v == 0 -> ":"
+                v > 100000 -> "!"
+                v > 9000 -> "@"
+                v > 900 -> "9"
+                v > 90 -> "8"
+                v < 10 -> "$v"
+                v <= 900 -> "."
                 else -> "X"
             }
         }
@@ -217,6 +244,44 @@ class NavUtilTest {
         val start = FramePoint(208, 75) // higher up
         check(114, start, FramePoint(250, 80), GamePad.MoveUp, level = 1,
             before = start.left)
+    }
+
+    @Test
+    fun `test rhino`() {
+        GStar.DEBUG = false
+//        val start = FramePoint(54, 128) // higher up
+//        val rhinoLocation = FramePoint(90, 128)
+//        val target = FramePoint(126, 128)
+
+        val start = FramePoint(136, 128) // higher up
+        val rhinoLocation = FramePoint(193, 128)
+        // rule, dont' route on top of the monster
+//        val target = FramePoint(216, 128)
+        val target = FramePoint(209, 128)
+//        val target = FramePoint(166, 128)
+        // it should be 209
+//        val target = FramePoint(215, 128)
+        check(14, start, target, GamePad.MoveUp, level = 2,
+            before = start.left, enemies = listOf(rhinoLocation))
+    }
+
+    @Test
+    fun `test rhinoTwo`() {
+        GStar.DEBUG = false
+//        val start = FramePoint(54, 128) // higher up
+//        val rhinoLocation = FramePoint(90, 128)
+//        val target = FramePoint(126, 128)
+
+        val start = FramePoint(48, 64) // higher up
+        val rhinoLocation = FramePoint(48, 87)
+        // rule, dont' route on top of the monster
+//        val target = FramePoint(216, 128)
+        val target = FramePoint(48, 119)
+//        val target = FramePoint(166, 128)
+        // it should be 209
+//        val target = FramePoint(215, 128)
+        check(14, start, target, GamePad.MoveUp, level = 2,
+            before = start.left, enemies = listOf(rhinoLocation))
     }
 
 

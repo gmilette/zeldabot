@@ -300,9 +300,10 @@ fun FramePoint.adjustBy(pad: GamePad) =
 val FramePoint.toScreenY
     get() = FramePoint(x, y + 61)
 
+// three grid ensures that it is routing to where link can go i think
 val FramePoint.isInLevelMap
-    get() = y in MapConstants.twoGrid.. MapConstants.MAX_Y - MapConstants.twoGrid &&
-            x in MapConstants.twoGrid..(MapConstants.MAX_X - MapConstants.twoGrid)
+    get() = y in MapConstants.twoGrid.. MapConstants.MAX_Y - MapConstants.threeGrid &&
+            x in MapConstants.twoGrid..(MapConstants.MAX_X - MapConstants.threeGrid)
 
 val FramePoint.isTop
     get() = y == 0
