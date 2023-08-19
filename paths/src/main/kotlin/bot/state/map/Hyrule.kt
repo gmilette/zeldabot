@@ -191,6 +191,8 @@ enum class Direction {
     }
 }
 
+val Direction.upOrLeft: Boolean
+    get() = this == Direction.Up || this == Direction.Left
 
 fun Direction.opposite(): Direction = when (this) {
     Direction.Left -> Direction.Right

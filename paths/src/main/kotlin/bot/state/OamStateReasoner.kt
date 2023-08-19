@@ -82,7 +82,7 @@ class OamStateReasoner(
         sprites = readOam()
     }
 
-    val DEBUG = false
+    val DEBUG = true
 
     val alive: List<SpriteData>
         get() {

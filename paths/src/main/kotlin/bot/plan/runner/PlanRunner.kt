@@ -104,6 +104,10 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
         return action?.target() ?: FramePoint(1,1)
     }
 
+    fun targets(): List<FramePoint> {
+        return action?.targets() ?: emptyList()
+    }
+
     fun path(): List<FramePoint> {
         d { " path for action ${action?.name ?: ""}"}
         return action?.path() ?: emptyList()

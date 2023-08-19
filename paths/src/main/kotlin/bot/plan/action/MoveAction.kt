@@ -246,6 +246,15 @@ class RouteTo(val params: Param = Param()) {
         val ignoreProjectiles: Boolean = false,
     )
 
+    data class RouteParam(
+        val forceNew: Boolean = false,
+        val overrideMapCell: MapCell? = null,
+        val makePassable: FramePoint? = null,
+        val enemyAvoid: List<FramePoint> = emptyList(),
+        val useB: Boolean = false,
+        val attackTarget: FramePoint? = null
+    )
+
     var route: FrameRoute? = null
         private set
     private var planCount = 0
@@ -261,25 +270,30 @@ class RouteTo(val params: Param = Param()) {
         makePassable: FramePoint? = null,
         useB: Boolean = false
     ): GamePad {
-        return attackOrRoute(state, to, forceNew, overrideMapCell, makePassable, useB)
+        return routeTo(state, to, RouteParam(forceNew, overrideMapCell, makePassable, emptyList(), useB))
+    }
+
+    fun routeTo(
+        state: MapLocationState,
+        to: List<FramePoint>,
+        param: RouteParam,
+    ): GamePad {
+        return attackOrRoute(state, to, param)
     }
 
     private fun attackOrRoute(
         state: MapLocationState,
         to: List<FramePoint>,
-        forceNewI: Boolean = false,
-        overrideMapCell: MapCell? = null,
-        makePassable: FramePoint? = null,
-        useB: Boolean = false
+        param: RouteParam,
     ): GamePad {
         // is this direction correct?
         // i tried dirActual
         d { " route To" }
 
-        return if (AttackActionDecider.shouldAttack(state) && (state.frameState.canUseSword && !useB)
+        return if (AttackActionDecider.shouldAttack(state) && (state.frameState.canUseSword && !param.useB)
         ) {
             d { " Route Action -> ATTACK" }
-            if (useB) {
+            if (param.useB) {
                 attackB.nextStep(state)
             } else {
                 attack.nextStep(state)
@@ -288,7 +302,7 @@ class RouteTo(val params: Param = Param()) {
             attack.reset()
             attackB.reset()
             d { " Route Action -> No Attack" }
-            doRouteTo(state, to, forceNewI, overrideMapCell, makePassable)
+            doRouteTo(state, to, param)
         }
     }
 
@@ -324,12 +338,10 @@ class RouteTo(val params: Param = Param()) {
 private fun doRouteTo(
     state: MapLocationState,
     to: List<FramePoint>,
-    forceNewI: Boolean = false,
-    overrideMapCell: MapCell? = null,
-    makePassable: FramePoint? = null
+    param: RouteParam
 ): GamePad {
     d { " DO routeTo TO ${to.size} first ${to.firstOrNull()} currently at ${state.currentMapCell.mapLoc}" }
-    var forceNew = forceNewI
+    var forceNew = param.forceNew
     if (to.isEmpty()) {
         d { " no where to go " }
         // dont do this because it could cause link to go off scren
@@ -385,7 +397,7 @@ private fun doRouteTo(
     var nextPoint: FramePoint = route?.pop() ?: FramePoint()
     val routeSize = route?.path?.size ?: 0
 
-    val linkPoints = listOf(linkPt, linkPt.justRightEnd, linkPt.justRightEndBottom, linkPt.justLeftDown)
+    val linkPoints =  listOf(linkPt, linkPt.justRightEnd, linkPt.justRightEndBottom, linkPt.justLeftDown)
     // it's ignoring the rhino!!
     val enemiesNear = state.aliveOrProjectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid * 5 }
     val projectilesNear = state.projectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid * 5 }
@@ -408,6 +420,11 @@ private fun doRouteTo(
 
     if (params.ignoreProjectiles) {
         avoid = avoid.filter { it.state != EnemyState.Projectile }
+    }
+
+    param.attackTarget?.let {
+        d { " remove enemy from filter $it"}
+        avoid = avoid.filter { it.point != param.attackTarget || it.point != FramePoint(it.point.x + 8, it.point.y) }
     }
 
     d { " enemies near ${enemiesNear.size} projectiles ${projectilesNear.size} avoid: ${avoid.size}" }
@@ -439,11 +456,11 @@ private fun doRouteTo(
         if (ladder != null) {
             passable.add(ladder.point)
         }
-        if (makePassable != null) {
-            passable.add(makePassable)
+        if (param.makePassable != null) {
+            passable.add(param.makePassable)
         }
 
-        val mapCell = overrideMapCell ?: state.currentMapCell
+        val mapCell = param.overrideMapCell ?: state.currentMapCell
 
         // of if the expected point is not where we should be
         // need to re route
@@ -453,7 +470,7 @@ private fun doRouteTo(
                 linkPt,
                 to,
                 state.previousMove.from,
-                avoid.map { it.point },
+                avoid.map { it.point }, // add direction in here?
                 passable
             )
         )

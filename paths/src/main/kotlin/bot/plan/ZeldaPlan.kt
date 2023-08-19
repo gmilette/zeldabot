@@ -133,6 +133,33 @@ object ZeldaPlan {
 //        return part(factory)
     }
 
+    private fun realPlan(factory: PlanInputs): MasterPlan {
+        val builder = factory.make("walked by a human")
+
+        return builder {
+            startAt(InLocations.Overworld.start)
+            phase("Opening sequence")
+            obj(Dest.item(ZeldaItem.WoodenSword))
+            obj(Dest.level(2))
+            includeLevelPlan(levelPlan2(factory))
+            // blue ring
+
+            obj(Dest.level(3))
+            includeLevelPlan(levelPlan4(factory))
+            obj(Dest.level(4))
+            includeLevelPlan(levelPlan4(factory))
+            // after 4, grab 30 secret x2 then buy shield
+            obj(Dest.level(6))
+            includeLevelPlan(levelPlan6(factory))
+            // whistle back to 2, fight the bomerang guys,
+            // proceed to 8
+            obj(Dest.level(8))
+            includeLevelPlan(levelPlan8(factory))
+            obj(Dest.level(8))
+            includeLevelPlan(levelPlan9(factory))
+        }
+    }
+
     private fun levelTour(factory: PlanInputs): MasterPlan {
         val builder = factory.make("tour of levels")
         return builder {

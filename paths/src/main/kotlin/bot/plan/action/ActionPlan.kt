@@ -21,6 +21,8 @@ interface Action {
 
     fun target() = FramePoint(0, 0)
 
+    fun targets() = listOf(target())
+
     fun path(): List<FramePoint> {
         d { " default no path"}
         return emptyList()

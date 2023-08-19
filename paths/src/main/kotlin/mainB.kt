@@ -301,6 +301,9 @@ private fun HyruleMap(state: MapLocationState, plan: PlanRunner) {
                 }
 
                 drawPoint(canvas, v, plan.target(), targetPaint)
+                for (target in plan.targets()) {
+                    drawPoint(canvas, v, target, targetPaint)
+                }
 
                 val path = Path()
                 val linkPath = plan.path()

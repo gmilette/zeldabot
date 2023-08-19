@@ -305,6 +305,14 @@ val FramePoint.isInLevelMap
     get() = y in MapConstants.twoGrid.. MapConstants.MAX_Y - MapConstants.threeGrid &&
             x in MapConstants.twoGrid..(MapConstants.MAX_X - MapConstants.threeGrid)
 
+fun FramePoint.corners(): List<FramePoint> {
+    return listOf(this.justOutside, this.justRightEndBottomOutside, justRightEndOutside, this.justLeftDownOutside)
+}
+
+fun FramePoint.cornersInLevel(): List<FramePoint> {
+    return corners().filter { it.isInLevelMap }
+}
+
 val FramePoint.isTop
     get() = y == 0
 val FramePoint.isBottom
@@ -325,6 +333,22 @@ val FramePoint.upEndRight
     get() = FramePoint(x + 16, y + 8 - 1)
 val FramePoint.upOneGrid
     get() = FramePoint(x, y - 16)
+val FramePoint.downOneGrid
+    get() = FramePoint(x, y + 16)
+val FramePoint.rightOneGrid
+    get() = FramePoint(x + 16, y )
+val FramePoint.leftOneGrid
+    get() = FramePoint(x - 16, y)
+
+val FramePoint.upTwoGrid
+    get() = FramePoint(x, y - 32)
+val FramePoint.downTwoGrid
+    get() = FramePoint(x, y + 32)
+val FramePoint.rightTwoGrid
+    get() = FramePoint(x + 32, y )
+val FramePoint.leftTwoGrid
+    get() = FramePoint(x - 32, y)
+
 val FramePoint.upLeftOneGrid
     get() = FramePoint(x - 16, y - 16)
 val FramePoint.upLeftOneGridALittleLess
@@ -370,6 +394,14 @@ val FramePoint.justRightEndBottom
 val FramePoint.justLeftBottom
     get() = FramePoint(x, y + 15)
 
+val FramePoint.justLeftDownOutside
+    get() = FramePoint(x, y + 18)
+val FramePoint.justRightEndOutside
+    get() = FramePoint(x + 18, y)
+val FramePoint.justRightEndBottomOutside
+    get() = FramePoint(x + 18, y + 18)
+val FramePoint.justOutside
+    get() = FramePoint(x - 2, y - 2)
 
 fun FramePoint.distTo(other: FramePoint) =
     abs(x - other.x) + abs(y - other.y)

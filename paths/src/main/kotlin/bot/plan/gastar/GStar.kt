@@ -16,7 +16,7 @@ class GStar(
         var DEBUG = false
         private val DEBUG_DIR = false
         val DEBUG_ONE = false
-        val MAX_ITER = 100000
+        val MAX_ITER = 10000
         val SHORT_ITER = MAX_ITER // 5000 // not sure if i should use
         val LIMIT_ITERATIONS = false
         val DO_CORNERS = true
@@ -74,6 +74,12 @@ class GStar(
         // the actual enemy should have very very high cost
         costsF.modify(from, point, MapConstants.oneGrid) { dist, current ->
             current + onEnemyCost
+        }
+    }
+
+    fun setNearEnemy(from: FramePoint, point: FramePoint) {
+        costsF.modify(from, point, MapConstants.oneGrid) { dist, current ->
+            current + nearEnemyCost
         }
     }
 
@@ -137,6 +143,7 @@ class GStar(
         targets: List<FramePoint>,
         pointBeforeStart: FramePoint? = null,
         enemies: List<FramePoint> = emptyList(),
+        avoidNearEnemy: List<FramePoint> = emptyList(),
         forcePassable: List<FramePoint> = emptyList(),
         maximumCost: Int = MaxCostAvoidEnemyNear
     ): List<FramePoint> {
@@ -146,6 +153,9 @@ class GStar(
         resetPassable()
         // only if inside a radius
         setEnemyCosts(start, enemies)
+        for (nearEnemy in avoidNearEnemy) {
+            setNearEnemy(start, nearEnemy)
+        }
         setForcePassable(forcePassable)
 //        if (forcePassable.isNotEmpty()) {
 //            d {" force passable "}
