@@ -381,7 +381,7 @@ class KillInCenter : Action {
         get() = "KillInCenter"
 }
 
-class DeadForAWhile(private val limit: Int = 450, val completeCriteria: (MapLocationState) -> Boolean) {
+class DeadForAWhile(private val limit: Int = 450, val reset: Boolean = false, val completeCriteria: (MapLocationState) -> Boolean) {
     var frameCount = 0
 
     operator fun invoke(state: MapLocationState): Boolean {
@@ -393,7 +393,9 @@ class DeadForAWhile(private val limit: Int = 450, val completeCriteria: (MapLoca
         if (completeCriteria(state)) {
             frameCount++
         } else {
-//            frameCount = 0
+            if (reset) {
+                frameCount = 0
+            }
         }
     }
 

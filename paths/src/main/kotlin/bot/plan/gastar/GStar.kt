@@ -16,8 +16,8 @@ class GStar(
         var DEBUG = false
         private val DEBUG_DIR = false
         val DEBUG_ONE = false
-        val MAX_ITER = 10000
-        val SHORT_ITER = MAX_ITER // 5000 // not sure if i should use
+        var MAX_ITER = 10000
+        var SHORT_ITER = MAX_ITER // 5000 // not sure if i should use
         val LIMIT_ITERATIONS = false
         val DO_CORNERS = true
         val DO_ADJUST = false

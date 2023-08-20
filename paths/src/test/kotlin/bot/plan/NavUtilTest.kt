@@ -51,8 +51,10 @@ class NavUtilTest {
         val cell = if (level == 0) hyrule.getMapCell(cell) else hyrule.levelMap.cell(level, cell)
         cell.write()
 
-        val pass = cell.passable.get(107 ,10)
-        d { " pass $pass level $level"}
+        val passPt = FramePoint(112, 119)
+        val inLev = passPt.isInLevelMap
+        val pass = cell.passable.get(passPt)
+        d { " pass check $inLev $pass level $level lb ${cell.passable.get(passPt.justLeftBottom)}"}
 
         val gstar = GStar(cell.passable, halfPassable = true, isLevel = level != 0)
 
@@ -248,16 +250,19 @@ class NavUtilTest {
 
     @Test
     fun `test rhino`() {
-        GStar.DEBUG = false
+        GStar.DEBUG = true
+        GStar.SHORT_ITER = 150
+        GStar.MAX_ITER = 150
 //        val start = FramePoint(54, 128) // higher up
 //        val rhinoLocation = FramePoint(90, 128)
 //        val target = FramePoint(126, 128)
 
-        val start = FramePoint(136, 128) // higher up
-        val rhinoLocation = FramePoint(193, 128)
+
+        val start = FramePoint(107, 112) // higher up
+        val rhinoLocation = FramePoint(112, 87)
         // rule, dont' route on top of the monster
 //        val target = FramePoint(216, 128)
-        val target = FramePoint(209, 128)
+        val target = FramePoint(112, 119)
 //        val target = FramePoint(166, 128)
         // it should be 209
 //        val target = FramePoint(215, 128)

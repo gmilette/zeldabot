@@ -17,7 +17,7 @@ data class RhinoStrategyParameters(
     fun getTargetGrid(from: FramePoint, direction: Direction?): FramePoint? {
         if (direction == null) return null
         // ahead
-        val adjusted = direction.pointModifier(MapConstants.oneGrid * targetGridsAhead + 2)
+        val adjusted = direction.pointModifier(MapConstants.oneGrid * targetGridsAhead)
         val adjustAboveBelow = direction.opposite().pointModifier(MapConstants.oneGrid * targetGridAboveBelow)
 //        return if (from.isInLevelMap) adjusted(from) else null
         return adjusted(from)
@@ -52,12 +52,34 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
     // 40 two bomb death
     private val ATTACK_DEATH_TIMING = 20
     private val TWO_BOMB_DEATH_TIMING = 30
+    private val waitBetweenAttacks = ATTACK_DEATH_TIMING
+    private val waitBetweenSwordAttacks = 9
+    private var keepAttacking = 0
 
     private val navToTarget = NavToTarget(ATTACK_DEATH_TIMING, ::targetSelect, ::weaponSelect, ::inFront)
 
     private var prevKnownPoint: FramePoint? = null
     private var prevKnownPoints: List<FramePoint> = emptyList()
     private var prevKnownPointInFront: FramePoint? = null
+
+    private val routeTo = RouteTo(RouteTo.Param(ignoreProjectiles = true, dodgeEnemies = true))
+
+    private var waitCt = 0
+
+    private var targets = listOf<FramePoint>()
+    private var target: FramePoint = FramePoint()
+    private var strategy: String = ""
+
+
+    override fun targets(): List<FramePoint> = targets
+
+    override fun path(): List<FramePoint> = routeTo.route?.path ?: emptyList()
+
+    override fun complete(state: MapLocationState): Boolean = criteria(state)
+
+    private val stateTracker = RhinoStateTracker()
+
+    private val moveBuffer = MoveBuffer(6)
 
     private fun weaponSelect(state: MapLocationState): Boolean =
         bombHead(stateTracker.rhinoState)
@@ -91,39 +113,16 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
                 // just attack it
                 it.point
 //                params.getOneInFrontClose(it.point, state.rhinoDir())
-            } else if (stateTracker.rhinoState is Eating) {
-                d { " eating so just wait? actually we don't want waiting, should ge same "}
-                params.getTargetGrid(it.point, state.rhinoDir())
             } else {
                 d { " attack moving rhino"}
                 params.getTargetGrid(it.point, state.rhinoDir())
             }
-            // not on the head, in front of it
-//            val target =
             d { " rhino location ${it.point} $target dir: ${state.rhinoDir()}"}
             if (target != null) {
                 prevKnownPoint = target
             }
             target
-//            it.point
-//            params.getTargetGrid(it.point, state.rhinoDir())
         } ?: prevKnownPoint //known point can go null for a time
-
-    private fun targetSelectPoints(state: MapLocationState): List<FramePoint> =
-        state.rhino()?.let {
-            if (stateTracker.rhinoState is Stopped) {
-                it.point.attackPoints()
-            } else {
-                val target = params.getTargetGrid(it.point, state.rhinoDir())
-                d { " rhino location ${it.point} $target dir: ${state.rhinoDir()} target=${target}"}
-                if (target != null) {
-                    prevKnownPoints = listOf(target)
-                    listOf(target)
-                } else {
-                    prevKnownPoints
-                }
-            }
-        } ?: prevKnownPoints
 
     val lastPoints: MoveBuffer = MoveBuffer(4)
     val prev: PrevBuffer<Boolean> = PrevBuffer(4)
@@ -146,19 +145,7 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
         return numTrue == 3
     }
 
-    override fun path(): List<FramePoint> = navToTarget.path()
-
-    override fun complete(state: MapLocationState): Boolean = criteria(state)
-
-    override fun target(): FramePoint = navToTarget.target()
-
-    override fun targets(): List<FramePoint> = navToTarget.targets()
-
-    private var prevPoint: FramePoint? = null
-
-    val stateTracker = RhinoStateTracker()
-
-    inner class RhinoStateTracker() {
+    inner class RhinoStateTracker {
         var rhinoState: RhinoState = ZeroState()
 
         fun update(eating: Boolean, moved: Boolean) {
@@ -166,16 +153,13 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
         }
     }
 
-    private val moveBuffer = MoveBuffer(6)
-
-    override fun nextStep(state: MapLocationState): GamePad {
+    private fun updateState(state: MapLocationState) {
         val isEatingBomb = state.isEatingBomb() // reliable
         val dir = state.rhinoDir()
         val where = state.rhino()
 
         // reliable for movement
         // look at 3 because it stays at same point for more than 1
-//        val moved = where != null && prevPoint != null && prevPoint != where.point
         where?.let {
             moveBuffer.add(it.point)
         }
@@ -184,32 +168,191 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
         stateTracker.update(isEatingBomb, moved)
         d { "Kill Rhino state ${stateTracker.rhinoState.name} moved $moved eating $isEatingBomb dir = $dir where = ${where?.point ?: ""}"}
 //        d { " move buffer $moveBuffer"}
-        rhinoLog.write(
-            where?.tile?.toString(16) ?: "noti",
-            if (isEatingBomb) "eat" else "noe",
-            dir?.toString() ?: "nodir",
-            where?.point?.oneStr ?: "non_pts",
-            if (moved) "moved" else "nomove",
-            if (isStationary(where?.point)) "stationary" else "notstation",
-            if (isBlinking(where != null)) "blink" else "nobli",
-            stateTracker.rhinoState.javaClass.simpleName
-        )
+//        rhinoLog.write(
+//            where?.tile?.toString(16) ?: "noti",
+//            if (isEatingBomb) "eat" else "noe",
+//            dir?.toString() ?: "nodir",
+//            where?.point?.oneStr ?: "non_pts",
+//            if (moved) "moved" else "nomove",
+//            if (isStationary(where?.point)) "stationary" else "notstation",
+//            if (isBlinking(where != null)) "blink" else "nobli",
+//            stateTracker.rhinoState.javaClass.simpleName
+//        )
+    }
+
+    private var rDir: Direction? = null
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        val previousTarget = target
+        rDir = state.rhinoDir()
+
+        updateState(state)
         criteria.nextStep(state)
         // if I can detect the nose open then, I can dodge while that is happening
         // otherwise, just relentlessly attack
         d { "ACTION" }
-//        val action = actions.nextStep(state)
-        val action = navToTarget.nextStep(state)
-//        if (where != null) {
-//            prevKnownPoint = where.point
-//        }
-        prevPoint = where?.point
+
+        val possibleRhino = state.rhino()
+        d { " rhino at $possibleRhino"}
+
+        // pick a spot near the rhino
+        val dodgeTargets = dodgePoints(state)
+        target = dodgeTargets.firstOrNull() ?: FramePoint(8.grid, 8.grid)
+
+        val useB = weaponSelect(state)
+        var attackRhino = false
+        targets = when {
+            possibleRhino == null -> {
+                d { " targets -> dodge (no rhino)"}
+                strategy = "dodgeN"
+                dodgeTargets
+            }
+            !useB && (stateTracker.rhinoState is Stopped || stateTracker.rhinoState is Eating) -> {
+                d { " targets -> corners of rhino ${possibleRhino.point}"}
+                attackRhino = true
+                strategy = "attack"
+                target = possibleRhino.point
+                possibleRhino.point.cornersInLevel()
+            }
+            false && useB -> {
+                val targ = params.getTargetGrid(possibleRhino.point, state.rhinoDir())
+                target = targ ?: FramePoint(8.grid, 4.grid)
+
+                val targCorners = targ?.cornersInLevel()
+
+                if (targCorners.isNullOrEmpty()) {
+                    d { "targets -> bomb position none, dodge targets dir=${state.rhinoDir()}"}
+                    strategy = "dodgeT"
+                    dodgeTargets
+                } else {
+                    d { "targets -> bomb position $target rh ${possibleRhino.point}"}
+                    strategy = "target"
+                    targCorners.forEach {
+                        d { "$it dist to rhino ${it.distTo(possibleRhino.point)} in ${possibleRhino.point.isInGrid(it)} "}
+                    }
+                    targCorners.filter { it.distTo(possibleRhino.point) >= 32}
+                }
+            }
+            else -> {
+                d { "targets -> else dodge"}
+                strategy = "dodgeD"
+                dodgeTargets
+            }
+        }
+        d { "targets -> $targets" }
+
+        val forceNew = previousTarget != target && previousTarget.distTo(target) > 3
+        if (forceNew) {
+            d { "forcenew, was $previousTarget no $target"}
+        }
+        val validTarget = possibleRhino?.let {
+            target.distTo(it.point) <= MapConstants.twoGrid
+        } ?: false
+        val should = AttackActionDecider.shouldAttack(state.frameState.link.dir, state.link, listOf(target))
+        val attack = validTarget && should
+
+        d { " useB $useB attack $validTarget should $should state ${stateTracker.rhinoState}" }
+
+        // dodge or still
+        waitCt--
+        keepAttacking--
+        val action = when {
+            waitCt > 0 && keepAttacking <= 0 -> {
+                if (attack && stateTracker.rhinoState is Stopped || stateTracker.rhinoState is Eating) {
+                    // if could attack just wait, but we could be in danger
+                    d { " **do nothing wait to attack again" }
+                    GamePad.None
+                } else {
+                    d { " **route to targets while waiting for attack" }
+                    routeTo.routeTo(state, targets,
+                        RouteTo.RouteParam(forceNew = forceNew, useB = useB)
+                    )
+                }
+            }
+            attack -> {
+                d { " **do attack"}
+                if (useB) {
+                    if (keepAttacking <= 0) keepAttacking = 3
+                    waitCt = waitBetweenAttacks
+                    GamePad.B
+                } else {
+                    if (keepAttacking <= 0) keepAttacking = 3
+                    waitCt = waitBetweenSwordAttacks
+                    GamePad.A
+                }
+            }
+            // can't attack yet, use normal targets
+            else -> {
+                // is the target the rhino? or near rhino
+                val attackTarget = if (attackRhino) {
+                    possibleRhino?.point
+                } else null
+
+                d { "**attack target " }
+                // should keep attacking I think why doesn't it?
+                if (stateTracker.rhinoState is Eating) {
+                    // hack
+                    if (keepAttacking <= 0) keepAttacking = 3
+                    waitCt = waitBetweenAttacks
+                    GamePad.B
+                } else {
+                    routeTo.routeTo(
+                        state, targets,
+                        RouteTo.RouteParam(forceNew = forceNew, useB = useB, attackTarget = attackTarget)
+                    )
+                }
+            }
+        }
         return action
-//        return GamePad.None
+    }
+
+    private fun dodgePoints(state: MapLocationState): List<FramePoint> {
+        var avoidTargets = listOf<FramePoint>()
+        val reference = FramePoint(8.grid, 5.grid)
+        val rhinoAt = state.rhino()?.point ?: reference
+        // try to route near current target or near rhino
+        val targ = params.getTargetGrid(rhinoAt, state.rhinoDir()) ?: reference
+
+
+        var possibleUnfiltered = listOf(
+            targ.downTwoGrid,
+            targ.upTwoGrid,
+            targ.leftTwoGrid,
+            targ.rightTwoGrid,
+        )
+        var possible = possibleUnfiltered.filter { it.isInLevelMap }.filter { it != rhinoAt }
+        d { "possible now $possibleUnfiltered after filter $possible"}
+        if (targ.isInLevelMap && targ != rhinoAt && targ.distTo(rhinoAt) > 4) {
+            d { "its just target" }
+            possible = listOf(targ)
+        }
+        if (possible.isEmpty()) {
+            d { " route to reference location "}
+            possible = listOf(
+                reference,
+                reference.downOneGrid,
+                reference.upOneGrid,
+                reference.leftOneGrid,
+                reference.rightOneGrid).filter { it.isInLevelMap }
+        }
+        if (possible.isNotEmpty()) {
+            d { " sort ${possible.size}"}
+            // maybe closest to link too?
+//            avoidTargets = listOf(possible.maxBy { (it.distTo(rhinoAt) - state.link.distTo(it)).also {dist ->
+//                d { " dist to $it is $dist "}
+//            } })
+            avoidTargets = listOf(possible.maxBy { (it.distTo(rhinoAt)).also {dist ->
+                d { " dist to $it is $dist "}
+            } })
+        }
+
+        d { "rhino $rhinoAt target grid $targ targs ${possible} avoid ${avoidTargets}"}
+
+        return avoidTargets
     }
 
     override val name: String
-        get() = "KillRhino ${stateTracker.rhinoState.name} ${criteria.frameCount} ${navToTarget.name} " // ${actions.stepName}
+        get() = "KillRhino ${stateTracker.rhinoState.name} ${criteria.frameCount} ${rDir} w ${waitCt} s $strategy" // ${actions.stepName}
 }
 
 class NavToTarget(
@@ -341,6 +484,7 @@ class NavToTarget(
                     attackTarget = target
                 }
 
+                // avoid all enemies
                 // why force new, only if the target is different
                 routeTo.routeTo(state, targets,
                     RouteTo.RouteParam(forceNew = forceNew, enemyAvoid = avoidList, useB = useB, attackTarget = attackTarget)
@@ -559,7 +703,7 @@ private fun MapLocationState.rhino(): Agent? =
     // pick the left most head
     frameState.enemies.filter { it.y != 187 && head.contains(it.tile) }.minByOrNull { it.x }
 
-private val criteria = DeadForAWhile(limit = 100) {
+private val criteria = DeadForAWhile(limit = 100, reset = true) {
     it.clearedWithMinIgnoreLoot(0).also {result ->
         if (result) {
             d { " DONE!!! num alive: ${it.frameState.enemies.filter { it.state == EnemyState.Alive }.size} "}
@@ -620,6 +764,7 @@ private val dirs = mapOf(
     0xE2 to mapOf (0x03 to Direction.Right, 0x43 to Direction.Left), // 03
     // necessary?
     // no, just use one
+    0xEA to mapOf (0x03 to Direction.Right, 0x43 to Direction.Left), // 03
     0xDE to mapOf (0x03 to Direction.Right, 0x43 to Direction.Left), // 03
     0xDC to mapOf (0x03 to Direction.Right, 0x43 to Direction.Left), // 03
 )

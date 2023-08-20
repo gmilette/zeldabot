@@ -426,6 +426,9 @@ private fun doRouteTo(
         d { " remove enemy from filter $it"}
         avoid = avoid.filter { it.point != param.attackTarget || it.point != FramePoint(it.point.x + 8, it.point.y) }
     }
+    if (param.attackTarget != null) {
+        avoid = emptyList()
+    }
 
     d { " enemies near ${enemiesNear.size} projectiles ${projectilesNear.size} avoid: ${avoid.size}" }
         for (agent in enemiesNear) {

@@ -364,8 +364,8 @@ val bat = (0x9A).toInt()
 
 val boulder = (0x90).toInt()
 val boulder2 = (0x92).toInt()
-val boulder3 = (0xEA).toInt() // it is also triforce part sooo...
-val boulder4 = (0xE8).toInt() // also part of circle enemy
+val boulder3 = (0xEA).toInt() // it is also triforce part sooo... // also rhino piece
+val boulder4 = (0xE8).toInt() // also part of circle enemy // also rhino
 val boulder4Pair = (0xE8).toInt() to (0x00).toInt() //??
 val arrowTipShotByEnemy = (0x88).toInt()
 val arrowButtShotByEnemy = (0x86).toInt()

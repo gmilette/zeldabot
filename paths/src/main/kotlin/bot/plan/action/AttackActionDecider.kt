@@ -89,9 +89,21 @@ object AttackActionDecider {
         }
     }
 
-    fun shouldAttack(from: Direction, link: FramePoint, enemiesClose: List<FramePoint>, dist: Int = MapConstants.oneGrid): Boolean {
-        val attackDirectionGrid = from.pointModifier(dist - 1)(link) // -1 otherwise the sword is just out of reach
+    fun shouldAttack(from: Direction, link: FramePoint, enemiesClose: List<FramePoint>, dist: Int = MapConstants.halfGrid): Boolean {
+        val distA = when (from) {
+            Direction.Left,
+            Direction.Up -> MapConstants.oneGridPoint5
+            Direction.Right,
+            Direction.Down -> MapConstants.halfGrid
+            else -> dist
+        }
+        val attackDirectionGrid = from.pointModifier(distA - 1)(link) // -1 otherwise the sword is just out of reach
 
+        d { " grid size $distA grid $attackDirectionGrid"}
+        for (framePoint in enemiesClose) {
+            val distToGrid = framePoint.distTo(attackDirectionGrid)
+            d { "enemy: $framePoint in grid ${attackDirectionGrid.isInGrid(framePoint)} ($distToGrid) in link ${link.isInGrid(framePoint)}"}
+        }
         // if it is on top of link ALWAYS attack, if it is in the direction link is facing, also attack
         return enemiesClose.any { link.isInGrid(it) || attackDirectionGrid.isInGrid(it) }.also {
             d { "should attack $it dir = $from link = $link dirGrid = $attackDirectionGrid numEnemies ${enemiesClose.size}" }
