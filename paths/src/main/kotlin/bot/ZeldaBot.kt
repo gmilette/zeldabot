@@ -220,9 +220,13 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                 }
 
                 // draws the right look but the colors are wrong
-                val mapCell = this.hyrule.getMapCell(this.frameState.mapLoc)
+//                val mapCell = this.hyrule.getMapCell(this.frameState.mapLoc)
                 try {
-                    mapCell.gstar.setEnemyCosts(this.link, listOf(this.rhino()?.point ?: FramePoint()))
+                    val mapCell = if (this.frameState.isLevel) hyrule.levelMap.cell(
+                        this.frameState.level,
+                        this.frameState.mapLoc
+                    ) else hyrule.getMapCell(this.frameState.mapLoc)
+//                    mapCell.gstar.setEnemyCosts(this.link, listOf(this.rhino()?.point ?: FramePoint()))
                     drawCosts(mapCell.gstar.costsF.copy())
                 } catch (e: Exception) {
                     d { "ERROR $e"}

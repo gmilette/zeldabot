@@ -527,6 +527,9 @@ object ZeldaPlan {
             goTo(InLocations.Level2.keyMid) //confirm
             seg("walk round corner")
             up // skip key
+            // kill enough to get by
+            // when there is no where to go, just attack nearest enemy!
+            killUntil2
             up
             left
             seg("past the compasS")
@@ -660,6 +663,8 @@ object ZeldaPlan {
             upm
             upm
             seg("go left to victory")
+            // key??
+            goTo(FramePoint(8.grid, 6.grid))
             leftm
             leftm
             leftm

@@ -89,23 +89,27 @@ object AttackActionDecider {
         }
     }
 
-    fun shouldAttack(from: Direction, link: FramePoint, enemiesClose: List<FramePoint>, dist: Int = MapConstants.halfGrid): Boolean {
+    fun shouldAttack(from: Direction, link: FramePoint, enemiesClose: List<FramePoint>, considerInLink: Boolean = true, dist: Int = MapConstants.halfGrid): Boolean {
         val distA = when (from) {
             Direction.Left,
-            Direction.Up -> MapConstants.oneGridPoint5
+            Direction.Up -> MapConstants.twoGrid //.oneGridPoint5
             Direction.Right,
-            Direction.Down -> MapConstants.halfGrid
+            Direction.Down -> MapConstants.twoGrid //.oneGridPoint5 // MapConstants.halfGrid
             else -> dist
         }
-        val attackDirectionGrid = from.pointModifier(distA - 1)(link) // -1 otherwise the sword is just out of reach
+        val attackDirectionGrid = from.pointModifier(MapConstants.oneGrid - 1)(link) // -1 otherwise the sword is just out of reach
+        val attackDirectionGrid2 = from.pointModifier(MapConstants.oneGridPoint5 - 1)(link) // -1 otherwise the sword is just out of reach
 
         d { " grid size $distA grid $attackDirectionGrid"}
         for (framePoint in enemiesClose) {
             val distToGrid = framePoint.distTo(attackDirectionGrid)
-            d { "enemy: $framePoint in grid ${attackDirectionGrid.isInGrid(framePoint)} ($distToGrid) in link ${link.isInGrid(framePoint)}"}
+            val distToLink = framePoint.distTo(link)
+            d { "enemy: $framePoint in grid ${attackDirectionGrid.isInGrid(framePoint)} ($distToGrid) in link ${link.isInGrid(framePoint)} ($distToLink)"}
         }
         // if it is on top of link ALWAYS attack, if it is in the direction link is facing, also attack
-        return enemiesClose.any { link.isInGrid(it) || attackDirectionGrid.isInGrid(it) }.also {
+        //|| it.isInGrid(attackDirectionGrid) || it.isInGrid(attackDirectionGrid2)
+        //|| attackDirectionGrid2.isInGrid(it)
+        return enemiesClose.any { (considerInLink && (link.isInGrid(it) || (it.isInGrid(link)))) || attackDirectionGrid.isInGrid(it) }.also {
             d { "should attack $it dir = $from link = $link dirGrid = $attackDirectionGrid numEnemies ${enemiesClose.size}" }
         }
     }

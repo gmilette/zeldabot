@@ -206,8 +206,8 @@ fun main() = application {
                     state?.enemiesInfo?.let { enemies ->
                         if (enemies.isNotEmpty()) {
                             enemies.filter { it.state != EnemyState.Dead } .forEachIndexed { index, enemy ->
-                                Text("$index: kind: ${enemy.index} (${enemy.index.toString(16)}) ${enemy.state.name} ${enemy.point} ${enemy.point.toG} id ${enemy
-                                    .droppedId}")
+                                Text("$index: kind: ${enemy.index} (${enemy.index.toString(16)}) ${enemy.state.name} ${enemy.point} ${enemy.point.toG} " +
+                                        "${enemy.damagedString}")
                             }
                         }
                     }

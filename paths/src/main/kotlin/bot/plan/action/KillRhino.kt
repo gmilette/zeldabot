@@ -56,8 +56,6 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
     private val waitBetweenSwordAttacks = 9
     private var keepAttacking = 0
 
-    private val navToTarget = NavToTarget(ATTACK_DEATH_TIMING, ::targetSelect, ::weaponSelect, ::inFront)
-
     private var prevKnownPoint: FramePoint? = null
     private var prevKnownPoints: List<FramePoint> = emptyList()
     private var prevKnownPointInFront: FramePoint? = null
@@ -181,7 +179,7 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
     }
 
     private var rDir: Direction? = null
-
+    private var linkDir: Direction? = null
     override fun nextStep(state: MapLocationState): GamePad {
         val previousTarget = target
         rDir = state.rhinoDir()
@@ -248,10 +246,24 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
         val validTarget = possibleRhino?.let {
             target.distTo(it.point) <= MapConstants.twoGrid
         } ?: false
-        val should = AttackActionDecider.shouldAttack(state.frameState.link.dir, state.link, listOf(target))
-        val attack = validTarget && should
+        //if link has gotten into the grid, then attack!
+        val should = AttackActionDecider.shouldAttack(state.frameState.link.dir, state.link, listOf(target), considerInLink = true)
+        // but first make sure link is facing the direction of the rhino
+        linkDir = state.frameState.link.dir
+        rDir = state.rhinoDir()
 
-        d { " useB $useB attack $validTarget should $should state ${stateTracker.rhinoState}" }
+        // does allow aiming elsewhere, but link often misses, disable
+        // revisit this when code is better at aiming
+//        val needsToFaceRhino = possibleRhino?.point?.let {
+//            it.x == state.frameState.link.x || it.y == state.frameState.link.y
+//        } ?: false
+//        val linkFacingRhino = !needsToFaceRhino || state.frameState.link.dir.opposite() == state.rhinoDir() || state.rhinoDir() == null || state.frameState.link.dir == Direction.None
+
+        val linkFacingRhino = state.frameState.link.dir.opposite() == state.rhinoDir() || state.rhinoDir() == null || state.frameState.link.dir == Direction.None
+
+        val attack = validTarget && should && linkFacingRhino
+
+        d { " useB $useB attack $validTarget should $should facing $linkFacingRhino" }
 
         // dodge or still
         waitCt--
@@ -264,9 +276,10 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
                     GamePad.None
                 } else {
                     d { " **route to targets while waiting for attack" }
-                    routeTo.routeTo(state, targets,
-                        RouteTo.RouteParam(forceNew = forceNew, useB = useB)
-                    )
+                    GamePad.None
+//                    routeTo.routeTo(state, targets,
+//                        RouteTo.RouteParam(forceNew = forceNew, useB = useB)
+//                    )
                 }
             }
             attack -> {
@@ -292,13 +305,19 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
                 // should keep attacking I think why doesn't it?
                 if (stateTracker.rhinoState is Eating) {
                     // hack
-                    if (keepAttacking <= 0) keepAttacking = 3
-                    waitCt = waitBetweenAttacks
-                    GamePad.B
+                    if (waitCt <= 0) {
+                        if (keepAttacking <= 0) keepAttacking = 3
+                        waitCt = waitBetweenAttacks
+                        GamePad.B
+                    } else if (keepAttacking > 0) {
+                        GamePad.B
+                    } else {
+                        GamePad.None
+                    }
                 } else {
                     routeTo.routeTo(
                         state, targets,
-                        RouteTo.RouteParam(forceNew = forceNew, useB = useB, attackTarget = attackTarget)
+                        RouteTo.RouteParam(forceNew = forceNew, useB = useB) //, attackTarget = attackTarget)
                     )
                 }
             }
@@ -352,210 +371,7 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
     }
 
     override val name: String
-        get() = "KillRhino ${stateTracker.rhinoState.name} ${criteria.frameCount} ${rDir} w ${waitCt} s $strategy" // ${actions.stepName}
-}
-
-class NavToTarget(
-    val waitBetweenAttacks: Int = 60,
-    val targetSelector: (MapLocationState) -> FramePoint?,
-    val weaponSelectorUseB: (MapLocationState) -> Boolean,
-    val oneInFront: (MapLocationState) -> FramePoint?) : Action {
-    private val routeTo = RouteTo(RouteTo.Param(ignoreProjectiles = true, dodgeEnemies = true))
-
-    private var waitCt = 0
-
-    private var targets = listOf<FramePoint>()
-    private var target = FramePoint()
-
-    override fun targets(): List<FramePoint> = targets
-
-    override fun complete(state: MapLocationState): Boolean = false
-
-    override fun path(): List<FramePoint> = routeTo.route?.path ?: emptyList()
-
-    override fun nextStep(state: MapLocationState): GamePad {
-        val previousTarget = target
-
-        target = targetSelector(state) ?: return GamePad.None
-
-        val isRhino = target == state.rhino()?.point
-        if (isRhino) {
-            d { " targeting -> Rhino $target rhino ${state.rhino()?.point}"}
-        } else {
-            d { " targeting -> Not Rhino $target rhino ${state.rhino()?.point}"}
-        }
-//        targets = target.about()
-        val waitingAfterAttack = waitCt > 0
-        // if it is waiting, then move back to the target
-        // if enemy is stopped I have to attack it!
-        if (waitingAfterAttack) {
-            d { " wait after wait count: $waitCt"}
-            targets = adjustTarget(state, target)
-//            // walk away from the target
-//            val rhinoAt = state.rhino()?.point ?: FramePoint(8.grid, 8.grid)
-//            val possible = listOf(
-//                target.downTwoGrid,
-//                target.upTwoGrid,
-//                target.leftTwoGrid,
-//                target.rightTwoGrid,
-//                rhinoAt.downTwoGrid,
-//                rhinoAt.upTwoGrid,
-//                rhinoAt.leftTwoGrid,
-//                rhinoAt.rightTwoGrid
-//            ).filter { it.isInLevelMap }
-//
-//            if (possible.isEmpty()) {
-//                targets = listOf()
-//            } else {
-//                targets = if (isRhino) {
-//                    d { " avoid rhino"}
-//                    listOf(possible.maxBy { it.distTo(target) })
-//                } else {
-//                    // keep same target but avoid the rhino?
-//                    d { " not targetting rhino keep same target"}
-//                    // but if that is out of level, dodge
-//                    listOf(target)
-//                }
-//                d { " move away from target to $target \n possible $possible selected target $targets"}
-//            }
-        } else {
-            // depends on what kind of target this is
-            // always attack the corners
-            d { " target corners"}
-            targets = target.cornersInLevel()
-            val reference = FramePoint(8.grid, 8.grid)
-            val rhinoAt = state.rhino()?.point ?: FramePoint(8.grid, 8.grid)
-            var possible = listOf(
-                target.downTwoGrid,
-                target.upTwoGrid,
-                target.leftTwoGrid,
-                target.rightTwoGrid,
-                rhinoAt.downTwoGrid,
-                rhinoAt.upTwoGrid,
-                rhinoAt.leftTwoGrid,
-                rhinoAt.rightTwoGrid,
-                ).filter { it.isInLevelMap }
-            if (possible.isEmpty()) {
-                d { " route to reference location "}
-                possible = listOf(
-                    reference.downTwoGrid,
-                    reference.upTwoGrid,
-                    reference.leftTwoGrid,
-                    reference.rightTwoGrid).filter { it.isInLevelMap }
-            }
-            if (targets.isEmpty() && possible.isNotEmpty()) {
-                targets = listOf(possible.maxBy { it.distTo(target).also {dist ->
-                    d { " dist to $it is $dist "}
-                } })
-                d { " no way to get to target location go to $targets possible $possible"}
-            }
-        }
-        val useB = weaponSelectorUseB(state)
-
-        val forceNew = previousTarget != target
-
-        // if waiting, then this should avoid instead of keep moving towards target
-        // do my own attack check here
-        val attack = AttackActionDecider.shouldAttack(state.frameState.link.dir, state.link, targets)
-
-        d { " move to spot attack: $attack $targets with ${useB.weapon} force ${if (forceNew) "new" else ""}" }
-        // if the target is off map, don't route just do nothing
-
-        return if (target.isInLevelMap) {
-            if (attack && waitCt <= 0) {
-                waitCt = waitBetweenAttacks
-                GamePad.None
-                if (weaponSelectorUseB(state)) {
-                    GamePad.B
-                } else {
-                    GamePad.A
-                }
-            } else {
-                waitCt--
-                // add unmovable spot in front of rhino
-//                val avoid = oneInFront(state)
-//                d {"avoid: ${avoid ?: "none"}"}
-//                val avoidList = if (avoid == null) emptyList() else listOf(avoid)
-                val avoidList = emptyList<FramePoint>()
-
-                var attackTarget: FramePoint? = null
-                // is the target the rhino? or near rhino
-                if (isRhino) {
-                    attackTarget = target
-                }
-
-                // avoid all enemies
-                // why force new, only if the target is different
-                routeTo.routeTo(state, targets,
-                    RouteTo.RouteParam(forceNew = forceNew, enemyAvoid = avoidList, useB = useB, attackTarget = attackTarget)
-                ).also {
-                    d { " Move to $it" }
-                }
-            }
-        } else {
-            waitCt--
-            // should route somewhere, maybe expand points
-            // why force new, only if the target is different
-//            routeTo.routeTo(state, target.corners(),
-//                RouteTo.RouteParam(forceNew = forceNew, enemyAvoid = emptyList())
-//            ).also {
-//                d { " Move to $it" }
-//            }
-            val avoidList = emptyList<FramePoint>()
-
-            var attackTarget: FramePoint? = null
-            // is the target the rhino? or near rhino
-            if (isRhino) {
-                attackTarget = target
-            }
-
-            // why force new, only if the target is different
-            routeTo.routeTo(state, targets,
-                RouteTo.RouteParam(forceNew = forceNew, enemyAvoid = avoidList, useB = useB, attackTarget = attackTarget)
-            ).also {
-                d { " Move to $it" }
-            }
-        }
-//        return routeTo.routeTo(state, targets, forceNew)
-    }
-
-    private fun adjustTarget(state: MapLocationState, currentTarget: FramePoint): List<FramePoint> {
-        var avoidTargets = listOf(currentTarget)
-        val reference = FramePoint(8.grid, 8.grid)
-        val rhinoAt = state.rhino()?.point ?: FramePoint(8.grid, 8.grid)
-        // try to route near current target or near rhino
-        var possible = listOf(
-            currentTarget.downTwoGrid,
-            currentTarget.upTwoGrid,
-            currentTarget.leftTwoGrid,
-            currentTarget.rightTwoGrid,
-            rhinoAt.downTwoGrid,
-            rhinoAt.upTwoGrid,
-            rhinoAt.leftTwoGrid,
-            rhinoAt.rightTwoGrid,
-        ).filter { it.isInLevelMap }
-        if (possible.isEmpty()) {
-            d { " route to reference location "}
-            possible = listOf(
-                reference.downTwoGrid,
-                reference.upTwoGrid,
-                reference.leftTwoGrid,
-                reference.rightTwoGrid).filter { it.isInLevelMap }
-        }
-        if (possible.isNotEmpty()) {
-            avoidTargets = listOf(possible.maxBy { it.distTo(target).also {dist ->
-                d { " dist to $it is $dist "}
-            } })
-            d { " no way to get to target location go to $targets possible $possible"}
-        }
-
-        return avoidTargets
-    }
-
-    override fun target() = target
-
-    override val name: String
-        get() = "Nav to Target ${target.oneStr}"
+        get() = "KillRhino ${stateTracker.rhinoState.name} ${criteria.frameCount} O:${linkDir?.opposite() == rDir} w ${waitCt} s $strategy" // ${actions.stepName}
 }
 
 

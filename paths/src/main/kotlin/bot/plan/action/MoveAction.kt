@@ -420,22 +420,36 @@ private fun doRouteTo(
 
     if (params.ignoreProjectiles) {
         avoid = avoid.filter { it.state != EnemyState.Projectile }
+    } else {
+        ////
+//        avoid = avoid.filter { it.state == EnemyState.Projectile }
     }
 
-    param.attackTarget?.let {
-        d { " remove enemy from filter $it"}
-        avoid = avoid.filter { it.point != param.attackTarget || it.point != FramePoint(it.point.x + 8, it.point.y) }
+    param.attackTarget?.let { targetAttack ->
+        d { " remove enemy from filter $targetAttack"}
+        avoid = avoid.filter { it.point != targetAttack }
     }
-    if (param.attackTarget != null) {
-        avoid = emptyList()
-    }
+    //combine these
+    //Debug: (Kermit)  enemy Agent(index=176, point=(128, 55), dir=None, state=Alive, countDown=0, hp=176, projectileState=NotProjectile, droppedId=1)
+    //Debug: (Kermit)  enemy Agent(index=178, point=(136, 55), dir=None, state=Alive, countDown=0, hp=178, projectileState=NotProjectile, droppedId=1)
+    //
+//    if (param.attackTarget != null) {
+//        d { " there is attack target why?"}
+//        avoid = emptyList()
+//    }
 
     d { " enemies near ${enemiesNear.size} projectiles ${projectilesNear.size} avoid: ${avoid.size}" }
         for (agent in enemiesNear) {
             d { " enemy $agent"}
         }
-//        val avoid = emptyList<FramePoint>()
+    d { " avoid attack target ${param.attackTarget}"}
+    for (agent in avoid) {
+        d { " enemy $agent"}
+    }
 
+
+    // faster, but i have to do tradeoff between dodging
+//    avoid = emptyList()
 
     if (forceNew ||
         route == null || // reset
@@ -469,12 +483,12 @@ private fun doRouteTo(
         // need to re route
         route = FrameRoute(
             NavUtil.routeToAvoidingObstacle(
-                mapCell,
-                linkPt,
-                to,
-                state.previousMove.from,
-                avoid.map { it.point }, // add direction in here?
-                passable
+                mapCell = mapCell,
+                from = linkPt,
+                to = to,
+                before = state.previousMove.from,
+                enemies = avoid.map { it.point }, // add direction in here?
+                forcePassable = passable
             )
         )
         d { " Plan: ${state.currentMapCell.mapLoc} new plan! because ($why)" }

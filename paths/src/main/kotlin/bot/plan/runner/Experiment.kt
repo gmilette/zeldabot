@@ -5,7 +5,8 @@ import sequence.ZeldaItem
 
 class Experiments(masterPlan: MasterPlan) {
     companion object {
-        const val current = "level2rhino"
+        const val current = "level2w"
+//        const val current = "level2rhino"
     }
 
     private val experiments: Map<String, Experiment>

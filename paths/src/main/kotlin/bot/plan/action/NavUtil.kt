@@ -119,7 +119,9 @@ data class PreviousMove(
 
 object NavUtil {
 
-    fun routeToAvoidingObstacle(mapCell: MapCell, from: FramePoint, to: List<FramePoint>, before: FramePoint? = null,
+    fun routeToAvoidingObstacle(mapCell: MapCell, from: FramePoint,
+                                to: List<FramePoint>,
+                                before: FramePoint? = null,
                                 enemies: List<FramePoint> = emptyList(),
                                 // locations to avoid like enemy
                                 avoidNearEnemy: List<FramePoint> = emptyList(),

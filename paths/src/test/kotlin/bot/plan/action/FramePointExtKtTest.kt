@@ -10,14 +10,15 @@ import io.kotest.matchers.shouldBe
 class FramePointExtKtTest {
     @Test
     fun a() {
-        val link = FramePoint(172, 24)
+        val link = FramePoint(160, 51)
         val other = FramePoint(112, 64)
 //        val enemy = FramePoint(176, 24)
-        val enemy = FramePoint(128, 80)
+        val enemy = FramePoint(160, 48)
 // 10
         val a = enemy.x
         val b = enemy.justRightEnd.x
-        other.isInGrid(enemy) shouldBe true
+//        link.isInGrid(enemy, buffer = 1) shouldBe true
+        enemy.isInGrid(link) shouldBe true
     }
 
     @Test

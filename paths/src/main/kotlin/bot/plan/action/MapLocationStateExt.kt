@@ -53,3 +53,9 @@ fun MapLocationState.numEnemiesAliveInCenter(): Int {
         middleGrids.any { it.isInGrid(agent.point) }
     }
 }
+
+fun MapLocationState.enemiesAliveInCenter(): List<Agent> {
+    return frameState.enemies.filter { it.state == EnemyState.Alive }.filter { agent ->
+        middleGrids.any { it.isInGrid(agent.point) }
+    }
+}

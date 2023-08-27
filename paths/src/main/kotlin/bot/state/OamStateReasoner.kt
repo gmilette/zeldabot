@@ -2,6 +2,7 @@ package bot.state
 
 import bot.state.map.Direction
 import nintaco.api.API
+import org.jheaps.annotations.VisibleForTesting
 import util.d
 
 
@@ -21,6 +22,22 @@ import util.d
 //96, // link again
 
 // attribute 42 is hit, I think
+
+data class Monster(
+    val parts:Set<Int> = setOf(0xb6, 0xb4),
+    val damaged:Set<Int> = setOf(0x01, 0x43)
+)
+
+object Monsters {
+    val boomerang = Monster(setOf(0xb6, 0xb4), setOf(0x01, 0x43))
+}
+
+// need
+
+object MonsterDirection {
+    // boomerang guy has
+    val damagedAttribute = setOf(1, 2, 3, 40, 43)
+}
 
 object LinkDirection { //14,16 attrib 01
     val damagedAttribute = setOf(41, 42, 43)
@@ -103,7 +120,12 @@ class OamStateReasoner(
     private fun SpriteData.toAgent(): Agent =
         Agent(index = tile, point = point, state = toState(), hp = tile, droppedId = attribute)
 
-    private fun combine(toCombine: List<SpriteData>): List<SpriteData> {
+    //combine these
+    //Debug: (Kermit)  enemy Agent(index=176, point=(128, 55), dir=None, state=Alive, countDown=0, hp=176, projectileState=NotProjectile, droppedId=1)
+    //Debug: (Kermit)  enemy Agent(index=178, point=(136, 55), dir=None, state=Alive, countDown=0, hp=178, projectileState=NotProjectile, droppedId=1)
+
+    @VisibleForTesting
+    fun combine(toCombine: List<SpriteData>): List<SpriteData> {
         val xMap = toCombine.associateBy { it.point.x }
 
         // can delete, because there is a sprite 8pxs to left that is the same
@@ -112,7 +134,9 @@ class OamStateReasoner(
 //            .filter { !SpriteData.projectiles.contains(it.tile) }
             .filter {
                 val matched = xMap[it.point.x - 8]
-                val delete = matched?.tile == it.tile && matched.point.y == it.point.y
+                // tiles do not always match
+//                val delete = matched?.tile == it.tile && matched.point.y == it.point.y
+                val delete = matched?.point?.y == it.point.y
                 if (DEBUG && delete) {
                     d { "! delete ${matched?.point}, copy of ${it.point}" }
                 }
@@ -382,6 +406,8 @@ val triforceTile2 = (0xF2).toInt()
 val triforceDirt = (0xEC).toInt() // attrib 03 //236 // also part of fourMonster
 val triforceDirt2 = (0xFA).toInt() // also circle enemy center
 val triforceDirt3 = (0xEA).toInt() // attrib 03
+
+val waterMonster = 0xEC to (0x43)
 
 // verify
 val triforceDirtPair = (0xEC).toInt() to (0x03)// attrib 03 //236 // also part of fourMonster

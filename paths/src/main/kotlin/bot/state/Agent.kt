@@ -16,7 +16,9 @@ data class Agent(
     val tile = hp
     val attribute = droppedId
 
-    val damaged: Boolean = tile in LinkDirection.damagedAttribute
+    val damaged: Boolean = tile in LinkDirection.damagedAttribute || tile in MonsterDirection.damagedAttribute
+
+    val damagedString: String = if (damaged) "*D*" else ""
 
     val isLoot: Boolean
         get() = state == EnemyState.Loot

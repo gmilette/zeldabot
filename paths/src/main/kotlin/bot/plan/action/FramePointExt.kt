@@ -6,9 +6,11 @@ fun FramePoint.distToSquare(other: FramePoint) = squarePts().minOf { it.distTo(o
 
 fun FramePoint.squarePts() = listOf(this, this.justRightEnd, this.justLeftBottom, this.justLeftDown)
 
-fun FramePoint.isInGrid(other: FramePoint, buffer: Int = 0) =
-    other.x in (this.x - buffer)..(this.justRightEnd.x + buffer) &&
-            other.y in (this.y - buffer)..(this.justLeftBottom.y + buffer)
+fun FramePoint.isInGrid(other: FramePoint, buffer: Int = 0): Boolean {
+    val xIn = other.x in (this.x - buffer)..(this.justRightEnd.x + buffer)
+    val yIn = other.y in (this.y - buffer)..(this.justLeftBottom.y + buffer)
+    return xIn && yIn
+}
 
 fun FramePoint.toLineOf(length: Int = 8): List<FramePoint> {
     val pts = mutableListOf<FramePoint>()

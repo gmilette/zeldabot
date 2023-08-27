@@ -27,10 +27,6 @@ class KillAll(
     private val routeTo = RouteTo(RouteTo.Param(dodgeEnemies = true))
     private val criteria = KillAllCompleteCriteria()
 
-    private var rhinoState = ZeroState()
-
-    private var sameEnemyCount = 0
-
     private var previousAttack = false
     private var pressACount = 0
     private var target: FramePoint = FramePoint(0, 0)
@@ -94,8 +90,8 @@ class KillAll(
                 d { "Press A last time" }
                 return GamePad.None
             }
-
-            pressACount > 4 -> {
+            //4
+            pressACount > 3 -> {
                 pressACount--
                 d { "Press A" }
                 return if (useBombs) GamePad.B else GamePad.A
@@ -120,12 +116,26 @@ class KillAll(
             waitAfterAllKilled--
             return GamePad.None // just wait
         } else {
-            var aliveEnemies = state.frameState.enemiesClosestToLink()
-            aliveEnemies = aliveEnemies.filter { state.currentMapCell.passable.get(it.point) }
+            // first kill the enemies not in center
+            var aliveEnemies: MutableList<Agent> = state.frameState.enemiesClosestToLink().toMutableList()
+            aliveEnemies = aliveEnemies.filter { state.currentMapCell.passable.get(it.point) }.toMutableList()
+            if (considerEnemiesInCenter) {
+                // all enemies
+                if (numEnemiesInCenter != aliveEnemies.size) {
+                    val centers = state.enemiesAliveInCenter()
+                    for (agent in centers) {
+                        aliveEnemies.remove(agent)
+                    }
+                } else {
+                    d { "Attack center enemies" }
+                }
+            }
+            // NEW
+//            aliveEnemies = aliveEnemies.filter { !it.damaged }
             // need special handling, cant route into center
             if (targetOnly.isNotEmpty()) {
                 d { " target only $targetOnly" }
-                aliveEnemies = aliveEnemies.filter { targetOnly.contains(it.tile) }
+                aliveEnemies = aliveEnemies.filter { targetOnly.contains(it.tile) }.toMutableList()
             }
 
             // for rhino, adjust target location
@@ -154,7 +164,7 @@ class KillAll(
                             // is linked turned in the correct direction towards
                             // the enemy?
                             previousAttack = true
-                            pressACount = 6
+                            pressACount = 5
                             // for the rhino
                             if (waitAfterAttack) {
                                 waitAfterPressing = 60
@@ -177,10 +187,16 @@ class KillAll(
 
                             // force a new route if this has changed targets
                             val forceNew = previousTarget.oneStr != target.oneStr
-                            d { "Plan: target changed was $previousTarget now ${target}"}
+                            d { "Plan: target changed was $previousTarget now ${target} forceNew = $forceNew"}
                             // can't tell if the target has changed
                             // handle replanning when just close, this might be fine
-                            routeTo.routeTo(state, listOf(target), false)
+
+                            // could route to all targets
+                            routeTo.routeTo(state, listOf(target),
+                                RouteTo.RouteParam(forceNew = forceNew, attackTarget = target)
+                            )
+
+
                         }
                     }
                 } ?: GamePad.None
