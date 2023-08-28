@@ -24,7 +24,9 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     private val target = Experiments.current
 
     init {
-        run(name = "all")
+//        run(name = "level1drag")
+//        run(name = "all")
+        run(name = "level8")
     }
 
     private fun rerun() {

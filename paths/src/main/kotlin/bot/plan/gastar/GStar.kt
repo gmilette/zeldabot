@@ -1,5 +1,6 @@
 package bot.plan.gastar
 
+import androidx.compose.runtime.traceEventEnd
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapConstants
@@ -129,6 +130,14 @@ class GStar(
         }
     }
 
+    private fun setZeroCost(target: FramePoint?) {
+        target?.let {
+            d { "set zero cost $target" }
+            // actual enemy higher cost then around the enemy
+            costsF.modifyTo(target, MapConstants.oneGrid, 0)
+        }
+    }
+
     // if link cannot get to the target, instantly return an empty route.
     // like if they do not fit
     // if the cost of the path exceeds a maximum, also just dodge and wait
@@ -145,7 +154,8 @@ class GStar(
         enemies: List<FramePoint> = emptyList(),
         avoidNearEnemy: List<FramePoint> = emptyList(),
         forcePassable: List<FramePoint> = emptyList(),
-        maximumCost: Int = MaxCostAvoidEnemyNear
+        maximumCost: Int = MaxCostAvoidEnemyNear,
+        enemyTarget: FramePoint? = null
     ): List<FramePoint> {
         val nearEnemies = enemies.isNotEmpty()
         val maxIter = if (nearEnemies) SHORT_ITER else MAX_ITER
@@ -157,6 +167,7 @@ class GStar(
             setNearEnemy(start, nearEnemy)
         }
         setForcePassable(forcePassable)
+        setZeroCost(enemyTarget)
 //        if (forcePassable.isNotEmpty()) {
 //            d {" force passable "}
 //            passable.write("forcePassable.csv") { v, x, y ->

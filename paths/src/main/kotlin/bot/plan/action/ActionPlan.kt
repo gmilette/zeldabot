@@ -217,7 +217,7 @@ class Optional(val action: Action, private val must: Boolean = true) : Action {
 }
 
 // after kill all, move to next screen
-val lootAndKill = DecisionAction(GetLoot(), KillAll()) { state ->
+val lootAndKill = DecisionAction(GetLoot(), KillAll(ignoreEnemies = true, ignoreProjectiles = emptyList(), roundX = false)) { state ->
     state.frameState.enemies.any { it.isLoot }
 }
 

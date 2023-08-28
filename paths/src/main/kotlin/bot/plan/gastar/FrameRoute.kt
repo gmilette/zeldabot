@@ -59,6 +59,7 @@ class FrameRoute(val path: List<FramePoint>) {
         for (framePoint in pathStack.subList(0, min(15, pathStack.size-1))) {
             d { " : $framePoint ${framePoint.isTopRightCorner}"}
         }
+        d { " :: ${pathStack.last()}"}
     }
 
     fun adjustCorner() {

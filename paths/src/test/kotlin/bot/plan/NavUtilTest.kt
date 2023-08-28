@@ -248,6 +248,22 @@ class NavUtilTest {
             before = start.left)
     }
 
+//target (166, 67) link (72, 54)
+@Test
+fun `test dragon`() {
+    GStar.DEBUG = true
+//    GStar.SHORT_ITER = 150
+    GStar.MAX_ITER = 10000
+    val start = FramePoint(72, 54) // higher up
+    // wtf is wrong
+    // it has two coordinates that are off grid
+    val target = FramePoint(170, 67)
+//        val target = FramePoint(166, 128)
+    // it should be 209
+//        val target = FramePoint(215, 128)
+    check(53, start, target, GamePad.MoveUp, level = 1,
+        before = start.left)
+}
     @Test
     fun `test rhino`() {
         GStar.DEBUG = true

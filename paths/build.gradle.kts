@@ -23,10 +23,12 @@ plugins {
     //    kotlin("jvm") version "1.6.10"
 //    id("org.jetbrains.kotlinx.dataframe") version "0.10.0"
     val kotlinVersion = "1.7.10"
+//    val kotlinVersion = "1.9.0"
     kotlin("jvm") version kotlinVersion
     kotlin("kapt") version kotlinVersion
 //    id("org.jetbrains.compose") version "1.1.1"
     id("org.jetbrains.compose") version "1.2.0"
+//    id("org.jetbrains.compose") version "1.4.3"
     //application
 }
 

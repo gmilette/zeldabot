@@ -43,7 +43,7 @@ fun main() = application {
         val ladder = remember { mutableStateOf(true) }
 
         Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
-            Text(
+                Text(
                 text = "Plan: ${state?.mapLoc} ${state?.state?.currentMapCell?.mapData?.name ?: ""}",
                 fontSize = 20.sp,
             )

@@ -21,7 +21,17 @@ class KillAll(
     /**
      * only target these tiles
      */
-    private val targetOnly: List<Int> = listOf()
+    private val targetOnly: List<Int> = listOf(),
+    /**
+     * only target these tiles
+     */
+    private val ignoreProjectiles: List<Int> = listOf(),
+    /**
+     * if true, ignore all enemies (useful for level dragon fighting, but makes link suicidal)
+     */
+    private val ignoreEnemies: Boolean = false,
+    private val roundX: Boolean = false,
+    private var firstAttackBomb: Boolean = false
 ) :
     Action {
     private val routeTo = RouteTo(RouteTo.Param(dodgeEnemies = true))
@@ -86,6 +96,7 @@ class KillAll(
             // reset on the last count
             pressACount == 1 -> {
                 pressACount = 0
+                firstAttackBomb = false // works!
                 // have to release for longer than 1
                 d { "Press A last time" }
                 return GamePad.None
@@ -94,7 +105,7 @@ class KillAll(
             pressACount > 3 -> {
                 pressACount--
                 d { "Press A" }
-                return if (useBombs) GamePad.B else GamePad.A
+                return if (useBombs || firstAttackBomb) GamePad.B else GamePad.A
             }
 
             // release for a few steps
@@ -137,6 +148,10 @@ class KillAll(
                 d { " target only $targetOnly" }
                 aliveEnemies = aliveEnemies.filter { targetOnly.contains(it.tile) }.toMutableList()
             }
+            if (ignoreProjectiles.isNotEmpty()) {
+                d { " ignore projectiles "}
+                aliveEnemies = aliveEnemies.filter { !ignoreProjectiles.contains(it.tile) }.toMutableList()
+            }
 
             // for rhino, adjust target location
             // action
@@ -152,6 +167,14 @@ class KillAll(
                 // 110 too low for bats
                 waitAfterAllKilled = if (needLongWait) 250 else 50
                 val firstEnemyOrNull = aliveEnemies.firstOrNull()
+                if (firstEnemyOrNull == null) {
+                    // added for the dragon, doesn't really work well
+                    d { "No enemies!!" }
+                    return routeTo.routeTo(state, listOf(FramePoint(8.grid, 6.grid)),
+                        RouteTo.RouteParam(forceNew = true)
+                    )
+                }
+                // no enemies? do dodge
                 // handle the null?? need to test
                 firstEnemyOrNull?.let { firstEnemy ->
                     val previousTarget = target
@@ -169,7 +192,9 @@ class KillAll(
                             if (waitAfterAttack) {
                                 waitAfterPressing = 60
                             }
-                            if (useBombs) GamePad.B else GamePad.A
+                            if (firstAttackBomb || useBombs) {
+                                GamePad.B
+                            } else GamePad.A
                         }
 
                         else -> {
@@ -191,9 +216,17 @@ class KillAll(
                             // can't tell if the target has changed
                             // handle replanning when just close, this might be fine
 
+                            val targetsToAttack: List<FramePoint> = if (roundX) {
+                                // for gradon
+                                val mod = target.x % 8
+                                listOf(FramePoint(target.x - mod, target.y))
+                            } else {
+                                listOf(target)
+                            }
+
                             // could route to all targets
-                            routeTo.routeTo(state, listOf(target),
-                                RouteTo.RouteParam(forceNew = forceNew, attackTarget = target)
+                            routeTo.routeTo(state, targetsToAttack,
+                                RouteTo.RouteParam(forceNew = forceNew, attackTarget = target, ignoreEnemies = this.ignoreEnemies)
                             )
 
 

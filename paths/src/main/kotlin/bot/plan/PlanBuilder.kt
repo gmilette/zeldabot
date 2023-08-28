@@ -8,7 +8,6 @@ import bot.plan.runner.PlanSegment
 import bot.state.*
 import bot.state.map.*
 import bot.state.map.level.LevelMapCellsLookup
-import bot.state.map.level.LevelStartMapLoc
 import sequence.AnalysisPlanBuilder
 import sequence.DestType
 import sequence.EntryType
@@ -213,6 +212,12 @@ class PlanBuilder(
             add(lastMapLoc, KillAll(needLongWait = false))
             return this
         }
+    val killFirstAttackBomb: PlanBuilder
+        get() {
+            add(lastMapLoc, KillAll(needLongWait = false, firstAttackBomb = true))
+            return this
+        }
+
     val killUntil2: PlanBuilder
         get() {
             add(lastMapLoc, KillAll(needLongWait = false, numberLeftToBeDead = 2))
@@ -220,12 +225,15 @@ class PlanBuilder(
         }
     val killLev4Dragon: PlanBuilder
         get() {
-            add(lastMapLoc, KillAll(needLongWait = false, targetOnly = listOf(dragon4Head)))
+            add(lastMapLoc, KillAll(needLongWait = false, targetOnly = listOf(dragon4Head), ignoreEnemies = false))
             return this
         }
     val killLev1Dragon: PlanBuilder
         get() {
-            add(lastMapLoc, KillAll(needLongWait = false, targetOnly = listOf(dragonHead, dragonNeck)))
+            add(lastMapLoc, KillAll(needLongWait = false, targetOnly = listOf(dragonHead, dragonNeck),
+                //ignoreProjectiles = listOf(dragonTail),
+                ignoreEnemies = true,
+                roundX = true))
             return this
         }
     val startHere: PlanBuilder

@@ -99,11 +99,11 @@ class OamStateReasoner(
         sprites = readOam()
     }
 
-    val DEBUG = true
+    val DEBUG = false
 
     val alive: List<SpriteData>
         get() {
-            return sprites.filter { !it.hidden }
+            return sprites.filter { it != null && !it.hidden }
         }
 
     val loot: List<SpriteData>
@@ -137,8 +137,8 @@ class OamStateReasoner(
                 // tiles do not always match
 //                val delete = matched?.tile == it.tile && matched.point.y == it.point.y
                 val delete = matched?.point?.y == it.point.y
-                if (DEBUG && delete) {
-                    d { "! delete ${matched?.point}, copy of ${it.point}" }
+                if (delete) {
+                    d { "! delete, ${it.point} because matches ${matched?.point}" }
                 }
                 delete
         }
@@ -203,10 +203,13 @@ class OamStateReasoner(
             null
         }
 
-        d { " sprites** alive ** ${spritesRaw.filter { !it.hidden }.size} dir ${direction}" }
+        d { " sprites ** alive ** ${spritesRaw.filter { !it.hidden }.size} dir ${direction}" }
         // ahh there are twice as many sprites because each sprite is two big
-        spritesRaw.filter { !it.hidden }.forEachIndexed { index, sprite ->
-            d { "$index: $sprite" }
+        val alive = spritesRaw.filter { !it.hidden }
+        if (DEBUG) {
+            alive.forEachIndexed { index, sprite ->
+                d { "$index: $sprite" }
+            }
         }
 
         if (DEBUG) {
@@ -216,7 +219,7 @@ class OamStateReasoner(
             }
         }
 
-        return combine(spritesRaw)
+        return combine(alive)
     }
 }
 fun Agent.isGannonTriforce(): Boolean =
@@ -231,6 +234,8 @@ data class SpriteData(
 ) {
     val tilePair = tile to attribute
 
+    // keep
+    // Debug: (Kermit) 49: SpriteData(index=49, point=(177, 128), tile=160, attribute=2) None
     val hidden: Boolean = point.y >= 248 || attribute == 32 || ignore.contains(tile) ||
             ignorePairs.contains(tilePair) // does this work?
             //|| point.y < 60  dont need that because the y coordinate is adjusted
@@ -276,7 +281,7 @@ data class SpriteData(
             114, // i think bomb smoke
 
             //164, // not sure, that is a pancake
-            160,
+//            160, // this happens to be the left side of the snake monster in level 2, snake has attribute 2
             ladder,
             wizard,
             flame1,
@@ -449,7 +454,7 @@ val dragonNeck = (0xC4).toInt()
 // but these are also the pinwheel guys
 //val dragonFeet = (0xC6).toInt() //wheel guy
 //val dragonFeet2 = (0xCA).toInt() // and spiders
-//val dragonTail = (0xC8).toInt() //wheel guy
+val dragonTail = (0xC8).toInt() //attribute 3 for dragon wheel guy
 //val dragonBody = (0xC2).toInt()
 
 val dragon4Head = (0xDC).toInt()

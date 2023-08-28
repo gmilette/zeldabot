@@ -2,6 +2,9 @@ package bot.state
 
 import bot.state.map.Direction
 
+val List<Agent>.points: List<FramePoint>
+    get() = this.map { it.point }
+
 val emptyAgent = Agent(0, FramePoint(0, 0), Direction.Down, EnemyState.Unknown,  0,0)
 data class Agent(
     val index: Int = 0,
