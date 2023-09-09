@@ -2,8 +2,10 @@ package bot.plan.action
 
 import bot.plan.action.NavUtil.directionToDir
 import bot.plan.gastar.FrameRoute
+import bot.plan.gastar.GStar
 import bot.state.*
 import bot.state.map.*
+import util.LogFile
 import util.d
 
 
@@ -265,6 +267,7 @@ class RouteTo(val params: Param = Param()) {
         // if false, dont bother avoiding any enemies, avoid projectiles though
         val ignoreEnemies: Boolean = false
     )
+    private val routeToFile: LogFile = LogFile("RouteTo")
 
     var route: FrameRoute? = null
         private set
@@ -300,10 +303,13 @@ class RouteTo(val params: Param = Param()) {
         // is this direction correct?
         // i tried dirActual
         d { " route To" }
+        val canAttack = param.useB || state.frameState.canUseSword
 
-        return if (AttackActionDecider.shouldAttack(state) && (state.frameState.canUseSword && !param.useB)
+        return if (AttackActionDecider.shouldAttack(state) && canAttack
         ) {
             d { " Route Action -> ATTACK" }
+            val att = if (param.useB) GamePad.B else GamePad.A
+            writeFile(to, state, param, att)
             if (param.useB) {
                 attackB.nextStep(state)
             } else {
@@ -315,6 +321,17 @@ class RouteTo(val params: Param = Param()) {
             d { " Route Action -> No Attack" }
             doRouteTo(state, to, param)
         }
+    }
+
+    private fun writeFile(
+        to: List<FramePoint>,
+        state: MapLocationState,
+        param: RouteParam,
+        gamePad: GamePad
+    ) {
+        val target = to.minByOrNull { it.distTo(state.link) }
+        val distTo = target?.distTo(state.link) ?: 0
+        routeToFile.write(state.currentMapCell.mapLoc, target?.oneStr ?: "0_0", state.link.oneStr, distTo, planCount, gamePad.name)
     }
 
 //        return if (params.dodgeEnemies && AttackActionDecider.shouldAttack(state) && (state.frameState.canUseSword && !useB)
@@ -500,12 +517,17 @@ private fun doRouteTo(
                 to = to,
                 before = state.previousMove.from,
                 enemies = avoid.points,
-                forcePassable = passable
+                forcePassable = passable,
+                ladderSpec = state.frameState.ladder?.let {
+                    d { " has ladder "}
+                    GStar.LadderSpec(false, it.point)
+                }
             )
         )
+
         d { " Plan: ${state.currentMapCell.mapLoc} new plan! because ($why) to ${to}" }
         route?.path?.lastOrNull()?.let { lastPt ->
-            if (lastPt in to) {
+            if (lastPt in to || ladder != null) {
                 d { "route to success target" }
             } else {
                 d { "route to fail, route towards enemies"}
@@ -549,9 +571,35 @@ private fun doRouteTo(
     } else if (nextPoint == FramePoint(0, 0) && linkPt.y == 0) {
         GamePad.MoveUp
     } else {
+        // what nav to direction, that's weird
+        val gamepad = nextPoint.direction?.toGamePad() ?: NavUtil.directionToDist(linkPt, nextPoint)
+
         // it's the wrong point
-        nextPoint.direction?.toGamePad() ?: NavUtil.directionToDist(linkPt, nextPoint)
+        if (ladder != null) {
+            d { "Ladder! $ladder horiz = ${state.ladderStateHorizontal}"}
+        }
+        if (true || ladder == null) gamepad else
+            if (state.previousMove.didntMove) {
+                // at least this allows link to escape sometimes, but not all times
+                d { "ladder didnt move ${state.previousMove.move} ${state.previousMove.dir}"}
+                if (state.previousMove.dir.horizontal || state.previousMove.move == GamePad.None) {
+                    // force vertical
+                    d { " ladder should go vertical " }
+                    GamePad.randomDirection()
+                } else {
+                    d { " ladder should go hori " }
+                    // force left
+                    GamePad.randomDirection()
+                }
+            } else {
+                gamepad
+            }
+//            state.ladderStateHorizontal == true && gamepad.isHorizontal -> gamepad
+//            state.ladderStateHorizontal == false && !gamepad.isHorizontal -> gamepad
+//            else -> GamePad.MoveUp
+//        }
     }.also {
+        writeFile(to, state, param, it)
         d { " next point $nextPoint dir: $it ${if (nextPoint.direction != null) "HAS DIR ${nextPoint.direction}" else ""}" }
     }
 }

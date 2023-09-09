@@ -126,10 +126,11 @@ object NavUtil {
                                 // locations to avoid like enemy
                                 avoidNearEnemy: List<FramePoint> = emptyList(),
                                 forcePassable: List<FramePoint> = emptyList(),
-                                enemyTarget: FramePoint? = null):
+                                enemyTarget: FramePoint? = null,
+                                ladderSpec: GStar.LadderSpec? = null):
             List<FramePoint> = mapCell.gstar.route(from, to, before, enemies,
         avoidNearEnemy, forcePassable, Int.MAX_VALUE,
-                enemyTarget)
+                enemyTarget, ladderSpec)
 
     fun randomDir(from: FramePoint = FramePoint(100, 100)): GamePad {
         d { " random dir "}

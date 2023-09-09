@@ -34,6 +34,29 @@ interface Action {
         get() = this.javaClass.simpleName
 }
 
+abstract class WrappedAction(private val wrapped: Action): Action {
+    override fun reset() {
+        wrapped.reset()
+    }
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        return wrapped.nextStep(state)
+    }
+
+    override fun complete(state: MapLocationState): Boolean = wrapped.complete(state)
+
+    override fun target() = wrapped.target()
+
+    override fun targets() = wrapped.targets()
+
+    override fun path(): List<FramePoint> = wrapped.path()
+
+    override fun gstar(): GStar? = wrapped.gstar()
+
+    override val name: String
+        get() = wrapped.name
+}
+
 interface MapAwareAction : Action {
     val from: MapLoc
     val to: MapLoc
@@ -99,6 +122,28 @@ class OrderedActionSequence(
 
     override val name: String
         get() = "OrderedAction Sequence ${actions.size}"
+}
+
+class CompleteIfGetItem(action: Action,
+                        val select: Inventory.() -> Int = {this.numKeys}) : WrappedAction(action) {
+    private var frameCt = 0
+    private var startingQuantity = -1
+    override fun complete(state: MapLocationState): Boolean {
+        return ((startingQuantity >= 0) && (quantity(state) != startingQuantity)) ||
+                super.complete(state)
+    }
+
+    private fun quantity(state: MapLocationState) =
+        state.frameState.inventory.select()
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        if (startingQuantity < 0) {
+            startingQuantity = quantity(state)
+        }
+        frameCt++
+        return super.nextStep(state)
+    }
+
 }
 
 class DecisionAction(
@@ -462,7 +507,14 @@ class PickupDroppedDungeonItemAndKill : Action {
     }
 }
 
-class GetLoot(private val adjustInSideLevel: Boolean = false) : Action {
+data class LootSpec(
+    val heartsAndFairy: Boolean = true,
+    val bigCoin: Boolean = true,
+    val smallCoin: Boolean = false,
+    val bomb: Boolean = true
+)
+
+class GetLoot(private val adjustInSideLevel: Boolean = false, ) : Action {
     // gannon triforce pieces are sometimes projectiles
     private val routeTo = RouteTo(RouteTo.Param(ignoreProjectiles = true))
 
@@ -503,9 +555,11 @@ class GetLoot(private val adjustInSideLevel: Boolean = false) : Action {
         }
 
         // untested, try to make it easier to navigate to the loot
-        val targets = target.about()
+        // this is the wrong way to target an item, let's try the new way
+//        val targets = target.about()
+        val targets = target.lootTargets
 
-        d { " get loot $target" }
+        d { " get loot $target from targets ${targets}" }
         return routeTo.routeTo(state, targets, forceNew = previousTarget != target)
     }
 

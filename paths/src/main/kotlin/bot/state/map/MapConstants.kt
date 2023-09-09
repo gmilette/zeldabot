@@ -8,7 +8,13 @@ object MapConstants {
     const val oneGrid = 16
     const val oneGridPoint5 = 24
     const val twoGrid = oneGrid * 2
+    const val twoGridPoint5 = 40
     const val threeGrid = oneGrid * 3
     const val gridMaxX = 16
     const val gridMaxY = 16
+
+    /**
+     * subtract from any y's to convert to 0 coordinates
+     */
+    const val yAdjust = 61
 }

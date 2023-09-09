@@ -5,6 +5,7 @@ import sequence.ZeldaItem
 
 class Experiments(masterPlan: MasterPlan) {
     companion object {
+        // to rerun
         const val current = "level2w"
 //        const val current = "level2rhino"
     }
@@ -20,7 +21,8 @@ class Experiments(masterPlan: MasterPlan) {
             Experiment("level2w", "level2.save", masterPlan.getPlanPhase("Destroy level 2", null), sword = ZeldaItem.WoodenSword, addEquipment = true),
             Experiment("level5start", "level2.save", masterPlan.getPlanPhase("Destroy level 5", null), sword = ZeldaItem.WoodenSword),
             Experiment("level2", "level2.save", masterPlan.getPlanPhase("Destroy level 2", null), sword = ZeldaItem.MagicSword),
-            Experiment("level1", "lev1_start.save", masterPlan.getPlanPhase("Destroy level 1", null)),
+            Experiment("level1L", "lev1_start.save", masterPlan.getPlanPhase("Destroy level 1", null), addEquipment = false),
+            Experiment("level1", "level1_start_no_ladder.save", masterPlan.getPlanPhase("Destroy level 1", null), addEquipment = false),
             Experiment("level1drag", "lev1_dragon.save", masterPlan.getPlanPhase("Destroy level 1", "destroy dragon")),
             Experiment("afterLev4", "level4_beat.save", masterPlan.getPlanAfter(Phases.grabHearts)),
             Experiment("afterForest30", "forest_30.save", masterPlan.getPlanPhase(Phases.forest30, null)),

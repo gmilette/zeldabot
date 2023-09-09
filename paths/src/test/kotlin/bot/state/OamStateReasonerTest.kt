@@ -20,6 +20,32 @@ class OamStateReasonerTest {
         }
     }
 
+//    =(136, 39), dir=None, state=Alive, countDown=0, hp=168, projectileState=NotProjectile, droppedId=66)
+//    Debug: (Kermit)  enemy Agent(index=170, point=(128, 39)
+@Test
+fun `test some more`() {
+    val reasoner = OamStateReasoner(mock())
+    val sprites = listOf(
+        SpriteData(176, FramePoint(136, 39), 176, 3),
+        SpriteData(178, FramePoint(128, 39), 178, 3)
+    )
+    reasoner.combine(sprites).apply {
+        size shouldBe 1
+        get(0).point.x shouldBe 128
+    }
+}
+    @Test
+    fun `test delete skeli`() {
+        val reasoner = OamStateReasoner(mock())
+        val sprites = listOf(
+            SpriteData(176, FramePoint(56, 90), 168, 3),
+            SpriteData(178, FramePoint(48, 90), 170, 3)
+        )
+        reasoner.combine(sprites).apply {
+            size shouldBe 1
+            get(0).point.x shouldBe 48
+        }
+    }
     @Test
     fun `test snake guy`() {
 //        (Kermit) 0: SpriteData(index=27, point=(200, 123), tile=166, attribute=2)

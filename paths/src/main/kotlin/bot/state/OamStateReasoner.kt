@@ -1,6 +1,7 @@
 package bot.state
 
 import bot.state.map.Direction
+import bot.state.map.MapConstants
 import nintaco.api.API
 import org.jheaps.annotations.VisibleForTesting
 import util.d
@@ -151,6 +152,16 @@ class OamStateReasoner(
             mutable.remove(spriteData)
         }
 
+        if (DEBUG || true) {
+            d { " alive sprites AFTER delete" }
+            if (mutable != null) {
+                mutable.filterNotNull().forEachIndexed { index, sprite ->
+                    d { "$index: $sprite" }
+                }
+            }
+        }
+
+
         return mutable
     }
 
@@ -175,7 +186,7 @@ class OamStateReasoner(
         val y = api.readOAM(at)
         val tile = api.readOAM(at + 0x0001)
         val attrib = api.readOAM(at + 0x0002)
-        return SpriteData(at / 4, FramePoint(x, y - 61), tile, attrib)
+        return SpriteData(at / 4, FramePoint(x, y - MapConstants.yAdjust), tile, attrib)
     }
 
     private fun readOam(): List<SpriteData> {
@@ -206,7 +217,8 @@ class OamStateReasoner(
         d { " sprites ** alive ** ${spritesRaw.filter { !it.hidden }.size} dir ${direction}" }
         // ahh there are twice as many sprites because each sprite is two big
         val alive = spritesRaw.filter { !it.hidden }
-        if (DEBUG) {
+        if (DEBUG || true) {
+            d { " alive sprites" }
             alive.forEachIndexed { index, sprite ->
                 d { "$index: $sprite" }
             }
@@ -275,7 +287,9 @@ data class SpriteData(
             (0x84).toInt(), // sword point
             90, // not sure what it is maybe link or his sword
             62, // blinking this
-            48, // sword
+            deadEnemy2,
+            deadEnemy,
+            (0x48).toInt(), // magic sword
             48, // swirly thing
             bombSmoke, // yea but then it attacks its own bomb// 112, // bomb smoke, removed it so I can attack the monsters
             114, // i think bomb smoke
@@ -360,7 +374,8 @@ data class SpriteData(
 //            triforceDirt, // why?
 //            triforceDirt2,
             triforceTile,
-            triforceTile2
+            triforceTile2,
+            magicSword
         )
     }
 }
@@ -369,6 +384,8 @@ object TileInfo {
     val longWaitEnemies = setOf(
         184, 186, // ghost
         ghost,
+        ghostWeak2,
+        ghostWeak,
         rhinoHeadDown, rhinoHeadDown2, rhinoHeadMouthOpen, rhinoHead2,
         bat,
         254, 248 // the circle monster because I dont know why im stuck here
@@ -376,6 +393,8 @@ object TileInfo {
 
     const val oldWoman = (0x9a).toInt()
 }
+val deadEnemy2 = (0x64).toInt() // attrib 40, 02 43 3// big splash
+val deadEnemy = (0x62).toInt() // attrib 40, small one
 
 val orbProjectile = (0x44).toInt() // fire from go to next room, also projectiles flying around from ship guy
 //val grabbyHands = 142
@@ -383,6 +402,8 @@ val grabbyHands = (0xAE).toInt() //158
 val grabbyHands2 = (0xAC).toInt() // 172
 
 val ghost = (0xBC).toInt()
+val ghostWeak = (0xB8).toInt()
+val ghostWeak2 = (0xBA).toInt()
 val bombSmoke = 112
 val monsterCloud = (0x70).toInt()
 val bomb = 52

@@ -2,6 +2,7 @@ package bot.plan.action
 
 import bot.state.*
 import bot.state.map.grid
+import util.LogFile
 import util.d
 
 class KillAll(
@@ -34,6 +35,8 @@ class KillAll(
     private var firstAttackBomb: Boolean = false
 ) :
     Action {
+    private val killAll: LogFile = LogFile("KillAll")
+
     private val routeTo = RouteTo(RouteTo.Param(dodgeEnemies = true))
     private val criteria = KillAllCompleteCriteria()
 
@@ -83,7 +86,10 @@ class KillAll(
 
     override fun nextStep(state: MapLocationState): GamePad {
         val numEnemiesInCenter = state.numEnemiesAliveInCenter()
-        needLongWait = state.longWait.isNotEmpty()
+        // once set to true, do not change it back
+        if (!needLongWait) {
+            needLongWait = state.longWait.isNotEmpty()
+        }
         d { " KILL ALL step ${state.currentMapCell.mapLoc} count $frameCount wait $waitAfterAllKilled center: $numEnemiesInCenter needLong $needLongWait" }
 
         for (enemy in state.frameState.enemies.filter { it.state != EnemyState.Dead }) {
@@ -156,9 +162,9 @@ class KillAll(
             // for rhino, adjust target location
             // action
 
-//            aliveEnemies.forEach {
-//                d { "alive enemy $it dist ${it.point.distTo(state.frameState.link.point)}" }
-//            }
+            aliveEnemies.forEach {
+                d { "alive enemy $it dist ${it.point.distTo(state.frameState.link.point)}" }
+            }
 
             if (killedAllEnemies(state)) {
                 waitAfterAllKilled--
@@ -176,14 +182,14 @@ class KillAll(
                 }
                 // no enemies? do dodge
                 // handle the null?? need to test
-                firstEnemyOrNull?.let { firstEnemy ->
+                firstEnemyOrNull.let { firstEnemy ->
                     val previousTarget = target
                     target = firstEnemy.point
                     val link = state.frameState.link
                     val dist = firstEnemy.point.distTo(link.point)
                     //d { " go find $firstEnemy from $link distance: $dist"}
                     when {
-                        state.frameState.canUseSword && AttackActionDecider.shouldAttack(state) -> {
+                        false && state.frameState.canUseSword && AttackActionDecider.shouldAttack(state) -> {
                             // is linked turned in the correct direction towards
                             // the enemy?
                             previousAttack = true
@@ -217,7 +223,7 @@ class KillAll(
                             // handle replanning when just close, this might be fine
 
                             val targetsToAttack: List<FramePoint> = if (roundX) {
-                                // for gradon
+                                // for dragon
                                 val mod = target.x % 8
                                 listOf(FramePoint(target.x - mod, target.y))
                             } else {
@@ -228,8 +234,6 @@ class KillAll(
                             routeTo.routeTo(state, targetsToAttack,
                                 RouteTo.RouteParam(forceNew = forceNew, attackTarget = target, ignoreEnemies = this.ignoreEnemies)
                             )
-
-
                         }
                     }
                 } ?: GamePad.None

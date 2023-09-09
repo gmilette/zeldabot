@@ -201,6 +201,12 @@ class PlanBuilder(
         ))
         return this
     }
+    val killUntilGetKey: PlanBuilder
+        get() {
+            add(lastMapLoc, CompleteIfGetItem(KillAll()))
+            add(lastMapLoc, GetLoot())
+            return this
+        }
     val killAndLoot: PlanBuilder
         get() {
             add(lastMapLoc, KillAll())
@@ -210,6 +216,11 @@ class PlanBuilder(
     val kill: PlanBuilder
         get() {
             add(lastMapLoc, KillAll(needLongWait = false))
+            return this
+        }
+    val killLongWait: PlanBuilder
+        get() {
+            add(lastMapLoc, KillAll(needLongWait = true))
             return this
         }
     val killFirstAttackBomb: PlanBuilder

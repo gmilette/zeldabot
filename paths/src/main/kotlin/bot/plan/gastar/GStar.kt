@@ -1,6 +1,7 @@
 package bot.plan.gastar
 
 import androidx.compose.runtime.traceEventEnd
+import bot.plan.action.isInGrid
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapConstants
@@ -28,6 +29,22 @@ class GStar(
         val onEnemyCost = 100000
         val MaxCostAvoidEnemy = onEnemyCost
         val MaxCostAvoidEnemyNear = nearEnemyCost
+    }
+
+    data class LadderSpec(val horizontal: Boolean, val point: FramePoint) {
+        private fun isIn(other: FramePoint) = point.isInGrid(other)
+
+        fun directions(other: FramePoint) = if (false && isIn(other)) {
+            if (DEBUG) {
+                d { "on ladder $other horiz=$horizontal" }
+            }
+            if (horizontal) Direction.horizontal else Direction.vertical
+        } else {
+            if (DEBUG) {
+                d { "on ladder no $other not in $point" }
+            }
+            Direction.all
+        }
     }
 
     private var iterCount = 0
@@ -155,7 +172,8 @@ class GStar(
         avoidNearEnemy: List<FramePoint> = emptyList(),
         forcePassable: List<FramePoint> = emptyList(),
         maximumCost: Int = MaxCostAvoidEnemyNear,
-        enemyTarget: FramePoint? = null
+        enemyTarget: FramePoint? = null,
+        ladderSpec: LadderSpec? = null
     ): List<FramePoint> {
         val nearEnemies = enemies.isNotEmpty()
         val maxIter = if (nearEnemies) SHORT_ITER else MAX_ITER
@@ -252,7 +270,7 @@ class GStar(
                 d { "from prev=$previousPoint to $point ${if (point.onHighway) "*" else ""} dir $dir" }
             }
 
-            val neighbors = (neighborFinder.neighbors(point, dir, dist ?: 0) - closedList - avoid).shuffled()
+            val neighbors = (neighborFinder.neighbors(point, dir, dist ?: 0, ladderSpec) - closedList - avoid).shuffled()
             for (toPoint in neighbors) {
                 // raw cost of this cell
                 val cost = costsF.get(toPoint)

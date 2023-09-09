@@ -28,6 +28,10 @@ class MapLocationState(
     var previousNumBombs: Int = 0,
     var previousGamePad: GamePad = GamePad.None,
 
+    // null: not deployed
+    // true/false: can move horizontal / vertical
+    var ladderStateHorizontal: Boolean? = null,
+
     // the last known framestate
     var frameState: FrameState = FrameState(ApiSource.getAPI(),
         emptyList(),

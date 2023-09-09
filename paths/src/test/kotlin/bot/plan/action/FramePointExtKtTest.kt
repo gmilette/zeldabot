@@ -1,13 +1,24 @@
 package bot.plan.action
 
-import bot.state.FramePoint
-import bot.state.isInLevelMap
-import bot.state.justRightEnd
+import bot.state.*
 import bot.state.map.MapConstants
 import org.junit.Test
 import io.kotest.matchers.shouldBe
 
 class FramePointExtKtTest {
+
+    @Test
+    fun nearestGrid() {
+        val key = FramePoint(84, 88)
+        key.nearestGrid.apply {
+            x shouldBe 80
+            y shouldBe 83
+        }
+        key.nearestBigGrid.apply {
+            x shouldBe 80
+            y shouldBe 83
+        }
+    }
     @Test
     fun a() {
         val link = FramePoint(160, 51)

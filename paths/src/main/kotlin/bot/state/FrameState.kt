@@ -240,19 +240,18 @@ val Int.notOnEdgeY: Boolean
 
 val Int.notOnEdge: Boolean
     get() = this in (MapConstants.oneGrid + 4)..(MapConstants.MAX_X - MapConstants.oneGrid)
-val FramePoint.onHighway
-    get() = x % 8 == 0 || y % 8 == 0
+val FramePoint.onHighway: Boolean
+    get() = onHighwayX || onHighwayY
 
-val FramePoint.onHighwayX
+val FramePoint.onHighwayX: Boolean
     get() = x % 8 == 0
 
-val FramePoint.onHighwayXNear
-    get() = (x + 1) % 8 == 0 || (x - 1) % 8 == 0
-val FramePoint.onHighwayY
-    get() = y % 8 == 0
+// subtracting by 61 to get the original coordinates so that this modular division works
+val FramePoint.onHighwayY: Boolean
+    get() = y.yAdjust % 8 == 0
 
-val FramePoint.onHighwayYNear
-    get() = (y + 1) % 8 == 0 || (y - 1) % 8 == 0
+private val Int.yAdjust: Int
+    get() = this + MapConstants.yAdjust
 
 val FramePoint.toG: FramePoint
     get() = FramePoint(x / 16, y / 16)
@@ -376,6 +375,34 @@ val FramePoint.rightEnd
     get() = FramePoint(x + 16 + 1, y)
 val FramePoint.rightEndDown
     get() = FramePoint(x + 16 + 1, y + 15) // why is this 15????
+
+/**
+ * loot can appear inside a grid, but link can pick it up from half a grid away, so allow those targets
+ */
+val FramePoint.lootTargets: List<FramePoint>
+    get() = listOf(this, this.leftHalf, this.upHalf, this.leftUpHalf, this.nearestGrid, this.nearestBigGrid) // round to nearest grid?
+
+val FramePoint.nearestGrid: FramePoint
+    get() {
+        val mod = this.x % 8
+        val mody = this.y.yAdjust % 8
+        return FramePoint(this.x - mod, this.y - mody)
+    }
+
+val FramePoint.nearestBigGrid: FramePoint
+    get() {
+        val mod = this.x % 16
+        val mody = this.y.yAdjust % 16
+        return FramePoint(this.x - mod, this.y - mody)
+    }
+
+val FramePoint.leftHalf
+    get() = FramePoint(x - MapConstants.halfGrid, y)
+val FramePoint.upHalf
+    get() = FramePoint(x, y - MapConstants.halfGrid)
+val FramePoint.leftUpHalf
+    get() = FramePoint(x - MapConstants.halfGrid, y - MapConstants.halfGrid)
+
 
 val FramePoint.left
     get() = FramePoint(x - 1, y)

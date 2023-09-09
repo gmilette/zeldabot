@@ -11,4 +11,82 @@ class AttackActionDeciderTest() {
     fun `go`() {
         AttackActionDecider.shouldAttack(Direction.Down, FramePoint(128, 107), listOf(FramePoint(128, 112))) shouldBe true
     }
+    //83,144_32,144_53,21,1,MoveUp
+    @Test
+    fun `go kil skelli`() {
+        AttackActionDecider.shouldAttack(
+            Direction.Up, FramePoint(144, 53), listOf(FramePoint(144, 32))) shouldBe true
+    }
+
+    @Test
+    fun `go off center`() {
+        AttackActionDecider.shouldAttack(
+            Direction.Right, FramePoint(150, 88), listOf(FramePoint(159, 96))) shouldBe true
+    }
+
+    @Test
+    fun `too far, do not attack`() {
+        AttackActionDecider.DEBUG = true
+        // 36 distance
+//        val target = FramePoint(114, 80)
+        // 80 + 16 = 96
+        val target = FramePoint(122, 80)
+        AttackActionDecider.shouldAttack(
+            Direction.Right, FramePoint(88, 80), listOf(target)) shouldBe false
+    }
+
+    @Test
+    fun `too far, dont attack missed target was in square left down`() {
+        AttackActionDecider.DEBUG = true
+        val target = FramePoint(40, 126)
+        val target2 = FramePoint(32, 126)
+        AttackActionDecider.shouldAttack(
+            Direction.Right, FramePoint(60, 112), listOf(target2)) shouldBe false
+    }
+    @Test
+    fun `bat below sword still hits`() {
+        AttackActionDecider.DEBUG = true
+        val target = FramePoint(80, 98)
+        // hits
+        AttackActionDecider.shouldAttack(
+            Direction.Left, FramePoint(101, 88), listOf(target)) shouldBe true
+    }
+    //link = (88, 80) dirGrid = (103, 80)
+
+    @Test
+    fun `out of range from below sword too far away`() {
+        //Route Action -> ATTACK
+        // maybe its because of this list of enemies
+//        Debug: (Kermit) enemy: (136, 43) useThird true in grid false (16) in link false (31)
+//        Debug: (Kermit) enemy: (128, 43) useThird true in grid false (8) in link false (23)
+//        Debug: (Kermit) enemy: (128, 37) useThird true in grid false (14) in link false (29)
+//        Debug: (Kermit) enemy: (172, 32) useThird true in grid false (63) in link false (78)
+//        Debug: (Kermit) enemy: (106, 64) useThird true in grid false (35) in link false (24)
+//        check(Direction.Left, FramePoint(128, 66), FramePoint(128, 43), true)
+        //check(Direction.Up, FramePoint(128, 66), FramePoint(106, 64), true)
+        AttackActionDecider.DEBUG = true
+        // hits
+        AttackActionDecider.shouldAttack(
+            Direction.Up, FramePoint(128, 66), listOf(
+                FramePoint(136,43),
+//                FramePoint(106,64),
+//            FramePoint(128,43),
+//                FramePoint(128,37),
+//                FramePoint(172,32),
+                )
+        ) shouldBe true
+    }
+
+    @Test
+    fun `attack skeli`() {
+        check(Direction.Right, FramePoint(68, 112), FramePoint(98, 112), false)
+    }
+        //(104, 64)
+    fun check(dir: Direction, link: FramePoint, target: FramePoint, should: Boolean) {
+        AttackActionDecider.DEBUG = true
+        // hits
+        AttackActionDecider.shouldAttack(
+            dir, link, listOf(target)) shouldBe should
+    }
 }
+// target (80, 98) link (101, 88)
