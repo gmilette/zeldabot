@@ -240,19 +240,18 @@ val Int.notOnEdgeY: Boolean
 
 val Int.notOnEdge: Boolean
     get() = this in (MapConstants.oneGrid + 4)..(MapConstants.MAX_X - MapConstants.oneGrid)
-val FramePoint.onHighway
-    get() = x % 8 == 0 || y % 8 == 0
+val FramePoint.onHighway: Boolean
+    get() = onHighwayX || onHighwayY
 
-val FramePoint.onHighwayX
+val FramePoint.onHighwayX: Boolean
     get() = x % 8 == 0
 
-val FramePoint.onHighwayXNear
-    get() = (x + 1) % 8 == 0 || (x - 1) % 8 == 0
-val FramePoint.onHighwayY
-    get() = y % 8 == 0
+// subtracting by 61 to get the original coordinates so that this modular division works
+val FramePoint.onHighwayY: Boolean
+    get() = y.yAdjust % 8 == 0
 
-val FramePoint.onHighwayYNear
-    get() = (y + 1) % 8 == 0 || (y - 1) % 8 == 0
+private val Int.yAdjust: Int
+    get() = this + MapConstants.yAdjust
 
 val FramePoint.toG: FramePoint
     get() = FramePoint(x / 16, y / 16)
@@ -302,8 +301,16 @@ val FramePoint.toScreenY
 
 // three grid ensures that it is routing to where link can go i think
 val FramePoint.isInLevelMap
-    get() = y in MapConstants.twoGrid.. MapConstants.MAX_Y - MapConstants.threeGrid &&
+    get() = y in MapConstants.twoGrid.. (MapConstants.MAX_Y - MapConstants.threeGrid) &&
             x in MapConstants.twoGrid..(MapConstants.MAX_X - MapConstants.threeGrid)
+
+fun FramePoint.corners(): List<FramePoint> {
+    return listOf(this.justOutside, this.justRightEndBottomOutside, justRightEndOutside, this.justLeftDownOutside)
+}
+
+fun FramePoint.cornersInLevel(): List<FramePoint> {
+    return corners().filter { it.isInLevelMap }
+}
 
 val FramePoint.isTop
     get() = y == 0
@@ -325,6 +332,22 @@ val FramePoint.upEndRight
     get() = FramePoint(x + 16, y + 8 - 1)
 val FramePoint.upOneGrid
     get() = FramePoint(x, y - 16)
+val FramePoint.downOneGrid
+    get() = FramePoint(x, y + 16)
+val FramePoint.rightOneGrid
+    get() = FramePoint(x + 16, y )
+val FramePoint.leftOneGrid
+    get() = FramePoint(x - 16, y)
+
+val FramePoint.upTwoGrid
+    get() = FramePoint(x, y - 32)
+val FramePoint.downTwoGrid
+    get() = FramePoint(x, y + 32)
+val FramePoint.rightTwoGrid
+    get() = FramePoint(x + 32, y )
+val FramePoint.leftTwoGrid
+    get() = FramePoint(x - 32, y)
+
 val FramePoint.upLeftOneGrid
     get() = FramePoint(x - 16, y - 16)
 val FramePoint.upLeftOneGridALittleLess
@@ -353,6 +376,34 @@ val FramePoint.rightEnd
 val FramePoint.rightEndDown
     get() = FramePoint(x + 16 + 1, y + 15) // why is this 15????
 
+/**
+ * loot can appear inside a grid, but link can pick it up from half a grid away, so allow those targets
+ */
+val FramePoint.lootTargets: List<FramePoint>
+    get() = listOf(this, this.leftHalf, this.upHalf, this.leftUpHalf, this.nearestGrid, this.nearestBigGrid) // round to nearest grid?
+
+val FramePoint.nearestGrid: FramePoint
+    get() {
+        val mod = this.x % 8
+        val mody = this.y.yAdjust % 8
+        return FramePoint(this.x - mod, this.y - mody)
+    }
+
+val FramePoint.nearestBigGrid: FramePoint
+    get() {
+        val mod = this.x % 16
+        val mody = this.y.yAdjust % 16
+        return FramePoint(this.x - mod, this.y - mody)
+    }
+
+val FramePoint.leftHalf
+    get() = FramePoint(x - MapConstants.halfGrid, y)
+val FramePoint.upHalf
+    get() = FramePoint(x, y - MapConstants.halfGrid)
+val FramePoint.leftUpHalf
+    get() = FramePoint(x - MapConstants.halfGrid, y - MapConstants.halfGrid)
+
+
 val FramePoint.left
     get() = FramePoint(x - 1, y)
 val FramePoint.left2
@@ -370,6 +421,14 @@ val FramePoint.justRightEndBottom
 val FramePoint.justLeftBottom
     get() = FramePoint(x, y + 15)
 
+val FramePoint.justLeftDownOutside
+    get() = FramePoint(x + 2, y + 18)
+val FramePoint.justRightEndOutside
+    get() = FramePoint(x + 18, y + 2)
+val FramePoint.justRightEndBottomOutside
+    get() = FramePoint(x + 18, y + 18)
+val FramePoint.justOutside
+    get() = FramePoint(x - 2, y - 2)
 
 fun FramePoint.distTo(other: FramePoint) =
     abs(x - other.x) + abs(y - other.y)

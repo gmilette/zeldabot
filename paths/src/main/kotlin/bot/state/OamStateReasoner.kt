@@ -1,7 +1,9 @@
 package bot.state
 
 import bot.state.map.Direction
+import bot.state.map.MapConstants
 import nintaco.api.API
+import org.jheaps.annotations.VisibleForTesting
 import util.d
 
 
@@ -21,6 +23,22 @@ import util.d
 //96, // link again
 
 // attribute 42 is hit, I think
+
+data class Monster(
+    val parts:Set<Int> = setOf(0xb6, 0xb4),
+    val damaged:Set<Int> = setOf(0x01, 0x43)
+)
+
+object Monsters {
+    val boomerang = Monster(setOf(0xb6, 0xb4), setOf(0x01, 0x43))
+}
+
+// need
+
+object MonsterDirection {
+    // boomerang guy has
+    val damagedAttribute = setOf(1, 2, 3, 40, 43)
+}
 
 object LinkDirection { //14,16 attrib 01
     val damagedAttribute = setOf(41, 42, 43)
@@ -86,7 +104,7 @@ class OamStateReasoner(
 
     val alive: List<SpriteData>
         get() {
-            return sprites.filter { !it.hidden }
+            return sprites.filter { it != null && !it.hidden }
         }
 
     val loot: List<SpriteData>
@@ -103,7 +121,12 @@ class OamStateReasoner(
     private fun SpriteData.toAgent(): Agent =
         Agent(index = tile, point = point, state = toState(), hp = tile, droppedId = attribute)
 
-    private fun combine(toCombine: List<SpriteData>): List<SpriteData> {
+    //combine these
+    //Debug: (Kermit)  enemy Agent(index=176, point=(128, 55), dir=None, state=Alive, countDown=0, hp=176, projectileState=NotProjectile, droppedId=1)
+    //Debug: (Kermit)  enemy Agent(index=178, point=(136, 55), dir=None, state=Alive, countDown=0, hp=178, projectileState=NotProjectile, droppedId=1)
+
+    @VisibleForTesting
+    fun combine(toCombine: List<SpriteData>): List<SpriteData> {
         val xMap = toCombine.associateBy { it.point.x }
 
         // can delete, because there is a sprite 8pxs to left that is the same
@@ -112,9 +135,11 @@ class OamStateReasoner(
 //            .filter { !SpriteData.projectiles.contains(it.tile) }
             .filter {
                 val matched = xMap[it.point.x - 8]
-                val delete = matched?.tile == it.tile && matched.point.y == it.point.y
-                if (DEBUG && delete) {
-                    d { "! delete ${matched?.point}, copy of ${it.point}" }
+                // tiles do not always match
+//                val delete = matched?.tile == it.tile && matched.point.y == it.point.y
+                val delete = matched?.point?.y == it.point.y
+                if (delete) {
+                    d { "! delete, ${it.point} because matches ${matched?.point}" }
                 }
                 delete
         }
@@ -126,6 +151,16 @@ class OamStateReasoner(
             }
             mutable.remove(spriteData)
         }
+
+        if (DEBUG || true) {
+            d { " alive sprites AFTER delete" }
+            if (mutable != null) {
+                mutable.filterNotNull().forEachIndexed { index, sprite ->
+                    d { "$index: $sprite" }
+                }
+            }
+        }
+
 
         return mutable
     }
@@ -151,7 +186,7 @@ class OamStateReasoner(
         val y = api.readOAM(at)
         val tile = api.readOAM(at + 0x0001)
         val attrib = api.readOAM(at + 0x0002)
-        return SpriteData(at / 4, FramePoint(x, y - 61), tile, attrib)
+        return SpriteData(at / 4, FramePoint(x, y - MapConstants.yAdjust), tile, attrib)
     }
 
     private fun readOam(): List<SpriteData> {
@@ -179,10 +214,14 @@ class OamStateReasoner(
             null
         }
 
-        d { " sprites** alive ** ${spritesRaw.filter { !it.hidden }.size} dir ${direction}" }
+        d { " sprites ** alive ** ${spritesRaw.filter { !it.hidden }.size} dir ${direction}" }
         // ahh there are twice as many sprites because each sprite is two big
-        spritesRaw.filter { !it.hidden }.forEachIndexed { index, sprite ->
-            d { "$index: $sprite" }
+        val alive = spritesRaw.filter { !it.hidden }
+        if (DEBUG || true) {
+            d { " alive sprites" }
+            alive.forEachIndexed { index, sprite ->
+                d { "$index: $sprite" }
+            }
         }
 
         if (DEBUG) {
@@ -192,7 +231,7 @@ class OamStateReasoner(
             }
         }
 
-        return combine(spritesRaw)
+        return combine(alive)
     }
 }
 fun Agent.isGannonTriforce(): Boolean =
@@ -207,6 +246,8 @@ data class SpriteData(
 ) {
     val tilePair = tile to attribute
 
+    // keep
+    // Debug: (Kermit) 49: SpriteData(index=49, point=(177, 128), tile=160, attribute=2) None
     val hidden: Boolean = point.y >= 248 || attribute == 32 || ignore.contains(tile) ||
             ignorePairs.contains(tilePair) // does this work?
             //|| point.y < 60  dont need that because the y coordinate is adjusted
@@ -246,13 +287,15 @@ data class SpriteData(
             (0x84).toInt(), // sword point
             90, // not sure what it is maybe link or his sword
             62, // blinking this
-            48, // sword
+            deadEnemy2,
+            deadEnemy,
+            (0x48).toInt(), // magic sword
             48, // swirly thing
             bombSmoke, // yea but then it attacks its own bomb// 112, // bomb smoke, removed it so I can attack the monsters
             114, // i think bomb smoke
 
             //164, // not sure, that is a pancake
-            160,
+//            160, // this happens to be the left side of the snake monster in level 2, snake has attribute 2
             ladder,
             wizard,
             flame1,
@@ -331,7 +374,8 @@ data class SpriteData(
 //            triforceDirt, // why?
 //            triforceDirt2,
             triforceTile,
-            triforceTile2
+            triforceTile2,
+            magicSword
         )
     }
 }
@@ -340,6 +384,8 @@ object TileInfo {
     val longWaitEnemies = setOf(
         184, 186, // ghost
         ghost,
+        ghostWeak2,
+        ghostWeak,
         rhinoHeadDown, rhinoHeadDown2, rhinoHeadMouthOpen, rhinoHead2,
         bat,
         254, 248 // the circle monster because I dont know why im stuck here
@@ -347,6 +393,8 @@ object TileInfo {
 
     const val oldWoman = (0x9a).toInt()
 }
+val deadEnemy2 = (0x64).toInt() // attrib 40, 02 43 3// big splash
+val deadEnemy = (0x62).toInt() // attrib 40, small one
 
 val orbProjectile = (0x44).toInt() // fire from go to next room, also projectiles flying around from ship guy
 //val grabbyHands = 142
@@ -354,6 +402,8 @@ val grabbyHands = (0xAE).toInt() //158
 val grabbyHands2 = (0xAC).toInt() // 172
 
 val ghost = (0xBC).toInt()
+val ghostWeak = (0xB8).toInt()
+val ghostWeak2 = (0xBA).toInt()
 val bombSmoke = 112
 val monsterCloud = (0x70).toInt()
 val bomb = 52
@@ -364,8 +414,8 @@ val bat = (0x9A).toInt()
 
 val boulder = (0x90).toInt()
 val boulder2 = (0x92).toInt()
-val boulder3 = (0xEA).toInt() // it is also triforce part sooo...
-val boulder4 = (0xE8).toInt() // also part of circle enemy
+val boulder3 = (0xEA).toInt() // it is also triforce part sooo... // also rhino piece
+val boulder4 = (0xE8).toInt() // also part of circle enemy // also rhino
 val boulder4Pair = (0xE8).toInt() to (0x00).toInt() //??
 val arrowTipShotByEnemy = (0x88).toInt()
 val arrowButtShotByEnemy = (0x86).toInt()
@@ -382,6 +432,8 @@ val triforceTile2 = (0xF2).toInt()
 val triforceDirt = (0xEC).toInt() // attrib 03 //236 // also part of fourMonster
 val triforceDirt2 = (0xFA).toInt() // also circle enemy center
 val triforceDirt3 = (0xEA).toInt() // attrib 03
+
+val waterMonster = 0xEC to (0x43)
 
 // verify
 val triforceDirtPair = (0xEC).toInt() to (0x03)// attrib 03 //236 // also part of fourMonster
@@ -423,7 +475,7 @@ val dragonNeck = (0xC4).toInt()
 // but these are also the pinwheel guys
 //val dragonFeet = (0xC6).toInt() //wheel guy
 //val dragonFeet2 = (0xCA).toInt() // and spiders
-//val dragonTail = (0xC8).toInt() //wheel guy
+val dragonTail = (0xC8).toInt() //attribute 3 for dragon wheel guy
 //val dragonBody = (0xC2).toInt()
 
 val dragon4Head = (0xDC).toInt()

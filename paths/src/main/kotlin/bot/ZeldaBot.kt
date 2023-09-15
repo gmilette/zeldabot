@@ -1,12 +1,9 @@
 package bot
 
-import bot.plan.PlanBuilder
 import bot.plan.ZeldaPlan
-import bot.plan.action.KillRhino
 import bot.plan.gastar.SkipLocationCollector
-import bot.plan.runner.PlanRunner
-import bot.plan.gastar.SkipPathDb
 import bot.plan.runner.MasterPlan
+import bot.plan.runner.PlanRunner
 import bot.state.*
 import bot.state.map.Hyrule
 import bot.state.map.MapCell
@@ -15,8 +12,6 @@ import nintaco.api.API
 import nintaco.api.ApiSource
 import nintaco.api.Colors
 import nintaco.api.GamepadButtons
-import org.jetbrains.skia.Color
-import sequence.ZeldaItem
 import util.Map2d
 import util.RunOnceLambda
 import util.d
@@ -220,9 +215,13 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                 }
 
                 // draws the right look but the colors are wrong
-                val mapCell = this.hyrule.getMapCell(this.frameState.mapLoc)
+//                val mapCell = this.hyrule.getMapCell(this.frameState.mapLoc)
                 try {
-                    mapCell.gstar.setEnemyCosts(this.link, listOf(this.rhino()?.point ?: FramePoint()))
+                    val mapCell = if (this.frameState.isLevel) hyrule.levelMap.cell(
+                        this.frameState.level,
+                        this.frameState.mapLoc
+                    ) else hyrule.getMapCell(this.frameState.mapLoc)
+//                    mapCell.gstar.setEnemyCosts(this.link, listOf(this.rhino()?.point ?: FramePoint()))
                     drawCosts(mapCell.gstar.costsF.copy())
                 } catch (e: Exception) {
                     d { "ERROR $e"}
@@ -255,7 +254,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             for (y in 0..167) {
 //                val pt = point.toScreenY
                 if (cell.passable.get(x, y)) {
-                    api.drawSprite(SPRITE_ID, x, y + 61)
+                    api.drawSprite(SPRITE_ID, x, y + MapConstants.yAdjust)
                 }
             }
         }
@@ -273,7 +272,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                 }
                 if (color != -1) {
                     api.color = color
-                    api.drawOval(x, y + 61, 1, 1)
+                    api.drawOval(x, y + MapConstants.yAdjust, 1, 1)
                 }
             }
         }

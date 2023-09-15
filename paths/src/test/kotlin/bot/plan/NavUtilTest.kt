@@ -40,19 +40,22 @@ class NavUtilTest {
 
     private fun check(cell: MapLoc, from: FramePoint, target: FramePoint,
                       dirResult: GamePad, level: Int = 0, before: FramePoint? = null, makePassable: FramePoint? = null,
-                      enemies: List<FramePoint> = emptyList()
+                      enemies: List<FramePoint> = emptyList(),
+                      ladderSpec: GStar.LadderSpec? = null
     ) {
-        checkA(cell, from, listOf(target), before, dirResult, level, makePassable = makePassable, enemies = enemies)
+        checkA(cell, from, listOf(target), before, dirResult, level, makePassable = makePassable, enemies = enemies, ladderSpec)
     }
     private fun checkA(cell: MapLoc, from: FramePoint, targets: List<FramePoint>,
                        before: FramePoint? = null, dirResult: GamePad, level: Int = 0, makePassable: FramePoint? = null,
-                       enemies: List<FramePoint> = emptyList()) {
+                       enemies: List<FramePoint> = emptyList(), ladderSpec: GStar.LadderSpec? = null) {
         val hyrule = Hyrule()
         val cell = if (level == 0) hyrule.getMapCell(cell) else hyrule.levelMap.cell(level, cell)
         cell.write()
 
-        val pass = cell.passable.get(107 ,10)
-        d { " pass $pass level $level"}
+        val passPt = FramePoint(134, 35)
+        val inLev = passPt.isInLevelMap
+        val pass = cell.passable.get(passPt)
+        d { " pass check $inLev $pass level $level lb ${cell.passable.get(passPt.justLeftBottom)}"}
 
         val gstar = GStar(cell.passable, halfPassable = true, isLevel = level != 0)
 
@@ -74,7 +77,7 @@ class NavUtilTest {
                 (x == from.justRightEndBottom.x && y == from
                     .justRightEndBottom.y) -> "Z"
                 v -> {
-                    if (x % 8 == 0 || y % 8 == 0) {
+                    if (FramePoint(x, y).onHighway) {
                         ":"
                     } else {
                         "."
@@ -100,7 +103,8 @@ class NavUtilTest {
             listOf(target),
             pointBeforeStart = before,
             enemies = enemies,
-            forcePassable = passable)
+            forcePassable = passable,
+            ladderSpec = ladderSpec)
 
         val firstPt = route.get(0)
         cell.passable.write("check_1192_r") { v, x, y ->
@@ -110,7 +114,7 @@ class NavUtilTest {
                 route.any { it.x == x && it.y == y && it.x == firstPt.x && it.y == firstPt.y } -> "S"
                 route.any { it.x == x && it.y == y } -> "Z"
                 FramePoint(x, y).isTopRightCorner -> "C"
-                v -> if (x % 8 == 0 || y % 8 == 0) {
+                v -> if (FramePoint(x, y).onHighway) {
                     ":"
                 } else {
                     "."
@@ -126,7 +130,7 @@ class NavUtilTest {
                 route.any { it.x == x && it.y == y && it.x == firstPt.x && it.y == firstPt.y } -> "S"
                 route.any { it.x == x && it.y == y } -> "Z"
                 FramePoint(x, y).isTopRightCorner -> "C"
-                v -> if (x % 8 == 0 || y % 8 == 0) {
+                v -> if (FramePoint(x, y).onHighway) {
                     ":"
                 } else {
                     "."
@@ -246,18 +250,69 @@ class NavUtilTest {
             before = start.left)
     }
 
+//target (166, 67) link (72, 54)
+@Test
+fun `test dragon`() {
+    GStar.DEBUG = true
+//    GStar.SHORT_ITER = 150
+    GStar.MAX_ITER = 10000
+    val start = FramePoint(72, 54) // higher up
+    // wtf is wrong
+    // it has two coordinates that are off grid
+    val target = FramePoint(170, 67)
+//        val target = FramePoint(166, 128)
+    // it should be 209
+//        val target = FramePoint(215, 128)
+    check(53, start, target, GamePad.MoveUp, level = 1,
+        before = start.left)
+}
+
+    @Test
+    fun `test lev 1 bat`() {
+        GStar.DEBUG = true
+//    GStar.SHORT_ITER = 150
+        // works if I give it more iterations, to find a route
+        // that isn't on the highway
+        GStar.MAX_ITER = 1000
+        //177, 35
+//        val start = FramePoint(112, 69) // higher up
+        val start = FramePoint(112, 69) // higher up
+//        val target = FramePoint(177, 35) // find it because it is near highway
+        val target = FramePoint(178, 35) // find it
+        check(114, start, target, GamePad.MoveUp, level = 1,
+            before = start.left)
+    }
+
+    @Test
+    fun `test lev 1 ladder`() {
+        GStar.DEBUG = true
+//    GStar.SHORT_ITER = 150
+        // works if I give it more iterations, to find a route
+        // that isn't on the highway
+        GStar.MAX_ITER = 1000
+        val ladder = FramePoint(120, 99)
+        val link = FramePoint(120, 104)
+//        val target = FramePoint(48, 70)
+        val target = FramePoint(56, 90)
+        check(51, link, target, GamePad.MoveUp, level = 1,
+            before = link.left, ladderSpec = GStar.LadderSpec(false, ladder))
+    }
+
     @Test
     fun `test rhino`() {
-        GStar.DEBUG = false
+        GStar.DEBUG = true
+        GStar.SHORT_ITER = 150
+        GStar.MAX_ITER = 150
 //        val start = FramePoint(54, 128) // higher up
 //        val rhinoLocation = FramePoint(90, 128)
 //        val target = FramePoint(126, 128)
 
-        val start = FramePoint(136, 128) // higher up
-        val rhinoLocation = FramePoint(193, 128)
+
+        val start = FramePoint(107, 112) // higher up
+        val rhinoLocation = FramePoint(112, 87)
         // rule, dont' route on top of the monster
 //        val target = FramePoint(216, 128)
-        val target = FramePoint(209, 128)
+        val target = FramePoint(112, 119)
 //        val target = FramePoint(166, 128)
         // it should be 209
 //        val target = FramePoint(215, 128)

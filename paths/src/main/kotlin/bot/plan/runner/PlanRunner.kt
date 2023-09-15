@@ -24,7 +24,11 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     private val target = Experiments.current
 
     init {
-        run(name = target)
+//        run(name = "level1drag")
+        run(name = "all")
+//        run(name = "level8")
+//        run(name = "level1L") // with ladder
+//        run(name = "level1") // with ladder
     }
 
     private fun rerun() {
@@ -102,6 +106,10 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 
     fun target(): FramePoint {
         return action?.target() ?: FramePoint(1,1)
+    }
+
+    fun targets(): List<FramePoint> {
+        return action?.targets() ?: emptyList()
     }
 
     fun path(): List<FramePoint> {

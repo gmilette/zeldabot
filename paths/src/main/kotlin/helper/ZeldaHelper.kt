@@ -70,7 +70,9 @@ class ZeldaHelper(private val monitor: ZeldaMonitor) {
 
     var frameStateUpdater: FrameStateUpdater = FrameStateUpdater(api, hyrule)
 
-    val plan = PlanRunner(ZeldaPlan.makeMasterPlan(hyrule, hyrule.mapCellsObject, hyrule.levelMap))
+    val plan = PlanRunner(
+        { ZeldaPlan.makeMasterPlan(hyrule, hyrule.mapCellsObject, hyrule.levelMap) },
+        api)
 
     private var spriteX = 0
     private var spriteY = 8

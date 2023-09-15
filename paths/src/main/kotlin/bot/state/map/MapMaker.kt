@@ -9,7 +9,7 @@ import util.d
 
 object MapMaker {
     fun createMapCells(data: Map<MapLoc, MapCellData>): Map<MapLoc, MapCell> {
-        val emptyMapData = MapCellData("unknown", Objective.empty)
+        val emptyMapData = MapCellData("", Objective.empty)
 
         // now read in mapTile2
         val fileContent =

@@ -1,5 +1,7 @@
 package bot.plan.gastar
 
+import androidx.compose.runtime.traceEventEnd
+import bot.plan.action.isInGrid
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapConstants
@@ -16,8 +18,8 @@ class GStar(
         var DEBUG = false
         private val DEBUG_DIR = false
         val DEBUG_ONE = false
-        val MAX_ITER = 100000
-        val SHORT_ITER = MAX_ITER // 5000 // not sure if i should use
+        var MAX_ITER = 1000 // not sure if need more than this
+        var SHORT_ITER = MAX_ITER // 5000 // not sure if i should use
         val LIMIT_ITERATIONS = false
         val DO_CORNERS = true
         val DO_ADJUST = false
@@ -27,6 +29,22 @@ class GStar(
         val onEnemyCost = 100000
         val MaxCostAvoidEnemy = onEnemyCost
         val MaxCostAvoidEnemyNear = nearEnemyCost
+    }
+
+    data class LadderSpec(val horizontal: Boolean, val point: FramePoint) {
+        private fun isIn(other: FramePoint) = point.isInGrid(other)
+
+        fun directions(other: FramePoint) = if (false && isIn(other)) {
+            if (DEBUG) {
+                d { "on ladder $other horiz=$horizontal" }
+            }
+            if (horizontal) Direction.horizontal else Direction.vertical
+        } else {
+            if (DEBUG) {
+                d { "on ladder no $other not in $point" }
+            }
+            Direction.all
+        }
     }
 
     private var iterCount = 0
@@ -77,6 +95,12 @@ class GStar(
         }
     }
 
+    fun setNearEnemy(from: FramePoint, point: FramePoint) {
+        costsF.modify(from, point, MapConstants.oneGrid) { dist, current ->
+            current + nearEnemyCost
+        }
+    }
+
     fun setEnemyBig(from: FramePoint, point: FramePoint, size: Int = 16) {
         // TODO: some enemies are smaller than 16!
         // why a little less?
@@ -123,6 +147,14 @@ class GStar(
         }
     }
 
+    private fun setZeroCost(target: FramePoint?) {
+        target?.let {
+            d { "set zero cost $target" }
+            // actual enemy higher cost then around the enemy
+            costsF.modifyTo(target, MapConstants.oneGrid, 0)
+        }
+    }
+
     // if link cannot get to the target, instantly return an empty route.
     // like if they do not fit
     // if the cost of the path exceeds a maximum, also just dodge and wait
@@ -137,8 +169,11 @@ class GStar(
         targets: List<FramePoint>,
         pointBeforeStart: FramePoint? = null,
         enemies: List<FramePoint> = emptyList(),
+        avoidNearEnemy: List<FramePoint> = emptyList(),
         forcePassable: List<FramePoint> = emptyList(),
-        maximumCost: Int = MaxCostAvoidEnemyNear
+        maximumCost: Int = MaxCostAvoidEnemyNear,
+        enemyTarget: FramePoint? = null,
+        ladderSpec: LadderSpec? = null
     ): List<FramePoint> {
         val nearEnemies = enemies.isNotEmpty()
         val maxIter = if (nearEnemies) SHORT_ITER else MAX_ITER
@@ -146,7 +181,11 @@ class GStar(
         resetPassable()
         // only if inside a radius
         setEnemyCosts(start, enemies)
+        for (nearEnemy in avoidNearEnemy) {
+            setNearEnemy(start, nearEnemy)
+        }
         setForcePassable(forcePassable)
+        setZeroCost(enemyTarget)
 //        if (forcePassable.isNotEmpty()) {
 //            d {" force passable "}
 //            passable.write("forcePassable.csv") { v, x, y ->
@@ -231,7 +270,7 @@ class GStar(
                 d { "from prev=$previousPoint to $point ${if (point.onHighway) "*" else ""} dir $dir" }
             }
 
-            val neighbors = (neighborFinder.neighbors(point, dir, dist ?: 0) - closedList - avoid).shuffled()
+            val neighbors = (neighborFinder.neighbors(point, dir, dist ?: 0, ladderSpec) - closedList - avoid).shuffled()
             for (toPoint in neighbors) {
                 // raw cost of this cell
                 val cost = costsF.get(toPoint)

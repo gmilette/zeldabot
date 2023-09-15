@@ -43,6 +43,22 @@ object Addresses {
    const val enemyX1 = 0x0071
    const val tenthEnemyCount = 0x0050
 
+   /////////////// I FOUND
+   /**
+    * 00FA:
+    * 02, when horiz going lef
+    * 01: going right
+    * 08: up
+    * 04: down
+    */
+   const val linkDirReal = 0x00FA
+
+   // i found
+   // 5F if ladder deployed
+   // 00 if not
+   const val ladderDeployed = 0x035A
+   //////////////// I FOUND
+
    // is it link or enemies
    val velocity = listOf(
       0x03BC,

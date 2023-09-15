@@ -119,10 +119,18 @@ data class PreviousMove(
 
 object NavUtil {
 
-    fun routeToAvoidingObstacle(mapCell: MapCell, from: FramePoint, to: List<FramePoint>, before: FramePoint? = null,
+    fun routeToAvoidingObstacle(mapCell: MapCell, from: FramePoint,
+                                to: List<FramePoint>,
+                                before: FramePoint? = null,
                                 enemies: List<FramePoint> = emptyList(),
-                                forcePassable: List<FramePoint> = emptyList()):
-            List<FramePoint> = mapCell.gstar.route(from, to, before, enemies, forcePassable, Int.MAX_VALUE)
+                                // locations to avoid like enemy
+                                avoidNearEnemy: List<FramePoint> = emptyList(),
+                                forcePassable: List<FramePoint> = emptyList(),
+                                enemyTarget: FramePoint? = null,
+                                ladderSpec: GStar.LadderSpec? = null):
+            List<FramePoint> = mapCell.gstar.route(from, to, before, enemies,
+        avoidNearEnemy, forcePassable, Int.MAX_VALUE,
+                enemyTarget, ladderSpec)
 
     fun randomDir(from: FramePoint = FramePoint(100, 100)): GamePad {
         d { " random dir "}

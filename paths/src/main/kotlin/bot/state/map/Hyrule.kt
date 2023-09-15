@@ -187,10 +187,12 @@ enum class Direction {
         val horizontal: List<Direction> = listOf(Direction.Left, Direction.Right)
         val vertical: List<Direction> = listOf(Direction.Up, Direction.Down)
         val all: List<Direction>
-            get() = Direction.values().toList()
+            get() = listOf(Up, Right, Down, Left)
     }
 }
 
+val Direction.upOrLeft: Boolean
+    get() = this == Direction.Up || this == Direction.Left
 
 fun Direction.opposite(): Direction = when (this) {
     Direction.Left -> Direction.Right

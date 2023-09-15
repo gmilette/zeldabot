@@ -131,13 +131,26 @@ class FrameStateUpdater(
         val oam = OamStateReasoner(api)
         val theEnemies = oam.agents()
         val linkDir = oam.direction
-        val ladder = oam.ladderSprite
+        val ladderMem = api.readCPU(Addresses.ladderDeployed) != 0
+        // check ladder memory first
+        d { "ladder mem $ladderMem ${api.readCPU(Addresses.ladderDeployed)}" }
+        val ladder = if (ladderMem) oam.ladderSprite else null
         val damagedTile = if (oam.damaged) LinkDirection.damagedAttribute.last() else 0
         val link = Agent(0, linkPoint, linkDir, hp = damagedTile)
-        val ladderHorizontal = state.previousMove.dir.horizontal
+        // has to persist between states
+        if (ladder != null) {
+            d { "ladder was ${state.ladderStateHorizontal} prev ${state.previousMove.dir.horizontal}"}
+        }
+        state.ladderStateHorizontal = when {
+            ladder == null -> null
+            state.ladderStateHorizontal == null ->
+                state.previousMove.dir.horizontal
+            else -> state.ladderStateHorizontal
+        }
         // and if it is horizontal, then make above and below not passable
         if (ladder != null) {
-            d { " ladder at ${ladder.point} directionHorizontal: $ladderHorizontal"}
+            d { " ladder at ${ladder.point} directionHorizontal: ${state.ladderStateHorizontal}"}
+            d { " prev ${state.previousMove.dir.horizontal}"}
         }
 
         val previousNow = state.previousMove

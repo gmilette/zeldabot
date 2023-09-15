@@ -111,8 +111,10 @@ object InLocations {
 object Phases {
     val grabHearts = "grab hearts"
     val forest30 = "forest 30"
+    val level3 = "level 3"
     val level7 = "level 7"
-    val level9 = "level 7"
+    val level8 = "level 8"
+    val level9 = "level 9"
 
     object Segment {
         val lev2Boss = "kill boss"
@@ -131,6 +133,33 @@ object ZeldaPlan {
         return real(factory)
 //        return realNoStuff(factory)
 //        return part(factory)
+    }
+
+    private fun realPlan(factory: PlanInputs): MasterPlan {
+        val builder = factory.make("walked by a human")
+
+        return builder {
+            startAt(InLocations.Overworld.start)
+            phase("Opening sequence")
+            obj(Dest.item(ZeldaItem.WoodenSword))
+            obj(Dest.level(2))
+            includeLevelPlan(levelPlan2(factory))
+            // blue ring
+
+            obj(Dest.level(3))
+            includeLevelPlan(levelPlan4(factory))
+            obj(Dest.level(4))
+            includeLevelPlan(levelPlan4(factory))
+            // after 4, grab 30 secret x2 then buy shield
+            obj(Dest.level(6))
+            includeLevelPlan(levelPlan6(factory))
+            // whistle back to 2, fight the bomerang guys,
+            // proceed to 8
+            obj(Dest.level(8))
+            includeLevelPlan(levelPlan8(factory))
+            obj(Dest.level(8))
+            includeLevelPlan(levelPlan9(factory))
+        }
     }
 
     private fun levelTour(factory: PlanInputs): MasterPlan {
@@ -260,8 +289,8 @@ object ZeldaPlan {
             obj(Dest.Secrets.forest100South)
             obj(Dest.Shop.arrowShop)
             obj(Dest.Heart.ladderHeart)
-            // exit the heart area
-            goIn(GamePad.MoveLeft, 200)
+            // exit the heart area, 200 is too much
+            goIn(GamePad.MoveLeft, 100)
             obj(Dest.Heart.raftHeart, itemLoc = Objective.ItemLoc.Right)
 
             // after this link just went left, where is he going?
@@ -284,21 +313,22 @@ object ZeldaPlan {
             obj(Dest.level(6))
             includeLevelPlan(levelPlan6(factory))
 
-            phase(Phases.level7)
-            obj(Dest.Shop.blueRing, itemLoc = Dest.Shop.ItemLocs.bait, position = true)
-            obj(Dest.level(7))
-            includeLevelPlan(levelPlan7(factory))
-
             phase("Gear for level 8")
 //            obj(Dest.Shop.potionShopWest, itemLoc = Dest.Shop.ItemLocs.redPotion)
 
             // is the 10 secret necessary, eh
 //            routeTo(78-16)
 //            obj(Dest.Secrets.level2secret10)
-            phase("level 8")
+            phase("go to level 8")
             obj(Dest.level(8))
             includeLevelPlan(levelPlan8(factory), Direction.Left)
-            phase("level 9")
+
+            phase(Phases.level7)
+            obj(Dest.Shop.blueRing, itemLoc = Dest.Shop.ItemLocs.bait, position = true)
+            obj(Dest.level(7))
+            includeLevelPlan(levelPlan7(factory))
+
+            phase("go to level 9")
             obj(Dest.level(9))
             includeLevelPlan(levelPlan9(factory))
 
@@ -369,13 +399,13 @@ object ZeldaPlan {
             right
             goIn(GamePad.MoveRight, 20)
             // need kill until loot
-            killAndLoot
+            killUntilGetKey
 //            pickupDeadItem
             seg("move to arrow")
             left // first rooms
             up //99
             up //83
-            goIn(GamePad.MoveUp, 30)
+            goIn(GamePad.MoveUp, 5)
             seg("get key from skeletons")
             kill // these skeletons provide a key
             goTo(InLocations.Level1.key83)
@@ -385,7 +415,8 @@ object ZeldaPlan {
             up // 67
             upm // 51
             seg("grab key from zig")
-            killAndLoot
+            killUntilGetKey
+//            killAndLoot
 //            pickupDeadItem
             seg("get key from boomerang guys")
             up //35
@@ -491,7 +522,7 @@ object ZeldaPlan {
     }
 
     private fun levelPlan3(factory: PlanInputs): MasterPlan {
-        val builder = factory.make("Destroy level 3")
+        val builder = factory.make(Phases.level3)
         return builder {
             lev(3)
             startAt(LevelStartMapLoc.lev(3))
@@ -500,15 +531,21 @@ object ZeldaPlan {
             goTo(InLocations.Level2.keyMid) //confirm
             seg("walk round corner")
             up // skip key
+            // kill enough to get by
+            // when there is no where to go, just attack nearest enemy!
+            killUntil2
             up
             left
-            seg("past the compasS")
+            seg("past the compass")
             left
             goIn(GamePad.MoveLeft, 30)
             seg("fight swords")
             kill
             down
             seg("get raft")
+            goIn(GamePad.MoveDown, 10)
+            // drop clearing bomb
+            goIn(GamePad.B, 2)
             goTo(InLocations.rightStair)
             startAt(15)
             go(InLocations.getItem)
@@ -525,7 +562,7 @@ object ZeldaPlan {
             bomb(InLocations.BombDirection.right) // right bomb
             right
             seg("kill boss")
-            kill // need special strategy for the 4monster
+            killFirstAttackBomb // need special strategy for the 4monster
 //            goTo(InLocations.Level5.triforceHeart) // where is triforce heart???
             go(InLocations.Level3.heartMid)
             // missed it once
@@ -633,6 +670,8 @@ object ZeldaPlan {
             upm
             upm
             seg("go left to victory")
+            // key??
+            goTo(FramePoint(8.grid, 6.grid))
             leftm
             leftm
             leftm
@@ -674,10 +713,7 @@ object ZeldaPlan {
             up
             seg("kill and push to continue")
             upm
-            // failed, ghosts do not move therefore, we dont know
-            // when they are killed
-            // ghosts, have their id's cycle
-            kill //            killUntil(1) // there is the suns so
+            killLongWait
             pushJust(InLocations.Level6.moveUp)
             upm // 38
             // maybe
@@ -821,13 +857,15 @@ object ZeldaPlan {
     }
 
     private fun levelPlan8(factory: PlanInputs): MasterPlan {
-        val builder = factory.make("Get to level 8")
+        val builder = factory.make(Phases.level8)
         return builder {
             lev(8)
             startAt(LevelStartMapLoc.lev(8))
             seg("run past")
             left
-            kill // 2 projectiles that are alive for brief moments
+            seg("bomb guy")
+            switchToBomb
+            killFirstAttackBomb // bomb?
             left
             startAt(124) //state1
             seg("go get book")

@@ -2,6 +2,7 @@ package bot.plan.action
 
 import bot.state.*
 import bot.state.map.grid
+import util.LogFile
 import util.d
 
 class KillAll(
@@ -21,15 +22,23 @@ class KillAll(
     /**
      * only target these tiles
      */
-    private val targetOnly: List<Int> = listOf()
+    private val targetOnly: List<Int> = listOf(),
+    /**
+     * only target these tiles
+     */
+    private val ignoreProjectiles: List<Int> = listOf(),
+    /**
+     * if true, ignore all enemies (useful for level dragon fighting, but makes link suicidal)
+     */
+    private val ignoreEnemies: Boolean = false,
+    private val roundX: Boolean = false,
+    private var firstAttackBomb: Boolean = false
 ) :
     Action {
+    private val killAll: LogFile = LogFile("KillAll")
+
     private val routeTo = RouteTo(RouteTo.Param(dodgeEnemies = true))
     private val criteria = KillAllCompleteCriteria()
-
-    private var rhinoState = ZeroState()
-
-    private var sameEnemyCount = 0
 
     private var previousAttack = false
     private var pressACount = 0
@@ -77,7 +86,10 @@ class KillAll(
 
     override fun nextStep(state: MapLocationState): GamePad {
         val numEnemiesInCenter = state.numEnemiesAliveInCenter()
-        needLongWait = state.longWait.isNotEmpty()
+        // once set to true, do not change it back
+        if (!needLongWait) {
+            needLongWait = state.longWait.isNotEmpty()
+        }
         d { " KILL ALL step ${state.currentMapCell.mapLoc} count $frameCount wait $waitAfterAllKilled center: $numEnemiesInCenter needLong $needLongWait" }
 
         for (enemy in state.frameState.enemies.filter { it.state != EnemyState.Dead }) {
@@ -90,15 +102,16 @@ class KillAll(
             // reset on the last count
             pressACount == 1 -> {
                 pressACount = 0
+                firstAttackBomb = false // works!
                 // have to release for longer than 1
                 d { "Press A last time" }
                 return GamePad.None
             }
-
-            pressACount > 4 -> {
+            //4
+            pressACount > 3 -> {
                 pressACount--
                 d { "Press A" }
-                return if (useBombs) GamePad.B else GamePad.A
+                return if (useBombs || firstAttackBomb) GamePad.B else GamePad.A
             }
 
             // release for a few steps
@@ -120,20 +133,38 @@ class KillAll(
             waitAfterAllKilled--
             return GamePad.None // just wait
         } else {
-            var aliveEnemies = state.frameState.enemiesClosestToLink()
-            aliveEnemies = aliveEnemies.filter { state.currentMapCell.passable.get(it.point) }
+            // first kill the enemies not in center
+            var aliveEnemies: MutableList<Agent> = state.frameState.enemiesClosestToLink().toMutableList()
+            aliveEnemies = aliveEnemies.filter { state.currentMapCell.passable.get(it.point) }.toMutableList()
+            if (considerEnemiesInCenter) {
+                // all enemies
+                if (numEnemiesInCenter != aliveEnemies.size) {
+                    val centers = state.enemiesAliveInCenter()
+                    for (agent in centers) {
+                        aliveEnemies.remove(agent)
+                    }
+                } else {
+                    d { "Attack center enemies" }
+                }
+            }
+            // NEW
+//            aliveEnemies = aliveEnemies.filter { !it.damaged }
             // need special handling, cant route into center
             if (targetOnly.isNotEmpty()) {
                 d { " target only $targetOnly" }
-                aliveEnemies = aliveEnemies.filter { targetOnly.contains(it.tile) }
+                aliveEnemies = aliveEnemies.filter { targetOnly.contains(it.tile) }.toMutableList()
+            }
+            if (ignoreProjectiles.isNotEmpty()) {
+                d { " ignore projectiles "}
+                aliveEnemies = aliveEnemies.filter { !ignoreProjectiles.contains(it.tile) }.toMutableList()
             }
 
             // for rhino, adjust target location
             // action
 
-//            aliveEnemies.forEach {
-//                d { "alive enemy $it dist ${it.point.distTo(state.frameState.link.point)}" }
-//            }
+            aliveEnemies.forEach {
+                d { "alive enemy $it dist ${it.point.distTo(state.frameState.link.point)}" }
+            }
 
             if (killedAllEnemies(state)) {
                 waitAfterAllKilled--
@@ -142,24 +173,34 @@ class KillAll(
                 // 110 too low for bats
                 waitAfterAllKilled = if (needLongWait) 250 else 50
                 val firstEnemyOrNull = aliveEnemies.firstOrNull()
+                if (firstEnemyOrNull == null) {
+                    // added for the dragon, doesn't really work well
+                    d { "No enemies!!" }
+                    return routeTo.routeTo(state, listOf(FramePoint(8.grid, 6.grid)),
+                        RouteTo.RouteParam(forceNew = true)
+                    )
+                }
+                // no enemies? do dodge
                 // handle the null?? need to test
-                firstEnemyOrNull?.let { firstEnemy ->
+                firstEnemyOrNull.let { firstEnemy ->
                     val previousTarget = target
                     target = firstEnemy.point
                     val link = state.frameState.link
                     val dist = firstEnemy.point.distTo(link.point)
                     //d { " go find $firstEnemy from $link distance: $dist"}
                     when {
-                        state.frameState.canUseSword && AttackActionDecider.shouldAttack(state) -> {
+                        false && state.frameState.canUseSword && AttackActionDecider.shouldAttack(state) -> {
                             // is linked turned in the correct direction towards
                             // the enemy?
                             previousAttack = true
-                            pressACount = 6
+                            pressACount = 5
                             // for the rhino
                             if (waitAfterAttack) {
                                 waitAfterPressing = 60
                             }
-                            if (useBombs) GamePad.B else GamePad.A
+                            if (firstAttackBomb || useBombs) {
+                                GamePad.B
+                            } else GamePad.A
                         }
 
                         else -> {
@@ -177,10 +218,22 @@ class KillAll(
 
                             // force a new route if this has changed targets
                             val forceNew = previousTarget.oneStr != target.oneStr
-                            d { "Plan: target changed was $previousTarget now ${target}"}
+                            d { "Plan: target changed was $previousTarget now ${target} forceNew = $forceNew"}
                             // can't tell if the target has changed
                             // handle replanning when just close, this might be fine
-                            routeTo.routeTo(state, listOf(target), false)
+
+                            val targetsToAttack: List<FramePoint> = if (roundX) {
+                                // for dragon
+                                val mod = target.x % 8
+                                listOf(FramePoint(target.x - mod, target.y))
+                            } else {
+                                listOf(target)
+                            }
+
+                            // could route to all targets
+                            routeTo.routeTo(state, targetsToAttack,
+                                RouteTo.RouteParam(forceNew = forceNew, attackTarget = target, ignoreEnemies = this.ignoreEnemies)
+                            )
                         }
                     }
                 } ?: GamePad.None
@@ -381,7 +434,7 @@ class KillInCenter : Action {
         get() = "KillInCenter"
 }
 
-class DeadForAWhile(private val limit: Int = 450, val completeCriteria: (MapLocationState) -> Boolean) {
+class DeadForAWhile(private val limit: Int = 450, val reset: Boolean = false, val completeCriteria: (MapLocationState) -> Boolean) {
     var frameCount = 0
 
     operator fun invoke(state: MapLocationState): Boolean {
@@ -393,7 +446,9 @@ class DeadForAWhile(private val limit: Int = 450, val completeCriteria: (MapLoca
         if (completeCriteria(state)) {
             frameCount++
         } else {
-//            frameCount = 0
+            if (reset) {
+                frameCount = 0
+            }
         }
     }
 

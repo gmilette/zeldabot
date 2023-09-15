@@ -2,10 +2,11 @@ package bot.plan.action
 
 import bot.plan.action.NavUtil.directionToDir
 import bot.plan.gastar.FrameRoute
+import bot.plan.gastar.GStar
 import bot.state.*
 import bot.state.map.*
+import util.LogFile
 import util.d
-import java.awt.Toolkit
 
 
 //val navUntil = CompleteIfAction(InsideNav()), completeIf = { state ->
@@ -104,6 +105,10 @@ class InsideNavAbout(
         return point
     }
 
+    override fun targets(): List<FramePoint> {
+        return listOf(point)
+    }
+
     override fun path(): List<FramePoint> = routeTo.route?.path ?: emptyList()
 
     override val name: String
@@ -148,11 +153,15 @@ class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val forceDirection: Dir
     }
 
     override fun target(): FramePoint {
-        return super.target()
+        return targets.firstOrNull() ?: FramePoint()
     }
 
-    override fun path(): List<FramePoint> {
-        return route?.path ?: emptyList()
+    override fun path(): List<FramePoint> = routeTo.route?.path ?: emptyList()
+
+    private var targets = listOf<FramePoint>()
+
+    override fun targets(): List<FramePoint> {
+        return targets
     }
 
     private var route: FrameRoute? = null
@@ -203,7 +212,7 @@ class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val forceDirection: Dir
 //        if (isInCurrent) {
 //            d { " ON THE RIGHT ROUTE on ${current.mapLoc} but should be on ${fromLoc} or start ${start?.mapLoc} go $dir"}
 //        } else {
-//            d { " ON THE WRONG ROUTE on ${current.mapLoc} but should be on ${fromLoc} or start ${start?.mapLoc} go $dir"}
+//             d { " ON THE WRONG ROUTE on ${current.mapLoc} but should be on ${fromLoc} or start ${start?.mapLoc} go $dir"}
 //        }
         dir = forceDirection ?: current.mapLoc.directionToDir(next.mapLoc)
 
@@ -212,6 +221,8 @@ class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val forceDirection: Dir
             d { " default move " }
         }
         val exits = state.currentMapCell.exitsFor(dir) ?: return NavUtil.randomDir()
+
+        targets = exits
 
         checkArrived(state, previousDir)
 
@@ -246,6 +257,18 @@ class RouteTo(val params: Param = Param()) {
         val ignoreProjectiles: Boolean = false,
     )
 
+    data class RouteParam(
+        val forceNew: Boolean = false,
+        val overrideMapCell: MapCell? = null,
+        val makePassable: FramePoint? = null,
+        val enemyAvoid: List<FramePoint> = emptyList(),
+        val useB: Boolean = false,
+        val attackTarget: FramePoint? = null,
+        // if false, dont bother avoiding any enemies, avoid projectiles though
+        val ignoreEnemies: Boolean = false
+    )
+    private val routeToFile: LogFile = LogFile("RouteTo")
+
     var route: FrameRoute? = null
         private set
     private var planCount = 0
@@ -261,25 +284,33 @@ class RouteTo(val params: Param = Param()) {
         makePassable: FramePoint? = null,
         useB: Boolean = false
     ): GamePad {
-        return attackOrRoute(state, to, forceNew, overrideMapCell, makePassable, useB)
+        return routeTo(state, to, RouteParam(forceNew, overrideMapCell, makePassable, emptyList(), useB))
+    }
+
+    fun routeTo(
+        state: MapLocationState,
+        to: List<FramePoint>,
+        param: RouteParam,
+    ): GamePad {
+        return attackOrRoute(state, to, param)
     }
 
     private fun attackOrRoute(
         state: MapLocationState,
         to: List<FramePoint>,
-        forceNewI: Boolean = false,
-        overrideMapCell: MapCell? = null,
-        makePassable: FramePoint? = null,
-        useB: Boolean = false
+        param: RouteParam,
     ): GamePad {
         // is this direction correct?
         // i tried dirActual
         d { " route To" }
+        val canAttack = param.useB || state.frameState.canUseSword
 
-        return if (AttackActionDecider.shouldAttack(state) && (state.frameState.canUseSword && !useB)
+        return if (AttackActionDecider.shouldAttack(state) && canAttack
         ) {
             d { " Route Action -> ATTACK" }
-            if (useB) {
+            val att = if (param.useB) GamePad.B else GamePad.A
+            writeFile(to, state, param, att)
+            if (param.useB) {
                 attackB.nextStep(state)
             } else {
                 attack.nextStep(state)
@@ -288,8 +319,19 @@ class RouteTo(val params: Param = Param()) {
             attack.reset()
             attackB.reset()
             d { " Route Action -> No Attack" }
-            doRouteTo(state, to, forceNewI, overrideMapCell, makePassable)
+            doRouteTo(state, to, param)
         }
+    }
+
+    private fun writeFile(
+        to: List<FramePoint>,
+        state: MapLocationState,
+        param: RouteParam,
+        gamePad: GamePad
+    ) {
+        val target = to.minByOrNull { it.distTo(state.link) }
+        val distTo = target?.distTo(state.link) ?: 0
+        routeToFile.write(state.currentMapCell.mapLoc, target?.oneStr ?: "0_0", state.link.oneStr, distTo, planCount, gamePad.name)
     }
 
 //        return if (params.dodgeEnemies && AttackActionDecider.shouldAttack(state) && (state.frameState.canUseSword && !useB)
@@ -324,12 +366,10 @@ class RouteTo(val params: Param = Param()) {
 private fun doRouteTo(
     state: MapLocationState,
     to: List<FramePoint>,
-    forceNewI: Boolean = false,
-    overrideMapCell: MapCell? = null,
-    makePassable: FramePoint? = null
+    param: RouteParam
 ): GamePad {
     d { " DO routeTo TO ${to.size} first ${to.firstOrNull()} currently at ${state.currentMapCell.mapLoc}" }
-    var forceNew = forceNewI
+    var forceNew = param.forceNew
     if (to.isEmpty()) {
         d { " no where to go " }
         // dont do this because it could cause link to go off scren
@@ -368,7 +408,7 @@ private fun doRouteTo(
     if (!state.hasEnemiesOrLoot && params.planCountMax != 1000) {
         d { " NO alive enemies, no need to replan just go plan count max: ${params.planCountMax}" }
         // make a plan now though
-        forceNew = true
+        forceNew = false // wny is this true?? no enemies! it caises
         params.planCountMax = 1000
     } else {
         d { " alive enemies, keep re planning" }
@@ -385,7 +425,7 @@ private fun doRouteTo(
     var nextPoint: FramePoint = route?.pop() ?: FramePoint()
     val routeSize = route?.path?.size ?: 0
 
-    val linkPoints = listOf(linkPt, linkPt.justRightEnd, linkPt.justRightEndBottom, linkPt.justLeftDown)
+    val linkPoints =  listOf(linkPt, linkPt.justRightEnd, linkPt.justRightEndBottom, linkPt.justLeftDown)
     // it's ignoring the rhino!!
     val enemiesNear = state.aliveOrProjectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid * 5 }
     val projectilesNear = state.projectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid * 5 }
@@ -408,14 +448,37 @@ private fun doRouteTo(
 
     if (params.ignoreProjectiles) {
         avoid = avoid.filter { it.state != EnemyState.Projectile }
+    } else {
+        ////
+//        avoid = avoid.filter { it.state == EnemyState.Projectile }
     }
+    if (param.ignoreEnemies) {
+        d { "ignore enemies" }
+        avoid = avoid.filter { it.state != EnemyState.Alive }
+    }
+
+    param.attackTarget?.let { targetAttack ->
+        d { " remove enemy from filter $targetAttack"}
+        avoid = avoid.filter { it.point != targetAttack }
+    }
+    //
+//    if (param.attackTarget != null) {
+//        d { " there is attack target why?"}
+//        avoid = emptyList()
+//    }
 
     d { " enemies near ${enemiesNear.size} projectiles ${projectilesNear.size} avoid: ${avoid.size}" }
         for (agent in enemiesNear) {
             d { " enemy $agent"}
         }
-//        val avoid = emptyList<FramePoint>()
+    d { " avoid attack target ${param.attackTarget}"}
+    for (agent in avoid) {
+        d { " enemy $agent"}
+    }
 
+
+    // faster, but i have to do tradeoff between dodging
+//    avoid = emptyList()
 
     if (forceNew ||
         route == null || // reset
@@ -427,7 +490,7 @@ private fun doRouteTo(
         val why = when {
             forceNew -> "force new $planCount of ${params.planCountMax}"
             !state.previousMove.movedNear -> "got hit"
-            planCount >= params.planCountMax -> "old plan"
+            planCount >= params.planCountMax -> "old plan max=${params.planCountMax}"
             route == null -> "no plan"
             routeSize <= 2 -> " 2 sized route"
             !skippedButIsOnRoute -> "skipped and not on route"
@@ -439,25 +502,53 @@ private fun doRouteTo(
         if (ladder != null) {
             passable.add(ladder.point)
         }
-        if (makePassable != null) {
-            passable.add(makePassable)
+        if (param.makePassable != null) {
+            passable.add(param.makePassable)
         }
 
-        val mapCell = overrideMapCell ?: state.currentMapCell
+        val mapCell = param.overrideMapCell ?: state.currentMapCell
 
         // of if the expected point is not where we should be
         // need to re route
         route = FrameRoute(
             NavUtil.routeToAvoidingObstacle(
-                mapCell,
-                linkPt,
-                to,
-                state.previousMove.from,
-                avoid.map { it.point },
-                passable
+                mapCell = mapCell,
+                from = linkPt,
+                to = to,
+                before = state.previousMove.from,
+                enemies = avoid.points,
+                forcePassable = passable,
+                ladderSpec = state.frameState.ladder?.let {
+                    d { " has ladder "}
+                    GStar.LadderSpec(false, it.point)
+                }
             )
         )
-        d { " Plan: ${state.currentMapCell.mapLoc} new plan! because ($why)" }
+
+        d { " Plan: ${state.currentMapCell.mapLoc} new plan! because ($why) to ${to}" }
+        route?.path?.lastOrNull()?.let { lastPt ->
+            if (lastPt in to || ladder != null) {
+                d { "route to success target" }
+            } else {
+                d { "route to fail, route towards enemies"}
+                d { "ended at $lastPt which is ${lastPt.distTo(to.first())}"}
+                // never go after projectiles
+                val withoutClosestEnemy = avoid.filter { it.state == EnemyState.Alive } .sortedBy { it.point.distTo(state.link) }.toMutableList()
+                val closest = withoutClosestEnemy.removeFirst()
+                d { "closest is ${closest.point}"}
+                route = FrameRoute(
+                    NavUtil.routeToAvoidingObstacle(
+                        mapCell = mapCell,
+                        from = linkPt,
+                        to = avoid.points,
+                        before = state.previousMove.from,
+                        enemies = withoutClosestEnemy.points,
+                        forcePassable = passable,
+                        enemyTarget = closest.point
+                    )
+                )
+            }
+        }
         route?.next15()
 //            route?.adjustCorner()
         nextPoint = route?.popOrEmpty() ?: FramePoint() // skip first point because it is the current location
@@ -480,9 +571,35 @@ private fun doRouteTo(
     } else if (nextPoint == FramePoint(0, 0) && linkPt.y == 0) {
         GamePad.MoveUp
     } else {
+        // what nav to direction, that's weird
+        val gamepad = nextPoint.direction?.toGamePad() ?: NavUtil.directionToDist(linkPt, nextPoint)
+
         // it's the wrong point
-        nextPoint.direction?.toGamePad() ?: NavUtil.directionToDist(linkPt, nextPoint)
+        if (ladder != null) {
+            d { "Ladder! $ladder horiz = ${state.ladderStateHorizontal}"}
+        }
+        if (true || ladder == null) gamepad else
+            if (state.previousMove.didntMove) {
+                // at least this allows link to escape sometimes, but not all times
+                d { "ladder didnt move ${state.previousMove.move} ${state.previousMove.dir}"}
+                if (state.previousMove.dir.horizontal || state.previousMove.move == GamePad.None) {
+                    // force vertical
+                    d { " ladder should go vertical " }
+                    GamePad.randomDirection()
+                } else {
+                    d { " ladder should go hori " }
+                    // force left
+                    GamePad.randomDirection()
+                }
+            } else {
+                gamepad
+            }
+//            state.ladderStateHorizontal == true && gamepad.isHorizontal -> gamepad
+//            state.ladderStateHorizontal == false && !gamepad.isHorizontal -> gamepad
+//            else -> GamePad.MoveUp
+//        }
     }.also {
+        writeFile(to, state, param, it)
         d { " next point $nextPoint dir: $it ${if (nextPoint.direction != null) "HAS DIR ${nextPoint.direction}" else ""}" }
     }
 }

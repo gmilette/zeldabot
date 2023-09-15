@@ -67,10 +67,10 @@ class NeighborFinder(
     }
 
     // need to know the previous point
-    fun neighbors(point: FramePoint, direction: Direction? = null, dist: Int = 1): List<FramePoint> {
+    fun neighbors(point: FramePoint, direction: Direction? = null, dist: Int = 1, ladderSpec: GStar.LadderSpec? = null): List<FramePoint> {
         val neigh = mutableListOf<FramePoint>()
 
-        val validDirections = Direction.all
+        val validDirections = ladderSpec?.directions(point) ?: Direction.all
 
 //        var validDirections = okDirections(point, direction, dist)
 //        if (GStar.DEBUG) {
@@ -96,6 +96,7 @@ class NeighborFinder(
 //                if (next.distTo(this) > 1) {
 //                    d { "skip loc" }
 //                }
+            //test passable (112, 129) Down false
             if (GStar.DEBUG) {
                 d { " test passable $next $direction ${next.onHighwayYAlmost}" }
                 d { "rb ${passable.get(next.justRightEndBottom)}"}

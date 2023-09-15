@@ -2,6 +2,9 @@ package bot.state
 
 import bot.state.map.Direction
 
+val List<Agent>.points: List<FramePoint>
+    get() = this.map { it.point }
+
 val emptyAgent = Agent(0, FramePoint(0, 0), Direction.Down, EnemyState.Unknown,  0,0)
 data class Agent(
     val index: Int = 0,
@@ -16,7 +19,9 @@ data class Agent(
     val tile = hp
     val attribute = droppedId
 
-    val damaged: Boolean = tile in LinkDirection.damagedAttribute
+    val damaged: Boolean = tile in LinkDirection.damagedAttribute || tile in MonsterDirection.damagedAttribute
+
+    val damagedString: String = if (damaged) "*D*" else ""
 
     val isLoot: Boolean
         get() = state == EnemyState.Loot

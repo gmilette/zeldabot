@@ -43,7 +43,7 @@ fun main() = application {
         val ladder = remember { mutableStateOf(true) }
 
         Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
-            Text(
+                Text(
                 text = "Plan: ${state?.mapLoc} ${state?.state?.currentMapCell?.mapData?.name ?: ""}",
                 fontSize = 20.sp,
             )
@@ -206,8 +206,8 @@ fun main() = application {
                     state?.enemiesInfo?.let { enemies ->
                         if (enemies.isNotEmpty()) {
                             enemies.filter { it.state != EnemyState.Dead } .forEachIndexed { index, enemy ->
-                                Text("$index: kind: ${enemy.index} (${enemy.index.toString(16)}) ${enemy.state.name} ${enemy.point} ${enemy.point.toG} id ${enemy
-                                    .droppedId}")
+                                Text("$index: kind: ${enemy.index} (${enemy.index.toString(16)}) ${enemy.state.name} ${enemy.point} ${enemy.point.toG} " +
+                                        "${enemy.damagedString}")
                             }
                         }
                     }
@@ -301,6 +301,9 @@ private fun HyruleMap(state: MapLocationState, plan: PlanRunner) {
                 }
 
                 drawPoint(canvas, v, plan.target(), targetPaint)
+                for (target in plan.targets()) {
+                    drawPoint(canvas, v, target, targetPaint)
+                }
 
                 val path = Path()
                 val linkPath = plan.path()

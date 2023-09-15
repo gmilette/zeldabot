@@ -190,6 +190,10 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
         return wrapped.target()
     }
 
+    override fun targets(): List<FramePoint> {
+        return wrapped.targets()
+    }
+
     override fun path(): List<FramePoint> =
         wrapped.path()
 
@@ -277,6 +281,10 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
 
     override fun target(): FramePoint =
         wrapped.target()
+
+    override fun targets(): List<FramePoint> {
+        return wrapped.targets()
+    }
 
     override fun path(): List<FramePoint> =
         wrapped.path()
