@@ -244,6 +244,8 @@ object ZeldaPlan {
             startAt(InLocations.Overworld.start)
             phase("Opening sequence")
             obj(Dest.item(ZeldaItem.WoodenSword))
+            obj(Dest.level(1))
+            includeLevelPlan(levelPlan1(factory))
             obj(Dest.level(2))
             includeLevelPlan(levelPlan2(factory))
             // position by routing
@@ -1044,7 +1046,6 @@ object ZeldaPlan {
             switchToArrow()
             goTo(InLocations.Level9.centerGannonAttack)
             killG
-//            startHere
             lootInside
             upm
             "seg get princess".seg()

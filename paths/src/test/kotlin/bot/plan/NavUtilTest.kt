@@ -299,6 +299,19 @@ fun `test dragon`() {
     }
 
     @Test
+    fun `test lev 1 bats`() {
+        GStar.DEBUG = false
+//    GStar.SHORT_ITER = 150
+        // works if I give it more iterations, to find a route
+        // that isn't on the highway
+        GStar.MAX_ITER = 10000
+        val link = FramePoint(96, 59)
+        val target = FramePoint(172, 52)
+        check(114, link, target, GamePad.MoveUp, level = 1,
+            before = link.left)
+    }
+
+    @Test
     fun `test rhino`() {
         GStar.DEBUG = true
         GStar.SHORT_ITER = 150

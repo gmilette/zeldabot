@@ -18,7 +18,9 @@ class GStar(
         var DEBUG = false
         private val DEBUG_DIR = false
         val DEBUG_ONE = false
-        var MAX_ITER = 1000 // not sure if need more than this
+        // at 1000, link cant go into the squares
+        // at 10000, it is slow
+        var MAX_ITER = 10000 // not sure if need more than this
         var SHORT_ITER = MAX_ITER // 5000 // not sure if i should use
         val LIMIT_ITERATIONS = false
         val DO_CORNERS = true
@@ -312,7 +314,7 @@ class GStar(
             }
         }
 
-        if (DEBUG) {
+        if (DEBUG || true) {
             d { " ****** DONE $iterCount ****** " }
         }
         // todo: actually should pick the best path so far..

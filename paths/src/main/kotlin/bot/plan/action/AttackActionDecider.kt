@@ -12,6 +12,8 @@ object AttackActionDecider {
     private const val dodgeBuffer = 3
     var DEBUG = false
 
+    // don't swing if there is projectile near by!
+
     fun shouldAttack(state: MapLocationState) =
         shouldAttack(
             state.frameState.link.dir,
@@ -92,7 +94,8 @@ object AttackActionDecider {
 
     // throw b randomly
     fun shouldThrowProjectile() {
-        // if boomerang enabled
+        // if have a projectile
+        // if boomerang enabled, throw it at loot
         // if full health
         // if lined up vertical or horiz, and facing
     }

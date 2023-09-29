@@ -61,7 +61,7 @@ class KillAll(
     }
 
     override val name: String
-        get() = "KILL ALL ${if (numberLeftToBeDead > 0) "until $numberLeftToBeDead" else ""}"
+        get() = "KILL ALL $waitAfterAllKilled ${if (numberLeftToBeDead > 0) "until $numberLeftToBeDead" else ""}"
 
     private fun killedAllEnemies(state: MapLocationState): Boolean {
         return state.clearedWithMinIgnoreLoot(numberLeftToBeDead + centerEnemies(state))
@@ -90,6 +90,7 @@ class KillAll(
         if (!needLongWait) {
             needLongWait = state.longWait.isNotEmpty()
         }
+        needLongWait = false
         d { " KILL ALL step ${state.currentMapCell.mapLoc} count $frameCount wait $waitAfterAllKilled center: $numEnemiesInCenter needLong $needLongWait" }
 
         for (enemy in state.frameState.enemies.filter { it.state != EnemyState.Dead }) {

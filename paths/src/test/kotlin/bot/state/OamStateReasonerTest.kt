@@ -46,6 +46,21 @@ fun `test some more`() {
             get(0).point.x shouldBe 48
         }
     }
+
+    @Test
+    fun `test delete samex`() {
+        val reasoner = OamStateReasoner(mock())
+        val sprites = listOf(
+            SpriteData(176, FramePoint(141, 64), 168, 3),
+            SpriteData(176, FramePoint(149, 64), 168, 3),
+            SpriteData(176, FramePoint(141, 32), 168, 3),
+            SpriteData(178, FramePoint(149, 32), 170, 3)
+        )
+        reasoner.combine(sprites).apply {
+            size shouldBe 2
+        }
+    }
+
     @Test
     fun `test snake guy`() {
 //        (Kermit) 0: SpriteData(index=27, point=(200, 123), tile=166, attribute=2)

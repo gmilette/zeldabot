@@ -530,10 +530,12 @@ private fun doRouteTo(
             if (lastPt in to || ladder != null) {
                 d { "route to success target" }
             } else {
+                // what if can't find a route here?
                 d { "route to fail, route towards enemies"}
                 d { "ended at $lastPt which is ${lastPt.distTo(to.first())}"}
                 // never go after projectiles
                 val withoutClosestEnemy = avoid.filter { it.state == EnemyState.Alive } .sortedBy { it.point.distTo(state.link) }.toMutableList()
+                val onlyProjectiles = avoid.filter { it.state == EnemyState.Projectile }.map { it.point }
                 val closest = withoutClosestEnemy.removeFirst()
                 d { "closest is ${closest.point}"}
                 route = FrameRoute(
@@ -542,11 +544,12 @@ private fun doRouteTo(
                         from = linkPt,
                         to = avoid.points,
                         before = state.previousMove.from,
-                        enemies = withoutClosestEnemy.points,
+                        enemies = onlyProjectiles, // withoutClosestEnemy.points,
                         forcePassable = passable,
                         enemyTarget = closest.point
                     )
                 )
+                d { "found route of size ${route?.path?.size ?: 0}"}
             }
         }
         route?.next15()

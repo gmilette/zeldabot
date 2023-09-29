@@ -135,7 +135,8 @@ class RunActionLog(private val fileNameRoot: String) {
                 totalFrames,
                 totalHits,
                 totalDamage,
-                bombsUsed.total
+                bombsUsed.total,
+                state.frameState.gameMode
             )
         }
     }
@@ -151,7 +152,7 @@ class RunActionLog(private val fileNameRoot: String) {
         val csvWriter2 = CsvWriter()
         if (!File(outputFileAll).exists()) {
             csvWriter2.open(outputFileAll, true) {
-                writeRow("date", "action", "file", "totalTime", "totalFrames", "totalHits", "totalDamage", "bombsUsed")
+                writeRow("date", "action", "file", "totalTime", "totalFrames", "totalHits", "totalDamage", "bombsUsed", "gamemode")
             }
         }
     }

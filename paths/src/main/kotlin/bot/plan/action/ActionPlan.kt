@@ -512,11 +512,15 @@ data class LootSpec(
     val bigCoin: Boolean = true,
     val smallCoin: Boolean = false,
     val bomb: Boolean = true
-)
+) {
 
-class GetLoot(private val adjustInSideLevel: Boolean = false, ) : Action {
+}
+
+class GetLoot(private val adjustInSideLevelBecauseGannon: Boolean = false, private val lootSpec: LootSpec? = null) : Action {
     // gannon triforce pieces are sometimes projectiles
-    private val routeTo = RouteTo(RouteTo.Param(ignoreProjectiles = true))
+    // yea but then we are going to route link into the projectiles
+    // so now I parameterize this so that it only ignores projectiles when in gannon
+    private val routeTo = RouteTo(RouteTo.Param(ignoreProjectiles = adjustInSideLevelBecauseGannon))
 
     override fun complete(state: MapLocationState): Boolean =
         !state.hasAnyLoot
@@ -550,7 +554,7 @@ class GetLoot(private val adjustInSideLevel: Boolean = false, ) : Action {
         // the target cannot actually be beyond the bottom two
         // lines that would be obsurd
         // need this only for gannon I think
-        if (adjustInSideLevel && target.y > 8.grid) {
+        if (adjustInSideLevelBecauseGannon && target.y > 8.grid) {
             target = FramePoint(target.x, 8.grid)
         }
 
@@ -559,7 +563,7 @@ class GetLoot(private val adjustInSideLevel: Boolean = false, ) : Action {
 //        val targets = target.about()
         val targets = target.lootTargets
 
-        d { " get loot $target from targets ${targets}" }
+        d { " get loot $target from targets $targets" }
         return routeTo.routeTo(state, targets, forceNew = previousTarget != target)
     }
 

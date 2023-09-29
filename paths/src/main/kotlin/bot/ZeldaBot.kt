@@ -12,6 +12,7 @@ import nintaco.api.API
 import nintaco.api.ApiSource
 import nintaco.api.Colors
 import nintaco.api.GamepadButtons
+import sequence.ZeldaItem
 import util.Map2d
 import util.RunOnceLambda
 import util.d
@@ -167,9 +168,12 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         }
 //        fillBombs()
         refillIfOut()
+        frameStateUpdater.setSword(ZeldaItem.MagicSword)
+        frameStateUpdater.setRing(ZeldaItem.BlueRing)
         if (setEquipmentCt > 0 && addEquipment) {
             d { " Set equip" }
 //            frameStateUpdater.setSword(ZeldaItem.MagicSword)
+//            frameStateUpdater.setRing(ZeldaItem.BlueRing)
             frameStateUpdater.setLadderAndRaft(true)
             frameStateUpdater.setRedCandle()
             frameStateUpdater.setHaveWhistle()
@@ -179,7 +183,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             frameStateUpdater.fillTriforce()
 //            frameStateUpdater.setRing(ZeldaItem.RedRing)
 
-            frameStateUpdater.fillHearts()
+//            frameStateUpdater.fillHearts()
             setEquipmentCt--
         }
         if (frameStateUpdater.state.frameState.clockActivated) {
@@ -339,7 +343,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         val life = frameStateUpdater.state.frameState.inventory.heartCalc.lifeInHearts2()
         if (life <= 2.5) {
             d { "fill hearts $life" }
-            frameStateUpdater.fillHearts()
+//            frameStateUpdater.fillHearts()
         } else {
             d { "fill hearts $life" }
         }

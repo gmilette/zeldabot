@@ -81,6 +81,12 @@ class AttackActionDeciderTest() {
     fun `attack skeli`() {
         check(Direction.Right, FramePoint(68, 112), FramePoint(98, 112), false)
     }
+
+    @Test
+    fun `attack below`() {
+        check(Direction.Right, link = FramePoint(169, 88),
+            FramePoint(154, 96), true)
+    }
         //(104, 64)
     fun check(dir: Direction, link: FramePoint, target: FramePoint, should: Boolean) {
         AttackActionDecider.DEBUG = true
