@@ -6,5 +6,5 @@ fun main(args: Array<String>) {
 
     val hyrule: Hyrule = Hyrule()
 
-    AnalysisPlanBuilder().buildHalfPlan(hyrule)
+    AnalysisPlanBuilder(hyrule).buildHalfPlan()
 }

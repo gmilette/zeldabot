@@ -8,7 +8,6 @@ import bot.state.map.destination.Dest
 import bot.state.map.level.LevelMapCellsLookup
 import bot.state.map.level.LevelSpecBuilder
 import bot.state.map.level.LevelStartMapLoc
-import sequence.AnalysisPlanBuilder
 import bot.state.map.destination.ZeldaItem
 
 object InLocations {
@@ -117,11 +116,10 @@ object Phases {
 }
 
 object ZeldaPlan {
-    // maybe just request a certain phase?
     fun makeMasterPlan(hyrule: Hyrule, mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
-        val plan = AnalysisPlanBuilder.MasterPlanOptimizer(hyrule)
+        val router = OverworldRouter(hyrule)
 
-        val factory = PlanInputs(mapData, levelData, plan)
+        val factory = PlanInputs(mapData, levelData, router)
 
 //        return levelTour(factory)
 //        return bombTour(factory)

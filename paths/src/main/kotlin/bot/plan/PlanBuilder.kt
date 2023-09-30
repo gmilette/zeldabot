@@ -16,7 +16,7 @@ import util.d
 class PlanBuilder(
     private val mapData: MapCells,
     private val levelData: LevelMapCellsLookup,
-    private val optimizer: AnalysisPlanBuilder.MasterPlanOptimizer,
+    private val optimizer: OverworldRouter,
     private var phase: String = ""
 ) {
     private var segment: String = ""

@@ -7,7 +7,7 @@ import sequence.AnalysisPlanBuilder
 class PlanInputs(
     val map: MapCells,
     private val levelData: LevelMapCellsLookup,
-    private val optimizer: AnalysisPlanBuilder.MasterPlanOptimizer
+    private val optimizer: OverworldRouter
 ) {
     fun make(phrase: String): PlanBuilder =
         PlanBuilder(map, levelData, optimizer, phrase)
