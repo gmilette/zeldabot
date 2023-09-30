@@ -1,8 +1,8 @@
 package bot.state.map
 
 import bot.state.MapLoc
-import sequence.DestType
-import sequence.ZeldaItem
+import bot.state.map.destination.DestType
+import bot.state.map.destination.ZeldaItem
 
 class MapCells(
     private val mapCells: Map<MapLoc, MapCell> = emptyMap()

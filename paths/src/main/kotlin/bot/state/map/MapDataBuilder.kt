@@ -2,6 +2,7 @@ package bot.state.map
 
 import bot.state.FramePoint
 import bot.state.MapLoc
+import bot.state.map.destination.*
 import sequence.*
 
 val Int.grid

@@ -1,12 +1,11 @@
 package bot.state
 
-import bot.plan.InLocations
 import bot.state.map.Direction
 import bot.state.map.MapConstants
+import bot.state.map.destination.ZeldaItem
+import bot.state.map.destination.zeldaItemsRequired
 import nintaco.api.API
 import nintaco.api.ApiSource
-import sequence.ZeldaItem
-import sequence.zeldaItemsRequired
 import util.d
 import kotlin.math.abs
 

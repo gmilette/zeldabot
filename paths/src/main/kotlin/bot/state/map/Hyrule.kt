@@ -3,7 +3,7 @@ package bot.state.map
 import bot.plan.gastar.GStar
 import bot.state.*
 import bot.state.map.level.LevelMapCellsLookup
-import sequence.DestType
+import bot.state.map.destination.DestType
 import util.Map2d
 import util.d
 import java.io.File

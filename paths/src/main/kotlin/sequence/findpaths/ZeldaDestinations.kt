@@ -1,6 +1,6 @@
 package sequence.findpaths
 
-import sequence.DestType
+import bot.state.map.destination.DestType
 
 object ZeldaDestinations {
     val levels = listOf(

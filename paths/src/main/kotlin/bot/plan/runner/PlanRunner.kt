@@ -9,7 +9,7 @@ import bot.state.FramePoint
 import bot.state.GamePad
 import bot.state.MapLocationState
 import nintaco.api.API
-import sequence.ZeldaItem
+import bot.state.map.destination.ZeldaItem
 import util.d
 
 class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {

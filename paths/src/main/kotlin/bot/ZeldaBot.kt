@@ -12,7 +12,7 @@ import nintaco.api.API
 import nintaco.api.ApiSource
 import nintaco.api.Colors
 import nintaco.api.GamepadButtons
-import sequence.ZeldaItem
+import bot.state.map.destination.ZeldaItem
 import util.Map2d
 import util.RunOnceLambda
 import util.d

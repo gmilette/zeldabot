@@ -3,7 +3,7 @@ package bot.plan.runner
 import bot.plan.Phases
 import bot.plan.action.Action
 import bot.plan.action.KillAll
-import sequence.ZeldaItem
+import bot.state.map.destination.ZeldaItem
 
 class Experiments(masterPlan: MasterPlan) {
     companion object {

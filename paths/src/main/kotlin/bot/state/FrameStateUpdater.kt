@@ -6,7 +6,7 @@ import bot.state.map.Hyrule
 import bot.state.map.MapConstants
 import bot.state.map.horizontal
 import nintaco.api.API
-import sequence.ZeldaItem
+import bot.state.map.destination.ZeldaItem
 import util.d
 import util.e
 import kotlin.math.max

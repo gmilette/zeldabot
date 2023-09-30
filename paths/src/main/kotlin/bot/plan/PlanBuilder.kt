@@ -6,11 +6,11 @@ import bot.plan.runner.MasterPlan
 import bot.plan.runner.PlanSegment
 import bot.state.*
 import bot.state.map.*
+import bot.state.map.destination.DestType
+import bot.state.map.destination.EntryType
 import bot.state.map.level.LevelMapCellsLookup
 import sequence.AnalysisPlanBuilder
-import sequence.DestType
-import sequence.EntryType
-import sequence.ZeldaItem
+import bot.state.map.destination.ZeldaItem
 import util.d
 
 class PlanBuilder(

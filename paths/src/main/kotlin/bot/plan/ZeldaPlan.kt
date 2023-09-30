@@ -4,12 +4,12 @@ import bot.plan.action.GoIn
 import bot.plan.runner.MasterPlan
 import bot.state.*
 import bot.state.map.*
+import bot.state.map.destination.Dest
 import bot.state.map.level.LevelMapCellsLookup
 import bot.state.map.level.LevelSpecBuilder
 import bot.state.map.level.LevelStartMapLoc
 import sequence.AnalysisPlanBuilder
-import sequence.Dest
-import sequence.ZeldaItem
+import bot.state.map.destination.ZeldaItem
 
 object InLocations {
     val topMiddleBombSpot = FramePoint(120, 32)
