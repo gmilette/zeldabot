@@ -33,19 +33,3 @@ data class Agent(
     val y: Int
         get() = point.y
 }
-
-// everything I can track about the enemy so far
-data class AgentData(
-    val point: FramePoint,
-    val dir: Direction,
-    val countDown: Int = 0,
-    val status: Int = 0,
-    val hp: Int = 0,
-    val velocity: Int = 0,
-    val animation: Int = 0,
-    val presence: Int = 0,
-    val droppedId: Int = 0,
-    val droppedEnemyItem: Int = 0,
-    val droppedItem: DroppedItem = DroppedItem.Unknown,
-    val projectileState: ProjectileState = ProjectileState.NotProjectile
-)

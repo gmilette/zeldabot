@@ -8,8 +8,6 @@ import nintaco.api.ApiSource
 class MapLocationState(
     var hyrule: Hyrule,
 
-    var enemyReasoner: EnemyStateReasoner = EnemyStateReasoner(),
-
     var lastGamePad: GamePad = GamePad.MoveUp,
 
     var previousMove: PreviousMove = PreviousMove(
@@ -53,12 +51,8 @@ class MapLocationState(
         get() = frameState.link.point
 
     fun clearHistory() {
-        enemyReasoner.clear()
         framesOnScreen = 0
     }
-
-    val numEnemiesSeen: Int
-        get() = enemyReasoner.numEnemiesSeen
 
     fun toStringEnemy(): String {
         var st = ""
