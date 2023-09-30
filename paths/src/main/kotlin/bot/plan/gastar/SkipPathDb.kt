@@ -1,11 +1,8 @@
 package bot.plan.gastar
 
 import bot.plan.action.PreviousMove
-import bot.state.FramePoint
 import bot.state.MapLoc
-import com.github.doyaaaaaken.kotlincsv.client.CsvFileWriter
 import com.github.doyaaaaaken.kotlincsv.client.CsvWriter
-import nintaco.gui.hexeditor.SearchQuery.Direction
 import java.io.File
 
 class SkipPathDb {

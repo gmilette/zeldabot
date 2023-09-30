@@ -1,12 +1,10 @@
 package bot.plan.action
 
-import bot.plan.action.NavUtil.directionToDir
 import bot.plan.gastar.GStar
 import bot.state.FramePoint
 import bot.state.GamePad
 import bot.state.MapLocationState
 import bot.state.distTo
-import bot.state.map.Direction
 import bot.state.map.MapCell
 import util.d
 import util.w

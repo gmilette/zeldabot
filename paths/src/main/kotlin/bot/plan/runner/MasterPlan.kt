@@ -2,12 +2,16 @@ package bot.plan.runner
 
 import bot.plan.action.Action
 import bot.plan.action.EndAction
-import bot.plan.action.MoveTo
 import bot.plan.action.StartHereAction
 import bot.state.MapLocationState
-import nintaco.api.API
 import util.d
 import util.i
+
+// master plan
+// - plan phase (main thing doing, get to lev 1, gather stuff for lev 3, just
+// a name
+//  - plan segment (sub route
+//  -- plan objective (per screen)
 
 class MasterPlan(val segments: List<PlanSegment>) {
     private var justRemoved: PlanStep = PlanStep(PlanSegment("", "", emptyList()), EndAction())
@@ -19,75 +23,6 @@ class MasterPlan(val segments: List<PlanSegment>) {
     val complete: Boolean
         get() = giant.isEmpty()
 
-    fun getPlanPhase(phaseName: String, segment: String? = null): MasterPlan =
-        MasterPlan(segments.filter { segment == null || it.name == segment}.filter { it.phase == phaseName })
-
-    fun getPlanAfter(phaseName: String): MasterPlan {
-        val index = segments.indexOfFirst { it.phase == phaseName }
-        return MasterPlan(segments.subList(index, segments.size))
-    }
-
-    /**
-     * return the next action
-     */
-    fun skipToStart(): Action {
-        var ct = 0
-        return if (hasStartHere) {
-            var action = pop()
-            while (action !is StartHereAction) {
-                action = pop()
-                d { " skip ${action.name}"}
-                ct++
-            }
-            (action as? StartHereAction)?.restoreSaveSlot()
-            d { " advanced $ct steps"}
-            action
-        } else {
-            pop()
-        }
-    }
-
-    private val hasStartHere: Boolean
-        get() = giant.any { it.action is StartHereAction }
-
-    // estimated time to complete
-
-    private val numMoves: Int
-        get() = if (giant.isNullOrEmpty()) 0 else giant.count {
-            true
-//            it.action is MoveTo
-        }
-
-    fun log() {
-        val first = giant.firstOrNull()
-
-        first?.inSegment?.apply {
-            d { "*** ${phase}: ${name}: ${first.action.name}" }
-        }
-    }
-
-    override fun toString(): String {
-        val first = giant.firstOrNull()
-
-        val text = first?.inSegment?.let {
-            "**** Phase: ${it.phase}: seg: ${it.name}: action:${first.action.name}"
-        } ?: ""
-
-        return text
-    }
-
-    fun toStringAll(): String {
-        val first = giant.firstOrNull()
-
-        var text = ""
-        var i = 0
-        for (step in giant) {
-            text += "$i ${step.action.name} \n"
-            i++
-        }
-
-        return text
-    }
 
     fun current(): Action =
         giant.first().action
@@ -113,8 +48,72 @@ class MasterPlan(val segments: List<PlanSegment>) {
         }
     }
 
+    fun getPlanPhase(phaseName: String, segment: String? = null): MasterPlan =
+        MasterPlan(segments.filter { segment == null || it.name == segment }.filter { it.phase == phaseName })
+
+    fun getPlanAfter(phaseName: String): MasterPlan {
+        val index = segments.indexOfFirst { it.phase == phaseName }
+        return MasterPlan(segments.subList(index, segments.size))
+    }
+
+    /**
+     * return the next action
+     */
+    fun skipToStart(): Action {
+        var ct = 0
+        return if (hasStartHere) {
+            var action = pop()
+            while (action !is StartHereAction) {
+                action = pop()
+                d { " skip ${action.name}" }
+                ct++
+            }
+            (action as? StartHereAction)?.restoreSaveSlot()
+            d { " advanced $ct steps" }
+            action
+        } else {
+            pop()
+        }
+    }
+
+    private val hasStartHere: Boolean
+        get() = giant.any { it.action is StartHereAction }
+
+    private val numMoves: Int
+        get() = if (giant.isEmpty()) 0 else giant.count {
+            true
+//            it.action is MoveTo
+        }
+
+    fun log() {
+        val first = giant.firstOrNull()
+
+        first?.inSegment?.apply {
+            d { "*** ${phase}: ${name}: ${first.action.name}" }
+        }
+    }
+
     fun toStringCurrentPlanPhase(): String =
         justRemoved.inSegment.toStringShort()
+
+    override fun toString(): String {
+        val first = giant.firstOrNull()
+
+        val text = first?.inSegment?.let {
+            "**** Phase: ${it.phase}: seg: ${it.name}: action:${first.action.name}"
+        } ?: ""
+
+        return text
+    }
+
+    fun toStringAll(): String {
+        var text = ""
+        for ((i, step) in giant.withIndex()) {
+            text += "$i ${step.action.name} \n"
+        }
+
+        return text
+    }
 }
 
 class EmptyAction : Action {
@@ -128,15 +127,15 @@ class EmptyAction : Action {
 
 data class PlanStep(val inSegment: PlanSegment, val action: Action)
 
-
 data class PlanSegment(
-    val phase: String, val name: String, val plan:
-    List<Action>
+    val phase: String,
+    val name: String,
+    val plan: List<Action>
 ) {
     override fun toString(): String {
         return plan.fold("") { R, t -> "$R $t " }
     }
 
     fun toStringShort(): String =
-        "ph: $phase seg: $name" // #act: ${plan.size}
+        "ph: $phase seg: $name"
 }

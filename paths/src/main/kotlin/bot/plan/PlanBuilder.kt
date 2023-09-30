@@ -1,7 +1,6 @@
 package bot.plan
 
 import KillHandsInLevel7
-import bot.state.GamePad
 import bot.plan.action.*
 import bot.plan.runner.MasterPlan
 import bot.plan.runner.PlanSegment

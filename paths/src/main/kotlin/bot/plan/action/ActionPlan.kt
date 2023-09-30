@@ -1,9 +1,11 @@
 package bot.plan.action
 
 import bot.plan.gastar.GStar
-import bot.state.GamePad
 import bot.state.*
-import bot.state.map.*
+import bot.state.map.Direction
+import bot.state.map.MapCell
+import bot.state.map.MapConstants
+import bot.state.map.grid
 import nintaco.api.ApiSource
 import util.d
 import util.i

@@ -38,7 +38,7 @@ class Experiments(masterPlan: MasterPlan) {
         ).associateBy { it.name }
     }
 
-    fun masterPlanWith(action: Action): MasterPlan {
+    private fun masterPlanWith(action: Action): MasterPlan {
         val segment = PlanSegment("phase", "set", listOf(action))
         return MasterPlan(listOf(segment))
     }
@@ -53,15 +53,5 @@ data class Experiment(
     val sword: ZeldaItem = ZeldaItem.MagicSword,
     val addEquipment: Boolean = false,
     val startAt: Int = 52
-    // startAt
 )
-
-object MakeExperiment {
-    fun go(masterPlan: MasterPlan) {
-
-
-    }
-
-}
-// add a final action to re-run, collect data
 

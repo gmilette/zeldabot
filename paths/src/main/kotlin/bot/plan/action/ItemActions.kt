@@ -1,7 +1,6 @@
 package bot.plan.action
 
 import bot.state.*
-import sequence.ZeldaItem
 import util.d
 import kotlin.random.Random
 

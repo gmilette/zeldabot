@@ -1,6 +1,8 @@
 package bot.plan.gastar
 
-import bot.state.*
+import bot.state.FramePoint
+import bot.state.dirTo
+import bot.state.distTo
 import bot.state.map.Direction
 import util.d
 import util.e

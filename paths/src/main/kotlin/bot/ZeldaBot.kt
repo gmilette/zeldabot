@@ -211,9 +211,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                 val tenth = this.frameState.tenth
                 val dir = this.frameState.link.dir.name.first()
                 val damage = this.frameState.inventory.heartCalc.damageNumber()
-                val st = plan.action?.name?.first() ?: ""
                 try {
-                    drawIt(plan.target(), plan.path(), "$locCoordinates $link $st t: $tenth d: $damage")
+                    drawIt(plan.target(), plan.path(), "$locCoordinates $link t: $tenth d: $damage")
                 } catch (e: Exception) {
                     d { "ERROR $e"}
                 }

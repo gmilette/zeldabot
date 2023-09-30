@@ -7,14 +7,9 @@ import bot.state.map.*
 import bot.state.map.level.LevelMapCellsLookup
 import bot.state.map.level.LevelSpecBuilder
 import bot.state.map.level.LevelStartMapLoc
-import sequence.*
-
-// master plan
-// - plan phase (main thing doing, get to lev 1, gather stuff for lev 3, just
-// a name
-//  - plan segment (sub route
-//  -- plan objective (per screen)
-
+import sequence.AnalysisPlanBuilder
+import sequence.Dest
+import sequence.ZeldaItem
 
 object InLocations {
     val topMiddleBombSpot = FramePoint(120, 32)
