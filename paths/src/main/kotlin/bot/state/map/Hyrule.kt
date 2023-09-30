@@ -1,7 +1,5 @@
 package bot.state.map
 
-import bot.state.GamePad
-import bot.plan.action.NavUtil
 import bot.plan.gastar.GStar
 import bot.state.*
 import bot.state.map.level.LevelMapCellsLookup
@@ -97,57 +95,6 @@ class ExitSet(vararg direction: Direction) {
 val ExitSetAll =
     ExitSet(Direction.Right, Direction.Down, Direction.Up, Direction.Left)
 
-
-
-class Plan(stepsIn: List<MapCell>) {
-    val steps = stepsIn.toMutableList()
-
-    var step: Int = 0
-
-    val current: MapCell
-        get() = steps.getOrElse(step) { MapCell.unknown }
-
-    val next: MapCell
-        get() = steps.getOrElse(step + 1) { MapCell.end }
-
-    val nextDirection: Direction
-        get() = NavUtil.directionToDir(
-            current.point.toFrame(), next.point
-                .toFrame()
-        )
-
-    fun advanceIfComplete(whereAmI: MapCell) {
-        val now = current
-        if (now == whereAmI) {
-//            d { " I am here: $whereAmI" }
-        } else {
-            d { " switch to here = $whereAmI" }
-            // pop until
-//            while (steps.removeLast() != whereAmI) {
-//                d { " removed one"}
-//            }
-            step = steps.indexOf(whereAmI)
-//            if (next == whereAmI) {
-//                d { " got to the next place where=$whereAmI next=$next " +
-//                        "step=$step"}
-//                step++
-//            }
-//            val nextOne = current
-//            if (nextOne == whereAmI) {
-//                d { " went to the correct place where=$whereAmI next=$nextOne"}
-//                step++
-//            } else {
-//                d { " Oh no you should be here!! where=$whereAmI " +
-//                        "next=$nextOne step $step"}
-//            }
-        }
-    }
-}
-
-class MapRoute() {
-
-}
-
 data class Objective(
     // how to enter the location
     val point: FramePoint,
@@ -162,13 +109,6 @@ data class Objective(
         val empty = Objective(FramePoint(), DestType.None)
     }
 
-//    val shopRightItem = FramePoint(152, 96) // 97 failed to get heart
-//    //        val selectHeart = FramePoint(152, 90) // still at location 44
-//    val centerItem = FramePoint(118, 88) // not 96
-//    val centerItemLetter = FramePoint(120, 88)
-//    val shopHeartItem = FramePoint(152, 96)
-//    val shopLeftItem = FramePoint(88, 88)
-
     // if in a level
     enum class ItemLoc(val point: FramePoint) {
         None(FramePoint(0, 0)),
@@ -178,52 +118,6 @@ data class Objective(
         Right(FramePoint(152, 96-2))
     }
 }
-
-
-enum class Direction {
-    Left, Right, Up, Down, None;
-
-    companion object {
-        val horizontal: List<Direction> = listOf(Direction.Left, Direction.Right)
-        val vertical: List<Direction> = listOf(Direction.Up, Direction.Down)
-        val all: List<Direction>
-            get() = listOf(Up, Right, Down, Left)
-    }
-}
-
-val Direction.upOrLeft: Boolean
-    get() = this == Direction.Up || this == Direction.Left
-
-fun Direction.opposite(): Direction = when (this) {
-    Direction.Left -> Direction.Right
-    Direction.Right -> Direction.Left
-    Direction.Up -> Direction.Down
-    Direction.Down -> Direction.Up
-    Direction.None -> Direction.None
-}
-
-fun Direction.toGamePad(): GamePad = when (this) {
-    Direction.Left -> GamePad.MoveLeft
-    Direction.Right -> GamePad.MoveRight
-    Direction.Up -> GamePad.MoveUp
-    Direction.Down -> GamePad.MoveDown
-    Direction.None -> GamePad.None
-}
-fun Direction.pointModifier(adjustment: Int = 1): (FramePoint) -> FramePoint {
-    return when (this) {
-        Direction.Up -> { p -> FramePoint(p.x, p.y - adjustment) }
-        Direction.Down -> { p -> FramePoint(p.x, p.y + adjustment) }
-        Direction.Left -> { p -> FramePoint(p.x - adjustment, p.y) }
-        Direction.Right -> { p -> FramePoint(p.x + adjustment, p.y) }
-        Direction.None -> { p -> FramePoint(p.x, p.y) }
-    }
-}
-
-val Direction.vertical: Boolean
-    get() = this == Direction.Up || this == Direction.Down
-
-val Direction.horizontal: Boolean
-    get() = this == Direction.Left || this == Direction.Right
 
 class MapCell(
     val point: MapCellPoint,
@@ -257,7 +151,7 @@ class MapCell(
 
     fun anyExit(): FramePoint? {
         var exit: FramePoint? = null
-        exits.forEach { t, u ->
+        exits.forEach { (t, u) ->
             val index = u.size / 2
             exit = u[index]
         }
@@ -286,40 +180,8 @@ class MapCell(
 
     fun allExits(): List<FramePoint> = exits.values.flatten()
 
-    val costImpassible = 99999.0
-    val costPassable = 1.0
-    // impassible = 99999
-    // passible = 1 (non-zero cost)
-    // near enemy = +
-
-//    private val aStar: AStarShortestPath<FramePoint, DefaultEdge>
-
     init {
         findExits()
-//        val start = System.currentTimeMillis()
-////        val g: Graph<FramePoint, DefaultEdge> =
-////            DefaultDirectedGraph(DefaultEdge::class.java)
-//        val g =
-//            GraphTypeBuilder.directed<FramePoint, DefaultEdge>()
-//                .allowingMultipleEdges(false)
-//                .allowingSelfLoops(false).weighted(true).edgeClass(
-//                    DefaultEdge::class.java
-//                ).vertexSupplier(FrameV())
-//        .buildGraph()
-//
-//        val generator = GridGraphGenerator<FramePoint, DefaultEdge>(256, 88)
-//        generator.generateGraph(g)
-//        val cost =
-//            AStarAdmissibleHeuristic<FramePoint> { sourceVertex, targetVertex ->
-//                // no this is just the total distance to the goal from this
-//                // source
-//                // if target vertext is passable
-//                val passable = passable.get(targetVertex)
-//                if (passable) costPassable else costImpassible
-//            }
-//        aStar = AStarShortestPath(g, cost)
-//        val total = System.currentTimeMillis() - start
-//        d { " total time $total"}
     }
 
     private fun findExits() {
@@ -358,10 +220,6 @@ class MapCell(
 
         }
     }
-
-//    fun path(from: FramePoint, to: FramePoint): List<FramePoint> {
-//        return aStar.getPath(from, to).vertexList
-//    }
 
     fun write(dir: String = "") {
         val dirWithPath = if (dir.isNotEmpty()) "$dir${File.separator}" else ""
