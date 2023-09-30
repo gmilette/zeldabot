@@ -305,7 +305,6 @@ class PlanBuilder(
             return this
         }
 
-    // context
     fun pushInLevelMiddleStair(inMapLoc: MapLoc = 88, upTo: MapLoc = lastMapLoc, outLocation: FramePoint = InLocations.getItem) {
 //        seg("push and go in upTo $upTo loc $outLocation")
         goTo(FramePoint(3.grid, 8.grid))
@@ -460,7 +459,7 @@ class PlanBuilder(
         return this
     }
 
-    fun goToOrMapChanges(to: FramePoint, makePassable: FramePoint? = null): PlanBuilder {
+    private fun goToOrMapChanges(to: FramePoint, makePassable: FramePoint? = null): PlanBuilder {
         add(lastMapLoc, CompleteIfMapChanges(InsideNavAbout(to, 2, 1, negVertical = 0, makePassable = makePassable)))
         return this
     }
@@ -522,7 +521,6 @@ class PlanBuilder(
     }
 
     private fun switchToItem(item: Int) {
-        // todo: skip this if the current inventory has it
         toggleMenu()
         plan.add(SwitchToItem(item))
         goIn(GamePad.None, 100)
@@ -569,18 +567,15 @@ class PlanBuilder(
     // L ... X
     // burn from left
     // turn opposite
-    fun burnFromGo(to: FramePoint, from: Direction, itemLoc: FramePoint = InLocations.Overworld.centerItem): PlanBuilder {
+    private fun burnFromGo(to: FramePoint, from: Direction, itemLoc: FramePoint = InLocations.Overworld.centerItem): PlanBuilder {
         // switch to candle
         switchToCandle()
         val burnFrom = from.pointModifier(MapConstants.twoGrid)(to)
         val opposite = from.opposite()
-//        switchToCandle()
         goTo(burnFrom)
         // turn in proper direction
         d { " burn from $burnFrom to $to op $opposite"}
         goIn(opposite.toGamePad(), 4)
-//        val faceBurn = opposite.pointModifier(4)(burnFrom)
-//        goTo(faceBurn)
 
         // execute burn
         plan.add(UseItem())

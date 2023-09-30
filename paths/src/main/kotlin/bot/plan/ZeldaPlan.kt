@@ -239,8 +239,8 @@ object ZeldaPlan {
             startAt(InLocations.Overworld.start)
             phase("Opening sequence")
             obj(Dest.item(ZeldaItem.WoodenSword))
-            obj(Dest.level(1))
-            includeLevelPlan(levelPlan1(factory))
+//            obj(Dest.level(1))
+//            includeLevelPlan(levelPlan1(factory))
             obj(Dest.level(2))
             includeLevelPlan(levelPlan2(factory))
             // position by routing
@@ -334,50 +334,6 @@ object ZeldaPlan {
             right
             right
             end
-        }
-    }
-
-    private fun levelPlan(factory: PlanInputs, level: Int): MasterPlan {
-        return when (level) {
-            1 -> {
-                levelPlan1(factory)
-            }
-
-            2 -> {
-                levelPlan2(factory)
-            }
-
-            3 -> {
-                levelPlan3(factory)
-            }
-
-            4 -> {
-                levelPlan4(factory)
-            }
-
-            5 -> {
-                levelPlan5(factory)
-            }
-
-            6 -> {
-                levelPlan6(factory)
-            }
-
-            7 -> {
-                levelPlan7(factory)
-            }
-
-            8 -> {
-                levelPlan8(factory)
-            }
-
-            9 -> {
-                levelPlan9(factory)
-            }
-
-            else -> {
-                MasterPlan(emptyList())
-            }
         }
     }
 
