@@ -2,10 +2,8 @@ package bot.state.map
 
 import bot.state.MapCellPoint
 import bot.state.MapLoc
-import bot.state.MapLocFromPoint
 import com.github.doyaaaaaken.kotlincsv.client.CsvReader
 import util.Map2d
-import util.d
 
 object MapMaker {
     fun createMapCells(data: Map<MapLoc, MapCellData>): Map<MapLoc, MapCell> {
@@ -25,7 +23,7 @@ object MapMaker {
             for (y in 0..7) { //8
 //                d { " read x $x y $y" }
                 val point = MapCellPoint(x, y)
-                val mapLoc = MapLocFromPoint(x, y)
+                val mapLoc = mapLocFromPoint(x, y)
                 val mapData = mutableListOf<MutableList<Boolean>>()
 //                passableMap.add(mapData)
                 val yPx = y * heightOfCell
@@ -138,3 +136,7 @@ val mapPassable = setOf(
     "9d",
     "12"
 )
+
+private fun mapLocFromPoint(x: Int, y: Int): MapLoc =
+    x + 16 * y
+

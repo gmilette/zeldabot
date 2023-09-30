@@ -28,3 +28,11 @@ data class Agent(
     val y: Int
         get() = point.y
 }
+
+enum class EnemyState {
+    Unknown,
+    Alive,
+    Dead,
+    Loot,
+    Projectile,
+}

@@ -7,7 +7,6 @@ import bot.state.MapLoc
 import bot.state.isTopRightCorner
 import bot.state.map.*
 import util.Map2d
-import util.d
 
 class LevelCellBuilder {
     companion object {
