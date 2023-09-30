@@ -195,7 +195,7 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
     override fun path(): List<FramePoint> =
         wrapped.path()
 
-    override fun gstar(): ZStar? = wrapped.gstar()
+    override fun zstar(): ZStar? = wrapped.zstar()
 
     override fun complete(state: MapLocationState): Boolean =
         wrapped.complete(state)
@@ -287,7 +287,7 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
     override fun path(): List<FramePoint> =
         wrapped.path()
 
-    override fun gstar(): ZStar? = wrapped.gstar()
+    override fun zstar(): ZStar? = wrapped.zstar()
 
     override fun complete(state: MapLocationState): Boolean =
         wrapped.complete(state)

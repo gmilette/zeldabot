@@ -137,7 +137,7 @@ class MapCell(
     }
 
     val exits = mutableMapOf<Direction, MutableList<FramePoint>>()
-    val gstar: ZStar = ZStar(passable, halfPassable, isLevel)
+    val zstar: ZStar = ZStar(passable, halfPassable, isLevel)
 
     val exitNames: String
         get() {

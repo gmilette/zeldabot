@@ -225,7 +225,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                         this.frameState.mapLoc
                     ) else hyrule.getMapCell(this.frameState.mapLoc)
 //                    mapCell.gstar.setEnemyCosts(this.link, listOf(this.rhino()?.point ?: FramePoint()))
-                    drawCosts(mapCell.gstar.costsF.copy())
+                    drawCosts(mapCell.zstar.costsF.copy())
                 } catch (e: Exception) {
                     d { "ERROR $e"}
                 }

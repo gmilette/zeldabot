@@ -30,7 +30,7 @@ interface Action {
         return emptyList()
     }
 
-    fun gstar(): ZStar? = null
+    fun zstar(): ZStar? = null
 
     val name: String
         get() = this.javaClass.simpleName
@@ -53,7 +53,7 @@ abstract class WrappedAction(private val wrapped: Action): Action {
 
     override fun path(): List<FramePoint> = wrapped.path()
 
-    override fun gstar(): ZStar? = wrapped.gstar()
+    override fun zstar(): ZStar? = wrapped.zstar()
 
     override val name: String
         get() = wrapped.name
@@ -169,7 +169,7 @@ class DecisionAction(
 
     override fun path(): List<FramePoint> = path
 
-    override fun gstar(): ZStar? = action1.gstar()
+    override fun zstar(): ZStar? = action1.zstar()
 
     override fun nextStep(state: MapLocationState): GamePad {
         val choose1 = chooseAction1(state)
@@ -212,7 +212,7 @@ class ActionSequence(
         return currentAction?.path() ?: emptyList()
     }
 
-    override fun gstar(): ZStar? = currentAction?.gstar()
+    override fun zstar(): ZStar? = currentAction?.zstar()
 
     override fun nextStep(state: MapLocationState): GamePad {
         d { " DO --> next step" }

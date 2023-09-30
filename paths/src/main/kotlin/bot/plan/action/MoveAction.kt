@@ -119,7 +119,7 @@ class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val forceDirection: Dir
     private val routeTo = RouteTo(params = RouteTo.Param(considerLiveEnemies = false))
 
     init {
-        next.gstar.clearAvoid()
+        next.zstar.clearAvoid()
     }
 
     override val from: MapLoc = fromLoc
@@ -131,7 +131,7 @@ class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val forceDirection: Dir
     private var arrivedDir: Direction = Direction.None
 
     override fun reset() {
-        next.gstar.clearAvoid()
+        next.zstar.clearAvoid()
         route = null
     }
 

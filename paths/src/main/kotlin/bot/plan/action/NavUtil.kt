@@ -128,7 +128,7 @@ object NavUtil {
                                 forcePassable: List<FramePoint> = emptyList(),
                                 enemyTarget: FramePoint? = null,
                                 ladderSpec: ZStar.LadderSpec? = null):
-            List<FramePoint> = mapCell.gstar.route(from, to, before, enemies,
+            List<FramePoint> = mapCell.zstar.route(from, to, before, enemies,
         avoidNearEnemy, forcePassable, Int.MAX_VALUE,
                 enemyTarget, ladderSpec)
 

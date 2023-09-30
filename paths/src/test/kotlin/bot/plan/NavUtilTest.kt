@@ -14,6 +14,9 @@ import org.junit.Test
 import util.Map2d
 import util.d
 
+/**
+ * unit test to investiate routes
+ */
 class NavUtilTest {
     //@Ignore
     @Test
@@ -26,12 +29,12 @@ class NavUtilTest {
         val cell = MapCell(MapCellPoint(0,0), 0, MapCellData.empty)
 
         val from = FramePoint(10, 24)
-        val gstar = ZStar(map)
-        gstar.setEnemy(from, FramePoint(20, 24), 10)
-//        gstar.setEnemy(from, FramePoint(30, 15), 10)
-//        gstar.setEnemy(FramePoint(40, 25), 1)
+        val zstar = ZStar(map)
+        zstar.setEnemy(from, FramePoint(20, 24), 10)
+//        zstar.setEnemy(from, FramePoint(30, 15), 10)
+//        zstar.setEnemy(FramePoint(40, 25), 1)
 
-        val route = gstar.route(from, listOf(FramePoint(45, 24)), null)
+        val route = zstar.route(from, listOf(FramePoint(45, 24)), null)
     }
 
 
@@ -54,11 +57,11 @@ class NavUtilTest {
         val pass = cell.passable.get(passPt)
         d { " pass check $inLev $pass level $level lb ${cell.passable.get(passPt.justLeftBottom)}"}
 
-        val gstar = ZStar(cell.passable, halfPassable = true, isLevel = level != 0)
+        val zstar = ZStar(cell.passable, halfPassable = true, isLevel = level != 0)
 
         val target = targets.get(0)
 
-//        cell.gstar.initialMap.write("TESTORIGINAMAP.csv") {  v, x, y ->
+//        cell.zstar.initialMap.write("TESTORIGINAMAP.csv") {  v, x, y ->
 //            v.toString()
 //        }
 
@@ -96,7 +99,7 @@ class NavUtilTest {
             passable.add(makePassable)
         }
 
-        val route = gstar.route(start = from,
+        val route = zstar.route(start = from,
             listOf(target),
             pointBeforeStart = before,
             enemies = enemies,
@@ -120,7 +123,7 @@ class NavUtilTest {
             }
         }
 
-        gstar.passable.write("check_1192_rgstar") { v, x, y ->
+        zstar.passable.write("check_1192_rzstar") { v, x, y ->
             val pt = FramePoint(x, y)
             when {
                 (x == target.x && y == target.y) -> "T"
@@ -136,14 +139,14 @@ class NavUtilTest {
             }
         }
 
-        gstar.costsF.write("check_1192_rgstar_costs") { v, x, y ->
+        zstar.costsF.write("check_1192_rzstar_costs") { v, x, y ->
             val pt = FramePoint(x, y)
             when {
                 (x == target.x && y == target.y) -> "T"
                 route.any { it.x == x && it.y == y && it.x == firstPt.x && it.y == firstPt.y } -> "S"
                 route.any { it.x == x && it.y == y } -> "Z"
                 FramePoint(x, y).isTopRightCorner -> "C"
-                !gstar.passable.get(x, y) -> "X"
+                !zstar.passable.get(x, y) -> "X"
                 v == 0 -> ":"
                 v > 100000 -> "!"
                 v > 9000 -> "@"
@@ -251,7 +254,7 @@ class NavUtilTest {
 @Test
 fun `test dragon`() {
     ZStar.DEBUG = true
-//    GStar.SHORT_ITER = 150
+//    zstar.SHORT_ITER = 150
     ZStar.MAX_ITER = 10000
     val start = FramePoint(72, 54) // higher up
     // wtf is wrong
@@ -267,7 +270,7 @@ fun `test dragon`() {
     @Test
     fun `test lev 1 bat`() {
         ZStar.DEBUG = true
-//    GStar.SHORT_ITER = 150
+//    zstar.SHORT_ITER = 150
         // works if I give it more iterations, to find a route
         // that isn't on the highway
         ZStar.MAX_ITER = 1000
@@ -283,7 +286,7 @@ fun `test dragon`() {
     @Test
     fun `test lev 1 ladder`() {
         ZStar.DEBUG = true
-//    GStar.SHORT_ITER = 150
+//    zstar.SHORT_ITER = 150
         // works if I give it more iterations, to find a route
         // that isn't on the highway
         ZStar.MAX_ITER = 1000
@@ -298,7 +301,7 @@ fun `test dragon`() {
     @Test
     fun `test lev 1 bats`() {
         ZStar.DEBUG = false
-//    GStar.SHORT_ITER = 150
+//    zstar.SHORT_ITER = 150
         // works if I give it more iterations, to find a route
         // that isn't on the highway
         ZStar.MAX_ITER = 10000
