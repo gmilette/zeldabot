@@ -119,11 +119,7 @@ class OamStateReasoner(
         sprites.map { it.toAgent() }
 
     private fun SpriteData.toAgent(): Agent =
-        Agent(index = tile, point = point, state = toState(), hp = tile, droppedId = attribute)
-
-    //combine these
-    //Debug: (Kermit)  enemy Agent(index=176, point=(128, 55), dir=None, state=Alive, countDown=0, hp=176, projectileState=NotProjectile, droppedId=1)
-    //Debug: (Kermit)  enemy Agent(index=178, point=(136, 55), dir=None, state=Alive, countDown=0, hp=178, projectileState=NotProjectile, droppedId=1)
+        Agent(index = tile, point = point, state = toState(), tile = tile, attribute = attribute)
 
     @VisibleForTesting
     fun combine(toCombine: List<SpriteData>): List<SpriteData> {

@@ -5,20 +5,15 @@ import bot.state.map.Direction
 val List<Agent>.points: List<FramePoint>
     get() = this.map { it.point }
 
-val emptyAgent = Agent(0, FramePoint(0, 0), Direction.Down, EnemyState.Unknown,  0,0)
+val emptyAgent = Agent(0, FramePoint(0, 0), Direction.Down, EnemyState.Unknown,  0)
 data class Agent(
     val index: Int = 0,
     val point: FramePoint,
     val dir: Direction = Direction.None,
     val state: EnemyState = EnemyState.Unknown,
-    val countDown: Int = 0,
-    val hp: Int = 0,
-    val projectileState: ProjectileState = ProjectileState.NotProjectile,
-    val droppedId: Int = 0
+    val tile: Int = 0,
+    val attribute: Int = 0
 ) {
-    val tile = hp
-    val attribute = droppedId
-
     val damaged: Boolean = tile in LinkDirection.damagedAttribute || tile in MonsterDirection.damagedAttribute
 
     val damagedString: String = if (damaged) "*D*" else ""

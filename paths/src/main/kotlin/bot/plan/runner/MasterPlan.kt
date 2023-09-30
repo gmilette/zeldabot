@@ -80,7 +80,7 @@ class MasterPlan(val segments: List<PlanSegment>) {
         get() = giant.any { it.action is StartHereAction }
 
     private val numMoves: Int
-        get() = if (giant.isEmpty()) 0 else giant.count {
+        get() = if (giant.isNullOrEmpty()) 0 else giant.count {
             true
 //            it.action is MoveTo
         }

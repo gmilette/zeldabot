@@ -16,7 +16,6 @@ enum class EnemyState {
     Unknown,
     Alive,
     Dead,
-    NotSeen,
     Loot,
     Projectile,
 }
