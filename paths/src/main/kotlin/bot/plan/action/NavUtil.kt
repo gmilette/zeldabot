@@ -1,6 +1,6 @@
 package bot.plan.action
 
-import bot.plan.gastar.GStar
+import bot.plan.gastar.ZStar
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapCell
@@ -127,7 +127,7 @@ object NavUtil {
                                 avoidNearEnemy: List<FramePoint> = emptyList(),
                                 forcePassable: List<FramePoint> = emptyList(),
                                 enemyTarget: FramePoint? = null,
-                                ladderSpec: GStar.LadderSpec? = null):
+                                ladderSpec: ZStar.LadderSpec? = null):
             List<FramePoint> = mapCell.gstar.route(from, to, before, enemies,
         avoidNearEnemy, forcePassable, Int.MAX_VALUE,
                 enemyTarget, ladderSpec)

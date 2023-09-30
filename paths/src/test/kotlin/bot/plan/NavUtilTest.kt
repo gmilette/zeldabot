@@ -2,26 +2,23 @@ package bot.plan
 
 import bot.state.GamePad
 import bot.plan.action.NavUtil
-import bot.plan.gastar.GStar
+import bot.plan.gastar.ZStar
 import bot.state.*
 import bot.state.map.Hyrule
 import bot.state.map.MapCell
 import bot.state.map.MapCellData
-import bot.state.map.MapConstants
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import org.junit.Ignore
 import org.junit.Test
 import util.Map2d
 import util.d
-import kotlin.math.min
 
 class NavUtilTest {
     //@Ignore
     @Test
     fun `test g`() {
-        GStar.DEBUG = true
+        ZStar.DEBUG = true
         val map = Map2d.Builder<Boolean>().add(
             100, 100, true
         ).build()
@@ -29,7 +26,7 @@ class NavUtilTest {
         val cell = MapCell(MapCellPoint(0,0), 0, MapCellData.empty)
 
         val from = FramePoint(10, 24)
-        val gstar = GStar(map)
+        val gstar = ZStar(map)
         gstar.setEnemy(from, FramePoint(20, 24), 10)
 //        gstar.setEnemy(from, FramePoint(30, 15), 10)
 //        gstar.setEnemy(FramePoint(40, 25), 1)
@@ -41,13 +38,13 @@ class NavUtilTest {
     private fun check(cell: MapLoc, from: FramePoint, target: FramePoint,
                       dirResult: GamePad, level: Int = 0, before: FramePoint? = null, makePassable: FramePoint? = null,
                       enemies: List<FramePoint> = emptyList(),
-                      ladderSpec: GStar.LadderSpec? = null
+                      ladderSpec: ZStar.LadderSpec? = null
     ) {
         checkA(cell, from, listOf(target), before, dirResult, level, makePassable = makePassable, enemies = enemies, ladderSpec)
     }
     private fun checkA(cell: MapLoc, from: FramePoint, targets: List<FramePoint>,
                        before: FramePoint? = null, dirResult: GamePad, level: Int = 0, makePassable: FramePoint? = null,
-                       enemies: List<FramePoint> = emptyList(), ladderSpec: GStar.LadderSpec? = null) {
+                       enemies: List<FramePoint> = emptyList(), ladderSpec: ZStar.LadderSpec? = null) {
         val hyrule = Hyrule()
         val cell = if (level == 0) hyrule.getMapCell(cell) else hyrule.levelMap.cell(level, cell)
         cell.write()
@@ -57,7 +54,7 @@ class NavUtilTest {
         val pass = cell.passable.get(passPt)
         d { " pass check $inLev $pass level $level lb ${cell.passable.get(passPt.justLeftBottom)}"}
 
-        val gstar = GStar(cell.passable, halfPassable = true, isLevel = level != 0)
+        val gstar = ZStar(cell.passable, halfPassable = true, isLevel = level != 0)
 
         val target = targets.get(0)
 
@@ -201,7 +198,7 @@ class NavUtilTest {
 //        check(119, FramePoint(40 ,64), FramePoint(255,80), GamePad.MoveRight)
 
         // leave level 1 but up too high
-        GStar.DEBUG = true
+        ZStar.DEBUG = true
 //        32, 128
 //        check(55, FramePoint(224 ,72), FramePoint(255,72), GamePad.MoveRight)
     }
@@ -215,7 +212,7 @@ class NavUtilTest {
         //40
 //        check(40, FramePoint(112, 108), FramePoint(112,0), GamePad.MoveRight)
 
-        GStar.DEBUG = true
+        ZStar.DEBUG = true
         //check(55, FramePoint(112, 88), FramePoint(112,64), GamePad.MoveUp)
 //        42 target (152, 100) link (104, 98)
         // not on highway
@@ -226,7 +223,7 @@ class NavUtilTest {
 
     @Test
     fun `test move 3`() {
-        GStar.DEBUG = true
+        ZStar.DEBUG = true
         val start = FramePoint(48, 74)
         check(13, start, FramePoint(32, 96), GamePad.MoveUp, level = 7,
             before = start.left)
@@ -234,7 +231,7 @@ class NavUtilTest {
 
     @Test
     fun `test move 1 corner`() {
-        GStar.DEBUG = true
+        ZStar.DEBUG = true
 //        val start = FramePoint(160 - MapConstants.twoGrid, 119)
         val start = FramePoint(208, 120)
         check(115, start, FramePoint(255, 120), GamePad.MoveUp, level = 1,
@@ -243,7 +240,7 @@ class NavUtilTest {
 
     @Test
     fun `test move 2 corner`() {
-        GStar.DEBUG = true
+        ZStar.DEBUG = true
 //        val start = FramePoint(160 - MapConstants.twoGrid, 119)
         val start = FramePoint(208, 75) // higher up
         check(114, start, FramePoint(250, 80), GamePad.MoveUp, level = 1,
@@ -253,9 +250,9 @@ class NavUtilTest {
 //target (166, 67) link (72, 54)
 @Test
 fun `test dragon`() {
-    GStar.DEBUG = true
+    ZStar.DEBUG = true
 //    GStar.SHORT_ITER = 150
-    GStar.MAX_ITER = 10000
+    ZStar.MAX_ITER = 10000
     val start = FramePoint(72, 54) // higher up
     // wtf is wrong
     // it has two coordinates that are off grid
@@ -269,11 +266,11 @@ fun `test dragon`() {
 
     @Test
     fun `test lev 1 bat`() {
-        GStar.DEBUG = true
+        ZStar.DEBUG = true
 //    GStar.SHORT_ITER = 150
         // works if I give it more iterations, to find a route
         // that isn't on the highway
-        GStar.MAX_ITER = 1000
+        ZStar.MAX_ITER = 1000
         //177, 35
 //        val start = FramePoint(112, 69) // higher up
         val start = FramePoint(112, 69) // higher up
@@ -285,26 +282,26 @@ fun `test dragon`() {
 
     @Test
     fun `test lev 1 ladder`() {
-        GStar.DEBUG = true
+        ZStar.DEBUG = true
 //    GStar.SHORT_ITER = 150
         // works if I give it more iterations, to find a route
         // that isn't on the highway
-        GStar.MAX_ITER = 1000
+        ZStar.MAX_ITER = 1000
         val ladder = FramePoint(120, 99)
         val link = FramePoint(120, 104)
 //        val target = FramePoint(48, 70)
         val target = FramePoint(56, 90)
         check(51, link, target, GamePad.MoveUp, level = 1,
-            before = link.left, ladderSpec = GStar.LadderSpec(false, ladder))
+            before = link.left, ladderSpec = ZStar.LadderSpec(false, ladder))
     }
 
     @Test
     fun `test lev 1 bats`() {
-        GStar.DEBUG = false
+        ZStar.DEBUG = false
 //    GStar.SHORT_ITER = 150
         // works if I give it more iterations, to find a route
         // that isn't on the highway
-        GStar.MAX_ITER = 10000
+        ZStar.MAX_ITER = 10000
         val link = FramePoint(96, 59)
         val target = FramePoint(172, 52)
         check(114, link, target, GamePad.MoveUp, level = 1,
@@ -313,9 +310,9 @@ fun `test dragon`() {
 
     @Test
     fun `test rhino`() {
-        GStar.DEBUG = true
-        GStar.SHORT_ITER = 150
-        GStar.MAX_ITER = 150
+        ZStar.DEBUG = true
+        ZStar.SHORT_ITER = 150
+        ZStar.MAX_ITER = 150
 //        val start = FramePoint(54, 128) // higher up
 //        val rhinoLocation = FramePoint(90, 128)
 //        val target = FramePoint(126, 128)
@@ -335,7 +332,7 @@ fun `test dragon`() {
 
     @Test
     fun `test rhinoTwo`() {
-        GStar.DEBUG = false
+        ZStar.DEBUG = false
 //        val start = FramePoint(54, 128) // higher up
 //        val rhinoLocation = FramePoint(90, 128)
 //        val target = FramePoint(126, 128)
@@ -355,7 +352,7 @@ fun `test dragon`() {
 
     @Test
     fun `test move 3 corner`() {
-        GStar.DEBUG = true
+        ZStar.DEBUG = true
 //        val start = FramePoint(160 - MapConstants.twoGrid, 119)
         val start = FramePoint(136, 61) // higher up
         check(68, start, FramePoint(128, 48), GamePad.MoveUp, level = 1,
@@ -364,7 +361,7 @@ fun `test dragon`() {
 
     @Test
     fun `test make passable)`() {
-        GStar.DEBUG = true
+        ZStar.DEBUG = true
         //passable 128, 32)
         val passable = FramePoint(128, 32)
 
@@ -377,7 +374,7 @@ fun `test dragon`() {
     @Test
     fun `test move 45`() {
         //(64, 24) to next (0, 0) [(80, 16)
-        GStar.DEBUG = true
+        ZStar.DEBUG = true
         //check(55, FramePoint(112, 88), FramePoint(112,64), GamePad.MoveUp)
 //        42 target (152, 100) link (104, 98)
         // below the open hole, it just wont navigate
@@ -391,7 +388,7 @@ fun `test dragon`() {
 
     @Test
     fun `test move level 2`() {
-        GStar.DEBUG = true
+        ZStar.DEBUG = true
 //        check(126, FramePoint(128, 32), FramePoint(128, 0), GamePad.MoveUp, level = 2)
         check(78, FramePoint(120, 32), FramePoint(120, 0), GamePad.MoveUp, level = 2)
 //        go to from (142, 56) to next (143, 56) [(120, 0), (121, 0), (122, 0), (123, 0), (124, 0), (125, 0), (126, 0), (127, 0), (128, 0)
@@ -408,7 +405,7 @@ fun `test dragon`() {
 
     @Test
     fun `test move level 4`() {
-        GStar.DEBUG = true
+        ZStar.DEBUG = true
 //        check(126, FramePoint(128, 32), FramePoint(128, 0), GamePad.MoveUp, level = 2)
 //        check(49, FramePoint(208, 80), FramePoint(71, 97), GamePad.MoveUp, level = 4)
         //(71, 97) link (208, 80
@@ -420,7 +417,7 @@ fun `test dragon`() {
     }
         @Test
     fun `test move level 1`() {
-        GStar.DEBUG = true
+        ZStar.DEBUG = true
         check(115, FramePoint(208, 81), FramePoint(255, 80), GamePad.MoveRight, level = 1,
             before = FramePoint(208, 79))
     }
@@ -437,7 +434,7 @@ fun `test dragon`() {
 
     @Test
     fun `test move shop`() {
-        GStar.DEBUG = true
+        ZStar.DEBUG = true
         check(58, FramePoint(144, 88), FramePoint(112, 167), GamePad.MoveDown)
     }
 

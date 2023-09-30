@@ -1,6 +1,6 @@
 package bot.state.map
 
-import bot.plan.gastar.GStar
+import bot.plan.gastar.ZStar
 import bot.state.*
 import bot.state.map.level.LevelMapCellsLookup
 import bot.state.map.destination.DestType
@@ -137,7 +137,7 @@ class MapCell(
     }
 
     val exits = mutableMapOf<Direction, MutableList<FramePoint>>()
-    val gstar: GStar = GStar(passable, halfPassable, isLevel)
+    val gstar: ZStar = ZStar(passable, halfPassable, isLevel)
 
     val exitNames: String
         get() {

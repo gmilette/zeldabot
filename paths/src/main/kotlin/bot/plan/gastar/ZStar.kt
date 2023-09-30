@@ -8,7 +8,10 @@ import util.Map2d
 import util.d
 import java.util.*
 
-class GStar(
+/**
+ * a star implementations modified for zelda routing
+ */
+class ZStar(
     var passable: Map2d<Boolean>,
     halfPassable: Boolean = true,
     isLevel: Boolean = false

@@ -67,7 +67,7 @@ class NeighborFinder(
     }
 
     // need to know the previous point
-    fun neighbors(point: FramePoint, direction: Direction? = null, dist: Int = 1, ladderSpec: GStar.LadderSpec? = null): List<FramePoint> {
+    fun neighbors(point: FramePoint, direction: Direction? = null, dist: Int = 1, ladderSpec: ZStar.LadderSpec? = null): List<FramePoint> {
         val neigh = mutableListOf<FramePoint>()
 
         val validDirections = ladderSpec?.directions(point) ?: Direction.all
@@ -97,7 +97,7 @@ class NeighborFinder(
 //                    d { "skip loc" }
 //                }
             //test passable (112, 129) Down false
-            if (GStar.DEBUG) {
+            if (ZStar.DEBUG) {
                 d { " test passable $next $direction ${next.onHighwayYAlmost}" }
                 d { "rb ${passable.get(next.justRightEndBottom)}"}
                 d { "re ${passable.get(next.justRightEnd)}"}
@@ -184,13 +184,13 @@ class NeighborFinder(
                 // going from 143 to 144
                  // check corners
                 val corner = corner(point, direction)
-                if (GStar.DO_CORNERS && corner != null) {
-                    if (GStar.DEBUG) {
+                if (ZStar.DO_CORNERS && corner != null) {
+                    if (ZStar.DEBUG) {
                         d { " add corner $corner $direction" }
                     }
                     neigh.add(corner.addDirection(direction))
                 }
-                if (GStar.DEBUG) {
+                if (ZStar.DEBUG) {
                     d { " corner $point $next $direction not passable" }
                 }
             }
@@ -275,7 +275,7 @@ class NeighborFinder(
             // was <= 32
             // (isLevel && point.y <= 24)
             (isLevel && point.y <= 32) && (!passable.get(point) || !passable.get(point.justRightEnd)) -> {
-                if (GStar.DEBUG) {
+                if (ZStar.DEBUG) {
                     d { " failed cuz y (pt: $point) < 32 ${passable.get(point)} ${passable.get(point.justRightEnd)}" }
                 }
                 false

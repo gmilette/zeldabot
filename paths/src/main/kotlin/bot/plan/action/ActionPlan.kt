@@ -1,6 +1,6 @@
 package bot.plan.action
 
-import bot.plan.gastar.GStar
+import bot.plan.gastar.ZStar
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapCell
@@ -30,7 +30,7 @@ interface Action {
         return emptyList()
     }
 
-    fun gstar(): GStar? = null
+    fun gstar(): ZStar? = null
 
     val name: String
         get() = this.javaClass.simpleName
@@ -53,7 +53,7 @@ abstract class WrappedAction(private val wrapped: Action): Action {
 
     override fun path(): List<FramePoint> = wrapped.path()
 
-    override fun gstar(): GStar? = wrapped.gstar()
+    override fun gstar(): ZStar? = wrapped.gstar()
 
     override val name: String
         get() = wrapped.name
@@ -169,7 +169,7 @@ class DecisionAction(
 
     override fun path(): List<FramePoint> = path
 
-    override fun gstar(): GStar? = action1.gstar()
+    override fun gstar(): ZStar? = action1.gstar()
 
     override fun nextStep(state: MapLocationState): GamePad {
         val choose1 = chooseAction1(state)
@@ -212,7 +212,7 @@ class ActionSequence(
         return currentAction?.path() ?: emptyList()
     }
 
-    override fun gstar(): GStar? = currentAction?.gstar()
+    override fun gstar(): ZStar? = currentAction?.gstar()
 
     override fun nextStep(state: MapLocationState): GamePad {
         d { " DO --> next step" }

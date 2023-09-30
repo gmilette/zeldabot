@@ -2,7 +2,7 @@ package bot.plan.action
 
 import bot.plan.action.NavUtil.directionToDir
 import bot.plan.gastar.FrameRoute
-import bot.plan.gastar.GStar
+import bot.plan.gastar.ZStar
 import bot.state.*
 import bot.state.map.*
 import util.LogFile
@@ -520,7 +520,7 @@ private fun doRouteTo(
                 forcePassable = passable,
                 ladderSpec = state.frameState.ladder?.let {
                     d { " has ladder "}
-                    GStar.LadderSpec(false, it.point)
+                    ZStar.LadderSpec(false, it.point)
                 }
             )
         )

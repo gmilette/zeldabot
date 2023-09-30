@@ -15,7 +15,7 @@ class NeighborFinderTest {
 
     @Before
     fun setup() {
-        GStar.DEBUG = true
+        ZStar.DEBUG = true
     }
 
     @Test

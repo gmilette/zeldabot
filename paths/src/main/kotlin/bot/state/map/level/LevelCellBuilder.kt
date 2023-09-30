@@ -1,6 +1,6 @@
 package bot.state.map.level
 
-import bot.plan.gastar.GStar
+import bot.plan.gastar.ZStar
 import bot.state.FramePoint
 import bot.state.MapCellPoint
 import bot.state.MapLoc
@@ -198,7 +198,7 @@ class LevelCellBuilder {
         }
         val passMap = Map2d(longRows.toList())
 //> 128,119*C  -> 128,120*  -> 129,120*  -> 1
-        return if (GStar.DO_MAKE_CORNERS) {
+        return if (ZStar.DO_MAKE_CORNERS) {
             passMap.mapXy { y, x ->
                 val pt = FramePoint(x, y)
                 when {
