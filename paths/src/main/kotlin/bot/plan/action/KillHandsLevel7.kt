@@ -1,6 +1,8 @@
 import bot.plan.action.*
 import bot.state.*
 import bot.state.map.grid
+import bot.state.oam.grabbyHands
+import bot.state.oam.grabbyHands2
 import util.d
 
 class KillHandsInLevel7 : Action {

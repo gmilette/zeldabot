@@ -6,6 +6,7 @@ import bot.state.map.Direction
 import bot.state.map.MapCell
 import bot.state.map.MapConstants
 import bot.state.map.grid
+import bot.state.oam.bomb
 import nintaco.api.ApiSource
 import util.d
 import util.i
@@ -273,10 +274,6 @@ val moveToKillAllInCenterSpot = DecisionAction(
     KillInCenter()
 ) { state ->
     state.numEnemies <= state.numEnemiesAliveInCenter()
-}
-
-val clockActivatedKillAllOrKill = DecisionAction(ClockActivatedKillAll(), KillAll()) { state ->
-    state.frameState.clockActivated
 }
 
 val lootOrKill = DecisionAction(Optional(GetLoot()), Optional(KillAll())) { state ->

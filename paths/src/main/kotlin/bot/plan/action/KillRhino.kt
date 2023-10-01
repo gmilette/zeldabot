@@ -2,6 +2,8 @@ package bot.plan.action
 
 import bot.state.*
 import bot.state.map.*
+import bot.state.oam.rhinoHeadHeadWithMouthClosed
+import bot.state.oam.rhinoHeadHeadWithMouthOpen
 import util.LogFile
 import util.d
 

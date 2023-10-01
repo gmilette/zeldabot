@@ -1,15 +1,13 @@
 package bot.state
 
 import bot.plan.action.PreviousMove
-import bot.state.map.Direction
 import bot.state.map.Hyrule
 import bot.state.map.MapConstants
 import bot.state.map.horizontal
 import nintaco.api.API
-import bot.state.map.destination.ZeldaItem
+import bot.state.oam.LinkDirectionFinder
+import bot.state.oam.OamStateReasoner
 import util.d
-import util.e
-import kotlin.math.max
 
 class FrameStateUpdater(
     private val api: API,
@@ -64,7 +62,7 @@ class FrameStateUpdater(
         // check ladder memory first
         d { "ladder mem $ladderMem ${api.readCPU(Addresses.ladderDeployed)}" }
         val ladder = if (ladderMem) oam.ladderSprite else null
-        val damagedTile = if (oam.damaged) LinkDirection.damagedAttribute.last() else 0
+        val damagedTile = if (oam.damaged) LinkDirectionFinder.damagedAttribute.last() else 0
         val link = Agent(0, linkPoint, linkDir, tile = damagedTile)
         // has to persist between states
         if (ladder != null) {

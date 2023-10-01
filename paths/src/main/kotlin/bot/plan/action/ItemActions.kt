@@ -1,6 +1,8 @@
 package bot.plan.action
 
 import bot.state.*
+import bot.state.oam.oldWoman
+import bot.state.oam.potion
 import util.d
 import kotlin.random.Random
 
@@ -128,10 +130,10 @@ class WaitForOldWoman : Action {
 }
 
 private val FrameState.hasOldWoman
-    get() = enemies.any { it.tile == oldWoman}
+    get() = enemies.any { it.tile == oldWoman }
 
 private val FrameState.hasPotion
-    get() = enemies.any { it.tile == potion}
+    get() = enemies.any { it.tile == potion }
 
 
 // any time enter shop add this action just in case

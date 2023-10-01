@@ -266,57 +266,6 @@ class KillAllCompleteCriteria {
         }
 }
 
-@Deprecated("unused")
-class ClockActivatedKillAll : Action {
-    private val routeTo = RouteTo()
-    private val criteria = KillAllCompleteCriteria()
-
-    private var target: FramePoint = FramePoint()
-
-    private var enemies = mutableListOf<Agent>()
-
-    private var pressedACt = 0
-
-    override val name: String
-        get() = "pickup dropped item and kill"
-
-    override fun path(): List<FramePoint> = routeTo.route?.path ?: emptyList()
-
-    override fun target(): FramePoint {
-        return target
-    }
-
-    override fun complete(state: MapLocationState): Boolean =
-    // needs another criteria like number killed is number seen or something
-        // need to add another "is alive" criteria like some of the presence
-        criteria.complete(state)
-
-    // need to visit all the enemy locations until it is done
-    override fun nextStep(state: MapLocationState): GamePad {
-        criteria.update(state)
-
-        if (enemies.isEmpty()) {
-            enemies = state.frameState.enemies.toMutableList()
-        }
-
-        state.frameState.logEnemies()
-
-        target = state.frameState.enemiesSorted.first().point
-
-        // todo; debug
-        return if (pressedACt > 0) {
-            pressedACt--
-            GamePad.A
-        } else if (enemies.any { it.topCenter.distTo(state.frameState.link.topCenter) < 8 }) {
-            // press A for a bit
-            pressedACt = 3
-            GamePad.A
-        } else {
-            routeTo.routeTo(state, enemies.map { it.topCenter })
-        }
-    }
-}
-
 class AttackOnce(useB: Boolean = false, private val freq: Int = 5) :
     Action {
     private var frames = 0

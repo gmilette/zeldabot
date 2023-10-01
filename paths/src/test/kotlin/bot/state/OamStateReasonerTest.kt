@@ -1,5 +1,7 @@
 package bot.state
 
+import bot.state.oam.OamStateReasoner
+import bot.state.oam.SpriteData
 import io.kotest.matchers.shouldBe
 import org.junit.Test
 import org.mockito.kotlin.mock

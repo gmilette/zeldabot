@@ -3,7 +3,7 @@ package bot.plan.action
 import bot.state.FramePoint
 import bot.state.GamePad
 import bot.state.MapLocationState
-import bot.state.isGannonTriforce
+import bot.state.oam.isGannonTriforce
 import util.d
 
 class KillGannon : Action {

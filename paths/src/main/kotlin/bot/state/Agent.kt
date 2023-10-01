@@ -1,6 +1,8 @@
 package bot.state
 
 import bot.state.map.Direction
+import bot.state.oam.LinkDirectionFinder
+import bot.state.oam.MonsterDirection
 
 val List<Agent>.points: List<FramePoint>
     get() = this.map { it.point }
@@ -14,7 +16,7 @@ data class Agent(
     val tile: Int = 0,
     val attribute: Int = 0
 ) {
-    val damaged: Boolean = tile in LinkDirection.damagedAttribute || tile in MonsterDirection.damagedAttribute
+    val damaged: Boolean = tile in LinkDirectionFinder.damagedAttribute || tile in MonsterDirection.damagedAttribute
 
     val damagedString: String = if (damaged) "*D*" else ""
 

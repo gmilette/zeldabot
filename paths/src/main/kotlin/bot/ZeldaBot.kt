@@ -12,6 +12,8 @@ import nintaco.api.ApiSource
 import nintaco.api.Colors
 import nintaco.api.GamepadButtons
 import bot.state.map.destination.ZeldaItem
+import bot.state.oam.rhinoHeadHeadWithMouthClosed
+import bot.state.oam.rhinoHeadHeadWithMouthOpen
 import util.Map2d
 import util.RunOnceLambda
 import util.d
