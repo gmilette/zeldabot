@@ -1,4 +1,4 @@
-package bot
+package helper
 
 import bot.state.Addresses
 import nintaco.api.API
@@ -6,7 +6,12 @@ import nintaco.api.ApiSource
 import nintaco.api.Colors
 import util.d
 
-class ZeldahelperBot {
+/**
+ * bot intended to help you play the game.
+ * such as: tell you how close you are to 10th enemy has the bomb.
+ *
+ */
+class ZeldaHelperBot {
     private val api: API = ApiSource.getAPI()
 
     fun launch() {
@@ -77,7 +82,7 @@ class ZeldahelperBot {
         @JvmStatic
         fun main(args: Array<String>) {
             ApiSource.initRemoteAPI("localhost", 9999)
-            ZeldahelperBot().launch()
+            ZeldaHelperBot().launch()
         }
     }
 }

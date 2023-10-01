@@ -1,7 +1,6 @@
 package bot
 
 import bot.plan.ZeldaPlan
-import bot.plan.gastar.SkipLocationCollector
 import bot.plan.runner.MasterPlan
 import bot.plan.runner.PlanRunner
 import bot.state.*
@@ -21,9 +20,19 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     private val api: API = ApiSource.getAPI()
 
     fun launch() {
-        // what is the relative dir?
+        startAndSetListeners()
+
+        api.addDeactivateListener { apiDisabled() }
+        api.addStopListener { dispose() }
+        api.run()
+    }
+
+    private fun startAndSetListeners() {
+        // this allows the code to programatically start the game at a certain state
+        // but it has to happen after the API is ready, so execute on callback from
+        // listeners
+
         val root = "../Nintaco_bin_2020-05-01/states/"
-//        val root = "/Users/greg/dev/zelda/Nintaco_bin_2020-05-01/states/"
         d { " master plan ${plan.masterPlan.toStringAll()}" }
         val loadZelda by RunOnceLambda {
             d { " load zelda" }
@@ -43,55 +52,11 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             apiEnabled()
             setSpeed
         }
-        api.addDeactivateListener { apiDisabled() }
-        api.addStopListener { dispose() }
-        api.run()
-
-//        d { " load zeldaaaa"}
-//        api.open(zelda2)
-//        val t = Thread( {
-//            api.run()
-//        })
-//        t.start()
-//        d { " load zeldaaaa2"}
-//        api.open(zelda2)
-        // run at 400% always for now
-//        api.setSpeed(400)
-//        api.isPaused = true
-//        api.stepToNextFrame()
-    }
-
-    private fun loadSave() {
-//        api.loadState()
     }
 
     private fun apiEnabled() {
         d { "apiEnabled" }
-        val sprite = IntArray(SPRITE_SIZE * SPRITE_SIZE)
-        for (y in 0 until SPRITE_SIZE) {
-            val Y = y - SPRITE_SIZE / 2 + 0.5
-            for (x in 0 until SPRITE_SIZE) {
-                val X = x - SPRITE_SIZE / 2 + 0.5
-                sprite[SPRITE_SIZE * y + x] = if (X * X + Y * Y
-                    <= SPRITE_SIZE * SPRITE_SIZE / 4
-                ) Colors.ORANGE else -1
-            }
-        }
-        api.createSprite(
-            SPRITE_ID,
-            SPRITE_SIZE,
-            SPRITE_SIZE, sprite
-        )
-        strWidth = api.getStringWidth(STRING, false)
-        strX = 0 //(256 - strWidth) / 2
-        strY = (240 - 8) - 40  /// 2 // interesting that's size
-
-        api.createSprite(
-            SPRITE_ID,
-            SPRITE_SIZE,
-            SPRITE_SIZE, sprite
-        )
-
+        screenDraw.apiEnabled()
     }
 
     private fun apiDisabled() {
@@ -103,232 +68,21 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     }
 
     private fun statusChanged(message: String) {
-        System.out.format("Status message: %s%n", message)
+        println("Status message: $message")
     }
 
-    var currentGamePad = GamePad.MoveRight;
-    private var untilFrame = 0
-    private val pressTime = 1
-    private val collectSkip = false
-
+    private var currentGamePad = GamePad.MoveRight
     private val hyrule: Hyrule = Hyrule()
+    private val screenDraw = ScreenDraw()
+    private val cheater = Cheater()
+    private var setEquipmentCt = 200
+    private var frameStateUpdater: FrameStateUpdater = FrameStateUpdater(api, hyrule)
+    val plan = PlanRunner(::makePlan, api)
 
-    var frameStateUpdater: FrameStateUpdater = FrameStateUpdater(api, hyrule)
-
-    fun makePlan(): MasterPlan {
+    private fun makePlan(): MasterPlan {
         // make sure to reset any state here
         frameStateUpdater.reset()
         return ZeldaPlan.makeMasterPlan(hyrule, hyrule.mapCellsObject, hyrule.levelMap)
-    }
-
-    val plan = PlanRunner(::makePlan, api)
-
-    var previousLink: FramePoint = FramePoint()
-    val collect = SkipLocationCollector()
-
-    private var setEquipmentCt = 200
-
-    private fun getAction(currentFrame: Int, currentGamePad: GamePad): GamePad {
-        frameStateUpdater.updateFrame(currentFrame, currentGamePad)
-        if (collectSkip) {
-            val link = frameStateUpdater.getLink()
-            collect.collect(link, previousLink)
-            previousLink = link
-            d { collect.toString() }
-            return GamePad.None
-        }
-        if (unstick > 0) {
-            unstick--
-            return if (forcedDirection == GamePad.None) {
-                GamePad.randomDirection()
-            } else {
-                forcedDirection
-            }
-        }
-
-        // filters..
-
-        if (frameStateUpdater.state.frameState.isDoneScrolling) {
-            d { " * clear history" }
-            frameStateUpdater.state.clearHistory()
-            // then skip action on this frame
-            return GamePad.None
-        }
-        if (frameStateUpdater.state.frameState.isScrolling) {
-            return GamePad.None
-        }
-
-        if (addKey) {
-            frameStateUpdater.addKey()
-            addKey = false
-        }
-        if (addRupee) {
-            frameStateUpdater.addRupee()
-            addRupee = false
-        }
-//        fillBombs()
-        refillIfOut()
-        frameStateUpdater.setSword(ZeldaItem.MagicSword)
-        frameStateUpdater.setRing(ZeldaItem.BlueRing)
-        if (setEquipmentCt > 0 && addEquipment) {
-            d { " Set equip" }
-//            frameStateUpdater.setSword(ZeldaItem.MagicSword)
-//            frameStateUpdater.setRing(ZeldaItem.BlueRing)
-            frameStateUpdater.setLadderAndRaft(true)
-            frameStateUpdater.setRedCandle()
-            frameStateUpdater.setHaveWhistle()
-            frameStateUpdater.setBait()
-            frameStateUpdater.setLetter()
-            frameStateUpdater.setArrow()
-            frameStateUpdater.fillTriforce()
-//            frameStateUpdater.setRing(ZeldaItem.RedRing)
-
-//            frameStateUpdater.fillHearts()
-            setEquipmentCt--
-        }
-        if (frameStateUpdater.state.frameState.clockActivated) {
-            frameStateUpdater.deactivateClock()
-        }
-
-//        plan.next(frameStateUpdater.state)
-
-        val nextGamePad = plan.next(frameStateUpdater.state)
-
-        frameStateUpdater.state.previousGamePad = nextGamePad
-
-        d { plan.toString() }
-        if (ZeldaBot.draw) {
-            with(frameStateUpdater.state) {
-                val currentCell = currentMapCell
-                val locCoordinates = "${frameState.level}: ${frameState.mapLoc} : ${currentCell.mapData.name.take(10)}"
-                d {
-                    "current --> " +
-                            "$locCoordinates " +
-//                            " current action: ${plan.action?.name ?: ""} "
-                            " target ${plan.target()} " + "link " +
-                            "${frameState.link.point}"
-                }
-                val tenth = this.frameState.tenth
-                val dir = this.frameState.link.dir.name.first()
-                val damage = this.frameState.inventory.heartCalc.damageNumber()
-                try {
-                    drawIt(plan.target(), plan.path(), "$locCoordinates $link t: $tenth d: $damage")
-                } catch (e: Exception) {
-                    d { "ERROR $e"}
-                }
-
-                // draws the right look but the colors are wrong
-//                val mapCell = this.hyrule.getMapCell(this.frameState.mapLoc)
-                try {
-                    val mapCell = if (this.frameState.isLevel) hyrule.levelMap.cell(
-                        this.frameState.level,
-                        this.frameState.mapLoc
-                    ) else hyrule.getMapCell(this.frameState.mapLoc)
-//                    mapCell.gstar.setEnemyCosts(this.link, listOf(this.rhino()?.point ?: FramePoint()))
-                    drawCosts(mapCell.zstar.costsF.copy())
-                } catch (e: Exception) {
-                    d { "ERROR $e"}
-                }
-            }
-        }
-        return nextGamePad
-    }
-
-    private val rhinoHeadLeftUp = 0xFA // foot up
-    private val rhinoHeadLeftUp2 = 0xFC // foot down
-    private val rhinoHeadLeftDown = 0xF6 // foot up
-    private val rhinoHeadLeftDown2 = 0xF4 // foot down
-    private val head = setOf(rhinoHeadHeadWithMouthOpen, rhinoHeadHeadWithMouthClosed, rhinoHeadLeftUp, rhinoHeadLeftUp2, rhinoHeadLeftDown, rhinoHeadLeftDown2)
-
-    private fun MapLocationState.rhino(): Agent? =
-        // pick the left most head
-        frameState.enemies.filter { it.y != 187 && head.contains(it.tile) }.minByOrNull { it.x }
-
-    private var spriteX = 0
-    private var spriteY = 8
-    private var spriteVx = 1
-    private var spriteVy = 1
-    private var strWidth = 0
-    private var strX = 0
-    private var strY = 200
-
-    private fun drawMap(cell: MapCell) {
-        for (x in 0..255) {
-            for (y in 0..167) {
-//                val pt = point.toScreenY
-                if (cell.passable.get(x, y)) {
-                    api.drawSprite(SPRITE_ID, x, y + MapConstants.yAdjust)
-                }
-            }
-        }
-    }
-
-    private fun drawCosts(map: Map2d<Int>) {
-        // with enemies
-        map.map.forEachIndexed { y, row ->
-            row.forEachIndexed { x, v ->
-                val color = when {
-                    v > 100000 -> Colors.MAGENTA
-                    v > 9000 && (y % 16 % 2 == 0) -> Colors.RED
-//                    v > 900 -> Colors.YELLOW // everything is yellow
-                    else -> -1
-                }
-                if (color != -1) {
-                    api.color = color
-                    api.drawOval(x, y + MapConstants.yAdjust, 1, 1)
-                }
-            }
-        }
-    }
-
-    private fun drawIt(point: FramePoint, path: List<FramePoint>, text: String) {
-        val pt = point.toScreenY
-        api.drawSprite(SPRITE_ID, pt.x, pt.y)
-        api.color = Colors.DARK_BLUE
-        api.fillRect(strX - 1, strY - 1, strWidth + 2, 9)
-
-        if (path.isNotEmpty()) {
-            api.color = Colors.ORANGE
-            val screenPath = path.map { it.toScreenY }
-            var prev: FramePoint = screenPath.first()
-            for (pathPt in screenPath) {
-                api.drawLine(prev.x, prev.y, pathPt.x, pathPt.y)
-                prev = pathPt
-            }
-        }
-
-        // todo: draw dots on enemies, one color for projectile, one for enemy
-        // draw the grid of cost function?
-
-//        api.setColor(Colors.BLUE)
-//        api.drawRect(strX - 2, strY - 2, strWidth + 3, 10)
-        api.color = Colors.WHITE
-        api.drawString("$text", strX, strY, false)
-    }
-
-    private fun drawDroppedItem(point: FramePoint, text: String) {
-        val pt = point.toScreenY
-        api.drawString("$text", pt.x, pt.y, false)
-    }
-
-    private fun refillIfOut() {
-        fillBombs()
-
-        if (frameStateUpdater.state.frameState.inventory.numRupees!! < 250) {
-            api.writeCPU(Addresses.numRupees, 252)
-        }
-    }
-
-    private fun refillKeys() {
-        if (frameStateUpdater.state.frameState.inventory.numKeys == 0) {
-            api.writeCPU(Addresses.numKeys, 2)
-        }
-    }
-
-    private fun fillBombs() {
-        if (frameStateUpdater.state.frameState.inventory.numBombs!! <= 2) {
-            api.writeCPU(Addresses.numBombs, 8)
-        }
     }
 
     private fun renderFinished() {
@@ -337,23 +91,18 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         d { "execute ### $currentFrame" }
         monitor.update(frameStateUpdater.state, plan)
 
-        // fill hearts
-        // not reliable enough
-        val life = frameStateUpdater.state.frameState.inventory.heartCalc.lifeInHearts2()
-        if (life <= 2.5) {
-            d { "fill hearts $life" }
-//            frameStateUpdater.fillHearts()
-        } else {
-            d { "fill hearts $life" }
-        }
+        cheater.refillAndSetItems()
 
-        val act = doAct && !collectSkip //currentFrame % 3 == 0
+        val act = doAct
         if (act) {
             currentGamePad = getAction(currentFrame, currentGamePad)
+            screenDraw.draw()
+            d { plan.toString() }
             d { " action: at ${frameStateUpdater.state.frameState.link.point} do -> $currentGamePad previous ${frameStateUpdater.state.previousMove.move}" }
 
-            val toRelease = mutableSetOf(GamePad.MoveRight, GamePad.MoveUp, GamePad.MoveLeft, GamePad.MoveDown)
-            toRelease.forEach { api.writeGamepad(0, it.toGamepadButton, false) }
+            // not necessary I think
+//            val toRelease = mutableSetOf(GamePad.MoveRight, GamePad.MoveUp, GamePad.MoveLeft, GamePad.MoveDown)
+//            toRelease.forEach { api.writeGamepad(0, it.toGamepadButton, false) }
             when (currentGamePad) {
                 GamePad.MoveRight -> api.writeGamepad(
                     0,
@@ -393,11 +142,43 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         }
     }
 
+    private fun getAction(currentFrame: Int, currentGamePad: GamePad): GamePad {
+        frameStateUpdater.updateFrame(currentFrame, currentGamePad)
+
+        // this is a debug function so the debug UI can control link
+        if (unstick > 0) {
+            unstick--
+            return if (forcedDirection == GamePad.None) {
+                GamePad.randomDirection()
+            } else {
+                forcedDirection
+            }
+        }
+
+        if (frameStateUpdater.state.frameState.isDoneScrolling) {
+            d { " * done scrolling to new screen" }
+            frameStateUpdater.state.clearHistory()
+            // then skip action on this frame
+            return GamePad.None
+        }
+        if (frameStateUpdater.state.frameState.isScrolling) {
+            return GamePad.None
+        }
+
+        val nextGamePad = plan.next(frameStateUpdater.state)
+
+        frameStateUpdater.state.previousGamePad = nextGamePad
+
+        return nextGamePad
+    }
+
     companion object {
         private const val STRING = "####"
         private const val SPRITE_ID = 123
         private const val SPRITE_ID_2 = 456
         private const val SPRITE_SIZE = 2
+
+        // parameters controlled by the debug UI
         var hasLadder = false
         var doAct = true
         var draw = true
@@ -415,24 +196,14 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             return bot
         }
 
-//        @JvmStatic
-//        fun startActionTest(monitor: ZeldaMonitor) {
-//            ApiSource.initRemoteAPI("localhost", 9999)
-//            // which save state to load
-//            // which action to start
-//            ZeldaBot(monitor).launch()
-//        }
-
         @JvmStatic
         fun main(args: Array<String>) {
-            println("API enabled GREG kotlin")
-            println("START")
             if (args.isNotEmpty()) {
-                System.out.println("start remote")
+                println("start remote")
                 ApiSource.initRemoteAPI("localhost", 9999)
             } else {
                 ApiSource.initRemoteAPI("localhost", 9999)
-                System.out.println("start local")
+                println("start local")
             }
             ZeldaBot(NoOp()).launch()
         }
@@ -447,5 +218,212 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             // todo
         }
     }
+
+    /**
+     * refil, make link invincible, etc..
+     */
+    inner class Cheater {
+        fun refillAndSetItems() {
+            // fill hearts
+            // not reliable enough
+            val life = frameStateUpdater.state.frameState.inventory.heartCalc.lifeInHearts2()
+            if (life <= 2.5) {
+                d { "fill hearts $life" }
+//            frameStateUpdater.fillHearts()
+            } else {
+                d { "fill hearts $life" }
+            }
+
+            if (addKey) {
+                frameStateUpdater.addKey()
+                addKey = false
+            }
+            if (addRupee) {
+                frameStateUpdater.addRupee()
+                addRupee = false
+            }
+            refillIfOut()
+            frameStateUpdater.setSword(ZeldaItem.MagicSword)
+            frameStateUpdater.setRing(ZeldaItem.BlueRing)
+            if (setEquipmentCt > 0 && addEquipment) {
+                d { " Set equip" }
+//            frameStateUpdater.setSword(ZeldaItem.MagicSword)
+//            frameStateUpdater.setRing(ZeldaItem.BlueRing)
+                frameStateUpdater.setLadderAndRaft(true)
+                frameStateUpdater.setRedCandle()
+                frameStateUpdater.setHaveWhistle()
+                frameStateUpdater.setBait()
+                frameStateUpdater.setLetter()
+                frameStateUpdater.setArrow()
+                frameStateUpdater.fillTriforce()
+//            frameStateUpdater.setRing(ZeldaItem.RedRing)
+
+//            frameStateUpdater.fillHearts()
+                setEquipmentCt--
+            }
+            if (frameStateUpdater.state.frameState.clockActivated) {
+                frameStateUpdater.deactivateClock()
+            }
+        }
+
+        private fun refillIfOut() {
+            fillBombs()
+
+            if (frameStateUpdater.state.frameState.inventory.numRupees < 250) {
+                api.writeCPU(Addresses.numRupees, 252)
+            }
+        }
+
+        private fun refillKeys() {
+            if (frameStateUpdater.state.frameState.inventory.numKeys == 0) {
+                api.writeCPU(Addresses.numKeys, 2)
+            }
+        }
+
+        private fun fillBombs() {
+            if (frameStateUpdater.state.frameState.inventory.numBombs!! <= 2) {
+                api.writeCPU(Addresses.numBombs, 8)
+            }
+        }
+    }
+
+    inner class ScreenDraw {
+        private val rhinoHeadLeftUp = 0xFA // foot up
+        private val rhinoHeadLeftUp2 = 0xFC // foot down
+        private val rhinoHeadLeftDown = 0xF6 // foot up
+        private val rhinoHeadLeftDown2 = 0xF4 // foot down
+        private val head = setOf(rhinoHeadHeadWithMouthOpen, rhinoHeadHeadWithMouthClosed, rhinoHeadLeftUp, rhinoHeadLeftUp2, rhinoHeadLeftDown, rhinoHeadLeftDown2)
+
+        private var spriteX = 0
+        private var spriteY = 8
+        private var spriteVx = 1
+        private var spriteVy = 1
+        private var strWidth = 0
+        private var strX = 0
+        private var strY = 200
+
+        fun apiEnabled() {
+            val sprite = IntArray(SPRITE_SIZE * SPRITE_SIZE)
+            for (y in 0 until SPRITE_SIZE) {
+                val Y = y - SPRITE_SIZE / 2 + 0.5
+                for (x in 0 until SPRITE_SIZE) {
+                    val X = x - SPRITE_SIZE / 2 + 0.5
+                    sprite[SPRITE_SIZE * y + x] = if (X * X + Y * Y
+                        <= SPRITE_SIZE * SPRITE_SIZE / 4
+                    ) Colors.ORANGE else -1
+                }
+            }
+            api.createSprite(
+                SPRITE_ID,
+                SPRITE_SIZE,
+                SPRITE_SIZE, sprite
+            )
+            strWidth = api.getStringWidth(STRING, false)
+            strX = 0 //(256 - strWidth) / 2
+            strY = (240 - 8) - 40  /// 2 // interesting that's size
+
+            api.createSprite(
+                SPRITE_ID,
+                SPRITE_SIZE,
+                SPRITE_SIZE, sprite
+            )
+        }
+
+        fun draw() {
+            if (draw) {
+                with(frameStateUpdater.state) {
+                    val currentCell = currentMapCell
+                    val locCoordinates = "${frameState.level}: ${frameState.mapLoc} : ${currentCell.mapData.name.take(10)}"
+                    d {
+                        "current --> " +
+                                "$locCoordinates " +
+//                            " current action: ${plan.action?.name ?: ""} "
+                                " target ${plan.target()} " + "link " +
+                                "${frameState.link.point}"
+                    }
+                    val tenth = this.frameState.tenth
+                    val dir = this.frameState.link.dir.name.first()
+                    val damage = this.frameState.inventory.heartCalc.damageNumber()
+                    try {
+                        drawIt(plan.target(), plan.path(), "$locCoordinates $link t: $tenth d: $damage")
+                    } catch (e: Exception) {
+                        d { "ERROR $e"}
+                    }
+
+                    // draws the right look but the colors are wrong
+//                val mapCell = this.hyrule.getMapCell(this.frameState.mapLoc)
+                    try {
+                        val mapCell = if (this.frameState.isLevel) hyrule.levelMap.cell(
+                            this.frameState.level,
+                            this.frameState.mapLoc
+                        ) else hyrule.getMapCell(this.frameState.mapLoc)
+//                    mapCell.gstar.setEnemyCosts(this.link, listOf(this.rhino()?.point ?: FramePoint()))
+                        drawCosts(mapCell.zstar.costsF.copy())
+                    } catch (e: Exception) {
+                        d { "ERROR $e"}
+                    }
+                }
+            }
+        }
+
+        private fun MapLocationState.rhino(): Agent? =
+            // pick the left most head
+            frameState.enemies.filter { it.y != 187 && head.contains(it.tile) }.minByOrNull { it.x }
+
+        private fun drawMap(cell: MapCell) {
+            for (x in 0..255) {
+                for (y in 0..167) {
+//                val pt = point.toScreenY
+                    if (cell.passable.get(x, y)) {
+                        api.drawSprite(SPRITE_ID, x, y + MapConstants.yAdjust)
+                    }
+                }
+            }
+        }
+
+        private fun drawCosts(map: Map2d<Int>) {
+            // with enemies
+            map.map.forEachIndexed { y, row ->
+                row.forEachIndexed { x, v ->
+                    val color = when {
+                        v > 100000 -> Colors.MAGENTA
+                        v > 9000 && (y % 16 % 2 == 0) -> Colors.RED
+//                    v > 900 -> Colors.YELLOW // everything is yellow
+                        else -> -1
+                    }
+                    if (color != -1) {
+                        api.color = color
+                        api.drawOval(x, y + MapConstants.yAdjust, 1, 1)
+                    }
+                }
+            }
+        }
+
+        private fun drawIt(point: FramePoint, path: List<FramePoint>, text: String) {
+            val pt = point.toScreenY
+            api.drawSprite(SPRITE_ID, pt.x, pt.y)
+            api.color = Colors.DARK_BLUE
+            api.fillRect(strX - 1, strY - 1, strWidth + 2, 9)
+
+            if (path.isNotEmpty()) {
+                api.color = Colors.ORANGE
+                val screenPath = path.map { it.toScreenY }
+                var prev: FramePoint = screenPath.first()
+                for (pathPt in screenPath) {
+                    api.drawLine(prev.x, prev.y, pathPt.x, pathPt.y)
+                    prev = pathPt
+                }
+            }
+
+            // todo: draw dots on enemies, one color for projectile, one for enemy
+            // draw the grid of cost function?
+
+//        api.setColor(Colors.BLUE)
+//        api.drawRect(strX - 2, strY - 2, strWidth + 3, 10)
+            api.color = Colors.WHITE
+            api.drawString("$text", strX, strY, false)
+        }
+    }
 }
+
 

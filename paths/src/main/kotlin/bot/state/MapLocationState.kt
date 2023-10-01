@@ -5,6 +5,9 @@ import bot.state.map.Hyrule
 import bot.state.map.MapCell
 import nintaco.api.ApiSource
 
+/**
+ * persists between frames
+ */
 class MapLocationState(
     var hyrule: Hyrule,
 
