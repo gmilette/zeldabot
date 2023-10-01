@@ -30,7 +30,9 @@ data class DirectionMap(
     val down: Set<Int> = setOf(),
     val left: Set<Int> = setOf(),
     val right: Set<Int> = setOf(),
-)
+) {
+    val all = up + down + left + right
+}
 
 object Monsters {
     val boomerang = Monster(
@@ -38,6 +40,13 @@ object Monsters {
         normal = setOf(),
         damaged = setOf(0x01, 0x43))
 }
+
+typealias TileAttribute = Pair<Byte, Byte>
+val TileAttribute.tile: Byte
+    get() = first
+
+val TileAttribute.attribute: Byte
+    get() = second
 
 // need
 

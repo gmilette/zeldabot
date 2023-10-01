@@ -44,7 +44,7 @@ class OamStateReasoner(
         sprites.map { it.toAgent() }
 
     private fun SpriteData.toAgent(): Agent =
-        Agent(index = tile, point = point, state = toState(), tile = tile, attribute = attribute)
+        Agent(index = index, point = point, state = toState(), tile = tile, attribute = attribute)
 
     @VisibleForTesting
     fun combine(toCombine: List<SpriteData>): List<SpriteData> {
@@ -80,10 +80,8 @@ class OamStateReasoner(
 
         if (DEBUG || true) {
             d { " alive sprites AFTER delete" }
-            if (mutable != null) {
-                mutable.filterNotNull().forEachIndexed { index, sprite ->
-                    d { "$index: $sprite" }
-                }
+            mutable.forEachIndexed { index, sprite ->
+                d { "$index: $sprite" }
             }
         }
 
