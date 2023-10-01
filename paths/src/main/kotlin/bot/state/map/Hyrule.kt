@@ -1,6 +1,6 @@
 package bot.state.map
 
-import bot.plan.gastar.ZStar
+import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.level.LevelMapCellsLookup
 import bot.state.map.destination.DestType

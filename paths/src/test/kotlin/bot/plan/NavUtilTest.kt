@@ -2,7 +2,7 @@ package bot.plan
 
 import bot.state.GamePad
 import bot.plan.action.NavUtil
-import bot.plan.gastar.ZStar
+import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.Hyrule
 import bot.state.map.MapCell

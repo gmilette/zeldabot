@@ -1,4 +1,4 @@
-package bot.plan.gastar
+package bot.plan.zstar
 
 import bot.state.map.Direction
 import bot.state.FramePoint

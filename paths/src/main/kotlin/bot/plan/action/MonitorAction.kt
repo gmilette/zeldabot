@@ -1,6 +1,6 @@
 package bot.plan.action
 
-import bot.plan.gastar.ZStar
+import bot.plan.zstar.ZStar
 import bot.state.FramePoint
 import bot.state.GamePad
 import bot.state.MapLocationState

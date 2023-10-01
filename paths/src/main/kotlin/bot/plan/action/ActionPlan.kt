@@ -1,6 +1,6 @@
 package bot.plan.action
 
-import bot.plan.gastar.ZStar
+import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapCell

@@ -1,4 +1,4 @@
-package bot.plan.gastar
+package bot.plan.zstar
 
 import bot.state.FramePoint
 import bot.state.isTopRightCorner

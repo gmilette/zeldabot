@@ -1,8 +1,8 @@
 package bot.plan.action
 
 import bot.plan.action.NavUtil.directionToDir
-import bot.plan.gastar.FrameRoute
-import bot.plan.gastar.ZStar
+import bot.plan.zstar.FrameRoute
+import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.*
 import util.LogFile

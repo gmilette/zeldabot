@@ -1,6 +1,6 @@
 package bot.state.map.level
 
-import bot.plan.gastar.ZStar
+import bot.plan.zstar.ZStar
 import bot.state.FramePoint
 import bot.state.MapCellPoint
 import bot.state.MapLoc
