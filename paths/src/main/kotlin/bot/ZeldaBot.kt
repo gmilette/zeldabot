@@ -74,9 +74,9 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     private var currentGamePad = GamePad.MoveRight
     private val hyrule: Hyrule = Hyrule()
     private val screenDraw = ScreenDraw()
-    private val cheater = Cheater()
     private var setEquipmentCt = 200
     private var frameStateUpdater: FrameStateUpdater = FrameStateUpdater(api, hyrule)
+    private val cheater = Cheater(api, frameStateUpdater)
     val plan = PlanRunner(::makePlan, api)
 
     private fun makePlan(): MasterPlan {
@@ -222,7 +222,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     /**
      * refil, make link invincible, etc..
      */
-    inner class Cheater {
+    inner class Cheater(api: API, frameStateUpdater: FrameStateUpdater) {
+        private val stateManipulator = StateManipulator(api, frameStateUpdater)
         fun refillAndSetItems() {
             // fill hearts
             // not reliable enough
@@ -235,35 +236,33 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             }
 
             if (addKey) {
-                frameStateUpdater.addKey()
+                stateManipulator.addKey()
                 addKey = false
             }
             if (addRupee) {
-                frameStateUpdater.addRupee()
+                stateManipulator.addRupee()
                 addRupee = false
             }
             refillIfOut()
-            frameStateUpdater.setSword(ZeldaItem.MagicSword)
-            frameStateUpdater.setRing(ZeldaItem.BlueRing)
+            stateManipulator.setSword(ZeldaItem.MagicSword)
+            stateManipulator.setRing(ZeldaItem.BlueRing)
             if (setEquipmentCt > 0 && addEquipment) {
                 d { " Set equip" }
 //            frameStateUpdater.setSword(ZeldaItem.MagicSword)
 //            frameStateUpdater.setRing(ZeldaItem.BlueRing)
-                frameStateUpdater.setLadderAndRaft(true)
-                frameStateUpdater.setRedCandle()
-                frameStateUpdater.setHaveWhistle()
-                frameStateUpdater.setBait()
-                frameStateUpdater.setLetter()
-                frameStateUpdater.setArrow()
-                frameStateUpdater.fillTriforce()
+                stateManipulator.setLadderAndRaft(true)
+                stateManipulator.setRedCandle()
+                stateManipulator.setHaveWhistle()
+                stateManipulator.setBait()
+                stateManipulator.setLetter()
+                stateManipulator.setArrow()
+                stateManipulator.fillTriforce()
 //            frameStateUpdater.setRing(ZeldaItem.RedRing)
 
 //            frameStateUpdater.fillHearts()
                 setEquipmentCt--
             }
-            if (frameStateUpdater.state.frameState.clockActivated) {
-                frameStateUpdater.deactivateClock()
-            }
+            stateManipulator.deactivateClock()
         }
 
         private fun refillIfOut() {
@@ -281,7 +280,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         }
 
         private fun fillBombs() {
-            if (frameStateUpdater.state.frameState.inventory.numBombs!! <= 2) {
+            if (frameStateUpdater.state.frameState.inventory.numBombs <= 2) {
                 api.writeCPU(Addresses.numBombs, 8)
             }
         }
@@ -292,7 +291,14 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         private val rhinoHeadLeftUp2 = 0xFC // foot down
         private val rhinoHeadLeftDown = 0xF6 // foot up
         private val rhinoHeadLeftDown2 = 0xF4 // foot down
-        private val head = setOf(rhinoHeadHeadWithMouthOpen, rhinoHeadHeadWithMouthClosed, rhinoHeadLeftUp, rhinoHeadLeftUp2, rhinoHeadLeftDown, rhinoHeadLeftDown2)
+        private val head = setOf(
+            rhinoHeadHeadWithMouthOpen,
+            rhinoHeadHeadWithMouthClosed,
+            rhinoHeadLeftUp,
+            rhinoHeadLeftUp2,
+            rhinoHeadLeftDown,
+            rhinoHeadLeftDown2
+        )
 
         private var spriteX = 0
         private var spriteY = 8
@@ -333,7 +339,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             if (draw) {
                 with(frameStateUpdater.state) {
                     val currentCell = currentMapCell
-                    val locCoordinates = "${frameState.level}: ${frameState.mapLoc} : ${currentCell.mapData.name.take(10)}"
+                    val locCoordinates =
+                        "${frameState.level}: ${frameState.mapLoc} : ${currentCell.mapData.name.take(10)}"
                     d {
                         "current --> " +
                                 "$locCoordinates " +
@@ -342,12 +349,12 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                                 "${frameState.link.point}"
                     }
                     val tenth = this.frameState.tenth
-                    val dir = this.frameState.link.dir.name.first()
+//                    val dir = this.frameState.link.dir.name.first()
                     val damage = this.frameState.inventory.heartCalc.damageNumber()
                     try {
                         drawIt(plan.target(), plan.path(), "$locCoordinates $link t: $tenth d: $damage")
                     } catch (e: Exception) {
-                        d { "ERROR $e"}
+                        d { "ERROR $e" }
                     }
 
                     // draws the right look but the colors are wrong
@@ -360,7 +367,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 //                    mapCell.gstar.setEnemyCosts(this.link, listOf(this.rhino()?.point ?: FramePoint()))
                         drawCosts(mapCell.zstar.costsF.copy())
                     } catch (e: Exception) {
-                        d { "ERROR $e"}
+                        d { "ERROR $e" }
                     }
                 }
             }

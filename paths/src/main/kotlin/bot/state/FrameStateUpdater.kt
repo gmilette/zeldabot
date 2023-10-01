@@ -15,7 +15,7 @@ class FrameStateUpdater(
     private val api: API,
     private val hyrule: Hyrule
 ) {
-    val yAdjustFactor = 61
+    private val yAdjustFactor = MapConstants.yAdjust
 
     private fun getLinkX() = api.readCPU(Addresses.linkX)
     private fun getLinkY() = api.readCPU(Addresses.linkY)
@@ -25,78 +25,6 @@ class FrameStateUpdater(
     fun reset() {
         d { "RESET State" }
         state = MapLocationState(hyrule)
-    }
-
-    fun fillTriforce() {
-        api.writeCPU(Addresses.triforce, 255)
-    }
-
-    fun fillHearts() {
-        api.writeCPU(Addresses.heartContainers, 0xCC) // 13 hearts all full
-        api.writeCPU(Addresses.heartContainersHalf, 0xFF) // make the half heart full too
-    }
-
-    fun setRing(item: ZeldaItem) {
-        val ringId = when (item) {
-            ZeldaItem.BlueRing -> 1
-            ZeldaItem.RedRing -> 2
-            else -> 0
-        }
-        // doesnt change visual but affects damage
-        api.writeCPU(Addresses.hasRing, ringId)
-    }
-
-    fun setLadderAndRaft(enable: Boolean) {
-        api.writeCPU(Addresses.hasLadder, enable.intTrue)
-        api.writeCPU(Addresses.hasRaft, enable.intTrue)
-    }
-
-    fun setBait() {
-        api.writeCPU(Addresses.hasFood, 1)
-    }
-
-    fun setLetter() {
-        api.writeCPU(Addresses.hasLetter, 1)
-    }
-
-    fun setArrow() {
-        api.writeCPU(Addresses.hasBow, 1)
-        // silver arrow of course, let's be luxurious
-        api.writeCPU(Addresses.hasArrow, 2)
-    }
-
-    fun deactivateClock() {
-        api.writeCPU(Addresses.clockActivated, 0)
-    }
-
-    fun setRedCandle() {
-        api.writeCPU(Addresses.hasCandle, 2)
-    }
-
-    fun setHaveWhistle() {
-        api.writeCPU(Addresses.hasWhistle, 1)
-    }
-
-    fun addKey() {
-        val current = state.frameState.inventory.numKeys
-        api.writeCPU(Addresses.numKeys, current + 1)
-    }
-
-    fun addRupee() {
-        val current = state.frameState.inventory.numRupees
-        val plus100 = max(252, current + 100)
-        api.writeCPU(Addresses.numRupees, plus100)
-    }
-
-    fun setSword(item: ZeldaItem) {
-        when (item) {
-            ZeldaItem.WoodenSword -> api.writeCPU(Addresses.hasSword, 1)
-            ZeldaItem.WhiteSword -> api.writeCPU(Addresses.hasSword, 2)
-            ZeldaItem.MagicSword -> api.writeCPU(Addresses.hasSword, 3)
-            else -> {
-                api.writeCPU(Addresses.hasSword, 0)
-            }
-        }
     }
 
     fun updateFrame(currentFrame: Int, currentGamePad: GamePad) {
@@ -174,5 +102,5 @@ class FrameStateUpdater(
     }
 }
 
-private val Boolean.intTrue: Int
+val Boolean.intTrue: Int
     get() = if (this) 1 else 0
