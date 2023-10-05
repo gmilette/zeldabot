@@ -189,6 +189,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         var unstick = 0
         var forcedDirection = GamePad.None
         var addEquipment: Boolean = false
+        var invincible: Boolean = true
 
         @JvmStatic
         fun startIt(monitor: ZeldaMonitor): ZeldaBot {
@@ -232,7 +233,9 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             val life = frameStateUpdater.state.frameState.inventory.heartCalc.lifeInHearts2()
             if (life <= 2.5) {
                 d { "fill hearts $life" }
-//            frameStateUpdater.fillHearts()
+                if (invincible) {
+                    stateManipulator.fillHearts()
+                }
             } else {
                 d { "fill hearts $life" }
             }

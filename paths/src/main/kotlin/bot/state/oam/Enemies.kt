@@ -47,6 +47,9 @@ val waterMonster = 0xEC to (0x43)
 
 // verify
 val triforceDirtPair = (0xEC).toInt() to (0x03)// attrib 03 //236 // also part of fourMonster
+val starCenter = (0xEC).toInt() to (0x41) // center star monster
+val starCenter2 = (0xEC).toInt() to (0x01) // center star monster
+
 
 // added from online
 // https://www.computerarcheology.com/NES/Zelda/Bank2.html
@@ -108,8 +111,9 @@ val rhinoHead2 = (0xE0).toInt()
 val fourMonster = (0xE2).toInt() to (0x41).toInt()
 val fourMonster2 = (0xE0).toInt() to (0x41).toInt()
 val fourMonsterBody = (0xEC).toInt() to (0x41).toInt()
-val fourMonster3 = (0xE8).toInt() to (0xC1).toInt() //??
-val fourMonster5 = (0xE8).toInt() to (0x81).toInt() //??
+val fourMonster3 = (0xE8).toInt() to (0xC1).toInt()
+val fourMonster4 = (0xE8).toInt() to (0x41).toInt()
+val fourMonster5 = (0xE8).toInt() to (0x01).toInt()
 
 val rhinoTail = (0xDC).toInt()
 val rhinoMid = (0xDE).toInt()

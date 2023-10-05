@@ -165,7 +165,9 @@ data class SpriteData(
     val index: Int,
     val point: FramePoint,
     val tile: Int,
-    val attribute: Int
+    val attribute: Int,
+    val tileByte: String = tile.toString(16),
+    val attributeByte: String = attribute.toString(16)
 ) {
     val tilePair = tile to attribute
 

@@ -40,6 +40,7 @@ fun main() = application {
         val act = remember { mutableStateOf(ZeldaBot.doAct) }
         val draw = remember { mutableStateOf(ZeldaBot.draw) }
         val ladder = remember { mutableStateOf(true) }
+        val inv = remember { mutableStateOf(true) }
 
         Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
                 Text(
@@ -133,6 +134,15 @@ fun main() = application {
                 modifier = Modifier.align(Alignment.Start)
             ) {
                 Row {
+                    Text("Invincible")
+                    Checkbox(
+                        checked = inv.value,
+                        onCheckedChange = {
+                            inv.value = it
+                            model.invincible(it)
+                        }
+                    )
+
                     Text("Ladder")
                     Checkbox(
                         checked = ladder.value,
@@ -394,6 +404,10 @@ class ZeldaModel : ZeldaBot.ZeldaMonitor {
 
     fun ladder(act: Boolean) {
         ZeldaBot.hasLadder = act
+    }
+
+    fun invincible(act: Boolean) {
+        ZeldaBot.invincible = act
     }
 
     data class ShowState(

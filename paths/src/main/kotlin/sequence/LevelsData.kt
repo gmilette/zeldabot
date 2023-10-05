@@ -3,7 +3,8 @@ package sequence
 data class LevelData(
     val level: Int,
     val numKeysIn: Int,
-    val numKeysNeeded: Int
+    val numKeysNeeded: Int,
+    val numKeysPlanned: Int = 0
 )
 
 object LevelsData {

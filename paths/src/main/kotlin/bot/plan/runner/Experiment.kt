@@ -9,16 +9,18 @@ class Experiments(masterPlan: MasterPlan) {
     companion object {
         // to rerun
 //        const val current = "level1bat"
-        const val current = "level2Boom"
+//        const val current = "level2Boom"
 //        const val current = "level2rhino"
+        const val current = "level6end"
     }
     private val experiments: Map<String, Experiment>
 
-    private val default = Experiment("all", "start_nothing.save", masterPlan, sword = ZeldaItem.MagicSword)
+    private val default = Experiment("all", "start_nothing.save", masterPlan, sword = ZeldaItem.MagicSword, addEquipment = false)
 
     init {
         experiments = listOf(
             Experiment("all", "start_nothing.save", masterPlan, sword = ZeldaItem.MagicSword, addEquipment = false),
+            Experiment("level6end", "level6_done.save", masterPlan.getPlanAfter(Phases.afterLevel6), sword = ZeldaItem.MagicSword, addEquipment = true),
             Experiment("level2rhino", "lev2_14_boss.save", masterPlan.getPlanPhase("Destroy level 2", Phases.Segment.lev2Boss), sword = ZeldaItem.WoodenSword, addEquipment = true),
             Experiment("level2Boom", "level2_boom_5h.save", masterPlanWith(KillAll()), sword = ZeldaItem.WhiteSword),
             Experiment("level2w", "level2.save", masterPlan.getPlanPhase("Destroy level 2", null), sword = ZeldaItem.WoodenSword, addEquipment = true),

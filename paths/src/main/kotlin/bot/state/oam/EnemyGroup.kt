@@ -92,7 +92,9 @@ object EnemyGroup {
     // triforce: F2, F4
 
     val ignorePairs = setOf(
-        triforceDirtPair
+        triforceDirtPair,
+        starCenter,
+        starCenter2
     )
 
     val loot = setOf(

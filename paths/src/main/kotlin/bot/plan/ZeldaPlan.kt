@@ -106,12 +106,14 @@ object Phases {
     val grabHearts = "grab hearts"
     val forest30 = "forest 30"
     val level3 = "level 3"
+    val afterLevel6 = "after level 6"
     val level7 = "level 7"
     val level8 = "level 8"
     val level9 = "level 9"
 
     object Segment {
         val lev2Boss = "kill boss"
+        val lev6End = "level6 end"
     }
 }
 
@@ -148,6 +150,7 @@ object ZeldaPlan {
             includeLevelPlan(levelPlan6(factory))
             // whistle back to 2, fight the bomerang guys,
             // proceed to 8
+            phase(Phases.afterLevel6)
             obj(Dest.level(8))
             includeLevelPlan(levelPlan8(factory))
             obj(Dest.level(8))
@@ -314,7 +317,7 @@ object ZeldaPlan {
             // is the 10 secret necessary, eh
 //            routeTo(78-16)
 //            obj(Dest.Secrets.level2secret10)
-            phase("go to level 8")
+            phase(Phases.afterLevel6)
             obj(Dest.level(8))
             includeLevelPlan(levelPlan8(factory), Direction.Left)
 
@@ -338,6 +341,7 @@ object ZeldaPlan {
     private fun levelPlan1(factory: PlanInputs): MasterPlan {
         val builder = factory.make("Destroy level 1")
         return builder {
+            //1, 2
             inLevel
             startAt(LevelStartMapLoc.lev(1))
             seg("grab key")
@@ -650,7 +654,10 @@ object ZeldaPlan {
             lev(6)
             startAt(LevelStartMapLoc.lev(6))
             seg("move to level 6")
-//            .right //key
+            // add key
+            right //key
+            loot // it's in middle
+            left
             leftm
             seg("first ghost")
             upm // skip

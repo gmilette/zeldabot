@@ -213,6 +213,7 @@ class LevelSpecBuilder {
         val stairsRight = splitSpot.up.right.right.right.right
         val specs = mutableListOf(
             LevelSpec(start, e(l, r), "start", LevelMapTemplateReader.Temp.lev_grid),
+            LevelSpec(start.right, e(l), "free key", LevelMapTemplateReader.Temp.lev_block4out),
             LevelSpec(start.left, e(u, r), "intro ghosts", LevelMapTemplateReader.Temp.lev_block4out2),
             LevelSpec(start.left.up, e(u, d), "inbetween", LevelMapTemplateReader.Temp.lev_blockside2),
             LevelSpec(start.left.up.up, e(u, d), "blocked arrow guy", LevelMapTemplateReader.Temp.lev_corner),
