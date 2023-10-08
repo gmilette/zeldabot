@@ -36,6 +36,7 @@ object InLocations {
         val start: MapLoc = 119
     }
     object Level1 {
+        val key114Position = FramePoint(9.grid, 6.grid)
         val key114 = FramePoint(10.grid, 8.grid)
         val key83 = FramePoint(8.grid, 3.grid)
 
@@ -107,6 +108,8 @@ object Phases {
     val forest30 = "forest 30"
     val level3 = "level 3"
     val afterLevel6 = "after level 6"
+    val level5 = "level 5"
+    val level6 = "level 6"
     val level7 = "level 7"
     val level8 = "level 8"
     val level9 = "level 9"
@@ -293,7 +296,7 @@ object ZeldaPlan {
 
             // after this link just went left, where is he going?
 
-            phase("level 5")
+            phase("go to level 5")
             obj(Dest.level(5))
             includeLevelPlan(levelPlan5(factory))
             phase("gear for level 6")
@@ -307,7 +310,6 @@ object ZeldaPlan {
 //            // hard to get into position when its passable, maybe position it
             obj(ZeldaItem.MagicSword)
 //
-            phase("level 6")
             obj(Dest.level(6))
             includeLevelPlan(levelPlan6(factory))
 
@@ -371,8 +373,6 @@ object ZeldaPlan {
             upm // 51
             seg("grab key from zig")
             killUntilGetKey
-//            killAndLoot
-//            pickupDeadItem
             seg("get key from boomerang guys")
             up //35
             goIn(GamePad.MoveUp, 30)
@@ -396,8 +396,10 @@ object ZeldaPlan {
             // extra vertical and horizontal is not good
 //            goAbout(InLocations.Level1.boomerang68, 4, 2, true)
             goAbout(InLocations.Level1.boomerang68, 1, 1, true, ignoreProjectiles = true)
-            seg("get past hand grabby")
             right //69 hand grabby
+            seg("steal key from hand grabby")
+            go(InLocations.Level1.key114Position)
+            go(InLocations.Level1.key114)
             // should do but too risky for now
 //                .go(InLocations.Level1.key114)
             up
@@ -431,17 +433,17 @@ object ZeldaPlan {
             seg("gather key 2")
             left
             kill
-            seg("gather key 3")
             left
-            // opportunity kill
             goTo(InLocations.Level2.keyMid)
             right
             right // grid room
             seg("sprint up from grid")
-            // right is nothing
-            up // need to be able to kill
+            up
             seg("go get blue boomerang")
-            upm // which upm
+            upm
+            seg("gather key 3")
+            kill
+            loot // key 2
             right
             kill
             // the boomerang is a projectile! do not avoid it
@@ -581,7 +583,7 @@ object ZeldaPlan {
     }
 
     private fun levelPlan5(factory: PlanInputs): MasterPlan {
-        val builder = factory.make("Get to level 5")
+        val builder = factory.make(Phases.level5)
         return builder {
             lev(5)
             startAt(LevelStartMapLoc.lev(5))
@@ -615,14 +617,15 @@ object ZeldaPlan {
             right
             right
             seg("kill all zombie to open")
-//            startAt(102)
-            kill //get key 102 ??
+            killUntilGetKey
             upm // 86, rhinos
             rightm //85
 //            startAt(87)
             seg("no head up to victory")
             upm // impossible maze
+            seg("zombie1")
             upm
+            seg("zombie2")
             upm
             seg("go left to victory")
             // key??
@@ -649,13 +652,14 @@ object ZeldaPlan {
     }
 
     private fun levelPlan6(factory: PlanInputs): MasterPlan {
-        val builder = factory.make("Get to level 6")
+        val builder = factory.make(Phases.level6)
         return builder {
             lev(6)
             startAt(LevelStartMapLoc.lev(6))
             seg("move to level 6")
             // add key
             right //key
+            kill
             loot // it's in middle
             left
             leftm
@@ -675,11 +679,13 @@ object ZeldaPlan {
             pushJust(InLocations.Level6.moveUp)
             upm // 38
             // maybe
-            killUntil(3) // leave some alive, just do some damage so bomb is successful
+            killUntil(5) // leave some alive, just do some damage so bomb is successful
 //            kill // just to make sure the bomb is successful
             bomb(InLocations.bombRightExactly) // there is a block near the bomb spot
             seg("go up to get wand")
             right // 39
+            kill
+            loot // another key, this is hard though because of ladder
             up
             up
             seg("get want")

@@ -19,14 +19,16 @@ object LevelsData {
         //6: 0 key: get 0, use 4 (if you have 4 all good)
         //8: 0 keys: get 2, use 2 (forced one, go right grab)
         // total 20 keys needed only
+        // start with 2
         LevelData(
             level = 1,
             // 1: left start
             // 2: right start
             numKeysIn = 6,
-            numKeysNeeded = 4 // only if use a bomb
+            numKeysNeeded = 5 // only if use a bomb
         ),
         LevelData(
+            // only got two
             level = 2,
             // 1: (mid, fast) right from start
             // 2: off path left
@@ -53,10 +55,10 @@ object LevelsData {
         LevelData(
             level = 5,
             // 1: (mid) kill right bunnies (? kill?
-            // 2: (easy) inside mummy grab
-            // 3: (high) have to kill zombie to get in, not worth it
+            // 2: (easy) inside mummy grab, Grab
+            // 3: (high) have to kill zombie to get in, not worth it yep at 71
             // 4: (mid) kill zombie
-            // 5: (mid) rabbits, zombies
+            // 5: (mid) rabbits, zombies at 39. Grab
             // 6: (mid), zombies
             numKeysIn = 6,
             numKeysNeeded = 2 //visual

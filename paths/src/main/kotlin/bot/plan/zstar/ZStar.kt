@@ -181,7 +181,7 @@ class ZStar(
     ): List<FramePoint> {
         val nearEnemies = enemies.isNotEmpty()
         val maxIter = if (nearEnemies) SHORT_ITER else MAX_ITER
-        d {"Plan: iter = $maxIter enemies ${enemies.size}"}
+        d {"Plan: iter = $maxIter enemies ${enemies.size} near ${avoidNearEnemy.size}"}
         resetPassable()
         // only if inside a radius
         setEnemyCosts(start, enemies)

@@ -220,7 +220,7 @@ class LevelSpecBuilder {
             LevelSpec(start.left.up.up.up, e(u, d), "side angles", LevelMapTemplateReader.Temp.lev_side_angle),
             LevelSpec(start.left.up.up.up.up, e(u, d), "blocked two", LevelMapTemplateReader.Temp.lev_block2center),
             LevelSpec(start.left.up.up.up.up.up, e(u, d, r), "grid bomb right", LevelMapTemplateReader.Temp.lev_grid_center),
-            LevelSpec(splitSpot, e(u, d), "split", LevelMapTemplateReader.Temp.lev_water_circle),
+            LevelSpec(splitSpot, e(u, d), "split", LevelMapTemplateReader.Temp.lev_water_circle_path),
             LevelSpec(splitSpot.up, e(u, d, l, r), "split up", LevelMapTemplateReader.Temp.lev_water_line_right),
             LevelSpec(splitSpot.up.up, e(d), "two push", LevelMapTemplateReader.Temp.lev_block2center),
             LevelSpec(splitSpot.down, e(u, r), "split down", LevelMapTemplateReader.Temp.lev_water_line_right_path),

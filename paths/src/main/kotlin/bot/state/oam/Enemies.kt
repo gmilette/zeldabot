@@ -83,7 +83,9 @@ val secretEverybodyMonsterOrCircleEnemyLeft = 250 // fa
 val secretEverybodyMonsterOrCircleEnemyRight = 248 // f8
 
 // enemies
-val dragonHead = (0xC0).toInt()
+//val dragonHead = (0xC0).toInt()
+val dragonHead = (0xCC).toInt() //3
+val dragonHead2 = (0xC0).toInt() //3
 val dragonNeck = (0xC4).toInt()
 // do not attack
 // but these are also the pinwheel guys

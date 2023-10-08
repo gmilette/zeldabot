@@ -8,8 +8,8 @@ import bot.state.Addresses
 import bot.state.FramePoint
 import bot.state.GamePad
 import bot.state.MapLocationState
-import nintaco.api.API
 import bot.state.map.destination.ZeldaItem
+import nintaco.api.API
 import util.d
 
 class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
@@ -26,10 +26,12 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     init {
 //        run(name = "level1drag")
 //        run(name = "level2Boom")
-        run(name = target)
+//        run(name = "level6start")
 //        run(name = "level8")
+        run(name = "level1drag")
 //        run(name = "level1L") // with ladder
 //        run(name = "level1") // with ladder
+//        run(name = "level5") // with ladder
     }
 
     private fun rerun() {

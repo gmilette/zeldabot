@@ -10,6 +10,18 @@ import util.d
 
 class OamStateReasonerTest {
     @Test
+    fun `test keep`() {
+        val reasoner = OamStateReasoner(mock())
+        val sprites = listOf(
+            SpriteData(176, FramePoint(85, 102), 176, 3),
+            SpriteData(178, FramePoint(77, 118), 178, 3)
+        )
+        reasoner.combine(sprites).apply {
+            size shouldBe 2
+        }
+    }
+
+    @Test
     fun `test some`() {
         val reasoner = OamStateReasoner(mock())
         val sprites = listOf(

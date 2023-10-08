@@ -455,6 +455,7 @@ private fun doRouteTo(
     if (param.ignoreEnemies) {
         d { "ignore enemies" }
         avoid = avoid.filter { it.state != EnemyState.Alive }
+//        avoid = mutableListOf()
     }
 
     param.attackTarget?.let { targetAttack ->

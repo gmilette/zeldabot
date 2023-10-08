@@ -90,7 +90,7 @@ class KillAll(
         if (!needLongWait) {
             needLongWait = state.longWait.isNotEmpty()
         }
-        needLongWait = false
+//        needLongWait = false
         d { " KILL ALL step ${state.currentMapCell.mapLoc} count $frameCount wait $waitAfterAllKilled center: $numEnemiesInCenter needLong $needLongWait" }
 
         for (enemy in state.frameState.enemies.filter { it.state != EnemyState.Dead }) {

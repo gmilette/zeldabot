@@ -44,30 +44,20 @@ class OamStateReasoner(
         sprites.map { it.toAgent() }
 
     private fun SpriteData.toAgent(): Agent =
-        Agent(index = index, point = point, state = toState(), tile = tile, attribute = attribute)
+        Agent(index = index, point = point, state = toState(), tile = tile, attribute = attribute,
+            tileByte = tile.toString(16), attributeByte = attribute.toString(16))
 
     @VisibleForTesting
     fun combine(toCombine: List<SpriteData>): List<SpriteData> {
-        // could be multiple at x
-        val xMap = toCombine.associateBy { it.point.x }
-
         // can delete, because there is a sprite 8pxs to left that is the same
         val toDelete = toCombine
             // keep all the projectiles because most are just small
 //            .filter { !SpriteData.projectiles.contains(it.tile) }
-            .filter {
+            .filter { maybeKeep ->
 //                val matched = xMap[it.point.x - 8]
-                val matched = xMap[it.point.x - 8]
-                // tiles do not always match
-//                val delete = matched?.tile == it.tile && matched.point.y == it.point.y
-                val delete = matched?.let { ma ->
-                    toCombine.any { ma.point.y == it.point.y }
-                } ?: false
-//                val delete = matched?.point?.y == it.point.y
-                if (delete) {
-                    d { "! delete, ${it.point} because matches ${matched?.point}" }
+                toCombine.filter { it.point.x == maybeKeep.point.x - 8 }.any { matched ->
+                    matched.point.y == maybeKeep.point.y
                 }
-                delete
         }
 
         val mutable = toCombine.toMutableList()
