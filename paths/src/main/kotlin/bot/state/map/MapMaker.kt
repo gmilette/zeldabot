@@ -70,6 +70,7 @@ object MapMaker {
 }
 
 val mapPassable = setOf(
+    //"3c", // TESTING, link keeps getting stuck on this, half mountains when going from level 4, does not work
     "XB", //added for bomb
     "XL", //added for ladder
     "XR", //added for easy raft, and rock near level 2

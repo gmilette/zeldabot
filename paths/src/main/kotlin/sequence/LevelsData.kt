@@ -8,6 +8,12 @@ data class LevelData(
 )
 
 object LevelsData {
+    // plan:
+    // 2 -> 3, rup: 176
+    // 1 -> 4, rup: 182 - candle 122
+    // 3 -> 3, rup 122, 222 (not enough)
+    // 4 -> 3, still at 3, 9 rup
+
     val levels = listOf(
         // option: level 2 left squishy, or level 8 right grab(is it a grab?)
         // plan

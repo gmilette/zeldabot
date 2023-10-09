@@ -273,6 +273,10 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         private fun refillIfOut() {
             fillBombs()
 
+//            refillRupees()
+        }
+
+        private fun refillRupees() {
             if (frameStateUpdater.state.frameState.inventory.numRupees < 250) {
                 api.writeCPU(Addresses.numRupees, 252)
             }
