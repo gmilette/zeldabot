@@ -396,6 +396,10 @@ class MapBuilder {
             "candle shop",
             Objective(FramePoint(7.grid, 1.grid), Dest.Shop.candleShopMid, Objective.ItemLoc.Right)
         )
+        objectives[103] = MapCellData(
+            "up start",
+            Objective(FramePoint(7.grid, 1.grid), Dest.Secrets.bomb30Start)
+        )
         objectives[104] = MapCellData(
             "upForest",
             Objective(

@@ -260,6 +260,7 @@ object ZeldaPlan {
             obj(ZeldaItem.WhiteSword)
             obj(Dest.level(1))
             includeLevelPlan(levelPlan1(factory))
+            obj(Dest.Secrets.bomb30Start) // could move later if we can guarantee level 2 provides
             obj(Dest.Shop.candleShopMid)
             obj(Dest.level(3))
             includeLevelPlan(levelPlan3(factory))

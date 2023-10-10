@@ -470,8 +470,8 @@ class PlanBuilder(
 
     private fun bombThenGoIn(entrance: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem): PlanBuilder {
         bomb(entrance.copy(y = entrance.y + 8))
-//        go(entrance)
-        add(lastMapLoc, ReBombIfNecessary(InsideNav(entrance)))
+
+        add(lastMapLoc, ReBombIfNecessary(InsideNav(entrance, makePassable = entrance)))
 
         goIn(GamePad.MoveUp, 5)
 

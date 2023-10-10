@@ -49,13 +49,13 @@ class CompleteIfMapChanges(private val wrapped: Action) : Action {
 }
 
 // move to this location then complete
-class InsideNav(private val point: FramePoint, ignoreProjectiles: Boolean = false) : Action {
+class InsideNav(private val point: FramePoint, ignoreProjectiles: Boolean = false, private val makePassable: FramePoint? = null) : Action {
     private val routeTo = RouteTo.hardlyReplan(ignoreProjectiles = ignoreProjectiles)
     override fun complete(state: MapLocationState): Boolean =
         state.frameState.link.point == point
 
     override fun nextStep(state: MapLocationState): GamePad {
-        val pad = routeTo.routeTo(state, listOf(point))
+        val pad = routeTo.routeTo(state, listOf(point), makePassable = makePassable)
         return pad
     }
 

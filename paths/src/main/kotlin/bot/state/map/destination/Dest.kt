@@ -28,6 +28,7 @@ object Dest {
         itemLookup[item] ?: DestType.Item(ZeldaItem.None)
 
     object Secrets {
+        val bomb30Start = DestType.SecretToEverybody(30, entry = EntryType.Bomb)
         val bomb20 = DestType.SecretToEverybody(20, entry = EntryType.Bomb)
         val walk100 = DestType.SecretToEverybody(100)
         val forest100South = DestType.SecretToEverybody(100, EntryType.Fire(from = Direction.Down))
