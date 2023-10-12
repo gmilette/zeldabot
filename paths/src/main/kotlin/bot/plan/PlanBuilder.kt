@@ -54,7 +54,8 @@ class PlanBuilder(
                 if (opp) {
                     add(mapCell.mapLoc, opportunityKillOrMove(mapCell))
                 } else {
-                    add(mapCell.mapLoc, MoveTo(lastMapLoc, mapCell))
+                    add(mapCell.mapLoc, lootAndMove(MoveTo(lastMapLoc, mapCell)))
+//                    add(mapCell.mapLoc, MoveTo(lastMapLoc, mapCell))
                 }
 //                d { " routeTo $name $last to ${mapCell.mapLoc}"}
 //                    add(mapCell.mapLoc, opportunityKillOrMove(mapCell))
@@ -169,7 +170,7 @@ class PlanBuilder(
     val killAllInCenter: PlanBuilder
         get() {
             // need to redo this so that link moves back to the position
-            add(lastMapLoc, KillAll(considerEnemiesInCenter = true))
+            add(lastMapLoc, lootAndKill(KillAll(considerEnemiesInCenter = true)))
             goTo(FramePoint(3.grid, 8.grid))
 //            goTo(FramePoint(7.grid, 7.grid)) // second to bottom
             goTo(FramePoint(8.grid, 8.grid)) // bottom center
@@ -198,14 +199,14 @@ class PlanBuilder(
             return this
         }
     fun killUntil(leftDead: Int): PlanBuilder {
-        add(lastMapLoc, KillAll(
+        add(lastMapLoc, lootAndKill(KillAll(
             numberLeftToBeDead = leftDead
-        ))
+        )))
         return this
     }
     val killUntilGetKey: PlanBuilder
         get() {
-            add(lastMapLoc, CompleteIfGetItem(KillAll()))
+            add(lastMapLoc, CompleteIfGetItem(lootAndKill(KillAll())))
             add(lastMapLoc, GetLoot())
             return this
         }
@@ -217,23 +218,23 @@ class PlanBuilder(
         }
     val kill: PlanBuilder
         get() {
-            add(lastMapLoc, KillAll(needLongWait = false))
+            add(lastMapLoc, lootAndKill(KillAll(needLongWait = false)))
             return this
         }
     val killLongWait: PlanBuilder
         get() {
-            add(lastMapLoc, KillAll(needLongWait = true))
+            add(lastMapLoc, lootAndKill(KillAll(needLongWait = true)))
             return this
         }
     val killFirstAttackBomb: PlanBuilder
         get() {
-            add(lastMapLoc, KillAll(needLongWait = false, firstAttackBomb = true))
+            add(lastMapLoc, lootAndKill(KillAll(needLongWait = false, firstAttackBomb = true)))
             return this
         }
 
     val killUntil2: PlanBuilder
         get() {
-            add(lastMapLoc, KillAll(needLongWait = false, numberLeftToBeDead = 2))
+            add(lastMapLoc, lootAndKill(KillAll(needLongWait = false, numberLeftToBeDead = 2)))
             return this
         }
     val killLev4Dragon: PlanBuilder

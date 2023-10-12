@@ -38,6 +38,7 @@ class Experiments(masterPlan: MasterPlan) {
             Experiment("level8", "level8_start.save", masterPlan.getPlanPhase(Phases.level8, null), sword = ZeldaItem.WoodenSword, addEquipment = true),
             Experiment("level9", "level9_start.save", masterPlan.getPlanAfter(Phases.level9), sword = ZeldaItem.MagicSword, addEquipment = true),
             Experiment("level1bat", "lev1_bat.save", masterPlanWith(KillAll()), addEquipment = false),
+            Experiment("gannon", "level9_gannon.save", masterPlan.getPlanPhase(Phases.level9, "seg kill gannon"), addEquipment = false),
         ).associateBy { it.name }
     }
 

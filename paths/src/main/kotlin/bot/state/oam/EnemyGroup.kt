@@ -90,11 +90,20 @@ object EnemyGroup {
     // gannon stuff
     // pile: EC, EA
     // triforce: F2, F4
+    // but also a
+    // blue rhino soldier f4, attribute 3
 
     val ignorePairs = setOf(
         triforceDirtPair,
+        triforceDirt3Pair,
         starCenter,
         starCenter2
+    )
+
+    val lootPairs = setOf(
+        triforceTile2Pair,
+        triforceTile2PairAlt,
+        triforceTilePair
     )
 
     val loot = setOf(
@@ -117,15 +126,16 @@ object EnemyGroup {
         candle,
         120, // not sure maybe something on triforce level , 78
         50,
-        243, // heart
+        heart, // heart
         key, //key
         116, // bomb
         bomb, // bomb
         triforceNormal,
 //            triforceDirt, // why?
 //            triforceDirt2,
-        triforceTile,
-        triforceTile2,
+        // same as rhinoenemies
+//        triforceTile,
+//        triforceTile2,
         magicSword
     )
 }

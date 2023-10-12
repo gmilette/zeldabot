@@ -7,6 +7,9 @@ import bot.state.map.MapCell
 import bot.state.map.MapConstants
 import bot.state.map.grid
 import bot.state.oam.bomb
+import bot.state.oam.fairy
+import bot.state.oam.fairy2
+import bot.state.oam.heart
 import nintaco.api.ApiSource
 import util.d
 import util.i
@@ -276,7 +279,15 @@ val moveToKillAllInCenterSpot = DecisionAction(
     state.numEnemies <= state.numEnemiesAliveInCenter()
 }
 
+fun lootAndKill(kill: KillAll) = DecisionAction(Optional(GetLoot()), kill) { state ->
+    state.frameState.enemies.any { it.isLoot }
+}
+
 val lootOrKill = DecisionAction(Optional(GetLoot()), Optional(KillAll())) { state ->
+    state.frameState.enemies.any { it.isLoot }
+}
+
+fun lootAndMove(moveTo: MoveTo) = DecisionAction(Optional(GetLoot()), moveTo) { state ->
     state.frameState.enemies.any { it.isLoot }
 }
 
@@ -512,7 +523,9 @@ data class LootSpec(
     val smallCoin: Boolean = false,
     val bomb: Boolean = true
 ) {
-
+    val keepSet = setOf(heart, bigCoin, fairy, fairy2)
+    fun keep(tile: Int): Boolean =
+        tile in keepSet
 }
 
 class GetLoot(private val adjustInSideLevelBecauseGannon: Boolean = false, private val lootSpec: LootSpec? = null) : Action {

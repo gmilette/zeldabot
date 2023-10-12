@@ -52,7 +52,8 @@ class KillGannon : Action {
     }
 
     override fun nextStep(state: MapLocationState): GamePad {
-        d {"KillGannon"}
+        d {"KillGannon num enemies ${state.numEnemies}"}
+        state.frameState.logEnemies()
         if (isReadyForDeath(state)) {
             d {"KillGannon !! READY FOR DEATH !!"}
         } else {

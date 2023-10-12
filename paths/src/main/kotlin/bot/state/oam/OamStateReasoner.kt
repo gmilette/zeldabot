@@ -149,7 +149,7 @@ class OamStateReasoner(
     }
 }
 fun Agent.isGannonTriforce(): Boolean =
-    tile == triforceTile
+    tile to attribute == triforceTile2Pair
 
 data class SpriteData(
     val index: Int,
@@ -175,7 +175,7 @@ data class SpriteData(
             || point.y >= 187 // this keeps coming up, make sense ,because we translated it 61
             || point.y < 0
 
-    val isLoot = !hidden && EnemyGroup.loot.contains(tile)
+    val isLoot = !hidden && (EnemyGroup.loot.contains(tile) || EnemyGroup.lootPairs.contains(tilePair))
 
     val isProjectile = !hidden && EnemyGroup.projectiles.contains(tile)
     // it doesn't solve the pancake problem

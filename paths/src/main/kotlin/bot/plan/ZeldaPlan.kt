@@ -1006,6 +1006,7 @@ object ZeldaPlan {
             kill
             up
             "seg kill gannon".seg()
+            goIn(GamePad.None, 100)
             switchToArrow()
             goTo(InLocations.Level9.centerGannonAttack)
             killG

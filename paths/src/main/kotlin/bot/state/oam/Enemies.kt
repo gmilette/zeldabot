@@ -18,6 +18,7 @@ val bombSmoke = 112
 val monsterCloud = (0x70).toInt()
 val bomb = 52
 val key = (0x2E).toInt() //key
+val heart = 243
 
 val shopkeeperAndBat = (0x9C).toInt()
 val bat = (0x9A).toInt()
@@ -38,11 +39,14 @@ val raft = (0x6C).toInt()
 val triforceNormal = (0x6E).toInt()
 // final triforce
 val triforceTile = (0xF4).toInt()
-val triforceTile2 = (0xF2).toInt()
+val triforceTilePair = (0xF4).toInt() to (0x01).toInt()
+val triforceTile2Pair = (0xF2).toInt() to (0x01).toInt()
+val triforceTile2PairAlt = (0xF2).toInt() to (0x02).toInt()
 val triforceDirt = (0xEC).toInt() // attrib 03 //236 // also part of fourMonster
 val triforceDirt2 = (0xFA).toInt() // also circle enemy center
 val triforceDirt3 = (0xEA).toInt() // attrib 03
 
+val triforceDirt3Pair = (0xEA).toInt() to (0x03).toInt() // attrib 03
 val waterMonster = 0xEC to (0x43)
 
 // verify
@@ -71,6 +75,7 @@ val bow = (0x2A).toInt()
 val map = (0x4C).toInt()
 val fairy = (0x50).toInt()
 val fairy2 = (0x52).toInt()
+val bigCoin = 50 //??
 val wizard = (0x98).toInt() // 152
 val flame1 = (0x5C).toInt() //92
 const val flame2 = (0x5E).toInt() //94
