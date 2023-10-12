@@ -6,10 +6,7 @@ import bot.state.map.Direction
 import bot.state.map.MapCell
 import bot.state.map.MapConstants
 import bot.state.map.grid
-import bot.state.oam.bomb
-import bot.state.oam.fairy
-import bot.state.oam.fairy2
-import bot.state.oam.heart
+import bot.state.oam.*
 import nintaco.api.ApiSource
 import util.d
 import util.i
@@ -30,7 +27,7 @@ interface Action {
     fun targets() = listOf(target())
 
     fun path(): List<FramePoint> {
-        d { " default no path"}
+        d { " default no path" }
         return emptyList()
     }
 
@@ -40,7 +37,7 @@ interface Action {
         get() = this.javaClass.simpleName
 }
 
-abstract class WrappedAction(private val wrapped: Action): Action {
+abstract class WrappedAction(private val wrapped: Action) : Action {
     override fun reset() {
         wrapped.reset()
     }
@@ -111,9 +108,10 @@ class OrderedActionSequence(
     }
 
     override fun path(): List<FramePoint> {
-        d { " current action ${currentAction?.name ?: ""}"}
+        d { " current action ${currentAction?.name ?: ""}" }
         return currentAction?.path() ?: emptyList()
     }
+
     override fun nextStep(state: MapLocationState): GamePad {
         val current = currentAction ?: pop() ?: restart() ?: return GamePad.randomDirection(state.link)
         if (current.complete(state)) {
@@ -130,8 +128,10 @@ class OrderedActionSequence(
         get() = "OrderedAction Sequence ${actions.size}"
 }
 
-class CompleteIfGetItem(action: Action,
-                        val select: Inventory.() -> Int = {this.numKeys}) : WrappedAction(action) {
+class CompleteIfGetItem(
+    action: Action,
+    val select: Inventory.() -> Int = { this.numKeys }
+) : WrappedAction(action) {
     private var frameCt = 0
     private var startingQuantity = -1
     override fun complete(state: MapLocationState): Boolean {
@@ -200,6 +200,7 @@ class ActionSequence(
 ) : Action {
     var stepName: String = ""
     var currentAction: Action? = null
+
     // never complete
     override fun complete(state: MapLocationState): Boolean =
         false
@@ -212,7 +213,7 @@ class ActionSequence(
     }
 
     override fun path(): List<FramePoint> {
-        d { " current action ${currentAction?.name ?: ""}"}
+        d { " current action ${currentAction?.name ?: ""}" }
         return currentAction?.path() ?: emptyList()
     }
 
@@ -268,9 +269,10 @@ class Optional(val action: Action, private val must: Boolean = true) : Action {
 }
 
 // after kill all, move to next screen
-val lootAndKill = DecisionAction(GetLoot(), KillAll(ignoreEnemies = true, ignoreProjectiles = emptyList(), roundX = false)) { state ->
-    state.frameState.enemies.any { it.isLoot }
-}
+val lootAndKill =
+    DecisionAction(GetLoot(), KillAll(ignoreEnemies = true, ignoreProjectiles = emptyList(), roundX = false)) { state ->
+        state.frameState.enemies.any { it.isLoot }
+    }
 
 val moveToKillAllInCenterSpot = DecisionAction(
     InsideNavAbout(FramePoint(5.grid, 5.grid), 2),
@@ -320,10 +322,10 @@ class GoInConsume(private val moves: Int = 5, private val dir: GamePad = GamePad
 
     override fun nextStep(state: MapLocationState): GamePad {
         if (state.previousLocation != state.link) {
-            d { " --> Moved"}
+            d { " --> Moved" }
             movements++
         } else {
-            d { " --> Moved not effective "}
+            d { " --> Moved not effective " }
         }
         return dir
     }
@@ -517,18 +519,16 @@ class PickupDroppedDungeonItemAndKill : Action {
     }
 }
 
-data class LootSpec(
-    val heartsAndFairy: Boolean = true,
-    val bigCoin: Boolean = true,
-    val smallCoin: Boolean = false,
-    val bomb: Boolean = true
-) {
-    val keepSet = setOf(heart, bigCoin, fairy, fairy2)
+object LootKnowledge {
+    val keepSet = setOf(heart, fairy, fairy2, bomb) //bigCoin,
     fun keep(tile: Int): Boolean =
         tile in keepSet
 }
 
-class GetLoot(private val adjustInSideLevelBecauseGannon: Boolean = false, private val lootSpec: LootSpec? = null) : Action {
+class GetLoot(
+    private val adjustInSideLevelBecauseGannon: Boolean = false,
+    private val onlyIfYouNeedIt: Boolean = false
+) : Action {
     // gannon triforce pieces are sometimes projectiles
     // yea but then we are going to route link into the projectiles
     // so now I parameterize this so that it only ignores projectiles when in gannon
@@ -541,6 +541,16 @@ class GetLoot(private val adjustInSideLevelBecauseGannon: Boolean = false, priva
     private var target: FramePoint = FramePoint(0, 0)
 
     override fun path(): List<FramePoint> = routeTo.route?.path ?: emptyList()
+
+    private fun needed(state: MapLocationState, agent: Agent) =
+        LootKnowledge.keep(agent.tile) &&
+                when (agent.tile) {
+                    bomb -> (state.frameState.inventory.numBombs < 8)
+                    bigCoin -> (state.frameState.inventory.numRupees < 250)
+                    // heart
+                    // fairy
+                    else -> true
+                }
 
     override fun nextStep(state: MapLocationState): GamePad {
         d { " GET LOOT" }
@@ -609,7 +619,7 @@ class StartHereAction(private val saveSlot: Int? = null) : Action {
 
     fun restoreSaveSlot() {
         saveSlot?.let {
-            i { " load save slot $saveSlot"}
+            i { " load save slot $saveSlot" }
             ApiSource.getAPI().quickLoadState(saveSlot)
         }
     }

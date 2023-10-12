@@ -206,7 +206,7 @@ class PlanBuilder(
     }
     val killUntilGetKey: PlanBuilder
         get() {
-            add(lastMapLoc, CompleteIfGetItem(lootAndKill(KillAll())))
+            add(lastMapLoc, CompleteIfGetItem(KillAll()))
             add(lastMapLoc, GetLoot())
             return this
         }
@@ -307,6 +307,12 @@ class PlanBuilder(
         get() {
             val nextLoc = lastMapLoc.right
             add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc)))
+            return this
+        }
+    val rightNoP: PlanBuilder
+        get() {
+            val nextLoc = lastMapLoc.right
+            add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc), ignoreProjectiles = true))
             return this
         }
 
@@ -420,11 +426,11 @@ class PlanBuilder(
      *  * *
      *   *
      */
-    fun pushThenGoTo(toB: FramePoint, toT: FramePoint = InLocations.middleStair): PlanBuilder {
-        add(lastMapLoc, InsideNavAbout(toB, 4))
+    fun pushThenGoTo(toB: FramePoint, toT: FramePoint = InLocations.middleStair, ignoreProjectiles: Boolean = false): PlanBuilder {
+        add(lastMapLoc, InsideNavAbout(toB, 4, ignoreProjectiles = ignoreProjectiles))
         add(lastMapLoc, GoDirection(GamePad.MoveUp, 70))
         add(lastMapLoc, GoDirection(GamePad.MoveRight, 70))
-        add(lastMapLoc, InsideNav(toT))
+        add(lastMapLoc, InsideNav(toT, ignoreProjectiles = ignoreProjectiles))
         return this
     }
 

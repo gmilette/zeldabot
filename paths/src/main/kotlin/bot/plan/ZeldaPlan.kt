@@ -384,12 +384,12 @@ object ZeldaPlan {
             goTo(FramePoint(3.grid, 2.grid))
             seg("get arrow")
             leftm
-            pushThenGoTo(InLocations.diamondLeftBottomPush) //InLocations.diamondLeftTopPush)
+            pushThenGoTo(InLocations.diamondLeftBottomPush, ignoreProjectiles = true) //InLocations.diamondLeftTopPush)
             startAt(127)
             go(InLocations.getItem)
             upTo(34) // eh
             seg("snag boomerang")
-            rightm // don't attack
+            rightNoP // don't attack // need special sequence here
             down.down // at 67 now
             right // boomerang
             goIn(GamePad.MoveRight, 30)
@@ -685,8 +685,9 @@ object ZeldaPlan {
             bomb(InLocations.bombRightExactly) // there is a block near the bomb spot
             seg("go up to get wand")
             right // 39
-            kill
-            loot // another key, this is hard though because of ladder
+            // dont need this key
+//            kill
+//            loot // another key, this is hard though because of ladder
             up
             up
             seg("get want")

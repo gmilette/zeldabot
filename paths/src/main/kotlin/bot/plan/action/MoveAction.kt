@@ -115,8 +115,8 @@ class InsideNavAbout(
         get() = "Nav to about $point"
 }
 
-class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val forceDirection: Direction? = null) : MapAwareAction {
-    private val routeTo = RouteTo(params = RouteTo.Param(considerLiveEnemies = false))
+class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val forceDirection: Direction? = null, ignoreProjectiles: Boolean = false) : MapAwareAction {
+    private val routeTo = RouteTo(params = RouteTo.Param(considerLiveEnemies = false, ignoreProjectiles = ignoreProjectiles))
 
     init {
         next.zstar.clearAvoid()
