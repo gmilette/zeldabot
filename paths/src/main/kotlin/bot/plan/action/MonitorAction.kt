@@ -376,7 +376,7 @@ class LadderAction: Action {
     private var ladderDirectionCount = 0
 
     companion object {
-        const val LADDER_ESCAPE_MOVEMENTS = 30
+        private const val LADDER_ESCAPE_MOVEMENTS = 30
     }
 
     override fun nextStep(state: MapLocationState): GamePad {
@@ -396,4 +396,7 @@ class LadderAction: Action {
             GamePad.None
         }
     }
+
+    override val name: String
+        get() = ""
 }

@@ -112,21 +112,7 @@ class OamStateReasoner(
         direction = dirDamage.direction
         damaged = dirDamage.damaged
 
-        val ladders = spritesRaw.filter { it.tile == ladder }
-        ladderSprite = if (ladders.isNotEmpty()) {
-            val sp = if (ladders.size == 1) {
-                ladders.first()
-            } else {
-                if (ladders[0].point.x < ladders[1].point.x) {
-                    ladders[0]
-                } else {
-                    ladders[1]
-                }
-            }
-            sp.toAgent()
-        } else {
-            null
-        }
+        setLadder(spritesRaw)
 
         d { " sprites ** alive ** ${spritesRaw.filter { !it.hidden }.size} dir ${direction}" }
         // ahh there are twice as many sprites because each sprite is two big
@@ -146,6 +132,24 @@ class OamStateReasoner(
         }
 
         return combine(alive)
+    }
+
+    private fun setLadder(spritesRaw: List<SpriteData>) {
+        val ladders = spritesRaw.filter { it.tile == ladder }
+        ladderSprite = if (ladders.isNotEmpty()) {
+            val sp = if (ladders.size == 1) {
+                ladders.first()
+            } else {
+                if (ladders[0].point.x < ladders[1].point.x) {
+                    ladders[0]
+                } else {
+                    ladders[1]
+                }
+            }
+            sp.toAgent()
+        } else {
+            null
+        }
     }
 }
 fun Agent.isGannonTriforce(): Boolean =

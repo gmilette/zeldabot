@@ -77,6 +77,8 @@ class OrderedActionSequence(
     private var stack = actions.toMutableList()
 
     var currentAction: Action? = null
+    val lastNull: Boolean
+        get() = currentAction == null
 
     val done: Boolean
         get() = stack.isEmpty()
@@ -177,11 +179,10 @@ class DecisionAction(
 
     override fun nextStep(state: MapLocationState): GamePad {
         val choose1 = chooseAction1(state)
-        val action: Action
-        if (choose1) {
-            action = action1
+        val action: Action = if (choose1) {
+            action1
         } else {
-            action = action2
+            action2
         }
         d { "Action -> ${action.javaClass.simpleName}" }
         val gamePad = action.nextStep(state)
@@ -191,7 +192,7 @@ class DecisionAction(
     }
 
     override val name: String
-        get() = "${action1.name} or ${action2.name}"
+        get() = "${action1.name}${if (action1.name.isEmpty()) "" else " or " }${action2.name}"
 }
 
 

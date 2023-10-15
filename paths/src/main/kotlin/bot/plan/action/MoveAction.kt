@@ -519,10 +519,11 @@ private fun doRouteTo(
                 before = state.previousMove.from,
                 enemies = avoid.points,
                 forcePassable = passable,
-                ladderSpec = state.frameState.ladder?.let {
-                    d { " has ladder "}
-                    ZStar.LadderSpec(false, it.point)
-                }
+                // disable for now
+//                ladderSpec = state.frameState.ladder?.let {
+//                    d { " has ladder "}
+//                    ZStar.LadderSpec(false, it.point)
+//                }
             )
         )
 

@@ -293,6 +293,12 @@ class PlanBuilder(
             add(lastMapLoc.left)
             return this
         }
+    val level3TriggerDoorThen: PlanBuilder
+        get() {
+            val nextLoc = lastMapLoc.left
+            add(nextLoc, Level3TriggerDoorTrapThenDo(MoveTo(nextLoc, mapCell(nextLoc))))
+            return this
+        }
     val leftm: PlanBuilder
         get() {
             val nextLoc = lastMapLoc.left

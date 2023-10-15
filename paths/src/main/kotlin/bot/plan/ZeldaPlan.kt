@@ -1,6 +1,8 @@
 package bot.plan
 
 import bot.plan.action.GoIn
+import bot.plan.action.Level3TriggerDoorTrapThenDo
+import bot.plan.action.MoveTo
 import bot.plan.runner.MasterPlan
 import bot.state.*
 import bot.state.map.*
@@ -264,17 +266,20 @@ object ZeldaPlan {
             obj(Dest.Shop.candleShopMid)
             obj(Dest.level(3))
             includeLevelPlan(levelPlan3(factory))
-            // prob dont need this tweek
-            val forestD: MapLoc = 114
-            val forestD2: MapLoc = 99 + 16
-            routeTo(forestD2)
-            routeTo(forestD)
+            val forestNextToLevel3: MapLoc = 115
+            // prevent going down on tile 114
+            seg("position burning")
+            routeTo(forestNextToLevel3)
+            seg("position burning up")
+            routeTo(forestNextToLevel3.up)
+            seg("position burning left")
+            routeTo(forestNextToLevel3.left)
+            seg("go to obj 100 brown fire")
             obj(Dest.Secrets.fire100SouthBrown)
-            // testing this
+            // otherwise link might walk back into the secret stairs
             val forest: MapLoc = 98
             routeTo(forest.down)
             routeTo(forest.down.right)
-
             obj(Dest.Shop.blueRing, position = true)
             // avoid accidentally going back in
             goIn(GamePad.MoveRight, 25) // test it
@@ -488,14 +493,15 @@ object ZeldaPlan {
             leftm
             goTo(InLocations.Level2.keyMid) //confirm
             seg("walk round corner")
-            up // skip key
-            // kill enough to get by
-            // when there is no where to go, just attack nearest enemy!
-            killUntil2
+            up // grab key it's easy
+            kill
+            loot
             up
             left
             seg("past the compass")
-            left
+            killUntil2
+//            left
+            level3TriggerDoorThen // it's not great but ok
             goIn(GamePad.MoveLeft, 30)
             seg("fight swords")
             kill
