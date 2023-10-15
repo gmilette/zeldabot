@@ -27,6 +27,7 @@ class Experiments(masterPlan: MasterPlan) {
             Experiment("level2w", "level2.save", masterPlan.getPlanPhase("Destroy level 2", null), sword = ZeldaItem.WoodenSword, addEquipment = true),
             Experiment("level5", "level5_start2.save", masterPlan.getPlanPhase(Phases.level5, null), sword = ZeldaItem.WoodenSword),
             Experiment("level2", "level2.save", masterPlan.getPlanPhase("Destroy level 2", null), sword = ZeldaItem.MagicSword),
+            Experiment("level1Ladder", "lev1_ladder.save", masterPlan.getPlanPhase("Destroy level 1", "grab key from zig"), addEquipment = false),
             Experiment("level1L", "lev1_start.save", masterPlan.getPlanPhase("Destroy level 1", null), addEquipment = false),
             Experiment("level1", "level1_start_no_ladder.save", masterPlan.getPlanPhase("Destroy level 1", null), addEquipment = false),
             Experiment("level1drag", "lev1_dragon.save", masterPlan.getPlanPhase("Destroy level 1", "destroy dragon")),

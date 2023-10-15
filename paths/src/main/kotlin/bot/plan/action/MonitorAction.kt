@@ -11,12 +11,18 @@ import util.w
 
 // try to detect when link is stuck and then get unstuck
 
-fun moveHistoryAttackAction(wrapped: Action) =
+fun moveHistoryAttackAction(wrapped: Action): Action {
 // really, if there are enemies attack, otherwise, move, or bomb
 // if there are pancake enemies
     // hopefully adding some random moves here will also help link get unstuck
     //MoveHistoryAction(wrapped, AlwaysAttack(otherwiseRandom = true))
-    StayInCurrentMapCell(MoveHistoryAction(wrapped, AlwaysAttack(otherwiseRandom = true)))
+    val moveHistoryAction = MoveHistoryAction(wrapped, AlwaysAttack(otherwiseRandom = true))
+    val combinedAction = DecisionAction(LadderAction(), StayInCurrentMapCell(moveHistoryAction)) {
+        it.frameState.ladder != null
+    }
+
+    return combinedAction
+}
 
 
 private class SameCount {
@@ -360,4 +366,34 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
 
     override val name: String
         get() = wrapped.name
+}
+
+class LadderAction: Action {
+    override fun complete(state: MapLocationState): Boolean =
+       state.frameState.ladder == null
+
+    private var ladderDirection: GamePad? = GamePad.None
+    private var ladderDirectionCount = 0
+
+    companion object {
+        const val LADDER_ESCAPE_MOVEMENTS = 30
+    }
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        if (state.frameState.ladder == null) return GamePad.None
+
+        return if (ladderDirectionCount < LADDER_ESCAPE_MOVEMENTS) {
+            if (ladderDirection == null) {
+                ladderDirection = GamePad.randomDirection(state.link)
+            }
+            d {"!! Ladder direction!! $ladderDirection"}
+            ladderDirectionCount++
+            ladderDirection ?: GamePad.None
+        } else {
+            d {"!! Ladder no ladder"}
+            ladderDirectionCount = 0
+            ladderDirection = null
+            GamePad.None
+        }
+    }
 }
