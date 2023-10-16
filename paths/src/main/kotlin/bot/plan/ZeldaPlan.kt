@@ -1,16 +1,14 @@
 package bot.plan
 
 import bot.plan.action.GoIn
-import bot.plan.action.Level3TriggerDoorTrapThenDo
-import bot.plan.action.MoveTo
 import bot.plan.runner.MasterPlan
 import bot.state.*
 import bot.state.map.*
 import bot.state.map.destination.Dest
+import bot.state.map.destination.ZeldaItem
 import bot.state.map.level.LevelMapCellsLookup
 import bot.state.map.level.LevelSpecBuilder
 import bot.state.map.level.LevelStartMapLoc
-import bot.state.map.destination.ZeldaItem
 
 object InLocations {
     val topMiddleBombSpot = FramePoint(120, 32)
@@ -53,14 +51,14 @@ object InLocations {
         val keyMidDown = FramePoint(128, 81)
         val bombItemRight = FramePoint(208, 43)
 //        val triforce = FramePoint(120, 88) // get the middle of the triangle at the top
-        val triforce = FramePoint(128, 88) // get the middle of the triangle at the top
+//        val triforce = FramePoint(128, 88) // get the middle of the triangle at the top
+        val triforce = FramePoint(128, 88).down // get the middle of the triangle at the top
     }
 
     object Level3 {
         val heartMid = FramePoint(128, 88)
-        // requires then moving up
+        // requires then moving up / needed?
         val triforce = FramePoint(7.grid, 6.grid) // get the middle of the triangle at the top
-//        val triforce = FramePoint(8.grid, 88) // get the middle of the triangle at the top
     }
 
     object Level4 {
@@ -82,6 +80,7 @@ object InLocations {
         val moveUp = FramePoint(6.grid, 5.grid)
         val moveUpSingle = FramePoint(7.grid, 5.grid)
         val triforceHeart = FramePoint(8.grid, 5.grid)
+        val keyCenter = FramePoint(8.grid, 5.grid)
     }
 
     object Level7 {
@@ -273,7 +272,7 @@ object ZeldaPlan {
             seg("position burning up")
             routeTo(forestNextToLevel3.up)
             seg("position burning left")
-            routeTo(forestNextToLevel3.left)
+            routeTo(forestNextToLevel3.up.left)
             seg("go to obj 100 brown fire")
             obj(Dest.Secrets.fire100SouthBrown)
             // otherwise link might walk back into the secret stairs
@@ -418,9 +417,7 @@ object ZeldaPlan {
             right // triforce
             goIn(GamePad.MoveRight, 20)
             seg("get the triforce")
-            goTo(InLocations.Level2.triforce)
-            // missed it once
-            goIn(GamePad.MoveUp, 5)
+            getTri
         }
     }
 
@@ -477,10 +474,7 @@ object ZeldaPlan {
             goTo(InLocations.Level2.heartMid)
             left
             goIn(GamePad.MoveLeft, 20)
-            goTo(InLocations.Level2.triforce)
-            // in case link goes to the left of it
-            goIn(GamePad.MoveRight, 4)
-            goIn(GamePad.MoveLeft, 8)
+            getTri
         }
     }
 
@@ -502,7 +496,7 @@ object ZeldaPlan {
             killUntil2
 //            left
             level3TriggerDoorThen // it's not great but ok
-            goIn(GamePad.MoveLeft, 30)
+            goIn(GamePad.MoveLeft, 10)
             seg("fight swords")
             kill
             down
@@ -518,21 +512,24 @@ object ZeldaPlan {
 //            startHere
             upm
             right
-            rightm
+            rightNoP
+//            rightm // ignore projectiles too
             seg("get to boss")
             upm // option to get key up, but skip
             rightm
             seg("BOMB RIGHT")
-            bomb(InLocations.BombDirection.right) // right bomb
-            right
+            switchToBomb
+            level3BombThen
+//            bomb(InLocations.BombDirection.right) // right bomb
+//            right
             seg("kill boss")
-            killFirstAttackBomb // need special strategy for the 4monster
+            starKill
+            //killFirstAttackBomb // need special strategy for the 4monster
 //            goTo(InLocations.Level5.triforceHeart) // where is triforce heart???
             go(InLocations.Level3.heartMid)
             // missed it once
             up
-            goTo(InLocations.Level3.triforce)
-            goIn(GamePad.MoveUp, 5)
+            getTri
         }
     }
 
@@ -584,8 +581,7 @@ object ZeldaPlan {
             //get heart
             goTo(InLocations.Level4.triforceHeart)
             up
-            goTo(InLocations.Level2.triforce)
-            goIn(GamePad.MoveUp, 5)
+            getTri
         }
     }
 
@@ -653,8 +649,7 @@ object ZeldaPlan {
             seg("Get 5 triforce")
             goTo(InLocations.Level5.triforceHeart)
             up
-            goTo(InLocations.Level2.triforce)
-            goIn(GamePad.MoveUp, 5)
+            getTri
         }
     }
 
@@ -665,11 +660,12 @@ object ZeldaPlan {
             startAt(LevelStartMapLoc.lev(6))
             seg("move to level 6")
             // add key
-            right //key
-            kill
-            loot // it's in middle
+            // skip this key
+//            right //key
+//            kill
+//            loot // it's in middle
+//            left
             left
-            leftm
             seg("first ghost")
             upm // skip
             seg("squishies")
@@ -708,7 +704,9 @@ object ZeldaPlan {
             seg("go down to other stair")
             down //25
             down //41
-            down //57 save7
+            // pick up key in center
+            goTo(InLocations.Level6.keyCenter)
+            down //57
             startAt(57)
             kill
             right
@@ -739,8 +737,7 @@ object ZeldaPlan {
             killArrowSpider
             goTo(InLocations.Level6.triforceHeart)
             up
-            goTo(InLocations.Level2.triforce)
-            goIn(GamePad.MoveUp, 5)
+            getTri
         }
     }
 
@@ -823,8 +820,7 @@ object ZeldaPlan {
             killLev1Dragon // aim for the head
             goTo(InLocations.Level7.triforceHeart)
             right
-            goTo(InLocations.Level2.triforce)
-            goIn(GamePad.MoveUp, 5)
+            getTri
         }
     }
 
@@ -891,8 +887,7 @@ object ZeldaPlan {
             killLev4Dragon // dragon
             goTo(InLocations.Level8.triforceHeart)
             up
-            goTo(InLocations.Level2.triforce)
-            goIn(GamePad.MoveUp, 5)
+            getTri
         }
     }
 

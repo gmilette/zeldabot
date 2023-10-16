@@ -8,9 +8,9 @@ object EnemyGroup {
         ghost,
         ghostWeak2,
         ghostWeak,
-        rhinoHeadDown, rhinoHeadDown2, rhinoHeadMouthOpen, rhinoHead2,
-        bat,
-        254, 248 // the circle monster because I dont know why im stuck here
+//        rhinoHeadDown, rhinoHeadDown2, rhinoHeadMouthOpen, rhinoHead2,
+//        bat,
+//        254, 248 // the circle monster because I dont know why im stuck here
     )
 
     val ignore = setOf(
@@ -48,9 +48,6 @@ object EnemyGroup {
         wizard,
         flame1,
         flame2,
-        dragon4Body,
-        dragon4BodyFoot,
-        dragon4BodySpine,
 //            triforceDirt,
         triforceDirt2,
 //            oldWoman
@@ -84,7 +81,7 @@ object EnemyGroup {
         144, 142, // sun
         fire,
         (0x96).toInt(), // trap,
-        boulder, boulder2, boulder3, boulder4,
+        boulder, boulder2,
         spinCircleEnemy
     )
 
@@ -94,11 +91,22 @@ object EnemyGroup {
     // but also a
     // blue rhino soldier f4, attribute 3
 
+    val projectilePairs = setOf(
+        arrowPair,
+        boulder4Pair,
+        boulder3Pair
+    )
+
     val ignorePairs = setOf(
         triforceDirtPair,
         triforceDirt3Pair,
         starCenter,
-        starCenter2
+        starCenter2,
+        dragon4BodyWingRight,
+        dragon4BodyWingLeft,
+        dragon4BodySpinePair,
+        dragon4BodyFoot,
+        dragon4Body
     )
 
     val lootPairs = setOf(
@@ -137,6 +145,7 @@ object EnemyGroup {
         // same as rhinoenemies
 //        triforceTile,
 //        triforceTile2,
-        magicSword
+        magicSword,
+        bait
     )
 }

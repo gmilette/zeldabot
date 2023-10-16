@@ -53,6 +53,16 @@ class SwitchToItem(private val inventoryPosition: Int = Inventory.Selected.candl
         get() = "SwitchToItem to ${inventoryPosition}"
 }
 
+//private class DoneWhenNotSelecting : Action {
+//    override fun complete(state: MapLocationState): Boolean =
+//        !state.frameState.isSelecting
+//}
+//
+//private class DoneWhenSelecting : Action {
+//    override fun complete(state: MapLocationState): Boolean =
+//        state.frameState.isSelecting
+//}
+
 class SwitchToItemConditionally(private val inventoryPosition: Int = Inventory.Selected.candle) : Action {
     private val switchSequence = mutableListOf(
         GoIn(2, GamePad.Start),
@@ -67,7 +77,7 @@ class SwitchToItemConditionally(private val inventoryPosition: Int = Inventory.S
 
 
     override fun complete(state: MapLocationState): Boolean {
-        return positionShoot.done || startedWithItem
+        return (positionShoot.done || startedWithItem).also { d { "SwitchToItemConditionally complete $it" } }
     }
 
     override fun target(): FramePoint {
@@ -78,7 +88,7 @@ class SwitchToItemConditionally(private val inventoryPosition: Int = Inventory.S
     private var startedWithItem = false
 
     override fun nextStep(state: MapLocationState): GamePad {
-        d {"SwitchToItemConditionally"}
+        d {"SwitchToItemConditionallyZ ${state.frameState.inventory.selectedItem} complete ${complete(state)} positionShoot ${positionShoot.stepName}"}
         return if (firstStep && state.frameState.inventory.selectedItem == inventoryPosition) {
             d {"Already have"}
             startedWithItem = true
@@ -90,7 +100,7 @@ class SwitchToItemConditionally(private val inventoryPosition: Int = Inventory.S
     }
 
     override val name: String
-        get() = "SwitchToItemConditionally ${inventoryPosition}"
+        get() = "SwitchToItemConditionally $inventoryPosition"
 }
 
 class UseItem(private val usedTimes: Int = 5) : Action {

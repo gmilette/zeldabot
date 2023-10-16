@@ -6,7 +6,7 @@ import bot.state.map.grid
 import util.LogFile
 import util.d
 
-class KillAll(
+class KillAll (
     /**
      * keep going after the current enemy for at least 60 frames before switching to another
      */
@@ -33,12 +33,27 @@ class KillAll(
      */
     private val ignoreEnemies: Boolean = false,
     private val roundX: Boolean = false,
-    private var firstAttackBomb: Boolean = false
-) :
-    Action {
+    private var firstAttackBomb: Boolean = false,
+    ignoreProjectilesRoute: Boolean = false
+) : Action {
+    companion object {
+        fun makeIgnoreEnemies() = KillAll(ignoreEnemies = true)
+        fun make() = KillAll()
+    }
+    constructor(needLongWaitVal: Boolean = false): this(needLongWait = needLongWaitVal)
+    constructor(useBombs: Boolean = false,
+                waitAfterAttack: Boolean = false,
+                numberLeftToBeDead: Int = 0,
+                considerEnemiesInCenter: Boolean = false,
+                needLongWait: Boolean = false,
+                    targetOnly: List<Int> = listOf(),
+                    ignoreProjectiles: List<Int> = listOf(),
+                    ignoreEnemies: Boolean = false,
+                    roundX: Boolean = false,
+                    firstAttackBomb: Boolean = false) : this(60, useBombs, waitAfterAttack, numberLeftToBeDead, considerEnemiesInCenter, needLongWait, targetOnly, ignoreProjectiles, ignoreEnemies, roundX, firstAttackBomb, ignoreProjectilesRoute =false)
     private val killAll: LogFile = LogFile("KillAll")
 
-    private val routeTo = RouteTo(RouteTo.Param(dodgeEnemies = true))
+    private val routeTo = RouteTo(RouteTo.Param(dodgeEnemies = true, ignoreProjectiles = ignoreProjectilesRoute))
     private val criteria = KillAllCompleteCriteria()
 
     private var previousAttack = false
@@ -88,7 +103,7 @@ class KillAll(
     override fun nextStep(state: MapLocationState): GamePad {
         val numEnemiesInCenter = state.numEnemiesAliveInCenter()
         // once set to true, do not change it back
-        if (!needLongWait) {
+        if (!needLongWait && !considerEnemiesInCenter) {
             needLongWait = state.longWait.isNotEmpty()
         }
 //        needLongWait = false
@@ -156,10 +171,6 @@ class KillAll(
                 d { " target only $targetOnly" }
                 aliveEnemies = aliveEnemies.filter { targetOnly.contains(it.tile) }.toMutableList()
             }
-            if (ignoreProjectiles.isNotEmpty()) {
-                d { " ignore projectiles "}
-                aliveEnemies = aliveEnemies.filter { !ignoreProjectiles.contains(it.tile) }.toMutableList()
-            }
 
             // for rhino, adjust target location
             // action
@@ -173,6 +184,8 @@ class KillAll(
                 return GamePad.None // just wait
             } else {
                 // 110 too low for bats
+//                waitAfterAllKilled = if (needLongWait) 250 else 50
+                // need 250 for ghosts
                 waitAfterAllKilled = if (needLongWait) 250 else 50
                 val firstEnemyOrNull = aliveEnemies.firstOrNull()
                 if (firstEnemyOrNull == null) {
@@ -234,7 +247,8 @@ class KillAll(
 
                             // could route to all targets
                             routeTo.routeTo(state, targetsToAttack,
-                                RouteTo.RouteParam(forceNew = forceNew, attackTarget = target, ignoreEnemies = this.ignoreEnemies)
+                                RouteTo.RouteParam(forceNew = forceNew, attackTarget = target,
+                                    ignoreEnemies = this.ignoreEnemies)
                             )
                         }
                     }

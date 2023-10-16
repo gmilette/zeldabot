@@ -44,7 +44,7 @@ repositories {
     google()
 }
 
-kotlin.sourceSets.getByName("main").kotlin.srcDir("build/generated/ksp/main/kotlin/")
+//kotlin.sourceSets.getByName("main").kotlin.srcDir("build/generated/ksp/main/kotlin/")
 
 dependencies {
     implementation("org.jetbrains.kotlinx:dataframe:0.10.0")
@@ -77,15 +77,15 @@ tasks.withType<KotlinCompile> {
 tasks.withType<Jar> {
 
     // required so that this app will run inside of nintaco
-    val include = setOf("kotlin-runtime-1.7.10.jar",
-        "kotlin-stdlib-1.7.10.jar")
+//    val include = setOf("kotlin-runtime-1.7.10.jar",
+//        "kotlin-stdlib-1.7.10.jar")
 
     println("run jar")
 
-    configurations.runtimeClasspath.get()
-        .filter { it.name in include }
-        .map { zipTree(it) }
-        .also { from(it) }
+//    configurations.runtimeClasspath.get()
+//        .filter { it.name in include }
+//        .map { zipTree(it) }
+//        .also { from(it) }
 }
 
 //application {

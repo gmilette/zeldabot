@@ -81,7 +81,7 @@ class OrderedActionSequence(
         get() = currentAction == null
 
     val done: Boolean
-        get() = stack.isEmpty()
+        get() = hasBegun && stack.isEmpty()
     val tasksLeft: Int
         get() = stack.size
 
@@ -114,9 +114,14 @@ class OrderedActionSequence(
         return currentAction?.path() ?: emptyList()
     }
 
+    private var hasBegun = false
+
     override fun nextStep(state: MapLocationState): GamePad {
+        hasBegun = true
+        d { "OrderedActionSequence begin $currentAction"}
         val current = currentAction ?: pop() ?: restart() ?: return GamePad.randomDirection(state.link)
         if (current.complete(state)) {
+            d { " sequence complete" }
             pop()
             // recur
             return nextStep(state)
@@ -271,7 +276,7 @@ class Optional(val action: Action, private val must: Boolean = true) : Action {
 
 // after kill all, move to next screen
 val lootAndKill =
-    DecisionAction(GetLoot(), KillAll(ignoreEnemies = true, ignoreProjectiles = emptyList(), roundX = false)) { state ->
+    DecisionAction(GetLoot(), KillAll.makeIgnoreEnemies()) { state ->
         state.frameState.enemies.any { it.isLoot }
     }
 
@@ -339,7 +344,7 @@ class GoInConsume(private val moves: Int = 5, private val dir: GamePad = GamePad
         get() = "Go In Consume $dir ($movements of $moves)"
 }
 
-class GoIn(private val moves: Int = 5, private val dir: GamePad = GamePad.MoveUp, private val reset: Boolean = false) :
+class GoInA(private val moves: Int = 5, private val dir: GamePad = GamePad.MoveUp, private val reset: Boolean = false) :
     Action {
     private var movements = 0
 
@@ -366,6 +371,36 @@ class GoIn(private val moves: Int = 5, private val dir: GamePad = GamePad.MoveUp
         get() = "Go In $dir ($movements of $moves)"
 }
 
+class GoIn(private val moves: Int = 5,
+           private val dir: GamePad = GamePad.MoveUp,
+           private val reset: Boolean = false,
+           private val condition: (MapLocationState) -> Boolean = { true }
+) :
+    Action {
+    private var movements = 0
+
+    override fun complete(state: MapLocationState): Boolean {
+        val complete = movements >= moves
+        if (complete && reset) {
+//            d { " --> RESET $name $movements"}
+            movements = 0
+        }
+        return complete
+    }
+
+    override fun nextStep(state: MapLocationState): GamePad {
+//        d { " --> Move $name movements $movements"}
+        movements++
+        return if (condition(state)) dir else GamePad.None
+    }
+
+    override fun target(): FramePoint {
+        return FramePoint()
+    }
+
+    override val name: String
+        get() = "Go In $dir ($movements of $moves)"
+}
 class GoDirection(private val dir: GamePad, private val moves: Int = 10) : Action {
     private var movements = 0
 
@@ -536,7 +571,10 @@ class GetLoot(
     private val routeTo = RouteTo(RouteTo.Param(ignoreProjectiles = adjustInSideLevelBecauseGannon))
 
     override fun complete(state: MapLocationState): Boolean =
-        !state.hasAnyLoot
+        state.neededLoot.isEmpty()
+
+    private val MapLocationState.neededLoot: List<Agent>
+        get() = frameState.enemies.filter { it.isLoot }.filter { needed(this, it) }
 
     // maybe I should
     private var target: FramePoint = FramePoint(0, 0)
@@ -555,7 +593,7 @@ class GetLoot(
 
     override fun nextStep(state: MapLocationState): GamePad {
         d { " GET LOOT" }
-        val loot = state.frameState.enemies.filter { it.isLoot }.sortedBy {
+        val loot = state.neededLoot.sortedBy {
             it.point.distTo(state.link)
         }
 

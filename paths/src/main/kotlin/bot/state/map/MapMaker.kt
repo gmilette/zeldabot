@@ -56,7 +56,7 @@ object MapMaker {
                 }
                 val mapCell = MapCell(
                     point, mapLoc, data.get(mapLoc) ?: emptyMapData, Map2d(mapData),
-                    halfPassable = true,
+                    halfPassable = !notHalfPassableMapLoc.contains(mapLoc),
                     isLevel = false
                 )
                 //168
@@ -66,8 +66,14 @@ object MapMaker {
         }
         return mapCells
     }
-
 }
+
+val notHalfPassableMapLoc = setOf<MapLoc>(
+    20, 36,
+    51, // near level 6,
+    49, //graveyard
+    33
+)
 
 val mapPassable = setOf(
     //"3c", // TESTING, link keeps getting stuck on this, half mountains when going from level 4, does not work

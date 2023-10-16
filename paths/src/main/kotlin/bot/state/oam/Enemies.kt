@@ -11,6 +11,7 @@ val orbProjectile = (0x44).toInt() // fire from go to next room, also projectile
 val grabbyHands = (0xAE).toInt() //158
 val grabbyHands2 = (0xAC).toInt() // 172
 
+val graveyardGhost = (0xe4).toInt() to (0x01).toInt()
 val ghost = (0xBC).toInt()
 val ghostWeak = (0xB8).toInt()
 val ghostWeak2 = (0xBA).toInt()
@@ -25,9 +26,10 @@ val bat = (0x9A).toInt()
 
 val boulder = (0x90).toInt()
 val boulder2 = (0x92).toInt()
-val boulder3 = (0xEA).toInt() // it is also triforce part sooo... // also rhino piece
-val boulder4 = (0xE8).toInt() // also part of circle enemy // also rhino
-val boulder4Pair = (0xE8).toInt() to (0x00).toInt() //??
+//val boulder3 = (0xEA).toInt() // it is also triforce part sooo... // also rhino piece
+//val boulder4 = (0xE8).toInt() // also part of circle enemy // also rhino
+val boulder4Pair = (0xE8).toInt() to (0x02).toInt()
+val boulder3Pair = (0xEA).toInt() to (0x02).toInt()
 val arrowTipShotByEnemy = (0x88).toInt()
 val arrowButtShotByEnemy = (0x86).toInt()
 
@@ -63,7 +65,7 @@ val rod = (0x4A).toInt()
 val letter = (0x4C).toInt()
 val powerBracelet = (0x4E).toInt()
 
-
+val arrowPair = (0x28).toInt() to (0x82).toInt()
 val silverArrow = (0x28).toInt()
 val compass = (0x6A).toInt()
 val clockTile = (0x66).toInt()
@@ -75,7 +77,7 @@ val bow = (0x2A).toInt()
 val map = (0x4C).toInt()
 val fairy = (0x50).toInt()
 val fairy2 = (0x52).toInt()
-val bigCoin = 50 //??
+val bigCoin = (0x32).toInt() //2, 01
 val wizard = (0x98).toInt() // 152
 val flame1 = (0x5C).toInt() //92
 const val flame2 = (0x5E).toInt() //94
@@ -83,6 +85,7 @@ const val oldWoman = (0x9a).toInt()
 const val potion = (0x99).toInt() //?
 val whistle = (0x24).toInt()
 val masterKey = (0x2C).toInt()
+val bait = (0x22).toInt() to (0x02).toInt()
 
 val secretEverybodyMonsterOrCircleEnemyLeft = 250 // fa
 val secretEverybodyMonsterOrCircleEnemyRight = 248 // f8
@@ -99,13 +102,18 @@ val dragonNeck = (0xC4).toInt()
 val dragonTail = (0xC8).toInt() //attribute 3 for dragon wheel guy
 //val dragonBody = (0xC2).toInt()
 
-val dragon4Head = (0xDC).toInt()
-val dragon4Body = (0xD4).toInt() // attrib 3
-val dragon4BodyWingRight = (0xD2).toInt()
-val dragon4BodyWingLeft = (0xD8).toInt()
-val dragon4BodyFoot = (0xD0).toInt() // attrib 3
+val spiderHeadLeft = (0xFC).toInt() to (0x02).toInt()
+val spiderHeadRight = (0xFC).toInt() to (0x42).toInt()
+val spiderHeadLeftClosed = (0xFE).toInt() to (0x02).toInt()
+val spiderHeadRightClosed = (0xFE).toInt() to (0x42).toInt()
+
+val dragon4Head = (0xDC).toInt() // 03
+val dragon4Body = (0xD4).toInt() to (0x03).toInt() // attrib 3
+val dragon4BodyWingRight = (0xD2).toInt() to (0x03).toInt()
+val dragon4BodyWingLeft = (0xD8).toInt() to (0x03).toInt()
+val dragon4BodyFoot = (0xD0).toInt() to (0x03).toInt() // attrib 3
 val dragon4BodySide = (0xD6).toInt()
-val dragon4BodySpine = (0xC6).toInt() // attribute 3
+val dragon4BodySpinePair = (0xC6).toInt() to (0x03).toInt() // attribute 3
 val dragon4FlamingHead = (0xDE).toInt()
 val rhinoHeadDown = (0xF4).toInt()
 val rhinoHeadDown2 = (0xF6).toInt()

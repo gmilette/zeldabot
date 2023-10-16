@@ -18,7 +18,7 @@ fun moveHistoryAttackAction(wrapped: Action): Action {
     //MoveHistoryAction(wrapped, AlwaysAttack(otherwiseRandom = true))
     val moveHistoryAction = MoveHistoryAction(wrapped, AlwaysAttack(otherwiseRandom = true))
     val combinedAction = DecisionAction(LadderAction(), StayInCurrentMapCell(moveHistoryAction)) {
-        it.frameState.ladder != null
+        it.frameState.ladderDeployed
     }
 
     return combinedAction
@@ -370,7 +370,7 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
 
 class LadderAction: Action {
     override fun complete(state: MapLocationState): Boolean =
-       state.frameState.ladder == null
+       !state.frameState.ladderDeployed
 
     private var ladderDirection: GamePad? = GamePad.None
     private var ladderDirectionCount = 0
@@ -380,7 +380,7 @@ class LadderAction: Action {
     }
 
     override fun nextStep(state: MapLocationState): GamePad {
-        if (state.frameState.ladder == null) return GamePad.None
+        if (!state.frameState.ladderDeployed) return GamePad.None
 
         return if (ladderDirectionCount < LADDER_ESCAPE_MOVEMENTS) {
             if (ladderDirection == null) {

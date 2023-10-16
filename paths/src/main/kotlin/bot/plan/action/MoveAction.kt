@@ -529,7 +529,8 @@ private fun doRouteTo(
 
         d { " Plan: ${state.currentMapCell.mapLoc} new plan! because ($why) to ${to}" }
         route?.path?.lastOrNull()?.let { lastPt ->
-            if (lastPt in to || ladder != null) {
+            // if it is just projectile then don't try to route towards the projectiles
+            if (lastPt in to || state.frameState.ladderDeployed || !state.hasEnemies) {
                 d { "route to success target" }
             } else {
                 // what if can't find a route here?
@@ -578,27 +579,23 @@ private fun doRouteTo(
     } else {
         // what nav to direction, that's weird
         val gamepad = nextPoint.direction?.toGamePad() ?: NavUtil.directionToDist(linkPt, nextPoint)
-
-        // it's the wrong point
-        if (ladder != null) {
-            d { "Ladder! $ladder horiz = ${state.ladderStateHorizontal}"}
-        }
-        if (true || ladder == null) gamepad else
-            if (state.previousMove.didntMove) {
-                // at least this allows link to escape sometimes, but not all times
-                d { "ladder didnt move ${state.previousMove.move} ${state.previousMove.dir}"}
-                if (state.previousMove.dir.horizontal || state.previousMove.move == GamePad.None) {
-                    // force vertical
-                    d { " ladder should go vertical " }
-                    GamePad.randomDirection()
-                } else {
-                    d { " ladder should go hori " }
-                    // force left
-                    GamePad.randomDirection()
-                }
-            } else {
-                gamepad
-            }
+        gamepad
+//        if (true || ladder == null) gamepad else
+//            if (state.previousMove.didntMove) {
+//                // at least this allows link to escape sometimes, but not all times
+//                d { "ladder didnt move ${state.previousMove.move} ${state.previousMove.dir}"}
+//                if (state.previousMove.dir.horizontal || state.previousMove.move == GamePad.None) {
+//                    // force vertical
+//                    d { " ladder should go vertical " }
+//                    GamePad.randomDirection()
+//                } else {
+//                    d { " ladder should go hori " }
+//                    // force left
+//                    GamePad.randomDirection()
+//                }
+//            } else {
+//                gamepad
+//            }
 //            state.ladderStateHorizontal == true && gamepad.isHorizontal -> gamepad
 //            state.ladderStateHorizontal == false && !gamepad.isHorizontal -> gamepad
 //            else -> GamePad.MoveUp

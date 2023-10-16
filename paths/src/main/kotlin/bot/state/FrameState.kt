@@ -40,6 +40,9 @@ class FrameState(
     val isDoneScrolling: Boolean
         get() = gameMode == 4
 
+    val ladderDeployed: Boolean
+        get() = ladder != null && ladder.point.y >= 0 //on selection screen it is above normal items
+
     fun enemiesClosestToLink(stateOfEnemy: EnemyState = EnemyState.Alive): List<Agent> {
         return enemies.filter {
             it.state == stateOfEnemy

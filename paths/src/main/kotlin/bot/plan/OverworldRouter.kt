@@ -104,7 +104,8 @@ class OverworldRouter(private val hyrule: Hyrule) {
         remove(85, 84, graph) // can't go through to water
         remove(98, 82, graph) // can't go up through 100 secret because you could be on wrong side
 
-        remove(98, 99, graph) // can't go through the secret hole and to the right, approach from the bottom
+        // can go from 99 to 98 though
+        removeJust(98, 99, graph) // can't go through the secret hole and to the right, approach from the bottom
 
         // go through green forest spot
         remove(108, 109, graph)
@@ -179,9 +180,16 @@ class OverworldRouter(private val hyrule: Hyrule) {
         graph.addEdge(hyrule.getMapCell(to), hyrule.getMapCell(from))
     }
 
+    /**
+     * and remove reverse too
+     */
     private fun remove(from: Int, to: Int, graph: Graph<MapCell, DefaultEdge>) {
         graph.removeEdge(hyrule.getMapCell(from), hyrule.getMapCell(to))
         graph.removeEdge(hyrule.getMapCell(to), hyrule.getMapCell(from))
+    }
+
+    private fun removeJust(from: Int, to: Int, graph: Graph<MapCell, DefaultEdge>) {
+        graph.removeEdge(hyrule.getMapCell(from), hyrule.getMapCell(to))
     }
 
     fun findPath(fromLoc: MapLoc, toLoc: MapLoc): GraphPath<MapCell, DefaultEdge>? {

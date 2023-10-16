@@ -218,7 +218,7 @@ class PlanBuilder(
         }
     val kill: PlanBuilder
         get() {
-            add(lastMapLoc, lootAndKill(KillAll(needLongWait = false)))
+            add(lastMapLoc, lootAndKill(KillAll(needLongWaitVal = false)))
             return this
         }
     val killLongWait: PlanBuilder
@@ -229,6 +229,21 @@ class PlanBuilder(
     val killFirstAttackBomb: PlanBuilder
         get() {
             add(lastMapLoc, lootAndKill(KillAll(needLongWait = false, firstAttackBomb = true)))
+            return this
+        }
+    val starKill: PlanBuilder
+        get() {
+            add(
+                lastMapLoc,
+                lootAndKill(
+                    KillAll(
+                        needLongWait = false,
+                        firstAttackBomb = true,
+                        ignoreEnemies = true,
+                        ignoreProjectilesRoute = true
+                    )
+                )
+            )
             return this
         }
 
@@ -296,7 +311,13 @@ class PlanBuilder(
     val level3TriggerDoorThen: PlanBuilder
         get() {
             val nextLoc = lastMapLoc.left
-            add(nextLoc, Level3TriggerDoorTrapThenDo(MoveTo(nextLoc, mapCell(nextLoc))))
+            add(nextLoc, level3TriggerDoorTrapThenDo(MoveTo(nextLoc, mapCell(nextLoc))))
+            return this
+        }
+    val level3BombThen: PlanBuilder
+        get() {
+            val nextLoc = lastMapLoc.right
+            add(nextLoc, level3TriggerBombThenDo(MoveTo(nextLoc, mapCell(nextLoc))))
             return this
         }
     val leftm: PlanBuilder
@@ -308,6 +329,15 @@ class PlanBuilder(
     val right: Unit
         get() {
             add(lastMapLoc.right)
+        }
+    val getTri: Unit
+        get() {
+//            goTo(InLocations.Level3.triforce)
+            goTo(InLocations.Level2.triforce)
+            goIn(GamePad.MoveUp, MapConstants.oneGridPoint5)
+            // in case link goes to the left of it
+            goIn(GamePad.MoveRight, 4)
+            goIn(GamePad.MoveLeft, 4)
         }
     val rightm: PlanBuilder
         get() {
@@ -697,7 +727,7 @@ class PlanBuilder(
         return this
     }
 
-    fun build(): MasterPlan {
+    private fun build(): MasterPlan {
         makeSegment()
         return MasterPlan(segments.toList())
     }
@@ -711,7 +741,8 @@ class PlanBuilder(
 
     private fun add(nextLoc: MapLoc) {
 //        add(nextLoc, opportunityKillOrMove(mapCell(nextLoc)))
-        add(nextLoc, MoveTo(nextLoc, mapCell(nextLoc)))
+        // look some??
+        add(nextLoc, lootAndMove(MoveTo(nextLoc, mapCell(nextLoc))))
     }
 
     private fun add(loc: MapLoc, action: Action): PlanBuilder {

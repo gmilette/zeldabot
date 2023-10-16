@@ -32,8 +32,8 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        run(name = "level1drag")
 //        run(name = "level1Ladder") // with ladder
 //        run(name = "level1")
-        run(name = "level3")
-//        run(name = "level5") // with ladder
+//        run(name = "level3")
+        run(name = "level5") // with ladder
 //        run(name = "afterLev4")
 //        run(name = "all")
 //        run(name = "gannon")

@@ -181,7 +181,7 @@ data class SpriteData(
 
     val isLoot = !hidden && (EnemyGroup.loot.contains(tile) || EnemyGroup.lootPairs.contains(tilePair))
 
-    val isProjectile = !hidden && EnemyGroup.projectiles.contains(tile)
+    val isProjectile = !hidden && (EnemyGroup.projectiles.contains(tile) || EnemyGroup.projectilePairs.contains(tilePair))
     // it doesn't solve the pancake problem
 }
 
