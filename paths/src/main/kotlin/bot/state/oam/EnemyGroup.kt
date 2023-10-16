@@ -112,7 +112,8 @@ object EnemyGroup {
     val lootPairs = setOf(
         triforceTile2Pair,
         triforceTile2PairAlt,
-        triforceTilePair
+        triforceTilePair,
+        bigHeart
     )
 
     val loot = setOf(
@@ -125,7 +126,6 @@ object EnemyGroup {
         map,
         masterKey,
         raft,
-        bigHeart,
         fairy,
         fairy2,
         magicBook,

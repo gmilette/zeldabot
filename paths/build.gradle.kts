@@ -8,13 +8,15 @@ buildscript {
     }
 
 
-    val composeVersion: String = "1.2.0"
-    val kotlinVersion: String = "1.7.10"
+//    val composeVersion: String = "1.5.0"
+//    val kotlinVersion: String = "1.9.0"
+    val composeVersion: String = "1.4.3"
+    val kotlinVersion: String = "1.8.22"
 
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         classpath("org.jetbrains.compose:compose-gradle-plugin:$composeVersion")
-        classpath("com.android.tools.build:gradle:7.0.4")
+        classpath("com.android.tools.build:gradle:8.1.2")
     }
 }
 
@@ -22,12 +24,15 @@ plugins {
 //    id("org.jetbrains.kotlinx.dataframe")
     //    kotlin("jvm") version "1.6.10"
 //    id("org.jetbrains.kotlinx.dataframe") version "0.10.0"
-    val kotlinVersion = "1.7.10"
+//    val kotlinVersion = "1.7.10"
 //    val kotlinVersion = "1.9.0"
+    val kotlinVersion = "1.8.22"
     kotlin("jvm") version kotlinVersion
     kotlin("kapt") version kotlinVersion
 //    id("org.jetbrains.compose") version "1.1.1"
-    id("org.jetbrains.compose") version "1.2.0"
+//    id("org.jetbrains.compose") version "1.5.0"
+    id("org.jetbrains.compose") version "1.4.3"
+
 //    id("org.jetbrains.compose") version "1.4.3"
     //application
 }
@@ -41,6 +46,7 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     google()
 }
 
@@ -77,15 +83,15 @@ tasks.withType<KotlinCompile> {
 tasks.withType<Jar> {
 
     // required so that this app will run inside of nintaco
-//    val include = setOf("kotlin-runtime-1.7.10.jar",
-//        "kotlin-stdlib-1.7.10.jar")
+    val include = setOf("kotlin-runtime-1.9.0.jar",
+        "kotlin-stdlib-1.9.0.jar")
 
     println("run jar")
 
-//    configurations.runtimeClasspath.get()
-//        .filter { it.name in include }
-//        .map { zipTree(it) }
-//        .also { from(it) }
+    configurations.runtimeClasspath.get()
+        .filter { it.name in include }
+        .map { zipTree(it) }
+        .also { from(it) }
 }
 
 //application {

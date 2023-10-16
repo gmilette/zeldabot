@@ -170,7 +170,7 @@ class ZStar(
 
     fun route(
         start: FramePoint,
-        targetsIn: List<FramePoint>,
+        targets: List<FramePoint>,
         pointBeforeStart: FramePoint? = null,
         enemies: List<FramePoint> = emptyList(),
         avoidNearEnemy: List<FramePoint> = emptyList(),
@@ -179,12 +179,12 @@ class ZStar(
         enemyTarget: FramePoint? = null,
         ladderSpec: LadderSpec? = null
     ): List<FramePoint> {
-        d { " round to nearest !!!" }
-        val targets = if (Random().nextInt(8) == 1) {
-            targetsIn
-        } else {
-            targetsIn + targetsIn.map { it.nearestGrid }
-        }
+//        d { " round to nearest !!!" }
+//        val targets = if (Random().nextInt(8) == 1) {
+//            targetsIn
+//        } else {
+//            targetsIn + targetsIn.map { it.nearestGrid }
+//        }
         val nearEnemies = enemies.isNotEmpty()
         val maxIter = if (nearEnemies) SHORT_ITER else MAX_ITER
         d {"Plan: iter = $maxIter enemies ${enemies.size} near ${avoidNearEnemy.size}"}
