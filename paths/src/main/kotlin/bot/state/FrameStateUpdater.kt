@@ -57,6 +57,7 @@ class FrameStateUpdater(
 
         val oam = OamStateReasoner(api)
         val theEnemies = oam.agents()
+        val theUncombined = oam.agentsUncombined()
         val linkDir = oam.direction
         val ladderMem = api.readCPU(Addresses.ladderDeployed) != 0
         // check ladder memory first
@@ -93,7 +94,7 @@ class FrameStateUpdater(
         // reset to prevent infinite memory being allocated
         previousNow.previous = null
 
-        val frame = FrameState(api, theEnemies, level, mapLoc, link, ladder)
+        val frame = FrameState(api, theEnemies, theUncombined, level, mapLoc, link, ladder)
 
         state.framesOnScreen++
         state.frameState = frame

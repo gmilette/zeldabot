@@ -344,7 +344,7 @@ class LevelSpecBuilder {
             LevelSpec(second, e(l, u), "squishy stair", LevelMapTemplateReader.Temp.lev_stair_side),
             LevelSpec(second.left, e(l, r), "dark place", LevelMapTemplateReader.Temp.lev_empty),
             // 97
-            LevelSpec(second.left.left, e(l, u), "stair to near arrow", LevelMapTemplateReader.Temp.lev_stairs_center_blocked),
+            LevelSpec(second.left.left, e(u, d, r), "stair to near arrow", LevelMapTemplateReader.Temp.lev_stairs_center_blocked),
 
             LevelSpec(neararrow, e(u), "near arrow stair bomb up", LevelMapTemplateReader.Temp.lev_stairs_center_blocked),
             LevelSpec(neararrow.up, e(d), "elbow", LevelMapTemplateReader.Temp.lev_u),

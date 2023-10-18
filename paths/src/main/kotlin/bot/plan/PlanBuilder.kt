@@ -228,7 +228,7 @@ class PlanBuilder(
         }
     val killFirstAttackBomb: PlanBuilder
         get() {
-            add(lastMapLoc, lootAndKill(KillAll(needLongWait = false, firstAttackBomb = true)))
+            add(lastMapLoc, KillAll(needLongWait = false, firstAttackBomb = true))
             return this
         }
     val starKill: PlanBuilder
@@ -707,8 +707,11 @@ class PlanBuilder(
     }
 
     fun rescuePrincess() {
-        goIn(GamePad.MoveUp, 15)
-        goIn(GamePad.A, 10)
+        goIn(GamePad.MoveUp, 4)
+        goIn(GamePad.A, 4)
+        goIn(GamePad.MoveLeft, 4)
+        goIn(GamePad.MoveUp, 1)
+        goIn(GamePad.A, 4)
         goIn(GamePad.None, 10)
         goIn(GamePad.MoveUp, 150)
     }

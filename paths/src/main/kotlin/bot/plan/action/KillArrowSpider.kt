@@ -5,6 +5,7 @@ import bot.state.GamePad
 import bot.state.MapLocationState
 import bot.state.map.MapConstants
 import bot.state.map.grid
+import bot.state.oam.spiderBlueHeadLeft
 import bot.state.oam.spiderHeadLeft
 import util.d
 
@@ -27,8 +28,9 @@ class KillArrowSpider : Action {
         repeat(5) {
             list.add(GoIn(3, GamePad.MoveUp, reset = true))
             // only shoot if the nose is open
-            list.add(GoIn(3, GamePad.B, reset = true) {
-                it.frameState.enemies.any { it.tile == spiderHeadLeft.first }
+            list.add(GoIn(3, GamePad.B, reset = true) { state ->
+                state.frameState.enemiesUncombined
+                    .any { it.tile == spiderHeadLeft.first || it.tile == spiderBlueHeadLeft.first }
             })
             list.add(GoIn(3, GamePad.None, reset = true))
         }

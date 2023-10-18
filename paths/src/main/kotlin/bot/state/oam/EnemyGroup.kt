@@ -41,8 +41,8 @@ object EnemyGroup {
         48, // swirly thing
         bombSmoke, // yea but then it attacks its own bomb// 112, // bomb smoke, removed it so I can attack the monsters
         114, // i think bomb smoke
-
-        //164, // not sure, that is a pancake
+        bigHeart, // plan always knows where to go
+                //164, // not sure, that is a pancake
 //            160, // this happens to be the left side of the snake monster in level 2, snake has attribute 2
         ladder,
         wizard,
@@ -106,14 +106,15 @@ object EnemyGroup {
         dragon4BodyWingLeft,
         dragon4BodySpinePair,
         dragon4BodyFoot,
-        dragon4Body
+        dragon4Body,
     )
 
     val lootPairs = setOf(
         triforceTile2Pair,
         triforceTile2PairAlt,
         triforceTilePair,
-        bigHeart
+        bigCoinPair,
+        bigCoinPair2
     )
 
     val loot = setOf(

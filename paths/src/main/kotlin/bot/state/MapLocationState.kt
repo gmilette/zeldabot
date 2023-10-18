@@ -36,6 +36,7 @@ class MapLocationState(
     // the last known framestate
     var frameState: FrameState = FrameState(ApiSource.getAPI(),
         emptyList(),
+        emptyList(),
         0,
         0,
         emptyAgent,

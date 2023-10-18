@@ -833,7 +833,9 @@ object ZeldaPlan {
             left
             seg("bomb guy")
             switchToBomb
-            killFirstAttackBomb // bomb?
+            killFirstAttackBomb
+            // get the coin
+            goTo(FramePoint(8.grid, 5.grid))
             left
             startAt(124) //state1
             seg("go get book")

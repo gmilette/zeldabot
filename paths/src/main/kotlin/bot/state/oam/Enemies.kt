@@ -78,6 +78,10 @@ val map = (0x4C).toInt()
 val fairy = (0x50).toInt()
 val fairy2 = (0x52).toInt()
 val bigCoin = (0x32).toInt() //2, 01
+val bigCoinPair = (0x32).toInt() to (0x02) //2, 01
+val bigCoinPair2 = (0x32).toInt() to (0x01) //2, 01
+// same as big coin
+//val smallCoin = (0x32).toInt() //2, 01
 val wizard = (0x98).toInt() // 152
 val flame1 = (0x5C).toInt() //92
 const val flame2 = (0x5E).toInt() //94
@@ -102,6 +106,8 @@ val dragonNeck = (0xC4).toInt()
 val dragonTail = (0xC8).toInt() //attribute 3 for dragon wheel guy
 //val dragonBody = (0xC2).toInt()
 
+val spiderBlueHeadLeft = (0xFC).toInt() to (0x01).toInt()
+val spiderBlueHeadRight = (0xFC).toInt() to (0x41).toInt()
 val spiderHeadLeft = (0xFC).toInt() to (0x02).toInt()
 val spiderHeadRight = (0xFC).toInt() to (0x42).toInt()
 val spiderHeadLeftClosed = (0xFE).toInt() to (0x02).toInt()

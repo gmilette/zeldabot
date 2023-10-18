@@ -17,8 +17,9 @@ fun moveHistoryAttackAction(wrapped: Action): Action {
     // hopefully adding some random moves here will also help link get unstuck
     //MoveHistoryAction(wrapped, AlwaysAttack(otherwiseRandom = true))
     val moveHistoryAction = MoveHistoryAction(wrapped, AlwaysAttack(otherwiseRandom = true))
-    val combinedAction = DecisionAction(LadderAction(), StayInCurrentMapCell(moveHistoryAction)) {
-        it.frameState.ladderDeployed
+    val ladderAction = LadderAction()
+    val combinedAction = DecisionAction(ladderAction, StayInCurrentMapCell(moveHistoryAction)) {
+        !ladderAction.complete(it)
     }
 
     return combinedAction
@@ -301,7 +302,6 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
 //                (state.frameState.isDoneScrolling && initialMapCell?.mapLoc == state.currentMapCell.mapLoc)
 
     override fun nextStep(state: MapLocationState): GamePad {
-        if (true) return wrapped.nextStep(state)
         frameCt++
         d { "StayInCurrentMapCell ${state.frameState.isDoneScrolling} ${initialMapCell != null}" }
         if (initialMapCell == null && !state.frameState.isScrolling && frameCt > FRAMES_BEFORE_SET_INITIAL) {
@@ -322,6 +322,13 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
         frameCtAfterScene++
 
         val isInCurrent = onCorrectMap(state)
+
+        if (!isInCurrent) {
+            val fromLoc = initialMapCell?.mapLoc ?: 0
+            d { " should be at $fromLoc"}
+        }
+
+        if (true) return wrapped.nextStep(state)
 
         return if (isInCurrent) {
             wrapped.nextStep(state)
@@ -369,8 +376,19 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
 }
 
 class LadderAction: Action {
+    // let link try to escape on its own for a bit
+    private var ladderDeployedForFrames = 0
     override fun complete(state: MapLocationState): Boolean =
-       !state.frameState.ladderDeployed
+        (!state.frameState.ladderDeployed || ladderDeployedForFrames < LADDER_ESCAPE_MOVEMENTS).also {
+            if (state.frameState.ladderDeployed) {
+                ladderDeployedForFrames++
+            }
+        } //|| ladderOnPassable(state)
+
+    private fun ladderOnPassable(state: MapLocationState) =
+        state.frameState.ladder?.let { ladder ->
+            state.currentMapCell.passable.get(ladder.x, ladder.y)
+        } ?: false
 
     private var ladderDirection: GamePad? = GamePad.None
     private var ladderDirectionCount = 0
@@ -380,7 +398,14 @@ class LadderAction: Action {
     }
 
     override fun nextStep(state: MapLocationState): GamePad {
-        if (!state.frameState.ladderDeployed) return GamePad.None
+        if (!state.frameState.ladderDeployed) {
+            ladderDeployedForFrames = 0
+            return GamePad.None
+        }
+
+        if (ladderOnPassable(state)) {
+            d { "!! ladder on passable ${state.frameState.ladder?.point}"}
+        }
 
         return if (ladderDirectionCount < LADDER_ESCAPE_MOVEMENTS) {
             if (ladderDirection == null) {

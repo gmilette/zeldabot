@@ -16,6 +16,7 @@ class OamStateReasoner(
     private val api: API
 ) {
     private val sprites: List<SpriteData>
+    private var spritesUncombined: List<SpriteData> = emptyList()
 
     var ladderSprite: Agent? = null
     var direction: Direction = Direction.None
@@ -29,7 +30,7 @@ class OamStateReasoner(
 
     val alive: List<SpriteData>
         get() {
-            return sprites.filter { it != null && !it.hidden }
+            return sprites.filter { !it.hidden }
         }
 
     val loot: List<SpriteData>
@@ -42,6 +43,9 @@ class OamStateReasoner(
 
     fun agents(): List<Agent> =
         sprites.map { it.toAgent() }
+
+    fun agentsUncombined(): List<Agent> =
+        spritesUncombined.map { it.toAgent() }
 
     private fun SpriteData.toAgent(): Agent =
         Agent(index = index, point = point, state = toState(), tile = tile, attribute = attribute,
@@ -131,6 +135,7 @@ class OamStateReasoner(
             }
         }
 
+        spritesUncombined = alive.toMutableList()
         return combine(alive)
     }
 

@@ -51,8 +51,8 @@ class MasterPlan(val segments: List<PlanSegment>) {
     fun getPlanPhase(phaseName: String, segment: String? = null): MasterPlan =
         MasterPlan(segments.filter { segment == null || it.name == segment }.filter { it.phase == phaseName })
 
-    fun getPlanAfter(phaseName: String): MasterPlan {
-        val index = segments.indexOfFirst { it.phase == phaseName }
+    fun getPlanAfter(phaseName: String, seg: String = ""): MasterPlan {
+        val index = segments.indexOfFirst { it.phase == phaseName && (seg.isEmpty() || it.name == seg) }
         return MasterPlan(segments.subList(index, segments.size))
     }
 

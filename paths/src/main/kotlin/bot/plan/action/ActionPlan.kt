@@ -277,7 +277,7 @@ class Optional(val action: Action, private val must: Boolean = true) : Action {
 // after kill all, move to next screen
 val lootAndKill =
     DecisionAction(GetLoot(), KillAll.makeIgnoreEnemies()) { state ->
-        state.frameState.enemies.any { it.isLoot }
+        state.neededLoot.isNotEmpty()
     }
 
 val moveToKillAllInCenterSpot = DecisionAction(
@@ -288,15 +288,15 @@ val moveToKillAllInCenterSpot = DecisionAction(
 }
 
 fun lootAndKill(kill: KillAll) = DecisionAction(Optional(GetLoot()), kill) { state ->
-    state.frameState.enemies.any { it.isLoot }
+    state.neededLoot.isNotEmpty()
 }
 
 val lootOrKill = DecisionAction(Optional(GetLoot()), Optional(KillAll())) { state ->
-    state.frameState.enemies.any { it.isLoot }
+    state.neededLoot.isNotEmpty()
 }
 
 fun lootAndMove(moveTo: MoveTo) = DecisionAction(Optional(GetLoot()), moveTo) { state ->
-    state.frameState.enemies.any { it.isLoot }
+    state.neededLoot.isNotEmpty()
 }
 
 fun opportunityKillOrMove(next: MapCell): Action =
@@ -555,10 +555,23 @@ class PickupDroppedDungeonItemAndKill : Action {
     }
 }
 
+val MapLocationState.neededLoot: List<Agent>
+    get() = frameState.enemies.filter { it.isLoot }.filter { LootKnowledge.needed(this, it) }
+
 object LootKnowledge {
     val keepSet = setOf(heart, fairy, fairy2, bomb) //bigCoin,
     fun keep(tile: Int): Boolean =
         tile in keepSet
+
+    fun needed(state: MapLocationState, agent: Agent) =
+        // get all the loot
+        when (agent.tile) {
+            bomb -> (state.frameState.inventory.numBombs < 8)
+            bigCoin -> (state.frameState.inventory.numRupees < 250)
+            // heart
+            // fairy
+            else -> true
+        }
 }
 
 class GetLoot(
@@ -573,23 +586,11 @@ class GetLoot(
     override fun complete(state: MapLocationState): Boolean =
         state.neededLoot.isEmpty()
 
-    private val MapLocationState.neededLoot: List<Agent>
-        get() = frameState.enemies.filter { it.isLoot }.filter { needed(this, it) }
-
     // maybe I should
     private var target: FramePoint = FramePoint(0, 0)
 
     override fun path(): List<FramePoint> = routeTo.route?.path ?: emptyList()
 
-    private fun needed(state: MapLocationState, agent: Agent) =
-        LootKnowledge.keep(agent.tile) &&
-                when (agent.tile) {
-                    bomb -> (state.frameState.inventory.numBombs < 8)
-                    bigCoin -> (state.frameState.inventory.numRupees < 250)
-                    // heart
-                    // fairy
-                    else -> true
-                }
 
     override fun nextStep(state: MapLocationState): GamePad {
         d { " GET LOOT" }

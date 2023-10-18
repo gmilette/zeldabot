@@ -10,6 +10,7 @@ import util.d
 class FrameState(
     val api: API = ApiSource.getAPI(),
     val enemies: List<Agent>,
+    val enemiesUncombined: List<Agent>,
     val level: Int,
     val mapLoc: MapLoc,
     val link: Agent,
