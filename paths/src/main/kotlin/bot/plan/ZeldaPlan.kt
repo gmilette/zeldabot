@@ -108,6 +108,7 @@ object Phases {
     val grabHearts = "grab hearts"
     val forest30 = "forest 30"
     val level3 = "level 3"
+    val level3After = "level 3"
     val afterLevel6 = "after level 6"
     val level5 = "level 5"
     val level6 = "level 6"
@@ -265,6 +266,7 @@ object ZeldaPlan {
             obj(Dest.Shop.candleShopMid)
             obj(Dest.level(3))
             includeLevelPlan(levelPlan3(factory))
+            phase(Phases.level3After)
             val forestNextToLevel3: MapLoc = 115
             // prevent going down on tile 114
             seg("position burning")
@@ -414,7 +416,7 @@ object ZeldaPlan {
 //            kill
             // it's bad, just
             killLev1Dragon // aim for the head
-            right // triforce
+            rightm // triforce
             goIn(GamePad.MoveRight, 20)
             seg("get the triforce")
             getTri
@@ -472,7 +474,7 @@ object ZeldaPlan {
             seg("get the triforce")
             wait
             goTo(InLocations.Level2.heartMid)
-            left
+            leftm
             goIn(GamePad.MoveLeft, 20)
             getTri
         }
@@ -491,7 +493,7 @@ object ZeldaPlan {
             kill
             loot
             up
-            left
+            leftm // breaks rescue if I use just leftm
             seg("past the compass")
             killUntil2
 //            left
@@ -528,7 +530,7 @@ object ZeldaPlan {
 //            goTo(InLocations.Level5.triforceHeart) // where is triforce heart???
             go(InLocations.Level3.heartMid)
             // missed it once
-            up
+            upm
             getTri
         }
     }
@@ -580,7 +582,7 @@ object ZeldaPlan {
             killLev4Dragon // dragon
             //get heart
             goTo(InLocations.Level4.triforceHeart)
-            up
+            upm
             getTri
         }
     }
@@ -648,7 +650,7 @@ object ZeldaPlan {
             kill // problem the projectiles are considered enemies
             seg("Get 5 triforce")
             goTo(InLocations.Level5.triforceHeart)
-            up
+            upm
             getTri
         }
     }
@@ -736,7 +738,7 @@ object ZeldaPlan {
             startAt(28) //save4
             killArrowSpider
             goTo(InLocations.Level6.triforceHeart)
-            up
+            upm
             getTri
         }
     }
@@ -819,7 +821,7 @@ object ZeldaPlan {
             rightm
             killLev1Dragon // aim for the head
             goTo(InLocations.Level7.triforceHeart)
-            right
+            rightm
             getTri
         }
     }
@@ -888,7 +890,7 @@ object ZeldaPlan {
             upm
             killLev4Dragon // dragon
             goTo(InLocations.Level8.triforceHeart)
-            up
+            upm
             getTri
         }
     }

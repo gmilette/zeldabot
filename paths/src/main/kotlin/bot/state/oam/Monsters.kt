@@ -22,8 +22,11 @@ data class Monster(
     // attributes while monster is in normal state
     val normal: Set<Int> = emptySet(),
     // attributes that indicate damage
-    val damaged:Set<Int> = setOf(0x01, 0x43)
+    val damaged:Set<Int> = setOf(0x01, 0x43),
+    val tile: Set<Int> = emptySet()
 )
+
+val waterMonster = Monster(tile = setOf(0x0EE0, 0x0EC0))
 
 data class DirectionMap(
     val up: Set<Int> = setOf(),

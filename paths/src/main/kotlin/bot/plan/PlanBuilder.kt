@@ -46,26 +46,20 @@ class PlanBuilder(
         }
     }
 
-    fun routeTo(loc: MapLoc, name: String = "", opp: Boolean = false): PlanBuilder {
+    fun routeTo(loc: MapLoc, name: String = ""): PlanBuilder {
         //d { " path from $lastMapLoc to $loc"}
         val path = optimizer.findPath(lastMapLoc, loc) ?: return this
         for (mapCell in optimizer.correct(path.vertexList)) {
             if (mapCell.mapLoc != lastMapLoc) {
-                if (opp) {
-                    add(mapCell.mapLoc, opportunityKillOrMove(mapCell))
-                } else {
-                    add(mapCell.mapLoc, lootAndMove(MoveTo(lastMapLoc, mapCell)))
-//                    add(mapCell.mapLoc, MoveTo(lastMapLoc, mapCell))
-                }
-//                d { " routeTo $name $last to ${mapCell.mapLoc}"}
-//                    add(mapCell.mapLoc, opportunityKillOrMove(mapCell))
+                add(mapCell.mapLoc, lootAndMove(MoveTo(lastMapLoc, mapCell, level)))
             }
         }
         return this
     }
 
     fun startAt(loc: MapLoc): PlanBuilder {
-        lastMapLoc = loc
+        // could add level too
+        add(loc, StartAtAction())
         return this
     }
 
@@ -86,7 +80,7 @@ class PlanBuilder(
         // exit the level so dont accidently go back in
         // have to wait for the triforce animation
         goIn(GamePad.None, 500)
-        goIn(exitDirection.toGamePad(), 20)
+        goInConsume(exitDirection.toGamePad(), 20)
         recall
         return this
     }
@@ -129,7 +123,7 @@ class PlanBuilder(
             return this
         }
     fun upTo(nextLoc: MapLoc): PlanBuilder {
-        add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc), Direction.Up))
+        add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc), level, Direction.Up))
         return this
     }
     val loot: PlanBuilder
@@ -275,9 +269,10 @@ class PlanBuilder(
         get() {
             // don't try to fight
             val nextLoc = lastMapLoc.up
-            add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc)))
+            add(nextLoc, moveTo(nextLoc))
             return this
         }
+
     val down: PlanBuilder
         get() {
             add(lastMapLoc.down)
@@ -286,7 +281,7 @@ class PlanBuilder(
     val downm: PlanBuilder
         get() {
             val nextLoc = lastMapLoc.down
-            add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc)))
+            add(nextLoc, moveTo(nextLoc))
             return this
         }
     val inLevel: PlanBuilder
@@ -311,19 +306,19 @@ class PlanBuilder(
     val level3TriggerDoorThen: PlanBuilder
         get() {
             val nextLoc = lastMapLoc.left
-            add(nextLoc, level3TriggerDoorTrapThenDo(MoveTo(nextLoc, mapCell(nextLoc))))
+            add(nextLoc, level3TriggerDoorTrapThenDo(moveTo(nextLoc)))
             return this
         }
     val level3BombThen: PlanBuilder
         get() {
             val nextLoc = lastMapLoc.right
-            add(nextLoc, level3TriggerBombThenDo(MoveTo(nextLoc, mapCell(nextLoc))))
+            add(nextLoc, level3TriggerBombThenDo(moveTo(nextLoc)))
             return this
         }
     val leftm: PlanBuilder
         get() {
             val nextLoc = lastMapLoc.left
-            add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc)))
+            add(nextLoc, moveTo(nextLoc))
             return this
         }
     val right: Unit
@@ -334,21 +329,22 @@ class PlanBuilder(
         get() {
 //            goTo(InLocations.Level3.triforce)
             goTo(InLocations.Level2.triforce)
+            startAt(0)
             goIn(GamePad.MoveUp, MapConstants.oneGridPoint5)
             // in case link goes to the left of it
-            goIn(GamePad.MoveRight, 4)
-            goIn(GamePad.MoveLeft, 4)
+//            goIn(GamePad.MoveRight, 4)
+//            goIn(GamePad.MoveLeft, 4)
         }
     val rightm: PlanBuilder
         get() {
             val nextLoc = lastMapLoc.right
-            add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc)))
+            add(nextLoc, moveTo(nextLoc))
             return this
         }
     val rightNoP: PlanBuilder
         get() {
             val nextLoc = lastMapLoc.right
-            add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc), ignoreProjectiles = true))
+            add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc), toLevel = level, ignoreProjectiles = true))
             return this
         }
 
@@ -420,16 +416,16 @@ class PlanBuilder(
         captureObjective(mapData.findObjective(item), itemLoc)
     }
 
-    fun obj(dest: DestType, opp: Boolean = false, itemLoc: Objective.ItemLoc? = null, position: Boolean =
+    fun obj(dest: DestType, itemLoc: Objective.ItemLoc? = null, position: Boolean =
         false) {
         seg("get ${dest.javaClass.simpleName} for ${dest.name} at ${dest.entry.javaClass.simpleName}")
-        captureObjective(mapData.findObjective(dest), itemLoc, opp, position)
+        captureObjective(mapData.findObjective(dest), itemLoc, position)
     }
 
-    private fun captureObjective(mapCell: MapCell, itemLocOverride: Objective.ItemLoc? = null, opp: Boolean = false, position: Boolean =
+    private fun captureObjective(mapCell: MapCell, itemLocOverride: Objective.ItemLoc? = null, position: Boolean =
         false) {
         // depending on the entrance type, do different actions
-        routeTo(mapCell.mapLoc, opp = opp)
+        routeTo(mapCell.mapLoc)
         with (mapCell.mapData.objective) {
             // if entry
             val itemLocPoint =
@@ -500,8 +496,8 @@ class PlanBuilder(
     }
 
     fun goTo(to: FramePoint, makePassable: FramePoint? = null): PlanBuilder {
-        // was 4,2
-        // made false so link can get into a stair
+        // need to add this elsewhere probably
+        add(lastMapLoc, StartAtAction(0, -1))
         goAbout(to, 2, 1, false, makePassable = makePassable)
         return this
     }
@@ -745,8 +741,11 @@ class PlanBuilder(
     private fun add(nextLoc: MapLoc) {
 //        add(nextLoc, opportunityKillOrMove(mapCell(nextLoc)))
         // look some??
-        add(nextLoc, lootAndMove(MoveTo(nextLoc, mapCell(nextLoc))))
+        add(nextLoc, lootAndMove(moveTo(nextLoc)))
     }
+
+    private fun moveTo(next: Int): MoveTo =
+        MoveTo(lastMapLoc, mapCell(next), level)
 
     private fun add(loc: MapLoc, action: Action): PlanBuilder {
         lastMapLoc = loc

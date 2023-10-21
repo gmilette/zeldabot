@@ -349,7 +349,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                 with(frameStateUpdater.state) {
                     val currentCell = currentMapCell
                     val locCoordinates =
-                        "${frameState.level}: ${frameState.mapLoc} : ${currentCell.mapData.name.take(10)}"
+                        "${frameState.level}: ${frameState.mapLoc} : ${currentCell.mapData.name.take(10)} at $movedTo"
                     d {
                         "current --> " +
                                 "$locCoordinates " +

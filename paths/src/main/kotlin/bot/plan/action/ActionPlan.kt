@@ -12,6 +12,12 @@ import util.d
 import util.i
 
 interface Action {
+    /**
+     * where this action should take place
+     */
+    val actionLoc: MapLoc
+        get() = -1
+
     fun reset() {
         // empty
     }
@@ -165,8 +171,15 @@ class DecisionAction(
     private val completeIf: (state: MapLocationState) -> Boolean = { false },
     private val chooseAction1: (state: MapLocationState) -> Boolean,
 ) : Action {
-    override fun complete(state: MapLocationState): Boolean =
-        completeIf(state) || (action1.complete(state) && action2.complete(state))
+    override val actionLoc: MapLoc
+        get() = if (action1 is MoveTo) action1.to else if (action2 is MoveTo) action2.to else -2
+
+    override fun complete(state: MapLocationState): Boolean {
+        val completeIf = completeIf(state)
+        val complete1 = action1.complete(state)
+        val complete2 = action2.complete(state)
+        return completeIf || (complete1 && complete2)
+    }
 //            .also {
 //            d { " decision complete $it ${action1.complete(state)} ${action2.complete(state)}"}
 //        }
@@ -299,9 +312,9 @@ fun lootAndMove(moveTo: MoveTo) = DecisionAction(Optional(GetLoot()), moveTo) { 
     state.neededLoot.isNotEmpty()
 }
 
-fun opportunityKillOrMove(next: MapCell): Action =
+fun opportunityKillOrMove(next: MapCell, level: Int): Action =
     // if it is close kill all will go kill it
-    DecisionAction(lootOrKill, MoveTo(0, next)) { state ->
+    DecisionAction(lootOrKill, MoveTo(0, next, level)) { state ->
         !state.cleared && state.hasEnemies && state.hasNearEnemy()
     }
 

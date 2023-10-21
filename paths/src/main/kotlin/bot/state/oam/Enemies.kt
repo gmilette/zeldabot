@@ -13,6 +13,13 @@ val grabbyHands2 = (0xAC).toInt() // 172
 
 val graveyardGhost = (0xe4).toInt() to (0x01).toInt()
 val ghost = (0xBC).toInt()
+// just ignore all of them if it's the overworld, rather than try to route to it
+val waterMonsterPairUnder = (0xbc) to (0x03).toInt()
+val waterMonsterPairUnder2 = (0xbc) to (0x43).toInt()
+val waterMonsterPair = (0xEC) to (0x03).toInt() // also is triforce dirt, but it's ok i think
+val waterMonsterPair2 = (0xEC) to (0x43).toInt()
+val waterMonsterPairAlt = (0xEE) to (0x03).toInt() // tile address = 0EE0
+val waterMonsterPairAlt2 = (0xEE) to (0x43).toInt()
 val ghostWeak = (0xB8).toInt()
 val ghostWeak2 = (0xBA).toInt()
 val bombSmoke = 112
@@ -31,7 +38,8 @@ val boulder2 = (0x92).toInt()
 val boulder4Pair = (0xE8).toInt() to (0x02).toInt()
 val boulder3Pair = (0xEA).toInt() to (0x02).toInt()
 val arrowTipShotByEnemy = (0x88).toInt()
-val arrowButtShotByEnemy = (0x86).toInt()
+val arrowTipShotByEnemyPair = (0x88).toInt() to (0x42).toInt()
+val arrowButtShotByEnemy = (0x86).toInt() to (0x42).toInt()
 
 val largeShield = (0x56).toInt()
 val candle = (0x26).toInt()
@@ -49,10 +57,9 @@ val triforceDirt2 = (0xFA).toInt() // also circle enemy center
 val triforceDirt3 = (0xEA).toInt() // attrib 03
 
 val triforceDirt3Pair = (0xEA).toInt() to (0x03).toInt() // attrib 03
-val waterMonster = 0xEC to (0x43)
 
 // verify
-val triforceDirtPair = (0xEC).toInt() to (0x03)// attrib 03 //236 // also part of fourMonster
+val triforceDirtPair = (0xEC).toInt() to (0x03)// attrib 03 //236 //0EC0 // also part of fourMonster
 val starCenter = (0xEC).toInt() to (0x41) // center star monster
 val starCenter2 = (0xEC).toInt() to (0x01) // center star monster
 

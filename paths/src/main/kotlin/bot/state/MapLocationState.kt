@@ -46,6 +46,9 @@ class MapLocationState(
     var framesOnScreen: Int = 0,
 
     var currentMapCell: MapCell = MapCell.unknown,
+
+    var movedTo: Int = 0,
+    var levelTo: Int = 0
 ) {
     init {
         clearHistory()

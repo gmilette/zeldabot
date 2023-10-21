@@ -274,6 +274,97 @@ class ReBombIfNecessary(private val wrapped: Action): Action {
 class StayInCurrentMapCell(private val wrapped: Action) : Action {
     private val routeTo = RouteTo(params = RouteTo.Param(considerLiveEnemies = false))
 
+    private var initialLevel: Int = -1
+
+    private var failureCt = 0
+
+    companion object {
+        private const val FRAMES_BEFORE_SET_INITIAL = 300
+    }
+
+    override fun target(): FramePoint =
+        wrapped.target()
+
+    override fun targets(): List<FramePoint> {
+        return wrapped.targets()
+    }
+
+    override fun path(): List<FramePoint> =
+        wrapped.path()
+
+    override fun zstar(): ZStar? = wrapped.zstar()
+
+    override fun complete(state: MapLocationState): Boolean =
+        wrapped.complete(state)
+//        initialMapCell == null ||
+//                (state.frameState.isDoneScrolling && initialMapCell?.mapLoc == state.currentMapCell.mapLoc)
+
+    var disabled = false
+    override fun nextStep(state: MapLocationState): GamePad {
+//        if (initialLevel == -1) {
+//            initialLevel = state.frameState.level
+//        } else {
+//            if (initialLevel != state.frameState.level) {
+//                disabled = true
+//                failureCt = 0
+//            }
+//        }
+//        initialLevel = state.frameState.level
+//        if (disabled) {
+//            d {"disabled"}
+//            return wrapped.nextStep(state)
+//        }
+//        d { "StayInCurrentMapCell ${state.frameState.isDoneScrolling} ${initialMapCell != null}" }
+//        if (initialMapCell == null && !state.frameState.isScrolling && frameCt > FRAMES_BEFORE_SET_INITIAL) {
+//            initialMapCell = state.currentMapCell
+//            d { "StayInCurrentMapCell set to ${state.currentMapCell.mapLoc} level = $initialLevel" }
+//            initialLevel = state.frameState.level
+//        }
+
+        // don't do any of this if the screen is scrolling
+        // if it is scrolling just reset the framect after the scene
+        if (state.frameState.isScrolling || state.movedTo == 0 || state.levelTo == -1) {
+            d { "StayInCurrentMapCell dont move = ${state.movedTo} level = ${state.levelTo}" }
+            failureCt = 0
+            return wrapped.nextStep(state)
+        }
+
+        val isInCurrent = state.currentMapCell.mapLoc == state.movedTo && state.frameState.level == state.levelTo
+        if (isInCurrent) {
+            failureCt = 0
+        } else {
+            failureCt++
+        }
+
+        return if (isInCurrent || failureCt < 70) {
+            wrapped.nextStep(state)
+        } else {
+            d { " should be at ${state.movedTo} but am at ${state.currentMapCell.mapLoc}"}
+            val exits = state.currentMapCell.allExits()
+            // what is the nearest point
+            // waste of computation just for debug but why not
+//            d { " closest to ${exits.minOf { it.distTo(state.link) }}"}
+//            d { "all "}
+//            exits.forEach {
+//                d { "   $it d:${it.distTo(state.link)}" }
+//            }
+            // maybe add parameter for NO attacking while moving, so link doesn't get lou
+            routeTo.routeTo(state, exits)
+        }
+    }
+
+    override fun reset() {
+        initialLevel = -1
+        failureCt = 0
+    }
+
+    override val name: String
+        get() = wrapped.name
+}
+
+class StayInCurrentMapCell0(private val wrapped: Action) : Action {
+    private val routeTo = RouteTo(params = RouteTo.Param(considerLiveEnemies = false))
+
     private var initialMapCell: MapCell? = null
     private var initialLevel: Int = -1
 
@@ -394,7 +485,7 @@ class LadderAction: Action {
     private var ladderDirectionCount = 0
 
     companion object {
-        private const val LADDER_ESCAPE_MOVEMENTS = 30
+        private const val LADDER_ESCAPE_MOVEMENTS = 20
     }
 
     override fun nextStep(state: MapLocationState): GamePad {

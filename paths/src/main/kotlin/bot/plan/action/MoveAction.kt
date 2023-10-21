@@ -2,7 +2,6 @@ package bot.plan.action
 
 import bot.plan.action.NavUtil.directionToDir
 import bot.plan.zstar.FrameRoute
-import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.*
 import util.LogFile
@@ -115,7 +114,16 @@ class InsideNavAbout(
         get() = "Nav to about $point"
 }
 
-class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val forceDirection: Direction? = null, ignoreProjectiles: Boolean = false) : MapAwareAction {
+class StartAtAction(val at: MapLoc = 0, val atLevel: Int = -1): Action {
+    override fun complete(state: MapLocationState): Boolean =
+        true.also {
+            d { "set start to $at" }
+            state.movedTo = at
+            state.levelTo = atLevel
+        }
+}
+
+class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val toLevel: Int, val forceDirection: Direction? = null, ignoreProjectiles: Boolean = false) : MapAwareAction {
     private val routeTo = RouteTo(params = RouteTo.Param(considerLiveEnemies = false, ignoreProjectiles = ignoreProjectiles))
 
     init {
@@ -124,6 +132,9 @@ class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val forceDirection: Dir
 
     override val from: MapLoc = fromLoc
     override val to: MapLoc = next.mapLoc
+
+    override val actionLoc: MapLoc
+        get() = to
 
     private var arrived = false
     private var movedIn = 0
@@ -137,14 +148,23 @@ class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val forceDirection: Dir
 
     override fun complete(state: MapLocationState): Boolean =
         (arrived && movedIn >= 5).also {
-            if (it) route = null
+            if (it) {
+                onArrived(state)
+                route = null
+            }
 //            d { " Move to complete $it"}
         }
+
+    private fun onArrived(state: MapLocationState) {
+        state.movedTo = to
+        state.levelTo = toLevel
+    }
 
     private fun checkArrived(state: MapLocationState, dir: Direction) {
         if (!arrived) {
             arrived = state.frameState.mapLoc == next.mapLoc
             if (arrived) {
+                onArrived(state)
                 movedIn = 0
                 arrivedDir = dir
                 d { " arrived! $arrived dir $arrivedDir" }
@@ -368,7 +388,7 @@ private fun doRouteTo(
     to: List<FramePoint>,
     param: RouteParam
 ): GamePad {
-    d { " DO routeTo TO ${to.size} first ${to.firstOrNull()} currently at ${state.currentMapCell.mapLoc}" }
+    d { " DO routeTo TO ${to.size} points first ${to.firstOrNull()} currently at ${state.currentMapCell.mapLoc}" }
     var forceNew = param.forceNew
     if (to.isEmpty()) {
         d { " no where to go " }
@@ -377,21 +397,22 @@ private fun doRouteTo(
         return NavUtil.randomDir(state.link)
     }
     val linkPt = state.frameState.link.point
-    if (linkPt.minDistToAny(to) <= 1) {
-        d { " CLOSE!! " }
-        if (to.first().y <= 1) {
+    val closest = to.minBy { it.distTo(linkPt) }
+    if (linkPt.distTo(closest) <= 1) {
+        d { " CLOSE!! ${closest}" }
+        if (closest.y <= 1) {
             d { " CLOSE!! up" }
             return GamePad.MoveUp
         }
-        if (to.first().x <= 1) {
+        if (closest.x <= 1) {
             d { " CLOSE!! left" }
             return GamePad.MoveLeft
         }
-        if (to.first().x >= MapConstants.MAX_X - 2) {
+        if (closest.x >= MapConstants.MAX_X - 2) {
             d { " CLOSE!! right" }
             return GamePad.MoveRight
         }
-        if (to.first().y >= MapConstants.MAX_Y - 2) {
+        if (closest.y >= MapConstants.MAX_Y - 2) {
             d { " CLOSE!! down" }
             return GamePad.MoveDown
         }

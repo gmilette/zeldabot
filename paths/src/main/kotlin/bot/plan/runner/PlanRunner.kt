@@ -1,9 +1,7 @@
 package bot.plan.runner
 
 import bot.ZeldaBot
-import bot.plan.action.Action
-import bot.plan.action.DoNothing
-import bot.plan.action.moveHistoryAttackAction
+import bot.plan.action.*
 import bot.state.Addresses
 import bot.state.FramePoint
 import bot.state.GamePad
@@ -32,11 +30,12 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        run(name = "level1drag")
 //        run(name = "level1Ladder") // with ladder
 //        run(name = "level1")
-//        run(name = "level3")
+        run(name = "level3")
 //        run(name = "level5") // with ladder
 //        run(name = "afterLev4")
 //        run(name = "all")
-        run(name = "gannon")
+//        run(name = "level2rhinoAfter")
+//        run(name = "gannon")
 //        run(name = "level9") // with ladder
     }
 
@@ -100,9 +99,23 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
             runLog.logFinalComplete(state )
             rerun()
         } else {
+            d { " complete action ${action?.javaClass?.name ?: ""}"}
+            completedAction(state, action)
             action = withDefaultAction(masterPlan.pop())
             action?.reset()
         }
+    }
+
+    private fun completedAction(state: MapLocationState, action: Action?) {
+//        val move = action as? MoveTo ?: return
+//        val loc = move.to
+//        val loc = action?.actionLoc ?: 0
+        // keep track of where link is supposed to be.. hmmm
+        val stateName = "${state.frameState.level}_${state.movedTo}"
+        val stateFileName = "mapstate/mapstate_${stateName}.save"
+        d { "Saved a state $stateFileName" }
+        api.saveState(stateFileName)
+//        api.saveScreenshot()
     }
 
     fun afterThis() = masterPlan.next()

@@ -94,7 +94,9 @@ object EnemyGroup {
     val projectilePairs = setOf(
         arrowPair,
         boulder4Pair,
-        boulder3Pair
+        boulder3Pair,
+        arrowTipShotByEnemyPair,
+        arrowButtShotByEnemy,
     )
 
     val ignorePairs = setOf(
@@ -107,6 +109,12 @@ object EnemyGroup {
         dragon4BodySpinePair,
         dragon4BodyFoot,
         dragon4Body,
+        waterMonsterPairUnder,
+        waterMonsterPairUnder2,
+        waterMonsterPair,
+        waterMonsterPair2,
+        waterMonsterPairAlt, // tile address = 0EE0
+        waterMonsterPairAlt2
     )
 
     val lootPairs = setOf(
@@ -117,10 +125,11 @@ object EnemyGroup {
         bigCoinPair2
     )
 
+
     val loot = setOf(
         compass,
         clockTile,
-        silverArrow,
+//        silverArrow,
         redring,
 //            brownBoomerang,
         bow,

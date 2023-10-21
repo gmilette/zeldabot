@@ -43,7 +43,7 @@ fun main() = application {
         val inv = remember { mutableStateOf(true) }
 
         Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
-                Text(
+            Text(
                 text = "Plan: ${state?.mapLoc} ${state?.state?.currentMapCell?.mapData?.name ?: ""}",
                 fontSize = 20.sp,
             )
@@ -301,7 +301,7 @@ private fun HyruleMap(state: MapLocationState, plan: PlanRunner) {
 
                 drawPoint(canvas, v, link, paint)
                 // draw path: linkPathPaint
-                d { " draw ${enemies.size} enemies"}
+                d { " draw num enemies ${enemies.size} enemies"}
                 for (enemy in enemies) {
                     drawGridPoint(canvas, v, enemy.point, enemyPaint)
                 }

@@ -1,5 +1,6 @@
 package bot.plan.action
 
+import bot.plan.InLocations
 import bot.state.FramePoint
 import bot.state.GamePad
 import bot.state.MapLocationState
@@ -7,28 +8,33 @@ import bot.state.oam.isGannonTriforce
 import util.d
 
 class KillGannon : Action {
+    companion object {
+        private const val MoveDelay = 2
+    }
     private val positionShoot = OrderedActionSequence(listOf(
         GoIn(5, GamePad.MoveRight, reset = true),
-        GoIn(2, GamePad.None, reset = true),
+        GoIn(MoveDelay, GamePad.None, reset = true),
         GannonAttack(),
-        GoIn(2, GamePad.None, reset = true),
+        GoIn(MoveDelay, GamePad.None, reset = true),
         GoIn(5, GamePad.MoveUp, reset = true),
-        GoIn(2, GamePad.None, reset = true),
+        GoIn(MoveDelay, GamePad.None, reset = true),
         GannonAttack(),
-        GoIn(2, GamePad.None, reset = true),
+        GoIn(MoveDelay, GamePad.None, reset = true),
         GoIn(5, GamePad.None, reset = true),
         GoIn(5, GamePad.MoveLeft, reset = true),
-        GoIn(2, GamePad.None, reset = true),
+        GoIn(MoveDelay, GamePad.None, reset = true),
         GannonAttack(),
-        GoIn(2, GamePad.None, reset = true),
+        GoIn(MoveDelay, GamePad.None, reset = true),
         GoIn(5, GamePad.MoveDown, reset = true),
-        GoIn(2, GamePad.None, reset = true),
+        GoIn(MoveDelay, GamePad.None, reset = true),
         GannonAttack(),
-        GoIn(2, GamePad.None, reset = true),
+        GoIn(MoveDelay, GamePad.None, reset = true),
         GoIn(5, GamePad.None, reset = true),
-        GoIn(2, GamePad.None, reset = true),
+        GoIn(MoveDelay, GamePad.None, reset = true),
         GannonAttack(),
-        GoIn(2, GamePad.None, reset = true),
+        GoIn(MoveDelay, GamePad.None, reset = true),
+        // it's better just to kill
+//        InsideNavAbout(InLocations.Level9.centerGannonAttack, about = 4)
     ))
 
     private fun isReadyForDeath(state: MapLocationState): Boolean {
@@ -48,11 +54,13 @@ class KillGannon : Action {
     }
 
     override fun target(): FramePoint {
-        return positionShoot.target()
+        return FramePoint()
     }
 
     override fun nextStep(state: MapLocationState): GamePad {
         d {"KillGannon num enemies ${state.numEnemies}"}
+        state.currentMapCell.zstar.resetPassable()
+        state.currentMapCell.zstar.reset()
         state.frameState.logEnemies()
         if (isReadyForDeath(state)) {
             d {"KillGannon !! READY FOR DEATH !!"}
@@ -69,13 +77,14 @@ class KillGannon : Action {
 }
 
 class GannonAttack : Action {
-    private var swordAction = AlwaysAttack(useB = false)
-    private var arrowAction = AlwaysAttack(useB = true)
+    private val freq = 10
+    private var swordAction = AlwaysAttack(useB = false, freq = freq)
+    private var arrowAction = AlwaysAttack(useB = true, freq = freq)
 
     private var frames = 0
 
     override fun complete(state: MapLocationState): Boolean {
-        val complete = frames >= 10
+        val complete = frames >= freq
         if (complete) {
             frames = 0
         }

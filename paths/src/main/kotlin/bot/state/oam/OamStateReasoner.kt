@@ -173,7 +173,7 @@ data class SpriteData(
     // keep
     // Debug: (Kermit) 49: SpriteData(index=49, point=(177, 128), tile=160, attribute=2) None
     val hidden: Boolean = point.y >= 248 || attribute == 32 || EnemyGroup.ignore.contains(tile) ||
-            EnemyGroup.ignorePairs.contains(tilePair) // does this work?
+            EnemyGroup.ignorePairs.contains(tilePair)
             //|| point.y < 60  dont need that because the y coordinate is adjusted
             //|| projectiles.contains(tile) //|| loot.contains(tile) // should be separate
             || ( (tile == 248 || tile == 250) && point.y == 187) // spinny guy
