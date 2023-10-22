@@ -115,6 +115,7 @@ object Phases {
     val level7 = "level 7"
     val level8 = "level 8"
     val level9 = "level 9"
+    val ladderHeart = "ladder heart"
 
     object Segment {
         val lev2Boss = "kill boss"
@@ -296,6 +297,7 @@ object ZeldaPlan {
             obj(Dest.Secrets.bombHeartSouth)
             obj(Dest.Secrets.forest100South)
             obj(Dest.Shop.arrowShop)
+            phase(Phases.ladderHeart)
             obj(Dest.Heart.ladderHeart)
             // exit the heart area, 200 is too much
             goIn(GamePad.MoveLeft, 100)

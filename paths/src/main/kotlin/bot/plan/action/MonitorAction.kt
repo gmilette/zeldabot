@@ -470,28 +470,33 @@ class LadderAction: Action {
     // let link try to escape on its own for a bit
     private var ladderDeployedForFrames = 0
     override fun complete(state: MapLocationState): Boolean =
-        (!state.frameState.ladderDeployed || ladderDeployedForFrames < LADDER_ESCAPE_MOVEMENTS).also {
-            if (state.frameState.ladderDeployed) {
-                ladderDeployedForFrames++
-            }
-        } //|| ladderOnPassable(state)
+        (!state.frameState.ladderDeployed || ladderDeployedForFrames < LADDER_ESCAPE_MOVEMENTS) || ladderOnPassable(state)
+//            .also {
+//            if (state.frameState.ladderDeployed) {
+//                ladderDeployedForFrames++
+//            }
+//        }
 
     private fun ladderOnPassable(state: MapLocationState) =
         state.frameState.ladder?.let { ladder ->
-            state.currentMapCell.passable.get(ladder.x, ladder.y)
+            state.currentMapCell.passable.get(ladder.x, ladder.y) ||
+                    state.currentMapCell.passable.get(ladder.x, ladder.y+1) ||
+                    state.currentMapCell.passable.get(ladder.x, ladder.y-1)
         } ?: false
 
     private var ladderDirection: GamePad? = GamePad.None
     private var ladderDirectionCount = 0
 
     companion object {
-        private const val LADDER_ESCAPE_MOVEMENTS = 20
+        private const val LADDER_ESCAPE_MOVEMENTS = 30
     }
 
     override fun nextStep(state: MapLocationState): GamePad {
         if (!state.frameState.ladderDeployed) {
             ladderDeployedForFrames = 0
             return GamePad.None
+        } else {
+            ladderDeployedForFrames++
         }
 
         if (ladderOnPassable(state)) {
