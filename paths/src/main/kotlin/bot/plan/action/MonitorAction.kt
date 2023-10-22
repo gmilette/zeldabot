@@ -471,11 +471,6 @@ class LadderAction: Action {
     private var ladderDeployedForFrames = 0
     override fun complete(state: MapLocationState): Boolean =
         (!state.frameState.ladderDeployed || ladderDeployedForFrames < LADDER_ESCAPE_MOVEMENTS) || ladderOnPassable(state)
-//            .also {
-//            if (state.frameState.ladderDeployed) {
-//                ladderDeployedForFrames++
-//            }
-//        }
 
     private fun ladderOnPassable(state: MapLocationState) =
         state.frameState.ladder?.let { ladder ->

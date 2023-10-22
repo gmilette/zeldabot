@@ -109,7 +109,8 @@ val dragonNeck = (0xC4).toInt()
 // do not attack
 // but these are also the pinwheel guys
 //val dragonFeet = (0xC6).toInt() //wheel guy
-//val dragonFeet2 = (0xCA).toInt() // and spiders
+val dragonFeetPair = (0xCA).toInt() to (0x03).toInt() // and spider
+val dragonFeet2 = (0xC2).toInt() to (0x03).toInt() // and spider
 val dragonTail = (0xC8).toInt() //attribute 3 for dragon wheel guy
 //val dragonBody = (0xC2).toInt()
 

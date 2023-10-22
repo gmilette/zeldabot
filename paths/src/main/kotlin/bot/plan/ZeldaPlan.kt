@@ -1,6 +1,7 @@
 package bot.plan
 
 import bot.plan.action.GoIn
+import bot.plan.action.GoInConsume
 import bot.plan.runner.MasterPlan
 import bot.state.*
 import bot.state.map.*
@@ -299,8 +300,8 @@ object ZeldaPlan {
             obj(Dest.Shop.arrowShop)
             phase(Phases.ladderHeart)
             obj(Dest.Heart.ladderHeart)
-            // exit the heart area, 200 is too much
-            goIn(GamePad.MoveLeft, 100)
+            // exit the heart area
+            goIn(GamePad.MoveLeft, 70)
             obj(Dest.Heart.raftHeart, itemLoc = Objective.ItemLoc.Right)
 
             // after this link just went left, where is he going?
@@ -711,16 +712,12 @@ object ZeldaPlan {
             // pick up key in center
             goTo(InLocations.Level6.keyCenter)
             down //57
-            startAt(57)
+//            startAt(57)
             kill
             right
-            startAt(58)//save6
+//            startAt(58)//save6
             seg("center move stair")
             kill
-//            pushInLevelAnyBlock(inMapLoc = LevelSpecBuilder.getItemMove6,
-//                pushTarget = InLocations.Level6.moveUpSingle,
-//                stairsTarget = InLocations.Level5.cornerStairs
-//            )
             pushInLevelAnyBlock(inMapLoc = LevelSpecBuilder.getItemMove6,
                 pushTarget = InLocations.Level6.moveUpSingle,
                 stairsTarget = InLocations.Level5.cornerStairs,
@@ -733,11 +730,8 @@ object ZeldaPlan {
             down
 //            // get key
             left
-//             44
-//             todo; ignore the iD2
-            startAt(44) //save5
-            upm
-            startAt(28) //save4
+            level6TriggerDoorThenUp
+//            upm
             killArrowSpider
             goTo(InLocations.Level6.triforceHeart)
             upm
@@ -759,7 +753,6 @@ object ZeldaPlan {
             up
             leftm
             up
-//            startAt(40)
             seg("bait spot")
             goIn(GamePad.MoveUp, 20)
             switchToBait()
@@ -769,7 +762,6 @@ object ZeldaPlan {
             useItem()
             upm
             rightm
-//            startAt(25)
             bomb(InLocations.bombRight)
             right
             seg("red candle")
@@ -797,7 +789,7 @@ object ZeldaPlan {
             bomb(InLocations.bombRight)
             right
             seg("Kill hands")
-            startAt(13)
+//            startAt(13)
             killHandsInLevel7
 //            kill3
             // hard, can't kill those hands
@@ -841,7 +833,7 @@ object ZeldaPlan {
             // get the coin
             goTo(FramePoint(8.grid, 5.grid))
             left
-            startAt(124) //state1
+//            startAt(124) //state1
             seg("go get book")
             kill
             pushInLevelMiddleStair(LevelSpecBuilder.getItemLoc8, upTo = 124)
@@ -853,7 +845,7 @@ object ZeldaPlan {
             "bomb".seg()
             bomb(InLocations.topMiddleBombSpot)
             up
-            startAt(94) // save3
+//            startAt(94) // save3
             kill
             goTo(InLocations.Level8.keySpot)
             upm
@@ -865,7 +857,7 @@ object ZeldaPlan {
             killArrowSpider // kill arrow guy
             rightm
             seg("get key")
-            startAt(31) // save2
+//            startAt(31) // save2
             killAllInCenter
             pushInLevelMiddleStair(LevelSpecBuilder.getItemLoc8Key, upTo = 31)
             seg("get back to master battle")
@@ -876,7 +868,7 @@ object ZeldaPlan {
             seg("take stair to end")
             rightm
 
-            startAt(63)
+//            startAt(63)
             pushInLevelAnyBlock(inMapLoc = 62, //fake
                 pushTarget = null,
                 stairsTarget = InLocations.rightStairGrid,
@@ -884,7 +876,6 @@ object ZeldaPlan {
                 upTo = 76,
                 thenGo = GamePad.MoveRight
             )
-//            startAt(76) //save4
             // give time to enter so that switching to bomb works
             goTo(FramePoint(11.grid, 2.grid))
             bomb(InLocations.topMiddleBombSpot)
@@ -901,23 +892,21 @@ object ZeldaPlan {
         this.add {
             lev(9)
             startAt(LevelStartMapLoc.lev(9))
+            // really dont want to accidently exit because link can't find way back to the entrance
+            GoInConsume(30, GamePad.MoveUp)
             upm
             leftm
             bomb(InLocations.topMiddleBombSpot)
             upm // or else it will chase the suns
 //            left
-//             it's not 14
-            startAt(85) // save8
             kill
             pushInLevelMiddleStair(LevelSpecBuilder.Companion.Nine.travel1, upTo = 20, outLocation = InLocations.getOutLeft)
 
-            startAt(20) //save7
             "spiral".seg()
             right // kill the pancakes, getting quite stuck
             rightm
             "go down to ring".seg()
             downm
-            startAt(38) //save6
             // what if the bomb missed
             bomb(InLocations.bombRight)
             rightm
@@ -927,7 +916,6 @@ object ZeldaPlan {
             bomb(InLocations.topMiddleBombSpot)
             upm
             "ring spot".seg()
-//            startAt(7) //save5
             kill // stuck here on the disappear ghost
             pushInLevelMiddleStair(LevelSpecBuilder.getItemLoc8)
         }

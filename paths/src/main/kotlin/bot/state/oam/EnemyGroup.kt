@@ -122,7 +122,8 @@ object EnemyGroup {
         triforceTile2PairAlt,
         triforceTilePair,
         bigCoinPair,
-        bigCoinPair2
+        bigCoinPair2,
+        bait
     )
 
 
@@ -156,6 +157,5 @@ object EnemyGroup {
 //        triforceTile,
 //        triforceTile2,
         magicSword,
-        bait
     )
 }

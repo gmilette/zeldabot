@@ -61,26 +61,26 @@ class FrameStateUpdater(
         val linkDir = oam.direction
         val ladderMem = api.readCPU(Addresses.ladderDeployed) != 0
         // check ladder memory first
-        d { "ladder mem $ladderMem ${api.readCPU(Addresses.ladderDeployed)}" }
+//        d { "ladder mem $ladderMem ${api.readCPU(Addresses.ladderDeployed)}" }
         val ladder = if (ladderMem) oam.ladderSprite else null
         val damagedTile = if (oam.damaged) LinkDirectionFinder.damagedAttribute.last() else 0
         val link = Agent(0, linkPoint, linkDir, tile = damagedTile)
         // has to persist between states
-        if (ladder != null) {
-            d { "ladder was ${state.ladderStateHorizontal} prev ${state.previousMove.dir.horizontal}" }
-        }
-        state.ladderStateHorizontal = when {
-            ladder == null -> null
-            state.ladderStateHorizontal == null ->
-                state.previousMove.dir.horizontal
-
-            else -> state.ladderStateHorizontal
-        }
-        // and if it is horizontal, then make above and below not passable
-        if (ladder != null) {
-            d { " ladder at ${ladder.point} directionHorizontal: ${state.ladderStateHorizontal}" }
-            d { " prev ${state.previousMove.dir.horizontal}" }
-        }
+//        if (ladder != null) {
+//            d { "ladder was ${state.ladderStateHorizontal} prev ${state.previousMove.dir.horizontal}" }
+//        }
+//        state.ladderStateHorizontal = when {
+//            ladder == null -> null
+//            state.ladderStateHorizontal == null ->
+//                state.previousMove.dir.horizontal
+//
+//            else -> state.ladderStateHorizontal
+//        }
+//        // and if it is horizontal, then make above and below not passable
+//        if (ladder != null) {
+//            d { " ladder at ${ladder.point} directionHorizontal: ${state.ladderStateHorizontal}" }
+//            d { " prev ${state.previousMove.dir.horizontal}" }
+//        }
 
         val previousNow = state.previousMove
         state.previousMove = PreviousMove(

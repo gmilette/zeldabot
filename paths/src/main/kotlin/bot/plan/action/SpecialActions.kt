@@ -7,6 +7,22 @@ import bot.state.MapLocationState
 import bot.state.map.grid
 import util.d
 
+fun level6TriggerDoorTrapThenDo(action: Action) = Level3SequenceThenDo(
+    OrderedActionSequence(
+        mutableListOf(
+            InsideNav(
+                FramePoint(7.grid, 3.grid)
+            ),
+            InsideNav(
+                FramePoint(7.grid, 2.grid)
+            ),
+            InsideNav(
+                FramePoint(7.grid, 5.grid)
+            ),
+        ), restartWhenDone = false
+    ), action
+)
+
 fun level3TriggerDoorTrapThenDo(action: Action) = Level3SequenceThenDo(
     OrderedActionSequence(
         mutableListOf(
