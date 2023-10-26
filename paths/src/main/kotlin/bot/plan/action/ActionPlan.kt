@@ -18,6 +18,9 @@ interface Action {
     val actionLoc: MapLoc
         get() = -1
 
+    val levelLoc: MapLoc
+        get() = -1
+
     fun reset() {
         // empty
     }
@@ -173,6 +176,9 @@ class DecisionAction(
 ) : Action {
     override val actionLoc: MapLoc
         get() = if (action1 is MoveTo) action1.to else if (action2 is MoveTo) action2.to else -2
+
+    override val levelLoc: MapLoc
+        get() = if (action1 is MoveTo) action1.levelLoc else if (action2 is MoveTo) action2.levelLoc else -2
 
     override fun complete(state: MapLocationState): Boolean {
         val completeIf = completeIf(state)
@@ -432,6 +438,27 @@ class GoDirection(private val dir: GamePad, private val moves: Int = 10) : Actio
 
     override val name: String
         get() = "Go Up $movements of $moves"
+}
+
+class GoToward(private val target: FramePoint, private val moves: Int = 10) : Action {
+    private var movements = 0
+
+    override fun complete(state: MapLocationState): Boolean =
+        movements == moves
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        val gamePad = state.link.directionTo(target)
+        d { " MOVE $movements" }
+        movements++
+        return gamePad
+    }
+
+    override fun target(): FramePoint {
+        return FramePoint()
+    }
+
+    override val name: String
+        get() = "Go Toward $target $movements of $moves"
 }
 
 open class Bomb(private val target: FramePoint) : Action {

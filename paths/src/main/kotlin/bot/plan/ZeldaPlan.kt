@@ -53,7 +53,7 @@ object InLocations {
         val bombItemRight = FramePoint(208, 43)
 //        val triforce = FramePoint(120, 88) // get the middle of the triangle at the top
 //        val triforce = FramePoint(128, 88) // get the middle of the triangle at the top
-        val triforce = FramePoint(128, 88).down // get the middle of the triangle at the top
+        val triforce = FramePoint(128, 88).down.down.down.down // get the middle of the triangle at the top
     }
 
     object Level3 {
@@ -90,6 +90,7 @@ object InLocations {
     }
 
     object Level8 {
+        val triforceHeartAbove = FramePoint(3.grid, 6.grid)
         val triforceHeart = FramePoint(2.grid, 8.grid)
         val keySpot = FramePoint(8.grid, 5.grid)
     }
@@ -116,6 +117,7 @@ object Phases {
     val level7 = "level 7"
     val level8 = "level 8"
     val level9 = "level 9"
+    val level9before = "level 9before"
     val ladderHeart = "ladder heart"
 
     object Segment {
@@ -149,7 +151,7 @@ object ZeldaPlan {
             // blue ring
 
             obj(Dest.level(3))
-            includeLevelPlan(levelPlan4(factory))
+            includeLevelPlan(levelPlan3(factory))
             obj(Dest.level(4))
             includeLevelPlan(levelPlan4(factory))
             // after 4, grab 30 secret x2 then buy shield
@@ -333,10 +335,10 @@ object ZeldaPlan {
             obj(Dest.level(8))
             includeLevelPlan(levelPlan8(factory), Direction.Left)
 
-            phase(Phases.level7)
             obj(Dest.Shop.blueRing, itemLoc = Dest.Shop.ItemLocs.bait, position = true)
             obj(Dest.level(7))
-            includeLevelPlan(levelPlan7(factory))
+            // link starts outside the lake, no need to move down
+            includeLevelPlan(levelPlan7(factory), consume = false)
 
             phase("go to level 9")
             obj(Dest.level(9))
@@ -393,7 +395,7 @@ object ZeldaPlan {
             goTo(FramePoint(3.grid, 2.grid))
             seg("get arrow")
             leftm
-            pushThenGoTo(InLocations.diamondLeftBottomPush, ignoreProjectiles = true) //InLocations.diamondLeftTopPush)
+            pushThenGoToDynamic(InLocations.diamondLeftBottomPush, ignoreProjectiles = true) //InLocations.diamondLeftTopPush)
             startAt(127)
             go(InLocations.getItem)
             upTo(34) // eh
@@ -568,7 +570,7 @@ object ZeldaPlan {
             go(InLocations.getItem)
             upTo(50)
             leftm
-            leftm
+            leftm // custom action to walk across using the ladder
             seg("get past 4 monster")
             up
             up
@@ -712,10 +714,10 @@ object ZeldaPlan {
             // pick up key in center
             goTo(InLocations.Level6.keyCenter)
             down //57
-//            startAt(57)
+            startAt(57)
             kill
             right
-//            startAt(58)//save6
+            startAt(58)//save6
             seg("center move stair")
             kill
             pushInLevelAnyBlock(inMapLoc = LevelSpecBuilder.getItemMove6,
@@ -734,13 +736,14 @@ object ZeldaPlan {
 //            upm
             killArrowSpider
             goTo(InLocations.Level6.triforceHeart)
+            // need
             upm
             getTri
         }
     }
 
     private fun levelPlan7(factory: PlanInputs): MasterPlan {
-        val builder = factory.make("Get to level 7")
+        val builder = factory.make(Phases.level7)
         return builder {
             lev(7)
             startAt(LevelStartMapLoc.lev(7))
@@ -882,6 +885,7 @@ object ZeldaPlan {
             "kill dragon".seg()
             upm
             killLev4Dragon // dragon
+            goTo(InLocations.Level8.triforceHeartAbove)
             goTo(InLocations.Level8.triforceHeart)
             upm
             getTri
@@ -916,7 +920,7 @@ object ZeldaPlan {
             bomb(InLocations.topMiddleBombSpot)
             upm
             "ring spot".seg()
-            kill // stuck here on the disappear ghost
+            kill
             pushInLevelMiddleStair(LevelSpecBuilder.getItemLoc8)
         }
     }
@@ -935,7 +939,7 @@ object ZeldaPlan {
             GoIn(5, GamePad.MoveLeft)
             "kill travel 1".seg()
             kill
-//            startAt(5) //save3
+            // trigger trap first
             pushInLevelAnyBlock(
                 inMapLoc = LevelSpecBuilder.Companion.Nine.travel2,
                 pushTarget = InLocations.Level9.moveUpBlock,

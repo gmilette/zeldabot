@@ -73,14 +73,16 @@ class PlanBuilder(
         other()
     }
 
-    fun includeLevelPlan(other: MasterPlan, exitDirection: Direction = Direction.Down): PlanBuilder {
+    fun includeLevelPlan(other: MasterPlan, exitDirection: Direction = Direction.Down, consume: Boolean = true): PlanBuilder {
         makeSegment()
         remember
         segments.addAll(other.segments)
         // exit the level so dont accidently go back in
         // have to wait for the triforce animation
         goIn(GamePad.None, 500)
-        goInConsume(exitDirection.toGamePad(), 20)
+        if (consume) {
+            goInConsume(exitDirection.toGamePad(), 20)
+        }
         recall
         return this
     }
@@ -472,6 +474,19 @@ class PlanBuilder(
         return this
     }
 
+    fun pushThenGoToDynamic(blockIn: FramePoint, toT: FramePoint = InLocations.middleStair, ignoreProjectiles: Boolean = false): PlanBuilder {
+        // just for compat ability
+        val block = blockIn.upOneGrid
+        val pushFromUp = Direction.Up.pointModifier(MapConstants.oneGrid)(block)
+        val pushFromDown = Direction.Down.pointModifier(MapConstants.oneGrid)(block)
+        add(lastMapLoc, InsideNavAbout(pushFromUp, 4, ignoreProjectiles = ignoreProjectiles, orPoints = listOf(pushFromDown)))
+        // go there
+        add(lastMapLoc, GoToward(block, 70))
+        add(lastMapLoc, GoDirection(GamePad.MoveRight, 70))
+        add(lastMapLoc, InsideNav(toT, ignoreProjectiles = ignoreProjectiles))
+        return this
+    }
+
     fun pushJust(target: FramePoint) {
         // position
         goTo(FramePoint(3.grid, 8.grid))
@@ -556,11 +571,15 @@ class PlanBuilder(
     }
 
     private fun goGetItem(itemLoc: FramePoint = InLocations.Overworld.centerItem) {
-        if (itemLoc != Objective.ItemLoc.None.point) {
+        if (itemLoc != Objective.ItemLoc.None.point && itemLoc != Objective.ItemLoc.Enter.point) {
             // walking down stairs, plus a few steps in
             // too much for bait
             goInConsume(GamePad.MoveUp, 15)
 
+            // avoid accidently picking the center item
+            if (itemLoc != InLocations.Overworld.centerItem) {
+                goShop(itemLoc.downTwoGrid)
+            }
             goShop(itemLoc)
             if (itemLoc != Objective.ItemLoc.Enter.point) {
                 exitShop()
@@ -570,6 +589,8 @@ class PlanBuilder(
     }
 
     private fun switchToItem(item: Int) {
+        // prevent accidental go back
+//        startAt(0)
         toggleMenu()
         plan.add(SwitchToItem(item))
         goIn(GamePad.None, 100)

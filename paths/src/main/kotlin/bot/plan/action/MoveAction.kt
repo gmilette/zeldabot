@@ -6,6 +6,7 @@ import bot.state.*
 import bot.state.map.*
 import util.LogFile
 import util.d
+import util.w
 
 
 //val navUntil = CompleteIfAction(InsideNav()), completeIf = { state ->
@@ -70,7 +71,9 @@ class InsideNav(private val point: FramePoint, ignoreProjectiles: Boolean = fals
 
 class InsideNavAbout(
     private val point: FramePoint, about: Int, vertical: Int = 1, negVertical: Int = 0,
-    val shop: Boolean = false, ignoreProjectiles: Boolean = false, private val makePassable: FramePoint? = null
+    val shop: Boolean = false, ignoreProjectiles: Boolean = false,
+    private val makePassable: FramePoint? = null,
+    orPoints: List<FramePoint> = emptyList()
 ) : Action {
     private val routeTo = RouteTo.hardlyReplan(dodgeEnemies = !shop, ignoreProjectiles)
     private val points: List<FramePoint>
@@ -82,6 +85,14 @@ class InsideNavAbout(
         }
         repeat(vertical) {
             pts.addAll(point.copy(y = point.y + it).toLineOf(about))
+        }
+        for (orPoint in orPoints) {
+            repeat(negVertical) {
+                pts.addAll(orPoint.copy(y = orPoint.y - it).toLineOf(about))
+            }
+            repeat(vertical) {
+                pts.addAll(orPoint.copy(y = orPoint.y + it).toLineOf(about))
+            }
         }
         points = pts
     }
@@ -135,6 +146,9 @@ class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val toLevel: Int, val f
 
     override val actionLoc: MapLoc
         get() = to
+
+    override val levelLoc: Int
+        get() = toLevel
 
     private var arrived = false
     private var movedIn = 0
@@ -285,7 +299,7 @@ class RouteTo(val params: Param = Param()) {
         val useB: Boolean = false,
         val attackTarget: FramePoint? = null,
         // if false, dont bother avoiding any enemies, avoid projectiles though
-        val ignoreEnemies: Boolean = false
+        val ignoreEnemies: Boolean = false,
     )
     private val routeToFile: LogFile = LogFile("RouteTo")
 
@@ -528,7 +542,13 @@ private fun doRouteTo(
             passable.add(param.makePassable)
         }
 
+        // was this
+        if (state.currentMapCell.mapLoc != state.frameState.mapLoc) {
+            w { "! different maplocs ${state.currentMapCell.mapLoc} != ${state.frameState.mapLoc}"}
+        }
         val mapCell = param.overrideMapCell ?: state.currentMapCell
+        // it needs to route with the frame state
+//        val mapCell = param.overrideMapCell ?: state.hyrule.getMapCell(state.frameState.mapLoc)
 
         // of if the expected point is not where we should be
         // need to re route
@@ -560,20 +580,24 @@ private fun doRouteTo(
                 // never go after projectiles
                 val withoutClosestEnemy = avoid.filter { it.state == EnemyState.Alive } .sortedBy { it.point.distTo(state.link) }.toMutableList()
                 val onlyProjectiles = avoid.filter { it.state == EnemyState.Projectile }.map { it.point }
-                val closest = withoutClosestEnemy.removeFirst()
-                d { "closest is ${closest.point}"}
-                route = FrameRoute(
-                    NavUtil.routeToAvoidingObstacle(
-                        mapCell = mapCell,
-                        from = linkPt,
-                        to = avoid.points,
-                        before = state.previousMove.from,
-                        enemies = onlyProjectiles, // withoutClosestEnemy.points,
-                        forcePassable = passable,
-                        enemyTarget = closest.point
+                withoutClosestEnemy.removeFirstOrNull()?.let { closest ->
+                    d { "closest is ${closest.point}"}
+                    route = FrameRoute(
+                        NavUtil.routeToAvoidingObstacle(
+                            mapCell = mapCell,
+                            from = linkPt,
+                            to = avoid.points,
+                            before = state.previousMove.from,
+                            enemies = onlyProjectiles, // withoutClosestEnemy.points,
+                            forcePassable = passable,
+                            enemyTarget = closest.point
+                        )
                     )
-                )
-                d { "found route of size ${route?.path?.size ?: 0}"}
+                    d { "found route of size ${route?.path?.size ?: 0}"}
+                }?: run {
+                    d { " no closest point, route "}
+                    route?.next15()
+                }
             }
         }
         route?.next15()

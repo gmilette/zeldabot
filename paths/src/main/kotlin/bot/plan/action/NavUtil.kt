@@ -130,7 +130,9 @@ object NavUtil {
                                 ladderSpec: ZStar.LadderSpec? = null):
             List<FramePoint> = mapCell.zstar.route(from, to, before, enemies,
         avoidNearEnemy, forcePassable, Int.MAX_VALUE,
-                enemyTarget, ladderSpec)
+                enemyTarget, ladderSpec).also {
+                    d { " route with mapcell: ${mapCell.mapLoc}"}
+    }
 
     fun randomDir(from: FramePoint = FramePoint(100, 100)): GamePad {
         d { " random dir "}

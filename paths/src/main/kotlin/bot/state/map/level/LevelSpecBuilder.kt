@@ -326,7 +326,7 @@ class LevelSpecBuilder {
         val stairbeforestair = second.up.up.up.up.up.up.right
         val specs = mutableListOf(
             LevelSpec(start, e(u, d), "start", LevelMapTemplateReader.Temp.lev_grid),
-            LevelSpec(start.up, e(l, u), "triforce guy", LevelMapTemplateReader.Temp.lev_empty),
+            LevelSpec(start.up, e(l, u, d), "triforce guy", LevelMapTemplateReader.Temp.lev_empty),
             LevelSpec(start.up.left, e(u, d), "ghost water", LevelMapTemplateReader.Temp.lev_water_line_path),
             LevelSpec(start.up.left.up, e(u, d), "first stair", LevelMapTemplateReader.Temp.lev_stairs_center),
 

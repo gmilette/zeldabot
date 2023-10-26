@@ -2,6 +2,7 @@ package bot.plan.action
 
 import bot.state.*
 import bot.state.map.Direction
+import bot.state.map.MapConstants
 import bot.state.map.grid
 import util.LogFile
 import util.d
@@ -363,22 +364,28 @@ class KillInCenter : Action {
     object KillInCenterLocations {
         // should be the middle of the attack area
         val position = FramePoint(3.grid, 8.grid)
-        val attackFrom = FramePoint(8.grid, 8.grid)
+//        val attackFrom = FramePoint(8.grid, 8.grid)
+        val attackFrom = FramePoint(8.grid, 8.grid - MapConstants.halfGrid)
     }
 
     // more debugging
-    private val positionShootActions = mutableListOf<Action>(
+    private val positionShootActions = mutableListOf(
         InsideNavAbout(
             KillInCenterLocations.attackFrom,
             2,
             vertical = 2,
             negVertical = 2
         ),
-        GoIn(2, GamePad.MoveUp),
-        AlwaysAttack()
-    )
+        GoIn(3, GamePad.MoveUp, true),
+//        AlwaysAttack()
+    ).apply {
+        repeat(times = 5) {
+            GoIn(3, GamePad.A, true)
+            GoIn(3, GamePad.None, true)
+        }
+    }
 
-    private val positionShoot = OrderedActionSequence(positionShootActions)
+    private val positionShoot = OrderedActionSequence(positionShootActions, restartWhenDone = true)
 
     override fun complete(state: MapLocationState): Boolean =
         state.numEnemiesAliveInCenter() == 0

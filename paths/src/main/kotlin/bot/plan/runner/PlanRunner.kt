@@ -33,15 +33,36 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        run(name = "level3")
 //        run(name = "level5") // with ladder
 //        run(name = "afterLev4")
-//        run(name = "all")
+ //        run(name = "all")
+//        run(name = "level7")
+//        run(name = "level1")
+//        run(name = "go to level 9")
 //        run(name = "level2rhinoAfter")
 //        run(name = "gannon")
 //        run(name = "level9") // with ladder
-        run(name = "ladder_heart")
+//        run(name = "ladder_heart")
+        runLoc(true,5, 0)
     }
 
     private fun rerun() {
         run(load = true, name = target)
+    }
+
+    private fun runLoc(load: Boolean = false, mapLoc: Int, level: Int = 0) {
+        val plan = makePlan()
+//        val ex = experiments.ex(name)
+//        d { "  run experiment ${ex.name}"}
+//        ZeldaBot.addEquipment = ex.addEquipment
+        masterPlan = plan
+//        val root = "../Nintaco_bin_2020-05-01/states/mapstate_${level}_${mapLoc}.save"
+
+        val root = "mapstate_0_5.save"
+
+        d { " map state $root"}
+        startPath = root
+        action = withDefaultAction(masterPlan.skipToLocation(mapLoc, level))
+        runLog = RunActionLog("mapstate_${level}_${mapLoc}")
+//        setSword(ex.sword)
     }
 
     private fun run(load: Boolean = false, name: String) {
@@ -108,14 +129,10 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     }
 
     private fun completedAction(state: MapLocationState, action: Action?) {
-//        val move = action as? MoveTo ?: return
-//        val loc = move.to
-//        val loc = action?.actionLoc ?: 0
-        // keep track of where link is supposed to be.. hmmm
-        val stateName = "${state.frameState.level}_${state.movedTo}"
-        val stateFileName = "mapstate/mapstate_${stateName}.save"
-        d { "Saved a state $stateFileName" }
-        api.saveState(stateFileName)
+//        val stateName = "${state.frameState.level}_${state.movedTo}"
+//        val stateFileName = "mapstate/mapstate_${stateName}.save"
+//        d { "Saved a state $stateFileName" }
+//        api.saveState(stateFileName)
 //        api.saveScreenshot()
     }
 

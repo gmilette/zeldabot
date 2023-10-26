@@ -2,7 +2,9 @@ package bot.plan.runner
 
 import bot.plan.action.Action
 import bot.plan.action.EndAction
+import bot.plan.action.MoveTo
 import bot.plan.action.StartHereAction
+import bot.state.MapLoc
 import bot.state.MapLocationState
 import util.d
 import util.i
@@ -54,6 +56,26 @@ class MasterPlan(val segments: List<PlanSegment>) {
     fun getPlanAfter(phaseName: String, seg: String = ""): MasterPlan {
         val index = segments.indexOfFirst { it.phase == phaseName && (seg.isEmpty() || it.name == seg) }
         return MasterPlan(segments.subList(index, segments.size))
+    }
+
+    fun skipToLocation(mapLoc: MapLoc, level: Int): Action {
+        var keepGoing = true
+        var current = pop()
+        while(keepGoing && giant.isNotEmpty()) {
+            val first = giant.first().action
+            d { " SEARCH one ${first.actionLoc}"}
+//            if (first.actionLoc == mapLoc && first.toLevel == level) {
+             if (first.actionLoc == mapLoc && first.levelLoc == level) {
+                d { " search plan move ${first.actionLoc} " } // lev ${first.toLevel}"}
+                // stop
+                keepGoing = false
+                 current = pop()
+            } else {
+                current = pop()
+            }
+        }
+        d { " done search plan "}
+        return current
     }
 
     /**

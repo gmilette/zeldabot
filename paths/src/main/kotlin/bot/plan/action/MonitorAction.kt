@@ -1,10 +1,9 @@
 package bot.plan.action
 
+import bot.plan.action.NavUtil.directionToDir
 import bot.plan.zstar.ZStar
-import bot.state.FramePoint
-import bot.state.GamePad
-import bot.state.MapLocationState
-import bot.state.distTo
+import bot.state.*
+import bot.state.map.Direction
 import bot.state.map.MapCell
 import util.d
 import util.w
@@ -340,15 +339,26 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
             wrapped.nextStep(state)
         } else {
             d { " should be at ${state.movedTo} but am at ${state.currentMapCell.mapLoc}"}
-            val exits = state.currentMapCell.allExits()
-            // what is the nearest point
-            // waste of computation just for debug but why not
-//            d { " closest to ${exits.minOf { it.distTo(state.link) }}"}
+            val dir = state.currentMapCell.mapLoc.directionToDir(state.movedTo)
+//
+//            // this should handle the case where link accidentally moves into
+//            // stair
+            val exits = when {
+                dir == Direction.None -> state.currentMapCell.allExits()
+                else -> state.currentMapCell.exitsFor(dir) ?: state.currentMapCell.allExits()
+            }
+//            if (dir == Direction.None) {
+////                // the only way to go is up and out I think, there isn't a way to warp
+////                // somewhere else
+////                dir = Direction.Up
+//            }
+            d { " closest to ${exits.minOf { it.distTo(state.link) }}"}
 //            d { "all "}
 //            exits.forEach {
 //                d { "   $it d:${it.distTo(state.link)}" }
 //            }
-            // maybe add parameter for NO attacking while moving, so link doesn't get lou
+            // maybe add parameter for NO attacking while moving, so link doesn't get pulled into the level.
+            // it happened in level 7 for sure
             routeTo.routeTo(state, exits)
         }
     }
@@ -473,10 +483,10 @@ class LadderAction: Action {
         (!state.frameState.ladderDeployed || ladderDeployedForFrames < LADDER_ESCAPE_MOVEMENTS) || ladderOnPassable(state)
 
     private fun ladderOnPassable(state: MapLocationState) =
-        state.frameState.ladder?.let { ladder ->
-            state.currentMapCell.passable.get(ladder.x, ladder.y) ||
-                    state.currentMapCell.passable.get(ladder.x, ladder.y+1) ||
-                    state.currentMapCell.passable.get(ladder.x, ladder.y-1)
+        state.frameState.ladder?.point?.let { ladder ->
+            listOf(ladder, ladder.justRightEnd, ladder.justLeftBottom, ladder.justRightEndBottom).any {
+                state.currentMapCell.passable.get(it.x, it.y)
+            }
         } ?: false
 
     private var ladderDirection: GamePad? = GamePad.None
@@ -488,6 +498,7 @@ class LadderAction: Action {
 
     override fun nextStep(state: MapLocationState): GamePad {
         if (!state.frameState.ladderDeployed) {
+//            d { " !! ladder not deployed "}
             ladderDeployedForFrames = 0
             return GamePad.None
         } else {
