@@ -431,8 +431,9 @@ class PlanBuilder(
         captureObjective(mapData.findObjective(dest), itemLoc, position)
     }
 
-    private fun captureObjective(mapCell: MapCell, itemLocOverride: Objective.ItemLoc? = null, position: Boolean =
-        false) {
+    private fun captureObjective(mapCell: MapCell,
+                                 itemLocOverride: Objective.ItemLoc? = null,
+                                 position: Boolean = false) {
         // depending on the entrance type, do different actions
         routeTo(mapCell.mapLoc)
         with (mapCell.mapData.objective) {
@@ -451,6 +452,7 @@ class PlanBuilder(
                     // need special parameter for walk in
                     goInGetCenterItem(point, itemLocPoint, this.type.entry.requireLetter)
                 }
+                EntryType.WalkInLadder -> goToNotMonitored(point)
                 EntryType.WalkIn -> goTo(point)
                 EntryType.Bomb -> bombThenGoIn(point, itemLocPoint)
                 is EntryType.Fire -> burnFromGo(point, this.type.entry.from, itemLocPoint)
@@ -532,6 +534,12 @@ class PlanBuilder(
         // need to add this elsewhere probably
         add(lastMapLoc, StartAtAction(0, -1))
         goAbout(to, 2, 1, false, makePassable = makePassable)
+        return this
+    }
+
+    fun goToNotMonitored(to: FramePoint): PlanBuilder {
+        add(lastMapLoc, StartAtAction(0, -1))
+        add(lastMapLoc, InsideNavAbout(to, 4, 2, 1, setMonitorEnabled = false))
         return this
     }
 

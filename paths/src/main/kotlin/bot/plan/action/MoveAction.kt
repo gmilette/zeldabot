@@ -76,10 +76,14 @@ class InsideNavAbout(
     private val point: FramePoint, about: Int, vertical: Int = 1, negVertical: Int = 0,
     val shop: Boolean = false, ignoreProjectiles: Boolean = false,
     private val makePassable: FramePoint? = null,
-    orPoints: List<FramePoint> = emptyList()
+    orPoints: List<FramePoint> = emptyList(),
+    private val setMonitorEnabled: Boolean = true
 ) : Action {
     private val routeTo = RouteTo.hardlyReplan(dodgeEnemies = !shop, ignoreProjectiles)
     private val points: List<FramePoint>
+
+    override val monitorEnabled: Boolean
+        get() = setMonitorEnabled
 
     init {
         val pts = mutableListOf<FramePoint>()

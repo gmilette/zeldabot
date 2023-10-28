@@ -44,7 +44,7 @@ object Dest {
     object Heart {
         val fireHeart = DestType.Heart(entry = EntryType.Fire(from = Direction.Up))
         val raftHeart = DestType.Heart(entry = EntryType.Walk())
-        val ladderHeart = DestType.Heart(entry = EntryType.WalkIn)
+        val ladderHeart = DestType.Heart(entry = EntryType.WalkInLadder)
     }
 
     object Shop {
@@ -101,6 +101,8 @@ enum class ShopType {
 sealed class EntryType(val name: String) {
     data class Walk(val requireLetter: Boolean = false) : EntryType("walk")
     object WalkIn : EntryType("walkIn")
+    // requires special handling because of the laddder
+    object WalkInLadder : EntryType("walkInLadder")
     object Bomb : EntryType("bomb")
     data class Fire(val from: Direction = Direction.Down) : EntryType("fire from $from")
     data class Push(val from: Direction = Direction.Up) : EntryType("push from $from")

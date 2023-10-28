@@ -303,7 +303,7 @@ object ZeldaPlan {
             phase(Phases.ladderHeart)
             obj(Dest.Heart.ladderHeart)
             // exit the heart area
-            goIn(GamePad.MoveLeft, 70)
+            goIn(GamePad.MoveLeft, 70, monitor = false)
             obj(Dest.Heart.raftHeart, itemLoc = Objective.ItemLoc.Right)
 
             // after this link just went left, where is he going?
