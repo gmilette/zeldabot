@@ -11,11 +11,14 @@ import util.w
 // try to detect when link is stuck and then get unstuck
 
 fun moveHistoryAttackAction(wrapped: Action): Action {
-// really, if there are enemies attack, otherwise, move, or bomb
-// if there are pancake enemies
-    // hopefully adding some random moves here will also help link get unstuck
-    //MoveHistoryAction(wrapped, AlwaysAttack(otherwiseRandom = true))
-    val moveHistoryAction = MoveHistoryAction(wrapped, AlwaysAttack(otherwiseRandom = true))
+    if (!wrapped.monitorEnabled) return wrapped
+
+    val moveHistoryAction = if (wrapped.escapeActionEnabled) {
+        MoveHistoryAction(wrapped, AlwaysAttack(otherwiseRandom = true))
+    } else {
+        d { " no escape enabled "}
+        wrapped
+    }
     val ladderAction = LadderAction()
     val combinedAction = DecisionAction(ladderAction, StayInCurrentMapCell(moveHistoryAction)) {
         !ladderAction.complete(it).also {
@@ -496,7 +499,7 @@ class LadderAction: Action {
             // try all makes sense but it also might disable the ladder action
             listOf(ladder, ladder.justRightEnd, ladder.justLeftBottom, ladder.justRightEndBottom).all {
                 state.currentMapCell.passable.get(it.x, it.y).also { res ->
-                    d { "on passable: $it $res"}
+                    //d { "on passable: $it $res"}
                 }
             }
 //            listOf(ladder).all {
@@ -508,7 +511,7 @@ class LadderAction: Action {
     private var ladderDirectionCount = 0
 
     companion object {
-        private const val LADDER_ESCAPE_MOVEMENTS = 20
+        private const val LADDER_ESCAPE_MOVEMENTS = 26
     }
 
     override fun nextStep(state: MapLocationState): GamePad {

@@ -497,6 +497,16 @@ class PlanBuilder(
         add(lastMapLoc, GoDirection(GamePad.MoveRight, 20))
     }
 
+    fun pushAction(toB: FramePoint): PlanBuilder {
+        add(lastMapLoc, makePushAction(toB))
+        return this
+    }
+
+    fun pushActionThenGoRight(toB: FramePoint): PlanBuilder {
+        add(lastMapLoc.right, makePushActionThen(toB, moveTo(lastMapLoc.right)))
+        return this
+    }
+
     fun pushWait(toB: FramePoint): PlanBuilder {
         // if it fails need to retry
         // position
@@ -713,8 +723,8 @@ class PlanBuilder(
         return this
     }
 
-    fun goIn(dir: GamePad = GamePad.MoveUp, num: Int): PlanBuilder {
-        add(lastMapLoc, GoIn(num, dir))
+    fun goIn(dir: GamePad = GamePad.MoveUp, num: Int, monitor: Boolean = true): PlanBuilder {
+        add(lastMapLoc, GoIn(num, dir, setMonitorEnabled = monitor))
         return this
     }
 

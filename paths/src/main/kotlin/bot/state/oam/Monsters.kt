@@ -38,10 +38,13 @@ data class DirectionMap(
 }
 
 val swordDir = DirectionMap(
-    up = setOf(),
-    down = setOf(0xB2), //02
-    left = setOf(),
-    right = setOf(0xBC, 0xBE), //be is tipattrib 02
+    up = setOf(0xb4, //02, 42
+        0xb6), //42
+    down = setOf(0xb0, 0xB2), //02
+    left = setOf(0xbe, //42
+        0xBC), //42
+    right = setOf(0xB8, //02
+        0xBA), //02
 )
 
 object Monsters {

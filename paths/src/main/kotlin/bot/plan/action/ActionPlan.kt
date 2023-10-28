@@ -22,6 +22,11 @@ interface Action {
     val levelLoc: MapLoc
         get() = -1
 
+    val escapeActionEnabled: Boolean
+        get() = true
+    val monitorEnabled: Boolean
+        get() = true
+
     fun reset() {
         // empty
     }
@@ -142,7 +147,7 @@ class OrderedActionSequence(
     }
 
     override val name: String
-        get() = "OrderedAction Sequence ${actions.size}"
+        get() = "OrderedAction Sequence ${actions.size} doing ${currentAction?.name}"
 }
 
 class CompleteIfGetItem(
@@ -343,6 +348,9 @@ class GoInConsume(private val moves: Int = 5, private val dir: GamePad = GamePad
     Action {
     private var movements = 0
 
+    override val escapeActionEnabled: Boolean
+        get() = false
+
     override fun complete(state: MapLocationState): Boolean =
         movements >= moves
 
@@ -364,40 +372,17 @@ class GoInConsume(private val moves: Int = 5, private val dir: GamePad = GamePad
         get() = "Go In Consume $dir ($movements of $moves)"
 }
 
-class GoInA(private val moves: Int = 5, private val dir: GamePad = GamePad.MoveUp, private val reset: Boolean = false) :
-    Action {
-    private var movements = 0
-
-    override fun complete(state: MapLocationState): Boolean {
-        val complete = movements >= moves
-        if (complete && reset) {
-//            d { " --> RESET $name $movements"}
-            movements = 0
-        }
-        return complete
-    }
-
-    override fun nextStep(state: MapLocationState): GamePad {
-//        d { " --> Move $name movements $movements"}
-        movements++
-        return dir
-    }
-
-    override fun target(): FramePoint {
-        return FramePoint()
-    }
-
-    override val name: String
-        get() = "Go In $dir ($movements of $moves)"
-}
-
 class GoIn(private val moves: Int = 5,
            private val dir: GamePad = GamePad.MoveUp,
            private val reset: Boolean = false,
+           private val setMonitorEnabled: Boolean = true,
            private val condition: (MapLocationState) -> Boolean = { true }
 ) :
     Action {
     private var movements = 0
+
+    override val monitorEnabled: Boolean
+        get() = setMonitorEnabled
 
     override fun complete(state: MapLocationState): Boolean {
         val complete = movements >= moves

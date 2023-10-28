@@ -40,6 +40,7 @@ class CompleteIfMapChanges(private val wrapped: Action) : Action {
         changedMapLoc(state) || wrapped.complete(state)
 
     override fun nextStep(state: MapLocationState): GamePad {
+        d { " CompleteIfMapChanges initial $initialMapLoc current ${state.frameState.mapLoc}"}
         if (initialMapLoc == -1) {
             initialMapLoc = state.frameState.mapLoc
         }

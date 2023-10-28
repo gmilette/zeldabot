@@ -51,40 +51,6 @@ fun level3TriggerBombThenDo(action: Action) = Level3SequenceThenDo(
 )
 
 
-class Level3TriggerDoorTrapThenDoZ(action: Action) : WrappedAction(action) {
-    private val positionShootActions = mutableListOf(
-        InsideNav(
-            FramePoint(2.grid, 5.grid)
-        ),
-//        GoIn(1, GamePad.MoveLeft), // open door
-        // dodge trap
-        InsideNav(
-            FramePoint(5.grid, 5.grid)
-        ),
-    )
-
-    private val positionShoot = OrderedActionSequence(positionShootActions, restartWhenDone = false)
-
-    override fun target(): FramePoint {
-        return positionShoot.target()
-    }
-
-    private fun orderedComplete(): Boolean =
-        positionShoot.done && positionShoot.lastNull
-
-    override fun nextStep(state: MapLocationState): GamePad {
-        d { "Level3TriggerDoorTrapThenDo done=${positionShoot.done}" }
-        return if (orderedComplete()) {
-            positionShoot.nextStep(state)
-        } else {
-            super.nextStep(state)
-        }
-    }
-
-    override val name: String
-        get() = "Level3TriggerDoorTrapThenDo ${super.name}"
-}
-
 class Level3SequenceThenDo(private val sequence: OrderedActionSequence, action: Action) : WrappedAction(action) {
     private var frameCt = 0
     override fun target(): FramePoint {

@@ -408,7 +408,7 @@ object ZeldaPlan {
             // extra vertical and horizontal is not good
 //            goAbout(InLocations.Level1.boomerang68, 4, 2, true)
             goAbout(InLocations.Level1.boomerang68, 1, 1, true, ignoreProjectiles = true)
-            right //69 hand grabby
+            rightm //69 hand grabby, dont get loot
             seg("steal key from hand grabby")
             go(InLocations.Level1.key114Position)
             go(InLocations.Level1.key114)
@@ -564,25 +564,29 @@ object ZeldaPlan {
             right
             kill // there will be 2 suns still running around
             seg("push")
-            pushWait(InLocations.Level4.moveLeftOfTwo)
-            goTo(InLocations.rightTop)
+            pushAction(InLocations.Level4.moveLeftOfTwo)
+//            pushWait(InLocations.Level4.moveLeftOfTwo)
+//            goTo(InLocations.rightTop)
             startAt(96)
             go(InLocations.getItem)
             upTo(50)
             leftm
-            leftm // custom action to walk across using the ladder
+            goIn(GamePad.MoveLeft, 11.grid, monitor = false) // custom action to walk across using the ladder
+            leftm
             seg("get past 4 monster")
             up
             up
             bomb(InLocations.BombDirection.right) // right bomb
             seg("get to the dragon")
-            right
+            rightm //skip coins
             //skip key that is up
             bomb(InLocations.BombDirection.right) // right bomb
             right
             kill
-            pushWait(InLocations.Level4.moveLeftOfTwo)
-            right
+            seg("push near")
+            pushActionThenGoRight(InLocations.Level4.moveLeftOfTwo)
+//            pushWait(InLocations.Level4.moveLeftOfTwo)
+//            right
             seg("fight dragon")
             killLev4Dragon // dragon
             //get heart
