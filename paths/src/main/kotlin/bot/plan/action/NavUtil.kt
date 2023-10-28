@@ -127,10 +127,11 @@ object NavUtil {
                                 avoidNearEnemy: List<FramePoint> = emptyList(),
                                 forcePassable: List<FramePoint> = emptyList(),
                                 enemyTarget: FramePoint? = null,
-                                ladderSpec: ZStar.LadderSpec? = null):
+                                ladderSpec: ZStar.LadderSpec? = null,
+                                mapNearest: Boolean = false):
             List<FramePoint> = mapCell.zstar.route(from, to, before, enemies,
         avoidNearEnemy, forcePassable, Int.MAX_VALUE,
-                enemyTarget, ladderSpec).also {
+                enemyTarget, ladderSpec, mapNearest).also {
                     d { " route with mapcell: ${mapCell.mapLoc}"}
     }
 

@@ -79,7 +79,8 @@ class PlanBuilder(
         segments.addAll(other.segments)
         // exit the level so dont accidently go back in
         // have to wait for the triforce animation
-        goIn(GamePad.None, 500)
+        // useless
+//        goIn(GamePad.None, 500)
         if (consume) {
             goInConsume(exitDirection.toGamePad(), 20)
         }
@@ -467,10 +468,11 @@ class PlanBuilder(
      *   *
      */
     fun pushThenGoTo(toB: FramePoint, toT: FramePoint = InLocations.middleStair, ignoreProjectiles: Boolean = false): PlanBuilder {
-        add(lastMapLoc, InsideNavAbout(toB, 4, ignoreProjectiles = ignoreProjectiles))
-        add(lastMapLoc, GoDirection(GamePad.MoveUp, 70))
-        add(lastMapLoc, GoDirection(GamePad.MoveRight, 70))
-        add(lastMapLoc, InsideNav(toT, ignoreProjectiles = ignoreProjectiles))
+        pushThenGoToDynamic(toB, toT, ignoreProjectiles)
+//        add(lastMapLoc, InsideNavAbout(toB, 4, ignoreProjectiles = ignoreProjectiles))
+//        add(lastMapLoc, GoDirection(GamePad.MoveUp, 70))
+//        add(lastMapLoc, GoDirection(GamePad.MoveRight, 70))
+//        add(lastMapLoc, InsideNav(toT, ignoreProjectiles = ignoreProjectiles))
         return this
     }
 

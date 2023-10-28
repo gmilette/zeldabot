@@ -1,5 +1,6 @@
 package bot.plan.action
 
+import bot.plan.zstar.NearestSafestPoint
 import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.Direction
@@ -664,9 +665,15 @@ class GetLoot(
         // this is the wrong way to target an item, let's try the new way
 //        val targets = target.about()
         val targets = target.lootTargets
+//        val targets = NearestSafestPoint.mapNearest(state, target.lootTargets)
+//        // i think this is ok, at least for vis
+//        target = NearestSafestPoint.mapNearest(state, listOf(loot.first().point)).first()
+
 
         d { " get loot $target from targets $targets" }
-        return routeTo.routeTo(state, targets, forceNew = previousTarget != target)
+        return routeTo.routeTo(state, targets,
+            RouteTo.RouteParam(forceNew = previousTarget != target, mapNearest = true)
+        )
     }
 
     override fun target() = target

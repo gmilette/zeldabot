@@ -31,17 +31,18 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        run(name = "level1Ladder") // with ladder
 //        run(name = "level1")
 //        run(name = "level3")
-//        run(name = "level5") // with ladder
+        run(name = "level5") // with ladder
 //        run(name = "afterLev4")
  //        run(name = "all")
 //        run(name = "level7")
-//        run(name = "level1")
 //        run(name = "go to level 9")
 //        run(name = "level2rhinoAfter")
 //        run(name = "gannon")
 //        run(name = "level9") // with ladder
 //        run(name = "ladder_heart")
-        runLoc(true,5, 0)
+//        runLoc(true,5, 0)
+//        run(name = "level1")
+//        runLoc(true,35, 1)
     }
 
     private fun rerun() {
@@ -56,7 +57,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
         masterPlan = plan
 //        val root = "../Nintaco_bin_2020-05-01/states/mapstate_${level}_${mapLoc}.save"
 
-        val root = "mapstate_0_5.save"
+        val root = "mapstate/mapstate_${level}_${mapLoc}.save"
 
         d { " map state $root"}
         startPath = root

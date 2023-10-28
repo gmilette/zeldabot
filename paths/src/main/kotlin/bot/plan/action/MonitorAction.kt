@@ -18,7 +18,9 @@ fun moveHistoryAttackAction(wrapped: Action): Action {
     val moveHistoryAction = MoveHistoryAction(wrapped, AlwaysAttack(otherwiseRandom = true))
     val ladderAction = LadderAction()
     val combinedAction = DecisionAction(ladderAction, StayInCurrentMapCell(moveHistoryAction)) {
-        !ladderAction.complete(it)
+        !ladderAction.complete(it).also {
+            d { "ladder decision $it"}
+        }
     }
 
     return combinedAction
@@ -480,11 +482,17 @@ class LadderAction: Action {
     // let link try to escape on its own for a bit
     private var ladderDeployedForFrames = 0
     override fun complete(state: MapLocationState): Boolean =
-        (!state.frameState.ladderDeployed || ladderDeployedForFrames < LADDER_ESCAPE_MOVEMENTS) || ladderOnPassable(state)
+        (!state.frameState.ladderDeployed || ladderDeployedForFrames < LADDER_ESCAPE_MOVEMENTS) || ladderOnPassable(state).also {
+            d { "!! ladder deployed ${state.frameState.ladderDeployed} frames ${ladderDeployedForFrames} passable ${ladderOnPassable(state)}" }
+        }
 
     private fun ladderOnPassable(state: MapLocationState) =
         state.frameState.ladder?.point?.let { ladder ->
-            listOf(ladder, ladder.justRightEnd, ladder.justLeftBottom, ladder.justRightEndBottom).any {
+            // try all makes sense but it also might disable the ladder action
+//            listOf(ladder, ladder.justRightEnd, ladder.justLeftBottom, ladder.justRightEndBottom).all {
+//                state.currentMapCell.passable.get(it.x, it.y)
+//            }
+            listOf(ladder).all {
                 state.currentMapCell.passable.get(it.x, it.y)
             }
         } ?: false
@@ -498,15 +506,12 @@ class LadderAction: Action {
 
     override fun nextStep(state: MapLocationState): GamePad {
         if (!state.frameState.ladderDeployed) {
-//            d { " !! ladder not deployed "}
+            d { " !! ladder not deployed "}
             ladderDeployedForFrames = 0
             return GamePad.None
         } else {
+            d { " !! ladder deployed "}
             ladderDeployedForFrames++
-        }
-
-        if (ladderOnPassable(state)) {
-            d { "!! ladder on passable ${state.frameState.ladder?.point}"}
         }
 
         return if (ladderDirectionCount < LADDER_ESCAPE_MOVEMENTS) {

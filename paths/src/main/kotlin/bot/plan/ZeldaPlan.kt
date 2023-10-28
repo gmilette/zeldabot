@@ -598,12 +598,12 @@ object ZeldaPlan {
             lev(5)
             startAt(LevelStartMapLoc.lev(5))
             seg("move to level 5")
-            up
+            upm
             bomb(InLocations.BombDirection.left)
-            seg("left 2")
-            left
+            seg("left past key")
+            leftm // key here
             bomb(InLocations.BombDirection.left)
-            left
+            leftm // bomb inside should we get?
             seg("kill before going in")
             kill
             seg("go in")
@@ -611,7 +611,6 @@ object ZeldaPlan {
             // move to bottom left first
             pushInLevelMiddleStair(88, upTo = 6, outLocation = InLocations.getOutRight)
             left
-//            startAt(5)
             seg("kill before getting item")
             kill
             // it is a center push
@@ -624,8 +623,8 @@ object ZeldaPlan {
 //            startAt(6)
             pushInLevelMiddleStair(88, upTo = 100, outLocation = InLocations.getOutLeft)
             seg("get back")
-            right
-            right
+            rightm
+            right // possibly kill until get bomb IF need bombs
             seg("kill all zombie to open")
             killUntilGetKey
             upm // 86, rhinos

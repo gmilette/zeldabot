@@ -2,8 +2,10 @@ package bot.plan
 
 import bot.state.GamePad
 import bot.plan.action.NavUtil
+import bot.plan.zstar.NearestSafestPoint
 import bot.plan.zstar.ZStar
 import bot.state.*
+import bot.state.map.Direction
 import bot.state.map.Hyrule
 import bot.state.map.MapCell
 import bot.state.map.MapCellData
@@ -37,6 +39,28 @@ class NavUtilTest {
         val route = zstar.route(from, listOf(FramePoint(45, 24)), null)
     }
 
+    @Test
+    fun testN() {
+        val hyrule = Hyrule()
+        val level = 5
+        val loc = 102
+        val cell = if (level == 0) hyrule.getMapCell(loc) else hyrule.levelMap.cell(level, loc)
+
+        val start = FramePoint(88, 91)
+
+        val enemies = listOf(
+            FramePoint(94, 112),
+            FramePoint(110, 32),
+//            FramePoint(97, 32)
+        )
+        cell.zstar.setEnemyCosts(start, enemies)
+//        for (enemy in enemies) {
+//            cell.zstar.setEnemy(start, enemy)
+//        }
+
+        val near = NearestSafestPoint.nearestSafePoints(FramePoint(101, 32), cell.zstar.costsF, cell.zstar.passable)
+        val a = 1
+    }
 
     private fun check(cell: MapLoc, from: FramePoint, target: FramePoint,
                       dirResult: GamePad, level: Int = 0, before: FramePoint? = null, makePassable: FramePoint? = null,
@@ -57,7 +81,7 @@ class NavUtilTest {
         val pass = cell.passable.get(passPt)
         d { " pass check $inLev $pass level $level lb ${cell.passable.get(passPt.justLeftBottom)}"}
 
-        val zstar = ZStar(cell.passable, halfPassable = true, isLevel = level != 0)
+        val zstar = ZStar(cell.passable, halfPassable = false, isLevel = level != 0)
 
         val target = targets.get(0)
 
@@ -225,11 +249,37 @@ class NavUtilTest {
     }
 
     @Test
-    fun `test move 3`() {
-        ZStar.DEBUG = true
-        val start = FramePoint(48, 74)
+    fun `test move lev5`() {
+        ZStar.DEBUG = false
+        val start = FramePoint(61, 121)
         check(13, start, FramePoint(32, 96), GamePad.MoveUp, level = 7,
             before = start.left)
+    }
+
+    @Test
+    fun `test move 3`() {
+        // route to nearest safe corner
+
+
+        ZStar.DEBUG = false
+        ZStar.MAX_ITER = 1000000
+        val start = FramePoint(88, 91)
+
+        val enemies = listOf(
+            FramePoint(94, 112),
+            FramePoint(110, 32),
+//            FramePoint(97, 32)
+        )
+//        check(102, start, FramePoint(110, 32), GamePad.MoveUp, level = 5,
+//            before = start.left)
+//        check(102, start, FramePoint(101, 32), GamePad.MoveUp, level = 5,
+//            before = start.left, enemies = enemies)
+        // nearest safe corner
+        // go left, up, down, right until reach safe point
+        // on one highway (modify highway? this point of 32 is
+        // correct
+        check(102, start, FramePoint(93, 32), GamePad.MoveUp, level = 5,
+            before = start.left, enemies = enemies)
     }
 
     @Test

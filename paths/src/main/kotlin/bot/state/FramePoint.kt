@@ -130,6 +130,10 @@ val FramePoint.isInLevelMap
     get() = y in MapConstants.twoGrid.. (MapConstants.MAX_Y - MapConstants.threeGrid) &&
             x in MapConstants.twoGrid..(MapConstants.MAX_X - MapConstants.threeGrid)
 
+val FramePoint.isOnMap
+    get() = y in 1.. MapConstants.MAX_Y &&
+            x in 1..MapConstants.MAX_X
+
 fun FramePoint.corners(): List<FramePoint> {
     return listOf(this.justOutside, this.justRightEndBottomOutside, justRightEndOutside, this.justLeftDownOutside)
 }

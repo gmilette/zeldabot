@@ -1,5 +1,6 @@
 package bot.plan.action
 
+import bot.plan.zstar.NearestSafestPoint
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapConstants
@@ -246,10 +247,14 @@ class KillAll (
                                 listOf(target)
                             }
 
+//                            val targetsToAttack = listOf(target)
+
                             // could route to all targets
                             routeTo.routeTo(state, targetsToAttack,
-                                RouteTo.RouteParam(forceNew = forceNew, attackTarget = target,
-                                    ignoreEnemies = this.ignoreEnemies)
+                                RouteTo.RouteParam(forceNew = forceNew,
+                                    attackTarget = target,
+                                    ignoreEnemies = this.ignoreEnemies,
+                                    mapNearest = true)
                             )
                         }
                     }

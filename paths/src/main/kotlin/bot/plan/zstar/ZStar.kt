@@ -81,7 +81,7 @@ class ZStar(
         neighborFinder.passable = passable
     }
 
-    val ENEMY_COST = 1000
+    val ENEMY_COST = 10000
 
     fun setEnemy(from: FramePoint, point: FramePoint, size: Int = 16) {
         // make cost relative to the distance??? so it's not all the same badness
@@ -170,14 +170,15 @@ class ZStar(
 
     fun route(
         start: FramePoint,
-        targets: List<FramePoint>,
+        targetsIn: List<FramePoint>,
         pointBeforeStart: FramePoint? = null,
         enemies: List<FramePoint> = emptyList(),
         avoidNearEnemy: List<FramePoint> = emptyList(),
         forcePassable: List<FramePoint> = emptyList(),
         maximumCost: Int = MaxCostAvoidEnemyNear,
         enemyTarget: FramePoint? = null,
-        ladderSpec: LadderSpec? = null
+        ladderSpec: LadderSpec? = null,
+        mapNearest: Boolean = false
     ): List<FramePoint> {
 //        d { " round to nearest !!!" }
 //        val targets = if (Random().nextInt(8) == 1) {
@@ -196,6 +197,13 @@ class ZStar(
         }
         setForcePassable(forcePassable)
         setZeroCost(enemyTarget)
+
+        val targets = if (mapNearest) {
+            targetsIn.flatMap { NearestSafestPoint.nearestSafePoints(it, costsF, passable) }
+        } else {
+            targetsIn
+        }
+
 //        if (forcePassable.isNotEmpty()) {
 //            d {" force passable "}
 //            passable.write("forcePassable.csv") { v, x, y ->

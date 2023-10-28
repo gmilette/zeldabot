@@ -2,11 +2,13 @@ package bot.plan.action
 
 import bot.plan.action.NavUtil.directionToDir
 import bot.plan.zstar.FrameRoute
+import bot.plan.zstar.NearestSafestPoint
 import bot.state.*
 import bot.state.map.*
 import util.LogFile
 import util.d
 import util.w
+import java.util.Random
 
 
 //val navUntil = CompleteIfAction(InsideNav()), completeIf = { state ->
@@ -300,6 +302,7 @@ class RouteTo(val params: Param = Param()) {
         val attackTarget: FramePoint? = null,
         // if false, dont bother avoiding any enemies, avoid projectiles though
         val ignoreEnemies: Boolean = false,
+        val mapNearest: Boolean = false
     )
     private val routeToFile: LogFile = LogFile("RouteTo")
 
@@ -473,7 +476,6 @@ private fun doRouteTo(
             // we should just boldly move towards it because when we get close
             // we will attack, but it's not always the case, at least for rhino
 //            (enemiesNear.size > 1) -> enemiesNear
-            // one projectile
             projectilesNear.isNotEmpty() -> projectilesNear
             else -> emptyList()
         }
@@ -483,10 +485,8 @@ private fun doRouteTo(
 
     if (params.ignoreProjectiles) {
         avoid = avoid.filter { it.state != EnemyState.Projectile }
-    } else {
-        ////
-//        avoid = avoid.filter { it.state == EnemyState.Projectile }
     }
+
     if (param.ignoreEnemies) {
         d { "ignore enemies" }
         avoid = avoid.filter { it.state != EnemyState.Alive }
@@ -552,14 +552,19 @@ private fun doRouteTo(
 
         // of if the expected point is not where we should be
         // need to re route
+
         route = FrameRoute(
             NavUtil.routeToAvoidingObstacle(
                 mapCell = mapCell,
                 from = linkPt,
+                // avoid getting stuck
+//                to = if (kotlin.random.Random.nextInt(10) == 1) to else to.flatMap { NearestSafestPoint.nearestSafePoints(it, mapCell.zstar.costsF, mapCell.zstar.passable) },
                 to = to,
                 before = state.previousMove.from,
                 enemies = avoid.points,
                 forcePassable = passable,
+                enemyTarget = param.attackTarget,
+                mapNearest = param.mapNearest
                 // disable for now
 //                ladderSpec = state.frameState.ladder?.let {
 //                    d { " has ladder "}

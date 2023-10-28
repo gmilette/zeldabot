@@ -61,7 +61,8 @@ class FrameStateUpdater(
         val linkDir = oam.direction
         val ladderMem = api.readCPU(Addresses.ladderDeployed) != 0
         // check ladder memory first
-//        d { "ladder mem $ladderMem ${api.readCPU(Addresses.ladderDeployed)}" }
+        val ladderSprite = oam.ladderSprite?.let { "ladder sprite "} ?: "no sprite"
+        d { "ladder mem $ladderMem ${api.readCPU(Addresses.ladderDeployed)} $ladderSprite" }
         val ladder = if (ladderMem) oam.ladderSprite else null
         val damagedTile = if (oam.damaged) LinkDirectionFinder.damagedAttribute.last() else 0
         val link = Agent(0, linkPoint, linkDir, tile = damagedTile)
