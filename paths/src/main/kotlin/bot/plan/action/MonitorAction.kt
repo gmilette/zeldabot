@@ -482,26 +482,33 @@ class LadderAction: Action {
     // let link try to escape on its own for a bit
     private var ladderDeployedForFrames = 0
     override fun complete(state: MapLocationState): Boolean =
-        (!state.frameState.ladderDeployed || ladderDeployedForFrames < LADDER_ESCAPE_MOVEMENTS) || ladderOnPassable(state).also {
-            d { "!! ladder deployed ${state.frameState.ladderDeployed} frames ${ladderDeployedForFrames} passable ${ladderOnPassable(state)}" }
+        (!state.frameState.ladderDeployed || (ladderDeployedForFrames < LADDER_ESCAPE_MOVEMENTS) || ladderOnPassable(state)).also {
+            d { "!! ladder deployed ${state.frameState.ladderDeployed} frames $ladderDeployedForFrames passable ${ladderOnPassable(state)}" }
+            if (state.frameState.ladderDeployed) {
+                ladderDeployedForFrames++
+            } else {
+                ladderDeployedForFrames = 0
+            }
         }
 
     private fun ladderOnPassable(state: MapLocationState) =
         state.frameState.ladder?.point?.let { ladder ->
             // try all makes sense but it also might disable the ladder action
-//            listOf(ladder, ladder.justRightEnd, ladder.justLeftBottom, ladder.justRightEndBottom).all {
+            listOf(ladder, ladder.justRightEnd, ladder.justLeftBottom, ladder.justRightEndBottom).all {
+                state.currentMapCell.passable.get(it.x, it.y).also { res ->
+                    d { "on passable: $it $res"}
+                }
+            }
+//            listOf(ladder).all {
 //                state.currentMapCell.passable.get(it.x, it.y)
 //            }
-            listOf(ladder).all {
-                state.currentMapCell.passable.get(it.x, it.y)
-            }
         } ?: false
 
     private var ladderDirection: GamePad? = GamePad.None
     private var ladderDirectionCount = 0
 
     companion object {
-        private const val LADDER_ESCAPE_MOVEMENTS = 30
+        private const val LADDER_ESCAPE_MOVEMENTS = 20
     }
 
     override fun nextStep(state: MapLocationState): GamePad {
@@ -511,7 +518,8 @@ class LadderAction: Action {
             return GamePad.None
         } else {
             d { " !! ladder deployed "}
-            ladderDeployedForFrames++
+            // not needed I think
+//            ladderDeployedForFrames++
         }
 
         return if (ladderDirectionCount < LADDER_ESCAPE_MOVEMENTS) {

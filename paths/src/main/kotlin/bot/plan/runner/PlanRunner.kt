@@ -31,7 +31,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        run(name = "level1Ladder") // with ladder
 //        run(name = "level1")
 //        run(name = "level3")
-        run(name = "level5") // with ladder
+//        run(name = "level5") // with ladder
 //        run(name = "afterLev4")
  //        run(name = "all")
 //        run(name = "level7")
@@ -43,6 +43,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        runLoc(true,5, 0)
 //        run(name = "level1")
 //        runLoc(true,35, 1)
+        runLoc(true,87, 5)
     }
 
     private fun rerun() {

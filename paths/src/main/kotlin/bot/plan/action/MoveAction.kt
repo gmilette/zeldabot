@@ -576,7 +576,7 @@ private fun doRouteTo(
         d { " Plan: ${state.currentMapCell.mapLoc} new plan! because ($why) to ${to}" }
         route?.path?.lastOrNull()?.let { lastPt ->
             // if it is just projectile then don't try to route towards the projectiles
-            if (lastPt in to || state.frameState.ladderDeployed || !state.hasEnemies) {
+            if (param.mapNearest || lastPt in to || state.frameState.ladderDeployed || !state.hasEnemies) {
                 d { "route to success target" }
             } else {
                 // what if can't find a route here?

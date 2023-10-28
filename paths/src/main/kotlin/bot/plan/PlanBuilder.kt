@@ -678,17 +678,14 @@ class PlanBuilder(
         // wait for it to move
         goIn(GamePad.None, 75)
 
-//        goTo(to)
         goToOrMapChanges(to)
 
+        // this means link could escape from the map
         // do a few random movements in case link narrowly missed the entrance
-        repeat(10) {
-            goIn(GamePad.randomDirection(), 1)
-        }
+//        repeat(10) {
+//            goIn(GamePad.randomDirection(), 1)
+//        }
 
-        // add 16 to it and that's there you need to go I think
-        // but you don't need to nav here unless you didn't go in the other way
-//        goTo(to.justLeftBottom)
         goGetItem(itemLoc)
         return this
     }
