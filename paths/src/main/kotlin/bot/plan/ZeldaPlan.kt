@@ -305,9 +305,9 @@ object ZeldaPlan {
             // exit the heart area
             goIn(GamePad.MoveLeft, 70, monitor = false)
             obj(Dest.Heart.raftHeart, itemLoc = Objective.ItemLoc.Right)
-
-            // after this link just went left, where is he going?
-
+            // go down and make sure to walk off.
+            // something like this
+//            goToAtPoint(33, FramePoint(11.grid, 3.grid))
             phase("go to level 5")
             obj(Dest.level(5))
             includeLevelPlan(levelPlan5(factory))

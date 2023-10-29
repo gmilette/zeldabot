@@ -214,7 +214,7 @@ class DecisionAction(
         } else {
             action2
         }
-        d { "Action -> ${action.javaClass.simpleName}" }
+        d { "Action -> ${action.name}" }
         val gamePad = action.nextStep(state)
         target = action.target()
         path = action.path()

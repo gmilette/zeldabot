@@ -370,7 +370,7 @@ class KillInCenter : Action {
         // should be the middle of the attack area
         val position = FramePoint(3.grid, 8.grid)
 //        val attackFrom = FramePoint(8.grid, 8.grid)
-        val attackFrom = FramePoint(8.grid, 8.grid - MapConstants.halfGrid)
+        val attackFrom = FramePoint(8.grid, 8.grid)
     }
 
     // more debugging
@@ -381,10 +381,10 @@ class KillInCenter : Action {
             vertical = 2,
             negVertical = 2
         ),
-        GoIn(3, GamePad.MoveUp, true),
 //        AlwaysAttack()
     ).apply {
         repeat(times = 5) {
+            GoIn(3, GamePad.MoveUp, true)
             GoIn(3, GamePad.A, true)
             GoIn(3, GamePad.None, true)
         }

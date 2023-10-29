@@ -267,7 +267,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 //            frameStateUpdater.fillHearts()
                 setEquipmentCt--
             }
-            stateManipulator.deactivateClock()
+//            stateManipulator.deactivateClock()
         }
 
         private fun refillIfOut() {

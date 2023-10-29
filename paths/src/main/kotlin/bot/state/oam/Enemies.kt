@@ -101,18 +101,31 @@ val bait = (0x22).toInt() to (0x02).toInt()
 val secretEverybodyMonsterOrCircleEnemyLeft = 250 // fa
 val secretEverybodyMonsterOrCircleEnemyRight = 248 // f8
 
+private val three = (0x03).toInt()
+
 // enemies
 //val dragonHead = (0xC0).toInt()
-val dragonHead = (0xCC).toInt() //3
-val dragonHead2 = (0xC0).toInt() //3
-val dragonNeck = (0xC4).toInt()
+val dragonHead = (0xCC).toInt()
+val dragonHead2 = (0xC0).toInt()
+val dragonNeck = (0xC4).toInt() to three
 // do not attack
 // but these are also the pinwheel guys
 //val dragonFeet = (0xC6).toInt() //wheel guy
-val dragonFeetPair = (0xCA).toInt() to (0x03).toInt() // and spider
-val dragonFeet2 = (0xC2).toInt() to (0x03).toInt() // and spider
-val dragonTail = (0xC8).toInt() //attribute 3 for dragon wheel guy
+val dragonFeetPair = (0xCA).toInt() to three // and spider
+val dragonFeet2 = (0xC2).toInt() to three // and spider
+val dragonTail = (0xC8).toInt() to three //attribute 3 for dragon
+val dragonTail2 = (0xC0).toInt() to three //attribute 3 for dragon wheel guy
 //val dragonBody = (0xC2).toInt()
+val dragon4Head = (0xDC).toInt() // 03
+val dragon4NeckSegment = (0xDA).toInt() to three
+val dragon4Body = (0xD4).toInt() to (0x03).toInt() // attrib 3
+val dragon4BodyWingRight = (0xD2).toInt() to (0x03).toInt()
+val dragon4BodyWingLeft = (0xD8).toInt() to (0x03).toInt()
+val dragon4BodyFoot = (0xD0).toInt() to (0x03).toInt() // attrib 3
+val dragon4BodySide = (0xD6).toInt()
+val dragon4BodySpinePair = (0xC6).toInt() to (0x03).toInt() // attribute 3
+val dragon4FlamingHead = (0xDE).toInt()
+
 
 val spiderBlueHeadLeft = (0xFC).toInt() to (0x01).toInt()
 val spiderBlueHeadRight = (0xFC).toInt() to (0x41).toInt()
@@ -121,14 +134,6 @@ val spiderHeadRight = (0xFC).toInt() to (0x42).toInt()
 val spiderHeadLeftClosed = (0xFE).toInt() to (0x02).toInt()
 val spiderHeadRightClosed = (0xFE).toInt() to (0x42).toInt()
 
-val dragon4Head = (0xDC).toInt() // 03
-val dragon4Body = (0xD4).toInt() to (0x03).toInt() // attrib 3
-val dragon4BodyWingRight = (0xD2).toInt() to (0x03).toInt()
-val dragon4BodyWingLeft = (0xD8).toInt() to (0x03).toInt()
-val dragon4BodyFoot = (0xD0).toInt() to (0x03).toInt() // attrib 3
-val dragon4BodySide = (0xD6).toInt()
-val dragon4BodySpinePair = (0xC6).toInt() to (0x03).toInt() // attribute 3
-val dragon4FlamingHead = (0xDE).toInt()
 val rhinoHeadDown = (0xF4).toInt()
 val rhinoHeadDown2 = (0xF6).toInt()
 val rhinoHeadMouthOpen = (0xE2).toInt()

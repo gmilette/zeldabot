@@ -251,13 +251,16 @@ class PlanBuilder(
         }
     val killLev4Dragon: PlanBuilder
         get() {
-            add(lastMapLoc, KillAll(needLongWait = false, targetOnly = listOf(dragon4Head), ignoreEnemies = false))
+            add(lastMapLoc, KillAll(needLongWait = false,
+                targetOnly = listOf(dragon4Head, dragonHead, dragonHead2),
+                ignoreEnemies = false,
+                roundX = true))
             return this
         }
     val killLev1Dragon: PlanBuilder
         get() {
             add(lastMapLoc, KillAll(needLongWait = false,
-                targetOnly = listOf(dragonHead, dragonNeck, dragonHead2),
+                targetOnly = listOf(dragon4Head, dragonHead, dragonHead2),
                 //ignoreProjectiles = listOf(dragonTail),
                 ignoreEnemies = true,
                 roundX = true))
@@ -470,11 +473,11 @@ class PlanBuilder(
      *   *
      */
     fun pushThenGoTo(toB: FramePoint, toT: FramePoint = InLocations.middleStair, ignoreProjectiles: Boolean = false): PlanBuilder {
-        pushThenGoToDynamic(toB, toT, ignoreProjectiles)
-//        add(lastMapLoc, InsideNavAbout(toB, 4, ignoreProjectiles = ignoreProjectiles))
-//        add(lastMapLoc, GoDirection(GamePad.MoveUp, 70))
-//        add(lastMapLoc, GoDirection(GamePad.MoveRight, 70))
-//        add(lastMapLoc, InsideNav(toT, ignoreProjectiles = ignoreProjectiles))
+//        pushThenGoToDynamic(toB, toT, ignoreProjectiles)
+        add(lastMapLoc, InsideNavAbout(toB, 4, ignoreProjectiles = ignoreProjectiles))
+        add(lastMapLoc, GoDirection(GamePad.MoveUp, 70))
+        add(lastMapLoc, GoDirection(GamePad.MoveRight, 70))
+        add(lastMapLoc, InsideNav(toT, ignoreProjectiles = ignoreProjectiles))
         return this
     }
 
@@ -488,6 +491,8 @@ class PlanBuilder(
         add(lastMapLoc, GoToward(block, 70))
         add(lastMapLoc, GoDirection(GamePad.MoveRight, 70))
         add(lastMapLoc, InsideNav(toT, ignoreProjectiles = ignoreProjectiles))
+        add(lastMapLoc, GoDirection(GamePad.MoveRight, 4))
+        add(lastMapLoc, GoDirection(GamePad.MoveLeft, 4))
         return this
     }
 
