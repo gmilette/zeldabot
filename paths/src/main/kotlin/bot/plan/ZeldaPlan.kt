@@ -653,7 +653,7 @@ object ZeldaPlan {
             goIn(GamePad.None, 50) // more in a bit before whistlin'
             goIn(GamePad.MoveLeft, 20) // move more in
             useItem()
-//            wait(100) // wait for whistle to happen
+            wait(100) // wait for whistle to happen, otherwise bot will route uselessly
             seg("Now destroy him")
             kill // problem the projectiles are considered enemies
             seg("Get 5 triforce")
@@ -788,8 +788,7 @@ object ZeldaPlan {
             goIn(GamePad.None, 50) // more in a bit before whistlin'
             goIn(GamePad.MoveRight, 20) // move more in
             useItem()
-//            // should do kill all but the projectiles
-////            startAt(28)
+            wait(100)
             kill
             upm
             bomb(InLocations.bombRight)

@@ -6,6 +6,7 @@ import bot.state.map.MapConstants
 import bot.state.map.pointModifier
 import bot.state.map.toGamePad
 import util.d
+import kotlin.random.Random
 
 object AttackActionDecider {
     // how close to get to enemies before engaging the dodge
@@ -15,12 +16,19 @@ object AttackActionDecider {
     // don't swing if there is projectile near by!
 
     fun shouldAttack(state: MapLocationState) =
-        shouldAttack(
-            state.frameState.link.dir,
-            state.link,
-            state.aliveEnemies.map { it.point }).also {
-            state.aliveEnemies.forEach {
-                d { " enemy: $it" }
+        // since the enemies aren't moving when the clock is activated
+        // need to introduce the chance for link to do some random movement instead
+        // should be fine since link can't get damaged
+        if (state.frameState.clockActivated && Random.nextInt(4) == 1) {
+            false
+        } else {
+            shouldAttack(
+                state.frameState.link.dir,
+                state.link,
+                state.aliveEnemies.map { it.point }).also {
+                state.aliveEnemies.forEach {
+                    d { " enemy: $it" }
+                }
             }
         }
 

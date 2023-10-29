@@ -40,7 +40,7 @@ object EnemyGroup {
         (0x48).toInt(), // magic sword
         48, // swirly thing
         bombSmoke, // yea but then it attacks its own bomb// 112, // bomb smoke, removed it so I can attack the monsters
-        114, // i think bomb smoke
+        bombSmokeLess,
         bigHeart, // plan always knows where to go
                 //164, // not sure, that is a pancake
 //            160, // this happens to be the left side of the snake monster in level 2, snake has attribute 2

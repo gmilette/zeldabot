@@ -23,6 +23,13 @@ object NearestSafestPoint {
             pt = modifier(pt)
             ct++
         }
+
+        // this is still possible, the safe point is surrounded by unsafe points
+
+        //////
+        //Pt//
+        /////
+
         return pt
     }
 

@@ -377,18 +377,21 @@ class KillInCenter : Action {
     private val positionShootActions = mutableListOf(
         InsideNavAbout(
             KillInCenterLocations.attackFrom,
-            2,
-            vertical = 2,
-            negVertical = 2
+            1,
+            vertical = 2
         ),
+        GoIn(10, GamePad.MoveUp, true)
 //        AlwaysAttack()
-    ).apply {
+    )
+
+    init {
         repeat(times = 5) {
-            GoIn(3, GamePad.MoveUp, true)
-            GoIn(3, GamePad.A, true)
-            GoIn(3, GamePad.None, true)
+            positionShootActions.add(GoIn(10, GamePad.MoveUp, true))
+            positionShootActions.add(GoIn(3, GamePad.A, true))
+            positionShootActions.add(GoIn(3, GamePad.None, true))
         }
     }
+
 
     private val positionShoot = OrderedActionSequence(positionShootActions, restartWhenDone = true)
 
@@ -408,7 +411,7 @@ class KillInCenter : Action {
     }
 
     override val name: String
-        get() = "KillInCenter"
+        get() = "KillInCenter ${positionShoot.stepName} ${positionShoot.name}"
 }
 
 class DeadForAWhile(private val limit: Int = 450, val reset: Boolean = false, val completeCriteria: (MapLocationState) -> Boolean) {

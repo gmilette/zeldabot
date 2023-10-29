@@ -261,7 +261,6 @@ class PlanBuilder(
         get() {
             add(lastMapLoc, KillAll(needLongWait = false,
                 targetOnly = listOf(dragon4Head, dragonHead, dragonHead2),
-                //ignoreProjectiles = listOf(dragonTail),
                 ignoreEnemies = true,
                 roundX = true))
             return this

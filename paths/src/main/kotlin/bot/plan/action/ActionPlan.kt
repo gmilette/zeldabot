@@ -11,6 +11,7 @@ import bot.state.oam.*
 import nintaco.api.ApiSource
 import util.d
 import util.i
+import util.w
 
 interface Action {
     /**
@@ -135,7 +136,8 @@ class OrderedActionSequence(
         hasBegun = true
         d { "OrderedActionSequence begin $currentAction"}
         val current = currentAction ?: pop() ?: restart() ?: return GamePad.randomDirection(state.link)
-        if (current.complete(state)) {
+        // check all complete to prevent infinite loop
+        if (current.complete(state)) { // causes bomb one to fail && !allComplete(state)
             d { " sequence complete" }
             pop()
             // recur
@@ -145,6 +147,9 @@ class OrderedActionSequence(
         stepName = current.name
         return current.nextStep(state)
     }
+
+    private fun allComplete(state: MapLocationState): Boolean =
+        actions.all { it.complete(state) }
 
     override val name: String
         get() = "OrderedAction Sequence ${actions.size} doing ${currentAction?.name}"
@@ -655,9 +660,10 @@ class GetLoot(
 //        target = NearestSafestPoint.mapNearest(state, listOf(loot.first().point)).first()
 
 
+        // map nearest can cause zelda to get stuck sometimes
         d { " get loot $target from targets $targets" }
         return routeTo.routeTo(state, targets,
-            RouteTo.RouteParam(forceNew = previousTarget != target, mapNearest = true)
+            RouteTo.RouteParam(forceNew = previousTarget != target, mapNearest = false)
         )
     }
 

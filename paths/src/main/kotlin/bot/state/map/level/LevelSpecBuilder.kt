@@ -123,7 +123,7 @@ class LevelSpecBuilder {
             LevelSpec(inStart.left.left.down, e(u,d,r), "stair to raft", LevelMapTemplateReader.Temp.lev_stair_side),
             LevelSpec(inStart.left.left.up, e(d,r), "free key with suns", LevelMapTemplateReader.Temp.lev_empty),
             LevelSpec(inStart.up, eall, "u with squishy and key", LevelMapTemplateReader.Temp.lev_u),
-            LevelSpec(inStart.up.right, e(l,u,r), "swordpass through", LevelMapTemplateReader.Temp.lev_empty),
+            LevelSpec(inStart.up.right, e(l,r, d), "swordpass through", LevelMapTemplateReader.Temp.lev_empty),
 //            LevelSpec(inStart.up.right.up, e(l,u,r), "squishbomb", LevelMapTemplateReader.Temp.lev_corner),
             LevelSpec(inStart.up.right.right, e(l,d,u), "boss", LevelMapTemplateReader.Temp.lev_empty),
             LevelSpec(inStart.up.right.right.up, e(l,d,u), "boss", LevelMapTemplateReader.Temp.lev_triforce),

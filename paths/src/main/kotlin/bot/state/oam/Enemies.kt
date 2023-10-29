@@ -22,8 +22,9 @@ val waterMonsterPairAlt = (0xEE) to (0x03).toInt() // tile address = 0EE0
 val waterMonsterPairAlt2 = (0xEE) to (0x43).toInt()
 val ghostWeak = (0xB8).toInt()
 val ghostWeak2 = (0xBA).toInt()
-val bombSmoke = 112
-val monsterCloud = (0x70).toInt()
+val bombSmoke = (0x70).toInt()
+val bombSmokeLess = (0x72).toInt() // 41
+val monsterCloud = (0x70).toInt() // 01 or 41
 val bomb = 52
 val key = (0x2E).toInt() //key
 val heart = 243
@@ -64,8 +65,6 @@ val starCenter = (0xEC).toInt() to (0x41) // center star monster
 val starCenter2 = (0xEC).toInt() to (0x01) // center star monster
 
 
-// added from online
-// https://www.computerarcheology.com/NES/Zelda/Bank2.html
 val magicBook = (0x42).toInt()
 val magicSword = (0x48).toInt()
 val rod = (0x4A).toInt()
@@ -126,7 +125,6 @@ val dragon4BodySide = (0xD6).toInt()
 val dragon4BodySpinePair = (0xC6).toInt() to (0x03).toInt() // attribute 3
 val dragon4FlamingHead = (0xDE).toInt()
 
-
 val spiderBlueHeadLeft = (0xFC).toInt() to (0x01).toInt()
 val spiderBlueHeadRight = (0xFC).toInt() to (0x41).toInt()
 val spiderHeadLeft = (0xFC).toInt() to (0x02).toInt()
@@ -158,5 +156,6 @@ val circleMonsterCenter = (0xFA).toInt()
 val circleMonsterCenter2 = (0xF8).toInt()
 val spinCircleEnemy = (0xC8).toInt() // attribute 42 and 2
 
-// enemies
+// some tile information
 // https://www.computerarcheology.com/NES/Zelda/Bank3.html
+// https://www.computerarcheology.com/NES/Zelda/Bank2.html

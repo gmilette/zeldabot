@@ -45,7 +45,9 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        runLoc(true,35, 1)
 //        runLoc(true,87, 5)
 //        runLoc(true,48, 4)
-        runLoc(true,18, 4)
+//        runLoc(true,18, 4)
+//        runLoc(true,24, 7)
+//        runLoc(true,76, 3)
     }
 
     private fun rerun() {
