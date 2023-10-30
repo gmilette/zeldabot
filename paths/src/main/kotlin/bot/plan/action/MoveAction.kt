@@ -474,7 +474,8 @@ private fun doRouteTo(
     val projectilesNear = state.projectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid * 5 }
     val ladder = state.frameState.ladder
 
-    var avoid = if (params.dodgeEnemies) {
+    // nothing to avoid if the clock is activated
+    var avoid = if (params.dodgeEnemies && !state.frameState.clockActivated) {
         when {
             enemiesNear.isNotEmpty() -> enemiesNear
             // I can see why I set this to > 1, in the case of there being an enemy
