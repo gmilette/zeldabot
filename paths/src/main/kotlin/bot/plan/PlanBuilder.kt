@@ -770,9 +770,38 @@ class PlanBuilder(
         }
         // wait a little longer
         goIn(GamePad.None, 10)
+        // ordered sequence, bomb and movement
         add(lastMapLoc, Bomb(target))
+
         return this
     }
+
+    val bombUp: PlanBuilder
+        get() {
+            doBomb(lastMapLoc.up, InLocations.topMiddleBombSpot)
+            return this
+        }
+    val bombLeft: PlanBuilder
+        get() {
+            doBomb(lastMapLoc.left, InLocations.bombRight)
+            return this
+        }
+    val bombRight: PlanBuilder
+        get() {
+            doBomb(lastMapLoc.right, InLocations.bombRight)
+            return this
+        }
+
+    private fun doBomb(nextLoc: MapLoc, bombLoc: FramePoint): PlanBuilder {
+        switchToBomb()
+        // wait a little longer
+        goIn(GamePad.None, 10)
+        add(nextLoc, BombThenMove(bombLoc = bombLoc, moveTo = moveTo(nextLoc)))
+
+        return this
+    }
+
+
 
     private fun build(): MasterPlan {
         makeSegment()

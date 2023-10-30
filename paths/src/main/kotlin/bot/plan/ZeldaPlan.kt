@@ -788,7 +788,7 @@ object ZeldaPlan {
             goIn(GamePad.None, 50) // more in a bit before whistlin'
             goIn(GamePad.MoveRight, 20) // move more in
             useItem()
-            wait(100)
+            wait(300)
             kill
             upm
             bomb(InLocations.bombRight)
@@ -902,8 +902,9 @@ object ZeldaPlan {
             GoInConsume(30, GamePad.MoveUp)
             upm
             leftm
-            bomb(InLocations.topMiddleBombSpot)
-            upm // or else it will chase the suns
+            bombUp()
+//            bomb(InLocations.topMiddleBombSpot)
+//            upm // or else it will chase the suns
 //            left
             kill
             pushInLevelMiddleStair(LevelSpecBuilder.Companion.Nine.travel1, upTo = 20, outLocation = InLocations.getOutLeft)
@@ -914,15 +915,19 @@ object ZeldaPlan {
             "go down to ring".seg()
             downm
             // what if the bomb missed
-            bomb(InLocations.bombRight)
-            rightm
-            bomb(InLocations.topMiddleBombSpot)
-//            startHere
-            upm
-            bomb(InLocations.topMiddleBombSpot)
-            upm
+//            bomb(InLocations.bombRight)
+//            rightm
+            bombRight()
+            bombUp()
+//            bomb(InLocations.topMiddleBombSpot)
+//            upm
+            bombUp()
+//
+//            bomb(InLocations.topMiddleBombSpot)
+//            upm
             "ring spot".seg()
             kill
+            "ring spot push".seg()
             pushInLevelMiddleStair(LevelSpecBuilder.getItemLoc8)
         }
     }
@@ -989,8 +994,7 @@ object ZeldaPlan {
             "past second pancake".seg()
             upm
             "bomb left ok".seg()
-            bomb(InLocations.bombLeft)
-            leftm
+            bombLeft()
             kill
             "push to inbetween travel".seg()
             pushInLevelAnyBlock(inMapLoc = LevelSpecBuilder.Companion.Nine.travel4,
@@ -1000,8 +1004,7 @@ object ZeldaPlan {
                 upTo = 4
             )
             "get to final stair".seg() // save7
-            bomb(InLocations.bombLeft)
-            leftm
+            bombLeft()
             kill
             pushInLevelMiddleStair(119, upTo = 82, outLocation = InLocations.getOutLeft)
             "doorstep of gannon".seg()

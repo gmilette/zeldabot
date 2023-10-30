@@ -4,6 +4,7 @@ import bot.plan.InLocations
 import bot.state.FramePoint
 import bot.state.GamePad
 import bot.state.MapLocationState
+import bot.state.leftTwoGrid
 import bot.state.map.grid
 import util.d
 
@@ -58,6 +59,30 @@ fun level3TriggerBombThenDo(action: Action) = Level3SequenceThenDo(
     ), action
 )
 
+class BombThenMove(bombLoc: FramePoint = InLocations.topMiddleBombSpot,
+                   moveTo: MoveTo): WrappedAction(moveTo) {
+
+   private var ct = 0
+    // keep doing this until moveTo Succeeds
+    val sequence = OrderedActionSequence(
+        mutableListOf(
+            Bomb(bombLoc),
+            moveTo,
+        ), restartWhenDone = true
+    )
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        ct++
+        if (ct > 800) {
+            sequence.restart()
+            ct = 0
+        }
+        return sequence.nextStep(state)
+    }
+
+    override val name: String
+        get() = "Bomb then ${super.name} doing ${sequence.stepName} $ct"
+}
 
 class Level3SequenceThenDo(private val sequence: OrderedActionSequence, action: Action) : WrappedAction(action) {
     private var frameCt = 0

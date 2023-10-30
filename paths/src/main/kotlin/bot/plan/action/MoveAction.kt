@@ -165,6 +165,8 @@ class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val toLevel: Int, val f
     override fun reset() {
         next.zstar.clearAvoid()
         route = null
+        arrived = false
+        movedIn = 0
     }
 
     override fun complete(state: MapLocationState): Boolean =

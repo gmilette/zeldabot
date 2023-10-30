@@ -154,7 +154,9 @@ class KillAll (
         } else {
             // first kill the enemies not in center
             var aliveEnemies: MutableList<Agent> = state.frameState.enemiesClosestToLink().toMutableList()
-            aliveEnemies = aliveEnemies.filter { state.currentMapCell.passable.get(it.point) }.toMutableList()
+            // if you have clock enabled, the ghost can get stuck on a location that is not passable
+            // we should try to route to it still with the nearest
+//            aliveEnemies = aliveEnemies.filter { state.currentMapCell.passable.get(it.point) }.toMutableList()
             if (considerEnemiesInCenter) {
                 // all enemies
                 if (numEnemiesInCenter != aliveEnemies.size) {

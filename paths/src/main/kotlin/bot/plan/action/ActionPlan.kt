@@ -107,7 +107,11 @@ class OrderedActionSequence(
 
     fun restart(): Action? {
         return if (restartWhenDone) {
+            d { " restart "}
             stack = actions.toMutableList()
+            for (action in actions) {
+                action.reset()
+            }
             pop()
         } else {
             null
@@ -138,7 +142,10 @@ class OrderedActionSequence(
         val current = currentAction ?: pop() ?: restart() ?: return GamePad.randomDirection(state.link)
         // check all complete to prevent infinite loop
         if (current.complete(state)) { // causes bomb one to fail && !allComplete(state)
-            d { " sequence complete" }
+            d { " sequence complete ${stack.size}" }
+            for (action in stack) {
+                d { "is complete ${action.name} = ${action.complete(state)}"}
+            }
             pop()
             // recur
             return nextStep(state)
@@ -457,6 +464,11 @@ open class Bomb(private val target: FramePoint) : Action {
     private val stretchedTarget: List<FramePoint> = target.toLineOf(3)
     private var triedToDeployBomb = false
     private var initialBombs = -1
+
+    override fun reset() {
+        triedToDeployBomb = false
+        initialBombs = -1
+    }
     override fun complete(state: MapLocationState): Boolean =
         state.usedABomb || state.frameState.inventory.numBombs == 0 // no bombs, just complete this
 
