@@ -4,6 +4,7 @@ import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapCell
+import bot.state.oam.map
 import util.d
 import kotlin.math.abs
 
@@ -129,11 +130,19 @@ object NavUtil {
                                 enemyTarget: FramePoint? = null,
                                 ladderSpec: ZStar.LadderSpec? = null,
                                 mapNearest: Boolean = false):
-            List<FramePoint> = mapCell.zstar.route(from, to, before, enemies,
-        avoidNearEnemy, forcePassable, Int.MAX_VALUE,
-                enemyTarget, ladderSpec, mapNearest).also {
-                    d { " route with mapcell: ${mapCell.mapLoc}"}
-    }
+            List<FramePoint> =
+        mapCell.zstar.route(ZStar.ZRouteParam(
+            start = from,
+            targets = to,
+            pointBeforeStart = before,
+            enemies = enemies,
+            avoidNearEnemy = avoidNearEnemy,
+            forcePassable = forcePassable,
+            enemyTarget = enemyTarget,
+            ladderSpec = ladderSpec,
+            mapNearest = mapNearest,
+            forceHighCost = emptyList()
+    ))
 
     fun randomDir(from: FramePoint = FramePoint(100, 100)): GamePad {
         d { " random dir "}

@@ -81,9 +81,35 @@ interface MapAwareAction : Action {
     val to: MapLoc
 }
 
+class OrderActionBuilder() {
+    fun build(block: OrderActionBuilder.() -> Unit) {
+
+    }
+
+    // plan builder?
+//    fun untilMapChange() {
+//
+//    }
+    fun untilMapChange(vararg actions: Action) {
+
+    }
+}
+
+fun make() {
+    OrderActionBuilder().build {
+        untilMapChange (
+
+        )
+    }
+}
+
+/**
+ * maintains a stack of actions, and moves to the next, once one is complete
+ */
 class OrderedActionSequence(
     private val actions: List<Action>,
-    private val restartWhenDone: Boolean = true
+    private val restartWhenDone: Boolean = true,
+    private val shouldComplete: Boolean = false
 ) : Action {
     private var lastComplete = -1
     var stepName: String = ""
@@ -105,13 +131,18 @@ class OrderedActionSequence(
         currentAction = it
     }
 
+    override fun reset() {
+        restart()
+    }
+
     fun restart(): Action? {
         return if (restartWhenDone) {
-            d { " restart "}
             stack = actions.toMutableList()
             for (action in actions) {
+                d { " reset ${action.name}"}
                 action.reset()
             }
+            d { " restart ${stack.size}"}
             pop()
         } else {
             null
@@ -120,7 +151,7 @@ class OrderedActionSequence(
 
     // never complete
     override fun complete(state: MapLocationState): Boolean =
-        false
+        shouldComplete && done && currentAction?.complete(state) == true
 
     private var target: FramePoint = actions.first().target()
     private var path: List<FramePoint> = emptyList()
@@ -138,7 +169,7 @@ class OrderedActionSequence(
 
     override fun nextStep(state: MapLocationState): GamePad {
         hasBegun = true
-        d { "OrderedActionSequence begin $currentAction"}
+        d { "OrderedActionSequence begin ${currentAction?.name ?: "none"}"}
         val current = currentAction ?: pop() ?: restart() ?: return GamePad.randomDirection(state.link)
         // check all complete to prevent infinite loop
         if (current.complete(state)) { // causes bomb one to fail && !allComplete(state)
@@ -159,7 +190,7 @@ class OrderedActionSequence(
         actions.all { it.complete(state) }
 
     override val name: String
-        get() = "OrderedAction Sequence ${actions.size} doing ${currentAction?.name}"
+        get() = "oSeq: ${currentAction?.name}"
 }
 
 class CompleteIfGetItem(
@@ -272,7 +303,7 @@ class ActionSequence(
     }
 
     override val name: String
-        get() = "Action Sequence ${actions.size}"
+        get() = "Action Sequence ${actions.size} ${currentAction?.name ?: ""}"
 }
 
 class EndAction : Action {
@@ -333,6 +364,13 @@ val lootOrKill = DecisionAction(Optional(GetLoot()), Optional(KillAll())) { stat
 }
 
 fun lootAndMove(moveTo: MoveTo) = DecisionAction(Optional(GetLoot()), moveTo) { state ->
+    state.neededLoot.isNotEmpty()
+}
+
+// do this for all move tasks that are after kill tasks
+// in case the kill all didnt work and there are enemies
+// around, in that case go back to kill mode
+fun killAndMove(moveTo: MoveTo) = DecisionAction(Optional(KillAll()), moveTo) { state ->
     state.neededLoot.isNotEmpty()
 }
 

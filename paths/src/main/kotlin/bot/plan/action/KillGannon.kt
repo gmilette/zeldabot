@@ -1,6 +1,5 @@
 package bot.plan.action
 
-import bot.plan.InLocations
 import bot.state.FramePoint
 import bot.state.GamePad
 import bot.state.MapLocationState
@@ -11,6 +10,7 @@ class KillGannon : Action {
     companion object {
         private const val MoveDelay = 2
     }
+    private var noEnemiesFrameCt = 0
     private val positionShoot = OrderedActionSequence(listOf(
         GoIn(5, GamePad.MoveRight, reset = true),
         GoIn(MoveDelay, GamePad.None, reset = true),
@@ -51,6 +51,9 @@ class KillGannon : Action {
 
     override fun complete(state: MapLocationState): Boolean {
         return state.frameState.enemies.any { it.isGannonTriforce() }
+                // it's possible that link could defeat gannon at exact same spot
+                // that the triforce appeared and this isGannonTriforce will not trigger, assume victory then
+                || noEnemiesFrameCt > 5000
     }
 
     override fun target(): FramePoint {
@@ -59,9 +62,15 @@ class KillGannon : Action {
 
     override fun nextStep(state: MapLocationState): GamePad {
         d {"KillGannon num enemies ${state.numEnemies}"}
-        state.currentMapCell.zstar.resetPassable()
-        state.currentMapCell.zstar.reset()
+        noEnemiesFrameCt++
+
+        // why is this needed
+//        state.currentMapCell.zstar.resetPassable()
+//        state.currentMapCell.zstar.reset()
         state.frameState.logEnemies()
+        if (state.frameState.enemies.isEmpty()) {
+            noEnemiesFrameCt++
+        }
         if (isReadyForDeath(state)) {
             d {"KillGannon !! READY FOR DEATH !!"}
         } else {

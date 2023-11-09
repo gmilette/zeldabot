@@ -62,7 +62,7 @@ class LevelSpecBuilder {
             // go up to get arrow
             LevelSpec(split.up, e(d, u), "", LevelMapTemplateReader.Temp.lev_maze),
             LevelSpec(split.up.up, e(l, r, d), "", LevelMapTemplateReader.Temp.lev_water_center),
-            LevelSpec(split.up.up.left, e(r), "", LevelMapTemplateReader.Temp.lev_stairs_center),
+            LevelSpec(split.up.up.left, e(r), "", LevelMapTemplateReader.Temp.lev_stairs_center_blocked),
             LevelSpec(split.up.up.left.down, e(u), "", LevelMapTemplateReader.Temp.lev_getitem),
 
             // go right to get triforce
@@ -146,7 +146,7 @@ class LevelSpecBuilder {
             LevelSpec(start.up.up, e(d, l), "bat key", LevelMapTemplateReader.Temp.lev_block4out),
             LevelSpec(start.up.up.left, e(r, u), "cross beast", LevelMapTemplateReader.Temp.lev_cross),
             LevelSpec(start.up.up.left.up, e(d, u), "squish key", LevelMapTemplateReader.Temp.lev_water_center),
-            LevelSpec(laddercross, e(d, r, u), "ladder cross", LevelMapTemplateReader.Temp.lev_water_center),
+            LevelSpec(laddercross, e(d, r, u), "ladder cross", LevelMapTemplateReader.Temp.lev_water_line_path),
 
             LevelSpec(laddercross.right, e(l, r, u), "beast maze", LevelMapTemplateReader.Temp.lev_maze, isHalfPassable = false),
             LevelSpec(laddercross.right.right, e(l, r, u), "ladder entry", LevelMapTemplateReader.Temp.lev_block2center),
@@ -174,7 +174,7 @@ class LevelSpecBuilder {
             LevelSpec(start, e(r, u, d), "start", LevelMapTemplateReader.Temp.lev_grid),
             LevelSpec(start.up, e(l, u, r, d), "mid river bomb left", LevelMapTemplateReader.Temp.lev_water_line_path, isHalfPassable = false),
             LevelSpec(start.up.left, e(l, u, r), "zombie bomb left", LevelMapTemplateReader.Temp.lev_block4mid),
-            LevelSpec(start.up.left.left, e(u, r), "stairs down", LevelMapTemplateReader.Temp.lev_stairs_center),
+            LevelSpec(start.up.left.left, e(u, r), "stairs down", LevelMapTemplateReader.Temp.lev_stairs_center_blocked),
 
             LevelSpec(start.up.up.up, e(u, d, l, r), "circlepond", LevelMapTemplateReader.Temp.lev_water_round_center, isHalfPassable = false),
 
@@ -256,7 +256,7 @@ class LevelSpecBuilder {
             LevelSpec(grumble.up, e(l, r, d), "maze", LevelMapTemplateReader.Temp.lev_water_maze_path, isHalfPassable = false),
 
             LevelSpec(grumble.up.right, e(l, r), "dude bomb", LevelMapTemplateReader.Temp.lev_block4out2),
-            LevelSpec(grumble.up.right.right, e(l, r), "red candle", LevelMapTemplateReader.Temp.lev_stairs_center_blocked),
+            LevelSpec(grumble.up.right.right, e(l, r), "red candle", LevelMapTemplateReader.Temp.lev_stairs_center),
             LevelSpec(grumble.up.right.right.right, e(l, r, u), "guys with bomb", LevelMapTemplateReader.Temp.lev_corner),
             LevelSpec(grumble.up.right.right.right.right, e(l, u), "whistle guy", LevelMapTemplateReader.Temp.lev_corner),
             LevelSpec(grumble.up.right.right.right.right.up, e(d, r), "block bomb right", LevelMapTemplateReader.Temp.lev_block2center),
@@ -293,7 +293,7 @@ class LevelSpecBuilder {
             LevelSpec(masterbattle, e(u, d, r), "master battle", LevelMapTemplateReader.Temp.lev_block2center),
             LevelSpec(masterbattle.up, e(l, u, d, r), "four bomb guy", LevelMapTemplateReader.Temp.lev_corner),
             LevelSpec(masterbattle.up.up, e(l, u, d, r), "arrow guy", LevelMapTemplateReader.Temp.lev_corner),
-            LevelSpec(masterbattle.up.up.right, e(l), "key stairs", LevelMapTemplateReader.Temp.lev_stairs_center_blocked),
+            LevelSpec(masterbattle.up.up.right, e(l), "key stairs", LevelMapTemplateReader.Temp.lev_stairs_center),
 
             LevelSpec(masterbattle.right, e(l), "stairs to boss", LevelMapTemplateReader.Temp.lev_stair_side),
 
@@ -328,7 +328,7 @@ class LevelSpecBuilder {
             LevelSpec(start, e(u, d), "start", LevelMapTemplateReader.Temp.lev_grid),
             LevelSpec(start.up, e(l, u, d), "triforce guy", LevelMapTemplateReader.Temp.lev_empty),
             LevelSpec(start.up.left, e(u, d), "ghost water", LevelMapTemplateReader.Temp.lev_water_line_path),
-            LevelSpec(start.up.left.up, e(u, d), "first stair", LevelMapTemplateReader.Temp.lev_stairs_center),
+            LevelSpec(start.up.left.up, e(u, d), "first stair", LevelMapTemplateReader.Temp.lev_stairs_center_blocked),
 
             LevelSpec(first, e(d, r), "spiral stair", LevelMapTemplateReader.Temp.lev_spiral),
             LevelSpec(first.right, e(l, d, r), "ghost circle", LevelMapTemplateReader.Temp.lev_water_circle_path),
@@ -336,7 +336,7 @@ class LevelSpecBuilder {
             LevelSpec(pathdown.down, e(u, d, l, r), "four out bomb", LevelMapTemplateReader.Temp.lev_block4out),
             LevelSpec(pathdown.down.right, e(u, d, l), "two before", LevelMapTemplateReader.Temp.lev_block2center),
             LevelSpec(pathdown.down.right.up, e(u, d), "ghost blocks", LevelMapTemplateReader.Temp.lev_block4out2),
-            LevelSpec(pathdown.down.right.up.up, e(d), "stair to ring", LevelMapTemplateReader.Temp.lev_stairs_center),
+            LevelSpec(pathdown.down.right.up.up, e(d), "stair to ring", LevelMapTemplateReader.Temp.lev_stairs_center_blocked),
 
             LevelSpec(pathdown.up, e(d, l), "go to next room", LevelMapTemplateReader.Temp.lev_empty),
             LevelSpec(pathdown.up.left, e(r), "ghost kill stairs", LevelMapTemplateReader.Temp.lev_block2center),
@@ -360,7 +360,7 @@ class LevelSpecBuilder {
             LevelSpec(arrowstair.up.left.up.up, e(d, r), "stair to last stair", LevelMapTemplateReader.Temp.lev_block2center),
 
             LevelSpec(stairbeforestair, e(l), "bomb left", LevelMapTemplateReader.Temp.lev_stairs_center),
-            LevelSpec(stairbeforestair.left, e(r), "last path stair", LevelMapTemplateReader.Temp.lev_stairs_center),
+            LevelSpec(stairbeforestair.left, e(r), "last path stair", LevelMapTemplateReader.Temp.lev_stairs_center_blocked),
 
             LevelSpec(second.left.up, e(u), "last path stair", LevelMapTemplateReader.Temp.lev_stair_side),
             LevelSpec(second.left.up.up, e(u), "!!!!GANNON!!!!", LevelMapTemplateReader.Temp.lev_gannon),

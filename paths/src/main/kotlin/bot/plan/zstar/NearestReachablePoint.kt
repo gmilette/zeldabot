@@ -6,7 +6,7 @@ import bot.state.map.MapConstants
 import bot.state.map.pointModifier
 import util.Map2d
 
-object NearestSafestPoint {
+object NearestReachablePoint {
     fun mapNearest(state: MapLocationState, pts: List<FramePoint>) =
         pts.flatMap { nearestSafePoints(it, state.currentMapCell.zstar.costsF, state.currentMapCell.zstar.passable) }
 
@@ -24,20 +24,11 @@ object NearestSafestPoint {
             ct++
         }
 
-        val safePoint = pt.copy()
-
-        // find nearest unsafe point
-        ct = 0
-        while(pt.isOnMap && pt.isSafe(costs, passable) && ct < MapConstants.oneGrid) {
-            pt = modifier(pt)
-            ct++
-        }
-
         // this is still possible, the safe point is surrounded by unsafe points
 
         //////
         //Pt//
-        //////
+        /////
 
         return pt
     }
