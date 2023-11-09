@@ -1097,12 +1097,6 @@ object ZeldaPlan {
             bombLeft
             kill
             "push to inbetween travel".seg()
-//            pushInLevelAnyBlock(inMapLoc = LevelSpecBuilder.Companion.Nine.travel4,
-//                pushTarget = InLocations.Push.moveLeftOfTwo.point,
-//                stairsTarget = InLocations.Level5.cornerStairs,
-//                outLocation = InLocations.getOutRight,
-//                upTo = 4
-//            )
             addNext(4, makePush(
                 InLocations.Push.moveLeftOfTwo,
                 makeUp(4),
