@@ -24,7 +24,8 @@ class PlanBuilder(
 ) {
     private var segment: String = ""
     private var plan = mutableListOf<Action>()
-    private var lastMapLoc = 0
+    var lastMapLoc = 0
+        private set
     private var level: Int = OVERWORLD_LEVEL
     private var segments = mutableListOf<PlanSegment>()
 
@@ -98,6 +99,14 @@ class PlanBuilder(
         seg(this)
     }
 
+    operator fun Action.unaryPlus() {
+        add(lastMapLoc, this)
+    }
+
+    fun addNext(nextLoc: MapLoc, action: Action) {
+        add(nextLoc, action)
+    }
+
     fun seg(name: String): PlanBuilder {
         makeSegment()
         segment = name
@@ -129,6 +138,10 @@ class PlanBuilder(
         add(nextLoc, MoveTo(lastMapLoc, mapCell(nextLoc), level, Direction.Up))
         return this
     }
+
+    fun makeUp(nextLoc: MapLoc): Action =
+        MoveTo(lastMapLoc, mapCell(nextLoc), level, Direction.Up)
+
     val loot: PlanBuilder
         get() {
             add(lastMapLoc, GetLoot())
@@ -336,6 +349,22 @@ class PlanBuilder(
         get() {
             add(lastMapLoc.right)
         }
+    val rightk: Unit
+        get() {
+            addK(lastMapLoc.right)
+        }
+    val leftk: Unit
+        get() {
+            addK(lastMapLoc.left)
+        }
+    val downk: Unit
+        get() {
+            addK(lastMapLoc.down)
+        }
+    val upk: Unit
+        get() {
+            addK(lastMapLoc.up)
+        }
     val getTri: Unit
         get() {
 //            goTo(InLocations.Level3.triforce)
@@ -383,6 +412,8 @@ class PlanBuilder(
                             thenGo: GamePad = GamePad.None) {
         // position
         goTo(position)
+
+        // dynamic direction?
 
         pushTarget?.let { pushTarget ->
             when (directionFrom) {
@@ -481,7 +512,7 @@ class PlanBuilder(
     }
 
     fun pushThenGoToDynamic(blockIn: FramePoint, toT: FramePoint = InLocations.middleStair, ignoreProjectiles: Boolean = false): PlanBuilder {
-        // just for compat ability
+//        // just for compat ability
         val block = blockIn.upOneGrid
         val pushFromUp = Direction.Up.pointModifier(MapConstants.oneGrid)(block)
         val pushFromDown = Direction.Down.pointModifier(MapConstants.oneGrid)(block)
@@ -503,15 +534,21 @@ class PlanBuilder(
         add(lastMapLoc, GoDirection(GamePad.MoveRight, 20))
     }
 
-    fun pushAction(toB: FramePoint): PlanBuilder {
-        add(lastMapLoc, makePushAction(toB))
+    fun pushActionThenGoRight(push: InLocations.Push): PlanBuilder {
+        add(lastMapLoc.right, makePushActionThen(push, moveTo(lastMapLoc.right)))
         return this
     }
 
-    fun pushActionThenGoRight(toB: FramePoint): PlanBuilder {
-        add(lastMapLoc.right, makePushActionThen(toB, moveTo(lastMapLoc.right)))
+    fun pushActionThenGoUp(push: InLocations.Push): PlanBuilder {
+        val up = lastMapLoc.up
+        add(up, makePushActionThen(push, moveTo(up)))
         return this
     }
+
+//    fun pushActionThenGoCorner(toB: FramePoint): PlanBuilder {
+//        add(lastMapLoc.right, makePushActionThen(toB, moveTo(lastMapLoc.right)))
+//        return this
+//    }
 
     fun pushWait(toB: FramePoint): PlanBuilder {
         // if it fails need to retry
@@ -528,6 +565,8 @@ class PlanBuilder(
         add(lastMapLoc, InsideNav(to))
         return this
     }
+
+    fun makeGo(to: FramePoint) = InsideNav(to)
 
     private fun showLetterIfRequired(): PlanBuilder {
         add(lastMapLoc, ShowLetterConditionally())
@@ -686,6 +725,25 @@ class PlanBuilder(
         return this
     }
 
+    class PushDownGet(to: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, position: Boolean = false) {
+    // until map changes or time runs out
+    val seq = OrderedActionSequence(
+        listOf(
+            InsideNavAbout(to.upOneGrid.justRightEnd, about = 2),
+            InsideNavAbout(to.upOneGrid, about = 2),
+            GoIn(20, GamePad.MoveDown),
+            GoIn(75,GamePad.None),
+            InsideNavAbout(to, about = 2),
+//            GoGetItem(itemLoc)
+        ), restartWhenDone = false)
+    }
+
+    // run this sequence until map changes or timeout
+    class SequenceRunner(untilMapChanged: Boolean = true, timeoutMax: Int? = 600,
+        sequence: OrderedActionSequence) {
+
+    }
+
     private fun pushDownGetItem(to: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, position: Boolean = false):
             PlanBuilder {
         if (position) {
@@ -783,9 +841,15 @@ class PlanBuilder(
         }
     val bombLeft: PlanBuilder
         get() {
-            doBomb(lastMapLoc.left, InLocations.bombRight)
+            doBomb(lastMapLoc.left, InLocations.bombLeft)
             return this
         }
+    val bombRightExactly: PlanBuilder
+        get() {
+            doBomb(lastMapLoc.right, InLocations.bombRightExactly)
+            return this
+        }
+
     val bombRight: PlanBuilder
         get() {
             doBomb(lastMapLoc.right, InLocations.bombRight)
@@ -816,9 +880,11 @@ class PlanBuilder(
         }
 
     private fun add(nextLoc: MapLoc) {
-//        add(nextLoc, opportunityKillOrMove(mapCell(nextLoc)))
-        // look some??
         add(nextLoc, lootAndMove(moveTo(nextLoc)))
+    }
+// kill and loot and move?
+    private fun addK(nextLoc: MapLoc) {
+        add(nextLoc, killAndMove(moveTo(nextLoc)))
     }
 
     private fun moveTo(next: Int): MoveTo =

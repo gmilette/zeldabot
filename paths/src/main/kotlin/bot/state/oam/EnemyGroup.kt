@@ -48,6 +48,7 @@ object EnemyGroup {
         wizard,
         flame1,
         flame2,
+        clockTile,
 //            triforceDirt,
         triforceDirt2,
 //            oldWoman
@@ -100,6 +101,8 @@ object EnemyGroup {
     )
 
     val ignorePairs = setOf(
+        movingBlock,
+        movingBlock2,
         triforceDirtPair,
         triforceDirt3Pair,
         starCenter,
@@ -135,7 +138,8 @@ object EnemyGroup {
 
     val loot = setOf(
         compass,
-        clockTile,
+        // this just breaks things
+//        clockTile,
 //        silverArrow,
         redring,
 //            brownBoomerang,

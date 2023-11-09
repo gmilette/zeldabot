@@ -1,5 +1,6 @@
 package bot.state
 
+import bot.state.map.Direction
 import bot.state.map.MapConstants
 import nintaco.api.GamepadButtons
 import kotlin.random.Random
@@ -13,6 +14,15 @@ enum class GamePad {
 
     val isHorizontal: Boolean
         get() = this == MoveLeft || this == MoveRight
+
+    fun opposite(): GamePad = when (this) {
+        MoveRight -> MoveLeft
+        MoveLeft -> MoveRight
+        MoveUp -> MoveDown
+        MoveDown -> MoveUp
+        None -> None
+        else -> this
+    }
 
     companion object {
         fun randomDirection(from: FramePoint): GamePad {

@@ -73,7 +73,7 @@ class BombThenMove(bombLoc: FramePoint = InLocations.topMiddleBombSpot,
 
     override fun nextStep(state: MapLocationState): GamePad {
         ct++
-        if (ct > 800) {
+        if (ct > 500) {
             sequence.restart()
             ct = 0
         }

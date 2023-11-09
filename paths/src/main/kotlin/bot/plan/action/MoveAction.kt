@@ -3,6 +3,7 @@ package bot.plan.action
 import bot.plan.action.NavUtil.directionToDir
 import bot.plan.zstar.FrameRoute
 import bot.plan.zstar.NearestSafestPoint
+import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.*
 import util.LogFile
@@ -52,14 +53,18 @@ class CompleteIfMapChanges(private val wrapped: Action) : Action {
 }
 
 // move to this location then complete
-class InsideNav(private val point: FramePoint, ignoreProjectiles: Boolean = false, private val makePassable: FramePoint? = null) : Action {
+class InsideNav(private val point: FramePoint,
+                ignoreProjectiles: Boolean = false,
+                private val makePassable: FramePoint? = null,
+                private val tag: String = "",
+                private val highCost: List<FramePoint> = emptyList()
+) : Action {
     private val routeTo = RouteTo.hardlyReplan(ignoreProjectiles = ignoreProjectiles)
     override fun complete(state: MapLocationState): Boolean =
         state.frameState.link.point == point
 
     override fun nextStep(state: MapLocationState): GamePad {
-        val pad = routeTo.routeTo(state, listOf(point), makePassable = makePassable)
-        return pad
+        return routeTo.routeTo(state, listOf(point), makePassable = makePassable, highCost = highCost)
     }
 
     override fun target(): FramePoint {
@@ -69,7 +74,7 @@ class InsideNav(private val point: FramePoint, ignoreProjectiles: Boolean = fals
     override fun path(): List<FramePoint> = routeTo.route?.path ?: emptyList()
 
     override val name: String
-        get() = "Nav to inside $point"
+        get() = "Nav to inside $point $tag"
 }
 
 class InsideNavAbout(
@@ -77,7 +82,9 @@ class InsideNavAbout(
     val shop: Boolean = false, ignoreProjectiles: Boolean = false,
     private val makePassable: FramePoint? = null,
     orPoints: List<FramePoint> = emptyList(),
-    private val setMonitorEnabled: Boolean = true
+    private val setMonitorEnabled: Boolean = true,
+    private val tag: String = "",
+    private val highCost: List<FramePoint> = emptyList()
 ) : Action {
     private val routeTo = RouteTo.hardlyReplan(dodgeEnemies = !shop, ignoreProjectiles)
     private val points: List<FramePoint>
@@ -114,8 +121,11 @@ class InsideNavAbout(
 
     override fun nextStep(state: MapLocationState): GamePad =
         routeTo.routeTo(
-            state, points, overrideMapCell = if (shop) state.hyrule.shopMapCell else null,
-            makePassable = makePassable
+            state,
+            to = points,
+            RouteTo.RouteParam(overrideMapCell = if (shop) state.hyrule.shopMapCell else null,
+                makePassable = makePassable,
+                forceHighCost = highCost)
         )
 
     override fun target(): FramePoint {
@@ -129,7 +139,7 @@ class InsideNavAbout(
     override fun path(): List<FramePoint> = routeTo.route?.path ?: emptyList()
 
     override val name: String
-        get() = "Nav to about $point"
+        get() = "Nav to about $point $tag"
 }
 
 class StartAtAction(val at: MapLoc = 0, val atLevel: Int = -1): Action {
@@ -270,7 +280,7 @@ class MoveTo(val fromLoc: MapLoc = 0, val next: MapCell, val toLevel: Int, val f
         checkArrived(state, previousDir)
 
         return if (!arrived) {
-            routeTo.routeTo(state, exits)
+            routeTo.routeTo(state, exits, RouteTo.RouteParam())
         } else {
             movedIn++
             arrivedDir.toGamePad()
@@ -309,7 +319,8 @@ class RouteTo(val params: Param = Param()) {
         val attackTarget: FramePoint? = null,
         // if false, dont bother avoiding any enemies, avoid projectiles though
         val ignoreEnemies: Boolean = false,
-        val mapNearest: Boolean = false
+        val mapNearest: Boolean = false,
+        val forceHighCost: List<FramePoint> = emptyList(),
     )
     private val routeToFile: LogFile = LogFile("RouteTo")
 
@@ -326,9 +337,12 @@ class RouteTo(val params: Param = Param()) {
         forceNew: Boolean = false,
         overrideMapCell: MapCell? = null,
         makePassable: FramePoint? = null,
-        useB: Boolean = false
+        useB: Boolean = false,
+        highCost: List<FramePoint> = emptyList()
     ): GamePad {
-        return routeTo(state, to, RouteParam(forceNew, overrideMapCell, makePassable, emptyList(), useB))
+        return routeTo(state, to, RouteParam(
+            forceNew, overrideMapCell, makePassable, emptyList(), useB,
+            forceHighCost = highCost))
     }
 
     fun routeTo(
@@ -562,22 +576,16 @@ private fun doRouteTo(
         // need to re route
 
         route = FrameRoute(
-            NavUtil.routeToAvoidingObstacle(
-                mapCell = mapCell,
-                from = linkPt,
-                // avoid getting stuck
-//                to = if (kotlin.random.Random.nextInt(10) == 1) to else to.flatMap { NearestSafestPoint.nearestSafePoints(it, mapCell.zstar.costsF, mapCell.zstar.passable) },
-                to = to,
-                before = state.previousMove.from,
+            mapCell.zstar.route(ZStar.ZRouteParam(
+                start = linkPt,
+                targets = to,
+                pointBeforeStart = state.previousMove.from,
                 enemies = avoid.points,
                 forcePassable = passable,
                 enemyTarget = param.attackTarget,
-                mapNearest = param.mapNearest
-                // disable for now
-//                ladderSpec = state.frameState.ladder?.let {
-//                    d { " has ladder "}
-//                    ZStar.LadderSpec(false, it.point)
-//                }
+                mapNearest = param.mapNearest,
+                forceHighCost = param.forceHighCost
+            )
             )
         )
 
@@ -596,15 +604,16 @@ private fun doRouteTo(
                 withoutClosestEnemy.removeFirstOrNull()?.let { closest ->
                     d { "closest is ${closest.point}"}
                     route = FrameRoute(
-                        NavUtil.routeToAvoidingObstacle(
-                            mapCell = mapCell,
-                            from = linkPt,
-                            to = avoid.points,
-                            before = state.previousMove.from,
-                            enemies = onlyProjectiles, // withoutClosestEnemy.points,
+                        mapCell.zstar.route(ZStar.ZRouteParam(
+                            start = linkPt,
+                            targets = avoid.points,
+                            pointBeforeStart = state.previousMove.from,
+                            enemies = onlyProjectiles,
                             forcePassable = passable,
-                            enemyTarget = closest.point
+                            enemyTarget = closest.point,
+                            forceHighCost = param.forceHighCost
                         )
+                    )
                     )
                     d { "found route of size ${route?.path?.size ?: 0}"}
                 }?: run {

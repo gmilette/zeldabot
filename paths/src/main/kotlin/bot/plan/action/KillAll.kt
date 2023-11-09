@@ -313,7 +313,6 @@ class AttackOnce(useB: Boolean = false, private val freq: Int = 5) :
 
 }
 
-
 class AlwaysAttack(useB: Boolean = false, private val freq: Int = 5, private val otherwiseRandom: Boolean = false) :
     Action {
     private var frames = 0
@@ -339,7 +338,6 @@ class AlwaysAttack(useB: Boolean = false, private val freq: Int = 5, private val
 
     override fun complete(state: MapLocationState): Boolean =
         false
-
 }
 
 class KillInCenterO : Action {

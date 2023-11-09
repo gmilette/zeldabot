@@ -48,6 +48,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         api.addFrameListener {
             renderFinished()
             loadZelda
+            setSpeed
         }
         api.addStatusListener { message: String -> statusChanged(message) }
         api.addActivateListener {

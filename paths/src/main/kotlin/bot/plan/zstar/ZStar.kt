@@ -3,6 +3,7 @@ package bot.plan.zstar
 import bot.plan.action.isInGrid
 import bot.state.*
 import bot.state.map.Direction
+import bot.state.map.MapCell
 import bot.state.map.MapConstants
 import util.Map2d
 import util.d
@@ -33,6 +34,7 @@ class ZStar(
         val onEnemyCost = 100000
         val MaxCostAvoidEnemy = onEnemyCost
         val MaxCostAvoidEnemyNear = nearEnemyCost
+        const val ENEMY_COST = 10000
     }
 
     data class LadderSpec(val horizontal: Boolean, val point: FramePoint) {
@@ -52,10 +54,6 @@ class ZStar(
     }
 
     private var iterCount = 0
-    // return to this map
-//    private val initialMap: Map2d<Int> = passable.map { if (it) 1 else 99999 }
-    // if it is on a divisible by 16 area 1, if not it is a 10
-//    private val initialMap: Map2d<Int> = passable.map { 1 }
 
     // this really helps keep zelda on track, it's a little strict though walking half way
     // is also acceptable
@@ -72,136 +70,52 @@ class ZStar(
 
     private val neighborFinder = NeighborFinder(passable, halfPassable, isLevel)
 
-    fun reset() {
-        costsF = initialMap.copy()
-    }
-
-    fun resetPassable() {
-        passable = initialPassable.copy()
-        neighborFinder.passable = passable
-    }
-
-    val ENEMY_COST = 10000
-
-    fun setEnemy(from: FramePoint, point: FramePoint, size: Int = 16) {
-        // make cost relative to the distance??? so it's not all the same badness
-        costsF.modify(
-            from,
-            FramePoint(point.x - MapConstants.oneGrid, point.y - MapConstants.oneGrid),
-            size
-        ) { dist, current ->
-            current + (100 * (MapConstants.twoGrid - dist)) // the closer the higher
-        }
-
-        // the actual enemy should have very very high cost
-        costsF.modify(from, point, MapConstants.oneGrid) { dist, current ->
-            current + onEnemyCost
-        }
-    }
-
-    fun setNearEnemy(from: FramePoint, point: FramePoint) {
-        costsF.modify(from, point, MapConstants.oneGrid) { dist, current ->
-            current + nearEnemyCost
-        }
-    }
-
-    fun setEnemyBig(from: FramePoint, point: FramePoint, size: Int = 16) {
-        // TODO: some enemies are smaller than 16!
-        // why a little less?
-        costsF.modify(from, point.upLeftOneGrid, MapConstants.twoGrid) { _, current ->
-            current + nearEnemyCost
-        }
-
-        // actual enemy higher cost then around the enemy
-        costsF.modify(from, point, MapConstants.oneGrid) { _, current ->
-            current + onEnemyCost
-        }
-    }
-
-    val totalCosts = mutableMapOf<FramePoint, Int>()
-    val distanceToGoal = mutableMapOf<FramePoint, Int>()
+    private val totalCosts = mutableMapOf<FramePoint, Int>()
+    private val distanceToGoal = mutableMapOf<FramePoint, Int>()
 
     private val avoid = mutableListOf<FramePoint>()
-    fun clearAvoid() {
-        avoid.clear()
-    }
 
-    fun route(start: FramePoint, beforeStart: FramePoint? = null, target: FramePoint, makePassable: List<FramePoint> = emptyList()): List<FramePoint> {
-        return route(start, listOf(target), pointBeforeStart = beforeStart, enemies = emptyList(),
-            forcePassable = makePassable)
-    }
-
-    fun setEnemyCosts(from: FramePoint, enemies: List<FramePoint> = emptyList()) {
-        reset()
-        for (enemy in enemies) {
-            d { " set enemy cost for $enemy"}
-            setEnemyBig(from, enemy)
-        }
-        ///???
-//        setForcePassable(enemies, setTo = false)
-    }
-
-    private fun setForcePassable(passableSpot: List<FramePoint> = emptyList(), setTo: Boolean = true) {
-        if (passableSpot.isNotEmpty()) {
-            d { " force passable $passableSpot" }
-            for (spot in passableSpot) {
-                // make it slighly
-                passable.modifyTo(spot, MapConstants.oneGrid, setTo)
-            }
-        }
-    }
-
-    private fun setZeroCost(target: FramePoint?) {
-        target?.let {
-            d { "set zero cost $target" }
-            // actual enemy higher cost then around the enemy
-            costsF.modifyTo(target, MapConstants.oneGrid, 0)
-        }
-    }
 
     // if link cannot get to the target, instantly return an empty route.
     // like if they do not fit
     // if the cost of the path exceeds a maximum, also just dodge and wait
     // instead link should dodge
     // if the created route doesn't actually go to the target, just return an empty one
-
     // could return a RouteResult with boolean "found target"
 
+    private val customizer = GridCustomizer()
+
+    data class ZRouteParam(
+        val start: FramePoint,
+        val targets: List<FramePoint>,
+        val pointBeforeStart: FramePoint? = null,
+        val enemies: List<FramePoint> = emptyList(),
+        val avoidNearEnemy: List<FramePoint> = emptyList(),
+        val forcePassable: List<FramePoint> = emptyList(),
+        val maximumCost: Int = MaxCostAvoidEnemyNear,
+        // could be used to avoid spots in front of sword guys too
+        val forceHighCost: List<FramePoint> = emptyList(),
+        val enemyTarget: FramePoint? = null,
+        val ladderSpec: LadderSpec? = null,
+        val mapNearest: Boolean = false
+    )
+
+    fun route(start: FramePoint, beforeStart: FramePoint? = null, target: FramePoint, makePassable: List<FramePoint> = emptyList()): List<FramePoint> {
+        return route(
+            ZRouteParam(start = start, targets = listOf(target), pointBeforeStart = beforeStart, enemies = emptyList(),
+                forcePassable = makePassable)
+        )
+    }
 
     fun route(
-        start: FramePoint,
-        targetsIn: List<FramePoint>,
-        pointBeforeStart: FramePoint? = null,
-        enemies: List<FramePoint> = emptyList(),
-        avoidNearEnemy: List<FramePoint> = emptyList(),
-        forcePassable: List<FramePoint> = emptyList(),
-        maximumCost: Int = MaxCostAvoidEnemyNear,
-        enemyTarget: FramePoint? = null,
-        ladderSpec: LadderSpec? = null,
-        mapNearest: Boolean = false
+        param: ZRouteParam
     ): List<FramePoint> {
-//        d { " round to nearest !!!" }
-//        val targets = if (Random().nextInt(8) == 1) {
-//            targetsIn
-//        } else {
-//            targetsIn + targetsIn.map { it.nearestGrid }
-//        }
-        val nearEnemies = enemies.isNotEmpty()
-        val maxIter = if (nearEnemies) SHORT_ITER else MAX_ITER
-        d {"Plan: iter = $maxIter enemies ${enemies.size} near ${avoidNearEnemy.size}"}
-        resetPassable()
-        // only if inside a radius
-        setEnemyCosts(start, enemies)
-        for (nearEnemy in avoidNearEnemy) {
-            setNearEnemy(start, nearEnemy)
-        }
-        setForcePassable(forcePassable)
-        setZeroCost(enemyTarget)
-
-        val targets = if (mapNearest) {
-            targetsIn.flatMap { NearestSafestPoint.nearestSafePoints(it, costsF, passable) }
+        customizer.customize(param)
+        val maxIter = MAX_ITER
+        val targets = if (param.mapNearest) {
+            param.targets.flatMap { NearestSafestPoint.nearestSafePoints(it, costsF, passable) }
         } else {
-            targetsIn
+            param.targets
         }
 
 //        if (forcePassable.isNotEmpty()) {
@@ -235,10 +149,10 @@ class ZStar(
             if (cell1Val < cell2Val) -1 else if (cell1Val > cell2Val) 1 else 0
         }
 
-        val costFromStart = mutableMapOf(start to 0)
+        val costFromStart = mutableMapOf(param.start to 0)
 
         var point = FramePoint(0, 0)
-        openList.add(start)
+        openList.add(param.start)
         iterCount = 0
 //        while (true && iterCount < MAX_ITER) {
         while (iterCount < maxIter) {
@@ -275,20 +189,20 @@ class ZStar(
             closedList.add(point)
 
             // I think this is it
-            val previousPoint = if (iterCount == 1 && pointBeforeStart != null) pointBeforeStart else cameFrom[point]
+            val previousPoint = if (iterCount == 1 && param.pointBeforeStart != null) param.pointBeforeStart else cameFrom[point]
             val dir = previousPoint?.let {
                 directionToDir(it, point)
             } ?: null
             val dist = previousPoint?.let { prev ->
-                pointBeforeStart?.let { st ->
-                    prev.distTo(pointBeforeStart)
+                param.pointBeforeStart?.let { st ->
+                    prev.distTo(param.pointBeforeStart)
                 }
             } ?: null
             if (DEBUG) {
                 d { "from prev=$previousPoint to $point ${if (point.onHighway) "*" else ""} dir $dir" }
             }
 
-            val neighbors = (neighborFinder.neighbors(point, dir, dist ?: 0, ladderSpec) - closedList - avoid).shuffled()
+            val neighbors = (neighborFinder.neighbors(point, dir, dist ?: 0, param.ladderSpec) - closedList - avoid).shuffled()
             for (toPoint in neighbors) {
                 // raw cost of this cell
                 val cost = costsF.get(toPoint)
@@ -309,7 +223,7 @@ class ZStar(
                 }
                 val costS = costFromStart.getOrDefault(toPoint, Int.MAX_VALUE)
 //                d {" cost: $cost $costS"}
-                if (cost < costS && cost < maximumCost) {
+                if (cost < costS && cost < param.maximumCost) {
                     distanceToGoal[toPoint] = costToGoal
                     costFromStart[toPoint] = pathCost
                     totalCosts[toPoint] = totalCost
@@ -433,6 +347,103 @@ class ZStar(
                     it.fold("") { sum, e -> "$sum -> ${e.x},${e.y}${if (e.onHighway) "*" else ""}${if (e.isTopRightCorner) "C" else ""} ${e.direction ?: ""}" }
                         .toString()
                 }
+            }
+        }
+    }
+
+    fun clearAvoid() {
+        avoid.clear()
+    }
+
+    inner class GridCustomizer {
+        fun customize(param: ZRouteParam) {
+            d {"Plan: iter = enemies ${param.enemies.size} near ${param.avoidNearEnemy.size}"}
+            resetPassable()
+            // only if inside a radius
+            setEnemyCosts(param.start, param.enemies)
+            for (nearEnemy in param.avoidNearEnemy) {
+                setNearEnemy(param.start, nearEnemy)
+            }
+            setForceHighCost(param.forceHighCost)
+            setForcePassable(param.forcePassable)
+            setZeroCost(param.enemyTarget)
+        }
+
+        fun reset() {
+            costsF = initialMap.copy()
+        }
+
+        private fun resetPassable() {
+            passable = initialPassable.copy()
+            neighborFinder.passable = passable
+        }
+
+        fun setEnemy(from: FramePoint, point: FramePoint, size: Int = 16) {
+            // make cost relative to the distance??? so it's not all the same badness
+            costsF.modify(
+                from,
+                FramePoint(point.x - MapConstants.oneGrid, point.y - MapConstants.oneGrid),
+                size
+            ) { dist, current ->
+                current + (100 * (MapConstants.twoGrid - dist)) // the closer the higher
+            }
+
+            // the actual enemy should have very very high cost
+            costsF.modify(from, point, MapConstants.oneGrid) { dist, current ->
+                current + onEnemyCost
+            }
+        }
+
+        fun setNearEnemy(from: FramePoint, point: FramePoint) {
+            costsF.modify(from, point, MapConstants.oneGrid) { dist, current ->
+                current + nearEnemyCost
+            }
+        }
+
+        fun setEnemyBig(from: FramePoint, point: FramePoint, size: Int = 16) {
+            // TODO: some enemies are smaller than 16!
+            // why a little less?
+            costsF.modify(from, point.upLeftOneGrid, MapConstants.twoGrid) { _, current ->
+                current + nearEnemyCost
+            }
+
+            // actual enemy higher cost then around the enemy
+            costsF.modify(from, point, MapConstants.oneGrid) { _, current ->
+                current + onEnemyCost
+            }
+        }
+
+        fun setEnemyCosts(from: FramePoint, enemies: List<FramePoint> = emptyList()) {
+            reset()
+            for (enemy in enemies) {
+                d { " set enemy cost for $enemy"}
+                setEnemyBig(from, enemy)
+            }
+            ///???
+//        setForcePassable(enemies, setTo = false)
+        }
+
+        private fun setForcePassable(passableSpot: List<FramePoint> = emptyList(), setTo: Boolean = true) {
+            if (passableSpot.isNotEmpty()) {
+                d { " force passable $passableSpot" }
+                for (spot in passableSpot) {
+                    // make it slighly
+                    passable.modifyTo(spot, MapConstants.oneGrid, setTo)
+                }
+            }
+        }
+
+        private fun setForceHighCost(grids: List<FramePoint> = emptyList()) {
+            for (grid in grids) {
+                costsF.modifyTo(grid, MapConstants.oneGrid, ENEMY_COST)
+            }
+        }
+
+        private fun setZeroCost(target: FramePoint?) {
+            target?.let {
+                d { "set zero cost $target" }
+                // actual enemy higher cost then around the enemy
+                costsF.modifyTo(target, MapConstants.oneGrid, 0)
             }
         }
     }

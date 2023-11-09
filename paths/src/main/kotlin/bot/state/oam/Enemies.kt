@@ -13,6 +13,8 @@ val grabbyHands2 = (0xAC).toInt() // 172
 
 val graveyardGhost = (0xe4).toInt() to (0x01).toInt()
 val ghost = (0xBC).toInt()
+val movingBlock = (0xb1).toInt() to (0x03).toInt()
+val movingBlock2 = (0xb3).toInt() to (0x03).toInt()
 // just ignore all of them if it's the overworld, rather than try to route to it
 val waterMonsterPairUnder = (0xbc) to (0x03).toInt()
 val waterMonsterPairUnder2 = (0xbc) to (0x43).toInt()

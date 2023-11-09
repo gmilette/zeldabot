@@ -7,6 +7,7 @@ import bot.state.map.Direction
 import bot.state.map.MapCell
 import util.d
 import util.w
+import kotlin.math.max
 
 // try to detect when link is stuck and then get unstuck
 
@@ -27,6 +28,42 @@ fun moveHistoryAttackAction(wrapped: Action): Action {
     }
 
     return combinedAction
+}
+
+private class MinDistTotalFramesCount {
+    private var count: Int = 0
+    private var frames: Int = 0
+    private var minX = 0
+    private var minY = 0
+    private var maxX = 0
+    private var maxY = 0
+
+    fun record(point: FramePoint): Boolean {
+        frames++
+        if (minX == 0 && minY == 0) {
+            minX = point.x
+            minY = point.y
+            maxX = point.x
+            maxY = point.y
+        }
+        if (point.x < minX) {
+            minX = point.x
+        }
+        if (point.y < minY) {
+            minY = point.y
+        }
+        maxY = max(maxY, point.y)
+        maxY = max(maxX, point.x)
+        return (frames > 10000) || (frames > 5000 && (maxY - minY < 50))
+    }
+
+    fun reset() {
+        count = 0
+        minX = 0
+        minY = 0
+        maxX = 0
+        maxY = 0
+    }
 }
 
 
@@ -191,9 +228,11 @@ private class CycleDetectorInList() {
 class MoveHistoryAction(private val wrapped: Action, private val escapeAction: Action) : Action {
     private val histSize = 250
     private val same = SameCount()
+    private val changed = MinDistTotalFramesCount()
     private var escapeActionCt = 0
     private val escapeActionTimes = 50
     private val cycleDetector = CycleDetector()
+    private var whyEscape = ""
 
     override fun target(): FramePoint {
         return wrapped.target()
@@ -201,6 +240,11 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
 
     override fun targets(): List<FramePoint> {
         return wrapped.targets()
+    }
+
+    override fun reset() {
+        changed.reset()
+        same.reset()
     }
 
     override fun path(): List<FramePoint> =
@@ -215,13 +259,14 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
 //        d { "MoveHistoryAction" }
         return when {
             escapeActionCt > 0 -> {
-                d { " ESCAPE ACTION " }
+                d { " ESCAPE ACTION $escapeActionCt left because $whyEscape" }
                 val action = escapeAction.nextStep(state)
                 escapeActionCt--
                 action
             }
 
             state.link in state.aliveEnemies.map { it.point } -> {
+                whyEscape = "on enemy"
                 escapeActionCt = escapeActionTimes
                 d { " ESCAPE ACTION reset" }
                 same.reset()
@@ -231,13 +276,17 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
             else -> {
                 val nextStep = wrapped.nextStep(state)
                 val ct = same.record(nextStep)
+                val notChanged = changed.record(state.link)
                 // keep saving link's location
-                cycleDetector.save(state.link)
+//                cycleDetector.save(state.link)
 //                d { " ESCAPE ACTION not same $nextStep + $ct last ${same.last}" }
-                if (ct >= histSize) {
+                if (ct >= histSize) { // || notChanged
                     escapeActionCt = escapeActionTimes
-                    d { " ESCAPE ACTION RESET" }
+                    // if not changed to the reset screen
+                    whyEscape = "not $notChanged ${ct >= histSize}"
+                    d { " ESCAPE ACTION RESET * not changed: $notChanged" }
                     same.reset()
+                    changed.reset()
                 }
                 nextStep
             }
@@ -374,7 +423,7 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
     }
 
     override val name: String
-        get() = wrapped.name
+        get() = "${if (failureCt>70) "! " else "" } ${wrapped.name}"
 }
 
 class StayInCurrentMapCell0(private val wrapped: Action) : Action {
@@ -543,3 +592,30 @@ class LadderAction: Action {
     override val name: String
         get() = ""
 }
+
+class Timeout(action: Action) : WrappedAction(action) {
+    private val frameLimit = 400
+    private var frames = 0
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        d { " timeout ct $frames"}
+        frames++
+        return super.nextStep(state)
+    }
+
+    override fun reset() {
+        frames = 0
+        super.reset()
+    }
+
+    override fun complete(state: MapLocationState): Boolean =
+        frames > frameLimit || super.complete(state).also {
+            if (it) {
+                frames = 0
+            }
+        }
+
+    override val name: String
+        get() = "Timeout of $frames ${super.name}"
+}
+
