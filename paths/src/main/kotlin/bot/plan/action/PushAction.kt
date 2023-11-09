@@ -195,7 +195,7 @@ private class PushIt(private val block: FramePoint,
 
 // move in a direction away from the block, ignoring routing
 private class AwayFrom(private val block: FramePoint,
-                       private val howMany: Int = MapConstants.twoGrid): Action {
+                       private val howMany: Int = (MapConstants.twoGrid * 2)): Action {
     private var frameCount = 0
 
     private var dir: GamePad = GamePad.randomDirection()

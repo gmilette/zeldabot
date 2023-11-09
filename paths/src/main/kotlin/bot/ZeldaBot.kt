@@ -232,7 +232,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             // fill hearts
             // not reliable enough
             val life = frameStateUpdater.state.frameState.inventory.heartCalc.lifeInHearts2()
-            if (life <= 2.5) {
+            if (life <= 4.0) {
                 d { "fill hearts $life" }
                 if (invincible) {
                     stateManipulator.fillHearts()
@@ -268,7 +268,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 //            frameStateUpdater.fillHearts()
                 setEquipmentCt--
             }
-//            stateManipulator.deactivateClock()
+            stateManipulator.deactivateClock()
         }
 
         private fun refillIfOut() {

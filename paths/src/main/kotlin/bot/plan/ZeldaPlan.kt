@@ -47,7 +47,18 @@ object InLocations {
         val ignoreProjectiles: Boolean = false,
         val highCost: List<FramePoint> = emptyList()) {
         singleLeft(FramePoint(7.grid, 5.grid), PushDirection(true, true), FramePoint(3.grid, 8.grid), needAway = true),
-        moveLeftOfTwo(FramePoint(6.grid, 5.grid), PushDirection(true, true), FramePoint(3.grid, 8.grid), needAway = true),
+        moveLeftOfTwo(
+            FramePoint(6.grid, 5.grid),
+            PushDirection(true, true),
+            FramePoint(3.grid, 8.grid),
+            needAway = true,
+            // each could be where link pushed
+            highCost = listOf()),
+//                FramePoint(6.grid, 5.grid).upOneGrid,
+//                FramePoint(6.grid, 5.grid).downOneGrid,
+//                FramePoint(6.grid, 5.grid).leftOneGrid,
+//                FramePoint(6.grid, 5.grid).rightOneGrid
+//            )),
         diamondLeft(FramePoint(6.grid, 5.grid),
             PushDirection(false, true),
             position = FramePoint(5.grid, 7.grid),
