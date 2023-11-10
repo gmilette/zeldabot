@@ -13,7 +13,6 @@ import bot.state.map.destination.ZeldaItem
 import bot.state.oam.dragon4Head
 import bot.state.oam.dragonHead
 import bot.state.oam.dragonHead2
-import bot.state.oam.dragonNeck
 import util.d
 
 class PlanBuilder(
@@ -333,7 +332,7 @@ class PlanBuilder(
             add(nextLoc, level3TriggerDoorTrapThenDo(moveTo(nextLoc)))
             return this
         }
-    val level3BombThen: PlanBuilder
+    val level3BombThenRight: PlanBuilder
         get() {
             val nextLoc = lastMapLoc.right
             add(nextLoc, level3TriggerBombThenDo(moveTo(nextLoc)))
