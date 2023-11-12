@@ -7,6 +7,9 @@ import kotlin.math.abs
 data class FramePoint(val x: Int = 0, val y: Int = 0, val direction: Direction? = null) {
     constructor(x: Int = 0, y: Int = 0) : this(x, y, null)
 
+    val isZero: Boolean
+        get() = x == 0 && y == 0
+
     override fun equals(other: Any?): Boolean {
         return if (other is FramePoint) {
             other.x == x && other.y == y
@@ -74,7 +77,8 @@ val FramePoint.onHighwayX: Boolean
 
 // subtracting by 61 to get the original coordinates so that this modular division works
 val FramePoint.onHighwayY: Boolean
-    get() = y.yAdjust % 8 == 0
+    get() = y % 8 == 0
+//    get() = y.yAdjust % 8 == 0
 
 private val Int.yAdjust: Int
     get() = this + MapConstants.yAdjust

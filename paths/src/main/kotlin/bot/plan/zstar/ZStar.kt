@@ -27,7 +27,6 @@ class ZStar(
         var SHORT_ITER = MAX_ITER // 5000 // not sure if i should use
         val LIMIT_ITERATIONS = false
         val DO_CORNERS = true
-        val DO_ADJUST = false
         val DO_MAKE_CORNERS = false
 
         val nearEnemyCost = 10000
@@ -118,16 +117,7 @@ class ZStar(
             param.targets
         }
 
-//        if (forcePassable.isNotEmpty()) {
-//            d {" force passable "}
-//            passable.write("forcePassable.csv") { v, x, y ->
-//                when {
-//                    v -> "."
-//                    forcePassable[0].isInGrid(FramePoint(x, y)) -> "L"
-//                    else -> "X"
-//                }
-//            }
-//        }
+        //writePassableFile(param.forcePassable)
 
         val closedList = mutableSetOf<FramePoint>()
         val cameFrom = mutableMapOf<FramePoint, FramePoint>()
@@ -135,21 +125,13 @@ class ZStar(
         val target = targets.toList()
 
         val openList: PriorityQueue<FramePoint> = PriorityQueue<FramePoint> { cell1, cell2 ->
-            //Compares 2 Node objects stored in the PriorityQueue and Reorders the Queue according to the object which has the lowest fValue
-//            val cell1Val = totalCosts[cell1] ?: 0
-//            val cell2Val = totalCosts[cell2] ?: 0
-            // distance that makes link just go straight into death, ignoring cost why?
-//            val cell1Val = distanceToGoal[cell1] ?: 0
-//            val cell2Val = distanceToGoal[cell2] ?: 0
-
             val cell1Val = (totalCosts[cell1] ?: 0) + (distanceToGoal[cell1] ?: 0)
             val cell2Val = (totalCosts[cell2] ?: 0) + (distanceToGoal[cell2] ?: 0)
-
-//            d { "sort ${cell1} ${cell2} $cell1Val $cell2Val"}
             if (cell1Val < cell2Val) -1 else if (cell1Val > cell2Val) 1 else 0
         }
 
         val costFromStart = mutableMapOf(param.start to 0)
+        var pointClosestToGoal = FramePoint()
 
         var point = FramePoint(0, 0)
         openList.add(param.start)
@@ -224,6 +206,10 @@ class ZStar(
                 val costS = costFromStart.getOrDefault(toPoint, Int.MAX_VALUE)
 //                d {" cost: $cost $costS"}
                 if (cost < costS && cost < param.maximumCost) {
+                    if (pointClosestToGoal.isZero ||
+                        costToGoal < (distanceToGoal[pointClosestToGoal] ?: Int.MAX_VALUE)) {
+                        pointClosestToGoal = toPoint
+                    }
                     distanceToGoal[toPoint] = costToGoal
                     costFromStart[toPoint] = pathCost
                     totalCosts[toPoint] = totalCost
@@ -248,7 +234,8 @@ class ZStar(
             d { " ****** DONE $iterCount ****** " }
         }
         // todo: actually should pick the best path so far..
-        return generatePath(target, cameFrom, point)
+        // if there is no goal, then use the closest point to the goal
+        return generatePath(target, cameFrom, pointClosestToGoal)
     }
 
     private fun getQuadCost(point: FramePoint): Int =
@@ -293,8 +280,9 @@ class ZStar(
     }
 
     private fun generatePath(
-        targets: List<FramePoint>, cameFrom: Map<FramePoint,
-                FramePoint>, lastExplored: FramePoint
+        targets: List<FramePoint>,
+        cameFrom: Map<FramePoint, FramePoint>,
+        lastExplored: FramePoint
     ): List<FramePoint> {
         val target = targets.firstOrNull { cameFrom.containsKey(it) }
 
@@ -329,9 +317,6 @@ class ZStar(
             d { " end " }
         }
         val pathAdjusted = path.toMutableList()
-        if (DO_ADJUST) {
-            adjustCorner(pathAdjusted)
-        }
 
         return pathAdjusted.also {
             // this doesn't work well
@@ -353,6 +338,19 @@ class ZStar(
 
     fun clearAvoid() {
         avoid.clear()
+    }
+
+    private fun writePassableFile(forcePassable: List<FramePoint>) {
+        if (forcePassable.isNotEmpty()) {
+            d {" force passable "}
+            passable.write("forcePassable.csv") { v, x, y ->
+                when {
+                    v -> "."
+                    forcePassable[0].isInGrid(FramePoint(x, y)) -> "L"
+                    else -> "X"
+                }
+            }
+        }
     }
 
     inner class GridCustomizer {
@@ -447,17 +445,4 @@ class ZStar(
             }
         }
     }
-}
-
-//-> 128,119*C  -> 128,120*  -> 129,120*  -> 130,120*  -> 131,120*  -> 132,120*
-fun adjustCorner(path: MutableList<FramePoint>) {
-    if (path.size < 2) return
-    val corner = path[0]
-    if (!corner.isTopRightCorner) return
-    d { "THE CORNER $corner" }
-    for (pt in path.take(5)) {
-        d { " was pt $pt" }
-    }
-    path.set(1, path[0].right)
-    path.set(2, path[0].right.right)
 }

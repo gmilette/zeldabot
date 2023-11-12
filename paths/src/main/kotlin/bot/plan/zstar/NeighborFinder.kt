@@ -107,7 +107,11 @@ class NeighborFinder(
 //            logPassable(next)
             if (passableAndWithin(next)) { // || next.isCorner
 //                d { " passable! ${neigh.size}"}
-                neigh.add(next)
+
+                // good but sometimes target points are not on highway, then what to do?
+                if (next.onHighway) {
+                    neigh.add(next)
+                }
                 // but also add an additional neighbor for using the corner
                 // then gstar will selection it randomly
                 if (next.onHighwayYAlmost && direction.horizontal) {
