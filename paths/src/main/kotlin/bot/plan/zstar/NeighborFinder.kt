@@ -7,6 +7,7 @@ import bot.state.map.pointModifier
 import bot.state.map.vertical
 import util.Map2d
 import util.d
+import kotlin.random.Random
 
 // list of passible nodes
 //    private val FramePoint.neighbors
@@ -105,101 +106,136 @@ class NeighborFinder(
                 d { "l ${passable.get(next)}"}
             }
 //            logPassable(next)
-            if (passableAndWithin(next)) { // || next.isCorner
+            if (passableAndWithin(next)) {
 //                d { " passable! ${neigh.size}"}
-
-                // good but sometimes target points are not on highway, then what to do?
+                // it's pointless to explore a point link cannot walk on. Link can
+                // only walk on highways
                 if (next.onHighway) {
                     neigh.add(next)
                 }
-                // but also add an additional neighbor for using the corner
-                // then gstar will selection it randomly
-                if (next.onHighwayYAlmost && direction.horizontal) {
-                    // it's going to go down, but the direction is right/left
-                    // don't add it if the point it outside
-                    if (point.down.within()) {
-                        val realMoveTo = point.down.addDirection(direction)
-                        //d { " onHighwayYAlmost point $point $direction real: $realMoveTo" }
-                        neigh.add(realMoveTo)
-                    }
-                }
 
-                if (next.onHighwayYAlmostBeyond && direction.horizontal) {
-                    // 104, 113 -> if  here you went one to low, and you want to go back up, you could go right to go up
-                    // 104, 112
-                    if (point.up.within()) {
-                        val realMoveTo = point.up.addDirection(direction)
-                        neigh.add(realMoveTo)
-                    }
+                // but it's possible link could attempt to move before a corner
+                // in order to actually move and not get stuck.
+                // this is needed because sometimes random pixels are not accessible by link
+                sometimes {
+                    addCornerMove(next, direction, point, neigh)
                 }
-
-                if (next.onHighwayXAlmost && direction.vertical) {
-                    // the way up is blocked, it can go up, but link is actually going to
-                    // go right instead to get around it and get on the highway
-//                // it's going to go right, but the direction is up/down
-                    if (point.right.within()) {
-                        val realMoveTo = point.right.addDirection(direction)
-                        //d { " onHighwayYAlmost point $point $direction real: $realMoveTo" }
-                        neigh.add(realMoveTo)
-                    }
-                }
-                if (next.onHighwayXAlmostBeyond && direction.vertical) {
-                    // copy and paste
-                    if (point.left.within()) {
-                        val realMoveTo = point.left.addDirection(direction)
-                        neigh.add(realMoveTo)
-                    }
-                }
-                // do left too
-            } else if (next.onHighwayYAlmost && direction.horizontal) {
-                // it's going to go down, but the direction is right/left
-                if (point.down.within()) {
-                    val realMoveTo = point.down.addDirection(direction)
-                    //d { " onHighwayYAlmost point $point $direction real: $realMoveTo" }
-                    neigh.add(realMoveTo)
-                }
-                // like when
-            } else if (next.onHighwayYAlmostBeyond && direction.horizontal) {
-                // 104, 113 -> if  here you went one to low, and you want to go back up, you could go right to go up
-                // 104, 112
-                if (point.up.within()) {
-                    val realMoveTo = point.up.addDirection(direction)
-//                d { " onHighwayYAlmostBeyond point $point $direction real: $realMoveTo" }
-                    neigh.add(realMoveTo)
-                }
-            } else if (next.onHighwayXAlmost && direction.vertical) {
-                // the way up is blocked, it can go up, but link is actually going to
-                // go right instead to get around it and get on the highway
-//                // it's going to go right, but the direction is up/down
-                if (point.right.within()) {
-                    val realMoveTo = point.right.addDirection(direction)
-                    //d { " onHighwayYAlmost point $point $direction real: $realMoveTo" }
-                    neigh.add(realMoveTo)
-                }
-            } else if (next.onHighwayXAlmostBeyond && direction.vertical) {
-                // copy and paste
-                if (point.left.within()) {
-                    val realMoveTo = point.left.addDirection(direction)
-                    neigh.add(realMoveTo)
-                }
-            }
-            else {
-//                d { " passable NOT"}
-                // going from 143 to 144
-                 // check corners
-                val corner = corner(point, direction)
-                if (ZStar.DO_CORNERS && corner != null) {
-                    if (ZStar.DEBUG) {
-                        d { " add corner $corner $direction" }
-                    }
-                    neigh.add(corner.addDirection(direction))
-                }
-                if (ZStar.DEBUG) {
-                    d { " corner $point $next $direction not passable" }
+            } else {
+                sometimes {
+                    addCornerMove(next, direction, point, neigh)
+                    // why are these different?
+//                    addCornerMoveNotPassable(next, direction, point, neigh)
                 }
             }
         }
         return neigh
+    }
+
+    private fun addCornerMove(
+        next: FramePoint,
+        direction: Direction,
+        point: FramePoint,
+        neigh: MutableList<FramePoint>
+    ) {
+        // but also add an additional neighbor for using the corner
+        // then gstar will selection it randomly
+        if (next.onHighwayYAlmost && direction.horizontal) {
+            // it's going to go down, but the direction is right/left
+            // don't add it if the point it outside
+            if (point.down.within()) {
+                val realMoveTo = point.down.addDirection(direction)
+                //d { " onHighwayYAlmost point $point $direction real: $realMoveTo" }
+                neigh.add(realMoveTo)
+            }
+        }
+
+        if (next.onHighwayYAlmostBeyond && direction.horizontal) {
+            // 104, 113 -> if  here you went one to low, and you want to go back up, you could go right to go up
+            // 104, 112
+            if (point.up.within()) {
+                val realMoveTo = point.up.addDirection(direction)
+                neigh.add(realMoveTo)
+            }
+        }
+
+        if (next.onHighwayXAlmost && direction.vertical) {
+            // the way up is blocked, it can go up, but link is actually going to
+            // go right instead to get around it and get on the highway
+    //                // it's going to go right, but the direction is up/down
+            if (point.right.within()) {
+                val realMoveTo = point.right.addDirection(direction)
+                //d { " onHighwayYAlmost point $point $direction real: $realMoveTo" }
+                neigh.add(realMoveTo)
+            }
+        }
+
+        if (next.onHighwayXAlmostBeyond && direction.vertical) {
+            // copy and paste
+            if (point.left.within()) {
+                val realMoveTo = point.left.addDirection(direction)
+                neigh.add(realMoveTo)
+            }
+        }
+    }
+
+    private fun addCornerMoveNotPassable(
+        next: FramePoint,
+        direction: Direction,
+        point: FramePoint,
+        neigh: MutableList<FramePoint>
+    ) {
+        if (next.onHighwayYAlmost && direction.horizontal) {
+            // it's going to go down, but the direction is right/left
+            if (point.down.within()) {
+                val realMoveTo = point.down.addDirection(direction)
+                //d { " onHighwayYAlmost point $point $direction real: $realMoveTo" }
+                neigh.add(realMoveTo)
+            }
+            // like when
+        } else if (next.onHighwayYAlmostBeyond && direction.horizontal) {
+            // 104, 113 -> if  here you went one to low, and you want to go back up, you could go right to go up
+            // 104, 112
+            if (point.up.within()) {
+                val realMoveTo = point.up.addDirection(direction)
+                //                d { " onHighwayYAlmostBeyond point $point $direction real: $realMoveTo" }
+                neigh.add(realMoveTo)
+            }
+        } else if (next.onHighwayXAlmost && direction.vertical) {
+            // the way up is blocked, it can go up, but link is actually going to
+            // go right instead to get around it and get on the highway
+            //                // it's going to go right, but the direction is up/down
+            if (point.right.within()) {
+                val realMoveTo = point.right.addDirection(direction)
+                //d { " onHighwayYAlmost point $point $direction real: $realMoveTo" }
+                neigh.add(realMoveTo)
+            }
+        } else if (next.onHighwayXAlmostBeyond && direction.vertical) {
+            // copy and paste
+            if (point.left.within()) {
+                val realMoveTo = point.left.addDirection(direction)
+                neigh.add(realMoveTo)
+            }
+        } else {
+            //                d { " passable NOT"}
+            // going from 143 to 144
+            // check corners
+            val corner = corner(point, direction)
+            if (ZStar.DO_CORNERS && corner != null) {
+                if (ZStar.DEBUG) {
+                    d { " add corner $corner $direction" }
+                }
+                neigh.add(corner.addDirection(direction))
+            }
+            if (ZStar.DEBUG) {
+                d { " corner $point $next $direction not passable" }
+            }
+        }
+    }
+
+    private fun sometimes(block: () -> Unit) {
+        if (Random.nextInt(4) == 0) {
+            block()
+        }
     }
 
     private fun logPassable(point: FramePoint) {

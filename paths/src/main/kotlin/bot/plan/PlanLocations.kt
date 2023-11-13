@@ -43,6 +43,7 @@ object InLocations {
                     val needAway: Boolean = false,
                     val ignoreProjectiles: Boolean = false,
                     val highCost: List<FramePoint> = emptyList()) {
+        statue(FramePoint(7.grid, 5.grid), PushDirection(true, true), FramePoint(3.grid, 8.grid), needAway = true),
         singleLeft(FramePoint(7.grid, 5.grid), PushDirection(true, true), FramePoint(3.grid, 8.grid), needAway = true),
         moveLeftOfTwo(
             FramePoint(6.grid, 5.grid),

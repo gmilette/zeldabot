@@ -2,10 +2,7 @@ package bot.plan.action
 
 import bot.plan.InLocations
 import bot.state.*
-import bot.state.map.Direction
-import bot.state.map.MapConstants
-import bot.state.map.grid
-import bot.state.map.pointModifier
+import bot.state.map.*
 import util.d
 
 // timeout
@@ -31,6 +28,53 @@ fun makeGo(to: FramePoint) = InsideNav(to)
 //            upTo,
 //        ), restartWhenDone = false, shouldComplete = true))
 //    ), restartWhenDone = false, shouldComplete = true)
+
+fun makeStatuePush(statue: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem): Action =
+    OrderedActionSequence(listOf(
+        CompleteIfMapChanges(OrderedActionSequence(listOf(
+            // position
+            InsideNav(statue.upOneGrid.justRightEnd, tag = "position"),
+            InsideNav(statue.upOneGrid, tag = "push position"),
+            GoIn(20, GamePad.MoveDown, reset = true),
+            GoIn(75, GamePad.None, reset = true),
+            Timeout(InsideNav(statue.upOneGrid, ignoreProjectiles = false, tag = "go in"))
+        ), restartWhenDone = false, shouldComplete = true) // fine if this restarts, it will end once user exits
+        ), CompleteIfMapChanges(OrderedActionSequence(
+            listOfNotNull(
+                GoInConsume(15, GamePad.MoveUp),
+                // need to do more here
+                if (itemLoc != InLocations.Overworld.centerItem) {
+                    InsideNavAbout(itemLoc.downTwoGrid, 4, 2, 1, shop = true)
+                } else null,
+                InsideNavAbout(itemLoc, 4, 2, 1, shop = true),
+                if (itemLoc != Objective.ItemLoc.Enter.point) {
+                    ExitShop()
+                } else null,
+                if (itemLoc != Objective.ItemLoc.Enter.point) {
+                    GoIn(5, GamePad.MoveDown)
+                } else null,
+            )
+        ))
+    ))
+
+//    // complete only when get the item
+
+//    if (position) {
+//        goTo(to.upOneGrid.justRightEnd)
+//    }
+//    val pushSpot = to.upOneGrid
+//    // doesn't work, need to use push spot
+//    goTo(pushSpot)
+//    // maybe just keep trying to get to a location in center of the push
+//    // needed to make this much lower for the pushing of magic sword
+//    goIn(GamePad.MoveDown, 20)
+//    // wait for it to move
+//    goIn(GamePad.None, 75)
+//
+//    goToOrMapChanges(to)
+
+}
+
 
 fun makeCenterPush(startAt: MapLoc,
                    upTo: Action,

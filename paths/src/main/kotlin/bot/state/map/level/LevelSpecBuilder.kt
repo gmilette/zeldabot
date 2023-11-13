@@ -256,7 +256,7 @@ class LevelSpecBuilder {
             LevelSpec(grumble.up, e(l, r, d), "maze", LevelMapTemplateReader.Temp.lev_water_maze_path, isHalfPassable = false),
 
             LevelSpec(grumble.up.right, e(l, r), "dude bomb", LevelMapTemplateReader.Temp.lev_block4out2),
-            LevelSpec(grumble.up.right.right, e(l, r), "red candle", LevelMapTemplateReader.Temp.lev_stairs_center),
+            LevelSpec(grumble.up.right.right, e(l, r), "red candle", LevelMapTemplateReader.Temp.lev_stairs_center_blocked),
             LevelSpec(grumble.up.right.right.right, e(l, r, u), "guys with bomb", LevelMapTemplateReader.Temp.lev_corner),
             LevelSpec(grumble.up.right.right.right.right, e(l, u), "whistle guy", LevelMapTemplateReader.Temp.lev_corner),
             LevelSpec(grumble.up.right.right.right.right.up, e(d, r), "block bomb right", LevelMapTemplateReader.Temp.lev_block2center),
