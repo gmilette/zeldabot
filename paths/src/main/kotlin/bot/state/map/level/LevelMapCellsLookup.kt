@@ -3,7 +3,6 @@ package bot.state.map.level
 import bot.state.MapLoc
 import bot.state.map.MapCell
 import bot.state.map.MapCells
-import java.io.File
 
 data class LevelMapCellsLookup(val mapCells: MutableMap<Int, MapCells> = mutableMapOf()) {
     init {

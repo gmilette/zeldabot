@@ -3,10 +3,9 @@ package bot.state
 import bot.plan.action.PreviousMove
 import bot.state.map.Hyrule
 import bot.state.map.MapConstants
-import bot.state.map.horizontal
-import nintaco.api.API
 import bot.state.oam.LinkDirectionFinder
 import bot.state.oam.OamStateReasoner
+import nintaco.api.API
 import util.d
 
 class FrameStateUpdater(

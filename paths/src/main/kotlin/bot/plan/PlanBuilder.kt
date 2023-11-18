@@ -8,12 +8,11 @@ import bot.state.*
 import bot.state.map.*
 import bot.state.map.destination.DestType
 import bot.state.map.destination.EntryType
-import bot.state.map.level.LevelMapCellsLookup
 import bot.state.map.destination.ZeldaItem
+import bot.state.map.level.LevelMapCellsLookup
 import bot.state.oam.dragon4Head
 import bot.state.oam.dragonHead
 import bot.state.oam.dragonHead2
-import sequence.findpaths.Plan
 import util.d
 
 class PlanBuilder(

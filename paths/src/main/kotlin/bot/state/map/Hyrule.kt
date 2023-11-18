@@ -2,8 +2,8 @@ package bot.state.map
 
 import bot.plan.zstar.ZStar
 import bot.state.*
-import bot.state.map.level.LevelMapCellsLookup
 import bot.state.map.destination.DestType
+import bot.state.map.level.LevelMapCellsLookup
 import util.Map2d
 import util.d
 import java.io.File

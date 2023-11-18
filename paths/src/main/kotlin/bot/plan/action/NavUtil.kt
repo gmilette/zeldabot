@@ -4,7 +4,6 @@ import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapCell
-import bot.state.oam.map
 import util.d
 import kotlin.math.abs
 

@@ -2,8 +2,8 @@ package bot.plan.action
 
 import bot.state.*
 import bot.state.map.MapConstants
-import org.junit.Test
 import io.kotest.matchers.shouldBe
+import org.junit.Test
 
 class FramePointExtKtTest {
 

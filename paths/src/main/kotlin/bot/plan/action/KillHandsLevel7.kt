@@ -1,5 +1,8 @@
 import bot.plan.action.*
-import bot.state.*
+import bot.state.EnemyState
+import bot.state.FramePoint
+import bot.state.GamePad
+import bot.state.MapLocationState
 import bot.state.map.grid
 import bot.state.oam.grabbyHands
 import bot.state.oam.grabbyHands2

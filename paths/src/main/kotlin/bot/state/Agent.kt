@@ -3,7 +3,6 @@ package bot.state
 import bot.state.map.Direction
 import bot.state.oam.LinkDirectionFinder
 import bot.state.oam.MonsterDirection
-import bot.state.oam.SpriteData
 
 val List<Agent>.points: List<FramePoint>
     get() = this.map { it.point }

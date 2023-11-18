@@ -4,7 +4,6 @@ import bot.plan.InLocations
 import bot.state.FramePoint
 import bot.state.GamePad
 import bot.state.MapLocationState
-import bot.state.leftTwoGrid
 import bot.state.map.grid
 import util.d
 

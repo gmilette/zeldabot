@@ -3,7 +3,6 @@ package bot.plan.zstar
 import bot.plan.action.isInGrid
 import bot.state.*
 import bot.state.map.Direction
-import bot.state.map.MapCell
 import bot.state.map.MapConstants
 import util.Map2d
 import util.d

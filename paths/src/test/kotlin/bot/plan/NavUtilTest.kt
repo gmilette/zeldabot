@@ -1,11 +1,9 @@
 package bot.plan
 
-import bot.state.GamePad
 import bot.plan.action.NavUtil
 import bot.plan.zstar.NearestSafestPoint
 import bot.plan.zstar.ZStar
 import bot.state.*
-import bot.state.map.Direction
 import bot.state.map.Hyrule
 import bot.state.map.MapCell
 import bot.state.map.MapCellData

@@ -1,7 +1,9 @@
 package bot
 
 import co.touchlab.kermit.Logger
-import nintaco.api.*
+import nintaco.api.API
+import nintaco.api.ApiSource
+import nintaco.api.Colors
 import util.d
 
 class HelloWorld {

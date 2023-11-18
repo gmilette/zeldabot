@@ -1,7 +1,7 @@
 package sequence
 
 import bot.plan.OverworldRouter
-import bot.state.*
+import bot.state.MapLoc
 import bot.state.map.Hyrule
 import bot.state.map.MapCell
 import util.d

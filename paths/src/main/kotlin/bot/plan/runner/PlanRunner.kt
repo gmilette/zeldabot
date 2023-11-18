@@ -1,7 +1,9 @@
 package bot.plan.runner
 
 import bot.ZeldaBot
-import bot.plan.action.*
+import bot.plan.action.Action
+import bot.plan.action.DoNothing
+import bot.plan.action.moveHistoryAttackAction
 import bot.state.Addresses
 import bot.state.FramePoint
 import bot.state.GamePad

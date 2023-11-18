@@ -2,15 +2,16 @@ package bot.plan.action
 
 import bot.plan.action.NavUtil.directionToDir
 import bot.plan.zstar.FrameRoute
-import bot.plan.zstar.NearestSafestPoint
 import bot.plan.zstar.ZStar
 import bot.state.*
-import bot.state.map.*
+import bot.state.map.Direction
+import bot.state.map.MapCell
+import bot.state.map.MapConstants
+import bot.state.map.toGamePad
 import bot.state.oam.shopOwner
 import util.LogFile
 import util.d
 import util.w
-import java.util.Random
 
 
 //val navUntil = CompleteIfAction(InsideNav()), completeIf = { state ->

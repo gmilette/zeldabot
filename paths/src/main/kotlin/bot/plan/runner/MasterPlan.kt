@@ -2,7 +2,6 @@ package bot.plan.runner
 
 import bot.plan.action.Action
 import bot.plan.action.EndAction
-import bot.plan.action.MoveTo
 import bot.plan.action.StartHereAction
 import bot.state.MapLoc
 import bot.state.MapLocationState

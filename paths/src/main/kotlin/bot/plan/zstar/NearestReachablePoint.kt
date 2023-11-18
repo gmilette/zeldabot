@@ -1,6 +1,8 @@
 package bot.plan.zstar
 
-import bot.state.*
+import bot.state.FramePoint
+import bot.state.MapLocationState
+import bot.state.isOnMap
 import bot.state.map.Direction
 import bot.state.map.MapConstants
 import bot.state.map.pointModifier

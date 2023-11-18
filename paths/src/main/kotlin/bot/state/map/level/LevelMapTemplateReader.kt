@@ -1,7 +1,6 @@
 package bot.state.map.level
 
 import com.github.doyaaaaaken.kotlincsv.client.CsvReader
-import util.Map2d
 import util.d
 
 /**

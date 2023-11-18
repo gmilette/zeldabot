@@ -1,8 +1,9 @@
 package analyze
 
-import bot.state.*
 import org.jetbrains.kotlinx.dataframe.DataFrame
-import org.jetbrains.kotlinx.dataframe.api.*
+import org.jetbrains.kotlinx.dataframe.api.filter
+import org.jetbrains.kotlinx.dataframe.api.print
+import org.jetbrains.kotlinx.dataframe.api.sortBy
 import org.jetbrains.kotlinx.dataframe.io.read
 
 //private val pathToCsv = "skips/skips.csv"

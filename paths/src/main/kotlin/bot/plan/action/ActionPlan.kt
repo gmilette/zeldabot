@@ -1,6 +1,5 @@
 package bot.plan.action
 
-import bot.plan.zstar.NearestSafestPoint
 import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.Direction
@@ -11,7 +10,6 @@ import bot.state.oam.*
 import nintaco.api.ApiSource
 import util.d
 import util.i
-import util.w
 
 interface Action {
     /**

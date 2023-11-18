@@ -1,9 +1,9 @@
 package bot.plan
 
-import bot.state.GamePad
 import bot.plan.action.MoveTowardsUtil
 import bot.plan.action.PreviousMove
 import bot.state.FramePoint
+import bot.state.GamePad
 import org.junit.Test
 
 class MoveTowardsUtilTest {

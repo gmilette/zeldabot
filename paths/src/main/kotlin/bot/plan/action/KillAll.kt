@@ -1,9 +1,6 @@
 package bot.plan.action
 
-import bot.plan.zstar.NearestSafestPoint
 import bot.state.*
-import bot.state.map.Direction
-import bot.state.map.MapConstants
 import bot.state.map.grid
 import util.LogFile
 import util.d

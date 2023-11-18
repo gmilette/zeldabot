@@ -1,15 +1,8 @@
 package bot.plan.runner
 
 import bot.plan.Phases
-import bot.plan.PlanBuilder
 import bot.plan.action.Action
-import bot.plan.action.Bomb
-import bot.plan.action.KillAll
-import bot.state.FramePoint
 import bot.state.map.destination.ZeldaItem
-import bot.state.map.grid
-import sequence.findpaths.Point
-import java.awt.Frame
 
 class Experiments(masterPlan: MasterPlan) {
     companion object {

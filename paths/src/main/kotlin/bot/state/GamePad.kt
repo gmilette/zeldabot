@@ -1,6 +1,5 @@
 package bot.state
 
-import bot.state.map.Direction
 import bot.state.map.MapConstants
 import nintaco.api.GamepadButtons
 import kotlin.random.Random

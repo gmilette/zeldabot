@@ -1,7 +1,7 @@
 package bot.state
 
-import nintaco.api.API
 import bot.state.map.destination.ZeldaItem
+import nintaco.api.API
 import util.d
 
 class InventoryItems(api: API) {

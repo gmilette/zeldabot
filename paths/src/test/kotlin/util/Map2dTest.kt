@@ -1,7 +1,6 @@
 package util
 
 import io.kotest.matchers.shouldBe
-import org.junit.Assert.*
 import org.junit.Test
 
 class Map2dTest {
