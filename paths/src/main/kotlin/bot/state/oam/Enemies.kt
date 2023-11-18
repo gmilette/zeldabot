@@ -31,7 +31,7 @@ val bomb = 52
 val key = (0x2E).toInt() //key
 val heart = 243
 
-val shopkeeperAndBat = (0x9C).toInt()
+val shopkeeperAndBat = (0x9C).toInt() to (0x00).toInt()
 val bat = (0x9A).toInt()
 
 val boulder = (0x90).toInt()

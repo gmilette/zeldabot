@@ -12,7 +12,7 @@ fun makePushActionThen(push: InLocations.Push, then: Action): Action =
 fun makeStatuePush(statue: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem): Action =
     OrderedActionSequence(listOf(
         CompleteIfChangeShopOwner(true, OrderedActionSequence(listOf(
-            InsideNav(statue.upOneGrid, highCost = listOf(statue.downOneGrid), tag = "push position"),
+            InsideNav(statue.upOneGrid, highCost = listOf(statue.downOneGrid, statue), tag = "push position"),
             GoIn(20, GamePad.MoveDown, reset = true),
             GoIn(75, GamePad.None, reset = true),
             Timeout(InsideNav(statue, ignoreProjectiles = false, tag = "go in"))

@@ -9,6 +9,7 @@ import bot.state.map.MapCell
 import bot.state.map.MapConstants
 import bot.state.map.toGamePad
 import bot.state.oam.shopOwner
+import bot.state.oam.shopkeeperAndBat
 import util.LogFile
 import util.d
 import util.w
@@ -44,7 +45,8 @@ class CompleteIfChangeShopOwner(private val changeTo: Boolean, private val wrapp
         state.frameState.enemies.isNotEmpty() && initial != null && (inShop(state) == changeTo)
 
     private fun inShop(state: MapLocationState): Boolean = state.frameState.enemies.any {
-        it.tile == shopOwner.first && it.attribute == shopOwner.second
+        (it.tile == shopOwner.first && it.attribute == shopOwner.second) ||
+            (it.tile == shopkeeperAndBat.first && it.attribute == shopkeeperAndBat.second)
     }
 
     override fun reset() {
