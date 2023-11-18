@@ -9,6 +9,14 @@ import util.d
 fun makePushActionThen(push: InLocations.Push, then: Action): Action =
     CompleteIfMapChanges(PushAction(push, then))
 
+fun makeStatuePushGo(statue: FramePoint): Action =
+    OrderedActionSequence(listOf(
+            InsideNav(statue.upOneGrid, highCost = listOf(statue.downOneGrid, statue), tag = "push position"),
+            GoIn(20, GamePad.MoveDown, reset = true),
+            GoIn(75, GamePad.None, reset = true),
+            Timeout(InsideNav(statue, ignoreProjectiles = false, tag = "go in"))
+        ), restartWhenDone = false, shouldComplete = true, tag = "push") // fine if this restarts, it will end once user exits
+
 fun makeStatuePush(statue: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem): Action =
     OrderedActionSequence(listOf(
         CompleteIfChangeShopOwner(true, OrderedActionSequence(listOf(

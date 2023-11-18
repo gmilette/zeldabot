@@ -741,7 +741,11 @@ class PlanBuilder(
 
     private fun PlanBuilder.pushDownGetItem(to: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, position: Boolean = false):
             PlanBuilder {
-        +makeStatuePush(statue = to, itemLoc = itemLoc)
+        if (itemLoc == Objective.ItemLoc.None.point) {
+            +makeStatuePushGo(statue = to)
+        } else {
+            +makeStatuePush(statue = to, itemLoc = itemLoc)
+        }
         return this
     }
 

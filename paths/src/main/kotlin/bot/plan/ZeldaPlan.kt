@@ -383,9 +383,11 @@ object ZeldaPlan {
             seg("get back")
             rightm
             right // possibly kill until get bomb IF need bombs
-            seg("kill all zombie to open")
+            seg("kill all zombie to open get key")
             killUntilGetKey
-            upm // 86, rhinos
+            seg("kill all zombie up move up to rhino")
+            up
+            seg("kill all zombie up move right")
             rightm //85
             seg("no head up to victory")
             upm // impossible maze

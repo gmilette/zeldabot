@@ -38,9 +38,6 @@ class CompleteIfChangeShopOwner(private val changeTo: Boolean, private val wrapp
     private var initial: Boolean? = null
     private var completeCt: Int = 0
 
-//    private fun changedOwnerAppearance(state: MapLocationState): Boolean =
-//        initial != null && (inShop(state) != initial)
-
     private fun changedOwnerAppearance(state: MapLocationState): Boolean =
         state.frameState.enemies.isNotEmpty() && initial != null && (inShop(state) == changeTo)
 
