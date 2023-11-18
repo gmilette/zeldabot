@@ -13,6 +13,7 @@ import bot.state.map.destination.ZeldaItem
 import bot.state.oam.dragon4Head
 import bot.state.oam.dragonHead
 import bot.state.oam.dragonHead2
+import sequence.findpaths.Plan
 import util.d
 
 class PlanBuilder(
@@ -712,13 +713,9 @@ class PlanBuilder(
         // execute burn
         plan.add(UseItem())
         // do not walk into the fire
-        // todo, evade instead
         goIn(GamePad.None, 75)
-//        val nextTo = from.pointModifier(6)(to.down2)
-        // modified the map for this
-//        goTo(to, to) // that should be passable now
         goToOrMapChanges(to, to) // that should be passable now
-        // maybe just keep trying to get to a location in center of the push
+
         goIn(opposite.toGamePad(), 16)
         goGetItem(itemLoc)
         return this
@@ -743,7 +740,13 @@ class PlanBuilder(
 
     }
 
-    private fun pushDownGetItem(to: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, position: Boolean = false):
+    private fun PlanBuilder.pushDownGetItem(to: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, position: Boolean = false):
+            PlanBuilder {
+        +makeStatuePush(statue = to, itemLoc = itemLoc)
+        return this
+    }
+
+    private fun pushDownGetItemo(to: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, position: Boolean = false):
             PlanBuilder {
         if (position) {
             goTo(to.upOneGrid.justRightEnd)

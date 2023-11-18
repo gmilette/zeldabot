@@ -51,6 +51,14 @@ enum class GamePad {
                 4 -> MoveRight
                 else -> MoveDown
             }
+
+        fun randomDirection(besides: GamePad): GamePad {
+            var dir = randomDirection()
+            while (dir != besides) {
+                dir = randomDirection()
+            }
+            return dir
+        }
     }
 }
 

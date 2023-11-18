@@ -109,7 +109,8 @@ fun make() {
 class OrderedActionSequence(
     private val actions: List<Action>,
     private val restartWhenDone: Boolean = true,
-    private val shouldComplete: Boolean = false
+    private val shouldComplete: Boolean = false,
+    private val tag: String = ""
 ) : Action {
     private var lastComplete = -1
     var stepName: String = ""
@@ -190,7 +191,7 @@ class OrderedActionSequence(
         actions.all { it.complete(state) }
 
     override val name: String
-        get() = "oSeq: ${currentAction?.name}"
+        get() = "oSeq: $tag doing ${currentAction?.name}"
 }
 
 class CompleteIfGetItem(

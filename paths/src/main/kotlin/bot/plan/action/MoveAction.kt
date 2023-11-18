@@ -6,6 +6,7 @@ import bot.plan.zstar.NearestSafestPoint
 import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.*
+import bot.state.oam.shopOwner
 import util.LogFile
 import util.d
 import util.w
@@ -29,6 +30,46 @@ class CompleteIfAction(
 
     override val name: String
         get() = action.name
+}
+
+class CompleteIfChangeShopOwner(private val changeTo: Boolean, private val wrapped: Action) : Action {
+    private var initial: Boolean? = null
+    private var completeCt: Int = 0
+
+//    private fun changedOwnerAppearance(state: MapLocationState): Boolean =
+//        initial != null && (inShop(state) != initial)
+
+    private fun changedOwnerAppearance(state: MapLocationState): Boolean =
+        state.frameState.enemies.isNotEmpty() && initial != null && (inShop(state) == changeTo)
+
+    private fun inShop(state: MapLocationState): Boolean = state.frameState.enemies.any {
+        it.tile == shopOwner.first && it.attribute == shopOwner.second
+    }
+
+    override fun reset() {
+        completeCt = 0
+        initial = null
+    }
+
+    override fun complete(state: MapLocationState): Boolean =
+        completeCt > 100 || wrapped.complete(state)
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        d { " CompleteIfChangeShopOwner initial $initial current ${inShop(state)} shouldBe $changeTo"}
+        state.frameState.logEnemies()
+        if (initial == null) {
+            initial = inShop(state)
+        }
+        if (changedOwnerAppearance(state)) {
+            completeCt++
+        } else {
+            completeCt = 0
+        }
+        return wrapped.nextStep(state)
+    }
+
+    override val name: String
+        get() = "Until Change Shop ${wrapped.name}"
 }
 
 class CompleteIfMapChanges(private val wrapped: Action) : Action {

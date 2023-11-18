@@ -33,7 +33,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        run(name = "level3")
 //        run(name = "level5") // with ladder
 //        run(name = "afterLev4")
-         run(name = "all")
+//         run(name = "all")
 //        run(name = "level7")
 //        run(name = "go to level 9")
 //        run(name = "level2rhinoAfter")
@@ -53,6 +53,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        runLoc(true,5, 5)
 //        runLoc(true,6, 5)
 //        runLoc(true,63, 8)
+        runLoc(true,61, 0) // forest statue
     }
 
     private fun rerun() {

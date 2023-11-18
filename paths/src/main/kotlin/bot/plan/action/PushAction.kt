@@ -9,37 +9,15 @@ import util.d
 fun makePushActionThen(push: InLocations.Push, then: Action): Action =
     CompleteIfMapChanges(PushAction(push, then))
 
-fun makeGo(to: FramePoint) = InsideNav(to)
-
-// redo whole map if this goes on too long
-
-//fun makeCenterPush(startAt: MapLoc, upTo: Action, goTo: FramePoint = InLocations.getItem): Action =
-//    OrderedActionSequence(listOf(
-//        // restart map, leave, then return. its extreme
-//        CompleteIfMapChanges(
-//            PushAction(
-//                InLocations.Push.diamondLeft,
-//                InsideNav(InLocations.middleStair)) // avoiding the spot in front of push
-//        ),
-//        // nav inside
-//        CompleteIfMapChanges(OrderedActionSequence(listOf(
-//            StartAtAction(startAt),
-//            InsideNav(goTo),
-//            upTo,
-//        ), restartWhenDone = false, shouldComplete = true))
-//    ), restartWhenDone = false, shouldComplete = true)
-
 fun makeStatuePush(statue: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem): Action =
     OrderedActionSequence(listOf(
-        CompleteIfMapChanges(OrderedActionSequence(listOf(
-            // position
-            InsideNav(statue.upOneGrid.justRightEnd, tag = "position"),
-            InsideNav(statue.upOneGrid, tag = "push position"),
+        CompleteIfChangeShopOwner(true, OrderedActionSequence(listOf(
+            InsideNav(statue.upOneGrid, highCost = listOf(statue.downOneGrid), tag = "push position"),
             GoIn(20, GamePad.MoveDown, reset = true),
             GoIn(75, GamePad.None, reset = true),
-            Timeout(InsideNav(statue.upOneGrid, ignoreProjectiles = false, tag = "go in"))
-        ), restartWhenDone = false, shouldComplete = true) // fine if this restarts, it will end once user exits
-        ), CompleteIfMapChanges(OrderedActionSequence(
+            Timeout(InsideNav(statue, ignoreProjectiles = false, tag = "go in"))
+        ), restartWhenDone = false, shouldComplete = true, tag = "push") // fine if this restarts, it will end once user exits
+        ), CompleteIfChangeShopOwner(false, OrderedActionSequence(
             listOfNotNull(
                 GoInConsume(15, GamePad.MoveUp),
                 // need to do more here
@@ -53,9 +31,9 @@ fun makeStatuePush(statue: FramePoint, itemLoc: FramePoint = InLocations.Overwor
                 if (itemLoc != Objective.ItemLoc.Enter.point) {
                     GoIn(5, GamePad.MoveDown)
                 } else null,
-            )
+            ), restartWhenDone = false, shouldComplete = true, tag = "get item"
         ))
-    ))
+    ), restartWhenDone = false, shouldComplete = true)
 
 //    // complete only when get the item
 
@@ -72,8 +50,7 @@ fun makeStatuePush(statue: FramePoint, itemLoc: FramePoint = InLocations.Overwor
 //    goIn(GamePad.None, 75)
 //
 //    goToOrMapChanges(to)
-
-}
+//}
 
 
 fun makeCenterPush(startAt: MapLoc,
@@ -135,7 +112,7 @@ fun goNoPush(upTo: Action,
 class PushAction(push: InLocations.Push, then: Action): Action {
 
     val sequence = OrderedActionSequence(
-    mutableListOf(
+    listOfNotNull(
 //        InsideNav(push.position, makePassable = push.point), // fails in level 9
         if (push == InLocations.Push.diamondLeft) navToPush(push, center = true) else null,
         if (push != InLocations.Push.none) navToPush(push) else null,
@@ -149,7 +126,7 @@ class PushAction(push: InLocations.Push, then: Action): Action {
         Timeout(then),
         KillAll(),
         InsideNav(push.position) // if we are going to retry reposition link
-        ).filterNotNull(), restartWhenDone = true)
+        ), restartWhenDone = true)
 
     override fun reset() {
         d { " reset seq " }
@@ -197,11 +174,8 @@ private fun navToPush(push: InLocations.Push, center: Boolean = false, ignorePro
 }
 
 private class PushIt(private val block: FramePoint,
-                     private val howMany: Int = MapConstants.twoGrid,
-                    private val howManyAway: Int = 0): Action {
+                     private val howMany: Int = MapConstants.twoGrid): Action {
     private var frameCount = 0
-    private var frameCountAway = 0
-    private var previousDir: GamePad = GamePad.None
 
     override fun reset() {
         frameCount = 0
@@ -212,37 +186,25 @@ private class PushIt(private val block: FramePoint,
     }
 
     override fun complete(state: MapLocationState): Boolean {
-        return frameCount > (howMany + howManyAway)
+        return frameCount > howMany
     }
 
     override fun nextStep(state: MapLocationState): GamePad {
         frameCount++
-        return if (frameCount > (howMany + howManyAway)) {
-            d { " DIR is OPPOSITE $previousDir"}
-            previousDir.opposite()
-        } else {
-            if (state.link != block) {
-                previousDir = state.link.directionTo(block)
-                d { " DIR is $previousDir link: ${state.link} to $block"}
-            }
-            previousDir
-        }
-//        return previousDir
-//        return state.link.directionTo(block).also {
-//            d { " DIR $it link: ${state.link} to $block"}
-//        }
+        return state.link.directionTo(block)
     }
 
     override val name: String
         get() = "PushIt $frameCount"
 }
 
-// move in a direction away from the block, ignoring routing
+// move in a direction away from the block, hm... routing would help avoid getting stuck
 private class AwayFrom(private val block: FramePoint,
-                       private val howMany: Int = (MapConstants.twoGrid * 2)): Action {
+                       private val howMany: Int = (MapConstants.twoGrid * 3)): Action {
     private var frameCount = 0
 
     private var dir: GamePad = GamePad.randomDirection()
+    private var dir2: GamePad = GamePad.randomDirection(dir)
 
     override fun reset() {
         frameCount = 0
@@ -257,11 +219,17 @@ private class AwayFrom(private val block: FramePoint,
     }
 
     override fun nextStep(state: MapLocationState): GamePad {
-        if (frameCount > howMany || frameCount == 0) {
+        if (frameCount == 0) {
             dir = GamePad.randomDirection()
+            dir2 = GamePad.randomDirection(dir)
         }
+
         frameCount++
-        return dir
+        return if (frameCount > howMany / 2) {
+            dir2
+        } else {
+            dir
+        }
     }
 
     override val name: String

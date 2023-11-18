@@ -156,6 +156,7 @@ val circleMonster = (0xFC).toInt()
 val circleMonster2 = (0xFE).toInt()
 val circleMonsterCenter = (0xFA).toInt()
 val circleMonsterCenter2 = (0xF8).toInt()
+val shopOwner = (0xF8).toInt() to (0x02).toInt()
 val spinCircleEnemy = (0xC8).toInt() // attribute 42 and 2
 
 // some tile information
