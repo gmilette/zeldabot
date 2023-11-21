@@ -173,6 +173,15 @@ val FramePoint.rightOneGrid
 val FramePoint.leftOneGrid
     get() = FramePoint(x - 16, y)
 
+val FramePoint.upHalfLeftOneGrid
+    get() = FramePoint(x - 16, y - 8)
+val FramePoint.upLeftHalfOneGrid
+    get() = FramePoint(x - 8, y - 8)
+val FramePoint.upHalfGrid
+    get() = FramePoint(x, y - 8)
+val FramePoint.leftHalfGrid
+    get() = FramePoint(x - 8, y)
+
 val FramePoint.upTwoGrid
     get() = FramePoint(x, y - 32)
 val FramePoint.downTwoGrid

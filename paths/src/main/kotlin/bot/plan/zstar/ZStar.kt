@@ -397,10 +397,14 @@ class ZStar(
             }
         }
 
-        fun setEnemyBig(from: FramePoint, point: FramePoint, size: Int = 16) {
-            // TODO: some enemies are smaller than 16!
-            // why a little less?
-            costsF.modify(from, point.upLeftOneGrid, MapConstants.twoGrid) { _, current ->
+        fun setEnemyBig(from: FramePoint, point: FramePoint) {
+//            costsF.modify(from, point.upLeftOneGrid, MapConstants.twoGrid) { _, current ->
+//                current + nearEnemyCost
+//            }
+            // try it
+            costsF.modify(from, point.upHalfLeftOneGrid,
+                sizeWide = MapConstants.twoGrid,
+                sizeTall = MapConstants.oneGridPoint5) { _, current ->
                 current + nearEnemyCost
             }
 

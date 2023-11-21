@@ -715,7 +715,8 @@ private fun doRouteTo(
                 val pt = dir.pointModifier(MapConstants.oneGrid)(agent.point)
                 listOf(
                     pt,
-                    if (dir.horizontal) pt.upOneGrid else pt.leftOneGrid
+                    // ok to be next to the enemy, just not half on top of the enemy
+                    if (dir.horizontal) pt.upHalfGrid else pt.leftHalfGrid
                 )
             } ?: emptyList()
         }

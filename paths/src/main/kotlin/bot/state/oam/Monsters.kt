@@ -62,17 +62,47 @@ val swordDir = DirectionMap(
         0xBA), //02
 )
 
-val ghostDir = DirectionMap(
-    up = setOf(0xb4, //02, 42
-        0xb6), //42x
-    down = setOf(0xac, 0xb0, 0xB2), //02
-    left = setOf(0xbe, //42
-//        0xBC, // was left
-        0xba
-    ), //42
-    right = setOf(0xB8, //02
-        0xBC, // was left
-        0xBA), //02
+data class DirectionMapGhosts(
+    val up: Set<TileAttribute> = setOf(),
+    val left: Set<TileAttribute> = setOf(),
+    val rightOrDown: Set<TileAttribute> = setOf(),
+) {
+    val all = up + left + rightOrDown
+
+    fun dirFront(agent: Agent): Direction? =
+        when {
+            agent.tileAttrib in up -> Direction.Up
+            agent.tileAttrib in rightOrDown -> Direction.Right
+            agent.tileAttrib in left -> Direction.Left
+            else -> null
+        }
+}
+
+private val one = 0x01
+private val fone = 0x41
+private val ftwo = 0x42
+
+val ghostDir = DirectionMapGhosts(
+    // could be diagonal too, but if diagonal, they aren't going to shoot
+    up = setOf(
+        0xbe to one, //b01
+        0xbc to one//b41, b01
+    ),
+    // left can't be down
+    left = setOf(
+        0xb6 to fone, //b,r 41, 42y
+        0xba to fone, //yellow, 42, yep, b41
+        0xb8 to fone,
+        0xb6 to ftwo, //b,r 41, 42y
+        0xba to ftwo, //yellow, 42, yep, b41
+        0xb8 to ftwo
+    ), //attrib 41
+    // left or right could be down!
+    // right or down
+    rightOrDown = setOf(
+        0xb6 to one,
+        0xba to one
+    ), //02, 012
 )
 
 object Monsters {
