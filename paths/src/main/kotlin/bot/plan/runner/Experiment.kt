@@ -35,7 +35,7 @@ class Experiments(masterPlan: MasterPlan) {
 //            Experiment("afterForest30", "forest_30.save", masterPlan.getPlanPhase(Phases.forest30, null)),
             Experiment("level7", "level7_strart.save", masterPlan.getPlanAfter(Phases.level7), sword = ZeldaItem.MagicSword, addEquipment = true),
             Experiment("go to level 9", "mapstate_0_5.save", masterPlan, sword = ZeldaItem.MagicSword, addEquipment = true),
-//            Experiment("level3", "level3.save", masterPlan.getPlanAfter(Phases.level3), sword = ZeldaItem.MagicSword, addEquipment = true),
+            Experiment("level3", "level3.save", masterPlan.getPlanAfter(Phases.level3), sword = ZeldaItem.MagicSword, addEquipment = true),
 //            Experiment("level3After", "level3After.save", masterPlan.getPlanAfter(Phases.level3After)),
             Experiment("ladder_heart", "ladder_heard.save", masterPlan.getPlanAfter(Phases.ladderHeart)),
             Experiment("level8", "level8_start.save", masterPlan.getPlanPhase(Phases.level8, segment = null), sword = ZeldaItem.MagicSword, addEquipment = true),

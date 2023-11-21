@@ -5,7 +5,7 @@ import bot.state.map.grid
 import util.LogFile
 import util.d
 
-class KillAll (
+class KillAll(
     /**
      * keep going after the current enemy for at least 60 frames before switching to another
      */
@@ -39,17 +39,34 @@ class KillAll (
         fun makeIgnoreEnemies() = KillAll(ignoreEnemies = true)
         fun make() = KillAll()
     }
-    constructor(needLongWaitVal: Boolean = false): this(needLongWait = needLongWaitVal)
-    constructor(useBombs: Boolean = false,
-                waitAfterAttack: Boolean = false,
-                numberLeftToBeDead: Int = 0,
-                considerEnemiesInCenter: Boolean = false,
-                needLongWait: Boolean = false,
-                    targetOnly: List<Int> = listOf(),
-                    ignoreProjectiles: List<Int> = listOf(),
-                    ignoreEnemies: Boolean = false,
-                    roundX: Boolean = false,
-                    firstAttackBomb: Boolean = false) : this(60, useBombs, waitAfterAttack, numberLeftToBeDead, considerEnemiesInCenter, needLongWait, targetOnly, ignoreProjectiles, ignoreEnemies, roundX, firstAttackBomb, ignoreProjectilesRoute =false)
+
+    constructor(needLongWaitVal: Boolean = false) : this(needLongWait = needLongWaitVal)
+    constructor(
+        useBombs: Boolean = false,
+        waitAfterAttack: Boolean = false,
+        numberLeftToBeDead: Int = 0,
+        considerEnemiesInCenter: Boolean = false,
+        needLongWait: Boolean = false,
+        targetOnly: List<Int> = listOf(),
+        ignoreProjectiles: List<Int> = listOf(),
+        ignoreEnemies: Boolean = false,
+        roundX: Boolean = false,
+        firstAttackBomb: Boolean = false
+    ) : this(
+        60,
+        useBombs,
+        waitAfterAttack,
+        numberLeftToBeDead,
+        considerEnemiesInCenter,
+        needLongWait,
+        targetOnly,
+        ignoreProjectiles,
+        ignoreEnemies,
+        roundX,
+        firstAttackBomb,
+        ignoreProjectilesRoute = false
+    )
+
     private val killAll: LogFile = LogFile("KillAll")
 
     private val routeTo = RouteTo(RouteTo.Param(dodgeEnemies = true, ignoreProjectiles = ignoreProjectilesRoute))
@@ -192,7 +209,8 @@ class KillAll (
                 if (firstEnemyOrNull == null) {
                     // added for the dragon, doesn't really work well
                     d { "No enemies!!" }
-                    return routeTo.routeTo(state, listOf(FramePoint(8.grid, 6.grid)),
+                    return routeTo.routeTo(
+                        state, listOf(FramePoint(8.grid, 6.grid)),
                         RouteTo.RouteParam(forceNew = true)
                     )
                 }
@@ -204,27 +222,11 @@ class KillAll (
                     val link = state.frameState.link
                     val dist = firstEnemy.point.distTo(link.point)
                     //d { " go find $firstEnemy from $link distance: $dist"}
-                    when {
-                        false && state.frameState.canUseSword && AttackActionDecider.shouldAttack(state) -> {
-                            // is linked turned in the correct direction towards
-                            // the enemy?
-                            previousAttack = true
-                            pressACount = 5
-                            // for the rhino
-                            if (waitAfterAttack) {
-                                waitAfterPressing = 60
-                            }
-                            if (firstAttackBomb || useBombs) {
-                                GamePad.B
-                            } else GamePad.A
-                        }
-
-                        else -> {
-                            // changed enemies
-                            // why is this here?
-                            // guess, don't keep switching target?
-                            // I dont like this, it could lead to chasing the wrong target
-                            // remove
+                    // changed enemies
+                    // why is this here?
+                    // guess, don't keep switching target?
+                    // I dont like this, it could lead to chasing the wrong target
+                    // remove
 //                            sameEnemyCount++
 //                            val sameEnemyForTooLong = sameEnemyCount > sameEnemyFor
 //                            if (sameEnemyForTooLong) {
@@ -232,31 +234,32 @@ class KillAll (
 //                            }
 //                            val forceNew = previousTarget != target && sameEnemyForTooLong
 
-                            // force a new route if this has changed targets
-                            val forceNew = previousTarget.oneStr != target.oneStr
-                            d { "Plan: target changed was $previousTarget now ${target} forceNew = $forceNew"}
-                            // can't tell if the target has changed
-                            // handle replanning when just close, this might be fine
+                    // force a new route if this has changed targets
+                    val forceNew = previousTarget.oneStr != target.oneStr
+                    d { "Plan: target changed was $previousTarget now ${target} forceNew = $forceNew" }
+                    // can't tell if the target has changed
+                    // handle replanning when just close, this might be fine
 
-                            val targetsToAttack: List<FramePoint> = if (roundX) {
-                                // for dragon
-                                val mod = target.x % 8
-                                listOf(FramePoint(target.x - mod, target.y))
-                            } else {
-                                listOf(target)
-                            }
+                    val targetsToAttack: List<FramePoint> = if (roundX) {
+                        // for dragon
+                        val mod = target.x % 8
+                        listOf(FramePoint(target.x - mod, target.y))
+                    } else {
+                        listOf(target)
+                    }
 
 //                            val targetsToAttack = listOf(target)
 
-                            // could route to all targets
-                            routeTo.routeTo(state, targetsToAttack,
-                                RouteTo.RouteParam(forceNew = forceNew,
-                                    attackTarget = target,
-                                    ignoreEnemies = this.ignoreEnemies,
-                                    mapNearest = true)
-                            )
-                        }
-                    }
+                    // could route to all targets
+                    routeTo.routeTo(
+                        state, targetsToAttack,
+                        RouteTo.RouteParam(
+                            forceNew = forceNew,
+                            attackTarget = target,
+                            ignoreEnemies = this.ignoreEnemies,
+                            mapNearest = true
+                        )
+                    )
                 } ?: GamePad.None
             }
         }
@@ -366,7 +369,8 @@ class KillInCenter : Action {
     object KillInCenterLocations {
         // should be the middle of the attack area
         val position = FramePoint(3.grid, 8.grid)
-//        val attackFrom = FramePoint(8.grid, 8.grid)
+
+        //        val attackFrom = FramePoint(8.grid, 8.grid)
         val attackFrom = FramePoint(8.grid, 8.grid)
     }
 
@@ -411,7 +415,11 @@ class KillInCenter : Action {
         get() = "KillInCenter ${positionShoot.stepName} ${positionShoot.name}"
 }
 
-class DeadForAWhile(private val limit: Int = 450, val reset: Boolean = false, val completeCriteria: (MapLocationState) -> Boolean) {
+class DeadForAWhile(
+    private val limit: Int = 450,
+    val reset: Boolean = false,
+    val completeCriteria: (MapLocationState) -> Boolean
+) {
     var frameCount = 0
 
     operator fun invoke(state: MapLocationState): Boolean {

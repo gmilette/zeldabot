@@ -1,5 +1,6 @@
 package bot.plan.action
 
+import bot.plan.zstar.NearestSafestPoint
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapConstants
@@ -21,6 +22,9 @@ object AttackActionDecider {
         // should be fine since link can't get damaged
         if (state.frameState.clockActivated && Random.nextInt(4) == 1) {
             false
+//        } else if (!NearestSafestPoint.isMapSafe(state, state.link) ) {
+//            // need test
+//            false
         } else {
             shouldAttack(
                 state.frameState.link.dir,
@@ -31,6 +35,10 @@ object AttackActionDecider {
                 }
             }
         }
+
+    private fun onUnsafeSpot(state: FrameState) {
+
+    }
 
     fun shouldDodgeDepending(state: MapLocationState): GamePad {
         // if it is ball projectile, going diagonal dodge all directions

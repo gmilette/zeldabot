@@ -4,12 +4,10 @@ import bot.plan.action.NavUtil.directionToDir
 import bot.plan.zstar.FrameRoute
 import bot.plan.zstar.ZStar
 import bot.state.*
-import bot.state.map.Direction
-import bot.state.map.MapCell
-import bot.state.map.MapConstants
-import bot.state.map.toGamePad
+import bot.state.map.*
 import bot.state.oam.shopOwner
 import bot.state.oam.shopkeeperAndBat
+import bot.state.oam.swordDir
 import util.LogFile
 import util.d
 import util.w
@@ -465,9 +463,10 @@ class RouteTo(val params: Param = Param()) {
 private fun doRouteTo(
     state: MapLocationState,
     to: List<FramePoint>,
-    param: RouteParam
+    paramIn: RouteParam
 ): GamePad {
     d { " DO routeTo TO ${to.size} points first ${to.firstOrNull()} currently at ${state.currentMapCell.mapLoc}" }
+    val param = paramIn //paramIn.copy(attackTarget = null)
     var forceNew = param.forceNew
     if (to.isEmpty()) {
         d { " no where to go " }
@@ -560,11 +559,6 @@ private fun doRouteTo(
         d { " remove enemy from filter $targetAttack"}
         avoid = avoid.filter { it.point != targetAttack }
     }
-    //
-//    if (param.attackTarget != null) {
-//        d { " there is attack target why?"}
-//        avoid = emptyList()
-//    }
 
     d { " enemies near ${enemiesNear.size} projectiles ${projectilesNear.size} avoid: ${avoid.size}" }
         for (agent in enemiesNear) {
@@ -615,6 +609,7 @@ private fun doRouteTo(
 
         // of if the expected point is not where we should be
         // need to re route
+        val inFrontOfGrids = getInFrontOfGrids(state)
 
         route = FrameRoute(
             mapCell.zstar.route(ZStar.ZRouteParam(
@@ -625,7 +620,7 @@ private fun doRouteTo(
                 forcePassable = passable,
                 enemyTarget = param.attackTarget,
                 mapNearest = param.mapNearest,
-                forceHighCost = param.forceHighCost
+                forceHighCost = param.forceHighCost + inFrontOfGrids
             )
             )
         )
@@ -633,7 +628,7 @@ private fun doRouteTo(
         d { " Plan: ${state.currentMapCell.mapLoc} new plan! because ($why) to ${to}" }
         route?.path?.lastOrNull()?.let { lastPt ->
             // if it is just projectile then don't try to route towards the projectiles
-            if (param.mapNearest || lastPt in to || state.frameState.ladderDeployed || !state.hasEnemies) {
+            if (true || param.mapNearest || lastPt in to || state.frameState.ladderDeployed || !state.hasEnemies) {
                 d { "route to success target" }
             } else {
                 // what if can't find a route here?
@@ -709,8 +704,32 @@ private fun doRouteTo(
 //            else -> GamePad.MoveUp
 //        }
     }.also {
-        writeFile(to, state, param, it)
+//        writeFile(to, state, param, it)
         d { " next point $nextPoint dir: $it ${if (nextPoint.direction != null) "HAS DIR ${nextPoint.direction}" else ""}" }
     }
 }
+
+    private fun getInFrontOfGrids(state: MapLocationState): List<FramePoint> =
+        state.frameState.enemies.flatMap { agent: Agent ->
+            swordDir.dirFront(agent)?.let { dir ->
+                val pt = dir.pointModifier(MapConstants.oneGrid)(agent.point)
+                listOf(
+                    pt,
+                    if (dir.horizontal) pt.upOneGrid else pt.leftOneGrid
+                )
+            } ?: emptyList()
+        }
+
+    private fun getInFrontOfGridsGhosts(state: MapLocationState): List<FramePoint> =
+        // all the frames in front of the ghost are dangerous
+        state.frameState.enemies.flatMap { agent: Agent ->
+            swordDir.dirFront(agent)?.let { dir ->
+                val pt = dir.pointModifier(MapConstants.oneGrid)(agent.point)
+                listOf(
+                    pt,
+                    if (dir.horizontal) pt.upOneGrid else pt.leftOneGrid
+                )
+            } ?: emptyList()
+        }
+
 }

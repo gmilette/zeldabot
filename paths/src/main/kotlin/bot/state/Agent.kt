@@ -3,6 +3,7 @@ package bot.state
 import bot.state.map.Direction
 import bot.state.oam.LinkDirectionFinder
 import bot.state.oam.MonsterDirection
+import bot.state.oam.TileAttribute
 
 val List<Agent>.points: List<FramePoint>
     get() = this.map { it.point }
@@ -18,6 +19,7 @@ data class Agent(
     val tileByte: String = tile.toString(16),
     val attributeByte: String = attribute.toString(16)
 ) {
+    val tileAttrib = TileAttribute(tile, attribute)
 
     val damaged: Boolean = tile in LinkDirectionFinder.damagedAttribute || tile in MonsterDirection.damagedAttribute
 

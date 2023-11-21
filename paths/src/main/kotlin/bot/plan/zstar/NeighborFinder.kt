@@ -233,7 +233,7 @@ class NeighborFinder(
     }
 
     private fun sometimes(block: () -> Unit) {
-        if (Random.nextInt(4) == 0) {
+        if (Random.nextInt(2) == 0) {
             block()
         }
     }

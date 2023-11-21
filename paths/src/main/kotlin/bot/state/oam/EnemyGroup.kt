@@ -77,6 +77,12 @@ object EnemyGroup {
     // todo: need to add back these projectiles when I know attrib
 //        boulder, boulder2, boulder3, boulder4,
 
+    // ghosts and sword guys
+    val avoidFrontEnemies = setOf(
+        ghost,
+        swordDir.up.first()
+    )
+
     val largeProjectiles = setOf(
         124, 126, // ghost attack
         144, 142, // sun

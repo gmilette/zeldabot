@@ -51,13 +51,14 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        runLoc(true,16, 4) // push drag
 //        runLoc(true,24, 7)
 //        runLoc(true,76, 3)
-//        runLoc(true,105, 3) // right stair
+//        runLoc(true,91, 3) //sword guy
+//        runLoc(true,107, 3) // right stair
 //        runLoc(true,5, 5)
 //        runLoc(true,6, 5)
 //        runLoc(true,63, 8)
 //        runLoc(true,61, 0) // forest statue
 //        runLoc(true,52, 0) // forest statue
-        runLoc(true,36, 0) // forest statue
+//        runLoc(true,36, 0) // forest statue
     }
 
     private fun rerun() {

@@ -9,6 +9,9 @@ import bot.state.map.pointModifier
 import util.Map2d
 
 object NearestSafestPoint {
+    fun isMapSafe(state: MapLocationState, pt: FramePoint) =
+        pt.isSafe(state.currentMapCell.zstar.costsF, state.currentMapCell.zstar.passable)
+
     fun mapNearest(state: MapLocationState, pts: List<FramePoint>) =
         pts.flatMap { nearestSafePoints(it, state.currentMapCell.zstar.costsF, state.currentMapCell.zstar.passable) }
 

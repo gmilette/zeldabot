@@ -1,5 +1,8 @@
 package bot.state.oam
 
+import bot.state.Agent
+import bot.state.map.Direction
+
 //18, 16, // link shield shite
 //12, 14, // facing up link
 //4, 6, 8, // link // 0
@@ -35,15 +38,40 @@ data class DirectionMap(
     val right: Set<Int> = setOf(),
 ) {
     val all = up + down + left + right
+
+    fun dirFront(agent: Agent): Direction? =
+        when {
+            agent.tile in up -> Direction.Up
+            agent.tile in down -> Direction.Down
+            agent.tile in left -> Direction.Left
+            agent.tile in right -> Direction.Right
+            else -> null
+        }
 }
 
 val swordDir = DirectionMap(
     up = setOf(0xb4, //02, 42
-        0xb6), //42
-    down = setOf(0xb0, 0xB2), //02
+        0xb6), //42x
+    down = setOf(0xac, 0xb0, 0xB2), //02
     left = setOf(0xbe, //42
-        0xBC), //42
+//        0xBC, // was left
+        0xba
+    ), //42
     right = setOf(0xB8, //02
+        0xBC, // was left
+        0xBA), //02
+)
+
+val ghostDir = DirectionMap(
+    up = setOf(0xb4, //02, 42
+        0xb6), //42x
+    down = setOf(0xac, 0xb0, 0xB2), //02
+    left = setOf(0xbe, //42
+//        0xBC, // was left
+        0xba
+    ), //42
+    right = setOf(0xB8, //02
+        0xBC, // was left
         0xBA), //02
 )
 
@@ -54,12 +82,15 @@ object Monsters {
         damaged = setOf(0x01, 0x43))
 }
 
-typealias TileAttribute = Pair<Byte, Byte>
-val TileAttribute.tile: Byte
+typealias TileAttribute = Pair<Int, Int>
+val TileAttribute.tile: Int
     get() = first
 
-val TileAttribute.attribute: Byte
+val TileAttribute.attribute: Int
     get() = second
+
+fun TileAttribute.matches(other: TileAttribute) =
+    this.first == other.first && this.second == other.second
 
 // need
 
