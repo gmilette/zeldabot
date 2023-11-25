@@ -250,7 +250,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                 addRupee = false
             }
             refillIfOut()
-            stateManipulator.setSword(ZeldaItem.MagicSword)
+            stateManipulator.setSword(ZeldaItem.WoodenSword)
             stateManipulator.setRing(ZeldaItem.BlueRing)
             if (setEquipmentCt > 0 && addEquipment) {
                 d { " Set equip" }

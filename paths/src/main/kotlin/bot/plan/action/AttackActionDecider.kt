@@ -2,10 +2,8 @@ package bot.plan.action
 
 import bot.plan.zstar.NearestSafestPoint
 import bot.state.*
-import bot.state.map.Direction
-import bot.state.map.MapConstants
-import bot.state.map.pointModifier
-import bot.state.map.toGamePad
+import bot.state.map.*
+import bot.state.oam.swordDir
 import util.d
 import kotlin.random.Random
 
@@ -26,18 +24,26 @@ object AttackActionDecider {
 //            // need test
 //            false
         } else {
+            !getInFrontOfGrids(state) &&
             shouldAttack(
                 state.frameState.link.dir,
                 state.link,
                 state.aliveEnemies.map { it.point }).also {
                 state.aliveEnemies.forEach {
-                    d { " enemy: $it" }
+                    d { " enemy: $it in grid ${getInFrontOfGrids(state)}" }
                 }
             }
         }
 
-    private fun onUnsafeSpot(state: FrameState) {
-
+    private fun getInFrontOfGrids(state: MapLocationState): Boolean {
+        val linkDir = state.frameState.link.dir
+        return state.frameState.enemies.any { agent: Agent ->
+            swordDir.dirFront(agent)?.let { dir ->
+                val pt = dir.pointModifier(MapConstants.oneGrid)(agent.point)
+                // link is in danger zone and is facing the enemy
+                (state.link.isInGrid(pt) && dir.opposite() == linkDir)
+            } ?: false
+        }
     }
 
     fun shouldDodgeDepending(state: MapLocationState): GamePad {

@@ -70,6 +70,7 @@ class ZStar(
 
     private val totalCosts = mutableMapOf<FramePoint, Int>()
     private val distanceToGoal = mutableMapOf<FramePoint, Int>()
+    private val pathSizeToGoal = mutableMapOf<FramePoint, Int>()
 
     private val avoid = mutableListOf<FramePoint>()
 
@@ -131,6 +132,7 @@ class ZStar(
 
         val costFromStart = mutableMapOf(param.start to 0)
         var pointClosestToGoal = FramePoint()
+        var pointClosestToGoalPathSize = Int.MAX_VALUE
 
         var point = FramePoint(0, 0)
         openList.add(param.start)
@@ -205,8 +207,14 @@ class ZStar(
                 val costS = costFromStart.getOrDefault(toPoint, Int.MAX_VALUE)
 //                d {" cost: $cost $costS"}
                 if (cost < costS && cost < param.maximumCost) {
+                    // todo: prefer short path, so weight path length vs. distance to
+//                    pathSizeToGoal[toPoint] = pathSize(cameFrom, toPoint)
                     if (pointClosestToGoal.isZero ||
                         costToGoal < (distanceToGoal[pointClosestToGoal] ?: Int.MAX_VALUE)) {
+
+//                        val pathSize = pathSize(cameFrom, toPoint)
+                        // if distance to goal is same, select based on path
+//                        pointClosestToGoalPathSize = pathSize
                         pointClosestToGoal = toPoint
                     }
                     distanceToGoal[toPoint] = costToGoal
@@ -276,6 +284,23 @@ class ZStar(
 
             else -> Direction.Left
         }
+    }
+
+    private fun pathSize(cameFrom: Map<FramePoint, FramePoint>, from: FramePoint): Int {
+        var current = from
+
+        val path = mutableListOf(current)
+//        d { " came froms "}
+//        for (entry in cameFrom) {
+//            d { " ${entry.key} -> ${entry.value}"}
+//        }
+        var size = 0
+        while (cameFrom.containsKey(current)) {
+            current = cameFrom.getValue(current)
+            size += 1
+        }
+
+        return size
     }
 
     private fun generatePath(
@@ -410,7 +435,7 @@ class ZStar(
 
             // actual enemy higher cost then around the enemy
             costsF.modify(from, point, MapConstants.oneGrid) { _, current ->
-                current + onEnemyCost
+                current + nearEnemyCost //onEnemyCost
             }
         }
 
