@@ -5,6 +5,7 @@ import bot.plan.action.EndAction
 import bot.plan.action.StartHereAction
 import bot.state.MapLoc
 import bot.state.MapLocationState
+import bot.state.map.Objective
 import util.d
 import util.i
 
@@ -17,13 +18,24 @@ import util.i
 class MasterPlan(val segments: List<PlanSegment>) {
     private var justRemoved: PlanStep = PlanStep(PlanSegment("", "", emptyList()), EndAction())
 
+    private var initialPlanSize: Int = 0
+
     private val giant = segments.flatMap { seg -> seg.plan.map { PlanStep(seg, it) } }.toMutableList().also {
-        d { " created plan with ${it.size} actions moves $numMoves" }
+        initialPlanSize = it.size
+        d { " created plan with $initialPlanSize actions moves $numMoves" }
     }
+
+    val actionsLeft: Int
+        get() = initialPlanSize - giant.size
+
+    val percentDoneInt: Int
+        get() = (percentDone * 100).toInt()
+
+    val percentDone: Float
+        get() = actionsLeft.toFloat() / initialPlanSize.toFloat()
 
     val complete: Boolean
         get() = giant.isEmpty()
-
 
     fun current(): Action =
         giant.first().action
@@ -117,6 +129,15 @@ class MasterPlan(val segments: List<PlanSegment>) {
     fun toStringCurrentPlanPhase(): String =
         justRemoved.inSegment.toStringShort()
 
+    fun toStringCurrentPhase(): String =
+        justRemoved.inSegment.phase
+
+    fun toStringCurrentSeg(): String =
+        justRemoved.inSegment.name
+
+    fun currentSeg(): PlanSegment =
+        justRemoved.inSegment
+
     override fun toString(): String {
         val first = giant.firstOrNull()
 
@@ -151,7 +172,8 @@ data class PlanStep(val inSegment: PlanSegment, val action: Action)
 data class PlanSegment(
     val phase: String,
     val name: String,
-    val plan: List<Action>
+    val plan: List<Action>,
+    val objective: Objective = Objective.empty
 ) {
     override fun toString(): String {
         return plan.fold("") { R, t -> "$R $t " }

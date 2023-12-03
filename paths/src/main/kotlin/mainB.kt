@@ -6,6 +6,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -24,6 +25,7 @@ import bot.state.map.MapConstants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import ui.FollowView
 import util.d
 
 fun main() = application {
@@ -33,311 +35,337 @@ fun main() = application {
         title = "Zelda"
     ) {
         val model = remember { ZeldaModel() }
-
-        val state = model.plan.value
-        var count = remember { mutableStateOf(0) }
-        var showMap = remember { mutableStateOf(false) }
-        val act = remember { mutableStateOf(ZeldaBot.doAct) }
-        val draw = remember { mutableStateOf(ZeldaBot.draw) }
-        val ladder = remember { mutableStateOf(true) }
-        val inv = remember { mutableStateOf(true) }
-
-        Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
-            Text(
-                text = "Plan: ${state?.mapLoc} ${state?.state?.currentMapCell?.mapData?.name ?: ""}",
-                fontSize = 20.sp,
-            )
-            Text(
-                text = state?.planRunner?.masterPlan?.toStringCurrentPlanPhase() ?: "None",
-                fontSize = 20.sp,
-            )
-            Text(
-                text = "Action (c): ${state?.currentAction}",
-                fontSize = 20.sp,
-            )
-            Text(
-                text = "Action (n): ${state?.planRunner?.afterThis()?.name ?: ""}",
-                fontSize = 20.sp,
-            )
-            Text(
-                text = "Action (n2): ${state?.planRunner?.afterAfterThis()?.name ?: ""}",
-                fontSize = 20.sp,
-            )
-            Row(
-                modifier = Modifier.align(Alignment.Start)
-            ) {
-                Button(
-                    modifier = Modifier.padding(8.dp),
-                    onClick = {
-                        model.forceDir(GamePad.A, num = 15)
-                    }) {
-                    Text("  A ")
-                }
-                Button(
-                    modifier = Modifier.padding(8.dp),
-                    onClick = {
-                        model.forceDir(GamePad.B, num = 15)
-                    }) {
-                    Text("  B ")
-                }
-                Button(
-                    modifier = Modifier.padding(8.dp),
-                    onClick = {
-                        model.forceDir(GamePad.Start, 2)
-                    }) {
-                    Text("  S  ")
-                }
-                Button(
-                    modifier = Modifier.padding(8.dp),
-                    onClick = {
-                        model.updateEnemies()
-                    }) {
-                    Text("  Update  ")
-                }
-
-            }
-
-            Row(
-                modifier = Modifier.align(Alignment.Start)
-            ) {
-                Button(
-                    modifier = Modifier.padding(8.dp),
-                    onClick = {
-                        model.forceDir(GamePad.MoveRight)
-                    }) {
-                    Text("  R  ")
-                }
-                Button(
-                    modifier = Modifier.padding(8.dp),
-                    onClick = {
-                        model.forceDir(GamePad.MoveLeft)
-                    }) {
-                    Text("  L  ")
-                }
-                Button(
-                    modifier = Modifier.padding(8.dp),
-                    onClick = {
-                        model.forceDir(GamePad.MoveUp)
-                    }) {
-                    Text("  U  ")
-                }
-                Button(
-                    modifier = Modifier.padding(8.dp),
-                    onClick = {
-                        model.forceDir(GamePad.MoveDown)
-                    }) {
-                    Text("  D  ")
-                }
-            }
-
-            Row(
-                modifier = Modifier.align(Alignment.Start)
-            ) {
-                Row {
-                    Text("Invincible")
-                    Checkbox(
-                        checked = inv.value,
-                        onCheckedChange = {
-                            inv.value = it
-                            model.invincible(it)
-                        }
-                    )
-
-                    Text("Ladder")
-                    Checkbox(
-                        checked = ladder.value,
-                        onCheckedChange = {
-                            ladder.value = it
-                            model.ladder(it)
-                        }
-                    )
-
-                    Text("Act")
-                    Checkbox(
-                        checked = act.value,
-                        onCheckedChange = {
-                            act.value = it
-                            model.changeAct(it)
-                        }
-                    )
-                    Text("Draw")
-                    Checkbox(
-                        checked = draw.value,
-                        onCheckedChange = {
-                            draw.value = it
-                            model.changeDraw(it)
-                        }
-                    )
-                }
-
-                Row {
-                    Text("ShowMap")
-                    Checkbox(
-                        checked = showMap.value,
-                        onCheckedChange = {
-                            showMap.value = it
-                        }
-                    )
-                }
-
-                Button(
-                    modifier = Modifier.padding(8.dp),
-                    onClick = {
-                        model.addKey()
-                    }) {
-                    Text("  +Key  ")
-                }
-
-                Button(
-                    modifier = Modifier.padding(8.dp),
-                    onClick = {
-                        model.addRupee()
-                    }) {
-                    Text("  +Rupee  ")
-                }
-            }
-
-            Row {
-                Text("Enemies", fontSize = 20.sp)
-                state?.state?.frameState?.let {
-                    val alive = it.enemiesClosestToLink(EnemyState.Alive).size
-                    val dead = it.enemiesClosestToLink(EnemyState.Dead).size
-                    val loot = it.enemiesClosestToLink(EnemyState.Loot).size
-                    val proj = it.enemiesClosestToLink(EnemyState.Projectile).size
-                    Text("Alive: $alive dead: $dead loot $loot $proj", modifier = Modifier.padding(12.dp))
-                }
-            }
-
-            Row {
-                Column(
-                    modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    Text("Enemies", fontSize = 20.sp)
-                    state?.enemiesInfo?.let { enemies ->
-                        if (enemies.isNotEmpty()) {
-                            enemies.filter { it.state != EnemyState.Dead } .forEachIndexed { index, enemy ->
-                                Text("$index: kind: ${enemy.index} (${enemy.index.toString(16)}) ${enemy.state.name} ${enemy.point} ${enemy.point.toG} " +
-                                        "${enemy.damagedString}")
-                            }
-                        }
-                    }
-                }
-            }
-
-//            state?.state?.let {mState ->
-//                HyruleMap(mState, state.planRunner)
-//            }
-            if (showMap.value) {
-                state?.stateSnapshot?.let { mState ->
-                    HyruleMap(mState, state.planRunner)
-                }
-//                showMap.value = false
+        val debugView = remember { mutableStateOf(true) }
+        if (debugView.value) {
+            Debugview(model, debugView)
+        } else {
+            FollowView(model) {
+                SwitchViewButton(debugView)
             }
         }
     }
 }
 
 @Composable
-private fun HyruleMap(state: MapLocationState, plan: PlanRunner) {
-        val link = state.link
-        val path: List<FramePoint> = emptyList()
-        val enemies: List<Agent> = state.frameState.enemiesSorted.filter { it.state == EnemyState.Alive }
-        val projectiles: List<Agent> = state.frameState.enemiesSorted.filter { it.state == EnemyState.Projectile }
+private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
 
-        val v = 2
-        Canvas(
-            modifier = Modifier.width((MapConstants.MAX_X.toFloat() * v).dp)
-                .height((MapConstants.MAX_Y.toFloat() * v).dp)
+    val state = model.plan.value
+    var count = remember { mutableStateOf(0) }
+    var showMap = remember { mutableStateOf(false) }
+    val act = remember { mutableStateOf(ZeldaBot.doAct) }
+    val draw = remember { mutableStateOf(ZeldaBot.draw) }
+    val ladder = remember { mutableStateOf(true) }
+    val inv = remember { mutableStateOf(true) }
+
+    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
+        SwitchViewButton(debugView)
+        Text(
+            text = "Plan: ${state?.mapLoc} ${state?.state?.currentMapCell?.mapData?.name ?: ""}",
+            fontSize = 20.sp,
+        )
+        Text(
+            text = state?.planRunner?.masterPlan?.toStringCurrentPlanPhase() ?: "None",
+            fontSize = 20.sp,
+        )
+        Text(
+            text = "Action (c): ${state?.currentAction}",
+            fontSize = 20.sp,
+        )
+        Text(
+            text = "Action (n): ${state?.planRunner?.afterThis()?.name ?: ""}",
+            fontSize = 20.sp,
+        )
+        Text(
+            text = "Action (n2): ${state?.planRunner?.afterAfterThis()?.name ?: ""}",
+            fontSize = 20.sp,
+        )
+        Row(
+            modifier = Modifier.align(Alignment.Start)
         ) {
-            drawIntoCanvas { canvas ->
-                val paint = Paint()
-                paint.color = Color.Black
-                val linkPathPaint = Paint()
-                linkPathPaint.style = PaintingStyle.Stroke
-                linkPathPaint.strokeWidth = 2.0f
-                linkPathPaint.color = Color.Blue
-                val targetPaint = Paint()
-                targetPaint.color = Color.Cyan
-                val passablePaint = Paint()
-                passablePaint.color = Color.LightGray
-                val notPassable = Paint()
-                notPassable.color = Color.Gray
-                val enemyPaint = Paint()
-                enemyPaint.color = Color.Red
-                val projPaint = Paint()
-                projPaint.color = Color.Magenta
+            Button(
+                modifier = Modifier.padding(8.dp),
+                onClick = {
+                    model.forceDir(GamePad.A, num = 15)
+                }) {
+                Text("  A ")
+            }
+            Button(
+                modifier = Modifier.padding(8.dp),
+                onClick = {
+                    model.forceDir(GamePad.B, num = 15)
+                }) {
+                Text("  B ")
+            }
+            Button(
+                modifier = Modifier.padding(8.dp),
+                onClick = {
+                    model.forceDir(GamePad.Start, 2)
+                }) {
+                Text("  S  ")
+            }
+            Button(
+                modifier = Modifier.padding(8.dp),
+                onClick = {
+                    model.updateEnemies()
+                }) {
+                Text("  Update  ")
+            }
+
+        }
+
+        Row(
+            modifier = Modifier.align(Alignment.Start)
+        ) {
+            Button(
+                modifier = Modifier.padding(8.dp),
+                onClick = {
+                    model.forceDir(GamePad.MoveRight)
+                }) {
+                Text("  R  ")
+            }
+            Button(
+                modifier = Modifier.padding(8.dp),
+                onClick = {
+                    model.forceDir(GamePad.MoveLeft)
+                }) {
+                Text("  L  ")
+            }
+            Button(
+                modifier = Modifier.padding(8.dp),
+                onClick = {
+                    model.forceDir(GamePad.MoveUp)
+                }) {
+                Text("  U  ")
+            }
+            Button(
+                modifier = Modifier.padding(8.dp),
+                onClick = {
+                    model.forceDir(GamePad.MoveDown)
+                }) {
+                Text("  D  ")
+            }
+        }
+
+        Row(
+            modifier = Modifier.align(Alignment.Start)
+        ) {
+            Row {
+                Text("Invincible")
+                Checkbox(
+                    checked = inv.value,
+                    onCheckedChange = {
+                        inv.value = it
+                        model.invincible(it)
+                    }
+                )
+
+                Text("Ladder")
+                Checkbox(
+                    checked = ladder.value,
+                    onCheckedChange = {
+                        ladder.value = it
+                        model.ladder(it)
+                    }
+                )
+
+                Text("Act")
+                Checkbox(
+                    checked = act.value,
+                    onCheckedChange = {
+                        act.value = it
+                        model.changeAct(it)
+                    }
+                )
+                Text("Draw")
+                Checkbox(
+                    checked = draw.value,
+                    onCheckedChange = {
+                        draw.value = it
+                        model.changeDraw(it)
+                    }
+                )
+            }
+
+            Row {
+                Text("ShowMap")
+                Checkbox(
+                    checked = showMap.value,
+                    onCheckedChange = {
+                        showMap.value = it
+                    }
+                )
+            }
+
+            Button(
+                modifier = Modifier.padding(8.dp),
+                onClick = {
+                    model.addKey()
+                }) {
+                Text("  +Key  ")
+            }
+
+            Button(
+                modifier = Modifier.padding(8.dp),
+                onClick = {
+                    model.addRupee()
+                }) {
+                Text("  +Rupee  ")
+            }
+        }
+
+        Row {
+            Text("Enemies", fontSize = 20.sp)
+            state?.state?.frameState?.let {
+                val alive = it.enemiesClosestToLink(EnemyState.Alive).size
+                val dead = it.enemiesClosestToLink(EnemyState.Dead).size
+                val loot = it.enemiesClosestToLink(EnemyState.Loot).size
+                val proj = it.enemiesClosestToLink(EnemyState.Projectile).size
+                Text("Alive: $alive dead: $dead loot $loot $proj", modifier = Modifier.padding(12.dp))
+            }
+        }
+
+        Row {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState())
+            ) {
+                Text("Enemies", fontSize = 20.sp)
+                state?.enemiesInfo?.let { enemies ->
+                    if (enemies.isNotEmpty()) {
+                        enemies.filter { it.state != EnemyState.Dead }.forEachIndexed { index, enemy ->
+                            Text(
+                                "$index: kind: ${enemy.index} (${enemy.index.toString(16)}) ${enemy.state.name} ${enemy.point} ${enemy.point.toG} " +
+                                        "${enemy.damagedString}"
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+//            state?.state?.let {mState ->
+//                HyruleMap(mState, state.planRunner)
+//            }
+        if (showMap.value) {
+            state?.stateSnapshot?.let { mState ->
+                HyruleMap(mState, state.planRunner)
+            }
+//                showMap.value = false
+        }
+    }
+}
+
+@Composable
+private fun SwitchViewButton(debugView: MutableState<Boolean>) {
+    val show = debugView.value
+    Button(onClick = {
+        debugView.value = !show
+    }) {
+        Text("${show}")
+    }
+}
+
+@Composable
+private fun HyruleMap(state: MapLocationState, plan: PlanRunner) {
+    val link = state.link
+    val path: List<FramePoint> = emptyList()
+    val enemies: List<Agent> = state.frameState.enemiesSorted.filter { it.state == EnemyState.Alive }
+    val projectiles: List<Agent> = state.frameState.enemiesSorted.filter { it.state == EnemyState.Projectile }
+
+    val v = 2
+    Canvas(
+        modifier = Modifier.width((MapConstants.MAX_X.toFloat() * v).dp)
+            .height((MapConstants.MAX_Y.toFloat() * v).dp)
+    ) {
+        drawIntoCanvas { canvas ->
+            val paint = Paint()
+            paint.color = Color.Black
+            val linkPathPaint = Paint()
+            linkPathPaint.style = PaintingStyle.Stroke
+            linkPathPaint.strokeWidth = 2.0f
+            linkPathPaint.color = Color.Blue
+            val targetPaint = Paint()
+            targetPaint.color = Color.Cyan
+            val passablePaint = Paint()
+            passablePaint.color = Color.LightGray
+            val notPassable = Paint()
+            notPassable.color = Color.Gray
+            val enemyPaint = Paint()
+            enemyPaint.color = Color.Red
+            val projPaint = Paint()
+            projPaint.color = Color.Magenta
 //            canvas.drawRect(0f, 0f, MapConstants.MAX_X.toFloat()*(v+1), MapConstants.MAX_Y.toFloat()*(v+1), paint)
 
 //            d { " draw map cell"}
 //            //for
-                val passable = state.currentMapCell.passable
+            val passable = state.currentMapCell.passable
 
-                try {
-                    for (x in 0..255) {
-                        val xa = x * v
-                        for (y in 0..167) {
-                            val ya = y * v
-                            if (passable.get(x, y)) {
-                                canvas.drawRect(
-                                    xa.toFloat(),
-                                    ya.toFloat(),
-                                    (xa + 1) * v.toFloat(),
-                                    (ya + 1) * v.toFloat(),
-                                    passablePaint
-                                )
-                            } else {
-                                canvas.drawRect(
-                                    xa.toFloat(),
-                                    ya.toFloat(),
-                                    (xa + 1) * v.toFloat(),
-                                    (ya + 1) * v.toFloat(),
-                                    notPassable
-                                )
-                            }
+            try {
+                for (x in 0..255) {
+                    val xa = x * v
+                    for (y in 0..167) {
+                        val ya = y * v
+                        if (passable.get(x, y)) {
+                            canvas.drawRect(
+                                xa.toFloat(),
+                                ya.toFloat(),
+                                (xa + 1) * v.toFloat(),
+                                (ya + 1) * v.toFloat(),
+                                passablePaint
+                            )
+                        } else {
+                            canvas.drawRect(
+                                xa.toFloat(),
+                                ya.toFloat(),
+                                (xa + 1) * v.toFloat(),
+                                (ya + 1) * v.toFloat(),
+                                notPassable
+                            )
                         }
                     }
-                } catch (e: Exception) {
-                    util.e { " map drawing crashed $e" }
                 }
-
-                drawPoint(canvas, v, link, paint)
-                // draw path: linkPathPaint
-                d { " draw num enemies ${enemies.size} enemies"}
-                for (enemy in enemies) {
-                    drawGridPoint(canvas, v, enemy.point, enemyPaint)
-                }
-                for (pro in projectiles) {
-                    drawGridPoint(canvas, v, pro.point, projPaint)
-                }
-
-                drawPoint(canvas, v, plan.target(), targetPaint)
-                for (target in plan.targets()) {
-                    drawPoint(canvas, v, target, targetPaint)
-                }
-
-                val path = Path()
-                val linkPath = plan.path()
-                if (linkPath.isNotEmpty()) {
-                    d { " draw path ${linkPath.size}" }
-                    path.moveTo(linkPath[0].x.toFloat() * v, linkPath[0].y.toFloat() * v)
-                    for (pt in linkPath) {
-                        path.lineTo(pt.x.toFloat() * v, pt.y.toFloat() * v)
-                    }
-                    canvas.drawPath(path, linkPathPaint)
-                } else {
-                    d { " draw no path "}
-                    //        Toolkit.getDefaultToolkit().beep()
-                }
-                // top is les than bottom
+            } catch (e: Exception) {
+                util.e { " map drawing crashed $e" }
             }
+
+            drawPoint(canvas, v, link, paint)
+            // draw path: linkPathPaint
+            d { " draw num enemies ${enemies.size} enemies" }
+            for (enemy in enemies) {
+                drawGridPoint(canvas, v, enemy.point, enemyPaint)
+            }
+            for (pro in projectiles) {
+                drawGridPoint(canvas, v, pro.point, projPaint)
+            }
+
+            drawPoint(canvas, v, plan.target(), targetPaint)
+            for (target in plan.targets()) {
+                drawPoint(canvas, v, target, targetPaint)
+            }
+
+            val path = Path()
+            val linkPath = plan.path()
+            if (linkPath.isNotEmpty()) {
+                d { " draw path ${linkPath.size}" }
+                path.moveTo(linkPath[0].x.toFloat() * v, linkPath[0].y.toFloat() * v)
+                for (pt in linkPath) {
+                    path.lineTo(pt.x.toFloat() * v, pt.y.toFloat() * v)
+                }
+                canvas.drawPath(path, linkPathPaint)
+            } else {
+                d { " draw no path " }
+                //        Toolkit.getDefaultToolkit().beep()
+            }
+            // top is les than bottom
         }
+    }
 }
 
 private fun drawPoint(canvas: Canvas, v: Int, pt: FramePoint, paint: Paint) {
-    canvas.drawRect(pt.x*v.toFloat(),pt.y*v.toFloat(),(pt.x+1)*v.toFloat(),(pt.y+1)*v.toFloat(), paint)
+    canvas.drawRect(pt.x * v.toFloat(), pt.y * v.toFloat(), (pt.x + 1) * v.toFloat(), (pt.y + 1) * v.toFloat(), paint)
 }
 
 private fun drawGridPoint(canvas: Canvas, v: Int, pt: FramePoint, paint: Paint) {
-    canvas.drawRect(pt.x*v.toFloat(),pt.y*v.toFloat(),(pt.x+16)*v.toFloat(),(pt.y+16)*v.toFloat(), paint)
+    canvas.drawRect(pt.x * v.toFloat(), pt.y * v.toFloat(), (pt.x + 16) * v.toFloat(), (pt.y + 16) * v.toFloat(), paint)
 }
 
 class ZeldaModel : ZeldaBot.ZeldaMonitor {

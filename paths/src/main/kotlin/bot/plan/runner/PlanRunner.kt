@@ -15,7 +15,7 @@ import util.d
 class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     var action: Action? = null
         private set
-    private lateinit var runLog: RunActionLog
+    lateinit var runLog: RunActionLog
     lateinit var masterPlan: MasterPlan
     lateinit var startPath: String
 
@@ -35,7 +35,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        run(name = "level3")
 //        run(name = "level5") // with ladder
 //        run(name = "afterLev4")
-//         run(name = "all")
+         run(name = "all")
 //        run(name = "level7"
 //        run(name = "go to level 9")
 //        run(name = "level2rhinoAfter")
@@ -52,7 +52,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        runLoc(true,24, 7)
 //        runLoc(true,76, 3)
 //        runLoc(true,91, 3) //sword guy
-        runLoc(true,107, 3) // right stair
+//        runLoc(true,107, 3) // right stair
 //        runLoc(true,5, 5)
 //        runLoc(true,6, 5)
 //        runLoc(true,63, 8)

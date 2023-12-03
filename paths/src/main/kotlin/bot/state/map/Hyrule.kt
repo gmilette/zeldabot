@@ -97,7 +97,7 @@ val ExitSetAll =
 
 data class Objective(
     // how to enter the location
-    val point: FramePoint,
+    val point: FramePoint = FramePoint(),
     val type: DestType,
     // like which part of the shop to go to
     val itemLoc: ItemLoc = ItemLoc.Center

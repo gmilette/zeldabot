@@ -14,6 +14,7 @@ import bot.state.oam.dragon4Head
 import bot.state.oam.dragonHead
 import bot.state.oam.dragonHead2
 import util.d
+import java.lang.runtime.ObjectMethods
 
 class PlanBuilder(
     private val mapData: MapCells,
@@ -21,6 +22,7 @@ class PlanBuilder(
     private val optimizer: OverworldRouter,
     private var phase: String = ""
 ) {
+    private var objective: Objective = Objective.empty
     private var segment: String = ""
     private var plan = mutableListOf<Action>()
     var lastMapLoc = 0
@@ -41,7 +43,7 @@ class PlanBuilder(
 
     private fun makeSegment() {
         if (plan.isNotEmpty()) {
-            segments.add(PlanSegment(phase, segment, plan.toList()))
+            segments.add(PlanSegment(phase, segment, plan.toList(), objective))
             plan = mutableListOf()
         }
     }
@@ -104,6 +106,10 @@ class PlanBuilder(
 
     fun addNext(nextLoc: MapLoc, action: Action) {
         add(nextLoc, action)
+    }
+
+    private fun setObjective(objective: Objective) {
+        this.objective = objective
     }
 
     fun seg(name: String): PlanBuilder {
@@ -459,15 +465,30 @@ class PlanBuilder(
 
     fun obj(dest: DestType, itemLoc: Objective.ItemLoc? = null, position: Boolean =
         false) {
-        seg("get ${dest.javaClass.simpleName} for ${dest.name} at ${dest.entry.javaClass.simpleName}")
+//        seg("get ${dest.javaClass.simpleName} for ${dest.name} at ${dest.entry.javaClass.simpleName}")
+        seg("get ${dest.name}")
         captureObjective(mapData.findObjective(dest), itemLoc, position)
     }
 
     private fun captureObjective(mapCell: MapCell,
                                  itemLocOverride: Objective.ItemLoc? = null,
                                  position: Boolean = false) {
-        // depending on the entrance type, do different actions
+        val objective = mapCell.mapData.objective
+        if (objective.type !is DestType.None) {
+            setObjective(objective)
+        }
         routeTo(mapCell.mapLoc)
+        // after going to the level, the goal is always to get the triforce
+        // doesn't work
+//        if (objective.type is DestType.Level) {
+//            seg("Destroy1 ${objective.type.which}")
+//            if (objective.type.which == 9) {
+//                setObjective(Objective(type = DestType.Princess))
+//            } else {
+//                setObjective(Objective(type = DestType.Triforce))
+//            }
+//            seg("Destroy2 ${objective.type.which}")
+//        }
         with (mapCell.mapData.objective) {
             // if entry
             val itemLocPoint =

@@ -17,11 +17,11 @@ class RunActionLog(private val fileNameRoot: String) {
     var framesForStep = 0
     private var totalFrames = 0
 
-    private var totalHits = 0
-    private var totalDamage = 0.0
-    private var stepHits = 0
-    private var stepDamage = 0.0
-    private val bombsUsed = DataCount()
+    var totalHits = 0
+    var totalDamage = 0.0
+    var stepHits = 0
+    var stepDamage = 0.0
+    val bombsUsed = DataCount()
 
     private val dataCounts = listOf(bombsUsed)
 

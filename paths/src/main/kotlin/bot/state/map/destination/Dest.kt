@@ -89,9 +89,12 @@ sealed class DestType(val entry: EntryType = EntryType.Walk(), val name: String 
     object Travel : DestType()
     class Heart(entry: EntryType = EntryType.Walk()) : DestType(entry, "heart by ${entry.name}")
     class SecretToEverybody(
-        val rupees: Int = -1,
+        rupees: Int = -1,
         entry: EntryType = EntryType.Walk(),
-    ) : DestType(entry, "secret_$rupees by ${entry.name}")
+    ) : DestType(entry, "Secret $rupees by ${entry.name}")
+    // when inside a level, goal is a triforce
+    object Triforce : DestType(name = "Triforce")
+    object Princess : DestType(name = "Princess")
 }
 
 enum class ShopType {
