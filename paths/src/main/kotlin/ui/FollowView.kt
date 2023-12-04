@@ -87,7 +87,7 @@ private fun ImageActionObjective(state: ZeldaModel.ShowState) {
     val obj = state.planRunner.masterPlan.currentSeg().objective
     val type = obj.type
     val image = when (type) {
-        is DestType.Level -> "icon_linktri.png"
+        is DestType.Level -> "icon_tri.png"
         is DestType.Heart -> "icon_heart.png"
         is DestType.SecretToEverybody -> "icon_coin.png"
         is DestType.Item -> {
@@ -99,6 +99,8 @@ private fun ImageActionObjective(state: ZeldaModel.ShowState) {
                 else -> "icon_empty.png"
             }
         }
+        is DestType.Triforce -> "icon_linktri.png"
+        is DestType.Princess -> "icon_linktri.png"
         is DestType.Woman -> "icon_empty.png"
         is DestType.Shop -> "icon_empty.png"
         else -> "icon_empty.png"
@@ -126,7 +128,7 @@ private fun ImageActionObjective(state: ZeldaModel.ShowState) {
 
         FollowCard(title = "action", background = Color.Black) {
             Image(
-                painter = painterResource("icon_empty.png"),
+                painter = painterResource(imageAction),
                 modifier = Modifier.size(40.dp).align(Alignment.Center).background(Color.LightGray),
                 contentDescription = ""
             )

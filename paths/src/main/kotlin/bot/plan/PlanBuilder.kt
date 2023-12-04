@@ -309,11 +309,16 @@ class PlanBuilder(
         }
     val inLevel: PlanBuilder
         get() {
-            level = 1
+            lev(1)
             return this
         }
     fun lev(levelIn: Int): PlanBuilder {
         level = levelIn
+        if (level == 9) {
+            setObjective(Objective(type = DestType.Princess))
+        } else {
+            setObjective(Objective(type = DestType.Triforce(levelIn)))
+        }
         return this
     }
     val inOverworld: PlanBuilder
@@ -478,17 +483,6 @@ class PlanBuilder(
             setObjective(objective)
         }
         routeTo(mapCell.mapLoc)
-        // after going to the level, the goal is always to get the triforce
-        // doesn't work
-//        if (objective.type is DestType.Level) {
-//            seg("Destroy1 ${objective.type.which}")
-//            if (objective.type.which == 9) {
-//                setObjective(Objective(type = DestType.Princess))
-//            } else {
-//                setObjective(Objective(type = DestType.Triforce))
-//            }
-//            seg("Destroy2 ${objective.type.which}")
-//        }
         with (mapCell.mapData.objective) {
             // if entry
             val itemLocPoint =

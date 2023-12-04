@@ -93,7 +93,7 @@ sealed class DestType(val entry: EntryType = EntryType.Walk(), val name: String 
         entry: EntryType = EntryType.Walk(),
     ) : DestType(entry, "Secret $rupees by ${entry.name}")
     // when inside a level, goal is a triforce
-    object Triforce : DestType(name = "Triforce")
+    data class Triforce(val level: Int) : DestType(name = "Triforce")
     object Princess : DestType(name = "Princess")
 }
 
