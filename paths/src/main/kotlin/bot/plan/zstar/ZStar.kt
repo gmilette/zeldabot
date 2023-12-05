@@ -82,7 +82,7 @@ class ZStar(
     // if the created route doesn't actually go to the target, just return an empty one
     // could return a RouteResult with boolean "found target"
 
-    private val customizer = GridCustomizer()
+    val customizer = GridCustomizer()
 
     data class ZRouteParam(
         val start: FramePoint,
@@ -106,12 +106,20 @@ class ZStar(
         )
     }
 
+    private fun sum(): Int {
+        var sum = 0
+        for (costRow in costsF.map) {
+            sum += costRow.sum()
+        }
+        return sum
+    }
+
     fun route(
         param: ZRouteParam
     ): List<FramePoint> {
         customizer.customize(param)
         val maxIter = MAX_ITER
-        val targets = if (param.mapNearest) {
+        val targets = if (false && param.mapNearest) {
             param.targets.flatMap { NearestSafestPoint.nearestSafePoints(it, costsF, passable) }
         } else {
             param.targets
@@ -379,11 +387,13 @@ class ZStar(
 
     inner class GridCustomizer {
         fun customize(param: ZRouteParam) {
-            d {"Plan: iter = enemies ${param.enemies.size} near ${param.avoidNearEnemy.size}"}
+            val startSum = sum()
+            d {"Plan: iter = enemies ${param.enemies.size} near ${param.avoidNearEnemy.size} $startSum"}
             resetPassable()
             // only if inside a radius
             setEnemyCosts(param.start, param.enemies)
             for (nearEnemy in param.avoidNearEnemy) {
+                d { " set near enemy $nearEnemy"}
                 setNearEnemy(param.start, nearEnemy)
             }
             setForceHighCost(param.forceHighCost)
@@ -416,7 +426,7 @@ class ZStar(
             }
         }
 
-        fun setNearEnemy(from: FramePoint, point: FramePoint) {
+        private fun setNearEnemy(from: FramePoint, point: FramePoint) {
             costsF.modify(from, point, MapConstants.oneGrid) { dist, current ->
                 current + nearEnemyCost
             }
@@ -426,6 +436,7 @@ class ZStar(
 //            costsF.modify(from, point.upLeftOneGrid, MapConstants.twoGrid) { _, current ->
 //                current + nearEnemyCost
 //            }
+            d { " enemy cost modify from ${point.upHalfLeftOneGrid}"}
             // try it
             costsF.modify(from, point.upHalfLeftOneGrid,
                 sizeWide = MapConstants.twoGrid,
@@ -461,6 +472,7 @@ class ZStar(
 
         private fun setForceHighCost(grids: List<FramePoint> = emptyList()) {
             for (grid in grids) {
+                d { " set highcost $grid"}
                 costsF.modifyTo(grid, MapConstants.oneGrid, ENEMY_COST)
             }
         }

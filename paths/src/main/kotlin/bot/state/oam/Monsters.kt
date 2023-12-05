@@ -49,6 +49,7 @@ data class DirectionMap(
         }
 }
 
+// also the boomerang guys
 val swordDir = DirectionMap(
     up = setOf(0xb4, //02, 42
         0xb6), //42x

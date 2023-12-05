@@ -7,6 +7,7 @@ import bot.state.*
 import bot.state.map.Hyrule
 import bot.state.map.MapCell
 import bot.state.map.MapCellData
+import bot.state.map.MapConstants
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -20,22 +21,28 @@ import util.d
 class NavUtilTest {
     //@Ignore
     @Test
-    fun `test g`() {
+    fun `test g NOW`() {
         ZStar.DEBUG = true
         val map = Map2d.Builder<Boolean>().add(
-            100, 100, true
+            MapConstants.MAX_Y + 1, MapConstants.MAX_X + 1, true
         ).build()
 
-        val cell = MapCell(MapCellPoint(0,0), 0, MapCellData.empty)
-
-        val from = FramePoint(10, 24)
+        val from = FramePoint(117, 96)
         val zstar = ZStar(map)
-        zstar.setEnemy(from, FramePoint(20, 24), 10)
-//        zstar.setEnemy(from, FramePoint(30, 15), 10)
-//        zstar.setEnemy(FramePoint(40, 25), 1)
+        val target = FramePoint(87, 96)
+        zstar.customizer.setEnemy(from, target)
+        // (117, 96) to next (118, 96) [(87, 96)]
 
-        val route = zstar.route(from, listOf(FramePoint(45, 24)), null)
+        val route = zstar.route(
+            ZStar.ZRouteParam(
+                start = from, targets = listOf(target), enemies = listOf(target),
+            )
+        )
+
+        val a = 1
+        a shouldBe 1
     }
+
 
     @Test
     fun testN() {
@@ -51,7 +58,7 @@ class NavUtilTest {
             FramePoint(110, 32),
 //            FramePoint(97, 32)
         )
-        cell.zstar.setEnemyCosts(start, enemies)
+        cell.zstar.customizer.setEnemyCosts(start, enemies)
 //        for (enemy in enemies) {
 //            cell.zstar.setEnemy(start, enemy)
 //        }
@@ -60,16 +67,30 @@ class NavUtilTest {
         val a = 1
     }
 
-    private fun check(cell: MapLoc, from: FramePoint, target: FramePoint,
-                      dirResult: GamePad, level: Int = 0, before: FramePoint? = null, makePassable: FramePoint? = null,
-                      enemies: List<FramePoint> = emptyList(),
-                      ladderSpec: ZStar.LadderSpec? = null
+    private fun check(
+        cell: MapLoc, from: FramePoint, target: FramePoint,
+        dirResult: GamePad, level: Int = 0, before: FramePoint? = null, makePassable: FramePoint? = null,
+        enemies: List<FramePoint> = emptyList(),
+        ladderSpec: ZStar.LadderSpec? = null
     ) {
-        checkA(cell, from, listOf(target), before, dirResult, level, makePassable = makePassable, enemies = enemies, ladderSpec)
+        checkA(
+            cell,
+            from,
+            listOf(target),
+            before,
+            dirResult,
+            level,
+            makePassable = makePassable,
+            enemies = enemies,
+            ladderSpec
+        )
     }
-    private fun checkA(cell: MapLoc, from: FramePoint, targets: List<FramePoint>,
-                       before: FramePoint? = null, dirResult: GamePad, level: Int = 0, makePassable: FramePoint? = null,
-                       enemies: List<FramePoint> = emptyList(), ladderSpec: ZStar.LadderSpec? = null) {
+
+    private fun checkA(
+        cell: MapLoc, from: FramePoint, targets: List<FramePoint>,
+        before: FramePoint? = null, dirResult: GamePad, level: Int = 0, makePassable: FramePoint? = null,
+        enemies: List<FramePoint> = emptyList(), ladderSpec: ZStar.LadderSpec? = null
+    ) {
         val hyrule = Hyrule()
         val cell = if (level == 0) hyrule.getMapCell(cell) else hyrule.levelMap.cell(level, cell)
         cell.write()
@@ -77,7 +98,7 @@ class NavUtilTest {
         val passPt = FramePoint(134, 35)
         val inLev = passPt.isInLevelMap
         val pass = cell.passable.get(passPt)
-        d { " pass check $inLev $pass level $level lb ${cell.passable.get(passPt.justLeftBottom)}"}
+        d { " pass check $inLev $pass level $level lb ${cell.passable.get(passPt.justLeftBottom)}" }
 
         val zstar = ZStar(cell.passable, halfPassable = false, isLevel = level != 0)
 
@@ -98,6 +119,7 @@ class NavUtilTest {
                 (x == from.justLeftDown.x && y == from.justLeftDown.y) -> "D"
                 (x == from.justRightEndBottom.x && y == from
                     .justRightEndBottom.y) -> "Z"
+
                 v -> {
                     if (FramePoint(x, y).onHighway) {
                         ":"
@@ -110,23 +132,28 @@ class NavUtilTest {
 //                        "."
 //                    }
                 }
+
                 else -> "X"
             }
         }
 
-        d { " done writing "}
+        d { " done writing " }
 
         val passable = mutableListOf<FramePoint>()
         if (makePassable != null) {
             passable.add(makePassable)
         }
 
-        val route = zstar.route(start = from,
-            listOf(target),
-            pointBeforeStart = before,
-            enemies = enemies,
-            forcePassable = passable,
-            ladderSpec = ladderSpec)
+        val route = zstar.route(
+            ZStar.ZRouteParam(
+                start = from,
+                listOf(target),
+                pointBeforeStart = before,
+                enemies = enemies,
+                forcePassable = passable,
+                ladderSpec = ladderSpec
+            )
+        )
 
         val firstPt = route.get(0)
         cell.passable.write("check_1192_r") { v, x, y ->
@@ -141,6 +168,7 @@ class NavUtilTest {
                 } else {
                     "."
                 }
+
                 else -> "X"
             }
         }
@@ -157,6 +185,7 @@ class NavUtilTest {
                 } else {
                     "."
                 }
+
                 else -> "X"
             }
         }
@@ -242,16 +271,20 @@ class NavUtilTest {
 //        42 target (152, 100) link (104, 98)
         // not on highway
         val start = FramePoint(61, 121)
-        check(13, start, FramePoint(32, 96), GamePad.MoveUp, level = 7,
-            before = start.left)
+        check(
+            13, start, FramePoint(32, 96), GamePad.MoveUp, level = 7,
+            before = start.left
+        )
     }
 
     @Test
     fun `test move lev5`() {
         ZStar.DEBUG = false
         val start = FramePoint(61, 121)
-        check(13, start, FramePoint(32, 96), GamePad.MoveUp, level = 7,
-            before = start.left)
+        check(
+            13, start, FramePoint(32, 96), GamePad.MoveUp, level = 7,
+            before = start.left
+        )
     }
 
     @Test
@@ -276,17 +309,24 @@ class NavUtilTest {
         // go left, up, down, right until reach safe point
         // on one highway (modify highway? this point of 32 is
         // correct
-        check(102, start, FramePoint(93, 32), GamePad.MoveUp, level = 5,
-            before = start.left, enemies = enemies)
+        check(
+            102, start, FramePoint(93, 32), GamePad.MoveUp, level = 5,
+            before = start.left, enemies = enemies
+        )
     }
+
+    // (117, 96) to next (118, 96) [(87, 96)]
 
     @Test
     fun `test move 1 corner`() {
         ZStar.DEBUG = true
 //        val start = FramePoint(160 - MapConstants.twoGrid, 119)
-        val start = FramePoint(208, 120)
-        check(115, start, FramePoint(255, 120), GamePad.MoveUp, level = 1,
-            before = start.left)
+        val start = FramePoint(80, 110)
+        //(80, 110) to next (80, 111) [(80, 80)]
+        check(
+            51, start, FramePoint(80, 80), GamePad.MoveUp, level = 1,
+            before = start.left
+        )
     }
 
     @Test
@@ -294,26 +334,30 @@ class NavUtilTest {
         ZStar.DEBUG = true
 //        val start = FramePoint(160 - MapConstants.twoGrid, 119)
         val start = FramePoint(208, 75) // higher up
-        check(114, start, FramePoint(250, 80), GamePad.MoveUp, level = 1,
-            before = start.left)
+        check(
+            114, start, FramePoint(250, 80), GamePad.MoveUp, level = 1,
+            before = start.left
+        )
     }
 
-//target (166, 67) link (72, 54)
-@Test
-fun `test dragon`() {
-    ZStar.DEBUG = true
+    //target (166, 67) link (72, 54)
+    @Test
+    fun `test dragon`() {
+        ZStar.DEBUG = true
 //    zstar.SHORT_ITER = 150
-    ZStar.MAX_ITER = 10000
-    val start = FramePoint(72, 54) // higher up
-    // wtf is wrong
-    // it has two coordinates that are off grid
-    val target = FramePoint(170, 67)
+        ZStar.MAX_ITER = 10000
+        val start = FramePoint(72, 54) // higher up
+        // wtf is wrong
+        // it has two coordinates that are off grid
+        val target = FramePoint(170, 67)
 //        val target = FramePoint(166, 128)
-    // it should be 209
+        // it should be 209
 //        val target = FramePoint(215, 128)
-    check(53, start, target, GamePad.MoveUp, level = 1,
-        before = start.left)
-}
+        check(
+            53, start, target, GamePad.MoveUp, level = 1,
+            before = start.left
+        )
+    }
 
     @Test
     fun `test lev 1 bat`() {
@@ -327,8 +371,10 @@ fun `test dragon`() {
         val start = FramePoint(112, 69) // higher up
 //        val target = FramePoint(177, 35) // find it because it is near highway
         val target = FramePoint(178, 35) // find it
-        check(114, start, target, GamePad.MoveUp, level = 1,
-            before = start.left)
+        check(
+            114, start, target, GamePad.MoveUp, level = 1,
+            before = start.left
+        )
     }
 
     @Test
@@ -342,8 +388,10 @@ fun `test dragon`() {
         val link = FramePoint(120, 104)
 //        val target = FramePoint(48, 70)
         val target = FramePoint(56, 90)
-        check(51, link, target, GamePad.MoveUp, level = 1,
-            before = link.left, ladderSpec = ZStar.LadderSpec(false, ladder))
+        check(
+            51, link, target, GamePad.MoveUp, level = 1,
+            before = link.left, ladderSpec = ZStar.LadderSpec(false, ladder)
+        )
     }
 
     @Test
@@ -355,8 +403,10 @@ fun `test dragon`() {
         ZStar.MAX_ITER = 10000
         val link = FramePoint(96, 59)
         val target = FramePoint(172, 52)
-        check(114, link, target, GamePad.MoveUp, level = 1,
-            before = link.left)
+        check(
+            114, link, target, GamePad.MoveUp, level = 1,
+            before = link.left
+        )
     }
 
     @Test
@@ -377,8 +427,10 @@ fun `test dragon`() {
 //        val target = FramePoint(166, 128)
         // it should be 209
 //        val target = FramePoint(215, 128)
-        check(14, start, target, GamePad.MoveUp, level = 2,
-            before = start.left, enemies = listOf(rhinoLocation))
+        check(
+            14, start, target, GamePad.MoveUp, level = 2,
+            before = start.left, enemies = listOf(rhinoLocation)
+        )
     }
 
     @Test
@@ -396,8 +448,10 @@ fun `test dragon`() {
 //        val target = FramePoint(166, 128)
         // it should be 209
 //        val target = FramePoint(215, 128)
-        check(14, start, target, GamePad.MoveUp, level = 2,
-            before = start.left, enemies = listOf(rhinoLocation))
+        check(
+            14, start, target, GamePad.MoveUp, level = 2,
+            before = start.left, enemies = listOf(rhinoLocation)
+        )
     }
 
 
@@ -406,8 +460,10 @@ fun `test dragon`() {
         ZStar.DEBUG = true
 //        val start = FramePoint(160 - MapConstants.twoGrid, 119)
         val start = FramePoint(136, 61) // higher up
-        check(68, start, FramePoint(128, 48), GamePad.MoveUp, level = 1,
-            before = start.left)
+        check(
+            68, start, FramePoint(128, 48), GamePad.MoveUp, level = 1,
+            before = start.left
+        )
     }
 
     @Test
@@ -418,8 +474,10 @@ fun `test dragon`() {
 
 //        val start = FramePoint(160 - MapConstants.twoGrid, 119)
         val start = FramePoint(104, 46)
-        check(98, start, FramePoint(128, 32), GamePad.MoveUp,
-            before = start.left, makePassable = passable)
+        check(
+            98, start, FramePoint(128, 32), GamePad.MoveUp,
+            before = start.left, makePassable = passable
+        )
     }
 
     @Test
@@ -445,12 +503,14 @@ fun `test dragon`() {
 //        go to from (142, 56) to next (143, 56) [(120, 0), (121, 0), (122, 0), (123, 0), (124, 0), (125, 0), (126, 0), (127, 0), (128, 0)
 //        , (129, 0), (130, 0), (131, 0), (132, 0), (133, 0), (134, 0), (135, 0)]
 
-        val targets = listOf(FramePoint(120, 0), FramePoint(121, 0), FramePoint(122, 0),
+        val targets = listOf(
+            FramePoint(120, 0), FramePoint(121, 0), FramePoint(122, 0),
             FramePoint(123, 0), FramePoint(124, 0), FramePoint(125, 0),
             FramePoint(126, 0), FramePoint(127, 0), FramePoint(128, 0),
             FramePoint(129, 0), FramePoint(130, 0),
             FramePoint(131, 0), FramePoint(132, 0), FramePoint(133, 0),
-            FramePoint(134, 0), FramePoint(135, 0))
+            FramePoint(134, 0), FramePoint(135, 0)
+        )
         checkA(109, FramePoint(147, 56), targets, null, GamePad.MoveUp, level = 2)
     }
 
@@ -466,11 +526,14 @@ fun `test dragon`() {
         check(49, FramePoint(122, 80), FramePoint(255, 80), GamePad.MoveLeft, level = 4)
         // can
     }
-        @Test
+
+    @Test
     fun `test move level 1`() {
         ZStar.DEBUG = true
-        check(115, FramePoint(208, 81), FramePoint(255, 80), GamePad.MoveRight, level = 1,
-            before = FramePoint(208, 79))
+        check(
+            115, FramePoint(208, 81), FramePoint(255, 80), GamePad.MoveRight, level = 1,
+            before = FramePoint(208, 79)
+        )
     }
 
     @Test
@@ -496,14 +559,15 @@ fun `test dragon`() {
             100, 250, true
         ).build()
 
-        val cell = MapCell(MapCellPoint(0,0), 0, MapCellData.empty)
+        val cell = MapCell(MapCellPoint(0, 0), 0, MapCellData.empty)
 
-        val path = NavUtil.manhattanPathFinder(cell, FramePoint(200, 20),
-            FramePoint(50, 20))
+        val path = NavUtil.manhattanPathFinder(
+            cell, FramePoint(200, 20),
+            FramePoint(50, 20)
+        )
 
 //        path[0].x shouldBe 199
     }
-
 
 
     @Test
@@ -512,8 +576,12 @@ fun `test dragon`() {
         // 1, 2, 3
         // 4, 5, 6
         val mapInt = Map2d(
-            mutableListOf(mutableListOf(true,true, true), mutableListOf(true, true,
-            true))
+            mutableListOf(
+                mutableListOf(true, true, true), mutableListOf(
+                    true, true,
+                    true
+                )
+            )
         )
 //        val mapB = Map2d(mapInt)
 //        val cell = MapCell(MapCellPoint(0, 0), 0,
@@ -527,7 +595,6 @@ fun `test dragon`() {
         // map passable to 1
 
         // route from 1 point to another
-
 
 
     }

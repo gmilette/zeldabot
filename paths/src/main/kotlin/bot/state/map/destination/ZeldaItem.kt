@@ -31,7 +31,8 @@ enum class ZeldaItem {
     Food,
     Potion,
     SecondPotion,
-    Wand
+    Wand,
+    Triforce
 }
 
 val zeldaItemsRequired = setOf<ZeldaItem>(

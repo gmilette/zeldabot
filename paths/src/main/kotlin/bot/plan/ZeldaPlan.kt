@@ -141,6 +141,7 @@ object ZeldaPlan {
         return builder {
             inLevel
             startAt(LevelStartMapLoc.lev(1))
+            objective(ZeldaItem.Bow)
             seg("grab key")
             left
             goIn(GamePad.MoveLeft, 30)
@@ -178,15 +179,15 @@ object ZeldaPlan {
             leftm
             seg("push action")
             +makeCenterPush(127, makeUp(34))
-            seg("snag boomerang")
             rightNoP // don't attack // need special sequence here
+            seg("snag boomerang", ZeldaItem.Boomerang)
             down.down // at 67 now
             right // boomerang
             goIn(GamePad.MoveRight, 30)
             kill
             goAbout(InLocations.Level1.boomerang68, 1, 1, true, ignoreProjectiles = true)
             rightm //69 hand grabby, dont get loot
-            seg("steal key from hand grabby")
+            seg("steal key from hand grabby", ZeldaItem.Triforce)
             go(InLocations.Level1.key114Position)
             go(InLocations.Level1.key114)
             // should do but too risky for now

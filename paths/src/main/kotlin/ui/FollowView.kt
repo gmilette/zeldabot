@@ -34,7 +34,7 @@ fun FollowView(
             FollowCard(
                 title = "Phase",
                 width = 160.dp,
-                height = 40.dp
+                height = 60.dp
             ) {
                 Text(
                     text = toStringCurrentPhase(),
@@ -44,7 +44,7 @@ fun FollowView(
             }
             FollowCard(
                 title = "Segment",
-                height = 40.dp,
+                height = 60.dp,
                 width = 160.dp,
                 text = ""
             ) {
@@ -93,9 +93,12 @@ private fun ImageActionObjective(state: ZeldaModel.ShowState) {
         is DestType.Item -> {
             when (type.item) {
                 ZeldaItem.Raft -> "icon_raft.png"
+                ZeldaItem.Bow -> "icon_bow.png"
+                ZeldaItem.Boomerang -> "icon_boomerang.png"
                 ZeldaItem.WoodenSword -> "icon_woodensword.png"
                 ZeldaItem.WhiteSword -> "icon_whitesword.png"
                 ZeldaItem.MagicSword -> "icon_sword.png"
+                ZeldaItem.Triforce -> "icon_linktri.png"
                 else -> "icon_empty.png"
             }
         }
@@ -108,11 +111,22 @@ private fun ImageActionObjective(state: ZeldaModel.ShowState) {
 
     Row {
         FollowCard(title = "objective", background = Color.Green) {
-            Image(
-                painter = painterResource(image),
-        modifier = Modifier.size(40.dp).align(Alignment.Center).background(Color.LightGray),
-                contentDescription = ""
-            )
+            Box {
+                Image(
+                    painter = painterResource(image),
+                    modifier = Modifier.size(40.dp).align(Alignment.Center).background(Color.LightGray),
+                    contentDescription = ""
+                )
+                if (type is DestType.Level) {
+                    Text(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = Color.Black,
+                        text = type.which.toString(),
+                        textAlign = TextAlign.Start,
+                        fontSize = 16.sp
+                    )
+                }
+            }
         }
 
 //        FollowCard(title = "objective", text = obj.type.name, background = Color.Green)
@@ -122,6 +136,8 @@ private fun ImageActionObjective(state: ZeldaModel.ShowState) {
             // KILL ALL
             act.contains("move") -> "icon_move.png"
             act.contains("kill all") -> "icon_kill.png"
+            act.contains("nav") -> "icon_move.png"
+//            act.contains("get secret") -> "icon_coin.png"
             act.contains("push") -> "icon_block.png"
             else -> "icon_empty.png"
         }

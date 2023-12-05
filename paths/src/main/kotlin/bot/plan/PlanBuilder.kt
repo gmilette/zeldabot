@@ -59,6 +59,10 @@ class PlanBuilder(
         return this
     }
 
+    fun objective(item: ZeldaItem) {
+        setObjective(Objective(type = DestType.Item(item)))
+    }
+
     fun startAt(loc: MapLoc): PlanBuilder {
         // could add level too
         add(loc, StartAtAction())
@@ -112,7 +116,10 @@ class PlanBuilder(
         this.objective = objective
     }
 
-    fun seg(name: String): PlanBuilder {
+    fun seg(name: String, item: ZeldaItem? = null): PlanBuilder {
+        item?.let {
+            objective(item)
+        }
         makeSegment()
         segment = name
         return this

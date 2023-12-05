@@ -29,14 +29,14 @@ object NearestSafestPoint {
             ct++
         }
 
-        val safePoint = pt.copy()
-
-        // find nearest unsafe point
-        ct = 0
-        while(pt.isOnMap && pt.isSafe(costs, passable) && ct < MapConstants.oneGrid) {
-            pt = modifier(pt)
-            ct++
-        }
+//        val safePoint = pt.copy()
+//
+//        // find nearest unsafe point
+//        ct = 0
+//        while(pt.isOnMap && pt.isSafe(costs, passable) && ct < MapConstants.oneGrid) {
+//            pt = modifier(pt)
+//            ct++
+//        }
 
         // this is still possible, the safe point is surrounded by unsafe points
 
