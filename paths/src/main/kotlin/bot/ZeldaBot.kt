@@ -179,7 +179,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         private const val STRING = "####"
         private const val SPRITE_ID = 123
         private const val SPRITE_ID_2 = 456
-        private const val SPRITE_SIZE = 2
+        private const val SPRITE_SIZE = 6
 
         // parameters controlled by the debug UI
         var hasLadder = false
@@ -326,7 +326,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                     val X = x - SPRITE_SIZE / 2 + 0.5
                     sprite[SPRITE_SIZE * y + x] = if (X * X + Y * Y
                         <= SPRITE_SIZE * SPRITE_SIZE / 4
-                    ) Colors.ORANGE else -1
+                    ) Colors.DARK_BLUE else -1
                 }
             }
             api.createSprite(
@@ -350,7 +350,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                 with(frameStateUpdater.state) {
                     val currentCell = currentMapCell
                     val locCoordinates =
-                        "${frameState.level}: ${frameState.mapLoc} : ${currentCell.mapData.name.take(10)} at $movedTo"
+                        "${frameState.level}: ${frameState.mapLoc} : ${currentCell.mapData.name.take(10)}" // at $movedTo"
                     d {
                         "current --> " +
                                 "$locCoordinates " +

@@ -1,5 +1,7 @@
 package bot.plan.zstar
 
+import bot.plan.action.AttackActionDecider
+import bot.plan.action.aliveEnemies
 import bot.plan.action.isInGrid
 import bot.state.*
 import bot.state.map.Direction
@@ -20,6 +22,7 @@ class ZStar(
         var DEBUG = false
         private val DEBUG_DIR = false
         val DEBUG_ONE = false
+
         // at 1000, link cant go into the squares
         // at 10000, it is slow
         var MAX_ITER = 10000 // not sure if need more than this
@@ -99,10 +102,17 @@ class ZStar(
         val mapNearest: Boolean = false
     )
 
-    fun route(start: FramePoint, beforeStart: FramePoint? = null, target: FramePoint, makePassable: List<FramePoint> = emptyList()): List<FramePoint> {
+    fun route(
+        start: FramePoint,
+        beforeStart: FramePoint? = null,
+        target: FramePoint,
+        makePassable: List<FramePoint> = emptyList()
+    ): List<FramePoint> {
         return route(
-            ZRouteParam(start = start, targets = listOf(target), pointBeforeStart = beforeStart, enemies = emptyList(),
-                forcePassable = makePassable)
+            ZRouteParam(
+                start = start, targets = listOf(target), pointBeforeStart = beforeStart, enemies = emptyList(),
+                forcePassable = makePassable
+            )
         )
     }
 
@@ -169,9 +179,32 @@ class ZStar(
             }
 
 //            if (point == target) {
-            if (target.contains(point)) {
+            // or of link can attack
+//fun shouldAttack(from: Direction, link: FramePoint, enemiesClose: List<FramePoint>, considerInLink: Boolean = true, dist: Int = MapConstants.halfGrid): Boolean {
+
+            /// TEST THIS!! stop routing if found a point link can attack from
+            val from = cameFrom.getOrDefault(point, null)
+            val dirFacing = from?.dirTo(point)
+            if (target.contains(point) || (param.enemyTarget != null && dirFacing != null && AttackActionDecider.shouldAttack(
+                    dirFacing,
+                    point,
+                    target
+                ))
+            ) {
                 if (DEBUG) {
                     d { " explore found! $point" }
+                }
+                dirFacing?.let { dirF ->
+                    val att = AttackActionDecider.shouldAttack(
+                        dirFacing,
+                        point,
+                        target
+                    )
+                    if (att) {
+                        d { "found within attack range $att $dirF, $point" }
+                    } else {
+                        d { "found within attack range NOT $att $dirF, $point" }
+                    }
                 }
                 closedList.add(point)
                 break
@@ -180,7 +213,8 @@ class ZStar(
             closedList.add(point)
 
             // I think this is it
-            val previousPoint = if (iterCount == 1 && param.pointBeforeStart != null) param.pointBeforeStart else cameFrom[point]
+            val previousPoint =
+                if (iterCount == 1 && param.pointBeforeStart != null) param.pointBeforeStart else cameFrom[point]
             val dir = previousPoint?.let {
                 directionToDir(it, point)
             } ?: null
@@ -193,7 +227,8 @@ class ZStar(
                 d { "from prev=$previousPoint to $point ${if (point.onHighway) "*" else ""} dir $dir" }
             }
 
-            val neighbors = (neighborFinder.neighbors(point, dir, dist ?: 0, param.ladderSpec) - closedList - avoid).shuffled()
+            val neighbors =
+                (neighborFinder.neighbors(point, dir, dist ?: 0, param.ladderSpec) - closedList - avoid).shuffled()
             for (toPoint in neighbors) {
                 // raw cost of this cell
                 val cost = costsF.get(toPoint)
@@ -218,7 +253,8 @@ class ZStar(
                     // todo: prefer short path, so weight path length vs. distance to
 //                    pathSizeToGoal[toPoint] = pathSize(cameFrom, toPoint)
                     if (pointClosestToGoal.isZero ||
-                        costToGoal < (distanceToGoal[pointClosestToGoal] ?: Int.MAX_VALUE)) {
+                        costToGoal < (distanceToGoal[pointClosestToGoal] ?: Int.MAX_VALUE)
+                    ) {
 
 //                        val pathSize = pathSize(cameFrom, toPoint)
                         // if distance to goal is same, select based on path
@@ -271,6 +307,7 @@ class ZStar(
             Direction.Up -> {
                 passable.get(from.upEnd) && passable.get(from.upEndRight)
             }
+
             Direction.None -> true //
         }
         //* Can't go down if y + 16, is impassible
@@ -374,7 +411,7 @@ class ZStar(
 
     private fun writePassableFile(forcePassable: List<FramePoint>) {
         if (forcePassable.isNotEmpty()) {
-            d {" force passable "}
+            d { " force passable " }
             passable.write("forcePassable.csv") { v, x, y ->
                 when {
                     v -> "."
@@ -388,12 +425,12 @@ class ZStar(
     inner class GridCustomizer {
         fun customize(param: ZRouteParam) {
             val startSum = sum()
-            d {"Plan: iter = enemies ${param.enemies.size} near ${param.avoidNearEnemy.size} $startSum"}
+            d { "Plan: iter = enemies ${param.enemies.size} near ${param.avoidNearEnemy.size} $startSum" }
             resetPassable()
             // only if inside a radius
             setEnemyCosts(param.start, param.enemies)
             for (nearEnemy in param.avoidNearEnemy) {
-                d { " set near enemy $nearEnemy"}
+                d { " set near enemy $nearEnemy" }
                 setNearEnemy(param.start, nearEnemy)
             }
             setForceHighCost(param.forceHighCost)
@@ -436,11 +473,13 @@ class ZStar(
 //            costsF.modify(from, point.upLeftOneGrid, MapConstants.twoGrid) { _, current ->
 //                current + nearEnemyCost
 //            }
-            d { " enemy cost modify from ${point.upHalfLeftOneGrid}"}
+            d { " enemy cost modify from ${point.upHalfLeftOneGrid}" }
             // try it
-            costsF.modify(from, point.upHalfLeftOneGrid,
+            costsF.modify(
+                from, point.upHalfLeftOneGrid,
                 sizeWide = MapConstants.twoGrid,
-                sizeTall = MapConstants.oneGridPoint5) { _, current ->
+                sizeTall = MapConstants.oneGridPoint5
+            ) { _, current ->
                 current + nearEnemyCost
             }
 
@@ -453,7 +492,7 @@ class ZStar(
         fun setEnemyCosts(from: FramePoint, enemies: List<FramePoint> = emptyList()) {
             reset()
             for (enemy in enemies) {
-                d { " set enemy cost for $enemy"}
+                d { " set enemy cost for $enemy" }
                 setEnemyBig(from, enemy)
             }
             ///???
@@ -472,7 +511,7 @@ class ZStar(
 
         private fun setForceHighCost(grids: List<FramePoint> = emptyList()) {
             for (grid in grids) {
-                d { " set highcost $grid"}
+                d { " set highcost $grid" }
                 costsF.modifyTo(grid, MapConstants.oneGrid, ENEMY_COST)
             }
         }
