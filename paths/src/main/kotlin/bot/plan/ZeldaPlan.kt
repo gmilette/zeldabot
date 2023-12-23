@@ -150,7 +150,7 @@ object ZeldaPlan {
             right
             seg("grab from skeleton")
             right
-            goIn(GamePad.MoveRight, 20)
+            goIn(GamePad.MoveRight, 2) // dont need this
             // need kill until loot
             killUntilGetKey
 //            pickupDeadItem

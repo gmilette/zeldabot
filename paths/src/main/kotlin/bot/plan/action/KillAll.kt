@@ -1,6 +1,7 @@
 package bot.plan.action
 
 import bot.state.*
+import bot.state.map.MapConstants
 import bot.state.map.grid
 import util.LogFile
 import util.d
@@ -245,9 +246,9 @@ class KillAll(
                         val mod = target.x % 8
                         listOf(FramePoint(target.x - mod, target.y))
                     } else {
-                        listOf(target)
+                        target.attackPoints()
+//                        listOf(target)
                     }
-
 //                            val targetsToAttack = listOf(target)
 
                     // could route to all targets
@@ -264,6 +265,14 @@ class KillAll(
             }
         }
     }
+
+    private fun FramePoint.attackPoints(): List<FramePoint> =
+        FramePointBuilder.has(mapOf(
+            x to y - MapConstants.oneGrid + 1, // add one to force direction
+            x to y + MapConstants.oneGridPoint5 - 1, // force up direction
+            x - MapConstants.oneGrid + 1 to y, // from left
+            x + MapConstants.oneGridPoint5 - 4 to y // from right
+        ))
 }
 
 class KillAllCompleteCriteria {

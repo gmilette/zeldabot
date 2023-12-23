@@ -349,20 +349,25 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             if (draw) {
                 with(frameStateUpdater.state) {
                     val currentCell = currentMapCell
+                    val locName = if (currentCell.mapData.name.isEmpty()) {
+                        ""
+                    } else {
+                        " : ${currentCell.mapData.name.take(10)}"
+                    }
                     val locCoordinates =
-                        "${frameState.level}: ${frameState.mapLoc} : ${currentCell.mapData.name.take(10)}" // at $movedTo"
+                        "${frameState.level}:${frameState.mapLoc} $locName" // at $movedTo"
                     d {
                         "current --> " +
                                 "$locCoordinates " +
-//                            " current action: ${plan.action?.name ?: ""} "
                                 " target ${plan.target()} " + "link " +
                                 "${frameState.link.point}"
                     }
                     val tenth = this.frameState.tenth
 //                    val dir = this.frameState.link.dir.name.first()
-                    val damage = this.frameState.inventory.heartCalc.damageNumber()
+//                    val damage = this.frameState.inventory.heartCalc.damageNumber()
+//                    d: $damage
                     try {
-                        drawIt(plan.target(), plan.path(), "$locCoordinates $link t: $tenth d: $damage")
+                        drawIt(plan.target(), plan.path(), "$locCoordinates $link t: $tenth")
                     } catch (e: Exception) {
                         d { "ERROR $e" }
                     }

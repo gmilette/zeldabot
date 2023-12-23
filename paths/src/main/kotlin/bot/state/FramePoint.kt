@@ -24,6 +24,12 @@ data class FramePoint(val x: Int = 0, val y: Int = 0, val direction: Direction? 
     }
 }
 
+object FramePointBuilder {
+    fun has(xys: Map<Int, Int>): List<FramePoint> =
+        xys.map { FramePoint(it.key, it.value) }
+
+}
+
 fun FramePoint.directionToDir(to: FramePoint): Direction {
     return when {
         this.x == to.x -> {

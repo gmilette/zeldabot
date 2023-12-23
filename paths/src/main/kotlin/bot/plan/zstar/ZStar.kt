@@ -178,33 +178,9 @@ class ZStar(
                 d { " explore $point" }
             }
 
-//            if (point == target) {
-            // or of link can attack
-//fun shouldAttack(from: Direction, link: FramePoint, enemiesClose: List<FramePoint>, considerInLink: Boolean = true, dist: Int = MapConstants.halfGrid): Boolean {
-
-            /// TEST THIS!! stop routing if found a point link can attack from
-            val from = cameFrom.getOrDefault(point, null)
-            val dirFacing = from?.dirTo(point)
-            if (target.contains(point) || (param.enemyTarget != null && dirFacing != null && AttackActionDecider.shouldAttack(
-                    dirFacing,
-                    point,
-                    target
-                ))
-            ) {
+            if (target.contains(point)) {
                 if (DEBUG) {
                     d { " explore found! $point" }
-                }
-                dirFacing?.let { dirF ->
-                    val att = AttackActionDecider.shouldAttack(
-                        dirFacing,
-                        point,
-                        target
-                    )
-                    if (att) {
-                        d { "found within attack range $att $dirF, $point" }
-                    } else {
-                        d { "found within attack range NOT $att $dirF, $point" }
-                    }
                 }
                 closedList.add(point)
                 break

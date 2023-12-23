@@ -10,7 +10,7 @@ import kotlin.random.Random
 object AttackActionDecider {
     // how close to get to enemies before engaging the dodge
     private const val dodgeBuffer = 3
-    var DEBUG = false
+    var DEBUG = true
 
     // don't swing if there is projectile near by!
 
@@ -133,7 +133,8 @@ object AttackActionDecider {
             else -> false
         }
         // I think the enemy can keep moving while link winds up to hit so -1 is not enough
-        val enemyMovesWhileSwingingFactor = 8
+        // not quite
+        val enemyMovesWhileSwingingFactor = 0 // wtf, we don't need this
         val attackDirectionGrid = from.pointModifier(MapConstants.oneGrid - enemyMovesWhileSwingingFactor)(link) // -1 otherwise the sword is just out of reach
         val attackDirectionGrid2 = from.pointModifier(MapConstants.oneGridPoint5 - enemyMovesWhileSwingingFactor)(link) // -1 otherwise the sword is just out of reach
         val attackDirectionGrid3 = from.pointModifier(MapConstants.twoGridPoint5 - enemyMovesWhileSwingingFactor)(link) // -1 otherwise the sword is just out of reach
@@ -147,6 +148,7 @@ object AttackActionDecider {
             if (DEBUG) {
                 val distToGrid2 = framePoint.distTo(attackDirectionGrid2)
                 val distToGrid3 = framePoint.distTo(attackDirectionGrid3)
+                d { "   linkg: ${link.isInGrid(framePoint)} ($distToLink) $link"}
                 d { "   grid1: ${attackDirectionGrid.isInGrid(framePoint)} ($distToGrid) $attackDirectionGrid"}
                 d { "   grid2: ${attackDirectionGrid2.isInGrid(framePoint)} ($distToGrid2) $attackDirectionGrid2"}
                 d { "   grid3: ${attackDirectionGrid3.isInGrid(framePoint)} ($distToGrid3) $attackDirectionGrid3"}
