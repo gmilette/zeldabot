@@ -1,9 +1,6 @@
 package bot.state
 
 import bot.state.map.Direction
-import bot.state.map.stats.MapStatsTracker
-import bot.state.oam.LinkDirectionFinder
-import bot.state.oam.MonsterDirection
 import bot.state.oam.TileAttribute
 
 val List<Agent>.points: List<FramePoint>
@@ -18,13 +15,10 @@ data class Agent(
     val tile: Int = 0,
     val attribute: Int = 0,
     val tileByte: String = tile.toString(16),
-    val attributeByte: String = attribute.toString(16)
+    val attributeByte: String = attribute.toString(16),
+    val damaged: Boolean = false
 ) {
     val tileAttrib = TileAttribute(tile, attribute)
-
-    val damaged: Boolean =
-        MapStatsTracker.isDamaged(this)
-//        tile in LinkDirectionFinder.damagedAttribute || tile in MonsterDirection.damagedAttribute
 
     val damagedString: String = if (damaged) "*D*" else ""
 

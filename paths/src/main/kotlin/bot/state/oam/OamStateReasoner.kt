@@ -14,7 +14,8 @@ import util.d
  * reason about the sprites
  */
 class OamStateReasoner(
-    private val api: API
+    private val api: API,
+    private val mapStatsTracker: MapStatsTracker
 ) {
     private val sprites: List<SpriteData>
     private var spritesUncombined: List<SpriteData> = emptyList()
@@ -48,9 +49,15 @@ class OamStateReasoner(
     fun agentsUncombined(): List<Agent> =
         spritesUncombined.map { it.toAgent() }
 
-    private fun SpriteData.toAgent(): Agent =
-        Agent(index = index, point = point, state = toState(), tile = tile, attribute = attribute,
-            tileByte = tile.toString(16), attributeByte = attribute.toString(16))
+    // calculate isDamaged here
+    private fun SpriteData.toAgent(): Agent {
+        val damaged = mapStatsTracker.isDamaged(tile, attribute)
+        return Agent(
+            index = index, point = point, state = toState(damaged), tile = tile, attribute = attribute,
+            tileByte = tile.toString(16), attributeByte = attribute.toString(16),
+            damaged = damaged
+        )
+    }
 
     @VisibleForTesting
     fun combine(toCombine: List<SpriteData>): List<SpriteData> {
@@ -84,13 +91,13 @@ class OamStateReasoner(
         return mutable
     }
 
-    private fun SpriteData.toState(): EnemyState =
+    private fun SpriteData.toState(damaged: Boolean): EnemyState =
         when {
             this.hidden -> EnemyState.Dead
             isLoot -> EnemyState.Loot
             isProjectile -> EnemyState.Projectile
             // treat as projectile for now
-            isDamaged -> EnemyState.Projectile
+            damaged -> EnemyState.Projectile
             else -> EnemyState.Alive
         }
 
@@ -190,8 +197,6 @@ data class SpriteData(
     val isLoot = !hidden && (EnemyGroup.loot.contains(tile) || EnemyGroup.lootPairs.contains(tilePair))
 
     val isProjectile = !hidden && (EnemyGroup.projectiles.contains(tile) || EnemyGroup.projectilePairs.contains(tilePair))
-    // it doesn't solve the pancake problem
-    val isDamaged = MapStatsTracker.isDamaged(tile, attribute)
 }
 
 

@@ -19,7 +19,7 @@ data class MapStatsData(
         gson.toJson(this)
 }
 
-object MapStatsTracker {
+class MapStatsTracker {
     private var mapCoordinates: MapCoordinates = MapCoordinates(0, 0)
 
     // the memory

@@ -13,6 +13,7 @@ class FrameStateUpdater(
     private val api: API,
     private val hyrule: Hyrule
 ) {
+    private val mapStats = MapStatsTracker()
     private val yAdjustFactor = MapConstants.yAdjust
 
     private fun getLinkX() = api.readCPU(Addresses.linkX)
@@ -55,7 +56,7 @@ class FrameStateUpdater(
             state.hyrule.levelMap.cellOrEmpty(level, mapLoc)
         }
 
-        val oam = OamStateReasoner(api)
+        val oam = OamStateReasoner(api, mapStats)
         val theEnemies = oam.agents()
         val theUncombined = oam.agentsUncombined()
         val linkDir = oam.direction
@@ -80,7 +81,7 @@ class FrameStateUpdater(
         previousNow.previous = null
 
         val mapCoordinates = MapCoordinates(level, mapLoc)
-        MapStatsTracker.track(mapCoordinates, theEnemies)
+        mapStats.track(mapCoordinates, theEnemies)
         val frame = FrameState(api, theEnemies, theUncombined, level, mapLoc, link, ladder)
 
         state.framesOnScreen++
