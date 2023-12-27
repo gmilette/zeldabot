@@ -22,6 +22,7 @@ import bot.ZeldaBot
 import bot.plan.runner.PlanRunner
 import bot.state.*
 import bot.state.map.MapConstants
+import bot.state.map.stats.MapStatsTracker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -232,9 +233,11 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
                 state?.enemiesInfo?.let { enemies ->
                     if (enemies.isNotEmpty()) {
                         enemies.filter { it.state != EnemyState.Dead }.forEachIndexed { index, enemy ->
+                            //
+                            val tileLine = MapStatsTracker.attribFor(enemy.tile).tileStringLine()
                             Text(
-                                "$index: kind: ${enemy.index} (${enemy.index.toString(16)}) ${enemy.state.name} ${enemy.point} ${enemy.point.toG} " +
-                                        "${enemy.damagedString}"
+                                "$index: (${enemy.tile.toString(16)}_${enemy.attribute.toString(16)}) ${enemy.state.name} ${enemy.point} ${enemy.point.toG} " +
+                                        enemy.damagedString + " " + tileLine
                             )
                         }
                     }
@@ -292,7 +295,7 @@ private fun HyruleMap(state: MapLocationState, plan: PlanRunner) {
             val enemyPaint = Paint()
             enemyPaint.color = Color.Red
             val projPaint = Paint()
-            projPaint.color = Color.Magenta
+            projPaint.color = Color.Yellow
 //            canvas.drawRect(0f, 0f, MapConstants.MAX_X.toFloat()*(v+1), MapConstants.MAX_Y.toFloat()*(v+1), paint)
 
 //            d { " draw map cell"}
@@ -329,7 +332,7 @@ private fun HyruleMap(state: MapLocationState, plan: PlanRunner) {
 
             drawPoint(canvas, v, link, paint)
             // draw path: linkPathPaint
-            d { " draw num enemies ${enemies.size} enemies" }
+//            d { " draw num enemies ${enemies.size} enemies" }
             for (enemy in enemies) {
                 drawGridPoint(canvas, v, enemy.point, enemyPaint)
             }

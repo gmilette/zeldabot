@@ -63,6 +63,7 @@ dependencies {
     implementation("co.touchlab:kermit:1.1.3")
     testImplementation("io.kotest:kotest-assertions-core-jvm:5.5.0")
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
+    implementation("com.google.code.gson:gson:2.10.1")
 }
 
 tasks.test {

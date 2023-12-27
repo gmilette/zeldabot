@@ -5,6 +5,7 @@ import bot.state.EnemyState
 import bot.state.FramePoint
 import bot.state.map.Direction
 import bot.state.map.MapConstants
+import bot.state.map.stats.MapStatsTracker
 import nintaco.api.API
 import org.jheaps.annotations.VisibleForTesting
 import util.d
@@ -88,6 +89,8 @@ class OamStateReasoner(
             this.hidden -> EnemyState.Dead
             isLoot -> EnemyState.Loot
             isProjectile -> EnemyState.Projectile
+            // treat as projectile for now
+            isDamaged -> EnemyState.Projectile
             else -> EnemyState.Alive
         }
 
@@ -188,6 +191,7 @@ data class SpriteData(
 
     val isProjectile = !hidden && (EnemyGroup.projectiles.contains(tile) || EnemyGroup.projectilePairs.contains(tilePair))
     // it doesn't solve the pancake problem
+    val isDamaged = MapStatsTracker.isDamaged(tile, attribute)
 }
 
 

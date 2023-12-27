@@ -3,6 +3,7 @@ package bot.state
 import bot.plan.action.PreviousMove
 import bot.state.map.Hyrule
 import bot.state.map.MapConstants
+import bot.state.map.stats.MapStatsTracker
 import bot.state.oam.LinkDirectionFinder
 import bot.state.oam.OamStateReasoner
 import nintaco.api.API
@@ -65,22 +66,6 @@ class FrameStateUpdater(
         val ladder = if (ladderMem) oam.ladderSprite else null
         val damagedTile = if (oam.damaged) LinkDirectionFinder.damagedAttribute.last() else 0
         val link = Agent(0, linkPoint, linkDir, tile = damagedTile)
-        // has to persist between states
-//        if (ladder != null) {
-//            d { "ladder was ${state.ladderStateHorizontal} prev ${state.previousMove.dir.horizontal}" }
-//        }
-//        state.ladderStateHorizontal = when {
-//            ladder == null -> null
-//            state.ladderStateHorizontal == null ->
-//                state.previousMove.dir.horizontal
-//
-//            else -> state.ladderStateHorizontal
-//        }
-//        // and if it is horizontal, then make above and below not passable
-//        if (ladder != null) {
-//            d { " ladder at ${ladder.point} directionHorizontal: ${state.ladderStateHorizontal}" }
-//            d { " prev ${state.previousMove.dir.horizontal}" }
-//        }
 
         val previousNow = state.previousMove
         state.previousMove = PreviousMove(
@@ -94,6 +79,8 @@ class FrameStateUpdater(
         // reset to prevent infinite memory being allocated
         previousNow.previous = null
 
+        val mapCoordinates = MapCoordinates(level, mapLoc)
+        MapStatsTracker.track(mapCoordinates, theEnemies)
         val frame = FrameState(api, theEnemies, theUncombined, level, mapLoc, link, ladder)
 
         state.framesOnScreen++
