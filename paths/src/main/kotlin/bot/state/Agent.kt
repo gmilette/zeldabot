@@ -40,3 +40,15 @@ enum class EnemyState {
     Loot,
     Projectile,
 }
+
+sealed class EnemyStates {
+    object Unknown: EnemyStates()
+    object Alive: EnemyStates()
+    object Dead: EnemyStates()
+    object Loot: EnemyStates()
+    sealed class Projectile(val blockable: Boolean, val magicShieldBlockable: Boolean): EnemyStates() {
+        object Unblockable: Projectile(blockable = false, magicShieldBlockable = false)
+        object Blockable: Projectile(blockable = true, magicShieldBlockable = false)
+        object BlockableWithMagicShield: Projectile(blockable = true, magicShieldBlockable = true)
+    }
+}

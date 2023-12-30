@@ -63,7 +63,6 @@ object EnemyGroup {
 //            secretEverybodyMonsterOrCircleEnemyRight
     )
     val projectiles = setOf(
-        124, 126, // ghost attack
         144, 142, // sun
         40, orbProjectile, // ganons
         arrowTipShotByEnemy,
@@ -72,7 +71,10 @@ object EnemyGroup {
         brownBoomerangSpin,
         (0x96).toInt(), // trap,
         dragon4FlamingHead,
-        spinCircleEnemy
+        spinCircleEnemy,
+        ghostProjectileUpDown,
+        ghostProjectileLeft1,
+        ghostProjectileLeft2
     )
     // todo: need to add back these projectiles when I know attrib
 //        boulder, boulder2, boulder3, boulder4,
@@ -84,7 +86,6 @@ object EnemyGroup {
     )
 
     val largeProjectiles = setOf(
-        124, 126, // ghost attack
         144, 142, // sun
         fire,
         (0x96).toInt(), // trap,

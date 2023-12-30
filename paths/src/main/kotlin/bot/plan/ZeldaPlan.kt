@@ -432,14 +432,16 @@ object ZeldaPlan {
             seg("kill bats")
             // have to kill them to go up
             kill // can't there too many fireballs, just move on
-            // get key after kill
-            goTo(FramePoint(8.grid, 5.grid))
+            // get key after kill, not needed because kill gets loot
+//            goTo(FramePoint(8.grid, 5.grid))
             up
             seg("kill and push to continue")
+            goIn(GamePad.MoveUp, 6.grid, monitor = false) // custom action avoid traps, just walk straight
             upm
             killLongWait
             pushActionThenGoUp(InLocations.Push.moveLeftOfTwo)
-            killUntil(5) // leave some alive, just do some damage so bomb is successful
+            // don't need thisP
+//            killUntil(5) // leave some alive, just do some damage so bomb is successful
             bombRightExactly
             seg("go up to get wand")
             // dont need this key

@@ -26,7 +26,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     init {
 //        run(name = "level1drag")
 //        run(name = "level2Boom")
-        run(name = "level6start")
+//        run(name = "level6start")
 //        run(name = "level8")
 //        run(name = "level1L") // with ladder
 //        run(name = "level1drag")
@@ -34,6 +34,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        run(name = "level1")
 //        run(name = "level3")
 //        run(name = "level5") // with ladder
+        runLoc(true, 120, 6)
 //        run(name = "afterLev4")
 //         run(name = "all")
 //        run(name = "level7"
@@ -79,7 +80,6 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
         startPath = root
         action = withDefaultAction(masterPlan.skipToLocation(mapLoc, level))
         runLog = RunActionLog("mapstate_${level}_${mapLoc}")
-//        setSword(ex.sword)
     }
 
     private fun run(load: Boolean = false, name: String) {
