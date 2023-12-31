@@ -226,14 +226,14 @@ object NavUtil {
         val xDist = abs(from.x - to.x)
         val yDist = abs(from.y - to.y)
         return when {
-            // TODO: Redo this
             xDist < yDist -> {
                 if (from.y < to.y) GamePad.MoveDown else GamePad.MoveUp
             }
-            else ->
+            else -> {
                 if (from.x < to.x) GamePad.MoveRight else GamePad.MoveLeft
             }
         }
+    }
 
     fun directionToDir(from: FramePoint, to: FramePoint): Direction {
         return when {

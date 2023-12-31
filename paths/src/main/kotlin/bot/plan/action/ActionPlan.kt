@@ -207,6 +207,7 @@ class CompleteIfGetItem(
         state.frameState.inventory.select()
 
     override fun nextStep(state: MapLocationState): GamePad {
+        d { " CompleteIfGetItem "}
         if (startingQuantity < 0) {
             startingQuantity = quantity(state)
         }
@@ -256,7 +257,7 @@ class DecisionAction(
         } else {
             action2
         }
-        d { "Action -> ${action.name}" }
+        d { "Decision Action -> ${action.name}" }
         val gamePad = action.nextStep(state)
         target = action.target()
         path = action.path()
@@ -333,6 +334,9 @@ class Optional(val action: Action, private val must: Boolean = true) : Action {
         return action.nextStep(state)
     }
 
+    override fun path(): List<FramePoint> =
+        action.path()
+
     override val name: String
         get() = "O(${action.name})"
 
@@ -340,12 +344,6 @@ class Optional(val action: Action, private val must: Boolean = true) : Action {
     override fun complete(state: MapLocationState): Boolean =
         true
 }
-
-// after kill all, move to next screen
-val lootAndKill =
-    DecisionAction(GetLoot(), KillAll.makeIgnoreEnemies()) { state ->
-        state.neededLoot.isNotEmpty()
-    }
 
 val moveToKillAllInCenterSpot = DecisionAction(
     InsideNavAbout(FramePoint(5.grid, 5.grid), 2),

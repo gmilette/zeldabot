@@ -10,6 +10,7 @@ import bot.state.oam.shopkeeperAndBat
 import bot.state.oam.swordDir
 import util.LogFile
 import util.d
+import util.e
 import util.w
 
 
@@ -343,7 +344,7 @@ class MoveTo(
 class RouteTo(val params: Param = Param()) {
     companion object {
         fun hardlyReplan(dodgeEnemies: Boolean = true, ignoreProjectiles: Boolean = false) = RouteTo(
-            RouteTo.Param(
+            Param(
                 planCountMax = 100,
                 dodgeEnemies = dodgeEnemies,
                 ignoreProjectiles = ignoreProjectiles,
@@ -490,32 +491,33 @@ class RouteTo(val params: Param = Param()) {
         val param = paramIn.copy(attackTarget = null)
         var forceNew = param.forceNew
         if (to.isEmpty()) {
-            d { " no where to go " }
-            // dont do this because it could cause link to go off scren
-//            throw RuntimeException("no where to bo")
+            w { " no where to go " }
             return NavUtil.randomDir(state.link)
         }
         val linkPt = state.frameState.link.point
-        val closest = to.minBy { it.distTo(linkPt) }
-        if (linkPt.distTo(closest) <= 1) {
-            d { " CLOSE!! ${closest}" }
-            if (closest.y <= 1) {
-                d { " CLOSE!! up" }
-                return GamePad.MoveUp
-            }
-            if (closest.x <= 1) {
-                d { " CLOSE!! left" }
-                return GamePad.MoveLeft
-            }
-            if (closest.x >= MapConstants.MAX_X - 2) {
-                d { " CLOSE!! right" }
-                return GamePad.MoveRight
-            }
-            if (closest.y >= MapConstants.MAX_Y - 2) {
-                d { " CLOSE!! down" }
-                return GamePad.MoveDown
-            }
-        }
+        val ladder = state.frameState.ladder
+
+        // why this? let's go without it and see if it's ok
+//        val closest = to.minBy { it.distTo(linkPt) }
+//        if (linkPt.distTo(closest) <= 1) {
+//            d { " CLOSE!! $closest" }
+//            if (closest.y <= 1) {
+//                d { " CLOSE!! up" }
+//                return GamePad.MoveUp
+//            }
+//            if (closest.x <= 1) {
+//                d { " CLOSE!! left" }
+//                return GamePad.MoveLeft
+//            }
+//            if (closest.x >= MapConstants.MAX_X - 2) {
+//                d { " CLOSE!! right" }
+//                return GamePad.MoveRight
+//            }
+//            if (closest.y >= MapConstants.MAX_Y - 2) {
+//                d { " CLOSE!! down" }
+//                return GamePad.MoveDown
+//            }
+//        }
 
         val skippedButIsOnRoute = (state.previousMove.skipped && route?.isOn(linkPt, 5) != null)
         if (skippedButIsOnRoute) {
@@ -528,7 +530,7 @@ class RouteTo(val params: Param = Param()) {
         if (!state.hasEnemiesOrLoot && params.planCountMax != 1000) {
             d { " NO alive enemies, no need to replan just go plan count max: ${params.planCountMax}" }
             // make a plan now though
-            forceNew = false // wny is this true?? no enemies! it caises
+            forceNew = false // wny is this true?? no enemies!
             params.planCountMax = 1000
         } else {
             d { " alive enemies, keep re planning" }
@@ -545,62 +547,63 @@ class RouteTo(val params: Param = Param()) {
         var nextPoint: FramePoint = route?.pop() ?: FramePoint()
         val routeSize = route?.path?.size ?: 0
 
+        // this is an optimization I dont think is necessary
         val linkPoints = listOf(linkPt, linkPt.justRightEnd, linkPt.justRightEndBottom, linkPt.justLeftDown)
-        // it's ignoring the rhino!!
         val enemiesNear =
             state.aliveOrProjectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid * 5 }
-        val projectilesNear = state.projectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid * 5 }
-        val ladder = state.frameState.ladder
+//        val projectilesNear = state.projectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid * 5 }
+        // nothing to avoid if the clock is activated
+//        var avoid = if (params.dodgeEnemies && !state.frameState.clockActivated) {
+//            when {
+//                enemiesNear.isNotEmpty() -> enemiesNear
+//                // I can see why I set this to > 1, in the case of there being an enemy
+//                // we should just boldly move towards it because when we get close
+//                // we will attack, but it's not always the case, at least for rhino
+////            (enemiesNear.size > 1) -> enemiesNear
+//                projectilesNear.isNotEmpty() -> projectilesNear
+//                else -> emptyList()
+//            }
+//        } else {
+//            emptyList()
+//        }
 
         // nothing to avoid if the clock is activated
         var avoid = if (params.dodgeEnemies && !state.frameState.clockActivated) {
             when {
-                enemiesNear.isNotEmpty() -> enemiesNear
-                // I can see why I set this to > 1, in the case of there being an enemy
-                // we should just boldly move towards it because when we get close
-                // we will attack, but it's not always the case, at least for rhino
-//            (enemiesNear.size > 1) -> enemiesNear
-                projectilesNear.isNotEmpty() -> projectilesNear
-                else -> emptyList()
+                params.ignoreProjectiles -> state.aliveEnemies
+                param.ignoreEnemies -> state.projectiles
+                else -> state.aliveOrProjectile
             }
         } else {
             emptyList()
         }
 
-        if (params.ignoreProjectiles) {
-            avoid = avoid.filter { it.state != EnemyState.Projectile }
-        }
-
-        if (param.ignoreEnemies) {
-            d { "ignore enemies" }
-            avoid = avoid.filter { it.state != EnemyState.Alive }
-//        avoid = mutableListOf()
-        }
+//        if (params.ignoreProjectiles) {
+//            d { "ignore enemies" }
+//            avoid = avoid.filter { it.state != EnemyState.Projectile }
+//        }
+//
+//        if (param.ignoreEnemies) {
+//            d { "ignore enemies" }
+//            avoid = avoid.filter { it.state != EnemyState.Alive }
+//        }
 
         param.attackTarget?.let { targetAttack ->
             d { " remove enemy from filter $targetAttack" }
             avoid = avoid.filter { it.point != targetAttack }
         }
 
-        d { " enemies near ${enemiesNear.size} projectiles ${projectilesNear.size} avoid: ${avoid.size}" }
-        for (agent in enemiesNear) {
-            d { " enemy $agent" }
-        }
         d { " avoid attack target ${param.attackTarget}" }
         for (agent in avoid) {
-            d { " enemy $agent" }
+            d { " enemy avoid $agent" }
         }
-
-
-        // faster, but i have to do tradeoff between dodging
-//    avoid = emptyList()
 
         if (forceNew ||
             route == null || // reset
             routeSize <= 2 ||
             planCount >= params.planCountMax || // could have gotten off track
             !state.previousMove.movedNear || // got hit
-            enemiesNear.isNotEmpty()
+            enemiesNear.isNotEmpty() // if near an enemy replan, probably not important
         ) {
             val why = when {
                 forceNew -> "force new $planCount of ${params.planCountMax}"
@@ -613,126 +616,78 @@ class RouteTo(val params: Param = Param()) {
                 else -> "I donno"
             }
 
-            val passable = mutableListOf<FramePoint>()
-            if (ladder != null) {
-                passable.add(ladder.point)
-            }
-            if (param.makePassable != null) {
-                passable.add(param.makePassable)
-            }
-
-            // was this
-            if (state.currentMapCell.mapLoc != state.frameState.mapLoc) {
-                w { "! different maplocs ${state.currentMapCell.mapLoc} != ${state.frameState.mapLoc}" }
-            }
-            val mapCell = param.overrideMapCell ?: state.currentMapCell
-            // it needs to route with the frame state
-//        val mapCell = param.overrideMapCell ?: state.hyrule.getMapCell(state.frameState.mapLoc)
-
-            // of if the expected point is not where we should be
-            // need to re route
-            val inFrontOfGrids = getInFrontOfGrids(state)
-
-            route = FrameRoute(
-                mapCell.zstar.route(
-                    ZStar.ZRouteParam(
-                        start = linkPt,
-                        targets = to,
-                        pointBeforeStart = state.previousMove.from,
-                        enemies = avoid.points,
-                        forcePassable = passable,
-                        enemyTarget = param.attackTarget,
-                        mapNearest = param.mapNearest,
-                        forceHighCost = param.forceHighCost + inFrontOfGrids
-                    )
-                )
-            )
-
-            d { " Plan: ${state.currentMapCell.mapLoc} new plan! because ($why) to ${to}" }
-            route?.path?.lastOrNull()?.let { lastPt ->
-                // if it is just projectile then don't try to route towards the projectiles
-                if (true || param.mapNearest || lastPt in to || state.frameState.ladderDeployed || !state.hasEnemies) {
-                    d { "route to success target" }
-                } else {
-                    // what if can't find a route here?
-                    d { "route to fail, route towards enemies" }
-                    d { "ended at $lastPt which is ${lastPt.distTo(to.first())}" }
-                    // never go after projectiles
-                    val withoutClosestEnemy =
-                        avoid.filter { it.state == EnemyState.Alive }.sortedBy { it.point.distTo(state.link) }
-                            .toMutableList()
-                    val onlyProjectiles = avoid.filter { it.state == EnemyState.Projectile }.map { it.point }
-                    withoutClosestEnemy.removeFirstOrNull()?.let { closest ->
-                        d { "closest is ${closest.point}" }
-                        route = FrameRoute(
-                            mapCell.zstar.route(
-                                ZStar.ZRouteParam(
-                                    start = linkPt,
-                                    targets = avoid.points,
-                                    pointBeforeStart = state.previousMove.from,
-                                    enemies = onlyProjectiles,
-                                    forcePassable = passable,
-                                    enemyTarget = closest.point,
-                                    forceHighCost = param.forceHighCost
-                                )
-                            )
-                        )
-                        d { "found route of size ${route?.path?.size ?: 0}" }
-                    } ?: run {
-                        d { " no closest point, route " }
-                        route?.next15()
-                    }
-                }
-            }
-            route?.next15()
-//            route?.adjustCorner()
-            nextPoint = route?.popOrEmpty() ?: FramePoint() // skip first point because it is the current location
-            nextPoint = route?.popOrEmpty() ?: FramePoint()
-            d { " next is $nextPoint" }
-            route?.next5()
-            planCount = 0
+            d { " Plan: ${state.currentMapCell.mapLoc} new plan! because ($why) to $to" }
+            nextPoint = makeNewRoute(param, state, to, avoid, nextPoint)
         } else {
             d { " Plan: same plan ct $planCount" }
         }
 
         planCount++
-//within ${current.mapLoc} -> ${next.mapLoc}
-        d { " go to from ${linkPt} to next ${nextPoint} ${to}" }
-//        route?.next5()
-        return if (nextPoint == null) {
-            NavUtil.randomDir(state.link)
-        } else if (nextPoint == FramePoint(0, 0) && linkPt.x == 0) {
+        d { " go to from $linkPt to next $nextPoint $to" }
+
+        return if (nextPoint.isZero && linkPt.x == 0) {
             GamePad.MoveLeft
-        } else if (nextPoint == FramePoint(0, 0) && linkPt.y == 0) {
+        } else if (nextPoint.isZero && linkPt.y == 0) {
             GamePad.MoveUp
         } else {
-            // what nav to direction, that's weird
-            val gamepad = nextPoint.direction?.toGamePad() ?: NavUtil.directionToDist(linkPt, nextPoint)
-            gamepad
-//        if (true || ladder == null) gamepad else
-//            if (state.previousMove.didntMove) {
-//                // at least this allows link to escape sometimes, but not all times
-//                d { "ladder didnt move ${state.previousMove.move} ${state.previousMove.dir}"}
-//                if (state.previousMove.dir.horizontal || state.previousMove.move == GamePad.None) {
-//                    // force vertical
-//                    d { " ladder should go vertical " }
-//                    GamePad.randomDirection()
-//                } else {
-//                    d { " ladder should go hori " }
-//                    // force left
-//                    GamePad.randomDirection()
-//                }
-//            } else {
-//                gamepad
-//            }
-//            state.ladderStateHorizontal == true && gamepad.isHorizontal -> gamepad
-//            state.ladderStateHorizontal == false && !gamepad.isHorizontal -> gamepad
-//            else -> GamePad.MoveUp
-//        }
+            nextPoint.direction?.toGamePad() ?: linkPt.directionTo(nextPoint)
         }.also {
 //        writeFile(to, state, param, it)
             d { " next point $nextPoint dir: $it ${if (nextPoint.direction != null) "HAS DIR ${nextPoint.direction}" else ""}" }
         }
+    }
+
+    private fun makeNewRoute(
+        param: RouteParam,
+        state: MapLocationState,
+        to: List<FramePoint>,
+        avoid: List<Agent>,
+        nextPoint: FramePoint
+    ): FramePoint {
+        val linkPt = state.frameState.link.point
+        val ladder = state.frameState.ladder
+        var nextPoint1 = nextPoint
+        val passable = mutableListOf<FramePoint>()
+
+        if (ladder != null) {
+            passable.add(ladder.point)
+        }
+        if (param.makePassable != null) {
+            passable.add(param.makePassable)
+        }
+
+        val mapCell = param.overrideMapCell ?: state.currentMapCell
+
+        val inFrontOfGrids = getInFrontOfGrids(state)
+
+        route = FrameRoute(
+            mapCell.zstar.route(
+                ZStar.ZRouteParam(
+                    start = linkPt,
+                    targets = to,
+                    pointBeforeStart = state.previousMove.from,
+                    enemies = avoid.points,
+                    forcePassable = passable,
+                    enemyTarget = param.attackTarget,
+                    mapNearest = param.mapNearest,
+                    forceHighCost = param.forceHighCost + inFrontOfGrids
+                )
+            )
+        )
+
+        route?.path?.lastOrNull()?.let { lastPt ->
+            // if it is just projectile then don't try to route towards the projectiles
+            if (param.mapNearest || lastPt in to || state.frameState.ladderDeployed || !state.hasEnemies) {
+                d { "route to success target" }
+            }
+        }
+        route?.next15()
+        nextPoint1 = route?.popOrEmpty() ?: FramePoint() // skip first point because it is the current location
+        nextPoint1 = route?.popOrEmpty() ?: FramePoint()
+        d { " next is $nextPoint1" }
+        route?.next5()
+        planCount = 0
+        return nextPoint1
     }
 
     private fun getInFrontOfGrids(state: MapLocationState): List<FramePoint> =

@@ -815,11 +815,6 @@ class PlanBuilder(
         return this
     }
 
-    fun lootKill(): PlanBuilder {
-        add(lastMapLoc, lootAndKill)
-        return this
-    }
-
     fun goIn(dir: GamePad = GamePad.MoveUp, num: Int, monitor: Boolean = true): PlanBuilder {
         add(lastMapLoc, GoIn(num, dir, setMonitorEnabled = monitor))
         return this

@@ -1,5 +1,6 @@
 package bot.state
 
+import bot.plan.action.NavUtil
 import bot.state.map.Direction
 import bot.state.map.MapConstants
 import kotlin.math.abs
@@ -105,7 +106,7 @@ fun FramePoint.directionTo(to: FramePoint): GamePad {
             if (x < to.x) GamePad.MoveRight else GamePad.MoveLeft
         }
 
-        else -> GamePad.MoveLeft
+        else -> NavUtil.directionToDist(this, to)
     }
 }
 

@@ -32,7 +32,7 @@ val MapLocationState.numEnemies: Int
 val MapLocationState.aliveEnemies: List<Agent>
     get() = frameState.enemies.filter { it.state == EnemyState.Alive }
 
-val MapLocationState.projectile: List<Agent>
+val MapLocationState.projectiles: List<Agent>
     get() = frameState.enemies.filter { it.state == EnemyState.Projectile }
 
 val MapLocationState.longWait: List<Agent>

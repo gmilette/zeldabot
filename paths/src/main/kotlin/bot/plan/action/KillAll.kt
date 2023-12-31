@@ -30,6 +30,7 @@ class KillAll(
     private val ignoreProjectiles: List<Int> = listOf(),
     /**
      * if true, ignore all enemies (useful for level dragon fighting, but makes link suicidal)
+     * consider projectiles though
      */
     private val ignoreEnemies: Boolean = false,
     private val roundX: Boolean = false,
@@ -37,7 +38,6 @@ class KillAll(
     ignoreProjectilesRoute: Boolean = false
 ) : Action {
     companion object {
-        fun makeIgnoreEnemies() = KillAll(ignoreEnemies = true)
         fun make() = KillAll()
     }
 
