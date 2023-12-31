@@ -1,12 +1,13 @@
 package bot
 
+import androidx.compose.ui.graphics.Color
 import bot.plan.ZeldaPlan
+import bot.plan.action.isInHalfFatGrid
+import bot.plan.action.isInHalfGrid
 import bot.plan.runner.MasterPlan
 import bot.plan.runner.PlanRunner
 import bot.state.*
-import bot.state.map.Hyrule
-import bot.state.map.MapCell
-import bot.state.map.MapConstants
+import bot.state.map.*
 import bot.state.map.destination.ZeldaItem
 import bot.state.oam.rhinoHeadHeadWithMouthClosed
 import bot.state.oam.rhinoHeadHeadWithMouthOpen
@@ -363,11 +364,11 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                                 "${frameState.link.point}"
                     }
                     val tenth = this.frameState.tenth
-//                    val dir = this.frameState.link.dir.name.first()
+                    val dir = this.frameState.link.dir.name.first()
 //                    val damage = this.frameState.inventory.heartCalc.damageNumber()
 //                    d: $damage
                     try {
-                        drawIt(plan.target(), plan.path(), "$locCoordinates $link t: $tenth")
+                        drawIt(plan.target(), plan.path(), "$locCoordinates $link t: $tenth d: $dir")
                     } catch (e: Exception) {
                         d { "ERROR $e" }
                     }
@@ -380,7 +381,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                             this.frameState.mapLoc
                         ) else hyrule.getMapCell(this.frameState.mapLoc)
 //                    mapCell.gstar.setEnemyCosts(this.link, listOf(this.rhino()?.point ?: FramePoint()))
-                        drawCosts(mapCell.zstar.costsF.copy())
+                        drawCosts(frameState.link.dir, frameState.link.point, mapCell.zstar.costsF.copy())
                     } catch (e: Exception) {
                         d { "ERROR $e" }
                     }
@@ -403,11 +404,26 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             }
         }
 
-        private fun drawCosts(map: Map2d<Int>) {
+        private fun drawCosts(dir: Direction, link: FramePoint, map: Map2d<Int>) {
             // with enemies
+            val useThirdGrid = when (dir) {
+                Direction.Left,
+                Direction.Up -> true // MapConstants.oneGridPoint5
+                Direction.Right,
+                Direction.Down -> false // MapConstants.twoGridPoint5 //.oneGridPoint5 // MapConstants.halfGrid
+                else -> false
+            }
+            val attackDirectionGrid = if (useThirdGrid)  {
+                dir.pointModifier(MapConstants.oneGridPoint5 - 1)(link)
+            } else {
+                dir.pointModifier(MapConstants.oneGrid - 1)(link)
+            }
+            d { " link $link dir $dir grid $attackDirectionGrid"}
             map.map.forEachIndexed { y, row ->
                 row.forEachIndexed { x, v ->
+                    // if it is in the attack grid color it
                     val color = when {
+                        (y % 16 % 2 == 0) && attackDirectionGrid.isInHalfFatGrid(FramePoint(x, y), dir.vertical) -> Colors.LIGHT_BLUE
                         v > 100000 -> Colors.MAGENTA
                         v > 9000 && (y % 16 % 2 == 0) -> Colors.RED
 //                    v > 900 -> Colors.YELLOW // everything is yellow

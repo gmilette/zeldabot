@@ -1,6 +1,5 @@
 package bot.plan.action
 
-import bot.plan.zstar.NearestSafestPoint
 import bot.state.*
 import bot.state.map.*
 import bot.state.oam.swordDir
@@ -122,9 +121,49 @@ object AttackActionDecider {
         // if lined up vertical or horiz, and facing
     }
 
-    // always get hearts or fairies
-
+    // this should be same but isn't
     fun shouldAttack(from: Direction, link: FramePoint, enemiesClose: List<FramePoint>, considerInLink: Boolean = true, dist: Int = MapConstants.halfGrid): Boolean {
+        val isLeftUp = when (from) {
+            Direction.Left,
+            Direction.Up -> true
+
+            Direction.Right,
+            Direction.Down -> false
+
+            else -> false
+        }
+        // I think the enemy can keep moving while link winds up to hit so -1 is not enough
+        val enemyMovesWhileSwingingFactor = 1
+
+        val attackDirectionGrid = if (isLeftUp) {
+            from.pointModifier(MapConstants.oneGridPoint5 - enemyMovesWhileSwingingFactor)(link)
+        } else {
+            // i think it should be whole
+            from.pointModifier(MapConstants.oneGrid - enemyMovesWhileSwingingFactor)(link)
+        }
+
+        if (DEBUG) {
+            d { " grid size third = $isLeftUp grid $attackDirectionGrid from $link" }
+            for (framePoint in enemiesClose) {
+                val distToGrid = framePoint.distTo(attackDirectionGrid)
+                val distToLink = framePoint.distTo(link)
+                d { "   linkg: ${link.isInGrid(framePoint)} ($distToLink) $link" }
+                d { "   grid: ${attackDirectionGrid.isInGrid(framePoint)} ($distToGrid) $attackDirectionGrid" }
+            }
+        }
+
+        return enemiesClose.any {
+            // this doesn't always work unless the monster is really close, or link is facing the correct
+            // way,
+            (considerInLink && (link.isInHalfGrid(it) || (it.isInHalfGrid(link)))) ||
+                    (attackDirectionGrid.isInHalfFatGrid(it, wide = from.vertical))
+        }.also {
+            d { "should attack $it dir = $from link = $link dirGrid = $attackDirectionGrid numEnemies ${enemiesClose.size}" }
+        }
+    }
+
+    // I should be able to use the refactored version but whatever
+    fun shouldAttackC(from: Direction, link: FramePoint, enemiesClose: List<FramePoint>, considerInLink: Boolean = true, dist: Int = MapConstants.halfGrid): Boolean {
         val useThirdGrid = when (from) {
             Direction.Left,
             Direction.Up -> true // MapConstants.oneGridPoint5
@@ -134,10 +173,14 @@ object AttackActionDecider {
         }
         // I think the enemy can keep moving while link winds up to hit so -1 is not enough
         // not quite
-        val enemyMovesWhileSwingingFactor = 0 // wtf, we don't need this
-        val attackDirectionGrid = from.pointModifier(MapConstants.oneGrid - enemyMovesWhileSwingingFactor)(link) // -1 otherwise the sword is just out of reach
+        // this can
+        val enemyMovesWhileSwingingFactor = 1
+//        val attackDirectionGrid = from.pointModifier(MapConstants.oneGrid - enemyMovesWhileSwingingFactor)(link) // -1 otherwise the sword is just out of reach
+//        val attackDirectionGrid2 = from.pointModifier(MapConstants.oneGridPoint5 - enemyMovesWhileSwingingFactor)(link) // -1 otherwise the sword is just out of reach
+//        val attackDirectionGrid3 = from.pointModifier(MapConstants.twoGridPoint5 - enemyMovesWhileSwingingFactor)(link) // -1 otherwise the sword is just out of reach
+        val attackDirectionGrid = from.pointModifier(MapConstants.halfGrid - enemyMovesWhileSwingingFactor)(link) // -1 otherwise the sword is just out of reach
         val attackDirectionGrid2 = from.pointModifier(MapConstants.oneGridPoint5 - enemyMovesWhileSwingingFactor)(link) // -1 otherwise the sword is just out of reach
-        val attackDirectionGrid3 = from.pointModifier(MapConstants.twoGridPoint5 - enemyMovesWhileSwingingFactor)(link) // -1 otherwise the sword is just out of reach
+        val attackDirectionGrid3 = from.pointModifier(MapConstants.halfGrid - enemyMovesWhileSwingingFactor)(link) // -1 otherwise the sword is just out of reach
 
         d { " grid size third = $useThirdGrid grid $attackDirectionGrid from $link"}
         for (framePoint in enemiesClose) {
@@ -158,10 +201,13 @@ object AttackActionDecider {
         //|| it.isInGrid(attackDirectionGrid) || it.isInGrid(attackDirectionGrid2)
         //|| attackDirectionGrid2.isInGrid(it)
 //        val isInOnePt5Grid =
-        return enemiesClose.any { (considerInLink && (link.isInGrid(it) || (it.isInGrid(link)))) ||
-                attackDirectionGrid.isInGrid(it) ||
-                (useThirdGrid && attackDirectionGrid2.isInGrid(it)) ||
-                (false && useThirdGrid && attackDirectionGrid3.isInGrid(it))
+        return enemiesClose.any {
+            // this doesn't always work unless the monster is really close, or link is facing the correct
+            // way,
+            (considerInLink && (link.isInHalfGrid(it) || (it.isInHalfGrid(link)))) ||
+                    (!useThirdGrid && attackDirectionGrid.isInHalfGrid(it)) ||
+                    (useThirdGrid && attackDirectionGrid2.isInHalfGrid(it)) ||
+                    (false && useThirdGrid && attackDirectionGrid3.isInGrid(it))
         }.also {
             d { "should attack $it dir = $from link = $link dirGrid = $attackDirectionGrid numEnemies ${enemiesClose.size}" }
         }
