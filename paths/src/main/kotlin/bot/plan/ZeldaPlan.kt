@@ -148,10 +148,10 @@ object ZeldaPlan {
             kill //164, 192
             goTo(InLocations.Level1.key114)
             right
-            seg("grab from skeleton")
-            right
-            goIn(GamePad.MoveRight, 2) // dont need this
+            seg("go to key skeleton")
+            rightm
             // need kill until loot
+            seg("grab from skeleton")
             killUntilGetKey
 //            pickupDeadItem
             seg("move to arrow")
