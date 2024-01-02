@@ -23,7 +23,7 @@ class OamStateReasonerTest {
 
     @Test
     fun `test some`() {
-        val reasoner = OamStateReasoner(mock())
+        val reasoner = OamStateReasoner(mock(), mock())
         val sprites = listOf(
             SpriteData(176, FramePoint(128, 55), 176, 3),
             SpriteData(178, FramePoint(136, 55), 178, 3)

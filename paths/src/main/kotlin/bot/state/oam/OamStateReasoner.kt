@@ -15,7 +15,7 @@ import util.d
  */
 class OamStateReasoner(
     private val api: API,
-    private val mapStatsTracker: MapStatsTracker
+    private val mapStatsTracker: MapStatsTracker = MapStatsTracker()
 ) {
     private val sprites: List<SpriteData>
     private var spritesUncombined: List<SpriteData> = emptyList()

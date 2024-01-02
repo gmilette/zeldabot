@@ -14,8 +14,8 @@ object AttackActionDecider {
     // don't swing if there is projectile near by!
 
     fun shouldAttack(state: MapLocationState) =
-        // since the enemies aren't moving when the clock is activated
-        // need to introduce the chance for link to do some random movement instead
+    // since the enemies aren't moving when the clock is activated
+    // need to introduce the chance for link to do some random movement instead
         // should be fine since link can't get damaged
         if (state.frameState.clockActivated && Random.nextInt(4) == 1) {
             false
@@ -24,14 +24,14 @@ object AttackActionDecider {
 //            false
         } else {
             !getInFrontOfGrids(state) &&
-            shouldAttack(
-                state.frameState.link.dir,
-                state.link,
-                state.aliveEnemies.map { it.point }).also {
-                state.aliveEnemies.forEach {
-                    d { " enemy: $it in grid ${getInFrontOfGrids(state)}" }
-                }
-            }
+                    shouldAttack(
+                        state.frameState.link.dir,
+                        state.link,
+                        state.aliveEnemies.map { it.point }).also {
+                        state.aliveEnemies.forEach {
+                            d { " enemy: $it in grid ${getInFrontOfGrids(state)}" }
+                        }
+                    }
         }
 
     private fun getInFrontOfGrids(state: MapLocationState): Boolean {
@@ -49,7 +49,7 @@ object AttackActionDecider {
         // if it is ball projectile, going diagonal dodge all directions
         // if it is normal one-direction monster and that monster is facing link and in front of, retreat
         // if it is blockable one-direction projectile, and not facing it, face it (like an arrow)
-          // if you have magic shield, you can block more
+        // if you have magic shield, you can block more
         // fast monster: attack at 2+ out
         return GamePad.None
     }
@@ -57,7 +57,7 @@ object AttackActionDecider {
     fun shouldDodge(state: MapLocationState): GamePad {
         val link = state.link
         // if it is a small projectile, then we only need to avoid a half grid
-        val enemies = state.aliveEnemies.map { it.point } .filter { it.isInGrid(link, dodgeBuffer) }
+        val enemies = state.aliveEnemies.map { it.point }.filter { it.isInGrid(link, dodgeBuffer) }
         if (enemies.isEmpty()) return GamePad.None
 
         // but some directions you cannot move in! depending on what the previous
@@ -68,10 +68,10 @@ object AttackActionDecider {
         val preferredDirection = Direction.values().filter { validDirs.contains(it) }.maxBy { dir ->
             val moved = dir.pointModifier()(link)
             val sum = enemies.sumOf { it.distToSquare(moved) }
-            d { " dodge $dir -> $sum enemies = ${enemies.size}"}
+            d { " dodge $dir -> $sum enemies = ${enemies.size}" }
             sum
         }
-        d { " dodge $preferredDirection from ${state.previousMove}"}
+        d { " dodge $preferredDirection from ${state.previousMove}" }
         return preferredDirection.toGamePad()
     }
 
@@ -87,6 +87,7 @@ object AttackActionDecider {
                     Direction.horizontal
                 }
             }
+
             Direction.Up,
             Direction.Down -> {
                 if (from.onHighwayX) {
@@ -95,6 +96,7 @@ object AttackActionDecider {
                     Direction.vertical
                 }
             }
+
             Direction.None -> all
         }
     }
@@ -121,49 +123,62 @@ object AttackActionDecider {
         // if lined up vertical or horiz, and facing
     }
 
-    // this should be same but isn't
-    fun shouldAttack(from: Direction, link: FramePoint, enemiesClose: List<FramePoint>, considerInLink: Boolean = true, dist: Int = MapConstants.halfGrid): Boolean {
-        val isLeftUp = when (from) {
-            Direction.Left,
-            Direction.Up -> true
-
-            Direction.Right,
-            Direction.Down -> false
-
-            else -> false
-        }
-        // I think the enemy can keep moving while link winds up to hit so -1 is not enough
-        val enemyMovesWhileSwingingFactor = 1
-
-        val attackDirectionGrid = if (isLeftUp) {
-            from.pointModifier(MapConstants.oneGridPoint5 - enemyMovesWhileSwingingFactor)(link)
+    fun attackGrid(from: Direction, link: FramePoint, enemyMovesWhileSwingingFactor: Int = 1): FramePoint =
+        if (from.isLeftUp) {
+            from.pointModifier(MapConstants.halfGrid - enemyMovesWhileSwingingFactor)(link)
         } else {
-            // i think it should be whole
             from.pointModifier(MapConstants.oneGrid - enemyMovesWhileSwingingFactor)(link)
-        }
+        } //.adjustToMiddle(from)
+//
+//        if (from.isLeftUp) {
+//            from.pointModifier(MapConstants.oneGridPoint5 - enemyMovesWhileSwingingFactor)(link)
+//        } else {
+//            from.pointModifier(MapConstants.halfGrid - enemyMovesWhileSwingingFactor)(link)
+//        }
+
+    // this should be same but isn't
+    fun shouldAttack(
+        from: Direction,
+        link: FramePoint,
+        enemiesClose: List<FramePoint>,
+        considerInLink: Boolean = true,
+        dist: Int = MapConstants.halfGrid
+    ): Boolean {
+        val attackDirectionGrid = attackGrid(from, link)
 
         if (DEBUG) {
-            d { " grid size third = $isLeftUp grid $attackDirectionGrid from $link" }
-            for (framePoint in enemiesClose) {
-                val distToGrid = framePoint.distTo(attackDirectionGrid)
-                val distToLink = framePoint.distTo(link)
-                d { "   linkg: ${link.isInGrid(framePoint)} ($distToLink) $link" }
-                d { "   grid: ${attackDirectionGrid.isInGrid(framePoint)} ($distToGrid) $attackDirectionGrid" }
+            for (enemy in enemiesClose.sortedBy { it.distTo(link) }) {
+                val distToGrid = enemy.distTo(attackDirectionGrid)
+                val distToLink = enemy.distTo(link)
+                d { "   Enemy $enemy middle: ${enemy.adjustToMiddle(from)} $from" }
+                d { "   linkg: ${link.isInGrid(enemy)} or ${enemy.isInGrid(link)} ($distToLink) $link" }
+//                d { "   grid: ${attackDirectionGrid.isInGrid(framePoint)} ($distToGrid) $attackDirectionGrid" }
+                d { "   gridH: ${enemy.isInGrid(attackDirectionGrid)} ($distToGrid) $attackDirectionGrid" }
             }
         }
 
-        return enemiesClose.any {
+        return enemiesClose.any { enemy ->
             // this doesn't always work unless the monster is really close, or link is facing the correct
             // way,
-            (considerInLink && (link.isInHalfGrid(it) || (it.isInHalfGrid(link)))) ||
-                    (attackDirectionGrid.isInHalfFatGrid(it, wide = from.vertical))
+//            (considerInLink && (link.isInHalfGrid(enemy) || (enemy.isInHalfGrid(link)))) ||
+//                    (attackDirectionGrid.isInHalfFatGrid(enemy, wide = from.vertical))
+            (considerInLink && (link.isInGrid(enemy) || (enemy.isInGrid(link)))) ||
+//                    (enemy.isInGrid(attackDirectionGrid))
+                    (enemy.isInGrid(attackDirectionGrid)) // idea maybe this should check +4 and +8
+                    || (enemy.isInGrid(attackDirectionGrid.adjustToMiddle(from)))
         }.also {
             d { "should attack $it dir = $from link = $link dirGrid = $attackDirectionGrid numEnemies ${enemiesClose.size}" }
         }
     }
 
     // I should be able to use the refactored version but whatever
-    fun shouldAttackC(from: Direction, link: FramePoint, enemiesClose: List<FramePoint>, considerInLink: Boolean = true, dist: Int = MapConstants.halfGrid): Boolean {
+    fun shouldAttackC(
+        from: Direction,
+        link: FramePoint,
+        enemiesClose: List<FramePoint>,
+        considerInLink: Boolean = true,
+        dist: Int = MapConstants.halfGrid
+    ): Boolean {
         val useThirdGrid = when (from) {
             Direction.Left,
             Direction.Up -> true // MapConstants.oneGridPoint5
@@ -178,23 +193,32 @@ object AttackActionDecider {
 //        val attackDirectionGrid = from.pointModifier(MapConstants.oneGrid - enemyMovesWhileSwingingFactor)(link) // -1 otherwise the sword is just out of reach
 //        val attackDirectionGrid2 = from.pointModifier(MapConstants.oneGridPoint5 - enemyMovesWhileSwingingFactor)(link) // -1 otherwise the sword is just out of reach
 //        val attackDirectionGrid3 = from.pointModifier(MapConstants.twoGridPoint5 - enemyMovesWhileSwingingFactor)(link) // -1 otherwise the sword is just out of reach
-        val attackDirectionGrid = from.pointModifier(MapConstants.halfGrid - enemyMovesWhileSwingingFactor)(link) // -1 otherwise the sword is just out of reach
-        val attackDirectionGrid2 = from.pointModifier(MapConstants.oneGridPoint5 - enemyMovesWhileSwingingFactor)(link) // -1 otherwise the sword is just out of reach
-        val attackDirectionGrid3 = from.pointModifier(MapConstants.halfGrid - enemyMovesWhileSwingingFactor)(link) // -1 otherwise the sword is just out of reach
+        val attackDirectionGrid =
+            from.pointModifier(MapConstants.halfGrid - enemyMovesWhileSwingingFactor)(link) // -1 otherwise the sword is just out of reach
+        val attackDirectionGrid2 =
+            from.pointModifier(MapConstants.oneGridPoint5 - enemyMovesWhileSwingingFactor)(link) // -1 otherwise the sword is just out of reach
+        val attackDirectionGrid3 =
+            from.pointModifier(MapConstants.halfGrid - enemyMovesWhileSwingingFactor)(link) // -1 otherwise the sword is just out of reach
 
-        d { " grid size third = $useThirdGrid grid $attackDirectionGrid from $link"}
+        d { " grid size third = $useThirdGrid grid $attackDirectionGrid from $link" }
         for (framePoint in enemiesClose) {
             val distToGrid = framePoint.distTo(attackDirectionGrid)
             val distToLink = framePoint.distTo(link)
 
-            d { "enemy: $framePoint useThird $useThirdGrid in grid ${attackDirectionGrid.isInGrid(framePoint)} ($distToGrid) in link ${link.isInGrid(framePoint)} ($distToLink)"}
+            d {
+                "enemy: $framePoint useThird $useThirdGrid in grid ${attackDirectionGrid.isInGrid(framePoint)} ($distToGrid) in link ${
+                    link.isInGrid(
+                        framePoint
+                    )
+                } ($distToLink)"
+            }
             if (DEBUG) {
                 val distToGrid2 = framePoint.distTo(attackDirectionGrid2)
                 val distToGrid3 = framePoint.distTo(attackDirectionGrid3)
-                d { "   linkg: ${link.isInGrid(framePoint)} ($distToLink) $link"}
-                d { "   grid1: ${attackDirectionGrid.isInGrid(framePoint)} ($distToGrid) $attackDirectionGrid"}
-                d { "   grid2: ${attackDirectionGrid2.isInGrid(framePoint)} ($distToGrid2) $attackDirectionGrid2"}
-                d { "   grid3: ${attackDirectionGrid3.isInGrid(framePoint)} ($distToGrid3) $attackDirectionGrid3"}
+                d { "   linkg: ${link.isInGrid(framePoint)} ($distToLink) $link" }
+                d { "   grid1: ${attackDirectionGrid.isInGrid(framePoint)} ($distToGrid) $attackDirectionGrid" }
+                d { "   grid2: ${attackDirectionGrid2.isInGrid(framePoint)} ($distToGrid2) $attackDirectionGrid2" }
+                d { "   grid3: ${attackDirectionGrid3.isInGrid(framePoint)} ($distToGrid3) $attackDirectionGrid3" }
             }
         }
         // if it is on top of link ALWAYS attack, if it is in the direction link is facing, also attack
@@ -213,7 +237,13 @@ object AttackActionDecider {
         }
     }
 
-    fun shouldAttackB(from: Direction, link: FramePoint, enemiesClose: List<FramePoint>, considerInLink: Boolean = true, dist: Int = MapConstants.halfGrid): Boolean {
+    fun shouldAttackB(
+        from: Direction,
+        link: FramePoint,
+        enemiesClose: List<FramePoint>,
+        considerInLink: Boolean = true,
+        dist: Int = MapConstants.halfGrid
+    ): Boolean {
         val useThirdGrid = when (from) {
             Direction.Left,
             Direction.Up -> true // MapConstants.oneGridPoint5
@@ -221,32 +251,42 @@ object AttackActionDecider {
             Direction.Down -> false // MapConstants.twoGridPoint5 //.oneGridPoint5 // MapConstants.halfGrid
             else -> false
         }
-        val attackDirectionGrid = from.pointModifier(MapConstants.oneGrid - 1)(link) // -1 otherwise the sword is just out of reach
-        val attackDirectionGrid2 = from.pointModifier(MapConstants.oneGridPoint5 - 1)(link) // -1 otherwise the sword is just out of reach
-        val attackDirectionGrid3 = from.pointModifier(MapConstants.twoGridPoint5 - 1)(link) // -1 otherwise the sword is just out of reach
+        val attackDirectionGrid =
+            from.pointModifier(MapConstants.oneGrid - 1)(link) // -1 otherwise the sword is just out of reach
+        val attackDirectionGrid2 =
+            from.pointModifier(MapConstants.oneGridPoint5 - 1)(link) // -1 otherwise the sword is just out of reach
+        val attackDirectionGrid3 =
+            from.pointModifier(MapConstants.twoGridPoint5 - 1)(link) // -1 otherwise the sword is just out of reach
 
-        d { " grid size third = $useThirdGrid grid $attackDirectionGrid from $link"}
+        d { " grid size third = $useThirdGrid grid $attackDirectionGrid from $link" }
         for (framePoint in enemiesClose) {
             val distToGrid = framePoint.distTo(attackDirectionGrid)
             val distToLink = framePoint.distTo(link)
 
-            d { "enemy: $framePoint useThird $useThirdGrid in grid ${attackDirectionGrid.isInGrid(framePoint)} ($distToGrid) in link ${link.isInGrid(framePoint)} ($distToLink)"}
+            d {
+                "enemy: $framePoint useThird $useThirdGrid in grid ${attackDirectionGrid.isInGrid(framePoint)} ($distToGrid) in link ${
+                    link.isInGrid(
+                        framePoint
+                    )
+                } ($distToLink)"
+            }
             if (DEBUG) {
                 val distToGrid2 = framePoint.distTo(attackDirectionGrid2)
                 val distToGrid3 = framePoint.distTo(attackDirectionGrid3)
-                d { "   grid1: ${attackDirectionGrid.isInGrid(framePoint)} ($distToGrid) $attackDirectionGrid"}
-                d { "   grid2: ${attackDirectionGrid2.isInGrid(framePoint)} ($distToGrid2) $attackDirectionGrid2"}
-                d { "   grid3: ${attackDirectionGrid3.isInGrid(framePoint)} ($distToGrid3) $attackDirectionGrid3"}
+                d { "   grid1: ${attackDirectionGrid.isInGrid(framePoint)} ($distToGrid) $attackDirectionGrid" }
+                d { "   grid2: ${attackDirectionGrid2.isInGrid(framePoint)} ($distToGrid2) $attackDirectionGrid2" }
+                d { "   grid3: ${attackDirectionGrid3.isInGrid(framePoint)} ($distToGrid3) $attackDirectionGrid3" }
             }
         }
         // if it is on top of link ALWAYS attack, if it is in the direction link is facing, also attack
         //|| it.isInGrid(attackDirectionGrid) || it.isInGrid(attackDirectionGrid2)
         //|| attackDirectionGrid2.isInGrid(it)
 //        val isInOnePt5Grid =
-        return enemiesClose.any { (considerInLink && (link.isInGrid(it) || (it.isInGrid(link)))) ||
-                attackDirectionGrid.isInGrid(it) ||
-                attackDirectionGrid2.isInGrid(it) ||
-                (useThirdGrid && attackDirectionGrid3.isInGrid(it))
+        return enemiesClose.any {
+            (considerInLink && (link.isInGrid(it) || (it.isInGrid(link)))) ||
+                    attackDirectionGrid.isInGrid(it) ||
+                    attackDirectionGrid2.isInGrid(it) ||
+                    (useThirdGrid && attackDirectionGrid3.isInGrid(it))
         }.also {
             d { "should attack $it dir = $from link = $link dirGrid = $attackDirectionGrid numEnemies ${enemiesClose.size}" }
         }

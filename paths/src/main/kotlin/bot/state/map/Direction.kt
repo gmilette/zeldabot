@@ -32,6 +32,7 @@ fun Direction.toGamePad(): GamePad = when (this) {
     Direction.Down -> GamePad.MoveDown
     Direction.None -> GamePad.None
 }
+
 fun Direction.pointModifier(adjustment: Int = 1): (FramePoint) -> FramePoint {
     return when (this) {
         Direction.Up -> { p -> FramePoint(p.x, p.y - adjustment) }
@@ -41,6 +42,17 @@ fun Direction.pointModifier(adjustment: Int = 1): (FramePoint) -> FramePoint {
         Direction.None -> { p -> FramePoint(p.x, p.y) }
     }
 }
+
+val Direction.isLeftUp: Boolean
+    get() = when (this) {
+        Direction.Left,
+        Direction.Up -> true
+
+        Direction.Right,
+        Direction.Down -> false
+
+        else -> false
+    }
 
 val Direction.vertical: Boolean
     get() = this == Direction.Up || this == Direction.Down

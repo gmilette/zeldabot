@@ -2,6 +2,7 @@ package bot
 
 import androidx.compose.ui.graphics.Color
 import bot.plan.ZeldaPlan
+import bot.plan.action.AttackActionDecider
 import bot.plan.action.isInHalfFatGrid
 import bot.plan.action.isInHalfGrid
 import bot.plan.runner.MasterPlan
@@ -381,7 +382,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                             this.frameState.mapLoc
                         ) else hyrule.getMapCell(this.frameState.mapLoc)
 //                    mapCell.gstar.setEnemyCosts(this.link, listOf(this.rhino()?.point ?: FramePoint()))
-                        drawCosts(frameState.link.dir, frameState.link.point, mapCell.zstar.costsF.copy())
+                        val should = AttackActionDecider.shouldAttack(this)
+                        drawCosts(frameState.link.dir, frameState.link.point, should, mapCell.zstar.costsF.copy())
                     } catch (e: Exception) {
                         d { "ERROR $e" }
                     }
@@ -404,26 +406,14 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             }
         }
 
-        private fun drawCosts(dir: Direction, link: FramePoint, map: Map2d<Int>) {
-            // with enemies
-            val useThirdGrid = when (dir) {
-                Direction.Left,
-                Direction.Up -> true // MapConstants.oneGridPoint5
-                Direction.Right,
-                Direction.Down -> false // MapConstants.twoGridPoint5 //.oneGridPoint5 // MapConstants.halfGrid
-                else -> false
-            }
-            val attackDirectionGrid = if (useThirdGrid)  {
-                dir.pointModifier(MapConstants.oneGridPoint5 - 1)(link)
-            } else {
-                dir.pointModifier(MapConstants.oneGrid - 1)(link)
-            }
-            d { " link $link dir $dir grid $attackDirectionGrid"}
+        private fun drawCosts(dir: Direction, link: FramePoint, should: Boolean = false, map: Map2d<Int>) {
+            val attackDirectionGrid = AttackActionDecider.attackGrid(dir, link)
             map.map.forEachIndexed { y, row ->
                 row.forEachIndexed { x, v ->
                     // if it is in the attack grid color it
                     val color = when {
-                        (y % 16 % 2 == 0) && attackDirectionGrid.isInHalfFatGrid(FramePoint(x, y), dir.vertical) -> Colors.LIGHT_BLUE
+                        (y % 16 % 2 == 0) && (x % 16 % 2 == 0) && attackDirectionGrid.isInHalfFatGrid(FramePoint(x, y), dir.vertical) ->
+                            if (should) Colors.DARK_GREEN else Colors.LIGHT_BLUE
                         v > 100000 -> Colors.MAGENTA
                         v > 9000 && (y % 16 % 2 == 0) -> Colors.RED
 //                    v > 900 -> Colors.YELLOW // everything is yellow

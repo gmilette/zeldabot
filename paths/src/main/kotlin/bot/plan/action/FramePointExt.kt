@@ -1,6 +1,8 @@
 package bot.plan.action
 
 import bot.state.*
+import bot.state.map.Direction
+import bot.state.map.vertical
 
 fun FramePoint.distToSquare(other: FramePoint) = squarePts().minOf { it.distTo(other) }
 
@@ -11,6 +13,9 @@ fun FramePoint.isInGrid(other: FramePoint, buffer: Int = 0): Boolean {
     val yIn = other.y in (this.y - buffer)..(this.justLeftBottom.y + buffer)
     return xIn && yIn
 }
+
+fun FramePoint.adjustToMiddle(direction: Direction) =
+    if (direction.vertical) FramePoint(x + 4, y) else FramePoint(x, y + 4)
 
 fun FramePoint.isInHalfGrid(other: FramePoint, buffer: Int = 0): Boolean {
     val xIn = other.x in (this.x - buffer)..(this.justRightHalf.x + buffer)

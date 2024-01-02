@@ -2,6 +2,7 @@ package bot.plan.action
 
 import bot.state.FramePoint
 import bot.state.map.Direction
+import bot.state.map.vertical
 import io.kotest.matchers.shouldBe
 import org.junit.Test
 
@@ -52,6 +53,16 @@ class AttackActionDeciderTest() {
             Direction.Left, FramePoint(101, 88), listOf(target)) shouldBe true
     }
     //link = (88, 80) dirGrid = (103, 80)
+
+    @Test
+    fun `test in grid`() {
+        val enemy = FramePoint(50, 48)
+        val link = FramePoint(64, 48)
+        val from = Direction.Left
+
+        val attackDirectionGrid = AttackActionDecider.attackGrid(from, link)
+        enemy.isInHalfFatGrid(attackDirectionGrid, wide = from.vertical) shouldBe true
+    }
 
     @Test
     fun `out of range from below sword too far away`() {
