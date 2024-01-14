@@ -166,6 +166,7 @@ object AttackActionDecider {
 //                    (enemy.isInGrid(attackDirectionGrid))
                     (enemy.isInGrid(attackDirectionGrid)) // idea maybe this should check +4 and +8
                     || (enemy.isInGrid(attackDirectionGrid.adjustToMiddle(from)))
+                    || (enemy.isInGrid(attackDirectionGrid.justLeftDown)) // test
         }.also {
             d { "should attack $it dir = $from link = $link dirGrid = $attackDirectionGrid numEnemies ${enemiesClose.size}" }
         }

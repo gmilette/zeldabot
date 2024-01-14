@@ -37,6 +37,9 @@ val heart = 243
 val shopkeeperAndBat = (0x9C).toInt() to (0x00).toInt()
 val bat = (0x9A).toInt()
 
+// shot from the enemies
+val rockProjectile = (0x9e).toInt() to (0x00).toInt()
+
 val boulder = (0x90).toInt()
 val boulder2 = (0x92).toInt()
 //val boulder3 = (0xEA).toInt() // it is also triforce part sooo... // also rhino piece

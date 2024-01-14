@@ -105,6 +105,7 @@ object EnemyGroup {
         boulder3Pair,
         arrowTipShotByEnemyPair,
         arrowButtShotByEnemy,
+        rockProjectile
     )
 
     val ignorePairs = setOf(

@@ -412,8 +412,6 @@ class RouteTo(val params: Param = Param()) {
         to: List<FramePoint>,
         param: RouteParam,
     ): GamePad {
-        // is this direction correct?
-        // i tried dirActual
         d { " route To" }
         val canAttack = param.useB || state.frameState.canUseSword
 
@@ -421,7 +419,7 @@ class RouteTo(val params: Param = Param()) {
         ) {
             d { " Route Action -> ATTACK" }
             val att = if (param.useB) GamePad.B else GamePad.A
-            writeFile(to, state, param, att)
+            writeFile(to, state, att)
             if (param.useB) {
                 attackB.nextStep(state)
             } else {
@@ -438,7 +436,6 @@ class RouteTo(val params: Param = Param()) {
     private fun writeFile(
         to: List<FramePoint>,
         state: MapLocationState,
-        param: RouteParam,
         gamePad: GamePad
     ) {
         val target = to.minByOrNull { it.distTo(state.link) }
@@ -569,6 +566,9 @@ class RouteTo(val params: Param = Param()) {
 
         // nothing to avoid if the clock is activated
         var avoid = if (params.dodgeEnemies && !state.frameState.clockActivated) {
+            // this seems to be ok, except link can get hit from the side
+            // unless it avoids projectiles
+//            state.aliveEnemies
             when {
                 params.ignoreProjectiles -> state.aliveEnemies
                 param.ignoreEnemies -> state.projectiles
@@ -577,11 +577,6 @@ class RouteTo(val params: Param = Param()) {
         } else {
             emptyList()
         }
-
-//        if (params.ignoreProjectiles) {
-//            d { "ignore enemies" }
-//            avoid = avoid.filter { it.state != EnemyState.Projectile }
-//        }
 //
 //        if (param.ignoreEnemies) {
 //            d { "ignore enemies" }
@@ -632,7 +627,7 @@ class RouteTo(val params: Param = Param()) {
         } else {
             nextPoint.direction?.toGamePad() ?: linkPt.directionTo(nextPoint)
         }.also {
-//        writeFile(to, state, param, it)
+//        writeFile(to, state, it)
             d { " next point $nextPoint dir: $it ${if (nextPoint.direction != null) "HAS DIR ${nextPoint.direction}" else ""}" }
         }
     }
