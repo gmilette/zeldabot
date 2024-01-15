@@ -88,6 +88,7 @@ val redring = (0x46).toInt()
 val brownBoomerang = (0x36).toInt() //trib 0, 40
 val brownBoomerangSpin = (0x38).toInt() //attrib 40
 val bow = (0x2A).toInt()
+val trap = (0x96).toInt()
 val map = (0x4C).toInt()
 val fairy = (0x50).toInt()
 val fairy2 = (0x52).toInt()

@@ -69,13 +69,32 @@ object EnemyGroup {
         fire,
         brownBoomerang, // but it is also an item to be gotten, not avoided, oy!
         brownBoomerangSpin,
-        (0x96).toInt(), // trap,
+        trap, // trap,
         dragon4FlamingHead,
         spinCircleEnemy,
         ghostProjectileUpDown,
         ghostProjectileLeft1,
         ghostProjectileLeft2
     )
+
+    val projectileMagicShieldBlockable = setOf(
+        ghostProjectileUpDown,
+        ghostProjectileLeft1,
+        ghostProjectileLeft2
+    )
+
+    val projectileUnblockable = setOf(
+        fire,
+        dragon4FlamingHead,
+        spinCircleEnemy,
+    )
+
+    val projectilePairsUnblockable = setOf(
+        boulder4Pair,
+        boulder3Pair,
+        rockProjectile
+    )
+
     // todo: need to add back these projectiles when I know attrib
 //        boulder, boulder2, boulder3, boulder4,
 
@@ -88,7 +107,7 @@ object EnemyGroup {
     val largeProjectiles = setOf(
         144, 142, // sun
         fire,
-        (0x96).toInt(), // trap,
+        trap, // trap,
         boulder, boulder2,
         spinCircleEnemy
     )
@@ -142,7 +161,6 @@ object EnemyGroup {
         bigCoinPair2,
         bait
     )
-
 
     val loot = setOf(
         compass,

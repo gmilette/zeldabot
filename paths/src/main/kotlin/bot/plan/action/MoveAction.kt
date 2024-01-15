@@ -418,8 +418,8 @@ class RouteTo(val params: Param = Param()) {
         return if (AttackActionDecider.shouldAttack(state) && canAttack
         ) {
             d { " Route Action -> ATTACK" }
-            val att = if (param.useB) GamePad.B else GamePad.A
-            writeFile(to, state, att)
+//            val att = if (param.useB) GamePad.B else GamePad.A
+//            writeFile(to, state, att)
             if (param.useB) {
                 attackB.nextStep(state)
             } else {
@@ -492,8 +492,6 @@ class RouteTo(val params: Param = Param()) {
             return NavUtil.randomDir(state.link)
         }
         val linkPt = state.frameState.link.point
-        val ladder = state.frameState.ladder
-
         // why this? let's go without it and see if it's ok
 //        val closest = to.minBy { it.distTo(linkPt) }
 //        if (linkPt.distTo(closest) <= 1) {
@@ -548,21 +546,6 @@ class RouteTo(val params: Param = Param()) {
         val linkPoints = listOf(linkPt, linkPt.justRightEnd, linkPt.justRightEndBottom, linkPt.justLeftDown)
         val enemiesNear =
             state.aliveOrProjectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid * 5 }
-//        val projectilesNear = state.projectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid * 5 }
-        // nothing to avoid if the clock is activated
-//        var avoid = if (params.dodgeEnemies && !state.frameState.clockActivated) {
-//            when {
-//                enemiesNear.isNotEmpty() -> enemiesNear
-//                // I can see why I set this to > 1, in the case of there being an enemy
-//                // we should just boldly move towards it because when we get close
-//                // we will attack, but it's not always the case, at least for rhino
-////            (enemiesNear.size > 1) -> enemiesNear
-//                projectilesNear.isNotEmpty() -> projectilesNear
-//                else -> emptyList()
-//            }
-//        } else {
-//            emptyList()
-//        }
 
         // nothing to avoid if the clock is activated
         var avoid = if (params.dodgeEnemies && !state.frameState.clockActivated) {

@@ -1,12 +1,14 @@
 package bot.state
 
 import bot.state.map.Direction
+import bot.state.oam.EnemyGroup
 import bot.state.oam.TileAttribute
 
 val List<Agent>.points: List<FramePoint>
     get() = this.map { it.point }
 
-val emptyAgent = Agent(0, FramePoint(0, 0), Direction.Down, EnemyState.Unknown,  0)
+val emptyAgent = Agent(0, FramePoint(0, 0), Direction.Down, EnemyState.Unknown, 0)
+
 data class Agent(
     val index: Int = 0,
     val point: FramePoint,
@@ -16,7 +18,8 @@ data class Agent(
     val attribute: Int = 0,
     val tileByte: String = tile.toString(16),
     val attributeByte: String = attribute.toString(16),
-    val damaged: Boolean = false
+    val damaged: Boolean = false,
+    val blockable: Blockable = Blockable.No
 ) {
     val tileAttrib = TileAttribute(tile, attribute)
 
@@ -38,17 +41,23 @@ enum class EnemyState {
     Alive,
     Dead,
     Loot,
-    Projectile,
+    Projectile
 }
 
 sealed class EnemyStates {
-    object Unknown: EnemyStates()
-    object Alive: EnemyStates()
-    object Dead: EnemyStates()
-    object Loot: EnemyStates()
-    sealed class Projectile(val blockable: Boolean, val magicShieldBlockable: Boolean): EnemyStates() {
-        object Unblockable: Projectile(blockable = false, magicShieldBlockable = false)
-        object Blockable: Projectile(blockable = true, magicShieldBlockable = false)
-        object BlockableWithMagicShield: Projectile(blockable = true, magicShieldBlockable = true)
+    object Unknown : EnemyStates()
+    object Alive : EnemyStates()
+    object Dead : EnemyStates()
+    object Loot : EnemyStates()
+    sealed class Projectile(val blockable: Boolean, val magicShieldBlockable: Boolean) : EnemyStates() {
+        object Unblockable : Projectile(blockable = false, magicShieldBlockable = false)
+        object Blockable : Projectile(blockable = true, magicShieldBlockable = false)
+        object BlockableWithMagicShield : Projectile(blockable = true, magicShieldBlockable = true)
     }
+}
+
+sealed class Blockable(val blockable: Boolean, val requiresMagicShield: Boolean) {
+    object No : Blockable(blockable = false, requiresMagicShield = false)
+    object WithSmallShield : Blockable(blockable = true, requiresMagicShield = false)
+    object WithMagicShield : Blockable(blockable = true, requiresMagicShield = true)
 }

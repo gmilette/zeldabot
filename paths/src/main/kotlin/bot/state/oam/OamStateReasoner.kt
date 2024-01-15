@@ -1,8 +1,6 @@
 package bot.state.oam
 
-import bot.state.Agent
-import bot.state.EnemyState
-import bot.state.FramePoint
+import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapConstants
 import bot.state.map.stats.MapStatsTracker
@@ -52,12 +50,21 @@ class OamStateReasoner(
     // calculate isDamaged here
     private fun SpriteData.toAgent(): Agent {
         val damaged = mapStatsTracker.isDamaged(tile, attribute)
+        val blockable = calcBlockable(tile, tile to attribute, )
         return Agent(
             index = index, point = point, state = toState(damaged), tile = tile, attribute = attribute,
             tileByte = tile.toString(16), attributeByte = attribute.toString(16),
-            damaged = damaged
+            damaged = damaged,
+            blockable = blockable
         )
     }
+
+    private fun calcBlockable(tile: Int, tilePair: Pair<Int, Int>): Blockable =
+        when {
+            EnemyGroup.projectilePairsUnblockable.contains(tilePair) -> Blockable.WithSmallShield
+            EnemyGroup.projectileMagicShieldBlockable.contains(tile) -> Blockable.WithMagicShield
+            else -> Blockable.No
+        }
 
     @VisibleForTesting
     fun combine(toCombine: List<SpriteData>): List<SpriteData> {
@@ -197,6 +204,13 @@ data class SpriteData(
     val isLoot = !hidden && (EnemyGroup.loot.contains(tile) || EnemyGroup.lootPairs.contains(tilePair))
 
     val isProjectile = !hidden && (EnemyGroup.projectiles.contains(tile) || EnemyGroup.projectilePairs.contains(tilePair))
+
+    val projectileType = when {
+        EnemyGroup.projectileMagicShieldBlockable.contains(tile) -> EnemyStates.Projectile.BlockableWithMagicShield
+        EnemyGroup.projectileUnblockable.contains(tile) -> EnemyStates.Projectile.Unblockable
+        EnemyGroup.projectilePairsUnblockable.contains(tilePair) -> EnemyStates.Projectile.Unblockable
+        else -> EnemyStates.Projectile.Blockable
+    }
 }
 
 
