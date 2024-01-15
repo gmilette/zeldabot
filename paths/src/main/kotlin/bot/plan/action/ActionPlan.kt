@@ -95,7 +95,7 @@ class OrderActionBuilder() {
 
 fun make() {
     OrderActionBuilder().build {
-        untilMapChange (
+        untilMapChange(
 
         )
     }
@@ -138,10 +138,10 @@ class OrderedActionSequence(
         return if (restartWhenDone) {
             stack = actions.toMutableList()
             for (action in actions) {
-                d { " reset ${action.name}"}
+                d { " reset ${action.name}" }
                 action.reset()
             }
-            d { " restart ${stack.size}"}
+            d { " restart ${stack.size}" }
             pop()
         } else {
             null
@@ -168,13 +168,13 @@ class OrderedActionSequence(
 
     override fun nextStep(state: MapLocationState): GamePad {
         hasBegun = true
-        d { "OrderedActionSequence begin ${currentAction?.name ?: "none"}"}
+        d { "OrderedActionSequence begin ${currentAction?.name ?: "none"}" }
         val current = currentAction ?: pop() ?: restart() ?: return GamePad.randomDirection(state.link)
         // check all complete to prevent infinite loop
         if (current.complete(state)) { // causes bomb one to fail && !allComplete(state)
             d { " sequence complete ${stack.size}" }
             for (action in stack) {
-                d { "is complete ${action.name} = ${action.complete(state)}"}
+                d { "is complete ${action.name} = ${action.complete(state)}" }
             }
             pop()
             // recur
@@ -207,7 +207,7 @@ class CompleteIfGetItem(
         state.frameState.inventory.select()
 
     override fun nextStep(state: MapLocationState): GamePad {
-        d { " CompleteIfGetItem "}
+        d { " CompleteIfGetItem " }
         if (startingQuantity < 0) {
             startingQuantity = quantity(state)
         }
@@ -265,7 +265,7 @@ class DecisionAction(
     }
 
     override val name: String
-        get() = "${action1.name}${if (action1.name.isEmpty()) "" else " or " }${action2.name}"
+        get() = "${action1.name}${if (action1.name.isEmpty()) "" else " or "}${action2.name}"
 }
 
 
@@ -419,11 +419,12 @@ class GoInConsume(private val moves: Int = 5, private val dir: GamePad = GamePad
         get() = "Go In Consume $dir ($movements of $moves)"
 }
 
-class GoIn(private val moves: Int = 5,
-           private val dir: GamePad = GamePad.MoveUp,
-           private val reset: Boolean = false,
-           private val setMonitorEnabled: Boolean = true,
-           private val condition: (MapLocationState) -> Boolean = { true }
+class GoIn(
+    private val moves: Int = 5,
+    private val dir: GamePad = GamePad.MoveUp,
+    private val reset: Boolean = false,
+    private val setMonitorEnabled: Boolean = true,
+    private val condition: (MapLocationState) -> Boolean = { true }
 ) :
     Action {
     private var movements = 0
@@ -453,6 +454,7 @@ class GoIn(private val moves: Int = 5,
     override val name: String
         get() = "Go In $dir ($movements of $moves)"
 }
+
 class GoDirection(private val dir: GamePad, private val moves: Int = 10) : Action {
     private var movements = 0
 
@@ -504,6 +506,7 @@ open class Bomb(private val target: FramePoint) : Action {
         triedToDeployBomb = false
         initialBombs = -1
     }
+
     override fun complete(state: MapLocationState): Boolean =
         state.usedABomb || state.frameState.inventory.numBombs == 0 // no bombs, just complete this
 
@@ -524,6 +527,7 @@ open class Bomb(private val target: FramePoint) : Action {
             (triedToDeployBomb && !state.usedABomb) -> GamePad.B
             else -> {
                 routeTo.routeTo(state, stretchedTarget)
+//                routeTo.routeTo(state, stretchedTarget)
             }
         }
     }
@@ -581,7 +585,11 @@ class ExitShop : Action {
         val dir = Direction.Down
         val link = state.frameState.link.point
         val exits = current.exitsFor(dir) ?: return NavUtil.randomDir(link)
-        return routeTo.routeTo(state, exits, overrideMapCell = current)
+        return routeTo.routeTo(
+            state, exits, RouteTo.RouteParam(
+                overrideMapCell = current
+            )
+        )
     }
 }
 
@@ -709,7 +717,8 @@ class GetLoot(
 
         // map nearest can cause zelda to get stuck sometimes
         d { " get loot $target from targets $targets" }
-        return routeTo.routeTo(state, targets,
+        return routeTo.routeTo(
+            state, targets,
             RouteTo.RouteParam(forceNew = previousTarget != target, mapNearest = false)
         )
     }
