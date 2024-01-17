@@ -142,12 +142,12 @@ object ZeldaPlan {
             inLevel
             startAt(LevelStartMapLoc.lev(1))
             objective(ZeldaItem.Bow)
-//            seg("grab key")
-//            left
-//            goIn(GamePad.MoveLeft, 30)
-//            kill //164, 192
-//            goTo(InLocations.Level1.key114)
-//            right
+            seg("grab key")
+            left
+            goIn(GamePad.MoveLeft, 30)
+            kill //164, 192
+            goTo(InLocations.Level1.key114)
+            right
             seg("go to key skeleton")
             rightm
             // need kill until loot
@@ -168,7 +168,7 @@ object ZeldaPlan {
             seg("grab key from zig")
             killUntilGetKey
             seg("get key from boomerang guys")
-            up //35
+            up
             goIn(GamePad.MoveUp, 30)
             kill
             goTo(InLocations.Level1.key83)
