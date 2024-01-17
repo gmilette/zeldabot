@@ -142,12 +142,12 @@ object ZeldaPlan {
             inLevel
             startAt(LevelStartMapLoc.lev(1))
             objective(ZeldaItem.Bow)
-            seg("grab key")
-            left
-            goIn(GamePad.MoveLeft, 30)
-            kill //164, 192
-            goTo(InLocations.Level1.key114)
-            right
+//            seg("grab key")
+//            left
+//            goIn(GamePad.MoveLeft, 30)
+//            kill //164, 192
+//            goTo(InLocations.Level1.key114)
+//            right
             seg("go to key skeleton")
             rightm
             // need kill until loot
@@ -178,7 +178,9 @@ object ZeldaPlan {
             seg("get arrow")
             leftm
             seg("push action")
+            goIn(GamePad.MoveLeft, MapConstants.oneGridPoint5) // dodge the traps by moving in
             +makeCenterPush(127, makeUp(34))
+            goTo(FramePoint(12.grid, 5.grid)) // make sure to go straight out
             rightNoP // don't attack // need special sequence here
             seg("snag boomerang", ZeldaItem.Boomerang)
             down.down // at 67 now

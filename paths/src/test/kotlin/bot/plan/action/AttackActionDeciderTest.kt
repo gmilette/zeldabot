@@ -2,11 +2,31 @@ package bot.plan.action
 
 import bot.state.FramePoint
 import bot.state.map.Direction
+import bot.state.map.MapConstants
 import bot.state.map.vertical
 import io.kotest.matchers.shouldBe
 import org.junit.Test
 
 class AttackActionDeciderTest() {
+    @Test
+    fun att() {
+        val attackDirectionGrid = FramePoint(88 + MapConstants.oneGridPoint5, 48)
+        val enemy = FramePoint(105, 48)
+        val link = FramePoint(88, 48)
+        val high = (enemy.isInGrid(attackDirectionGrid))
+        high shouldBe true
+    }
+    @Test
+    fun att2() {
+//        Debug: (Kermit)    Enemy (128, 89) middle: (132, 89) Up up [(128, 113), (136, 113)]
+//        Debug: (Kermit)    linkg: false or false (23) (128, 112)
+//        Debug: (Kermit)    gridH: false false false (128, 105) mid=(132, 105)
+        val attackDirectionGrid = FramePoint(128, 104)
+        val enemy = FramePoint(128, 89)
+        val link = FramePoint(128, 112)
+        val high = (enemy.isInGrid(attackDirectionGrid))
+        high shouldBe true
+    }
 
     @Test
     fun `go`() {

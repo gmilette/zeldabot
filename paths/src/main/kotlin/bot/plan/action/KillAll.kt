@@ -246,7 +246,8 @@ class KillAll(
                         val mod = target.x % 8
                         listOf(FramePoint(target.x - mod, target.y))
                     } else {
-                        target.attackPoints()
+//                        target.attackPoints()
+                        AttackActionDecider.attackPoints(target)
 //                        listOf(target)
                     }
 //                            val targetsToAttack = listOf(target)
@@ -324,25 +325,43 @@ class AttackOnce(useB: Boolean = false, private val freq: Int = 5) :
 
 class AlwaysAttack(useB: Boolean = false, private val freq: Int = 5, private val otherwiseRandom: Boolean = false) :
     Action {
-    private var frames = 0
+    private var frames = attackLength // was 0
     private val gameAction = if (useB) GamePad.B else GamePad.A
+
+    companion object {
+        private const val attackLength = 10
+    }
 
     override fun nextStep(state: MapLocationState): GamePad {
         // just always do it
         val move = if (frames < 0) {
+            d { "*wait for frames $attackLength" }
             GamePad.None
         } else {
             when {
-                frames % 10 < freq -> gameAction
-                else -> if (otherwiseRandom) GamePad.randomDirection(state.link) else GamePad.None
+                frames % attackLength < freq -> {
+                    d { "* do attack now $attackLength" }
+                    gameAction
+                }
+                else -> {
+                    d { "* do attack now wait $attackLength $otherwiseRandom" }
+                    if (otherwiseRandom) GamePad.randomDirection(state.link) else GamePad.None
+                }
             }
         }
         frames++
         return move
     }
 
+    /**
+     * link will attack for 10 frames. If frames start at 10, then continue attacking until 10 frames pass
+     * (doesn't seem to hurt things
+     */
+    fun isAttacking(): Boolean =
+        frames < (attackLength * 2) && frames != attackLength
+
     override fun reset() {
-        frames = 10
+        frames = attackLength
     }
 
     override fun complete(state: MapLocationState): Boolean =

@@ -452,7 +452,9 @@ class ZStar(
             d { " enemy cost modify from ${point.upHalfLeftOneGrid}" }
             // try it
             costsF.modify(
-                from, point.upHalfLeftOneGrid,
+                from,
+//                point.upHalfLeftOneGrid,
+                point.upLeftHalfOneGrid,
                 sizeWide = MapConstants.twoGrid,
                 sizeTall = MapConstants.oneGridPoint5
             ) { _, current ->
