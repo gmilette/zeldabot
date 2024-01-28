@@ -99,7 +99,11 @@ class ZStar(
         val forceHighCost: List<FramePoint> = emptyList(),
         val enemyTarget: FramePoint? = null,
         val ladderSpec: LadderSpec? = null,
-        val mapNearest: Boolean = false
+        val mapNearest: Boolean = false,
+        /**
+         * keep searching until the path ends with link being in the correct direction
+         */
+        val finalDirectionRequirement: Direction? = null
     )
 
     fun route(
@@ -178,6 +182,9 @@ class ZStar(
                 d { " explore $point" }
             }
 
+            // or can attack from?
+            // move to corners?
+            // don't make it done until the direction is correct
             if (target.contains(point)) {
                 if (DEBUG) {
                     d { " explore found! $point" }
@@ -231,7 +238,6 @@ class ZStar(
                     if (pointClosestToGoal.isZero ||
                         costToGoal < (distanceToGoal[pointClosestToGoal] ?: Int.MAX_VALUE)
                     ) {
-
 //                        val pathSize = pathSize(cameFrom, toPoint)
                         // if distance to goal is same, select based on path
 //                        pointClosestToGoalPathSize = pathSize
@@ -241,6 +247,7 @@ class ZStar(
                     costFromStart[toPoint] = pathCost
                     totalCosts[toPoint] = totalCost
                     cameFrom[toPoint] = point
+                    // needs to test equality of directions
                     if (!openList.contains(toPoint)) {
                         openList.add(toPoint)
                     }
@@ -257,7 +264,7 @@ class ZStar(
             }
         }
 
-        if (DEBUG || true) {
+        if (DEBUG) {
             d { " ****** DONE $iterCount ****** " }
         }
         // todo: actually should pick the best path so far..

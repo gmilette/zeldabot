@@ -21,9 +21,9 @@ class AttackActionDeciderTest() {
 //        Debug: (Kermit)    Enemy (128, 89) middle: (132, 89) Up up [(128, 113), (136, 113)]
 //        Debug: (Kermit)    linkg: false or false (23) (128, 112)
 //        Debug: (Kermit)    gridH: false false false (128, 105) mid=(132, 105)
-        val attackDirectionGrid = FramePoint(128, 104)
-        val enemy = FramePoint(128, 89)
-        val link = FramePoint(128, 112)
+        val attackDirectionGrid = FramePoint(175, 128)
+        val enemy = FramePoint(180, 128)
+        val link = FramePoint(159, 128)
         val high = (enemy.isInGrid(attackDirectionGrid))
         high shouldBe true
     }

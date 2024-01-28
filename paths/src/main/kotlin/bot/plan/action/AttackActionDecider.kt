@@ -12,11 +12,11 @@ object AttackActionDecider {
     var DEBUG = true
 
     fun attackPoints(point: FramePoint) =
-        point.upPoints() + point.rightPoints() + point.leftPoint() + point.downPoint()
+        point.upPoints() + point.rightPoints() + point.leftPoint() + point.downPoint() + point.cornersIn()
 
     // don't swing if there is projectile near by!
     fun FramePoint.upPoints(): List<FramePoint> =
-        FramePointBuilder.has(mapOf(
+        FramePointBuilder.hasL(listOf(
             // up points
             // for now
 //            x - MapConstants.halfGrid to (y + MapConstants.oneGridPoint5),
@@ -32,7 +32,7 @@ object AttackActionDecider {
         ))
 
     fun FramePoint.rightPoints(): List<FramePoint> =
-        FramePointBuilder.has(mapOf(
+        FramePointBuilder.hasL(listOf(
             // up points
             // for now
 //            x - MapConstants.halfGrid to (y + MapConstants.oneGridPoint5),
@@ -40,13 +40,13 @@ object AttackActionDecider {
             (x - MapConstants.oneGridPoint5) to y,
             (x - MapConstants.oneGridPoint5 + 1) to y,
             (x - MapConstants.oneGridPoint5 + 2) to y,
-            (x - MapConstants.oneGridPoint5) to y + MapConstants.halfGrid,
-            (x - MapConstants.oneGridPoint5 + 1) to y + MapConstants.halfGrid,
-            (x - MapConstants.oneGridPoint5 + 2) to y + MapConstants.halfGrid,
+            (x - MapConstants.oneGridPoint5) to (y + MapConstants.halfGrid),
+            (x - MapConstants.oneGridPoint5 + 1) to (y + MapConstants.halfGrid),
+            (x - MapConstants.oneGridPoint5 + 2) to (y + MapConstants.halfGrid),
         ))
 
     fun FramePoint.leftPoint(): List<FramePoint> =
-        FramePointBuilder.has(mapOf(
+        FramePointBuilder.hasL(listOf(
             // up points
             // for now
 //            x - MapConstants.halfGrid to (y + MapConstants.oneGridPoint5),
@@ -60,15 +60,14 @@ object AttackActionDecider {
         ))
 
     fun FramePoint.downPoint(): List<FramePoint> =
-        FramePointBuilder.has(mapOf(
-            x to (y - MapConstants.halfGrid) - 2,
-            x to (y - MapConstants.halfGrid) - 1,
-            x to (y - MapConstants.halfGrid),
-            // to do add all the points in between
-            // i don't think so
-            x + MapConstants.halfGrid to (y - MapConstants.halfGrid),
-            x + MapConstants.halfGrid to (y - MapConstants.halfGrid) - 1,
-            x + MapConstants.halfGrid to (y - MapConstants.halfGrid) - 2,
+        FramePointBuilder.hasL(listOf(
+            // i think these should be -1.5
+//            x to (y - MapConstants.oneGridPoint5) - 2,
+//            x to (y - MapConstants.oneGridPoint5) - 1,
+            x to (y - MapConstants.oneGridPoint5),
+            x + MapConstants.halfGrid to (y - MapConstants.oneGridPoint5),
+//            x + MapConstants.halfGrid to (y - MapConstants.oneGridPoint5) - 1,
+//            x + MapConstants.halfGrid to (y - MapConstants.oneGridPoint5) - 2,
         ))
 
     fun FramePoint.isInUpPointPosition(): Boolean =
@@ -78,7 +77,7 @@ object AttackActionDecider {
     // since the enemies aren't moving when the clock is activated
     // need to introduce the chance for link to do some random movement instead
         // should be fine since link can't get damaged
-        if (state.frameState.clockActivated && Random.nextInt(4) == 1) {
+        if (state.frameState.clockActivated && Random.nextInt(10) == 1) {
             false
 //        } else if (!NearestSafestPoint.isMapSafe(state, state.link) ) {
 //            // need test
@@ -191,6 +190,9 @@ object AttackActionDecider {
         } else {
             // should be 1.5 because the sword can one half grid beyond link
             // might want to also check the oneGrid
+            // NO, no one grid, that's like checking if the sword would hit within link
+            // the 1.5 is check to see if the 1.5 point is inside the monster
+            // we could also check 1.25 maybe
 //            from.pointModifier(MapConstants.oneGrid - enemyMovesWhileSwingingFactor)(link)
             from.pointModifier(MapConstants.oneGridPoint5 - enemyMovesWhileSwingingFactor)(link)
         } //.adjustToMiddle(from)
@@ -218,9 +220,6 @@ object AttackActionDecider {
                 d { "   Enemy $enemy middle: ${enemy.adjustToMiddle(from)} $from up ${enemy.upPoints()}" }
                 d { "   linkg: ${link.isInGrid(enemy)} or ${enemy.isInGrid(link)} ($distToLink) $link" }
 //                d { "   grid: ${attackDirectionGrid.isInGrid(framePoint)} ($distToGrid) $attackDirectionGrid" }
-                val attackGrid = FramePoint(104, 48)
-                val enemy = FramePoint(105, 48)
-                val link = FramePoint(88, 48)
                 val high = (enemy.isInGrid(attackDirectionGrid))
                 val middle = (enemy.isInGrid(attackDirectionGrid.adjustToMiddle(from)))
                 val low = (enemy.isInGrid(attackDirectionGrid.justLeftDown))

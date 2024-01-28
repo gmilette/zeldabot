@@ -3,6 +3,7 @@ package bot
 import androidx.compose.ui.graphics.Color
 import bot.plan.ZeldaPlan
 import bot.plan.action.AttackActionDecider
+import bot.plan.action.attackPoints
 import bot.plan.action.isInHalfFatGrid
 import bot.plan.action.isInHalfGrid
 import bot.plan.runner.MasterPlan
@@ -386,6 +387,14 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                         drawCosts(frameState.link.dir, frameState.link.point, should, mapCell.zstar.costsF.copy())
                     } catch (e: Exception) {
                         d { "ERROR $e" }
+                    }
+
+                    for (enemy in frameState.enemies) {
+                        api.color = Colors.CYAN
+                        val pts = AttackActionDecider.attackPoints(enemy.point)
+                        for (pt in pts) {
+                            api.drawOval(pt.x, pt.y + MapConstants.yAdjust, 3, 3)
+                        }
                     }
                 }
             }

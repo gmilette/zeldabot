@@ -251,6 +251,9 @@ class KillAll(
 //                        listOf(target)
                     }
 //                            val targetsToAttack = listOf(target)
+                    if (link.point in targetsToAttack) {
+                        d { " !On Target " }
+                    }
 
                     // could route to all targets
                     routeTo.routeTo(

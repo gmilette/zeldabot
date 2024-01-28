@@ -56,14 +56,6 @@ class RouteTo(val params: Param = Param()) {
     fun routeTo(
         state: MapLocationState,
         to: List<FramePoint>,
-        param: RouteParam = RouteParam(),
-    ): GamePad {
-        return attackOrRoute(state, to, param)
-    }
-
-    private fun attackOrRoute(
-        state: MapLocationState,
-        to: List<FramePoint>,
         param: RouteParam,
     ): GamePad {
         d { " route To attackOrRoute" }

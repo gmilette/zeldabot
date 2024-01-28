@@ -29,6 +29,8 @@ object FramePointBuilder {
     fun has(xys: Map<Int, Int>): List<FramePoint> =
         xys.map { FramePoint(it.key, it.value) }
 
+    fun hasL(xys: List<Pair<Int, Int>>): List<FramePoint> =
+        xys.map { FramePoint(it.first, it.second) }
 }
 
 fun FramePoint.directionToDir(to: FramePoint): Direction {
@@ -144,6 +146,10 @@ val FramePoint.isInLevelMap
 val FramePoint.isOnMap
     get() = y in 1.. MapConstants.MAX_Y &&
             x in 1..MapConstants.MAX_X
+
+fun FramePoint.cornersIn(): List<FramePoint> {
+    return listOf(this, this.justRightEnd, justLeftDown, this.justRightEndBottom)
+}
 
 fun FramePoint.corners(): List<FramePoint> {
     return listOf(this.justOutside, this.justRightEndBottomOutside, justRightEndOutside, this.justLeftDownOutside)

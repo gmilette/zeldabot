@@ -10,7 +10,7 @@ class Experiments(masterPlan: MasterPlan) {
 //        const val current = "level1bat"
 //        const val current = "level2Boom"
 //        const val current = "level2rhino"
-        val current = "level6start"
+        val current = "level2w"
     }
     private val experiments: Map<String, Experiment>
 
@@ -24,7 +24,7 @@ class Experiments(masterPlan: MasterPlan) {
 //            Experiment("level2rhino", "lev2_14_boss.save", masterPlan.getPlanPhase("Destroy level 2", Phases.Segment.lev2Boss), sword = ZeldaItem.WoodenSword, addEquipment = true),
 //            Experiment("level2rhinoAfter", "lev2_14_boss.save", masterPlan.getPlanAfter("Destroy level 2", Phases.Segment.lev2Boss)),
 //            Experiment("level2Boom", "level2_boom_5h.save", masterPlanWith(KillAll.make()), sword = ZeldaItem.WhiteSword),
-//            Experiment("level2w", "level2.save", masterPlan.getPlanPhase("Destroy level 2", null), sword = ZeldaItem.WoodenSword, addEquipment = true),
+            Experiment("level2w", "level2.save", masterPlan.getPlanPhase("Destroy level 2", null), sword = ZeldaItem.WoodenSword, addEquipment = true),
             Experiment("level5", "level5_start2.save", masterPlan.getPlanAfter(Phases.level5), sword = ZeldaItem.MagicSword),
 //            Experiment("level2", "level2.save", masterPlan.getPlanPhase("Destroy level 2", null), sword = ZeldaItem.MagicSword),
 //            Experiment("level1Ladder", "lev1_ladder.save", masterPlan.getPlanPhase("Destroy level 1", "grab key from zig"), addEquipment = false),
