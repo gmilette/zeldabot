@@ -280,6 +280,20 @@ val FramePoint.justLeftBottom
     get() = FramePoint(x, y + 15)
 val FramePoint.justLeftBottomHalf
     get() = FramePoint(x, y + 8)
+val FramePoint.justLeftHalf
+    get() = FramePoint(x, y + 8)
+val FramePoint.justLeftFourth
+    get() = FramePoint(x, y + 4)
+val FramePoint.justLeftThreeFourth
+    get() = FramePoint(x, y + 12)
+val FramePoint.justRightFourth
+    get() = FramePoint(x + 4, y)
+val FramePoint.justRightThreeFourth
+    get() = FramePoint(x + 12, y)
+
+
+fun FramePoint.withX(changeX: Int): FramePoint = FramePoint(changeX, y)
+fun FramePoint.withY(changeY: Int): FramePoint = FramePoint(x, changeY)
 
 val FramePoint.justLeftDownOutside
     get() = FramePoint(x + 2, y + 18)

@@ -56,7 +56,7 @@ class RouteTo(val params: Param = Param()) {
     fun routeTo(
         state: MapLocationState,
         to: List<FramePoint>,
-        param: RouteParam,
+        param: RouteParam = RouteParam(),
     ): GamePad {
         d { " route To attackOrRoute" }
         val canAttack = param.useB || state.frameState.canUseSword

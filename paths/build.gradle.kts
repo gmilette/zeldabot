@@ -24,8 +24,6 @@ plugins {
 //    id("org.jetbrains.kotlinx.dataframe")
     //    kotlin("jvm") version "1.6.10"
 //    id("org.jetbrains.kotlinx.dataframe") version "0.10.0"
-//    val kotlinVersion = "1.7.10"
-//    val kotlinVersion = "1.9.0"
     val kotlinVersion = "1.8.22"
     kotlin("jvm") version kotlinVersion
     kotlin("kapt") version kotlinVersion
@@ -57,6 +55,7 @@ dependencies {
 //    implementation(compose.desktop.currentOs)
     implementation(compose.desktop.macos_arm64)
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.6.0")
+    implementation("org.locationtech.jts:jts-core:1.19.0")
     implementation("org.jgrapht:jgrapht-core:1.5.1")
     implementation(files("libs/Nintaco.jar"))
     testImplementation(kotlin("test"))
