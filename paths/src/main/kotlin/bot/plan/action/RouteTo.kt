@@ -53,6 +53,13 @@ class RouteTo(val params: Param = Param()) {
     private val attack = AlwaysAttack()
     private val attackB = AlwaysAttack(useB = true)
 
+    fun faceEnemyThen(
+        state: MapLocationState,
+        to: List<FramePoint>,
+        param: RouteParam = RouteParam()) {
+
+    }
+
     fun routeTo(
         state: MapLocationState,
         to: List<FramePoint>,
@@ -91,9 +98,9 @@ class RouteTo(val params: Param = Param()) {
         } else {
             attack
         }
+        val inRangeOf = AttackActionDecider.inRangeOf(state)
         // TODO: do not move if in middle of an attack
-        return if (attack.isAttacking() || AttackActionDecider.shouldAttack(state) && canAttack
-        ) {
+        return if (attack.isAttacking() || AttackActionDecider.shouldAttack(state) && canAttack) {
             d { " Route Action -> ATTACK" }
 //            val att = if (param.useB) GamePad.B else GamePad.A
 //            writeFile(to, state, att)

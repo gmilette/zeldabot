@@ -24,6 +24,8 @@ enum class GamePad {
     }
 
     companion object {
+        fun aOrB(useB: Boolean) = if (useB) B else A
+
         fun randomDirection(from: FramePoint): GamePad {
             val possible = mutableListOf<GamePad>()
             if (from.x > MapConstants.oneGrid + 2) {

@@ -2,6 +2,7 @@ package bot.state.map
 
 import bot.state.FramePoint
 import bot.state.GamePad
+import util.Geom
 
 enum class Direction {
     Left, Right, Up, Down, None;
@@ -13,6 +14,17 @@ enum class Direction {
             get() = listOf(Up, Right, Down, Left)
     }
 }
+
+fun FramePoint.facing(rect: Geom.Rectangle): Boolean = when (this) {
+    Direction.Left -> x
+    Direction.Right -> x < rect.topLeft.x
+    Direction.Up -> Direction.Down
+    Direction.Down -> Direction.Up
+    Direction.None -> Direction.None
+}
+
+private fun FramePoint.isLeftOf(rect: Geom.Rectangle): Boolean =
+    x < rect.topLeft.x
 
 val Direction.upOrLeft: Boolean
     get() = this == Direction.Up || this == Direction.Left

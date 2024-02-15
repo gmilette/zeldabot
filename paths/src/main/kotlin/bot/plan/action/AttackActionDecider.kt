@@ -3,6 +3,7 @@ package bot.plan.action
 import bot.state.*
 import bot.state.map.*
 import bot.state.oam.swordDir
+import util.Geom
 import util.d
 import kotlin.random.Random
 
@@ -16,59 +17,67 @@ object AttackActionDecider {
 
     // don't swing if there is projectile near by!
     fun FramePoint.upPoints(): List<FramePoint> =
-        FramePointBuilder.hasL(listOf(
-            // up points
-            // for now
+        FramePointBuilder.hasL(
+            listOf(
+                // up points
+                // for now
 //            x - MapConstants.halfGrid to (y + MapConstants.oneGridPoint5),
-            // this -1 should allow link to chase
-            x to (y + MapConstants.oneGridPoint5) - 2,
-            x to (y + MapConstants.oneGridPoint5) - 1,
-            x to (y + MapConstants.oneGridPoint5),
-            // to do add all the points in between
-            // i don't think so
-            x + MapConstants.halfGrid to (y + MapConstants.oneGridPoint5),
-            x + MapConstants.halfGrid to (y + MapConstants.oneGridPoint5) - 1,
-            x + MapConstants.halfGrid to (y + MapConstants.oneGridPoint5) - 2,
-        ))
+                // this -1 should allow link to chase
+                x to (y + MapConstants.oneGridPoint5) - 2,
+                x to (y + MapConstants.oneGridPoint5) - 1,
+                x to (y + MapConstants.oneGridPoint5),
+                // to do add all the points in between
+                // i don't think so
+                x + MapConstants.halfGrid to (y + MapConstants.oneGridPoint5),
+                x + MapConstants.halfGrid to (y + MapConstants.oneGridPoint5) - 1,
+                x + MapConstants.halfGrid to (y + MapConstants.oneGridPoint5) - 2,
+            )
+        )
 
     fun FramePoint.rightPoints(): List<FramePoint> =
-        FramePointBuilder.hasL(listOf(
-            // up points
-            // for now
+        FramePointBuilder.hasL(
+            listOf(
+                // up points
+                // for now
 //            x - MapConstants.halfGrid to (y + MapConstants.oneGridPoint5),
-            // this -1 should allow link to chase
-            (x - MapConstants.oneGridPoint5) to y,
-            (x - MapConstants.oneGridPoint5 + 1) to y,
-            (x - MapConstants.oneGridPoint5 + 2) to y,
-            (x - MapConstants.oneGridPoint5) to (y + MapConstants.halfGrid),
-            (x - MapConstants.oneGridPoint5 + 1) to (y + MapConstants.halfGrid),
-            (x - MapConstants.oneGridPoint5 + 2) to (y + MapConstants.halfGrid),
-        ))
+                // this -1 should allow link to chase
+                (x - MapConstants.oneGridPoint5) to y,
+                (x - MapConstants.oneGridPoint5 + 1) to y,
+                (x - MapConstants.oneGridPoint5 + 2) to y,
+                (x - MapConstants.oneGridPoint5) to (y + MapConstants.halfGrid),
+                (x - MapConstants.oneGridPoint5 + 1) to (y + MapConstants.halfGrid),
+                (x - MapConstants.oneGridPoint5 + 2) to (y + MapConstants.halfGrid),
+            )
+        )
 
     fun FramePoint.leftPoint(): List<FramePoint> =
-        FramePointBuilder.hasL(listOf(
-            // up points
-            // for now
+        FramePointBuilder.hasL(
+            listOf(
+                // up points
+                // for now
 //            x - MapConstants.halfGrid to (y + MapConstants.oneGridPoint5),
-            // this -1 should allow link to chase
-            (x + MapConstants.oneGridPoint5) to y,
-            (x + MapConstants.oneGridPoint5 - 1) to y,
-            (x + MapConstants.oneGridPoint5 - 2) to y,
-            (x + MapConstants.oneGridPoint5) to y + MapConstants.halfGrid,
-            (x + MapConstants.oneGridPoint5 - 1) to y + MapConstants.halfGrid,
-            (x + MapConstants.oneGridPoint5 - 2) to y + MapConstants.halfGrid,
-        ))
+                // this -1 should allow link to chase
+                (x + MapConstants.oneGridPoint5) to y,
+                (x + MapConstants.oneGridPoint5 - 1) to y,
+                (x + MapConstants.oneGridPoint5 - 2) to y,
+                (x + MapConstants.oneGridPoint5) to y + MapConstants.halfGrid,
+                (x + MapConstants.oneGridPoint5 - 1) to y + MapConstants.halfGrid,
+                (x + MapConstants.oneGridPoint5 - 2) to y + MapConstants.halfGrid,
+            )
+        )
 
     fun FramePoint.downPoint(): List<FramePoint> =
-        FramePointBuilder.hasL(listOf(
-            // i think these should be -1.5
+        FramePointBuilder.hasL(
+            listOf(
+                // i think these should be -1.5
 //            x to (y - MapConstants.oneGridPoint5) - 2,
 //            x to (y - MapConstants.oneGridPoint5) - 1,
-            x to (y - MapConstants.oneGridPoint5),
-            x + MapConstants.halfGrid to (y - MapConstants.oneGridPoint5),
+                x to (y - MapConstants.oneGridPoint5),
+                x + MapConstants.halfGrid to (y - MapConstants.oneGridPoint5),
 //            x + MapConstants.halfGrid to (y - MapConstants.oneGridPoint5) - 1,
 //            x + MapConstants.halfGrid to (y - MapConstants.oneGridPoint5) - 2,
-        ))
+            )
+        )
 
     fun FramePoint.isInUpPointPosition(): Boolean =
         this in upPoints()
@@ -240,6 +249,87 @@ object AttackActionDecider {
         }.also {
             d { "should attack $it dir = $from link = $link dirGrid = $attackDirectionGrid numEnemies ${enemiesClose.size}" }
         }
+    }
+
+    fun inRangeOf(state: MapLocationState): GamePad {
+        return if (getInFrontOfGrids(state) || (state.frameState.clockActivated && Random.nextInt(10) == 1)) {
+            GamePad.None
+        } else {
+                val inRange = inRangeOf(
+                    state.frameState.link.dir,
+                    state.link,
+                    state.aliveEnemies.map { it.point },
+                    false
+                )
+                inRange
+        }
+    }
+
+    /**
+     * null, no attack
+     * gamepad dir, move, or gamePad.None not in range, cant attack
+     * gamepad
+     */
+    fun inRangeOf(
+        from: Direction,
+        link: FramePoint,
+        enemies: List<FramePoint>,
+        useB: Boolean
+    ): GamePad {
+        val swords = swordRectangles(link)
+
+        val enemiesClose = enemies.filter { link.distTo(it) < MapConstants.twoGrid }.map { it.toRect() }
+        return if (enemiesClose.any {
+                it.intersect(
+                    swords.getOrDefault(
+                        from,
+                        Geom.Rectangle(FramePoint(), FramePoint())
+                    )
+                )
+            }) {
+            // attack it
+            GamePad.aOrB(useB)
+        } else {
+            // check other directions
+            val otherDirs = swords.filter { it.key != from }
+            val attackMove = enemiesClose.firstNotNullOfOrNull { enemy ->
+                val attackDir = otherDirs.firstNotNullOfOrNull {
+                    val dir = it.key
+                    if (enemy.intersect(it.value)) {
+                        dir
+                    } else {
+                        null
+                    }
+                }
+                attackDir
+            }?.toGamePad() ?: GamePad.None
+            attackMove
+        }
+    }
+
+    fun swordRectangles(link: FramePoint): Map<Direction, Geom.Rectangle> {
+        val leftAttack = Geom.Rectangle(
+            link.justDownFourth, link.justDownThreeFourth.withX(link.x - MapConstants.halfGrid)
+        )
+        val rightAttack = Geom.Rectangle(
+            link.justDownFourth.justRightEnd,
+            link.justDownThreeFourth.justRightEnd.withX(link.x + MapConstants.oneGridPoint5)
+        )
+        val upAttack = Geom.Rectangle(
+            link.justRightFourth, link.justRightThreeFourth.withY(link.y - MapConstants.halfGrid)
+        )
+        val downAttack = Geom.Rectangle(
+            link.justRightFourth.justLeftDown,
+            link.justRightThreeFourth.justLeftDown.withY(link.y + MapConstants.oneGridPoint5)
+        )
+
+        val swords = mapOf(
+            Direction.Left to leftAttack,
+            Direction.Right to rightAttack,
+            Direction.Up to upAttack,
+            Direction.Down to downAttack
+        )
+        return swords
     }
 
     // I should be able to use the refactored version but whatever

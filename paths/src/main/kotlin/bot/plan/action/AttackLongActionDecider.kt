@@ -1,6 +1,5 @@
 package bot.plan.action
 
-import bot.plan.action.AttackLongActionDecider.toRect
 import bot.state.*
 import bot.state.map.*
 import org.jheaps.annotations.VisibleForTesting
@@ -38,14 +37,11 @@ object AttackLongActionDecider {
         val link = state.link
 
         // assume go right
-        val midLink = link.justLeftFourth
+        val midLink = link.justDownFourth
 
         val endReach = rayFrom(state.currentMapCell.passable, midLink, dir)
         return firstEnemyIntersect(state, endReach, dir) != null
     }
-
-    private fun FramePoint.toRect(size: Int = MapConstants.oneGrid): Geom.Rectangle =
-        Geom.Rectangle(this, this.justRightEndBottom)
 
     private fun firstEnemyIntersect(state: MapLocationState, to: FramePoint, dir: Direction): Agent? {
         //     0  link
@@ -70,7 +66,7 @@ object AttackLongActionDecider {
 
     @VisibleForTesting
     fun swordRectangle(link: FramePoint, to: FramePoint, dir: Direction) = when {
-        dir.horizontal -> Geom.Rectangle(link.justLeftFourth, link.justLeftThreeFourth.withX(to.x))
+        dir.horizontal -> Geom.Rectangle(link.justDownFourth, link.justDownThreeFourth.withX(to.x))
         dir.vertical -> Geom.Rectangle(link.justRightFourth, link.justRightThreeFourth.withY(to.y))
         else -> link.toRect()
     }

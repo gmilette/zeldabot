@@ -3,6 +3,7 @@ package bot.state
 import bot.plan.action.NavUtil
 import bot.state.map.Direction
 import bot.state.map.MapConstants
+import util.Geom
 import kotlin.math.abs
 
 data class FramePoint(val x: Int = 0, val y: Int = 0, val direction: Direction? = null) {
@@ -47,6 +48,8 @@ fun FramePoint.directionToDir(to: FramePoint): Direction {
     }
 }
 
+fun FramePoint.toRect(size: Int = MapConstants.oneGrid): Geom.Rectangle =
+    Geom.Rectangle(this, this.justRightEndBottom)
 
 // maybe have to actually do the top right, not top left
 val FramePoint.isTopRightCorner: Boolean
@@ -282,9 +285,9 @@ val FramePoint.justLeftBottomHalf
     get() = FramePoint(x, y + 8)
 val FramePoint.justLeftHalf
     get() = FramePoint(x, y + 8)
-val FramePoint.justLeftFourth
+val FramePoint.justDownFourth
     get() = FramePoint(x, y + 4)
-val FramePoint.justLeftThreeFourth
+val FramePoint.justDownThreeFourth
     get() = FramePoint(x, y + 12)
 val FramePoint.justRightFourth
     get() = FramePoint(x + 4, y)
