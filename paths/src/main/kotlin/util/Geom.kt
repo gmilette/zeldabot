@@ -1,6 +1,7 @@
 package util
 
 import bot.state.FramePoint
+import kotlin.math.abs
 
 object Geom {
 //    fun doOverlap(l1: FramePoint, r1: FramePoint, l2: FramePoint, r2: FramePoint): Boolean {
@@ -32,8 +33,11 @@ object Geom {
 
     data class Rectangle(val topLeft: FramePoint, val bottomRight: FramePoint) {
         fun intersect(other: Rectangle): Boolean {
-            return Geom.intersect(this, other)
+            return intersect(this, other)
         }
+
+        val height = abs(bottomRight.y - topLeft.y)
+        val width = abs(bottomRight.x - topLeft.x)
     }
 
     fun intersect(rect1: Rectangle, rect2: Rectangle): Boolean {

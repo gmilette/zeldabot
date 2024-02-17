@@ -8,20 +8,20 @@ enum class Direction {
     Left, Right, Up, Down, None;
 
     companion object {
-        val horizontal: List<Direction> = listOf(Direction.Left, Direction.Right)
-        val vertical: List<Direction> = listOf(Direction.Up, Direction.Down)
+        val horizontal: List<Direction> = listOf(Left, Right)
+        val vertical: List<Direction> = listOf(Up, Down)
         val all: List<Direction>
             get() = listOf(Up, Right, Down, Left)
     }
 }
 
-fun FramePoint.facing(rect: Geom.Rectangle): Boolean = when (this) {
-    Direction.Left -> x
-    Direction.Right -> x < rect.topLeft.x
-    Direction.Up -> Direction.Down
-    Direction.Down -> Direction.Up
-    Direction.None -> Direction.None
-}
+//fun FramePoint.facing(rect: Geom.Rectangle): Boolean = when (this) {
+//    Direction.Left -> x
+//    Direction.Right -> x < rect.topLeft.x
+//    Direction.Up -> Direction.Down
+//    Direction.Down -> Direction.Up
+//    Direction.None -> Direction.None
+//}
 
 private fun FramePoint.isLeftOf(rect: Geom.Rectangle): Boolean =
     x < rect.topLeft.x

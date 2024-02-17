@@ -1,5 +1,6 @@
 package bot.plan.action
 
+import bot.plan.action.AttackActionDecider.upPoints
 import bot.state.*
 import bot.state.map.*
 import bot.state.oam.swordDir
@@ -103,7 +104,7 @@ object AttackActionDecider {
                     }
         }
 
-    private fun getInFrontOfGrids(state: MapLocationState): Boolean {
+    fun getInFrontOfGrids(state: MapLocationState): Boolean {
         val linkDir = state.frameState.link.dir
         return state.frameState.enemies.any { agent: Agent ->
             swordDir.dirFront(agent)?.let { dir ->
@@ -252,17 +253,26 @@ object AttackActionDecider {
     }
 
     fun inRangeOf(state: MapLocationState): GamePad {
-        return if (getInFrontOfGrids(state) || (state.frameState.clockActivated && Random.nextInt(10) == 1)) {
-            GamePad.None
-        } else {
-                val inRange = inRangeOf(
-                    state.frameState.link.dir,
-                    state.link,
-                    state.aliveEnemies.map { it.point },
-                    false
-                )
-                inRange
+        val inRange = inRangeOf(
+            state.frameState.link.dir,
+            state.link,
+            state.aliveEnemies.map { it.point },
+            false
+        )
+        return inRange
+    }
+
+    fun inStrikingRange(from: FramePoint, enemies: List<FramePoint>): Boolean {
+        val swords = swordRectangles(from)
+
+        val enemiesClose = enemies.filter { from.distTo(it) < MapConstants.twoGrid }.map { it.toRect() }
+        for (enemy in enemiesClose) {
+            if (swords.any { it.value.intersect(enemy) } ) {
+                return true
+            }
         }
+
+        return false
     }
 
     /**
@@ -278,7 +288,26 @@ object AttackActionDecider {
     ): GamePad {
         val swords = swordRectangles(link)
 
+        d { " link $link from $from"}
+        for (enemy in enemies) {
+            d { " enemy $enemy"}
+        }
+        d { "**check intersect**"}
+
         val enemiesClose = enemies.filter { link.distTo(it) < MapConstants.twoGrid }.map { it.toRect() }
+        if (DEBUG) {
+            for (enemy in enemiesClose.sortedBy { it.topLeft.distTo(link) }) {
+                d { "enemy: $enemy"}
+                for (sword in swords) {
+                    if (sword.value.intersect(enemy)) {
+                        d { "  ${sword.key}: Intersects $enemy" }
+                    } else {
+                        d { "  ${sword.key}: Intersects No $enemy" }
+                    }
+                }
+            }
+        }
+
         return if (enemiesClose.any {
                 it.intersect(
                     swords.getOrDefault(
@@ -308,19 +337,23 @@ object AttackActionDecider {
     }
 
     fun swordRectangles(link: FramePoint): Map<Direction, Geom.Rectangle> {
+//        val nearSize = MapConstants.halfGrid
+//        val farSize = MapConstants.oneGridPoint5
+        val nearSize = MapConstants.oneGrid
+        val farSize = MapConstants.twoGrid
         val leftAttack = Geom.Rectangle(
-            link.justDownFourth, link.justDownThreeFourth.withX(link.x - MapConstants.halfGrid)
+            link.justDownFourth.withX(link.x - nearSize), link.justDownThreeFourth
         )
         val rightAttack = Geom.Rectangle(
             link.justDownFourth.justRightEnd,
-            link.justDownThreeFourth.justRightEnd.withX(link.x + MapConstants.oneGridPoint5)
+            link.justDownThreeFourth.justRightEnd.withX(link.x + farSize)
         )
         val upAttack = Geom.Rectangle(
-            link.justRightFourth, link.justRightThreeFourth.withY(link.y - MapConstants.halfGrid)
+            link.justRightFourth.withY(link.y - nearSize), link.justRightThreeFourth
         )
         val downAttack = Geom.Rectangle(
             link.justRightFourth.justLeftDown,
-            link.justRightThreeFourth.justLeftDown.withY(link.y + MapConstants.oneGridPoint5)
+            link.justRightThreeFourth.justLeftDown.withY(link.y + farSize)
         )
 
         val swords = mapOf(

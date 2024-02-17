@@ -101,9 +101,14 @@ class ZStar(
         val ladderSpec: LadderSpec? = null,
         val mapNearest: Boolean = false,
         /**
+         * if true, stop searching when route puts link within striking range
+         * otherwise route until reach the desired point
+         */
+        val finishWithinStrikingRange: Boolean = false,
+        /**
          * keep searching until the path ends with link being in the correct direction
          */
-        val finalDirectionRequirement: Direction? = null
+        val finalDirectionRequirement: Direction? = null,
     )
 
     fun route(
@@ -182,15 +187,16 @@ class ZStar(
                 d { " explore $point" }
             }
 
-            // or can attack from?
-            // move to corners?
-            // don't make it done until the direction is correct
-            if (target.contains(point)) {
+            val done = if (param.finishWithinStrikingRange) {
+                AttackActionDecider.inStrikingRange(point, enemies = param.enemies)
+            } else {
+                target.contains(point)
+            }
+            if (done) {
                 if (DEBUG) {
-                    d { " explore found! $point" }
+                    d { " explore found: $point" }
                 }
                 closedList.add(point)
-                break
             }
 
             closedList.add(point)

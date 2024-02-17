@@ -262,7 +262,8 @@ class KillAll(
                             forceNew = forceNew,
                             attackTarget = target,
                             ignoreEnemies = this.ignoreEnemies,
-                            mapNearest = true
+                            mapNearest = true,
+                            finishWithinStrikingRange = true
                         )
                     )
                 } ?: GamePad.None

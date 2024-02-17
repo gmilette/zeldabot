@@ -396,6 +396,14 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                             api.drawOval(pt.x, pt.y + MapConstants.yAdjust, 3, 3)
                         }
                     }
+                    val swords = AttackActionDecider.swordRectangles(link)
+                    for (sword in swords) {
+                        api.color = Colors.RED
+                        sword.value.apply {
+                            api.drawRect(topLeft.x, topLeft.y + MapConstants.yAdjust, width, height)
+                        }
+                    }
+
                 }
             }
         }
@@ -421,8 +429,9 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                 row.forEachIndexed { x, v ->
                     // if it is in the attack grid color it
                     val color = when {
-                        (y % 16 % 2 == 0) && (x % 16 % 2 == 0) && attackDirectionGrid.isInHalfFatGrid(FramePoint(x, y), dir.vertical) ->
-                            if (should) Colors.DARK_GREEN else Colors.LIGHT_BLUE
+                        // attack grid
+//                        (y % 16 % 2 == 0) && (x % 16 % 2 == 0) && attackDirectionGrid.isInHalfFatGrid(FramePoint(x, y), dir.vertical) ->
+//                            if (should) Colors.DARK_GREEN else Colors.LIGHT_BLUE
                         v > 100000 -> Colors.MAGENTA
                         v > 9000 && (y % 16 % 2 == 0) -> Colors.RED
 //                    v > 900 -> Colors.YELLOW // everything is yellow
