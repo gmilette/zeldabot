@@ -158,6 +158,9 @@ fun FramePoint.corners(): List<FramePoint> {
     return listOf(this.justOutside, this.justRightEndBottomOutside, justRightEndOutside, this.justLeftDownOutside)
 }
 
+val FramePoint.corners: List<FramePoint>
+    get() = cornersIn()
+
 fun FramePoint.cornersInLevel(): List<FramePoint> {
     return corners().filter { it.isInLevelMap }
 }
@@ -269,7 +272,6 @@ val FramePoint.left2
     get() = FramePoint(x - 2, y)
 val FramePoint.leftDown
     get() = FramePoint(x - 1, y + 15)
-
 
 val FramePoint.justLeftDown
     get() = FramePoint(x, y + 15)

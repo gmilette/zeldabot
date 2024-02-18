@@ -250,7 +250,7 @@ class KillAll(
                         AttackActionDecider.attackPoints(target)
 //                        listOf(target)
                     }
-//                            val targetsToAttack = listOf(target)
+
                     if (link.point in targetsToAttack) {
                         d { " !On Target " }
                     }

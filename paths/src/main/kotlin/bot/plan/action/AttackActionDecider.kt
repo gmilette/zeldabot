@@ -275,6 +275,12 @@ object AttackActionDecider {
         return false
     }
 
+    fun inStrikingRange(from: FramePoint, enemy: FramePoint): Boolean {
+        val swords = swordRectangles(from)
+        val enemyRect = enemy.toRect()
+        return swords.any { it.value.intersect(enemyRect) }
+    }
+
     /**
      * null, no attack
      * gamepad dir, move, or gamePad.None not in range, cant attack

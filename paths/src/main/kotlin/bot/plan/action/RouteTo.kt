@@ -55,13 +55,6 @@ class RouteTo(val params: Param = Param()) {
     private val attack = AlwaysAttack()
     private val attackB = AlwaysAttack(useB = true)
 
-    fun faceEnemyThen(
-        state: MapLocationState,
-        to: List<FramePoint>,
-        param: RouteParam = RouteParam()) {
-
-    }
-
     fun routeTo(
         state: MapLocationState,
         to: List<FramePoint>,
@@ -151,35 +144,6 @@ class RouteTo(val params: Param = Param()) {
         )
     }
 
-//        return if (params.dodgeEnemies && AttackActionDecider.shouldAttack(state) && (state.frameState.canUseSword && !useB)
-//        ) {
-//            d { " Route Action -> ATTACK" }
-//            if (useB) {
-//                attackB.nextStep(state)
-//            } else {
-//                attack.nextStep(state)
-//            }
-//        } else {
-//            if (params.dodgeEnemies) {
-//                val pad = AttackActionDecider.shouldDodgeDepending(state)
-//                if (pad != GamePad.None) {
-//                    d { " Route Action -> DODGE" }
-//                    pad
-//                } else {
-//                    d { " Route Action -> No Attack (no dodge)" }
-//                    attack.reset()
-//                    attackB.reset()
-//                    doRouteTo(state, to, forceNewI, overrideMapCell, makePassable)
-//                }
-//            } else {
-//                attack.reset()
-//                attackB.reset()
-//                d { " Route Action -> No Attack" }
-//                doRouteTo(state, to, forceNewI, overrideMapCell, makePassable)
-//            }
-//        }
-//}
-
     private fun doRouteTo(
         state: MapLocationState,
         to: List<FramePoint>,
@@ -244,7 +208,7 @@ class RouteTo(val params: Param = Param()) {
         val routeSize = route?.path?.size ?: 0
 
         // this is an optimization I dont think is necessary
-        val linkPoints = listOf(linkPt, linkPt.justRightEnd, linkPt.justRightEndBottom, linkPt.justLeftDown)
+        val linkPoints = linkPt.corners
         val enemiesNear =
             state.aliveOrProjectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid * 5 }
 

@@ -38,6 +38,8 @@ object Geom {
 
         val height = abs(bottomRight.y - topLeft.y)
         val width = abs(bottomRight.x - topLeft.x)
+
+        fun intersectsOtherRectangles() {}
     }
 
     fun intersect(rect1: Rectangle, rect2: Rectangle): Boolean {

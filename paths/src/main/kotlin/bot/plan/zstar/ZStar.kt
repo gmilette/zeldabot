@@ -187,6 +187,8 @@ class ZStar(
                 d { " explore $point" }
             }
 
+            // enemy target is always null currently, this is going to route to nearest
+            // which is what we want anyway I think
             val done = if (param.finishWithinStrikingRange) {
                 AttackActionDecider.inStrikingRange(point, enemies = param.enemies)
             } else {
