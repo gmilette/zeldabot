@@ -325,7 +325,7 @@ class ReBombIfNecessary(private val wrapped: Action): Action {
 }
 
 class StayInCurrentMapCell(private val wrapped: Action) : Action {
-    private val routeTo = RouteTo(params = RouteTo.Param(considerLiveEnemies = false))
+    private val routeTo = RouteTo(params = RouteTo.Param())
 
     private var initialLevel: Int = -1
 

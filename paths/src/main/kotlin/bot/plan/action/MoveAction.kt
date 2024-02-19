@@ -2,15 +2,11 @@ package bot.plan.action
 
 import bot.plan.action.NavUtil.directionToDir
 import bot.plan.zstar.FrameRoute
-import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.*
 import bot.state.oam.shopOwner
 import bot.state.oam.shopkeeperAndBat
-import bot.state.oam.swordDir
-import util.LogFile
 import util.d
-import util.w
 
 class CompleteIfAction(
     private val action: Action,
@@ -101,7 +97,9 @@ class InsideNav(
     override fun nextStep(state: MapLocationState): GamePad {
         return routeTo.routeTo(state, listOf(point),
             RouteTo.RouteParam(
-                makePassable = makePassable, forceHighCost = highCost
+                rParam = RouteTo.RoutingParamCommon(
+                    forcePassable = makePassable?.let { listOf(makePassable) } ?: emptyList(),
+                    forceHighCost = highCost)
             )
         )
     }
@@ -164,8 +162,10 @@ class InsideNavAbout(
             to = points,
             RouteTo.RouteParam(
                 overrideMapCell = if (shop) state.hyrule.shopMapCell else null,
-                makePassable = makePassable,
-                forceHighCost = highCost
+                rParam = RouteTo.RoutingParamCommon(
+                    makePassable?.let { listOf(makePassable) } ?: emptyList(),
+                    forceHighCost = highCost
+                ),
             )
         )
 
@@ -199,8 +199,7 @@ class MoveTo(
     private val forceDirection: Direction? = null,
     ignoreProjectiles: Boolean = false
 ) : MapAwareAction {
-    private val routeTo =
-        RouteTo(params = RouteTo.Param(considerLiveEnemies = false, ignoreProjectiles = ignoreProjectiles))
+    private val routeTo = RouteTo(params = RouteTo.Param(whatToAvoid = RouteTo.Param.makeIgnoreProjectiles(ignoreProjectiles)))
 
     init {
         next.zstar.clearAvoid()

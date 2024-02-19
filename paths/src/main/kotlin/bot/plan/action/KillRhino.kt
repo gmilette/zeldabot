@@ -62,7 +62,7 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
     private var prevKnownPoints: List<FramePoint> = emptyList()
     private var prevKnownPointInFront: FramePoint? = null
 
-    private val routeTo = RouteTo(RouteTo.Param(ignoreProjectiles = true, dodgeEnemies = true))
+    private val routeTo = RouteTo(params = RouteTo.Param(whatToAvoid = RouteTo.WhatToAvoid.JustEnemies))
 
     private var waitCt = 0
 

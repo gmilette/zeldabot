@@ -667,7 +667,7 @@ class GetLoot(
     // gannon triforce pieces are sometimes projectiles
     // yea but then we are going to route link into the projectiles
     // so now I parameterize this so that it only ignores projectiles when in gannon
-    private val routeTo = RouteTo(RouteTo.Param(ignoreProjectiles = adjustInSideLevelBecauseGannon))
+    private val routeTo = RouteTo(params = RouteTo.Param(whatToAvoid = RouteTo.Param.makeIgnoreProjectiles(adjustInSideLevelBecauseGannon)))
 
     override fun complete(state: MapLocationState): Boolean =
         state.neededLoot.isEmpty()
@@ -719,7 +719,7 @@ class GetLoot(
         d { " get loot $target from targets $targets" }
         return routeTo.routeTo(
             state, targets,
-            RouteTo.RouteParam(forceNew = previousTarget != target, mapNearest = false)
+            RouteTo.RouteParam(forceNew = previousTarget != target) // mapNearest = false
         )
     }
 

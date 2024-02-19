@@ -32,45 +32,48 @@ class KillAll(
      * if true, ignore all enemies (useful for level dragon fighting, but makes link suicidal)
      * consider projectiles though
      */
-    private val ignoreEnemies: Boolean = false,
+//    ignoreEnemies: Boolean = false,
     private val roundX: Boolean = false,
     private var firstAttackBomb: Boolean = false,
-    ignoreProjectilesRoute: Boolean = false
+//    ignoreProjectilesRoute: Boolean = false,
+    whatToAvoid: RouteTo.WhatToAvoid = RouteTo.WhatToAvoid.All
 ) : Action {
     companion object {
         fun make() = KillAll()
     }
 
-    constructor(needLongWaitVal: Boolean = false) : this(needLongWait = needLongWaitVal)
-    constructor(
-        useBombs: Boolean = false,
-        waitAfterAttack: Boolean = false,
-        numberLeftToBeDead: Int = 0,
-        considerEnemiesInCenter: Boolean = false,
-        needLongWait: Boolean = false,
-        targetOnly: List<Int> = listOf(),
-        ignoreProjectiles: List<Int> = listOf(),
-        ignoreEnemies: Boolean = false,
-        roundX: Boolean = false,
-        firstAttackBomb: Boolean = false
-    ) : this(
-        60,
-        useBombs,
-        waitAfterAttack,
-        numberLeftToBeDead,
-        considerEnemiesInCenter,
-        needLongWait,
-        targetOnly,
-        ignoreProjectiles,
-        ignoreEnemies,
-        roundX,
-        firstAttackBomb,
-        ignoreProjectilesRoute = false
-    )
+//    constructor(needLongWaitVal: Boolean = false) : this(needLongWait = needLongWaitVal)
+//    constructor(
+//        useBombs: Boolean = false,
+//        waitAfterAttack: Boolean = false,
+//        numberLeftToBeDead: Int = 0,
+//        considerEnemiesInCenter: Boolean = false,
+//        needLongWait: Boolean = false,
+//        targetOnly: List<Int> = listOf(),
+//        ignoreProjectiles: List<Int> = listOf(),
+//        ignoreEnemies: Boolean = false,
+//        roundX: Boolean = false,
+//        firstAttackBomb: Boolean = false
+//    ) : this(
+//        60,
+//        useBombs,
+//        waitAfterAttack,
+//        numberLeftToBeDead,
+//        considerEnemiesInCenter,
+//        needLongWait,
+//        targetOnly,
+//        ignoreProjectiles,
+//        ignoreEnemies,
+//        roundX,
+//        firstAttackBomb,
+//        ignoreProjectilesRoute = false
+//    )
 
     private val killAll: LogFile = LogFile("KillAll")
 
-    private val routeTo = RouteTo(RouteTo.Param(dodgeEnemies = true, ignoreProjectiles = ignoreProjectilesRoute))
+    private val routeTo = RouteTo(RouteTo.Param(
+        whatToAvoid = whatToAvoid)
+    )
     private val criteria = KillAllCompleteCriteria()
 
     private var previousAttack = false
@@ -241,15 +244,18 @@ class KillAll(
                     // can't tell if the target has changed
                     // handle replanning when just close, this might be fine
 
-                    val targetsToAttack: List<FramePoint> = if (roundX) {
-                        // for dragon
-                        val mod = target.x % 8
-                        listOf(FramePoint(target.x - mod, target.y))
-                    } else {
-//                        target.attackPoints()
-                        AttackActionDecider.attackPoints(target)
-//                        listOf(target)
-                    }
+                    // don't need this anymore I think
+//                    val targetsToAttack: List<FramePoint> = if (roundX) {
+//                        // for dragon
+//                        val mod = target.x % 8
+//                        listOf(FramePoint(target.x - mod, target.y))
+//                    } else {
+////                        target.attackPoints()
+//                        AttackActionDecider.attackPoints(target)
+////                        listOf(target)
+//                    }
+
+                    val targetsToAttack: List<FramePoint> = AttackActionDecider.attackPoints(target)
 
                     if (link.point in targetsToAttack) {
                         d { " !On Target " }
@@ -260,10 +266,11 @@ class KillAll(
                         state, targetsToAttack,
                         RouteTo.RouteParam(
                             forceNew = forceNew,
-                            attackTarget = target,
-                            ignoreEnemies = this.ignoreEnemies,
-                            mapNearest = true,
-                            finishWithinStrikingRange = true
+                            rParam = RouteTo.RoutingParamCommon(
+                                attackTarget = target,
+                                mapNearest = true,
+                                finishWithinStrikingRange = true
+                            ),
                         )
                     )
                 } ?: GamePad.None

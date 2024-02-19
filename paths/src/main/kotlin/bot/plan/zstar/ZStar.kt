@@ -1,7 +1,7 @@
 package bot.plan.zstar
 
 import bot.plan.action.AttackActionDecider
-import bot.plan.action.aliveEnemies
+import bot.plan.action.RouteTo
 import bot.plan.action.isInGrid
 import bot.state.*
 import bot.state.map.Direction
@@ -37,6 +37,8 @@ class ZStar(
         val MaxCostAvoidEnemyNear = nearEnemyCost
         const val ENEMY_COST = 10000
     }
+
+    val maximumCost: Int = MaxCostAvoidEnemyNear
 
     data class LadderSpec(val horizontal: Boolean, val point: FramePoint) {
         private fun isIn(other: FramePoint) = point.isInGrid(other)
@@ -92,23 +94,7 @@ class ZStar(
         val targets: List<FramePoint>,
         val pointBeforeStart: FramePoint? = null,
         val enemies: List<FramePoint> = emptyList(),
-        val avoidNearEnemy: List<FramePoint> = emptyList(),
-        val forcePassable: List<FramePoint> = emptyList(),
-        val maximumCost: Int = MaxCostAvoidEnemyNear,
-        // could be used to avoid spots in front of sword guys too
-        val forceHighCost: List<FramePoint> = emptyList(),
-        val enemyTarget: FramePoint? = null,
-        val ladderSpec: LadderSpec? = null,
-        val mapNearest: Boolean = false,
-        /**
-         * if true, stop searching when route puts link within striking range
-         * otherwise route until reach the desired point
-         */
-        val finishWithinStrikingRange: Boolean = false,
-        /**
-         * keep searching until the path ends with link being in the correct direction
-         */
-        val finalDirectionRequirement: Direction? = null,
+        val rParam: RouteTo.RoutingParamCommon = RouteTo.RoutingParamCommon(),
     )
 
     fun route(
@@ -120,7 +106,9 @@ class ZStar(
         return route(
             ZRouteParam(
                 start = start, targets = listOf(target), pointBeforeStart = beforeStart, enemies = emptyList(),
-                forcePassable = makePassable
+                rParam = RouteTo.RoutingParamCommon(
+                    forcePassable = makePassable
+                ),
             )
         )
     }
@@ -138,7 +126,7 @@ class ZStar(
     ): List<FramePoint> {
         customizer.customize(param)
         val maxIter = MAX_ITER
-        val targets = if (false && param.mapNearest) {
+        val targets = if (false && param.rParam.mapNearest) {
             param.targets.flatMap { NearestSafestPoint.nearestSafePoints(it, costsF, passable) }
         } else {
             param.targets
@@ -189,7 +177,7 @@ class ZStar(
 
             // enemy target is always null currently, this is going to route to nearest
             // which is what we want anyway I think
-            val done = if (param.finishWithinStrikingRange) {
+            val done = if (param.rParam.finishWithinStrikingRange) {
                 AttackActionDecider.inStrikingRange(point, enemies = param.enemies)
             } else {
                 target.contains(point)
@@ -219,7 +207,7 @@ class ZStar(
             }
 
             val neighbors =
-                (neighborFinder.neighbors(point, dir, dist ?: 0, param.ladderSpec) - closedList - avoid).shuffled()
+                (neighborFinder.neighbors(point, dir, dist ?: 0, param.rParam.ladderSpec) - closedList - avoid).shuffled()
             for (toPoint in neighbors) {
                 // raw cost of this cell
                 val cost = costsF.get(toPoint)
@@ -240,7 +228,7 @@ class ZStar(
                 }
                 val costS = costFromStart.getOrDefault(toPoint, Int.MAX_VALUE)
 //                d {" cost: $cost $costS"}
-                if (cost < costS && cost < param.maximumCost) {
+                if (cost < costS && cost < maximumCost) {
                     // todo: prefer short path, so weight path length vs. distance to
 //                    pathSizeToGoal[toPoint] = pathSize(cameFrom, toPoint)
                     if (pointClosestToGoal.isZero ||
@@ -416,17 +404,13 @@ class ZStar(
     inner class GridCustomizer {
         fun customize(param: ZRouteParam) {
             val startSum = sum()
-            d { "Plan: iter = enemies ${param.enemies.size} near ${param.avoidNearEnemy.size} $startSum" }
+            d { "Plan: iter = enemies ${param.enemies.size} near $startSum" }
             resetPassable()
             // only if inside a radius
             setEnemyCosts(param.start, param.enemies)
-            for (nearEnemy in param.avoidNearEnemy) {
-                d { " set near enemy $nearEnemy" }
-                setNearEnemy(param.start, nearEnemy)
-            }
-            setForceHighCost(param.forceHighCost)
-            setForcePassable(param.forcePassable)
-            setZeroCost(param.enemyTarget)
+            setForceHighCost(param.rParam.forceHighCost)
+            setForcePassable(param.rParam.forcePassable)
+            setZeroCost(param.rParam.attackTarget)
         }
 
         fun reset() {

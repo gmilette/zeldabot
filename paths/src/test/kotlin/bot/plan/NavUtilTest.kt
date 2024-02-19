@@ -1,6 +1,7 @@
 package bot.plan
 
 import bot.plan.action.NavUtil
+import bot.plan.action.RouteTo
 import bot.plan.zstar.NearestSafestPoint
 import bot.plan.zstar.ZStar
 import bot.state.*
@@ -150,8 +151,10 @@ class NavUtilTest {
                 listOf(target),
                 pointBeforeStart = before,
                 enemies = enemies,
-                forcePassable = passable,
-                ladderSpec = ladderSpec
+                rParam = RouteTo.RoutingParamCommon(
+                    forcePassable = passable,
+                    ladderSpec = ladderSpec
+                ),
             )
         )
 

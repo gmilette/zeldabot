@@ -314,7 +314,10 @@ object AttackActionDecider {
             }
         }
 
-        return if (enemiesClose.any {
+        val linkRect = link.toRect()
+        val intersectWithLink = enemiesClose.any { it.intersect(linkRect) }
+
+        return if (intersectWithLink || enemiesClose.any {
                 it.intersect(
                     swords.getOrDefault(
                         from,

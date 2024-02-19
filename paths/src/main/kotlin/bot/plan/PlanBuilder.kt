@@ -14,7 +14,6 @@ import bot.state.oam.dragon4Head
 import bot.state.oam.dragonHead
 import bot.state.oam.dragonHead2
 import util.d
-import java.lang.runtime.ObjectMethods
 
 class PlanBuilder(
     private val mapData: MapCells,
@@ -240,7 +239,7 @@ class PlanBuilder(
         }
     val kill: PlanBuilder
         get() {
-            add(lastMapLoc, lootAndKill(KillAll(needLongWaitVal = false)))
+            add(lastMapLoc, lootAndKill(KillAll(needLongWait = false)))
             return this
         }
     val killLongWait: PlanBuilder
@@ -261,8 +260,10 @@ class PlanBuilder(
                     KillAll(
                         needLongWait = false,
                         firstAttackBomb = true,
-                        ignoreEnemies = true,
-                        ignoreProjectilesRoute = true
+                        // ignore just projectiles I think
+//                        ignoreEnemies = true,
+//                        ignoreProjectilesRoute = true
+                        whatToAvoid = RouteTo.WhatToAvoid.JustEnemies,
                     )
                 )
             )
@@ -278,7 +279,6 @@ class PlanBuilder(
         get() {
             add(lastMapLoc, KillAll(needLongWait = false,
                 targetOnly = listOf(dragon4Head, dragonHead, dragonHead2),
-                ignoreEnemies = false,
                 roundX = true))
             return this
         }
@@ -286,7 +286,7 @@ class PlanBuilder(
         get() {
             add(lastMapLoc, KillAll(needLongWait = false,
                 targetOnly = listOf(dragon4Head, dragonHead, dragonHead2),
-                ignoreEnemies = true,
+                whatToAvoid = RouteTo.WhatToAvoid.JustProjectiles,
                 roundX = true))
             return this
         }

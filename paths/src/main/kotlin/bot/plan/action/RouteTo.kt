@@ -1,8 +1,5 @@
 package bot.plan.action
 
-import androidx.compose.runtime.structuralEqualityPolicy
-import bot.plan.action.AttackActionDecider.isInUpPointPosition
-import bot.plan.action.AttackActionDecider.upPoints
 import bot.plan.zstar.FrameRoute
 import bot.plan.zstar.ZStar
 import bot.state.*
@@ -18,31 +15,76 @@ class RouteTo(val params: Param = Param()) {
         fun hardlyReplan(dodgeEnemies: Boolean = true, ignoreProjectiles: Boolean = false) = RouteTo(
             Param(
                 planCountMax = 100,
-                dodgeEnemies = dodgeEnemies,
-                ignoreProjectiles = ignoreProjectiles,
+                whatToAvoid =
+                if (!dodgeEnemies) {
+                    WhatToAvoid.None
+                } else if (ignoreProjectiles) {
+                    WhatToAvoid.JustEnemies
+                } else {
+                    WhatToAvoid.All
+                }
             )
         )
     }
 
     data class Param(
         var planCountMax: Int = 20,
-        // not used
-        val considerLiveEnemies: Boolean = true,
-        val dodgeEnemies: Boolean = true, // always dodge I think, unless i'm in a shop or something
-        val ignoreProjectiles: Boolean = false,
-    )
+        /**
+         * what obstacles to avoid
+         */
+        val whatToAvoid: WhatToAvoid = WhatToAvoid.All
+    ) {
+        companion object {
+            /**
+             * if ignore projectiles, then just avoid enemies
+             * otherwise ignore enemies and projectiles
+             */
+            fun makeIgnoreProjectiles(ignoreProjectiles: Boolean): WhatToAvoid =
+                if (ignoreProjectiles) {
+                    WhatToAvoid.JustEnemies // ignore projectiles
+                } else {
+                    WhatToAvoid.All
+                }
+        }
+    }
+
+    enum class WhatToAvoid {
+        None, // avoid nothing even if they exist
+        JustProjectiles, // no enemies
+        JustEnemies, // no projectiles
+        All // include projectiles and enemies
+    }
 
     data class RouteParam(
+        /**
+         * trigger a new plan
+         */
         val forceNew: Boolean = false,
+        /**
+         * if set, use this map cell, otherwise look up from the current state
+         */
         val overrideMapCell: MapCell? = null,
-        val makePassable: FramePoint? = null,
-        val enemyAvoid: List<FramePoint> = emptyList(),
+        /**
+         * for attacking use B
+         */
         val useB: Boolean = false,
-        val attackTarget: FramePoint? = null,
-        // if false, dont bother avoiding any enemies, avoid projectiles though
-        val ignoreEnemies: Boolean = false,
-        val mapNearest: Boolean = false,
+        val rParam: RoutingParamCommon = RoutingParamCommon()
+    )
+
+    data class RoutingParamCommon(
+        val forcePassable: List<FramePoint> = emptyList(),
+        // could be used to avoid spots in front of sword guys too
         val forceHighCost: List<FramePoint> = emptyList(),
+        val attackTarget: FramePoint? = null,
+        val ladderSpec: ZStar.LadderSpec? = null,
+        /**
+         * move any points to their nearest highway grid spot
+         */
+        val mapNearest: Boolean = false,
+        /**
+         * if true, stop searching when route puts link within striking range
+         * otherwise route until reach the desired point
+         */
         val finishWithinStrikingRange: Boolean = false,
     )
 
@@ -99,15 +141,17 @@ class RouteTo(val params: Param = Param()) {
                 d { " Route Action -> Keep Attacking" }
                 theAttack.nextStep(state)
             }
+
             !canAttack ||
-            (state.frameState.clockActivated && Random.nextInt(10) == 1) ||
-            AttackActionDecider.getInFrontOfGrids(state) ||
-            inRangeOf == GamePad.None -> {
+                    (state.frameState.clockActivated && Random.nextInt(10) == 1) ||
+                    AttackActionDecider.getInFrontOfGrids(state) ||
+                    inRangeOf == GamePad.None -> {
                 attack.reset()
                 attackB.reset()
                 d { " Route Action -> No Attack" }
                 doRouteTo(state, to, param)
             }
+
             else -> {
                 d { " Route Action -> RangeAction $inRangeOf" }
                 inRangeOf
@@ -150,7 +194,7 @@ class RouteTo(val params: Param = Param()) {
         paramIn: RouteParam
     ): GamePad {
         d { " DO routeTo TO ${to.size} points first ${to.firstOrNull()} currently at ${state.currentMapCell.mapLoc}" }
-        val param = paramIn.copy(attackTarget = null)
+        val param = paramIn.copy(rParam = paramIn.rParam.copy(attackTarget = null))
         var forceNew = param.forceNew
         if (to.isEmpty()) {
             w { " no where to go " }
@@ -158,26 +202,28 @@ class RouteTo(val params: Param = Param()) {
         }
         val linkPt = state.frameState.link.point
         // why this? let's go without it and see if it's ok
-//        val closest = to.minBy { it.distTo(linkPt) }
-//        if (linkPt.distTo(closest) <= 1) {
-//            d { " CLOSE!! $closest" }
-//            if (closest.y <= 1) {
-//                d { " CLOSE!! up" }
-//                return GamePad.MoveUp
-//            }
-//            if (closest.x <= 1) {
-//                d { " CLOSE!! left" }
-//                return GamePad.MoveLeft
-//            }
-//            if (closest.x >= MapConstants.MAX_X - 2) {
-//                d { " CLOSE!! right" }
-//                return GamePad.MoveRight
-//            }
-//            if (closest.y >= MapConstants.MAX_Y - 2) {
-//                d { " CLOSE!! down" }
-//                return GamePad.MoveDown
-//            }
-//        }
+        // it gets stuck almost about to exit some levels
+        // i'm not sure if this fixes it
+        val closest = to.minBy { it.distTo(linkPt) }
+        if (linkPt.distTo(closest) <= 1) {
+            d { " CLOSE!! $closest" }
+            if (closest.y <= 1) {
+                d { " CLOSE!! up" }
+                return GamePad.MoveUp
+            }
+            if (closest.x <= 1) {
+                d { " CLOSE!! left" }
+                return GamePad.MoveLeft
+            }
+            if (closest.x >= MapConstants.MAX_X - 2) {
+                d { " CLOSE!! right" }
+                return GamePad.MoveRight
+            }
+            if (closest.y >= MapConstants.MAX_Y - 2) {
+                d { " CLOSE!! down" }
+                return GamePad.MoveDown
+            }
+        }
 
         val skippedButIsOnRoute = (state.previousMove.skipped && route?.isOn(linkPt, 5) != null)
         if (skippedButIsOnRoute) {
@@ -213,30 +259,43 @@ class RouteTo(val params: Param = Param()) {
             state.aliveOrProjectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid * 5 }
 
         // nothing to avoid if the clock is activated
-        var avoid = if (params.dodgeEnemies && !state.frameState.clockActivated) {
+//        var avoid = if (params.dodgeEnemies && !state.frameState.clockActivated) {
+//            // this seems to be ok, except link can get hit from the side
+//            // unless it avoids projectiles
+////            state.aliveEnemies
+//            when {
+//                params.ignoreProjectiles -> state.aliveEnemies
+//                params.ignoreEnemies -> state.projectiles
+//                else -> state.aliveOrProjectile
+//            }
+//        } else {
+//            emptyList()
+//        }
+
+        var avoid = if (!state.frameState.clockActivated) {
             // this seems to be ok, except link can get hit from the side
             // unless it avoids projectiles
-//            state.aliveEnemies
-            when {
-                params.ignoreProjectiles -> state.aliveEnemies
-                param.ignoreEnemies -> state.projectiles
+            when (params.whatToAvoid) {
+                WhatToAvoid.None -> emptyList()
+                WhatToAvoid.JustProjectiles -> state.projectiles
+                WhatToAvoid.JustEnemies -> state.aliveEnemies
                 else -> state.aliveOrProjectile
             }
         } else {
             emptyList()
         }
+
 //
 //        if (param.ignoreEnemies) {
 //            d { "ignore enemies" }
 //            avoid = avoid.filter { it.state != EnemyState.Alive }
 //        }
 
-        param.attackTarget?.let { targetAttack ->
+        param.rParam.attackTarget?.let { targetAttack ->
             d { " remove enemy from filter $targetAttack" }
             avoid = avoid.filter { it.point != targetAttack }
         }
 
-        d { " avoid attack target ${param.attackTarget}" }
         for (agent in avoid) {
             d { " enemy avoid $agent" }
         }
@@ -290,13 +349,10 @@ class RouteTo(val params: Param = Param()) {
         val linkPt = state.frameState.link.point
         val ladder = state.frameState.ladder
         var nextPoint1 = nextPoint
-        val passable = mutableListOf<FramePoint>()
+        val passable = param.rParam.forcePassable.toMutableList()
 
         if (ladder != null) {
             passable.add(ladder.point)
-        }
-        if (param.makePassable != null) {
-            passable.add(param.makePassable)
         }
 
         val mapCell = param.overrideMapCell ?: state.currentMapCell
@@ -310,22 +366,26 @@ class RouteTo(val params: Param = Param()) {
                     targets = to,
                     pointBeforeStart = state.previousMove.from,
                     enemies = avoid.points,
-                    forcePassable = passable,
-                    enemyTarget = param.attackTarget,
-                    mapNearest = param.mapNearest,
-                    forceHighCost = param.forceHighCost + inFrontOfGrids,
-                    // could just use this if enemyTarget isn't null
-                    finishWithinStrikingRange = param.finishWithinStrikingRange
+                    rParam = param.rParam.copy(
+                        forcePassable = passable,
+                        forceHighCost = param.rParam.forceHighCost + inFrontOfGrids
+                    )
+//                    forcePassable = passable,
+//                    attackTarget = param.attackTarget,
+//                    mapNearest = param.mapNearest,
+//                    forceHighCost = param.forceHighCost + inFrontOfGrids,
+//                    // could just use this if enemyTarget isn't null
+//                    finishWithinStrikingRange = param.finishWithinStrikingRange
                 )
             )
         )
 
-        route?.path?.lastOrNull()?.let { lastPt ->
-            // if it is just projectile then don't try to route towards the projectiles
-            if (param.mapNearest || lastPt in to || state.frameState.ladderDeployed || !state.hasEnemies) {
-                d { "route to success target" }
-            }
-        }
+//        route?.path?.lastOrNull()?.let { lastPt ->
+//            // if it is just projectile then don't try to route towards the projectiles
+//            if (param.rParam.mapNearest || lastPt in to || state.frameState.ladderDeployed || !state.hasEnemies) {
+//                d { "route to success target" }
+//            }
+//        }
         route?.next15()
         nextPoint1 = route?.popOrEmpty() ?: FramePoint() // skip first point because it is the current location
         nextPoint1 = route?.popOrEmpty() ?: FramePoint()

@@ -119,30 +119,6 @@ data class PreviousMove(
 
 object NavUtil {
 
-    fun routeToAvoidingObstacle(mapCell: MapCell, from: FramePoint,
-                                to: List<FramePoint>,
-                                before: FramePoint? = null,
-                                enemies: List<FramePoint> = emptyList(),
-                                // locations to avoid like enemy
-                                avoidNearEnemy: List<FramePoint> = emptyList(),
-                                forcePassable: List<FramePoint> = emptyList(),
-                                enemyTarget: FramePoint? = null,
-                                ladderSpec: ZStar.LadderSpec? = null,
-                                mapNearest: Boolean = false):
-            List<FramePoint> =
-        mapCell.zstar.route(ZStar.ZRouteParam(
-            start = from,
-            targets = to,
-            pointBeforeStart = before,
-            enemies = enemies,
-            avoidNearEnemy = avoidNearEnemy,
-            forcePassable = forcePassable,
-            enemyTarget = enemyTarget,
-            ladderSpec = ladderSpec,
-            mapNearest = mapNearest,
-            forceHighCost = emptyList()
-    ))
-
     fun randomDir(from: FramePoint = FramePoint(100, 100)): GamePad {
         d { " random dir "}
         return GamePad.randomDirection(from)
