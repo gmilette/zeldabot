@@ -278,16 +278,14 @@ class PlanBuilder(
     val killLev4Dragon: PlanBuilder
         get() {
             add(lastMapLoc, KillAll(needLongWait = false,
-                targetOnly = listOf(dragon4Head, dragonHead, dragonHead2),
-                roundX = true))
+                targetOnly = listOf(dragon4Head, dragonHead, dragonHead2)))
             return this
         }
     val killLev1Dragon: PlanBuilder
         get() {
             add(lastMapLoc, KillAll(needLongWait = false,
                 targetOnly = listOf(dragon4Head, dragonHead, dragonHead2),
-                whatToAvoid = RouteTo.WhatToAvoid.JustProjectiles,
-                roundX = true))
+                whatToAvoid = RouteTo.WhatToAvoid.JustProjectiles))
             return this
         }
     val startHere: PlanBuilder

@@ -4,10 +4,10 @@ object EnemyGroup {
     const val oldWoman = (0x9a).toInt()
 
     val longWaitEnemies = setOf(
-        184, 186, // ghost
+//        184, 186, // ghost
         ghost,
         ghostWeak2,
-        ghostWeak,
+//        ghostWeak, // do not use because it it same as boomerang guy
 //        rhinoHeadDown, rhinoHeadDown2, rhinoHeadMouthOpen, rhinoHead2,
 //        bat,
 //        254, 248 // the circle monster because I dont know why im stuck here

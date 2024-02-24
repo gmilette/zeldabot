@@ -154,21 +154,13 @@ class RouteTo(val params: Param = Param()) {
 
             else -> {
                 d { " Route Action -> RangeAction $inRangeOf" }
-                inRangeOf
+                if (inRangeOf.isAttack) {
+                    theAttack.nextStep(state)
+                } else {
+                    inRangeOf
+                }
             }
         }
-//        // TODO: do not move if in middle of an attack
-//        return if (attack.isAttacking() || AttackActionDecider.shouldAttack(state) && canAttack) {
-//            d { " Route Action -> ATTACK" }
-////            val att = if (param.useB) GamePad.B else GamePad.A
-////            writeFile(to, state, att)
-//            theAttack.nextStep(state)
-//        } else {
-//            attack.reset()
-//            attackB.reset()
-//            d { " Route Action -> No Attack" }
-//            doRouteTo(state, to, param)
-//        }
     }
 
     private fun writeFile(
@@ -259,19 +251,6 @@ class RouteTo(val params: Param = Param()) {
             state.aliveOrProjectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid * 5 }
 
         // nothing to avoid if the clock is activated
-//        var avoid = if (params.dodgeEnemies && !state.frameState.clockActivated) {
-//            // this seems to be ok, except link can get hit from the side
-//            // unless it avoids projectiles
-////            state.aliveEnemies
-//            when {
-//                params.ignoreProjectiles -> state.aliveEnemies
-//                params.ignoreEnemies -> state.projectiles
-//                else -> state.aliveOrProjectile
-//            }
-//        } else {
-//            emptyList()
-//        }
-
         var avoid = if (!state.frameState.clockActivated) {
             // this seems to be ok, except link can get hit from the side
             // unless it avoids projectiles

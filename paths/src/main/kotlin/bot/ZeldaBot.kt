@@ -253,8 +253,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                 addRupee = false
             }
             refillIfOut()
-            stateManipulator.setSword(ZeldaItem.WoodenSword)
-            stateManipulator.setRing(ZeldaItem.BlueRing)
+//            stateManipulator.setSword(ZeldaItem.WoodenSword)
+//            stateManipulator.setRing(ZeldaItem.BlueRing)
             if (setEquipmentCt > 0 && addEquipment) {
                 d { " Set equip" }
 //            frameStateUpdater.setSword(ZeldaItem.MagicSword)
@@ -266,8 +266,6 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                 stateManipulator.setLetter()
                 stateManipulator.setArrow()
                 stateManipulator.fillTriforce()
-//            frameStateUpdater.setRing(ZeldaItem.RedRing)
-
 //            frameStateUpdater.fillHearts()
                 setEquipmentCt--
             }
@@ -382,8 +380,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                             this.frameState.level,
                             this.frameState.mapLoc
                         ) else hyrule.getMapCell(this.frameState.mapLoc)
-//                    mapCell.gstar.setEnemyCosts(this.link, listOf(this.rhino()?.point ?: FramePoint()))
-                        val should = AttackActionDecider.shouldAttack(this)
+//                        val should = AttackActionDecider.shouldAttack(this)
+                        val should = false
                         drawCosts(frameState.link.dir, frameState.link.point, should, mapCell.zstar.costsF.copy())
                     } catch (e: Exception) {
                         d { "ERROR $e" }
@@ -424,7 +422,6 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         }
 
         private fun drawCosts(dir: Direction, link: FramePoint, should: Boolean = false, map: Map2d<Int>) {
-            val attackDirectionGrid = AttackActionDecider.attackGrid(dir, link)
             map.map.forEachIndexed { y, row ->
                 row.forEachIndexed { x, v ->
                     // if it is in the attack grid color it

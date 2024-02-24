@@ -249,7 +249,7 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
             target.distTo(it.point) <= MapConstants.twoGrid
         } ?: false
         //if link has gotten into the grid, then attack!
-        val should = AttackActionDecider.shouldAttack(state.frameState.link.dir, state.link, listOf(target), considerInLink = true)
+        val should = AttackActionDecider.shouldAttack(state, target)
         // but first make sure link is facing the direction of the rhino
         linkDir = state.frameState.link.dir
         rDir = state.rhinoDir()
@@ -319,7 +319,9 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
                 } else {
                     routeTo.routeTo(
                         state, targets,
-                        RouteTo.RouteParam(forceNew = forceNew, useB = useB) //, attackTarget = attackTarget)
+                        RouteTo.RouteParam(forceNew = forceNew,
+                            useB = useB,
+                            rParam = RouteTo.RoutingParamCommon(attackTarget = attackTarget))
                     )
                 }
             }
@@ -334,8 +336,7 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
         // try to route near current target or near rhino
         val targ = params.getTargetGrid(rhinoAt, state.rhinoDir()) ?: reference
 
-
-        var possibleUnfiltered = listOf(
+        val possibleUnfiltered = listOf(
             targ.downTwoGrid,
             targ.upTwoGrid,
             targ.leftTwoGrid,

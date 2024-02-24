@@ -23,6 +23,9 @@ enum class GamePad {
         else -> this
     }
 
+    val isAttack: Boolean
+        get() = this == A || this == B
+
     companion object {
         fun aOrB(useB: Boolean) = if (useB) B else A
 

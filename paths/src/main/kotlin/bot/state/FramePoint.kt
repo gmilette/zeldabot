@@ -48,8 +48,14 @@ fun FramePoint.directionToDir(to: FramePoint): Direction {
     }
 }
 
-fun FramePoint.toRect(size: Int = MapConstants.oneGrid): Geom.Rectangle =
+fun FramePoint.toRect(): Geom.Rectangle =
     Geom.Rectangle(this, this.justRightEndBottom)
+
+fun FramePoint.toRectPlus(adjustment: Int): Geom.Rectangle =
+    Geom.Rectangle(this.adjustBy((-1 * adjustment)), this.justRightEndBottom.adjustBy(adjustment))
+
+fun FramePoint.adjustBy(adjustment: Int): FramePoint =
+    FramePoint(x + adjustment, y + adjustment)
 
 // maybe have to actually do the top right, not top left
 val FramePoint.isTopRightCorner: Boolean

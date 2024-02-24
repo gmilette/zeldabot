@@ -25,7 +25,7 @@ val waterMonsterPair = (0xEC) to (0x03).toInt() // also is triforce dirt, but it
 val waterMonsterPair2 = (0xEC) to (0x43).toInt()
 val waterMonsterPairAlt = (0xEE) to (0x03).toInt() // tile address = 0EE0
 val waterMonsterPairAlt2 = (0xEE) to (0x43).toInt()
-val ghostWeak = (0xB8).toInt()
+val ghostWeak = (0xB8).toInt() // also it is the back of boomerang guy
 val ghostWeak2 = (0xBA).toInt()
 val bombSmoke = (0x70).toInt()
 val bombSmokeLess = (0x72).toInt() // 41

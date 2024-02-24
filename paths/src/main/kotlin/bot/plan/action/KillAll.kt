@@ -33,7 +33,6 @@ class KillAll(
      * consider projectiles though
      */
 //    ignoreEnemies: Boolean = false,
-    private val roundX: Boolean = false,
     private var firstAttackBomb: Boolean = false,
 //    ignoreProjectilesRoute: Boolean = false,
     whatToAvoid: RouteTo.WhatToAvoid = RouteTo.WhatToAvoid.All
@@ -41,33 +40,6 @@ class KillAll(
     companion object {
         fun make() = KillAll()
     }
-
-//    constructor(needLongWaitVal: Boolean = false) : this(needLongWait = needLongWaitVal)
-//    constructor(
-//        useBombs: Boolean = false,
-//        waitAfterAttack: Boolean = false,
-//        numberLeftToBeDead: Int = 0,
-//        considerEnemiesInCenter: Boolean = false,
-//        needLongWait: Boolean = false,
-//        targetOnly: List<Int> = listOf(),
-//        ignoreProjectiles: List<Int> = listOf(),
-//        ignoreEnemies: Boolean = false,
-//        roundX: Boolean = false,
-//        firstAttackBomb: Boolean = false
-//    ) : this(
-//        60,
-//        useBombs,
-//        waitAfterAttack,
-//        numberLeftToBeDead,
-//        considerEnemiesInCenter,
-//        needLongWait,
-//        targetOnly,
-//        ignoreProjectiles,
-//        ignoreEnemies,
-//        roundX,
-//        firstAttackBomb,
-//        ignoreProjectilesRoute = false
-//    )
 
     private val killAll: LogFile = LogFile("KillAll")
 
@@ -207,8 +179,8 @@ class KillAll(
             } else {
                 // 110 too low for bats
 //                waitAfterAllKilled = if (needLongWait) 250 else 50
-                // need 250 for ghosts
-                waitAfterAllKilled = if (needLongWait) 250 else 50
+                // need 250 for ghosts only
+                waitAfterAllKilled = if (needLongWait) 250 else 25
                 val firstEnemyOrNull = aliveEnemies.firstOrNull()
                 if (firstEnemyOrNull == null) {
                     // added for the dragon, doesn't really work well
