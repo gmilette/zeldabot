@@ -87,6 +87,7 @@ val bigHeart = (0x68).toInt() //104
 val redring = (0x46).toInt()
 val brownBoomerang = (0x36).toInt() //trib 0, 40
 val brownBoomerangSpin = (0x38).toInt() //attrib 40
+val brownBoomerangSpinBendFacingUp = (0x3a).toInt() //attrib 0
 val bow = (0x2A).toInt()
 val trap = (0x96).toInt()
 val map = (0x4C).toInt()

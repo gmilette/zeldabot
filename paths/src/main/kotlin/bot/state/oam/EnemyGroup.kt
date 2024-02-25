@@ -69,6 +69,7 @@ object EnemyGroup {
         fire,
         brownBoomerang, // but it is also an item to be gotten, not avoided, oy!
         brownBoomerangSpin,
+        brownBoomerangSpinBendFacingUp,
         trap, // trap,
         dragon4FlamingHead,
         spinCircleEnemy,
@@ -84,6 +85,10 @@ object EnemyGroup {
     )
 
     val projectileUnblockable = setOf(
+        144, 142, // sun
+        dragon4FlamingHead,
+        spinCircleEnemy,
+        trap,
         fire,
         dragon4FlamingHead,
         spinCircleEnemy,
@@ -94,6 +99,8 @@ object EnemyGroup {
         boulder3Pair,
         rockProjectile
     )
+
+    val projectileBlockable = projectiles - projectileUnblockable - projectileMagicShieldBlockable - projectilePairsUnblockable.map { it.first }.toSet()
 
     // todo: need to add back these projectiles when I know attrib
 //        boulder, boulder2, boulder3, boulder4,

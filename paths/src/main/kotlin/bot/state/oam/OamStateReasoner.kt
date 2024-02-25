@@ -61,7 +61,8 @@ class OamStateReasoner(
 
     private fun calcBlockable(tile: Int, tilePair: Pair<Int, Int>): Blockable =
         when {
-            EnemyGroup.projectilePairsUnblockable.contains(tilePair) -> Blockable.WithSmallShield
+            EnemyGroup.projectilePairsUnblockable.contains(tilePair) -> Blockable.No
+            EnemyGroup.projectileBlockable.contains(tile) -> Blockable.WithSmallShield
             EnemyGroup.projectileMagicShieldBlockable.contains(tile) -> Blockable.WithMagicShield
             else -> Blockable.No
         }
