@@ -201,4 +201,9 @@ object EnemyGroup {
 //        triforceTile2,
         magicSword,
     )
+
+    val enemiesToIgnoreNotAttackInOverworld = setOf(
+        spinCircleEnemy,
+        spinCircleEnemy2
+    )
 }

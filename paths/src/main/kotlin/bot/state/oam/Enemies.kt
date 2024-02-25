@@ -165,7 +165,9 @@ val circleMonster2 = (0xFE).toInt()
 val circleMonsterCenter = (0xFA).toInt()
 val circleMonsterCenter2 = (0xF8).toInt()
 val shopOwner = (0xF8).toInt() to (0x02).toInt()
+// on map locations (anywhere in overworld) 31, map 29
 val spinCircleEnemy = (0xC8).toInt() // attribute 42 and 2
+val spinCircleEnemy2 = (0xC6).toInt() // attribute 42 and 2
 
 // some tile information
 // https://www.computerarcheology.com/NES/Zelda/Bank3.html

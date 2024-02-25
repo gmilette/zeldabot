@@ -68,10 +68,6 @@ class RouteTo(val params: Param = Param()) {
          * for attacking use B
          */
         val useB: Boolean = false,
-        // not sure I need this, but when
-        // i do a moveTo, there are to locations, but the code should not
-        // try to attack, the how to avoid parameter is lost
-        val attackPossible: Boolean = true,
         val rParam: RoutingParamCommon = RoutingParamCommon()
     )
 
@@ -106,34 +102,9 @@ class RouteTo(val params: Param = Param()) {
         to: List<FramePoint>,
         param: RouteParam = RouteParam(),
     ): GamePad {
-        d { " route To attackOrRoute" }
         val canAttack = param.useB || state.frameState.canUseSword
-
-//        val closest = state.aliveEnemies.minBy { it.point.distTo(state.link) }
-//        d { " route To link at ${state.link} closest=${closest}" }
-//        for (upPoint in closest.point.upPoints()) {
-//            d { " point $upPoint"}
-//        }
-        // if it's in the up position for ANY enemy
-//        val inUpPosition = state.aliveEnemies.any { enemy ->
-//            enemy.point.upPoints().contains(state.link)
-//        }
-//        if (inUpPosition) {
-//            d { " route to in position at direction ${state.frameState.link.dir}"}
-//            // go up
-//            if (state.frameState.link.dir != Direction.Up) {
-//                // make sure it is on the highway, otherwise don't
-//                if (state.link.onHighway) {
-//                    d { " route to go up to correct direction"}
-//                    return GamePad.MoveUp
-//                } else {
-//                    d { " route to no on highway don't try to correct position"}
-//                }
-//            }
-//        } else {
-//            d { " not in position ${state.frameState.link.dir}"}
-//        }
-
+        val attackPossible by lazy { params.whatToAvoid != WhatToAvoid.None}
+        d { " route To attackOrRoute attack=$attackPossible can=$canAttack" }
         val theAttack = if (param.useB) {
             attackB
         } else {
@@ -146,7 +117,7 @@ class RouteTo(val params: Param = Param()) {
                 theAttack.nextStep(state)
             }
 
-            !param.attackPossible ||
+            !attackPossible ||
             !canAttack ||
                     (state.frameState.clockActivated && Random.nextInt(10) == 1) ||
                     AttackActionDecider.getInFrontOfGrids(state) ||

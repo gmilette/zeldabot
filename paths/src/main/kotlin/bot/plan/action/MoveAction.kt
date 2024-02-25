@@ -162,7 +162,6 @@ class InsideNavAbout(
             to = points,
             RouteTo.RouteParam(
                 overrideMapCell = if (shop) state.hyrule.shopMapCell else null,
-                attackPossible = !shop,
                 rParam = RouteTo.RoutingParamCommon(
                     makePassable?.let { listOf(makePassable) } ?: emptyList(),
                     forceHighCost = highCost

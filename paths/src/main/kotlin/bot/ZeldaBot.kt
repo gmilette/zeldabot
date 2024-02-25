@@ -396,7 +396,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                     }
                     val swords = AttackActionDecider.swordRectangles(link)
                     for (sword in swords) {
-                        api.color = Colors.RED
+                        api.color = Colors.BLACK
                         sword.value.apply {
                             api.drawRect(topLeft.x, topLeft.y + MapConstants.yAdjust, width, height)
                         }
