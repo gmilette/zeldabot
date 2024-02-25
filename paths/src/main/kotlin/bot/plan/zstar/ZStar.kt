@@ -407,7 +407,9 @@ class ZStar(
             d { "Plan: iter = enemies ${param.enemies.size} near $startSum" }
             resetPassable()
             // only if inside a radius
-            setEnemyCosts(param.start, param.enemies)
+//            setEnemyCosts(param.start, param.enemies)
+            // fails, why?
+            setEnemyCostsByIntersect(param.enemies)
             setForceHighCost(param.rParam.forceHighCost)
             setForcePassable(param.rParam.forcePassable)
             setZeroCost(param.rParam.attackTarget)
@@ -474,6 +476,21 @@ class ZStar(
             }
             ///???
 //        setForcePassable(enemies, setTo = false)
+        }
+
+        private fun setEnemyCostsByIntersect(enemies: List<FramePoint> = emptyList()) {
+            reset()
+            val enemyRect = enemies.map { it.toRect() }
+
+            d { " set enemy cost for intersecting" }
+            costsF.mapXyCurrent { x, y, current ->
+                val pt = FramePoint(x,y).toRect()
+                if (enemyRect.any { pt.intersect(it) }) {
+                    current + nearEnemyCost
+                } else {
+                    current
+                }
+            }
         }
 
         private fun setForcePassable(passableSpot: List<FramePoint> = emptyList(), setTo: Boolean = true) {

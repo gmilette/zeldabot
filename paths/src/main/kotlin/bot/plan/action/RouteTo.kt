@@ -68,6 +68,10 @@ class RouteTo(val params: Param = Param()) {
          * for attacking use B
          */
         val useB: Boolean = false,
+        // not sure I need this, but when
+        // i do a moveTo, there are to locations, but the code should not
+        // try to attack, the how to avoid parameter is lost
+        val attackPossible: Boolean = true,
         val rParam: RoutingParamCommon = RoutingParamCommon()
     )
 
@@ -142,6 +146,7 @@ class RouteTo(val params: Param = Param()) {
                 theAttack.nextStep(state)
             }
 
+            !param.attackPossible ||
             !canAttack ||
                     (state.frameState.clockActivated && Random.nextInt(10) == 1) ||
                     AttackActionDecider.getInFrontOfGrids(state) ||

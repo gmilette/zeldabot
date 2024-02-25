@@ -51,6 +51,15 @@ class Map2d<T>(
         return Map2d(map.mapIndexed{ x, r -> r.mapIndexed { y, c -> transform(x, y) }.toMutableList() })
     }
 
+    fun mapXyCurrent(transform: (Int, Int, T) -> T) {
+        map.forEachIndexed { yIndex, row ->
+            row.forEachIndexed { xIndex, current ->
+                val newVal = transform(xIndex, yIndex, current)
+                map[yIndex][xIndex] = newVal
+            }
+        }
+    }
+
     fun apply(transform: (Int, Int, T) -> Unit) {
         // change to values
         map.mapIndexed{ x, r -> r.mapIndexed { y, c -> transform(x, y, c) } }

@@ -243,7 +243,8 @@ object ZeldaPlan {
             upm
             kill
             seg("bomb room")
-            goTo(InLocations.Level2.keyMid)
+            // no key I think
+//            goTo(InLocations.Level2.keyMid)
             up
             kill // blocked before going // allow bombs
             goTo(InLocations.Level2.bombItemRight)

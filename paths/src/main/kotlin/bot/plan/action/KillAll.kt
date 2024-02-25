@@ -180,7 +180,7 @@ class KillAll(
                 // 110 too low for bats
 //                waitAfterAllKilled = if (needLongWait) 250 else 50
                 // need 250 for ghosts only
-                waitAfterAllKilled = if (needLongWait) 250 else 25
+                waitAfterAllKilled = if (needLongWait) 250 else 50
                 val firstEnemyOrNull = aliveEnemies.firstOrNull()
                 if (firstEnemyOrNull == null) {
                     // added for the dragon, doesn't really work well

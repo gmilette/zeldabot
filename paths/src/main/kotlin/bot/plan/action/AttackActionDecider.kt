@@ -11,6 +11,9 @@ object AttackActionDecider {
     private const val dodgeBuffer = 3
     var DEBUG = true
 
+    private val longExtra = MapConstants.swordGridPlusOne
+    private val shortExtra = MapConstants.swordGrid
+
     fun attackPoints(point: FramePoint) =
         point.upPoints() + point.rightPoints() + point.leftPoint() + point.downPoint() + point.cornersIn()
 
@@ -22,14 +25,14 @@ object AttackActionDecider {
                 // for now
 //            x - MapConstants.halfGrid to (y + MapConstants.oneGridPoint5),
                 // this -1 should allow link to chase
-                x to (y + MapConstants.oneGridPoint5) - 2,
-                x to (y + MapConstants.oneGridPoint5) - 1,
-                x to (y + MapConstants.oneGridPoint5),
+                x to (y + longExtra) - 2,
+                x to (y + longExtra) - 1,
+                x to (y + longExtra),
                 // to do add all the points in between
                 // i don't think so
-                x + MapConstants.halfGrid to (y + MapConstants.oneGridPoint5),
-                x + MapConstants.halfGrid to (y + MapConstants.oneGridPoint5) - 1,
-                x + MapConstants.halfGrid to (y + MapConstants.oneGridPoint5) - 2,
+                x + shortExtra to (y + longExtra),
+                x + shortExtra to (y + longExtra) - 1,
+                x + shortExtra to (y + longExtra) - 2,
             )
         )
 
@@ -38,14 +41,14 @@ object AttackActionDecider {
             listOf(
                 // up points
                 // for now
-//            x - MapConstants.halfGrid to (y + MapConstants.oneGridPoint5),
+//            x - shortExtra to (y + longExtra),
                 // this -1 should allow link to chase
-                (x - MapConstants.oneGridPoint5) to y,
-                (x - MapConstants.oneGridPoint5 + 1) to y,
-                (x - MapConstants.oneGridPoint5 + 2) to y,
-                (x - MapConstants.oneGridPoint5) to (y + MapConstants.halfGrid),
-                (x - MapConstants.oneGridPoint5 + 1) to (y + MapConstants.halfGrid),
-                (x - MapConstants.oneGridPoint5 + 2) to (y + MapConstants.halfGrid),
+                (x - longExtra) to y,
+                (x - longExtra + 1) to y,
+                (x - longExtra + 2) to y,
+                (x - longExtra) to (y + shortExtra),
+                (x - longExtra + 1) to (y + shortExtra),
+                (x - longExtra + 2) to (y + shortExtra),
             )
         )
 
@@ -54,14 +57,14 @@ object AttackActionDecider {
             listOf(
                 // up points
                 // for now
-//            x - MapConstants.halfGrid to (y + MapConstants.oneGridPoint5),
+//            x - shortExtra to (y + longExtra),
                 // this -1 should allow link to chase
-                (x + MapConstants.oneGridPoint5) to y,
-                (x + MapConstants.oneGridPoint5 - 1) to y,
-                (x + MapConstants.oneGridPoint5 - 2) to y,
-                (x + MapConstants.oneGridPoint5) to y + MapConstants.halfGrid,
-                (x + MapConstants.oneGridPoint5 - 1) to y + MapConstants.halfGrid,
-                (x + MapConstants.oneGridPoint5 - 2) to y + MapConstants.halfGrid,
+                (x + longExtra) to y,
+                (x + longExtra - 1) to y,
+                (x + longExtra - 2) to y,
+                (x + longExtra) to y + shortExtra,
+                (x + longExtra - 1) to y + shortExtra,
+                (x + longExtra - 2) to y + shortExtra,
             )
         )
 
@@ -69,12 +72,12 @@ object AttackActionDecider {
         FramePointBuilder.hasL(
             listOf(
                 // i think these should be -1.5
-//            x to (y - MapConstants.oneGridPoint5) - 2,
-//            x to (y - MapConstants.oneGridPoint5) - 1,
-                x to (y - MapConstants.oneGridPoint5),
-                x + MapConstants.halfGrid to (y - MapConstants.oneGridPoint5),
-//            x + MapConstants.halfGrid to (y - MapConstants.oneGridPoint5) - 1,
-//            x + MapConstants.halfGrid to (y - MapConstants.oneGridPoint5) - 2,
+//            x to (y - longExtra) - 2,
+//            x to (y - longExtra) - 1,
+                x to (y - longExtra),
+                x + shortExtra to (y - longExtra),
+//            x + shortExtra to (y - MapConstants.oneGridPoint5) - 1,
+//            x + shortExtra to (y - MapConstants.oneGridPoint5) - 2,
             )
         )
 

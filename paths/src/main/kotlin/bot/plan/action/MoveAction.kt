@@ -162,6 +162,7 @@ class InsideNavAbout(
             to = points,
             RouteTo.RouteParam(
                 overrideMapCell = if (shop) state.hyrule.shopMapCell else null,
+                attackPossible = !shop,
                 rParam = RouteTo.RoutingParamCommon(
                     makePassable?.let { listOf(makePassable) } ?: emptyList(),
                     forceHighCost = highCost
@@ -180,7 +181,7 @@ class InsideNavAbout(
     override fun path(): List<FramePoint> = routeTo.route?.path ?: emptyList()
 
     override val name: String
-        get() = "Nav to about $point $tag"
+        get() = "Nav to about $point $tag ${routeTo.params.whatToAvoid}"
 }
 
 class StartAtAction(val at: MapLoc = 0, val atLevel: Int = -1) : Action {
