@@ -202,7 +202,7 @@ object EnemyGroup {
         magicSword,
     )
 
-    val enemiesToIgnoreNotAttackInOverworld = setOf(
+    val enemiesToNotAttackInOverworld = setOf(
         spinCircleEnemy,
         spinCircleEnemy2
     )

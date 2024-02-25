@@ -3,7 +3,6 @@ package bot.plan.action
 import bot.state.*
 import bot.state.map.*
 import bot.state.oam.EnemyGroup
-import bot.state.oam.spinCircleEnemy
 import bot.state.oam.swordDir
 import util.Geom
 import util.d
@@ -201,13 +200,11 @@ object AttackActionDecider {
      */
     private fun aliveEnemiesCanAttack(state: MapLocationState): List<FramePoint> {
         val enemies = state.aliveEnemies
-        return if (!state.frameState.isLevel) {
-            enemies.filter { it.tile !in EnemyGroup.enemiesToIgnoreNotAttackInOverworld }
-        } else {
+        return if (state.frameState.isLevel) {
             enemies
-        }.map { it.point }.also {
-            d { " got enemies ${it.size} from $enemies"}
-        }
+        } else {
+            enemies.filter { it.tile !in EnemyGroup.enemiesToNotAttackInOverworld }
+        }.map { it.point }
     }
 
     fun inStrikingRange(from: FramePoint, enemies: List<FramePoint>): Boolean {
