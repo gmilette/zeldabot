@@ -48,7 +48,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        run(name = "level1")
 //        run(name = "level2w")
 //        runLoc(true,94, 2) // before boomerang
-        runLoc(true,35, 1)
+//        runLoc(true,35, 1)
 //        runLoc(true,87, 5)
 //        runLoc(true,48, 4)
 //        runLoc(true,50, 4) // push ladder
@@ -64,6 +64,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        runLoc(true,61, 0) // forest statue
 //        runLoc(true,52, 0) // forest statue
 //        runLoc(true,36, 0) // forest statue
+        runLoc(true,69+16+16, 0) // going to 13
     }
 
     private fun rerun() {
