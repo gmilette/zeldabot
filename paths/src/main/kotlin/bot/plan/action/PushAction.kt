@@ -123,7 +123,8 @@ class PushAction(push: InLocations.Push, then: Action): Action {
     listOfNotNull(
 //        InsideNav(push.position, makePassable = push.point), // fails in level 9
         if (push == InLocations.Push.diamondLeft) navToPush(push, center = true) else null,
-        if (push != InLocations.Push.none) navToPush(push) else null,
+        // added the != diamond left
+        if (push != InLocations.Push.none && (push != InLocations.Push.diamondLeft)) navToPush(push) else null,
         if (push != InLocations.Push.none) PushIt(push.point) else null,
         // optional some push
         if (push.needAway) AwayFrom(push.point) else null,
@@ -134,7 +135,7 @@ class PushAction(push: InLocations.Push, then: Action): Action {
         Timeout(then),
         KillAll(),
         InsideNav(push.position) // if we are going to retry reposition link
-        ), restartWhenDone = true)
+        ), restartWhenDone = true, tag = "push sequence")
 
     override fun reset() {
         d { " reset seq " }
@@ -169,8 +170,8 @@ private fun navToPush(push: InLocations.Push, center: Boolean = false, ignorePro
     }
     if (push.dir.vertical) {
         if (center) {
-            dirs.add(Direction.Up.pointModifier(MapConstants.oneGrid)(push.point).leftOneGrid)
-            dirs.add(Direction.Down.pointModifier(MapConstants.oneGrid)(push.point).leftOneGrid)
+            dirs.add(Direction.Up.pointModifier(MapConstants.oneGrid)(push.point))
+            dirs.add(Direction.Down.pointModifier(MapConstants.oneGrid)(push.point))
         } else {
             dirs.add(Direction.Up.pointModifier(MapConstants.oneGrid)(push.point))
             dirs.add(Direction.Down.pointModifier(MapConstants.oneGrid)(push.point))
@@ -178,7 +179,7 @@ private fun navToPush(push: InLocations.Push, center: Boolean = false, ignorePro
     }
     return InsideNavAbout(dirs.first(), 4, ignoreProjectiles = ignoreProjectiles,
         makePassable = push.point,
-        orPoints = dirs, tag = "navToPush $push ${push.point}", highCost = push.highCost)
+        orPoints = dirs, tag = "navToPush $push ${push.point} center=$center $dirs", highCost = push.highCost)
 }
 
 private class PushIt(private val block: FramePoint,

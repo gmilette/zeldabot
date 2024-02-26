@@ -56,7 +56,7 @@ class KillAll(
     private var waitAfterPressing = 0
 
     // just be sure everything is dead and not just slow to move
-    private var waitAfterAllKilled = 200
+    private var waitAfterAllKilled = 0
 
     override fun reset() {
         super.reset()
@@ -249,14 +249,6 @@ class KillAll(
             }
         }
     }
-
-    private fun FramePoint.attackPoints(): List<FramePoint> =
-        FramePointBuilder.has(mapOf(
-            x to y - MapConstants.oneGrid + 1, // add one to force direction
-            x to y + MapConstants.oneGridPoint5 - 1, // force up direction
-            x - MapConstants.oneGrid + 1 to y, // from left
-            x + MapConstants.oneGridPoint5 - 4 to y // from right
-        ))
 }
 
 class KillAllCompleteCriteria {

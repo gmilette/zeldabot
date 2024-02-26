@@ -180,7 +180,7 @@ class InsideNavAbout(
     override fun path(): List<FramePoint> = routeTo.route?.path ?: emptyList()
 
     override val name: String
-        get() = "Nav to about $point $tag ${routeTo.params.whatToAvoid}"
+        get() = "Nav to about $point $tag avoid ${routeTo.params.whatToAvoid}"
 }
 
 class StartAtAction(val at: MapLoc = 0, val atLevel: Int = -1) : Action {
