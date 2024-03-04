@@ -197,35 +197,9 @@ class KillAll(
                     target = firstEnemy.point
                     val link = state.frameState.link
                     val dist = firstEnemy.point.distTo(link.point)
-                    //d { " go find $firstEnemy from $link distance: $dist"}
-                    // changed enemies
-                    // why is this here?
-                    // guess, don't keep switching target?
-                    // I dont like this, it could lead to chasing the wrong target
-                    // remove
-//                            sameEnemyCount++
-//                            val sameEnemyForTooLong = sameEnemyCount > sameEnemyFor
-//                            if (sameEnemyForTooLong) {
-//                                sameEnemyCount = 0
-//                            }
-//                            val forceNew = previousTarget != target && sameEnemyForTooLong
-
                     // force a new route if this has changed targets
                     val forceNew = previousTarget.oneStr != target.oneStr
                     d { "Plan: target changed was $previousTarget now ${target} forceNew = $forceNew" }
-                    // can't tell if the target has changed
-                    // handle replanning when just close, this might be fine
-
-                    // don't need this anymore I think
-//                    val targetsToAttack: List<FramePoint> = if (roundX) {
-//                        // for dragon
-//                        val mod = target.x % 8
-//                        listOf(FramePoint(target.x - mod, target.y))
-//                    } else {
-////                        target.attackPoints()
-//                        AttackActionDecider.attackPoints(target)
-////                        listOf(target)
-//                    }
 
                     val targetsToAttack: List<FramePoint> = AttackActionDecider.attackPoints(target)
 

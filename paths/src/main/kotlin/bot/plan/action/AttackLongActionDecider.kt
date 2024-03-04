@@ -1,10 +1,12 @@
 package bot.plan.action
 
 import bot.state.*
-import bot.state.map.*
+import bot.state.map.Direction
+import bot.state.map.pointModifier
 import org.jheaps.annotations.VisibleForTesting
 import util.Geom
 import util.Map2d
+import util.d
 
 object AttackLongActionDecider {
 
@@ -33,25 +35,32 @@ object AttackLongActionDecider {
     // since enemies are fro
 
     private fun targetInLongRange(state: MapLocationState): Boolean {
-        val dir = state.frameState.link.dir
-        val link = state.link
-
-        // assume go right
-        val midLink = link.justDownFourth
-
-        val endReach = rayFrom(state.currentMapCell.passable, midLink, dir)
-        return firstEnemyIntersect(state, endReach, dir) != null
+        return firstEnemyIntersect(state, longRectangle(state)) != null
     }
 
-    private fun firstEnemyIntersect(state: MapLocationState, to: FramePoint, dir: Direction): Agent? {
+    fun longRectangle(state: MapLocationState): Geom.Rectangle {
+        val dir = state.frameState.link.dir
+        val link = state.link
+        // assume go right
+        val midLink = link.justDownFourth
+        val endReach = rayFrom(state.currentMapCell.passable, midLink, dir)
+        d { " end reach is $endReach $dir"}
+        val swordRectangle = swordRectangle(link, endReach, dir)
+        d { " $link intersect sword rect $swordRectangle"}
+        return swordRectangle
+    }
+
+    private fun firstEnemyIntersect(state: MapLocationState, swordRectangle: Geom.Rectangle): Agent? {
         //     0  link
         //     +4 top sword
         // -->
         //     +12 bottom sword (account for size of sword or boomerang)
 
         // depends on direction
-        val link = state.link
-        val swordRectangle = swordRectangle(link, to, dir)
+        for (aliveEnemy in state.aliveEnemies) {
+            val inter = swordRectangle.intersect(aliveEnemy.point.toRect())
+            d { "intersect ${aliveEnemy.point} $inter" }
+        }
 
 //        // don't shoot at front of sword guy
 //        return state.aliveEnemies.affectedByBoomerang().filter {
@@ -65,9 +74,11 @@ object AttackLongActionDecider {
     }
 
     @VisibleForTesting
-    fun swordRectangle(link: FramePoint, to: FramePoint, dir: Direction) = when {
-        dir.horizontal -> Geom.Rectangle(link.justDownFourth, link.justDownThreeFourth.withX(to.x))
-        dir.vertical -> Geom.Rectangle(link.justRightFourth, link.justRightThreeFourth.withY(to.y))
+    fun swordRectangle(link: FramePoint, to: FramePoint, dir: Direction) = when (dir) {
+        Direction.Left -> Geom.Rectangle(link.justDownFourth.withX(to.x), link.justDownThreeFourth)
+        Direction.Right -> Geom.Rectangle(link.justDownFourth, link.justDownThreeFourth.withX(to.x))
+        Direction.Down -> Geom.Rectangle(link.justRightFourth, link.justRightThreeFourth.withY(to.y))
+        Direction.Up -> Geom.Rectangle(link.justRightFourth.withY(to.y), link.justRightThreeFourth)
         else -> link.toRect()
     }
 
@@ -79,12 +90,13 @@ object AttackLongActionDecider {
 //        this.tile !in immuneToBoomerang
 
     private fun rayFrom(map: Map2d<Boolean>, point: FramePoint, dir: Direction): FramePoint {
+        if (dir == Direction.None) return FramePoint()
         var farthestPoint = point.copy()
         val modifier = dir.pointModifier()
-        while (map.get(point) && farthestPoint.isOnMap) {
-            farthestPoint = modifier(point)
+        while (map.getOr(point, false) && farthestPoint.isOnMap) {
+            farthestPoint = modifier(farthestPoint)
         }
-        return point
+        return farthestPoint
     }
 
     fun shouldActivateBoomerang(state: MapLocationState) {

@@ -55,7 +55,8 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
     val act = remember { mutableStateOf(ZeldaBot.doAct) }
     val draw = remember { mutableStateOf(ZeldaBot.draw) }
     val ladder = remember { mutableStateOf(true) }
-    val inv = remember { mutableStateOf(true) }
+    val inv = remember { mutableStateOf(ZeldaBot.invincible) }
+    val max = remember { mutableStateOf(ZeldaBot.maxLife) }
 
     Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
         SwitchViewButton(debugView)
@@ -156,6 +157,15 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
                     onCheckedChange = {
                         inv.value = it
                         model.invincible(it)
+                    }
+                )
+
+                Text("Max")
+                Checkbox(
+                    checked = max.value,
+                    onCheckedChange = {
+                        max.value = it
+                        model.max(it)
                     }
                 )
 
@@ -438,6 +448,10 @@ class ZeldaModel : ZeldaBot.ZeldaMonitor {
 
     fun invincible(act: Boolean) {
         ZeldaBot.invincible = act
+    }
+
+    fun max(act: Boolean) {
+        ZeldaBot.maxLife = act
     }
 
     data class ShowState(

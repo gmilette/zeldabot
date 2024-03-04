@@ -48,7 +48,7 @@ class Map2d<T>(
 
     fun <V> mapXy(transform: (Int, Int) -> V): Map2d<V> {
         // change to values
-        return Map2d(map.mapIndexed{ x, r -> r.mapIndexed { y, c -> transform(x, y) }.toMutableList() })
+        return Map2d(map.mapIndexed { x, r -> r.mapIndexed { y, c -> transform(x, y) }.toMutableList() })
     }
 
     fun mapXyCurrent(transform: (Int, Int, T) -> T) {
@@ -62,14 +62,14 @@ class Map2d<T>(
 
     fun apply(transform: (Int, Int, T) -> Unit) {
         // change to values
-        map.mapIndexed{ x, r -> r.mapIndexed { y, c -> transform(x, y, c) } }
+        map.mapIndexed { x, r -> r.mapIndexed { y, c -> transform(x, y, c) } }
     }
 
     fun modify(link: FramePoint, point: FramePoint, sizeWide: Int = 16, sizeTall: Int = 16, how: (Int, T) -> T) {
         for (y in point.y until point.y + sizeTall) {
-            for (x in point.x until point.x + sizeWide ) {
+            for (x in point.x until point.x + sizeWide) {
                 try {
-                    val dist = link.distTo(FramePoint(x,y))
+                    val dist = link.distTo(FramePoint(x, y))
                     val newVal = how(dist, map[y][x])
                     map[y][x] = newVal
                 } catch (e: IndexOutOfBoundsException) {
@@ -81,7 +81,7 @@ class Map2d<T>(
 
     fun modifyTo(point: FramePoint, size: Int = 16, newVal: T) {
         for (y in point.y until point.y + size) {
-            for (x in point.x until point.x + size ) {
+            for (x in point.x until point.x + size) {
                 try {
                     map[y][x] = newVal
                 } catch (e: IndexOutOfBoundsException) {
@@ -94,10 +94,24 @@ class Map2d<T>(
     fun get(point: FramePoint): T =
         get(point.x, point.y)
 
+    fun getOr(point: FramePoint, default: T): T =
+        getOr(point.x, point.y, default)
+
     // - 61?
     fun get(x: Int, y: Int): T =
-        map[(y).coerceIn(0, MapConstants.MAX_Y)][x.coerceIn(0, MapConstants
-            .MAX_X)]
+        map[(y).coerceIn(0, MapConstants.MAX_Y)][x.coerceIn(
+            0, MapConstants
+                .MAX_X
+        )]
+
+    fun getOr(x: Int, y: Int, default: T): T = try {
+        map[(y).coerceIn(0, MapConstants.MAX_Y)][x.coerceIn(
+            0, MapConstants
+                .MAX_X
+        )]
+    } catch (e: IndexOutOfBoundsException) {
+        default
+    }
 
     fun write(name: String, render: (T, x: Int, y: Int) -> String) {
         val csvWriter2 = CsvWriter()

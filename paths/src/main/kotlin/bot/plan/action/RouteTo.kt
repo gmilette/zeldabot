@@ -110,10 +110,17 @@ class RouteTo(val params: Param = Param()) {
         } else {
             attack
         }
+
         val inRangeOf by lazy { AttackActionDecider.inRangeOf(state) }
+        val shouldLongAttack by lazy { AttackLongActionDecider.shouldShootSword(state) }
         return when {
             attack.isAttacking() -> {
                 d { " Route Action -> Keep Attacking" }
+                theAttack.nextStep(state)
+            }
+
+            attackPossible && canAttack && shouldLongAttack -> {
+                d { " Route Action -> LongAttack" }
                 theAttack.nextStep(state)
             }
 
@@ -169,28 +176,9 @@ class RouteTo(val params: Param = Param()) {
             return NavUtil.randomDir(state.link)
         }
         val linkPt = state.frameState.link.point
-        // why this? let's go without it and see if it's ok
-        // it gets stuck almost about to exit some levels
-        // i'm not sure if this fixes it
-        val closest = to.minBy { it.distTo(linkPt) }
-        if (linkPt.distTo(closest) <= 1) {
-            d { " CLOSE!! $closest" }
-            if (closest.y <= 1) {
-                d { " CLOSE!! up" }
-                return GamePad.MoveUp
-            }
-            if (closest.x <= 1) {
-                d { " CLOSE!! left" }
-                return GamePad.MoveLeft
-            }
-            if (closest.x >= MapConstants.MAX_X - 2) {
-                d { " CLOSE!! right" }
-                return GamePad.MoveRight
-            }
-            if (closest.y >= MapConstants.MAX_Y - 2) {
-                d { " CLOSE!! down" }
-                return GamePad.MoveDown
-            }
+        val exitOffScreenAction = exitOfScreen(linkPt, to)
+        if (exitOffScreenAction != GamePad.None) {
+            return exitOffScreenAction
         }
 
         val skippedButIsOnRoute = (state.previousMove.skipped && route?.isOn(linkPt, 5) != null)
@@ -348,6 +336,33 @@ class RouteTo(val params: Param = Param()) {
         route?.next5()
         planCount = 0
         return nextPoint1
+    }
+
+    private fun exitOfScreen(linkPt: FramePoint, to: List<FramePoint>): GamePad {
+        // why this? let's go without it and see if it's ok
+        // it gets stuck almost about to exit some levels
+        // i'm not sure if this fixes it
+        val closest = to.minBy { it.distTo(linkPt) }
+        return if (linkPt.distTo(closest) <= 1) {
+            d { " CLOSE!! $closest" }
+            if (closest.y <= 1) {
+                d { " CLOSE!! up" }
+                GamePad.MoveUp
+            } else if (closest.x <= 1) {
+                d { " CLOSE!! left" }
+                GamePad.MoveLeft
+            } else if (closest.x >= MapConstants.MAX_X - 2) {
+                d { " CLOSE!! right" }
+                GamePad.MoveRight
+            } else if (closest.y >= MapConstants.MAX_Y - 2) {
+                d { " CLOSE!! down" }
+                GamePad.MoveDown
+            } else {
+                GamePad.None
+            }
+        } else {
+            GamePad.None
+        }
     }
 
     private fun getInFrontOfGrids(state: MapLocationState): List<FramePoint> =

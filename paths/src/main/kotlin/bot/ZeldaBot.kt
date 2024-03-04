@@ -1,16 +1,15 @@
 package bot
 
-import androidx.compose.ui.graphics.Color
 import bot.plan.ZeldaPlan
 import bot.plan.action.AttackActionDecider
-import bot.plan.action.attackPoints
-import bot.plan.action.isInHalfFatGrid
-import bot.plan.action.isInHalfGrid
+import bot.plan.action.AttackLongActionDecider
 import bot.plan.runner.MasterPlan
 import bot.plan.runner.PlanRunner
 import bot.state.*
-import bot.state.map.*
-import bot.state.map.destination.ZeldaItem
+import bot.state.map.Direction
+import bot.state.map.Hyrule
+import bot.state.map.MapCell
+import bot.state.map.MapConstants
 import bot.state.oam.rhinoHeadHeadWithMouthClosed
 import bot.state.oam.rhinoHeadHeadWithMouthOpen
 import nintaco.api.API
@@ -194,6 +193,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         var forcedDirection = GamePad.None
         var addEquipment: Boolean = false
         var invincible: Boolean = true
+        var maxLife: Boolean = true
 
         @JvmStatic
         fun startIt(monitor: ZeldaMonitor): ZeldaBot {
@@ -235,13 +235,13 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             // fill hearts
             // not reliable enough
             val life = frameStateUpdater.state.frameState.inventory.heartCalc.lifeInHearts2()
-            if (life <= 4.0) {
-                d { "fill hearts $life" }
-                if (invincible) {
+            d { "fill hearts $life" }
+            when {
+                life <= 4.0 && invincible -> {
+                    d { "*fill*" }
                     stateManipulator.fillHearts()
                 }
-            } else {
-                d { "fill hearts $life" }
+                maxLife -> stateManipulator.fillHearts()
             }
 
             if (addKey) {
@@ -391,15 +391,22 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                         api.color = Colors.CYAN
                         val pts = AttackActionDecider.attackPoints(enemy.point)
                         for (pt in pts) {
-                            api.drawOval(pt.x, pt.y + MapConstants.yAdjust, 3, 3)
+                            api.drawOval(pt.x, pt.y + MapConstants.yAdjust, 2, 2)
                         }
                     }
+
+                    // only display if hearts are not full, which is always
                     val swords = AttackActionDecider.swordRectangles(link)
                     for (sword in swords) {
                         api.color = Colors.BLACK
                         sword.value.apply {
                             api.drawRect(topLeft.x, topLeft.y + MapConstants.yAdjust, width, height)
                         }
+                    }
+                    val longAttack = AttackLongActionDecider.longRectangle(this)
+                    longAttack.apply {
+                        api.color = Colors.GRAY
+                        api.drawRect(topLeft.x, topLeft.y + MapConstants.yAdjust, width, height)
                     }
 
                 }
@@ -429,9 +436,9 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                         // attack grid
 //                        (y % 16 % 2 == 0) && (x % 16 % 2 == 0) && attackDirectionGrid.isInHalfFatGrid(FramePoint(x, y), dir.vertical) ->
 //                            if (should) Colors.DARK_GREEN else Colors.LIGHT_BLUE
-                        v > 100000 -> Colors.MAGENTA
-                        v > 9000 && (y % 16 % 2 == 0) -> Colors.RED
-//                    v > 900 -> Colors.YELLOW // everything is yellow
+
+//                        v > 100000 -> Colors.MAGENTA
+//                        v > 9000 && (y % 16 % 2 == 0) -> Colors.RED
                         else -> -1
                     }
                     if (color != -1) {

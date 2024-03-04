@@ -296,7 +296,9 @@ object AttackActionDecider {
     fun swordRectangles(link: FramePoint): Map<Direction, Geom.Rectangle> {
 //        val nearSize = MapConstants.halfGrid
 //        val farSize = MapConstants.oneGridPoint5
-        val swordSizeLessThanGrid = 6 // experiment with this number
+        // experiment with this number. 2 seems too short
+//        val swordSizeLessThanGrid = 6
+        val swordSizeLessThanGrid = 4
         val nearSize = MapConstants.oneGrid - swordSizeLessThanGrid
         val farSize = MapConstants.twoGrid - swordSizeLessThanGrid
         val leftAttack = Geom.Rectangle(
