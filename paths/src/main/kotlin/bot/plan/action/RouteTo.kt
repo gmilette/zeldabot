@@ -5,6 +5,7 @@ import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.*
 import bot.state.oam.swordDir
+import util.Geom
 import util.LogFile
 import util.d
 import util.w
@@ -111,15 +112,18 @@ class RouteTo(val params: Param = Param()) {
             attack
         }
 
+        val leftCorner = state.link.leftOneGrid.upLeftOneGridALittleLess
+        val nearLink = Geom.Rectangle(leftCorner, state.link.downOneGrid.rightOneGrid)
+        val projectileNear = state.projectiles.any { it.point.toRect().intersect(nearLink) }
         val inRangeOf by lazy { AttackActionDecider.inRangeOf(state) }
         val shouldLongAttack by lazy { AttackLongActionDecider.shouldShootSword(state) }
         return when {
-            attack.isAttacking() -> {
+            !projectileNear && attack.isAttacking() -> {
                 d { " Route Action -> Keep Attacking" }
                 theAttack.nextStep(state)
             }
 
-            attackPossible && canAttack && shouldLongAttack -> {
+            !projectileNear && attackPossible && canAttack && shouldLongAttack -> {
                 d { " Route Action -> LongAttack" }
                 theAttack.nextStep(state)
             }

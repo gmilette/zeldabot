@@ -188,6 +188,18 @@ data class SpriteData(
 ) {
     val tilePair = tile to attribute
 
+    val hiddenOrLink: Boolean = point.y >= 248 || attribute == 32 ||
+            EnemyGroup.ignorePairs.contains(tilePair)
+            //|| point.y < 60  dont need that because the y coordinate is adjusted
+            //|| projectiles.contains(tile) //|| loot.contains(tile) // should be separate
+            || ( (tile == 248 || tile == 250) && point.y == 187) // spinny guy
+            // tile 52 is a bomb
+            || ( (tile == 52) && point.y == 187) // could be just any 187 point should be considered dead
+            || ( (tile == 142 || tile == 144) && point.y == 187)
+            || ( (tile == 164) && point.y == 187)
+            || point.y >= 187 // this keeps coming up, make sense ,because we translated it 61
+            || point.y < 0
+
     // keep
     // Debug: (Kermit) 49: SpriteData(index=49, point=(177, 128), tile=160, attribute=2) None
     val hidden: Boolean = point.y >= 248 || attribute == 32 || EnemyGroup.ignore.contains(tile) ||

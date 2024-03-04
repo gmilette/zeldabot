@@ -9,7 +9,7 @@ import util.d
 object LinkDirectionFinder {
     val damagedAttribute = setOf(41, 42, 43)
 
-    private val down = setOf(0x16, 0x14, 0x5A, 0x08, 0x5A, 0x58, 0x0A, 0x60) //5A, attribute 00 is down. 60, attribute 00, 08 attribute 40
+    private val down = setOf(0x16, 0x14, 0x5A, 0x5A, 0x08, 0x58, 0x0A, 0x60) //5A, attribute 00 is down. 60, attribute 00, 08 attribute 40
     private val up = setOf(0x0C, 0x0E, 0x18, 0x1A) //43 was hit (dark color), //41 was hit light color
     //42 is hit
     private val right = setOf((0x02).toInt(), (0x00).toInt(), (0x06).toInt(), (0x04).toInt()) // attribute 00, could be 02 with attrib 00
@@ -19,14 +19,24 @@ object LinkDirectionFinder {
     private val upInt = up.map { it.toInt() }
     private val rightInt = right.map { it.toInt() }
     private val leftInt = left.map { it.toInt() }
+    private val all = downInt + upInt + rightInt + leftInt
+
+    fun isLink(tile: Int) = tile in all
 
     data class DirectionDamage(val direction: Direction, val damaged: Boolean)
 
     fun direction(sprites: List<SpriteData>): DirectionDamage {
-        val linkMatch = sprites.firstOrNull { it.toDir() != Direction.None }
+//        val linkMatch = sprites.firstOrNull { it.toDir() != Direction.None && !it.hidden }
+        val linkMatch = sprites.firstOrNull { !it.hiddenOrLink && isLink(it.tile) }
         val dir = linkMatch?.toDir()
         val isDamaged = damagedAttribute.contains(linkMatch?.attribute)
         d { "link match $linkMatch $dir damaged $isDamaged"}
+        for (sprite in sprites.filter { isLink(it.tile) }) {
+            d { "sprite LINK was $sprite hidden=${sprite.hidden} hidden=${sprite.hiddenOrLink}" }
+        }
+        for (sprite in sprites) {
+            d { "sprite was $sprite" }
+        }
 //        if (linkMatch == null) {
 //            d { " sprites link!" }
 //            sprites.forEachIndexed { index, sprite ->
@@ -44,7 +54,8 @@ object LinkDirectionFinder {
             upInt.contains(tile) -> Direction.Up
             leftInt.contains(tile) ||
                     rightInt.contains(tile) -> {
-                if (attribute == 40 || attribute == 64 || attribute == 43) Direction.Left else Direction.Right
+                        // no 40?? attribute == 40 ||
+                if (attribute == 64 || attribute == 43) Direction.Left else Direction.Right
             }
             else -> Direction.None
 //                .also {
