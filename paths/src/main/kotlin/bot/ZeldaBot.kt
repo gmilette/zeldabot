@@ -10,6 +10,7 @@ import bot.state.map.Direction
 import bot.state.map.Hyrule
 import bot.state.map.MapCell
 import bot.state.map.MapConstants
+import bot.state.map.destination.ZeldaItem
 import bot.state.oam.rhinoHeadHeadWithMouthClosed
 import bot.state.oam.rhinoHeadHeadWithMouthOpen
 import nintaco.api.API
@@ -254,7 +255,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             }
             refillIfOut()
 //            stateManipulator.setSword(ZeldaItem.WoodenSword)
-//            stateManipulator.setRing(ZeldaItem.BlueRing)
+            stateManipulator.setRing(ZeldaItem.RedRing)
             if (setEquipmentCt > 0 && addEquipment) {
                 d { " Set equip" }
 //            frameStateUpdater.setSword(ZeldaItem.MagicSword)
@@ -438,7 +439,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 //                            if (should) Colors.DARK_GREEN else Colors.LIGHT_BLUE
 
 //                        v > 100000 -> Colors.MAGENTA
-//                        v > 9000 && (y % 16 % 2 == 0) -> Colors.RED
+                        v > 9000 && (y % 16 % 2 == 0) -> Colors.RED
                         else -> -1
                     }
                     if (color != -1) {

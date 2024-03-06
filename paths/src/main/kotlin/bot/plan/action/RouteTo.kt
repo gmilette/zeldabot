@@ -87,6 +87,12 @@ class RouteTo(val params: Param = Param()) {
          * otherwise route until reach the desired point
          */
         val finishWithinStrikingRange: Boolean = false,
+        /**
+         * good for the kill all scenario where everything must die
+         * if link is just moving around though this will cause
+         * too much distraction. Need a long range B weapon or full hearts available
+         */
+        val finishWithinLongStrikingRange: Boolean = false
     )
 
     private val routeToFile: LogFile = LogFile("RouteTo")

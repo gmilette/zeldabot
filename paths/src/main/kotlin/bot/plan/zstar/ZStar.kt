@@ -1,6 +1,7 @@
 package bot.plan.zstar
 
 import bot.plan.action.AttackActionDecider
+import bot.plan.action.AttackLongActionDecider
 import bot.plan.action.RouteTo
 import bot.plan.action.isInGrid
 import bot.state.*
@@ -121,6 +122,9 @@ class ZStar(
         return sum
     }
 
+    private fun Map2d<Int>.safe(point: FramePoint): Boolean =
+        get(point) < 1000
+
     fun route(
         param: ZRouteParam
     ): List<FramePoint> {
@@ -178,7 +182,12 @@ class ZStar(
             // enemy target is always null currently, this is going to route to nearest
             // which is what we want anyway I think
             val done = if (param.rParam.finishWithinStrikingRange) {
+                val inLongRange = param.rParam.finishWithinLongStrikingRange &&
+                        // hard to do without direction..
+                        AttackLongActionDecider.inStrikingRange(point, enemies = param.enemies)
                 AttackActionDecider.inStrikingRange(point, enemies = param.enemies)
+            } else if (false && costsF.safe(point)) {
+                true
             } else {
                 target.contains(point)
             }
@@ -187,6 +196,7 @@ class ZStar(
                     d { " explore found: $point" }
                 }
                 closedList.add(point)
+                break
             }
 
             closedList.add(point)
@@ -206,6 +216,7 @@ class ZStar(
                 d { "from prev=$previousPoint to $point ${if (point.onHighway) "*" else ""} dir $dir" }
             }
 
+            neighborFinder.costF = costsF
             val neighbors =
                 (neighborFinder.neighbors(point, dir, dist ?: 0, param.rParam.ladderSpec) - closedList - avoid).shuffled()
             for (toPoint in neighbors) {
@@ -454,10 +465,11 @@ class ZStar(
             // try it
             costsF.modify(
                 from,
-//                point.upHalfLeftOneGrid,
                 point.upLeftHalfOneGrid,
                 sizeWide = MapConstants.twoGrid,
                 sizeTall = MapConstants.oneGridPoint5
+//                sizeWide = MapConstants.threeGrid,
+//                sizeTall = MapConstants.twoGridPoint5
             ) { _, current ->
                 current + nearEnemyCost
             }
@@ -484,7 +496,11 @@ class ZStar(
 
             d { " set enemy cost for intersecting" }
             costsF.mapXyCurrent { x, y, current ->
-                val pt = FramePoint(x,y).toRect()
+                val pt = FramePoint(x,y).toRect() //Plus(MapConstants.oneGrid)
+
+//                val cost = enemyRect.sumOf { 1 / it.distTo(pt) } * nearEnemyCost
+//                (current + cost).toInt()
+
                 if (enemyRect.any { pt.intersect(it) }) {
                     current + nearEnemyCost
                 } else {

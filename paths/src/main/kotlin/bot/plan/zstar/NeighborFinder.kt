@@ -23,6 +23,7 @@ class NeighborFinder(
      */
     private val isLevel: Boolean = false
 ) {
+    var costF: Map2d<Int> = Map2d(mutableListOf())
 
     private val horizontal: List<Direction> = Direction.horizontal
     private val vertical: List<Direction> = Direction.vertical
@@ -309,7 +310,7 @@ class NeighborFinder(
         return when {
             // if the point
             !halfPassable || (point.x > 208 && isLevel) -> {
-                blockPassable(point)
+                blockPassable(point) // && blockSafe(point)
             }
             // check point end end
             // was <= 32
@@ -324,7 +325,7 @@ class NeighborFinder(
                 if (passable.empty) {
                     d { " Passable empty "}
                 }
-                blockPassableHalf(point)
+                blockPassableHalf(point) // && blockSafeHalf(point)
 //                return try {
 //                blockPassableHalf(point)
 //                } catch(e: Exception) {
@@ -344,6 +345,14 @@ class NeighborFinder(
                 && passable.get(point.justLeftBottom)
     }
 
+    private fun blockSafe(point: FramePoint): Boolean {
+        return costF.safe(point) && costF.safe(point.justRightEndBottom)
+                && costF.safe(point.justRightEnd)
+                && costF.safe(point.justLeftBottom)
+    }
+
+    fun Map2d<Int>.safe(point: FramePoint): Boolean =
+        get(point) < 100
     /**
      * test at mid
      */
@@ -352,6 +361,13 @@ class NeighborFinder(
                 && passable.get(point.justMidEnd)
                 && passable.get(point.justRightEndBottom)
                 && passable.get(point.justLeftBottom)
+    }
+
+    private fun blockSafeHalf(point: FramePoint): Boolean {
+        return costF.safe(point.justMid)
+                && costF.safe(point.justMidEnd)
+                && costF.safe(point.justRightEndBottom)
+                && costF.safe(point.justLeftBottom)
     }
 
     private fun FramePoint.within() =

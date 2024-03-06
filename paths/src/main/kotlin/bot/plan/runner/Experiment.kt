@@ -2,6 +2,8 @@ package bot.plan.runner
 
 import bot.plan.Phases
 import bot.plan.action.Action
+import bot.plan.action.KillAll
+import bot.plan.action.dodge
 import bot.state.map.destination.ZeldaItem
 
 class Experiments(masterPlan: MasterPlan) {
@@ -19,6 +21,7 @@ class Experiments(masterPlan: MasterPlan) {
     init {
         experiments = listOf(
             Experiment("all", "start_nothing.save", masterPlan, sword = ZeldaItem.MagicSword, addEquipment = false),
+            Experiment("level2dodge", "level2_boom_dead.save", masterPlanWith(dodge), sword = ZeldaItem.MagicSword, addEquipment = true),
             Experiment("level6start", "level6_start.save", masterPlan.getPlanAfter(Phases.level6), sword = ZeldaItem.MagicSword, addEquipment = true),
 //            Experiment("level6end", "level6_done.save", masterPlan.getPlanAfter(Phases.afterLevel6), sword = ZeldaItem.MagicSword, addEquipment = true),
 //            Experiment("level2rhino", "lev2_14_boss.save", masterPlan.getPlanPhase("Destroy level 2", Phases.Segment.lev2Boss), sword = ZeldaItem.WoodenSword, addEquipment = true),

@@ -100,6 +100,16 @@ class HeartsStateCalculator(private val inventory: Inventory) {
         return lifeTotalDecimal
     }
 
+    fun full(): Boolean {
+        val containers = heartContainers()
+        val full = heartContainersFull()
+        val damage = damageDecimal()
+        // if you have the red ring, it will be 0.875
+        return (containers == full && damage <= 0.5).also {
+            d { " full cont $containers full $full damage $damage full $it"}
+        }
+    }
+
     // empty: FD, 7E, FC (yes it is indeed full), FB, FA, F9, F4(2 full hearts), F3(1 heart)
     // half: 7D, 7C, 7B, 7A, 79, 74 (1.5 hearts), 73, only 0.5 hearts
     //C8, C7, C6(6 full hearts), C1(2 full hearts), c0 (1 heart full or 0.5)

@@ -2,6 +2,7 @@ package bot.plan.action
 
 import bot.state.*
 import bot.state.map.Direction
+import bot.state.map.MapConstants
 import bot.state.map.pointModifier
 import org.jheaps.annotations.VisibleForTesting
 import util.Geom
@@ -12,7 +13,8 @@ object AttackLongActionDecider {
 
     fun shouldShootSword(state: MapLocationState): Boolean {
         val swordIsFlying = false
-        val canShoot = true //state.frameState HeartCalculator.isFull()
+        val full = state.frameState.inventory.heartCalc.full()
+        val canShoot = full //state.frameState HeartCalculator.isFull()
         // draw ray from attack point. Does it hi
         return (canShoot && !swordIsFlying && targetInLongRange(state))
     }
@@ -102,6 +104,10 @@ object AttackLongActionDecider {
     fun shouldActivateBoomerang(state: MapLocationState) {
         // there are enemies or loot that are affected by boomerang
         // have the boomerang
+    }
+
+    fun inStrikingRange(point: FramePoint, enemies: List<FramePoint>): Boolean {
+        return false
     }
 
     private val MapLocationState.boomerangeActive: Boolean
