@@ -20,6 +20,7 @@ data class MapStatsData(
 }
 
 class MapStatsTracker {
+    private val DEBUG = false
     private var mapCoordinates: MapCoordinates = MapCoordinates(0, 0)
 
     // the memory
@@ -43,10 +44,14 @@ class MapStatsTracker {
 //        d { "is damaged: ${enemy.tile} ${enemy.attribute} ${count}" }
         return attrib.damaged(attribute).also {
             if (it) {
-                d { "check damage DAMAGED Attrib=${attribute}" }
+                if (DEBUG) {
+                    d { "check damage DAMAGED Attrib=${attribute}" }
+                }
                 d { attrib.tileString(tile) }
             } else {
-                d { "check damage NOT DAMAGED" }
+                if (DEBUG) {
+                    d { "check damage NOT DAMAGED" }
+                }
                 d { attrib.tileString(tile) }
             }
         }
@@ -69,9 +74,11 @@ class MapStatsTracker {
 
     private fun reset(mapCoordinates: MapCoordinates) {
         val mapStatsData = MapStatsData(mapCoordinates, tileAttribCount)
-        d { "**Map stats**" }
-        d { mapStatsData.toString() }
-        writeJson(mapCoordinates)
+        if (DEBUG) {
+            d { "**Map stats**" }
+            d { mapStatsData.toString() }
+            writeJson(mapCoordinates)
+        }
         tileAttribCount.clear()
         this.mapCoordinates = mapCoordinates
         // read json for this map coordinates

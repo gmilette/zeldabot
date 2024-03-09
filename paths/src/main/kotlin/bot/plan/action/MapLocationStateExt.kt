@@ -26,6 +26,9 @@ val MapLocationState.hasEnemies: Boolean
 val MapLocationState.hasEnemiesOrLoot: Boolean
     get() = frameState.enemies.any { it.state == EnemyState.Loot || it.state == EnemyState.Alive }
 
+val MapLocationState.hasEnemiesOrLootOrProjectiles: Boolean
+    get() = frameState.enemies.any { it.state == EnemyState.Loot || it.state == EnemyState.Alive || it.state == EnemyState.Projectile }
+
 val MapLocationState.numEnemies: Int
     get() = frameState.enemies.count { it.state == EnemyState.Alive }
 

@@ -439,7 +439,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 //                            if (should) Colors.DARK_GREEN else Colors.LIGHT_BLUE
 
 //                        v > 100000 -> Colors.MAGENTA
-                        v > 9000 && (y % 16 % 2 == 0) -> Colors.RED
+//                        v > 9000 && (y % 16 % 2 == 0) -> Colors.RED
                         else -> -1
                     }
                     if (color != -1) {

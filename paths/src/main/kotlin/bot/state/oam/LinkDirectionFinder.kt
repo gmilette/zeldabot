@@ -30,13 +30,13 @@ object LinkDirectionFinder {
         val linkMatch = sprites.firstOrNull { !it.hiddenOrLink && isLink(it.tile) }
         val dir = linkMatch?.toDir()
         val isDamaged = damagedAttribute.contains(linkMatch?.attribute)
-        d { "link match $linkMatch $dir damaged $isDamaged"}
-        for (sprite in sprites.filter { isLink(it.tile) }) {
-            d { "sprite LINK was $sprite hidden=${sprite.hidden} hidden=${sprite.hiddenOrLink}" }
-        }
-        for (sprite in sprites) {
-            d { "sprite was $sprite" }
-        }
+//        d { "link match $linkMatch $dir damaged $isDamaged"}
+//        for (sprite in sprites.filter { isLink(it.tile) }) {
+//            d { "sprite LINK was $sprite hidden=${sprite.hidden} hidden=${sprite.hiddenOrLink}" }
+//        }
+//        for (sprite in sprites) {
+//            d { "sprite was $sprite" }
+//        }
 //        if (linkMatch == null) {
 //            d { " sprites link!" }
 //            sprites.forEachIndexed { index, sprite ->

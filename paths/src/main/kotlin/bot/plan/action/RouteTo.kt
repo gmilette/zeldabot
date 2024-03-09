@@ -123,17 +123,19 @@ class RouteTo(val params: Param = Param()) {
         val projectileNear = state.projectiles.any { it.point.toRect().intersect(nearLink) }
         val inRangeOf by lazy { AttackActionDecider.inRangeOf(state) }
         val shouldLongAttack by lazy { AttackLongActionDecider.shouldShootSword(state) }
+        val allowAttack = true
         return when {
-            !projectileNear && attack.isAttacking() -> {
+            allowAttack && !projectileNear && attack.isAttacking() -> {
                 d { " Route Action -> Keep Attacking" }
                 theAttack.nextStep(state)
             }
 
-            !projectileNear && attackPossible && canAttack && shouldLongAttack -> {
+            allowAttack && !projectileNear && attackPossible && canAttack && shouldLongAttack -> {
                 d { " Route Action -> LongAttack" }
                 theAttack.nextStep(state)
             }
 
+            !allowAttack ||
             !attackPossible ||
             !canAttack ||
                     (state.frameState.clockActivated && Random.nextInt(10) == 1) ||
@@ -199,7 +201,7 @@ class RouteTo(val params: Param = Param()) {
         // getting me suck: && params.planCountMax != 1000
         // there are no enemies so it just keeps forcing replanning
         // make a new boolean force new ONCE
-        if (!state.hasEnemiesOrLoot && params.planCountMax != 1000) {
+        if (!state.hasEnemiesOrLootOrProjectiles && params.planCountMax != 1000) {
             d { " NO alive enemies, no need to replan just go plan count max: ${params.planCountMax}" }
             // make a plan now though
             forceNew = false // wny is this true?? no enemies!
@@ -342,7 +344,10 @@ class RouteTo(val params: Param = Param()) {
         route?.next15()
         nextPoint1 = route?.popOrEmpty() ?: FramePoint() // skip first point because it is the current location
         nextPoint1 = route?.popOrEmpty() ?: FramePoint()
-        d { " next is $nextPoint1" }
+        if (nextPoint1.isZero) {
+            d { "NO ROUTE"}
+        }
+        d { " next is $nextPoint1 of ${route?.numPoints ?: 0}" }
         route?.next5()
         planCount = 0
         return nextPoint1

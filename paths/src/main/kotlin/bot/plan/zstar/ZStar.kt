@@ -189,7 +189,7 @@ class ZStar(
             } else if (false && costsF.safe(point)) {
                 true
             } else {
-                target.contains(point)
+                target.contains(point) && costsF.safe(point)
             }
             if (done) {
                 if (DEBUG) {
