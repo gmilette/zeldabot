@@ -34,8 +34,6 @@ class MapLocationState(
     // true/false: can move horizontal / vertical
     var ladderStateHorizontal: Boolean? = null,
 
-    var previousEnemyLocations: PrevBuffer<List<Agent>> = PrevBuffer(size = 5),
-
     // the last known framestate
     var frameState: FrameState = FrameState(ApiSource.getAPI(),
         emptyList(),
@@ -63,7 +61,6 @@ class MapLocationState(
 
     fun clearHistory() {
         framesOnScreen = 0
-        previousEnemyLocations.clear()
     }
 
     fun toStringEnemy(): String {

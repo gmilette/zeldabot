@@ -21,6 +21,7 @@ class Experiments(masterPlan: MasterPlan) {
     init {
         experiments = listOf(
             Experiment("all", "start_nothing.save", masterPlan, sword = ZeldaItem.MagicSword, addEquipment = false),
+            Experiment("overworlddodge", "overworlddodge.save", masterPlanWith(dodge), sword = ZeldaItem.MagicSword, addEquipment = true),
             Experiment("level2dodge", "level2_boom_dead.save", masterPlanWith(dodge), sword = ZeldaItem.MagicSword, addEquipment = true),
             Experiment("level1dodge", "level1_skele.save", masterPlanWith(dodge), sword = ZeldaItem.MagicSword, addEquipment = true),
             Experiment("level6start", "level6_start.save", masterPlan.getPlanAfter(Phases.level6), sword = ZeldaItem.MagicSword, addEquipment = true),
@@ -34,10 +35,11 @@ class Experiments(masterPlan: MasterPlan) {
 //            Experiment("level1Ladder", "lev1_ladder.save", masterPlan.getPlanPhase("Destroy level 1", "grab key from zig"), addEquipment = false),
 //            Experiment("level1L", "lev1_start.save", masterPlan.getPlanPhase("Destroy level 1", null), addEquipment = false),
             Experiment("level1", "level1_start_no_ladder.save", masterPlan.getPlanPhase("Destroy level 1", null), addEquipment = false),
-//            Experiment("level1drag", "lev1_dragon.save", masterPlan.getPlanPhase("Destroy level 1", "destroy dragon")),
+            Experiment("level1drag", "lev1_dragon.save", masterPlan.getPlanAfter("Destroy level 1", "destroy dragon")),
 //            Experiment("afterLev4", "level4_beat.save", masterPlan.getPlanAfter(Phases.grabHearts), addEquipment = true),
 //            Experiment("afterForest30", "forest_30.save", masterPlan.getPlanPhase(Phases.forest30, null)),
             Experiment("level7", "level7_strart.save", masterPlan.getPlanAfter(Phases.level7), sword = ZeldaItem.MagicSword, addEquipment = true),
+            Experiment("go to level 9", "mapstate_0_5.save", masterPlan, sword = ZeldaItem.MagicSword, addEquipment = true),
             Experiment("go to level 9", "mapstate_0_5.save", masterPlan, sword = ZeldaItem.MagicSword, addEquipment = true),
             Experiment("level3", "level3.save", masterPlan.getPlanAfter(Phases.level3), sword = ZeldaItem.MagicSword, addEquipment = true),
 //            Experiment("level3After", "level3After.save", masterPlan.getPlanAfter(Phases.level3After)),

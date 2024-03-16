@@ -88,12 +88,6 @@ class FrameStateUpdater(
         val seenBoomerang = mapStats.seenBoomerang
         val frame = FrameState(api, theEnemies, theUncombined, level, mapLoc, link, ladder, seenBoomerang)
 
-        val enemyCopies = mutableListOf<Agent>()
-        for (agent: Agent in theEnemies) {
-            enemyCopies.add(agent.copy())
-        }
-        state.previousEnemyLocations.add(enemyCopies)
-
         state.framesOnScreen++
         state.frameState = frame
     }

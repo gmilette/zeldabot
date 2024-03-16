@@ -1,5 +1,6 @@
 package bot.state.map.stats
 
+import bot.plan.action.PrevBuffer
 import bot.state.Agent
 import bot.state.FramePoint
 import bot.state.MapCoordinates
@@ -26,6 +27,8 @@ class MapStatsTracker {
 
     // the memory
     private val tileAttribCount = mutableMapOf<Int, AttributeCount>()
+    var previousEnemyLocations: PrevBuffer<List<Agent>> = PrevBuffer(size = 15)
+
     val seenBoomerang: Boolean
         get() = boomerangs.any { tileAttribCount.contains(it) }
 
@@ -60,11 +63,19 @@ class MapStatsTracker {
         }
     }
 
-    // enemies?
+    private fun savePrevious(enemies: List<Agent>) {
+        val enemyCopies = mutableListOf<Agent>()
+        for (agent: Agent in enemies) {
+            enemyCopies.add(agent.copy())
+        }
+        previousEnemyLocations.add(enemyCopies)
+    }
+
     fun track(mapCoordinates: MapCoordinates, enemies: List<Agent>) {
         if (mapCoordinates != this.mapCoordinates) {
             reset(mapCoordinates)
         }
+        savePrevious(enemies)
         for (entry in enemies.groupBy { it.tile }) {
             tileAttribCount.getOrDefault(entry.key, AttributeCount()).apply {
                 for (agent in entry.value) {
@@ -82,6 +93,7 @@ class MapStatsTracker {
             d { mapStatsData.toString() }
             writeJson(mapCoordinates)
         }
+        previousEnemyLocations.clear()
         tileAttribCount.clear()
         this.mapCoordinates = mapCoordinates
         // read json for this map coordinates
