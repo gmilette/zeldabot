@@ -85,7 +85,8 @@ class FrameStateUpdater(
 
         val mapCoordinates = MapCoordinates(level, mapLoc)
         mapStats.track(mapCoordinates, theEnemies)
-        val frame = FrameState(api, theEnemies, theUncombined, level, mapLoc, link, ladder)
+        val seenBoomerang = mapStats.seenBoomerang
+        val frame = FrameState(api, theEnemies, theUncombined, level, mapLoc, link, ladder, seenBoomerang)
 
         val enemyCopies = mutableListOf<Agent>()
         for (agent: Agent in theEnemies) {

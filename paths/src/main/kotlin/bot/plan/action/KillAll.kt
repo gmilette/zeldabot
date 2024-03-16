@@ -94,9 +94,15 @@ class KillAll(
 
     override fun nextStep(state: MapLocationState): GamePad {
         val numEnemiesInCenter = state.numEnemiesAliveInCenter()
-        // once set to true, do not change it back
-        if (!needLongWait && !considerEnemiesInCenter) {
-            needLongWait = state.longWait.isNotEmpty()
+        // dont have to wait on any levels that have boomerangs
+        // which gets confused with ghosts
+        if (state.frameState.seenBoomerang) {
+            needLongWait = false
+        } else {
+            // once set to true, do not change it back
+            if (!needLongWait && !considerEnemiesInCenter) {
+                needLongWait = state.longWait.isNotEmpty()
+            }
         }
 //        needLongWait = false
         d { " KILL ALL step ${state.currentMapCell.mapLoc} count $frameCount wait $waitAfterAllKilled center: $numEnemiesInCenter needLong $needLongWait" }

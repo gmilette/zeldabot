@@ -43,7 +43,8 @@ class MapLocationState(
         0,
         0,
         emptyAgent,
-        emptyAgent
+        emptyAgent,
+        false
     ),
 
     var framesOnScreen: Int = 0,

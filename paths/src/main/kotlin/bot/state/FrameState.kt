@@ -15,6 +15,7 @@ class FrameState(
     val mapLoc: MapLoc,
     val link: Agent,
     val ladder: Agent?,
+    val seenBoomerang: Boolean,
     val inventory: Inventory = Inventory(api)
 ) {
     val numBombs: Int = inventory.numBombs

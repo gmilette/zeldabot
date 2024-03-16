@@ -13,6 +13,12 @@ object EnemyGroup {
 //        254, 248 // the circle monster because I dont know why im stuck here
     )
 
+    val boomerangs = setOf(
+        brownBoomerang, // but it is also an item to be gotten, not avoided, oy!
+        brownBoomerangSpin,
+        brownBoomerangSpinBendFacingUp,
+    )
+
     val ignore = setOf(
         18, 16, // link shield shite
         12, 14, // facing up link

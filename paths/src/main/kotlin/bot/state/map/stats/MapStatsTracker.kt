@@ -3,6 +3,7 @@ package bot.state.map.stats
 import bot.state.Agent
 import bot.state.FramePoint
 import bot.state.MapCoordinates
+import bot.state.oam.EnemyGroup.boomerangs
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import util.d
@@ -25,6 +26,8 @@ class MapStatsTracker {
 
     // the memory
     private val tileAttribCount = mutableMapOf<Int, AttributeCount>()
+    val seenBoomerang: Boolean
+        get() = boomerangs.any { tileAttribCount.contains(it) }
 
     fun isDamaged(enemy: Agent): Boolean = isDamaged(enemy.tile, enemy.attribute)
 
