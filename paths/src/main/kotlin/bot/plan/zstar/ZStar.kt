@@ -141,7 +141,27 @@ class ZStar(
         val closedList = mutableSetOf<FramePoint>()
         val cameFrom = mutableMapOf<FramePoint, FramePoint>()
 
-        val target = targets.toList()
+        // really what I want is it to just seek ANY safe point
+        var routeToSafe = false
+
+        val startIsSafe = costsF.safe(param.start)
+
+        // can result in NO_ROUTE, if already at target, or if already safe without routing anywhere
+        val target = targets.toList().filter { costsF.safe(it) }.ifEmpty {
+            routeToSafe = !startIsSafe
+            if (routeToSafe) {
+                d { " route to safe " }
+            } else {
+                d { " route to extra points " }
+            }
+            targets.flatMap { listOf(it.leftOneGrid, it.upOneGrid, it.downOneGrid, it.rightOneGrid,
+                it.leftTwoGrid, it.upTwoGrid, it.downTwoGrid, it.rightTwoGrid ) }.filter { costsF.safe(it) }
+        }.filter { costsF.safe(it) }
+            // if all else fails just go with the original list
+            .ifEmpty { targets.toList() }
+
+        // stil getting NO ROUTE
+        d { "From safe: $startIsSafe cost = ${costsF.get(param.start)} targets size = ${target.size}"}
 
         val openList: PriorityQueue<FramePoint> = PriorityQueue<FramePoint> { cell1, cell2 ->
             val cell1Val = (totalCosts[cell1] ?: 0) + (distanceToGoal[cell1] ?: 0)
@@ -186,10 +206,10 @@ class ZStar(
                         // hard to do without direction..
                         AttackLongActionDecider.inStrikingRange(point, enemies = param.enemies)
                 AttackActionDecider.inStrikingRange(point, enemies = param.enemies)
-            } else if (false && costsF.safe(point)) {
+            } else if (routeToSafe && costsF.safe(point)) {
                 true
             } else {
-                target.contains(point) && costsF.safe(point)
+                target.contains(point) // && costsF.safe(point)
             }
             if (done) {
                 if (DEBUG) {
@@ -228,7 +248,10 @@ class ZStar(
                 // route to get to this point including parent
                 val pathCost = cost + parentCost
 
-                val costToGoal = toPoint.minDistToAny(target)
+                // min distance to link
+                val minDistToLong = toPoint.distTo(param.start)
+                val minDistToTarget = toPoint.minDistToAny(target)
+                val costToGoal = if (routeToSafe) minDistToLong else minDistToTarget
                 val totalCost = costToGoal + pathCost
 
                 if (DEBUG) {
@@ -239,7 +262,9 @@ class ZStar(
                 }
                 val costS = costFromStart.getOrDefault(toPoint, Int.MAX_VALUE)
 //                d {" cost: $cost $costS"}
-                if (cost < costS && cost < maximumCost) {
+                //  cost < maximumCost failed attempt to discourage
+                // link from walking into enemies
+                if (cost < costS) { // && cost < maximumCost) {
                     // todo: prefer short path, so weight path length vs. distance to
 //                    pathSizeToGoal[toPoint] = pathSize(cameFrom, toPoint)
                     if (pointClosestToGoal.isZero ||
@@ -276,7 +301,14 @@ class ZStar(
         }
         // todo: actually should pick the best path so far..
         // if there is no goal, then use the closest point to the goal
-        return generatePath(target, cameFrom, pointClosestToGoal)
+        return generatePath(target, cameFrom, pointClosestToGoal).also {
+            if (it.isEmpty() || it.size == 1) {
+                if (DEBUG) {
+                    d { " ****** EMPTY ****** " }
+                }
+//                writePassable(param.start)
+            }
+        }
     }
 
     private fun getQuadCost(point: FramePoint): Int =
@@ -412,6 +444,16 @@ class ZStar(
         }
     }
 
+    private fun writePassable(start: FramePoint) {
+        passable.write("passable.csv") { v, x, y ->
+            when {
+                x == start.x && y == start.y -> "L"
+                v -> "."
+                else -> "X"
+            }
+        }
+    }
+
     inner class GridCustomizer {
         fun customize(param: ZRouteParam) {
             val startSum = sum()
@@ -492,10 +534,12 @@ class ZStar(
 
         private fun setEnemyCostsByIntersect(enemies: List<FramePoint> = emptyList()) {
             reset()
+//            val enemyRect = enemies.map { it.toRectPlus(MapConstants.halfGrid) }
             val enemyRect = enemies.map { it.toRect() }
 
             d { " set enemy cost for intersecting" }
             costsF.mapXyCurrent { x, y, current ->
+//                val pt = FramePoint(x,y).toRectPlus(MapConstants.halfGrid)
                 val pt = FramePoint(x,y).toRect() //Plus(MapConstants.oneGrid)
 
 //                val cost = enemyRect.sumOf { 1 / it.distTo(pt) } * nearEnemyCost

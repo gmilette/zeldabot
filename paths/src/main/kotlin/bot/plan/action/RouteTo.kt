@@ -110,7 +110,7 @@ class RouteTo(val params: Param = Param()) {
         param: RouteParam = RouteParam(),
     ): GamePad {
         val canAttack = param.useB || state.frameState.canUseSword
-        val attackPossible by lazy { params.whatToAvoid != WhatToAvoid.None}
+        val attackPossible by lazy { params.whatToAvoid != WhatToAvoid.None }
         d { " route To attackOrRoute attack=$attackPossible can=$canAttack" }
         val theAttack = if (param.useB) {
             attackB
@@ -136,8 +136,8 @@ class RouteTo(val params: Param = Param()) {
             }
 
             !allowAttack ||
-            !attackPossible ||
-            !canAttack ||
+                    !attackPossible ||
+                    !canAttack ||
                     (state.frameState.clockActivated && Random.nextInt(10) == 1) ||
                     AttackActionDecider.getInFrontOfGrids(state) ||
                     inRangeOf == GamePad.None -> {
@@ -182,7 +182,7 @@ class RouteTo(val params: Param = Param()) {
     ): GamePad {
         d { " DO routeTo TO ${to.size} points first ${to.firstOrNull()} currently at ${state.currentMapCell.mapLoc}" }
         val param = paramIn.copy(rParam = paramIn.rParam.copy(attackTarget = null))
-        var forceNew = param.forceNew
+        var forceNew = true || param.forceNew
         if (to.isEmpty()) {
             w { " no where to go " }
             return NavUtil.randomDir(state.link)
@@ -282,14 +282,14 @@ class RouteTo(val params: Param = Param()) {
         planCount++
         d { " go to from $linkPt to next $nextPoint $to" }
 
-        return if (nextPoint.isZero && linkPt.x == 0) {
-            GamePad.MoveLeft
-        } else if (nextPoint.isZero && linkPt.y == 0) {
-            GamePad.MoveUp
-        } else {
-            nextPoint.direction?.toGamePad() ?: linkPt.directionTo(nextPoint)
+        return when {
+            nextPoint.isZero && linkPt.x == 0 -> GamePad.MoveLeft
+            nextPoint.isZero && linkPt.y == 0 -> GamePad.MoveUp
+            // already in a good spot
+            nextPoint.isZero -> GamePad.None
+            else -> nextPoint.direction?.toGamePad() ?: linkPt.directionTo(nextPoint)
         }.also {
-//        writeFile(to, state, it)
+            //        writeFile(to, state, it)
             d { " next point $nextPoint dir: $it ${if (nextPoint.direction != null) "HAS DIR ${nextPoint.direction}" else ""}" }
         }
     }
@@ -345,7 +345,7 @@ class RouteTo(val params: Param = Param()) {
         nextPoint1 = route?.popOrEmpty() ?: FramePoint() // skip first point because it is the current location
         nextPoint1 = route?.popOrEmpty() ?: FramePoint()
         if (nextPoint1.isZero) {
-            d { "NO ROUTE"}
+            d { "NO ROUTE" }
         }
         d { " next is $nextPoint1 of ${route?.numPoints ?: 0}" }
         route?.next5()

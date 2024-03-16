@@ -80,9 +80,18 @@ class FrameStateUpdater(
         // reset to prevent infinite memory being allocated
         previousNow.previous = null
 
+        // TODO: analyze direction
+        // agents must be the same type (projectile or not) maybe same tile
+
         val mapCoordinates = MapCoordinates(level, mapLoc)
         mapStats.track(mapCoordinates, theEnemies)
         val frame = FrameState(api, theEnemies, theUncombined, level, mapLoc, link, ladder)
+
+        val enemyCopies = mutableListOf<Agent>()
+        for (agent: Agent in theEnemies) {
+            enemyCopies.add(agent.copy())
+        }
+        state.previousEnemyLocations.add(enemyCopies)
 
         state.framesOnScreen++
         state.frameState = frame

@@ -3,6 +3,7 @@ package bot.state
 import bot.state.map.Direction
 import bot.state.oam.EnemyGroup
 import bot.state.oam.TileAttribute
+import util.CalculateDirection
 
 val List<Agent>.points: List<FramePoint>
     get() = this.map { it.point }
@@ -19,7 +20,8 @@ data class Agent(
     val tileByte: String = tile.toString(16),
     val attributeByte: String = attribute.toString(16),
     val damaged: Boolean = false,
-    val blockable: Blockable = Blockable.No
+    val blockable: Blockable = Blockable.No,
+    val moving: CalculateDirection.MovingDirection = CalculateDirection.MovingDirection.UNKNOWN
 ) {
     val tileAttrib = TileAttribute(tile, attribute)
 

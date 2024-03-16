@@ -128,7 +128,11 @@ class MoveBuffer(val size: Int = 2) {
 }
 
 class PrevBuffer<T>(val size: Int = 2) {
-    val buffer = mutableListOf<T>()
+    var buffer = mutableListOf<T>()
+
+    fun clear() {
+        buffer = mutableListOf()
+    }
 
     val isFull: Boolean
         get() = buffer.size == size

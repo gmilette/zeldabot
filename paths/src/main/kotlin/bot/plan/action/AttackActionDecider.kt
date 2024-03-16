@@ -289,6 +289,7 @@ object AttackActionDecider {
                 }
                 attackDir
             }?.toGamePad() ?: GamePad.None
+            d {"Attack move $attackMove" }
             attackMove
         }
     }

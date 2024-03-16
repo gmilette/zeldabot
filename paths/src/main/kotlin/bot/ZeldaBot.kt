@@ -299,6 +299,10 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     }
 
     inner class ScreenDraw {
+        private val drawAttackZone = false
+        private val drawAttackPoints = false
+        private val drawEnemyCosts = true
+
         private val rhinoHeadLeftUp = 0xFA // foot up
         private val rhinoHeadLeftUp2 = 0xFC // foot down
         private val rhinoHeadLeftDown = 0xF6 // foot up
@@ -376,38 +380,44 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 
                     // draws the right look but the colors are wrong
 //                val mapCell = this.hyrule.getMapCell(this.frameState.mapLoc)
-                    try {
-                        val mapCell = if (this.frameState.isLevel) hyrule.levelMap.cell(
-                            this.frameState.level,
-                            this.frameState.mapLoc
-                        ) else hyrule.getMapCell(this.frameState.mapLoc)
+                    if (drawEnemyCosts) {
+                        try {
+                            val mapCell = if (this.frameState.isLevel) hyrule.levelMap.cell(
+                                this.frameState.level,
+                                this.frameState.mapLoc
+                            ) else hyrule.getMapCell(this.frameState.mapLoc)
 //                        val should = AttackActionDecider.shouldAttack(this)
-                        val should = false
-                        drawCosts(frameState.link.dir, frameState.link.point, should, mapCell.zstar.costsF.copy())
-                    } catch (e: Exception) {
-                        d { "ERROR $e" }
-                    }
-
-                    for (enemy in frameState.enemies) {
-                        api.color = Colors.CYAN
-                        val pts = AttackActionDecider.attackPoints(enemy.point)
-                        for (pt in pts) {
-                            api.drawOval(pt.x, pt.y + MapConstants.yAdjust, 2, 2)
+                            val should = false
+                            drawCosts(frameState.link.dir, frameState.link.point, should, mapCell.zstar.costsF.copy())
+                        } catch (e: Exception) {
+                            d { "ERROR $e" }
                         }
                     }
 
-                    // only display if hearts are not full, which is always
-                    val swords = AttackActionDecider.swordRectangles(link)
-                    for (sword in swords) {
-                        api.color = Colors.BLACK
-                        sword.value.apply {
+                    if (drawAttackPoints) {
+                        for (enemy in frameState.enemies) {
+                            api.color = Colors.CYAN
+                            val pts = AttackActionDecider.attackPoints(enemy.point)
+                            for (pt in pts) {
+                                api.drawOval(pt.x, pt.y + MapConstants.yAdjust, 2, 2)
+                            }
+                        }
+                    }
+
+                    if (drawAttackZone) {
+                        // only display if hearts are not full, which is always
+                        val swords = AttackActionDecider.swordRectangles(link)
+                        for (sword in swords) {
+                            api.color = Colors.BLACK
+                            sword.value.apply {
+                                api.drawRect(topLeft.x, topLeft.y + MapConstants.yAdjust, width, height)
+                            }
+                        }
+                        val longAttack = AttackLongActionDecider.longRectangle(this)
+                        longAttack.apply {
+                            api.color = Colors.GRAY
                             api.drawRect(topLeft.x, topLeft.y + MapConstants.yAdjust, width, height)
                         }
-                    }
-                    val longAttack = AttackLongActionDecider.longRectangle(this)
-                    longAttack.apply {
-                        api.color = Colors.GRAY
-                        api.drawRect(topLeft.x, topLeft.y + MapConstants.yAdjust, width, height)
                     }
 
                 }
@@ -439,7 +449,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 //                            if (should) Colors.DARK_GREEN else Colors.LIGHT_BLUE
 
 //                        v > 100000 -> Colors.MAGENTA
-//                        v > 9000 && (y % 16 % 2 == 0) -> Colors.RED
+                        v > 9000 && (y % 16 % 2 == 0) -> Colors.RED
                         else -> -1
                     }
                     if (color != -1) {

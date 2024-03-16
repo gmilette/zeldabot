@@ -1,5 +1,6 @@
 package bot.state
 
+import bot.plan.action.PrevBuffer
 import bot.plan.action.PreviousMove
 import bot.state.map.Hyrule
 import bot.state.map.MapCell
@@ -33,6 +34,8 @@ class MapLocationState(
     // true/false: can move horizontal / vertical
     var ladderStateHorizontal: Boolean? = null,
 
+    var previousEnemyLocations: PrevBuffer<List<Agent>> = PrevBuffer(size = 5),
+
     // the last known framestate
     var frameState: FrameState = FrameState(ApiSource.getAPI(),
         emptyList(),
@@ -59,6 +62,7 @@ class MapLocationState(
 
     fun clearHistory() {
         framesOnScreen = 0
+        previousEnemyLocations.clear()
     }
 
     fun toStringEnemy(): String {
