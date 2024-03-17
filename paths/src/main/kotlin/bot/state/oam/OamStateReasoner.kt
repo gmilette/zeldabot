@@ -50,12 +50,15 @@ class OamStateReasoner(
     // calculate isDamaged here
     private fun SpriteData.toAgent(): Agent {
         val damaged = mapStatsTracker.isDamaged(tile, attribute)
-        val blockable = calcBlockable(tile, tile to attribute, )
+        val blockable = calcBlockable(tile, tile to attribute)
+        val state = toState(damaged)
+        val moveDirection = mapStatsTracker.calcDirection(point, state)
         return Agent(
             index = index, point = point, state = toState(damaged), tile = tile, attribute = attribute,
             tileByte = tile.toString(16), attributeByte = attribute.toString(16),
             damaged = damaged,
-            blockable = blockable
+            blockable = blockable,
+            moving = moveDirection
         )
     }
 

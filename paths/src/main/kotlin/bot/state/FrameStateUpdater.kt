@@ -1,6 +1,7 @@
 package bot.state
 
 import bot.plan.action.PreviousMove
+import bot.plan.action.ProjectileDirectionCalculator
 import bot.state.map.Hyrule
 import bot.state.map.MapConstants
 import bot.state.map.stats.MapStatsTracker
@@ -80,11 +81,9 @@ class FrameStateUpdater(
         // reset to prevent infinite memory being allocated
         previousNow.previous = null
 
-        // TODO: analyze direction
-        // agents must be the same type (projectile or not) maybe same tile
-
         val mapCoordinates = MapCoordinates(level, mapLoc)
         mapStats.track(mapCoordinates, theEnemies)
+
         val seenBoomerang = mapStats.seenBoomerang
         val frame = FrameState(api, theEnemies, theUncombined, level, mapLoc, link, ladder, seenBoomerang)
 

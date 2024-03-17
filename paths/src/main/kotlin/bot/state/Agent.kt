@@ -1,6 +1,7 @@
 package bot.state
 
 import bot.state.map.Direction
+import bot.state.map.MovingDirection
 import bot.state.oam.EnemyGroup
 import bot.state.oam.TileAttribute
 import util.CalculateDirection
@@ -21,7 +22,7 @@ data class Agent(
     val attributeByte: String = attribute.toString(16),
     val damaged: Boolean = false,
     val blockable: Blockable = Blockable.No,
-    val moving: CalculateDirection.MovingDirection = CalculateDirection.MovingDirection.UNKNOWN
+    val moving: MovingDirection = MovingDirection.UNKNOWN_OR_STATIONARY
 ) {
     val tileAttrib = TileAttribute(tile, attribute)
 

@@ -1,9 +1,12 @@
 package bot.state.map.stats
 
 import bot.plan.action.PrevBuffer
+import bot.plan.action.ProjectileDirectionCalculator
 import bot.state.Agent
+import bot.state.EnemyState
 import bot.state.FramePoint
 import bot.state.MapCoordinates
+import bot.state.map.MovingDirection
 import bot.state.oam.EnemyGroup.boomerangs
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -27,7 +30,7 @@ class MapStatsTracker {
 
     // the memory
     private val tileAttribCount = mutableMapOf<Int, AttributeCount>()
-    var previousEnemyLocations: PrevBuffer<List<Agent>> = PrevBuffer(size = 15)
+    var previousEnemyLocations: PrevBuffer<List<Agent>> = PrevBuffer(size = 10)
 
     val seenBoomerang: Boolean
         get() = boomerangs.any { tileAttribCount.contains(it) }
@@ -106,6 +109,11 @@ class MapStatsTracker {
 //        writer.write(json)
 //        writer.close()
     }
+
+    fun calcDirection(point: FramePoint, state: EnemyState): MovingDirection =
+        previousEnemyLocations.buffer.firstOrNull()?.let { first ->
+            ProjectileDirectionCalculator.calc(point, state, first)
+        } ?: MovingDirection.UNKNOWN_OR_STATIONARY
 }
 
 class AttributeCount {

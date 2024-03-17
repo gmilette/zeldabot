@@ -230,11 +230,12 @@ object ZeldaPlan {
             seg("gather key 3")
             kill
             loot // key 2
-            right
-            kill
-            // the boomerang is a projectile! do not avoid it
-            goAbout(InLocations.Level2.keyMid, 1, 1, true, ignoreProjectiles = true)
-            left
+            seg("turn right to get boomerang")
+//            right
+//            kill
+//            // the boomerang is a projectile! do not avoid it
+//            goAbout(InLocations.Level2.keyMid, 1, 1, true, ignoreProjectiles = true)
+//            left
             seg("resume sprint")
             up // skip squishy snake
             // skip getting key from squishy guy

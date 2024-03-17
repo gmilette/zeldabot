@@ -193,8 +193,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         var unstick = 0
         var forcedDirection = GamePad.None
         var addEquipment: Boolean = false
-        var invincible: Boolean = true
-        var maxLife: Boolean = true
+        var invincible: Boolean = false
+        var maxLife: Boolean = false
 
         @JvmStatic
         fun startIt(monitor: ZeldaMonitor): ZeldaBot {
@@ -255,7 +255,9 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             }
             refillIfOut()
 //            stateManipulator.setSword(ZeldaItem.WoodenSword)
-            stateManipulator.setRing(ZeldaItem.RedRing)
+            if (invincible) {
+                stateManipulator.setRing(ZeldaItem.RedRing)
+            }
             if (setEquipmentCt > 0 && addEquipment) {
                 d { " Set equip" }
 //            frameStateUpdater.setSword(ZeldaItem.MagicSword)

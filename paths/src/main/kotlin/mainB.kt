@@ -22,6 +22,7 @@ import bot.ZeldaBot
 import bot.plan.runner.PlanRunner
 import bot.state.*
 import bot.state.map.MapConstants
+import bot.state.map.MovingDirection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -244,9 +245,10 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
                         enemies.filter { it.state != EnemyState.Dead }.forEachIndexed { index, enemy ->
 //                            val tileLine = MapStatsTracker.attribFor(enemy.tile).tileStringLine()
 //                            + " " + tileLine
+                            val moving = if (enemy.moving == MovingDirection.UNKNOWN_OR_STATIONARY) "" else enemy.moving
                             Text(
                                 "$index: (${enemy.tile.toString(16)}_${enemy.attribute.toString(16)}) ${enemy.state.name} ${enemy.point} ${enemy.point.toG} " +
-                                        enemy.damagedString
+                                        enemy.damagedString + " ${moving}"
                             )
                         }
                     }
