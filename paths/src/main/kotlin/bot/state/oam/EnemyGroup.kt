@@ -137,6 +137,7 @@ object EnemyGroup {
         boulder3Pair,
         arrowTipShotByEnemyPair,
         arrowButtShotByEnemy,
+        arrowButtShotByEnemy2,
         rockProjectile
     )
 

@@ -5,6 +5,7 @@ import bot.state.map.Direction
 import bot.state.map.MapConstants
 import util.Geom
 import kotlin.math.abs
+import kotlin.math.sqrt
 
 data class FramePoint(val x: Int = 0, val y: Int = 0, val direction: Direction? = null) {
     constructor(x: Int = 0, y: Int = 0) : this(x, y, null)
@@ -24,6 +25,11 @@ data class FramePoint(val x: Int = 0, val y: Int = 0, val direction: Direction? 
     override fun toString(): String {
         return "($x, $y)"
     }
+}
+
+data class FloatPoint(val x: Float, val y: Float) {
+    fun nearest(): FramePoint =
+        FramePoint(x.toInt(), y.toInt())
 }
 
 object FramePointBuilder {
@@ -184,6 +190,34 @@ val FramePoint.justMid
     get() = FramePoint(x, y + 8)
 val FramePoint.justMidEnd
     get() = FramePoint(x + 15, y + 8)
+
+fun FramePoint.relativeTo(slope: FramePoint): FramePoint {
+    return this.plus(slope.x, slope.y)
+//    // normalize it first somehow
+//    val unitVector = slope.unitVector()
+//    val deltaX = MapConstants.oneGridF * unitVector.x
+//    val deltaY = MapConstants.oneGridF * unitVector.y
+//    return this.plus(deltaX.toInt(), deltaY.toInt())
+}
+
+fun FramePoint.pointAtDistance(slope: FramePoint, distance: Double): FramePoint {
+    val slope = slope.x.toFloat() / slope.y.toFloat()
+    val dx = distance / sqrt(1 + slope * slope)
+    val dy = slope * dx
+    return FramePoint(x + dx.toInt(), y + dy.toInt())
+}
+
+fun FramePoint.unitVector(): FloatPoint {
+    val magnitude = sqrt(x.toFloat() * x.toFloat() + y.toFloat() * y.toFloat())
+    return if (magnitude != 0.0f) {
+        FloatPoint(x / magnitude, y / magnitude)
+    } else {
+        FloatPoint(0.0f, 0.0f)
+    }
+}
+
+fun FramePoint.plus(xAdd: Int, yAdd: Int) =
+    FramePoint(x + xAdd, y = y + yAdd)
 
 val FramePoint.upEnd
     get() = FramePoint(x, y + 8 - 1)

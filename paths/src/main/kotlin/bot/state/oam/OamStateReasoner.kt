@@ -52,7 +52,8 @@ class OamStateReasoner(
         val damaged = mapStatsTracker.isDamaged(tile, attribute)
         val blockable = calcBlockable(tile, tile to attribute)
         val state = toState(damaged)
-        val moveDirection = mapStatsTracker.calcDirection(point, state)
+        val moveDirection = mapStatsTracker.calcDirection(point, state, tile)
+        d { " Move dir for $point is ${moveDirection.toArrow()}"}
         return Agent(
             index = index, point = point, state = toState(damaged), tile = tile, attribute = attribute,
             tileByte = tile.toString(16), attributeByte = attribute.toString(16),

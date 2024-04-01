@@ -6,13 +6,11 @@ import bot.state.Agent
 import bot.state.EnemyState
 import bot.state.FramePoint
 import bot.state.MapCoordinates
+import bot.state.map.MapConstants
 import bot.state.map.MovingDirection
 import bot.state.oam.EnemyGroup.boomerangs
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import util.d
-import java.util.*
-import kotlin.math.min
 
 var gson = GsonBuilder().setPrettyPrinting().create()
 
@@ -30,7 +28,8 @@ class MapStatsTracker {
 
     // the memory
     private val tileAttribCount = mutableMapOf<Int, AttributeCount>()
-    var previousEnemyLocations: PrevBuffer<List<Agent>> = PrevBuffer(size = 10)
+    // where was the enemy size frames ago, so I can imagine where it will be size frames from now
+    var previousEnemyLocations: PrevBuffer<List<Agent>> = PrevBuffer(size = MapConstants.halfGrid)
 
     val seenBoomerang: Boolean
         get() = boomerangs.any { tileAttribCount.contains(it) }
@@ -110,9 +109,9 @@ class MapStatsTracker {
 //        writer.close()
     }
 
-    fun calcDirection(point: FramePoint, state: EnemyState): MovingDirection =
-        previousEnemyLocations.buffer.firstOrNull()?.let { first ->
-            ProjectileDirectionCalculator.calc(point, state, first)
+    fun calcDirection(currentPoint: FramePoint, state: EnemyState, tile: Int): MovingDirection =
+        previousEnemyLocations.buffer.firstOrNull()?.let { previousPoint ->
+            ProjectileDirectionCalculator.calc(currentPoint, state, previousPoint, tile)
         } ?: MovingDirection.UNKNOWN_OR_STATIONARY
 }
 

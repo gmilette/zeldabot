@@ -123,7 +123,7 @@ class RouteTo(val params: Param = Param()) {
         val projectileNear = state.projectiles.any { it.point.toRect().intersect(nearLink) }
         val inRangeOf by lazy { AttackActionDecider.inRangeOf(state) }
         val shouldLongAttack by lazy { AttackLongActionDecider.shouldShootSword(state) }
-        val allowAttack = true
+        val allowAttack = false
         return when {
             allowAttack && !projectileNear && attack.isAttacking() -> {
                 d { " Route Action -> Keep Attacking" }
@@ -379,8 +379,27 @@ class RouteTo(val params: Param = Param()) {
             GamePad.None
         }
     }
+    private fun getInFrontOfGridsForProjectiles(state: MapLocationState): List<FramePoint> =
+        state.frameState.enemies.filter { it.state == EnemyState.Projectile }.mapNotNull { agent ->
+            when (agent.moving) {
+                MovingDirection.LEFT -> agent.point.leftTwoGrid.right2
+                MovingDirection.RIGHT -> agent.point.rightOneGrid.left2
+                MovingDirection.DOWN -> agent.point.downOneGrid.up2
+                MovingDirection.UP -> agent.point.upTwoGrid.down2
+                // incorrect most likely
+                is MovingDirection.DIAGONAL -> agent.point.relativeTo(agent.moving.slope)
+                else -> null
+            }.also {
+                if (it != null) {
+                    d { "${agent.point} is moving ${agent.moving.javaClass.simpleName} in front --> $it" }
+                }
+            }
+        }
 
     private fun getInFrontOfGrids(state: MapLocationState): List<FramePoint> =
+        getInFrontOfGridsSword(state) + getInFrontOfGridsForProjectiles(state)
+
+    private fun getInFrontOfGridsSword(state: MapLocationState): List<FramePoint> =
         state.frameState.enemies.flatMap { agent: Agent ->
             swordDir.dirFront(agent)?.let { dir ->
                 val pt = dir.pointModifier(MapConstants.oneGrid)(agent.point)

@@ -49,6 +49,7 @@ val boulder3Pair = (0xEA).toInt() to (0x02).toInt()
 val arrowTipShotByEnemy = (0x88).toInt()
 val arrowTipShotByEnemyPair = (0x88).toInt() to (0x42).toInt()
 val arrowButtShotByEnemy = (0x86).toInt() to (0x42).toInt()
+val arrowButtShotByEnemy2 = (0x86).toInt() to (0x02).toInt()
 
 val largeShield = (0x56).toInt()
 val candle = (0x26).toInt()
