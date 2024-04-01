@@ -17,13 +17,13 @@ object LevelsData {
     val levels = listOf(
         // option: level 2 left squishy, or level 8 right grab(is it a grab?)
         // plan
-        //2: 2 keys (skip snake?, skip left squishy)
-        //1: 4 keys: use 4, get 6, (get all - could skip boomerang)
-        //3: 5 keys: get 2, use 1
-        //4: 5 keys: get 2, use 2 (initial squishies)
-        //5: 4 keys: get 1, use 2 // don't waste getting all the keys, just the one inside the zombie
-        //6: 0 key: get 0, use 4 (if you have 4 all good)
-        //8: 0 keys: get 2, use 2 (forced one, go right grab)
+        // 2: 2 keys (skip snake?, skip left squishy)
+        // 1: 4 keys: use 4, get 6, (get all - could skip boomerang)
+        // 3: 5 keys: get 2, use 1
+        // 4: 5 keys: get 2, use 2 (initial squishies)
+        // 5: 4 keys: get 1, use 2 // don't waste getting all the keys, just the one inside the zombie
+        // 6: 0 key: get 0, use 4 (if you have 4 all good)
+        // 8: 0 keys: get 2, use 2 (forced one, go right grab)
         // total 20 keys needed only
         // start with 2
         LevelData(

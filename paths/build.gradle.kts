@@ -7,7 +7,6 @@ buildscript {
         mavenCentral()
     }
 
-
 //    val composeVersion: String = "1.5.0"
 //    val kotlinVersion: String = "1.9.0"
     val composeVersion: String = "1.4.3"
@@ -21,6 +20,7 @@ buildscript {
 }
 
 plugins {
+    id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
 //    id("org.jetbrains.kotlinx.dataframe")
     //    kotlin("jvm") version "1.6.10"
 //    id("org.jetbrains.kotlinx.dataframe") version "0.10.0"
@@ -30,14 +30,7 @@ plugins {
 //    id("org.jetbrains.compose") version "1.1.1"
 //    id("org.jetbrains.compose") version "1.5.0"
     id("org.jetbrains.compose") version "1.4.3"
-
-//    id("org.jetbrains.compose") version "1.4.3"
-    //application
 }
-
-//composeOptions {
-//    kotlinCompilerExtensionVersion = '1.1.0-beta03'
-//}
 
 group = "me.greg"
 version = "1.0-SNAPSHOT"

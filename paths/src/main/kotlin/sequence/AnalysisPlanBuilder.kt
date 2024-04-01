@@ -92,7 +92,7 @@ class AnalysisPlanBuilder(private val hyrule: Hyrule) {
     //            d {"iter $iter"}
             val result = evaluate(nextExplore)
             if (result.total < best.total) {
-                d { " better result ${result} ${result.total}" }
+                d { " better result $result ${result.total}" }
                 result.log()
                 best = result
             }

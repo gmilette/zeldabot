@@ -271,7 +271,6 @@ class FindPaths {
         val score = evaluate(levelSequence, distTable)
 
         println("Score: $score")
-
     }
 
     private fun evaluateTour(
@@ -288,7 +287,7 @@ class FindPaths {
         var total: Int = 0
         tour.forEach { pt ->
             val length = dTable[current]?.getPath(pt)?.length ?: 0
-            println("from ${current} to $pt length $length")
+            println("from $current to $pt length $length")
             total += length
             current = pt
         }

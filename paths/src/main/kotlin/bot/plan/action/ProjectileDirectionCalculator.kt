@@ -15,12 +15,12 @@ object ProjectileDirectionCalculator {
         for (agent in prev) {
             d { " prev ${agent.point} ${agent.state}"}
         }
-        for (prevPoint in prev.filter { it.state == state && !it.damaged} ) { // && it.tile == tile  don't check tile because it changes
+        for (prevPoint in prev.filter { it.state == state && !it.damaged && it.tile == tile} ) { // && it.tile == tile  don't check tile because it changes
             val dir = CalculateDirection.calculateDirection(prevPoint.point, currentPoint)
             d { "  to ${prevPoint.point} ${dir.toArrow()}" }
         }
         return prev.asSequence()
-            .filter { it.state == state && !it.damaged }
+            .filter { it.state == state && !it.damaged && it.tile == tile}
             .map { it.point }
             .map { prevPoint -> CalculateDirection.calculateDirection(prevPoint, currentPoint) }
             .firstOrNull { it != MovingDirection.UNKNOWN_OR_STATIONARY }
