@@ -22,6 +22,17 @@ sealed class MovingDirection {
     object DOWN: MovingDirection()
     object UNKNOWN_OR_STATIONARY: MovingDirection()
 
+    companion object {
+        fun from(dir: Direction): MovingDirection =
+            when (dir) {
+                Direction.Left -> LEFT
+                Direction.Right -> RIGHT
+                Direction.Down -> DOWN
+                Direction.Up -> UP
+                else -> UNKNOWN_OR_STATIONARY
+            }
+    }
+
     fun toArrow(): String =
         when (this) {
             is DIAGONAL -> "/"
@@ -30,5 +41,14 @@ sealed class MovingDirection {
             is UP -> "^"
             is DOWN -> "_"
             else -> "x"
+        }
+
+    fun toDirection(): Direction =
+        when (this) {
+            is LEFT -> Direction.Left
+            is RIGHT ->Direction.Right
+            is UP -> Direction.Up
+            is DOWN -> Direction.Down
+            else -> Direction.None
         }
 }

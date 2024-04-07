@@ -13,9 +13,13 @@ val grabbyHands2 = (0xAC).toInt() // 172
 
 val graveyardGhost = (0xe4).toInt() to (0x01).toInt()
 val ghost = (0xBC).toInt()
+val ghostProjectileUp = (0x7a).toInt() to (0x01).toInt()
+val ghostProjectileUp2 = (0x7a).toInt() to (0x41).toInt()
 const val ghostProjectileUpDown = (0x7a).toInt() // 1 and 41, 02/42, down 81,c1, 83, c3, 82,c2
 const val ghostProjectileLeft1 = (0x7e).toInt() // right is 03
 const val ghostProjectileLeft2 = (0x7c).toInt() // right is 03
+val ghostProjectileRightPair = (0x7e).toInt() to (0x03).toInt() // right is 03
+val ghostProjectileRightPair2 = (0x7c).toInt() to (0x03).toInt() // right is 03
 val movingBlock = (0xb1).toInt() to (0x03).toInt()
 val movingBlock2 = (0xb3).toInt() to (0x03).toInt()
 // just ignore all of them if it's the overworld, rather than try to route to it
@@ -48,6 +52,11 @@ val boulder4Pair = (0xE8).toInt() to (0x02).toInt()
 val boulder3Pair = (0xEA).toInt() to (0x02).toInt()
 val arrowTipShotByEnemy = (0x88).toInt()
 val arrowTipShotByEnemyPair = (0x88).toInt() to (0x42).toInt()
+val arrowButtShotByEnemyPair = (0x86).toInt() to (0x42).toInt()
+val arrowTipShotByEnemyPairRight = (0x88).toInt() to (0x02).toInt()
+val arrowButtShotByEnemyPairRight = (0x86).toInt() to (0x02).toInt()
+val arrowTipShotByEnemyPairDown = (0x28).toInt() to (0x82).toInt()
+val arrowTipShotByEnemyPairUp = (0x28).toInt() to (0x02).toInt()
 val arrowButtShotByEnemy = (0x86).toInt() to (0x42).toInt()
 val arrowButtShotByEnemy2 = (0x86).toInt() to (0x02).toInt()
 
@@ -89,6 +98,7 @@ val redring = (0x46).toInt()
 val brownBoomerang = (0x36).toInt() //trib 0, 40
 val brownBoomerangSpin = (0x38).toInt() //attrib 40
 val brownBoomerangSpinBendFacingUp = (0x3a).toInt() //attrib 0
+val brownBoomerangSpinBendFacingUpPair = (0x3a).toInt() to 0
 val bow = (0x2A).toInt()
 val trap = (0x96).toInt()
 val map = (0x4C).toInt()

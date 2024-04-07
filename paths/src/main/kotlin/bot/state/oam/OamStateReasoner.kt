@@ -3,6 +3,7 @@ package bot.state.oam
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapConstants
+import bot.state.map.MovingDirection
 import bot.state.map.stats.MapStatsTracker
 import nintaco.api.API
 import org.jheaps.annotations.VisibleForTesting
@@ -49,17 +50,39 @@ class OamStateReasoner(
 
     // calculate isDamaged here
     private fun SpriteData.toAgent(): Agent {
+        val tileAttribute = tile to attribute
         val damaged = mapStatsTracker.isDamaged(tile, attribute)
-        val blockable = calcBlockable(tile, tile to attribute)
+        val blockable = calcBlockable(tile, tileAttribute)
         val state = toState(damaged)
-        val moveDirection = mapStatsTracker.calcDirection(point, state, tile)
-        d { " Move dir for $point is ${moveDirection.toArrow()}"}
+        // could look up the direction based on tile and sprite
+        // arrow
+        // wizard
+        // diagonal
+        // boulder -> down in block of 4 pattern
+        var movingDirection: MovingDirection = MovingDirection.UNKNOWN_OR_STATIONARY
+        val findDir = if (state == EnemyState.Projectile) {
+            val found = ProjectileDirectionLookup.findDir(tileAttribute)
+            if (found == Direction.None) {
+                movingDirection = mapStatsTracker.calcDirection(point, state, tile)
+                movingDirection.toDirection()
+            } else {
+                movingDirection = MovingDirection.from(found)
+                found
+            }
+        } else {
+            Direction.None
+        }
+        if (state == EnemyState.Projectile) {
+            d { " Move dir for ${tileAttribute.toHex()} $point is ${movingDirection.toArrow()} and ${findDir.toArrow()}" }
+        }
         return Agent(
-            index = index, point = point, state = toState(damaged), tile = tile, attribute = attribute,
+            index = index, point = point,
+            dir = findDir,
+            state = toState(damaged), tile = tile, attribute = attribute,
             tileByte = tile.toString(16), attributeByte = attribute.toString(16),
             damaged = damaged,
             blockable = blockable,
-            moving = moveDirection
+            moving = movingDirection
         )
     }
 

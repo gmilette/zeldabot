@@ -123,6 +123,9 @@ val TileAttribute.attribute: Int
 fun TileAttribute.matches(other: TileAttribute) =
     this.first == other.first && this.second == other.second
 
+fun TileAttribute.toHex() =
+    "${tile.toString(16)} (${attribute.toString(16)}) "
+
 // need
 
 object MonsterDirection {

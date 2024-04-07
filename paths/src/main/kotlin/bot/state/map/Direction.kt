@@ -13,6 +13,15 @@ enum class Direction {
         val all: List<Direction>
             get() = listOf(Up, Right, Down, Left)
     }
+
+    fun toArrow(): String =
+        when (this) {
+            Left -> "<--"
+            Right -> "-->"
+            Up -> "^"
+            Down -> "_"
+            else -> "x"
+        }
 }
 
 //fun FramePoint.facing(rect: Geom.Rectangle): Boolean = when (this) {
