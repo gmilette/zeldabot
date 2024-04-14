@@ -125,6 +125,89 @@ class ZStar(
     private fun Map2d<Int>.safe(point: FramePoint): Boolean =
         get(point) < 1000
 
+    fun routeNearestSafe(
+        param: ZRouteParam
+    ): List<FramePoint> {
+        customizer.customize(param)
+        return breadthSearch(param.start, param.targets)
+    }
+
+    // if safe needed
+    // BFS
+    // greedy (if fail)
+    // astar
+
+    /**
+     * find the path that gets closest to the goal
+     */
+    private fun greedySearch() {
+
+    }
+
+    private fun breadthSearch(current: FramePoint,
+                              targets: List<FramePoint>,
+                              visited: MutableSet<FramePoint> = mutableSetOf()): List<FramePoint> {
+        val toExplore = neighborFinder.neighbors(current).toMutableList()
+        val cameFrom = mutableMapOf<FramePoint, FramePoint>()
+        var finalPoint = FramePoint()
+
+        d { " targets $targets start $current" }
+        var i = 0
+        while (toExplore.isNotEmpty()) {
+            if (DEBUG) {
+                d { "$i: open nodes: ${toExplore.size} : $toExplore" }
+            }
+            for (nearPoint in toExplore.toMutableList()) {
+                if (DEBUG) {
+                    d { " -->explore $nearPoint" }
+                }
+                if (costsF.safe(nearPoint)) {
+//                if (nearPoint in targets) {
+                    if (DEBUG) {
+                        d { " Found end!!" }
+                    }
+                    finalPoint = nearPoint
+                    toExplore.clear()
+                    break;
+                } else {
+                    visited.add(nearPoint)
+                    val neighbors = neighborFinder.neighbors(nearPoint) - visited
+                    for (neighbor in neighbors) {
+                        cameFrom[neighbor] = nearPoint
+                    }
+                    toExplore.addAll(neighbors)
+                }
+                i++
+            }
+        }
+
+        val path = mutableListOf(finalPoint)
+        if (DEBUG) {
+            d { " came froms " }
+            for (entry in cameFrom) {
+                d { " ${entry.key} -> ${entry.value}" }
+            }
+            d { " came from $finalPoint" }
+        }
+
+        var lastPoint = finalPoint
+        while (cameFrom.containsKey(lastPoint)) {
+            lastPoint = cameFrom.getValue(lastPoint)
+            path.add(0, lastPoint)
+        }
+
+        d { " the final path is $path"}
+        return path
+    }
+
+    private fun targetAnalysis() {
+        // determine
+    }
+
+    private fun goalFunction() {
+
+    }
+
     fun route(
         param: ZRouteParam
     ): List<FramePoint> {
@@ -145,6 +228,12 @@ class ZStar(
         var routeToSafe = false
 
         val startIsSafe = costsF.safe(param.start)
+
+        // testing
+        if (param.rParam.findNearestSafeIfCurrentlyNotSafe == true && !startIsSafe) {
+            d { " dodge! "}
+            return routeNearestSafe(param)
+        }
 
         // can result in NO_ROUTE, if already at target, or if already safe without routing anywhere
         val target = targets.toList().filter { costsF.safe(it) }.ifEmpty {

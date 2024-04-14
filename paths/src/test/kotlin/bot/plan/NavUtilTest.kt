@@ -72,7 +72,8 @@ class NavUtilTest {
         cell: MapLoc, from: FramePoint, target: FramePoint,
         dirResult: GamePad, level: Int = 0, before: FramePoint? = null, makePassable: FramePoint? = null,
         enemies: List<FramePoint> = emptyList(),
-        ladderSpec: ZStar.LadderSpec? = null
+        ladderSpec: ZStar.LadderSpec? = null,
+        routeSafe: Boolean = false
     ) {
         checkA(
             cell,
@@ -83,14 +84,16 @@ class NavUtilTest {
             level,
             makePassable = makePassable,
             enemies = enemies,
-            ladderSpec
+            ladderSpec,
+            routeSafe
         )
     }
 
     private fun checkA(
         cell: MapLoc, from: FramePoint, targets: List<FramePoint>,
         before: FramePoint? = null, dirResult: GamePad, level: Int = 0, makePassable: FramePoint? = null,
-        enemies: List<FramePoint> = emptyList(), ladderSpec: ZStar.LadderSpec? = null
+        enemies: List<FramePoint> = emptyList(), ladderSpec: ZStar.LadderSpec? = null,
+        routeSafe: Boolean = false
     ) {
         val hyrule = Hyrule()
         val cell = if (level == 0) hyrule.getMapCell(cell) else hyrule.levelMap.cell(level, cell)
@@ -145,18 +148,38 @@ class NavUtilTest {
             passable.add(makePassable)
         }
 
-        val route = zstar.route(
-            ZStar.ZRouteParam(
-                start = from,
-                listOf(target),
-                pointBeforeStart = before,
-                enemies = enemies,
-                rParam = RouteTo.RoutingParamCommon(
-                    forcePassable = passable,
-                    ladderSpec = ladderSpec
-                ),
+        val route = if (routeSafe) {
+            zstar.routeNearestSafe( //route(
+                ZStar.ZRouteParam(
+                    start = from,
+                    listOf(target),
+                    pointBeforeStart = before,
+                    enemies = enemies,
+                    rParam = RouteTo.RoutingParamCommon(
+                        forcePassable = passable,
+                        ladderSpec = ladderSpec
+                    ),
+                )
             )
-        )
+        } else {
+            zstar.route(
+                ZStar.ZRouteParam(
+                    start = from,
+                    listOf(target),
+                    pointBeforeStart = before,
+                    enemies = enemies,
+                    rParam = RouteTo.RoutingParamCommon(
+                        forcePassable = passable,
+                        ladderSpec = ladderSpec
+                    ),
+                )
+            )
+        }
+
+        if (route.isEmpty()) {
+            d { " empty route "}
+            return
+        }
 
         val firstPt = route.get(0)
         cell.passable.write("check_1192_r") { v, x, y ->
@@ -276,6 +299,28 @@ class NavUtilTest {
         val start = FramePoint(61, 121)
         check(
             13, start, FramePoint(32, 96), GamePad.MoveUp, level = 7,
+            before = start.left
+        )
+    }
+
+    @Test
+    fun `test bfs`() {
+        ZStar.DEBUG = false
+        val four = 4*MapConstants.oneGrid
+        val start = FramePoint(four, four)
+        check(
+            13, start, FramePoint(four, four + 4), GamePad.MoveDown, level = 7,
+            before = start.left,
+            routeSafe = true
+        )
+    }
+
+    @Test
+    fun `test bfs two same dir`() {
+        ZStar.DEBUG = true
+        val start = FramePoint(61, 121)
+        check(
+            13, start, FramePoint(65, 121), GamePad.MoveUp, level = 7,
             before = start.left
         )
     }

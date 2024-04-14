@@ -92,7 +92,11 @@ class RouteTo(val params: Param = Param()) {
          * if link is just moving around though this will cause
          * too much distraction. Need a long range B weapon or full hearts available
          */
-        val finishWithinLongStrikingRange: Boolean = false
+        val finishWithinLongStrikingRange: Boolean = false,
+        /**
+         * if current spot is not safe, get to a safe spot
+         */
+        val findNearestSafeIfCurrentlyNotSafe: Boolean = true
     )
 
     private val routeToFile: LogFile = LogFile("RouteTo")
@@ -110,7 +114,7 @@ class RouteTo(val params: Param = Param()) {
         param: RouteParam = RouteParam(),
     ): GamePad {
         val canAttack = param.useB || state.frameState.canUseSword
-        val attackPossible by lazy { params.whatToAvoid != WhatToAvoid.None }
+        val attackPossible by lazy { params.whatToAvoid != WhatToAvoid.None && canAttack }
         d { " route To attackOrRoute attack=$attackPossible can=$canAttack" }
         val theAttack = if (param.useB) {
             attackB
@@ -119,13 +123,13 @@ class RouteTo(val params: Param = Param()) {
         }
 
         val leftCorner = state.link.leftOneGrid.upLeftOneGridALittleLess
-        val nearLink = Geom.Rectangle(leftCorner, state.link.downOneGrid.rightOneGrid)
+        val nearLink = Geom.Rectangle(leftCorner, state.link.downTwoGrid.rightTwoGrid)
         val projectileNear = state.projectiles.any { it.point.toRect().intersect(nearLink) }
         val inRangeOf by lazy { AttackActionDecider.inRangeOf(state) }
         val shouldLongAttack by lazy { AttackLongActionDecider.shouldShootSword(state) }
-        val allowAttack = false
+        val allowAttack = true
         return when {
-            allowAttack && !projectileNear && attack.isAttacking() -> {
+            allowAttack && !projectileNear && attackPossible && attack.isAttacking() -> {
                 d { " Route Action -> Keep Attacking" }
                 theAttack.nextStep(state)
             }
@@ -137,7 +141,7 @@ class RouteTo(val params: Param = Param()) {
 
             !allowAttack ||
                     !attackPossible ||
-                    !canAttack ||
+//                    !canAttack || // redundant
                     (state.frameState.clockActivated && Random.nextInt(10) == 1) ||
                     AttackActionDecider.getInFrontOfGrids(state) ||
                     inRangeOf == GamePad.None -> {
