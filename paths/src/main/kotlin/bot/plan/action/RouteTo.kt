@@ -13,6 +13,7 @@ import kotlin.random.Random
 
 class RouteTo(val params: Param = Param()) {
     companion object {
+        var allowAttack = true
         fun hardlyReplan(dodgeEnemies: Boolean = true, ignoreProjectiles: Boolean = false) = RouteTo(
             Param(
                 planCountMax = 100,
@@ -128,7 +129,6 @@ class RouteTo(val params: Param = Param()) {
         val projectileNear = state.projectiles.any { it.point.toRect().intersect(nearLink) }
         val inRangeOf by lazy { AttackActionDecider.inRangeOf(state) }
         val shouldLongAttack by lazy { AttackLongActionDecider.shouldShootSword(state) }
-        val allowAttack = false
         val blockReflex = AttackActionBlockDecider.blockReflex(state)
         return when {
             blockReflex != null -> {

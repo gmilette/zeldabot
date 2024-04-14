@@ -13,7 +13,9 @@ object AttackActionBlockDecider {
      * return null if no action should be taken
      */
     fun blockReflex(state: MapLocationState): GamePad? {
-        for (projectile in state.projectiles) {
+        val hasMagicShield = state.frameState.inventory.inventoryItems.hasMagicShield
+        val blockableProjectiles = state.projectiles.filter { blockable(hasMagicShield, it) }
+        for (projectile in blockableProjectiles) {
             val reflexAction = check(state.frameState.link, projectile)
             if (reflexAction != null) {
                 return reflexAction
@@ -21,6 +23,13 @@ object AttackActionBlockDecider {
         }
         return null
     }
+
+    private fun blockable(magicShield: Boolean, projectile: Agent) =
+        when (projectile.blockable) {
+            Blockable.No -> false
+            Blockable.WithSmallShield -> true
+            Blockable.WithMagicShield -> magicShield
+        }
 
     private fun check(link: Agent, projectile: Agent): GamePad? {
         if (projectile.dir == Direction.None) return null

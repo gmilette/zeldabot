@@ -1,11 +1,13 @@
 package bot.state
 
+import bot.state.InventoryReader.readCpuB
 import bot.state.map.destination.ZeldaItem
 import nintaco.api.API
 import util.d
 
 class InventoryItems(api: API) {
     val hasRing by lazy { api.readCPU(api.readCPU(Addresses.hasRing)) }
+    val hasMagicShield by lazy { api.readCpuB(Addresses.hasShield) }
 }
 
 object InventoryReader {
@@ -55,6 +57,6 @@ object InventoryReader {
         return items
     }
 
-    private fun API.readCpuB(address: Int): Boolean =
+    fun API.readCpuB(address: Int): Boolean =
         readCPU(address) != 0
 }

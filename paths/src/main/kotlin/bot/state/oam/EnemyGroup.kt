@@ -72,6 +72,7 @@ object EnemyGroup {
         144, 142, // sun
         40, orbProjectile, // ganons
         arrowTipShotByEnemy,
+        arrowTipShotByEnemy2,
         fire,
         brownBoomerang, // but it is also an item to be gotten, not avoided, oy!
         brownBoomerangSpin,
@@ -81,7 +82,18 @@ object EnemyGroup {
         spinCircleEnemy,
         ghostProjectileUpDown,
         ghostProjectileLeft1,
-        ghostProjectileLeft2
+        ghostProjectileLeft2,
+        rockProjectile.tile
+    )
+
+    val projectilePairs = setOf(
+        arrowPair,
+        boulder4Pair,
+        boulder3Pair,
+        arrowTipShotByEnemyPair,
+        arrowButtShotByEnemy,
+        arrowButtShotByEnemy2,
+        rockProjectile
     )
 
     val projectileMagicShieldBlockable = setOf(
@@ -103,10 +115,14 @@ object EnemyGroup {
     val projectilePairsUnblockable = setOf(
         boulder4Pair,
         boulder3Pair,
-        rockProjectile
+//        rockProjectile // it's shot by the overworld enemies
     )
 
-    val projectileBlockable = projectiles - projectileUnblockable - projectileMagicShieldBlockable - projectilePairsUnblockable.map { it.first }.toSet()
+    // don't use the projectile pairs
+    val projectileBlockable = projectiles -
+            projectileUnblockable -
+            projectileMagicShieldBlockable -
+            projectilePairsUnblockable.map { it.first }.toSet()
 
     // todo: need to add back these projectiles when I know attrib
 //        boulder, boulder2, boulder3, boulder4,
@@ -130,16 +146,6 @@ object EnemyGroup {
     // triforce: F2, F4
     // but also a
     // blue rhino soldier f4, attribute 3
-
-    val projectilePairs = setOf(
-        arrowPair,
-        boulder4Pair,
-        boulder3Pair,
-        arrowTipShotByEnemyPair,
-        arrowButtShotByEnemy,
-        arrowButtShotByEnemy2,
-        rockProjectile
-    )
 
     val ignorePairs = setOf(
         movingBlock,

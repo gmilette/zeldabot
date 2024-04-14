@@ -116,7 +116,7 @@ class HeartsStateCalculator(private val inventory: Inventory) {
     }
 
     private fun info(): String =
-        if (full()) "F" else "${heartContainers() - heartContainersFull() + damageDecimal()}"
+        if (full()) "F_${damageDecimal()}" else "${heartContainers() - heartContainersFull() + damageDecimal()}"
 
     // empty: FD, 7E, FC (yes it is indeed full), FB, FA, F9, F4(2 full hearts), F3(1 heart)
     // half: 7D, 7C, 7B, 7A, 79, 74 (1.5 hearts), 73, only 0.5 hearts

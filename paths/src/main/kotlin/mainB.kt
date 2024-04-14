@@ -1,7 +1,5 @@
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Text
@@ -13,12 +11,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
 import bot.ZeldaBot
+import bot.plan.action.AttackActionDecider
+import bot.plan.action.RouteTo
 import bot.plan.runner.PlanRunner
 import bot.state.*
 import bot.state.map.MapConstants
@@ -58,6 +59,7 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
     val ladder = remember { mutableStateOf(true) }
     val inv = remember { mutableStateOf(ZeldaBot.invincible) }
     val max = remember { mutableStateOf(ZeldaBot.maxLife) }
+    val allowAttack = remember { mutableStateOf(RouteTo.allowAttack) }
 
     Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
         SwitchViewButton(debugView)
@@ -161,6 +163,15 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
                     }
                 )
 
+                Text("Attack")
+                Checkbox(
+                    checked = allowAttack.value,
+                    onCheckedChange = {
+                        allowAttack.value = it
+                        model.allowAttack(it)
+                    }
+                )
+
                 Text("Max")
                 Checkbox(
                     checked = max.value,
@@ -198,7 +209,7 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
             }
 
             Row {
-                Text("ShowMap")
+                Text("Map")
                 Checkbox(
                     checked = showMap.value,
                     onCheckedChange = {
@@ -212,16 +223,24 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
                 onClick = {
                     model.addKey()
                 }) {
-                Text("  +Key  ")
+                Text("+K")
             }
 
-            Button(
-                modifier = Modifier.padding(8.dp),
-                onClick = {
+            Image(
+                painter = painterResource("icon_coin.png"),
+                modifier = Modifier.size(40.dp).background(Color.LightGray).clickable {
                     model.addRupee()
-                }) {
-                Text("  +Rupee  ")
-            }
+                },
+                contentDescription = ""
+            )
+
+            Image(
+                painter = painterResource("icon_coin.png"),
+                modifier = Modifier.size(40.dp).background(Color.LightGray).clickable {
+                    model.addRupee()
+                },
+                contentDescription = ""
+            )
         }
 
         Row {
@@ -450,6 +469,10 @@ class ZeldaModel : ZeldaBot.ZeldaMonitor {
 
     fun invincible(act: Boolean) {
         ZeldaBot.invincible = act
+    }
+
+    fun allowAttack(act: Boolean) {
+        RouteTo.allowAttack = act
     }
 
     fun max(act: Boolean) {
