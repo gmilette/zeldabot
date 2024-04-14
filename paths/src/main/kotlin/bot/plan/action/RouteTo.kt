@@ -122,13 +122,19 @@ class RouteTo(val params: Param = Param()) {
             attack
         }
 
+
         val leftCorner = state.link.leftOneGrid.upLeftOneGridALittleLess
         val nearLink = Geom.Rectangle(leftCorner, state.link.downTwoGrid.rightTwoGrid)
         val projectileNear = state.projectiles.any { it.point.toRect().intersect(nearLink) }
         val inRangeOf by lazy { AttackActionDecider.inRangeOf(state) }
         val shouldLongAttack by lazy { AttackLongActionDecider.shouldShootSword(state) }
-        val allowAttack = true
+        val allowAttack = false
+        val blockReflex = AttackActionBlockDecider.blockReflex(state)
         return when {
+            blockReflex != null -> {
+                d { " Route Action -> Block Reflex! $blockReflex" }
+                blockReflex
+            }
             allowAttack && !projectileNear && attackPossible && attack.isAttacking() -> {
                 d { " Route Action -> Keep Attacking" }
                 theAttack.nextStep(state)

@@ -363,7 +363,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                         " : ${currentCell.mapData.name.take(10)}"
                     }
                     val locCoordinates =
-                        "${frameState.level}:${frameState.mapLoc} $locName" // at $movedTo"
+                        "${frameState.level}:${frameState.mapLoc} $locName"
                     d {
                         "current --> " +
                                 "$locCoordinates " +
@@ -371,11 +371,14 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                                 "${frameState.link.point}"
                     }
                     val tenth = this.frameState.tenth
-                    val dir = this.frameState.link.dir.name.first()
+//                    val dir = this.frameState.link.dir.name.first()
 //                    val damage = this.frameState.inventory.heartCalc.damageNumber()
 //                    d: $damage
+                    // t: $tenth d: $dir
+                    //heart
+                    val heart = this.frameState.inventory.heartCalc.toString()
                     try {
-                        drawIt(plan.target(), plan.path(), "$locCoordinates $link t: $tenth d: $dir")
+                        drawIt(plan.target(), plan.path(), "$locCoordinates $link t:$tenth h:$heart")
                     } catch (e: Exception) {
                         d { "ERROR $e" }
                     }
