@@ -62,6 +62,10 @@ class StateManipulator(
         api.writeCPU(Addresses.hasCandle, 2)
     }
 
+    fun setMagicShield() {
+        api.writeCPU(Addresses.hasShield, 1)
+    }
+
     fun setHaveWhistle() {
         api.writeCPU(Addresses.hasWhistle, 1)
     }

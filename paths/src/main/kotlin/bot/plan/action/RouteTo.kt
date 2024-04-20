@@ -250,6 +250,18 @@ class RouteTo(val params: Param = Param()) {
             emptyList()
         }
 
+        var avoidProjectiles = if (!state.frameState.clockActivated) {
+            // this seems to be ok, except link can get hit from the side
+            // unless it avoids projectiles
+            when (params.whatToAvoid) {
+                WhatToAvoid.None,
+                WhatToAvoid.JustEnemies -> emptyList()
+                else -> state.projectiles
+            }
+        } else {
+            emptyList()
+        }
+
 //
 //        if (param.ignoreEnemies) {
 //            d { "ignore enemies" }
@@ -284,7 +296,7 @@ class RouteTo(val params: Param = Param()) {
             }
 
             d { " Plan: ${state.currentMapCell.mapLoc} new plan! because ($why) to $to" }
-            nextPoint = makeNewRoute(param, state, to, avoid, nextPoint)
+            nextPoint = makeNewRoute(param, state, to, avoid, avoidProjectiles, nextPoint)
         } else {
             d { " Plan: same plan ct $planCount" }
         }
@@ -309,6 +321,7 @@ class RouteTo(val params: Param = Param()) {
         state: MapLocationState,
         to: List<FramePoint>,
         avoid: List<Agent>,
+        avoidProjectiles: List<Agent>,
         nextPoint: FramePoint
     ): FramePoint {
         val linkPt = state.frameState.link.point
@@ -331,6 +344,7 @@ class RouteTo(val params: Param = Param()) {
                     targets = to,
                     pointBeforeStart = state.previousMove.from,
                     enemies = avoid.points,
+                    projectiles = avoidProjectiles.map { it.point }, // don't add if there is no dodging
                     rParam = param.rParam.copy(
                         forcePassable = passable,
                         forceHighCost = param.rParam.forceHighCost + inFrontOfGrids

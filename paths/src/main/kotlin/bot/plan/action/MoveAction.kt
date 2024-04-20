@@ -149,8 +149,8 @@ class InsideNavAbout(
     }
 
     override fun complete(state: MapLocationState): Boolean =
-        state.link.minDistToAny(points) < 2.also {
-            d { "! ${state.link} in $points isComplete=$it" }
+        (state.link.minDistToAny(points) < 2).also {
+            d { "MoveAction! ${state.link} in $points isComplete=$it" }
         }
 //        points.contains(state.frameState.link.point).also {
 //            d { "! ${state.link} not in ${points} "}

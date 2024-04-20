@@ -3,6 +3,9 @@ package bot.state.oam
 import bot.state.map.Direction
 
 object ProjectileDirectionLookup {
+    fun hasKnownDirection(tileAttrib: TileAttribute): Boolean =
+        findDir(tileAttrib) != Direction.None
+
     fun findDir(tileAttrib: TileAttribute): Direction =
         findElse(tileAttrib, listOf(::findDirArrow, ::findDirBoomerang, ::findDirWiz))
 

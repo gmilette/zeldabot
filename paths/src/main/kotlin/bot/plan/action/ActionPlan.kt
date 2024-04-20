@@ -156,7 +156,7 @@ class OrderedActionSequence(
     private var path: List<FramePoint> = emptyList()
 
     override fun target(): FramePoint {
-        return target
+        return currentAction?.target() ?: stack.firstOrNull()?.target() ?: target
     }
 
     override fun path(): List<FramePoint> {
@@ -173,9 +173,9 @@ class OrderedActionSequence(
         // check all complete to prevent infinite loop
         if (current.complete(state)) { // causes bomb one to fail && !allComplete(state)
             d { " sequence complete ${stack.size}" }
-            for (action in stack) {
-                d { "is complete ${action.name} = ${action.complete(state)}" }
-            }
+//            for (action in stack) {
+//                d { "is complete ${action.name} = ${action.complete(state)}" }
+//            }
             pop()
             // recur
             return nextStep(state)

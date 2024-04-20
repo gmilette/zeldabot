@@ -2,9 +2,7 @@ package bot.plan.action
 
 import bot.state.*
 import bot.state.map.*
-import bot.state.oam.EnemyGroup
-import bot.state.oam.swordDir
-import util.Geom
+import bot.state.oam.ProjectileDirectionLookup
 import util.d
 
 object AttackActionBlockDecider {
@@ -16,7 +14,13 @@ object AttackActionBlockDecider {
         val hasMagicShield = state.frameState.inventory.inventoryItems.hasMagicShield
         val blockableProjectiles = state.projectiles.filter { blockable(hasMagicShield, it) }
         for (projectile in blockableProjectiles) {
-            val reflexAction = check(state.frameState.link, projectile)
+            val reflexAction = if (ProjectileDirectionLookup.hasKnownDirection(projectile.tileAttrib)) {
+                check(state.frameState.link, projectile)
+            } else {
+                // we don't know which direction this is traveling, check all the directions it could be
+                d { " check all dir ${state.frameState.link.point.distTo(projectile.point)}"}
+                checkAllDirections(state.frameState.link, projectile)
+            }
             if (reflexAction != null) {
                 return reflexAction
             }
@@ -51,6 +55,34 @@ object AttackActionBlockDecider {
             d { "Block reflex: face $facingProjectileDirection"}
             facingProjectileDirection.toGamePad()
         }
+    }
+
+    private fun checkAllDirections(link: Agent, projectile: Agent): GamePad? {
+        val allDirs = Direction.all
+
+        for (dir in allDirs) {
+            val modifier = dir.pointModifier(MapConstants.halfGrid)
+            val projectileTarget = modifier(projectile.point).toRect()
+            val facingProjectileDirection = dir.opposite()
+
+            // todo
+            // if it is inside two more directions pick the closest one
+            if (projectileTarget.intersect(link.point.toRect())) {
+                // it's going to hit us!
+                d { "Block reflex: about to get hit by ${projectile.point}" }
+                return if (link.dir == facingProjectileDirection) {
+                    d { "Block reflex: wait and block" }
+                    GamePad.None
+                } else {
+                    d { "Block reflex: face $facingProjectileDirection" }
+                    facingProjectileDirection.toGamePad()
+                }
+            } else {
+                d { "Block reflex: not in direction $dir"}
+            }
+        }
+
+        return null
     }
 
 }

@@ -95,6 +95,12 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         val currentFrame = api.frameCount
 
         d { "execute ### $currentFrame" }
+        // could log zapper to try different routes
+        // zapperLoc -> fix Link location -> advanceFrame (hopefully render route)
+        // Action, Map, ZParam, click listener
+        // FrameState
+//        d { "zapper ${FramePoint(api.zapperX, api.zapperY)}"}
+
         monitor.update(frameStateUpdater.state, plan)
 
         cheater.refillAndSetItems()
@@ -148,8 +154,15 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         }
     }
 
+    // have to round to nearest highway
+    private fun zapperPoint() = FramePoint(api.zapperX, api.zapperY - MapConstants.yAdjust).nearestGrid
+
     private fun getAction(currentFrame: Int, currentGamePad: GamePad): GamePad {
-        frameStateUpdater.updateFrame(currentFrame, currentGamePad)
+        if (ZeldaBot.fixLocationToZapper) {
+            frameStateUpdater.updateFrame(currentFrame, currentGamePad, zapperPoint())
+        } else {
+            frameStateUpdater.updateFrame(currentFrame, currentGamePad)
+        }
 
         // this is a debug function so the debug UI can control link
         if (unstick > 0) {
@@ -175,7 +188,12 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 
         frameStateUpdater.state.previousGamePad = nextGamePad
 
-        return nextGamePad
+        return if (ZeldaBot.fixLocationToZapper) {
+            d { " FIX ZAP "}
+            GamePad.None
+        } else {
+            nextGamePad
+        }
     }
 
     companion object {
@@ -195,6 +213,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         var addEquipment: Boolean = false
         var invincible: Boolean = false
         var maxLife: Boolean = false
+        var fixLocationToZapper: Boolean = false
 
         @JvmStatic
         fun startIt(monitor: ZeldaMonitor): ZeldaBot {
@@ -263,6 +282,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 //            frameStateUpdater.setSword(ZeldaItem.MagicSword)
 //            frameStateUpdater.setRing(ZeldaItem.BlueRing)
                 stateManipulator.setLadderAndRaft(true)
+//                stateManipulator.setMagicShield()
                 stateManipulator.setRedCandle()
                 stateManipulator.setHaveWhistle()
                 stateManipulator.setBait()
@@ -370,6 +390,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                                 " target ${plan.target()} " + "link " +
                                 "${frameState.link.point}"
                     }
+                    val zapper = zapperPoint()
                     val tenth = this.frameState.tenth
 //                    val dir = this.frameState.link.dir.name.first()
 //                    val damage = this.frameState.inventory.heartCalc.damageNumber()
@@ -377,8 +398,11 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                     // t: $tenth d: $dir
                     //heart
                     val heart = this.frameState.inventory.heartCalc.toString()
+                    val z = if (api.isZapperTrigger) {
+                        "!"
+                    } else ""
                     try {
-                        drawIt(plan.target(), plan.path(), "$locCoordinates $link t:$tenth h:$heart")
+                        drawIt(plan.target(), plan.path(), "$locCoordinates $link z: $zapper$z t:$tenth h:$heart")
                     } catch (e: Exception) {
                         d { "ERROR $e" }
                     }
@@ -454,7 +478,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 //                            if (should) Colors.DARK_GREEN else Colors.LIGHT_BLUE
 
 //                        v > 100000 -> Colors.MAGENTA
-                        v > 9000 && (y % 16 % 2 == 0) -> Colors.RED
+//                        v > 9000 && (y % 16 % 2 == 0) -> Colors.RED
                         else -> -1
                     }
                     if (color != -1) {

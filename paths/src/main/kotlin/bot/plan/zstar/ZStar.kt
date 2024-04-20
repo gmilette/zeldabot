@@ -7,6 +7,7 @@ import bot.plan.action.isInGrid
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapConstants
+import bot.state.map.pointModifier
 import util.Map2d
 import util.d
 import java.util.*
@@ -21,6 +22,7 @@ class ZStar(
 ) {
     companion object {
         var DEBUG = false
+        var DEBUG_B = false
         private val DEBUG_DIR = false
         val DEBUG_ONE = false
 
@@ -93,6 +95,7 @@ class ZStar(
     data class ZRouteParam(
         val start: FramePoint,
         val targets: List<FramePoint>,
+        val projectiles: List<FramePoint> = emptyList(),
         val pointBeforeStart: FramePoint? = null,
         val enemies: List<FramePoint> = emptyList(),
         val rParam: RouteTo.RoutingParamCommon = RouteTo.RoutingParamCommon(),
@@ -129,7 +132,7 @@ class ZStar(
         param: ZRouteParam
     ): List<FramePoint> {
         customizer.customize(param)
-        return breadthSearch(param.start, param.targets)
+        return breadthSearch(param, param.start, param.targets)
     }
 
     // if safe needed
@@ -144,26 +147,43 @@ class ZStar(
 
     }
 
-    private fun breadthSearch(current: FramePoint,
+    // for each step in the breadth first search, move the enemies closer to link
+    // regardless if the enemy is moving in the direction as link, just assume it's going
+    // to do the worst thing
+    // if I know the direction the enemy is facing, then be smart.
+    // some enemies only travel on the highways
+    /**
+     * @param time how long to progress enemy
+     */
+    private fun progressEnemies(speed: Int = 1, time: Int) {
+        // for now, only progress projectiles, how fast do they go? let's say 1 pixel per frame?
+    }
+
+    private fun breadthSearch(
+        param: ZRouteParam,
+        current: FramePoint,
                               targets: List<FramePoint>,
                               visited: MutableSet<FramePoint> = mutableSetOf()): List<FramePoint> {
         val toExplore = neighborFinder.neighbors(current).toMutableList()
         val cameFrom = mutableMapOf<FramePoint, FramePoint>()
         var finalPoint = FramePoint()
 
-        d { " targets $targets start $current" }
+        // doesn't work. more testing needed
+        d { "start dodge targets $targets start $current toExplore: ${toExplore.size}" }
         var i = 0
-        while (toExplore.isNotEmpty()) {
-            if (DEBUG) {
+        while (toExplore.isNotEmpty() && i < MAX_ITER) {
+            if (DEBUG_B) {
                 d { "$i: open nodes: ${toExplore.size} : $toExplore" }
             }
+            customizer.setAllEnemyCosts(param, i)
             for (nearPoint in toExplore.toMutableList()) {
-                if (DEBUG) {
-                    d { " -->explore $nearPoint" }
+                if (DEBUG_B) {
+                    d { "$i: -->explore $nearPoint" }
                 }
+                // check if it intersects any enemies
                 if (costsF.safe(nearPoint)) {
 //                if (nearPoint in targets) {
-                    if (DEBUG) {
+                    if (DEBUG_B) {
                         d { " Found end!!" }
                     }
                     finalPoint = nearPoint
@@ -182,7 +202,7 @@ class ZStar(
         }
 
         val path = mutableListOf(finalPoint)
-        if (DEBUG) {
+        if (DEBUG_B) {
             d { " came froms " }
             for (entry in cameFrom) {
                 d { " ${entry.key} -> ${entry.value}" }
@@ -207,6 +227,12 @@ class ZStar(
     private fun goalFunction() {
 
     }
+
+//    fun route(
+//        param: ZRouteParam
+//    ): List<FramePoint> {
+//        return routeNearestSafe(param)
+//    }
 
     fun route(
         param: ZRouteParam
@@ -545,14 +571,15 @@ class ZStar(
 
     inner class GridCustomizer {
         fun customize(param: ZRouteParam) {
-            val startSum = sum()
-            d { "Plan: iter = enemies ${param.enemies.size} near $startSum" }
+//            val startSum = sum()
+            d { "Plan: iter = enemies ${param.enemies.size}" }
             resetPassable()
             // only if inside a radius
 //            setEnemyCosts(param.start, param.enemies)
             // fails, why?
-            setEnemyCostsByIntersect(param.enemies)
-            setForceHighCost(param.rParam.forceHighCost)
+            setAllEnemyCosts(param)
+//            setEnemyCostsByIntersect(param.enemies, param.projectiles)
+//            setForceHighCost(param.rParam.forceHighCost)
             setForcePassable(param.rParam.forcePassable)
             setZeroCost(param.rParam.attackTarget)
         }
@@ -621,10 +648,27 @@ class ZStar(
 //        setForcePassable(enemies, setTo = false)
         }
 
-        private fun setEnemyCostsByIntersect(enemies: List<FramePoint> = emptyList()) {
+        fun setAllEnemyCosts(param: ZRouteParam, progress: Int = 0) {
+            setEnemyCostsByIntersect(param.enemies, param.projectiles, progress)
+            setForceHighCost(param.rParam.forceHighCost)
+        }
+
+        private fun setEnemyCostsByIntersect(enemies: List<FramePoint> = emptyList(),
+                                             projectiles: List<FramePoint>,
+                                             progress: Int = 0) {
             reset()
 //            val enemyRect = enemies.map { it.toRectPlus(MapConstants.halfGrid) }
-            val enemyRect = enemies.map { it.toRect() }
+            val enemyRect = if (progress == 0) {
+                enemies.map { it.toRect() }
+            } else {
+                projectiles.map { pt ->
+                    pt.direction?.pointModifier(progress)?.let { mod ->
+                        val adj = mod(pt)
+                        d { "$progress: moveit to $pt to $adj"}
+                        adj
+                    } ?: pt
+                }.map { it.toRect() } + (enemies - projectiles.toSet()).map { it.toRect() }
+            }
 
             d { " set enemy cost for intersecting" }
             costsF.mapXyCurrent { x, y, current ->

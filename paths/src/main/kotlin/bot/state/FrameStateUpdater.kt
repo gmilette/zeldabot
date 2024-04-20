@@ -17,9 +17,9 @@ class FrameStateUpdater(
     private val mapStats = MapStatsTracker()
     private val yAdjustFactor = MapConstants.yAdjust
 
-    private fun getLinkX() = api.readCPU(Addresses.linkX)
-    private fun getLinkY() = api.readCPU(Addresses.linkY)
-    fun getLink() = FramePoint(getLinkX(), getLinkY())
+//    private fun getLinkX() = api.readCPU(Addresses.linkX)
+//    private fun getLinkY() = api.readCPU(Addresses.linkY)
+//    fun getLink() = FramePoint(getLinkX(), getLinkY())
     var state: MapLocationState = MapLocationState(hyrule = hyrule)
 
     fun reset() {
@@ -27,7 +27,7 @@ class FrameStateUpdater(
         state = MapLocationState(hyrule)
     }
 
-    fun updateFrame(currentFrame: Int, currentGamePad: GamePad) {
+    fun updateFrame(currentFrame: Int, currentGamePad: GamePad, forcedLinkPoint: FramePoint? = null) {
         val previous = state.frameState
 
         if (currentFrame > 10) {
@@ -42,7 +42,10 @@ class FrameStateUpdater(
 
         val linkX = api.readCPU(Addresses.linkX)
         val linkY = api.readCPU(Addresses.linkY) - yAdjustFactor
-        val linkPoint = FramePoint(linkX, linkY)
+        val linkPt = FramePoint(linkX, linkY)
+        val linkPoint =
+            forcedLinkPoint ?: FramePoint(linkX, linkY)
+        d { " linkPoint: $linkPt $forcedLinkPoint"}
 //        val calculatedDir = previous.link.point.directionToDir(linkPoint)
 
         // works

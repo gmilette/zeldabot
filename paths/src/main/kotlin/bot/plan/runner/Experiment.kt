@@ -22,7 +22,8 @@ class Experiments(masterPlan: MasterPlan) {
         experiments = listOf(
             Experiment("all", "start_nothing.save", masterPlan, sword = ZeldaItem.MagicSword, addEquipment = false),
             Experiment("overworlddodge", "overworlddodge.save", masterPlanWith(dodge), sword = ZeldaItem.MagicSword, addEquipment = true),
-            Experiment("level2dodge", "level2_boom_dead.save", masterPlanWith(dodge), sword = ZeldaItem.MagicSword, addEquipment = true),
+            Experiment("level2dodge", "level2_dodge_shield.save", masterPlanWith(dodge), sword = ZeldaItem.MagicSword, addEquipment = true),
+            Experiment("level2dodgeNoShield", "level2_boom_dead.save", masterPlanWith(dodge), sword = ZeldaItem.MagicSword, addEquipment = true),
             Experiment("level1dodge", "level1_skele.save", masterPlanWith(dodge), sword = ZeldaItem.MagicSword, addEquipment = true),
             Experiment("level6start", "level6_start.save", masterPlan.getPlanAfter(Phases.level6), sword = ZeldaItem.MagicSword, addEquipment = true),
 //            Experiment("level6end", "level6_done.save", masterPlan.getPlanAfter(Phases.afterLevel6), sword = ZeldaItem.MagicSword, addEquipment = true),

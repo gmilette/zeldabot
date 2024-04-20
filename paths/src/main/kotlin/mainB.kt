@@ -60,6 +60,7 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
     val inv = remember { mutableStateOf(ZeldaBot.invincible) }
     val max = remember { mutableStateOf(ZeldaBot.maxLife) }
     val allowAttack = remember { mutableStateOf(RouteTo.allowAttack) }
+    val zapperLoc = remember { mutableStateOf(ZeldaBot.fixLocationToZapper) }
 
     Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
         SwitchViewButton(debugView)
@@ -169,6 +170,15 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
                     onCheckedChange = {
                         allowAttack.value = it
                         model.allowAttack(it)
+                    }
+                )
+
+                Text("Zap")
+                Checkbox(
+                    checked = zapperLoc.value,
+                    onCheckedChange = {
+                        zapperLoc.value = it
+                        model.fixLocationToZapper(it)
                     }
                 )
 
@@ -473,6 +483,10 @@ class ZeldaModel : ZeldaBot.ZeldaMonitor {
 
     fun allowAttack(act: Boolean) {
         RouteTo.allowAttack = act
+    }
+
+    fun fixLocationToZapper(act: Boolean) {
+        ZeldaBot.fixLocationToZapper = act
     }
 
     fun max(act: Boolean) {
