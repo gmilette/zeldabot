@@ -7,13 +7,14 @@ object ProjectileDirectionLookup {
         findDir(tileAttrib) != Direction.None
 
     fun findDir(tileAttrib: TileAttribute): Direction =
-        findElse(tileAttrib, listOf(::findDirArrow, ::findDirBoomerang, ::findDirWiz))
+        findElse(tileAttrib, listOf(::findDirArrow, ::findDirWiz))
 
-    private fun findDirBoomerang(tileAttrib: TileAttribute) =
-        when (tileAttrib) {
-            brownBoomerangSpinBendFacingUpPair -> Direction.Up
-            else -> Direction.None
-        }
+//::findDirBoomerang
+//    private fun findDirBoomerang(tileAttrib: TileAttribute) =
+//        when (tileAttrib) {
+//            brownBoomerangSpinBendFacingUpPair -> Direction.Up
+//            else -> Direction.None
+//        }
 
     private fun findDirWiz(tileAttrib: TileAttribute) =
         when {

@@ -301,6 +301,14 @@ class PlanBuilder(
             return this
         }
 
+    val upNoBlock: PlanBuilder
+        get() {
+            // don't try to fight
+            val nextLoc = lastMapLoc.up
+            add(nextLoc, moveTo(nextLoc, false))
+            return this
+        }
+
     val down: PlanBuilder
         get() {
             add(lastMapLoc.down)
@@ -907,8 +915,8 @@ class PlanBuilder(
         add(nextLoc, killAndMove(moveTo(nextLoc)))
     }
 
-    private fun moveTo(next: Int): MoveTo =
-        MoveTo(lastMapLoc, mapCell(next), level)
+    private fun moveTo(next: Int, allowBlocking: Boolean = true): MoveTo =
+        MoveTo(lastMapLoc, mapCell(next), level, ignoreProjectiles = false, allowBlocking = allowBlocking)
 
     private fun add(loc: MapLoc, action: Action): PlanBuilder {
         lastMapLoc = loc

@@ -73,7 +73,7 @@ class OamStateReasoner(
             Direction.None
         }
         if (state == EnemyState.Projectile) {
-            d { " Move dir for ${tileAttribute.toHex()} $point is ${movingDirection.toArrow()} and ${findDir.toArrow()}" }
+            d { " Move dir for d:$damaged ${tileAttribute.toHex()} $point is ${movingDirection.toArrow()} and ${findDir.toArrow()}" }
         }
         return Agent(
             index = index, point = point,

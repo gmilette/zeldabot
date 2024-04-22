@@ -11,6 +11,8 @@ import bot.state.map.MovingDirection
 import bot.state.oam.EnemyGroup.boomerangs
 import com.google.gson.GsonBuilder
 import util.d
+import java.io.File
+import java.io.FileWriter
 
 var gson = GsonBuilder().setPrettyPrinting().create()
 
@@ -23,7 +25,7 @@ data class MapStatsData(
 }
 
 class MapStatsTracker {
-    private val DEBUG = false
+    private val DEBUG = true
     private var mapCoordinates: MapCoordinates = MapCoordinates(0, 0)
 
     // the memory
@@ -53,12 +55,12 @@ class MapStatsTracker {
         return attrib.damaged(attribute).also {
             if (it) {
                 if (DEBUG) {
-                    d { "check damage DAMAGED Attrib=${attribute}" }
+                    d { "check damage DAMAGED tile=$tile Attrib=${attribute}" }
                 }
                 d { attrib.tileString(tile) }
             } else {
                 if (DEBUG) {
-                    d { "check damage NOT DAMAGED" }
+                    d { "check damage NOT DAMAGED tile=$tile " }
                 }
                 d { attrib.tileString(tile) }
             }
@@ -103,7 +105,7 @@ class MapStatsTracker {
 
     private fun writeJson(mapCoordinates: MapCoordinates) {
 //        val json = gson.toJson(myObject)
-//        val file = File("my_file.json")
+//        val file = File("map_stats_db.json")
 //        val writer = FileWriter(file)
 //        writer.write(json)
 //        writer.close()

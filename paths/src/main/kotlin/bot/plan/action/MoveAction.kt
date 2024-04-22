@@ -197,9 +197,11 @@ class MoveTo(
     val next: MapCell,
     val toLevel: Int,
     private val forceDirection: Direction? = null,
-    ignoreProjectiles: Boolean = false
+    ignoreProjectiles: Boolean = false,
+    private val allowBlocking: Boolean = true
 ) : MapAwareAction {
-    private val routeTo = RouteTo(params = RouteTo.Param(whatToAvoid = RouteTo.Param.makeIgnoreProjectiles(ignoreProjectiles)))
+    private val routeTo = RouteTo(params = RouteTo.Param(
+        whatToAvoid = RouteTo.Param.makeIgnoreProjectiles(ignoreProjectiles)))
 
     init {
         next.zstar.clearAvoid()
@@ -270,7 +272,7 @@ class MoveTo(
     private var start: MapCell? = null
 
     override fun nextStep(state: MapLocationState): GamePad {
-        d { " DO MOVE TO cell ${next.mapLoc} arrived=${arrived} $movedIn" }
+        d { " DO MOVE TO cell ${next.mapLoc} arrived=${arrived} $movedIn allow: $allowBlocking" }
 
         val current = state.currentMapCell
         if (start == null) {
@@ -291,7 +293,7 @@ class MoveTo(
         checkArrived(state, previousDir)
 
         return if (!arrived) {
-            routeTo.routeTo(state, exits, RouteTo.RouteParam())
+            routeTo.routeTo(state, exits, RouteTo.RouteParam(allowBlock = allowBlocking))
         } else {
             movedIn++
             arrivedDir.toGamePad()

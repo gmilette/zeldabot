@@ -6,7 +6,6 @@ import bot.state.oam.ProjectileDirectionLookup
 import util.d
 
 object AttackActionBlockDecider {
-
     /**
      * return null if no action should be taken
      */

@@ -237,11 +237,11 @@ object ZeldaPlan {
 //            goAbout(InLocations.Level2.keyMid, 1, 1, true, ignoreProjectiles = true)
 //            left
             seg("resume sprint")
-            up // skip squishy snake
+            up
             // skip getting key from squishy guy
 //            .kill
 //            .goTo(InLocations.Level2.keyMid)
-            upm
+            upNoBlock // the squishy guy appears like a projectile so do not block
             kill
             seg("bomb room")
             // no key I think

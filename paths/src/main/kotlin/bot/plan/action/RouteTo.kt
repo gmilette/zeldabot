@@ -70,6 +70,7 @@ class RouteTo(val params: Param = Param()) {
          * for attacking use B
          */
         val useB: Boolean = false,
+        val allowBlock: Boolean = true,
         val rParam: RoutingParamCommon = RoutingParamCommon()
     )
 
@@ -116,7 +117,7 @@ class RouteTo(val params: Param = Param()) {
     ): GamePad {
         val canAttack = param.useB || state.frameState.canUseSword
         val attackPossible by lazy { params.whatToAvoid != WhatToAvoid.None && canAttack }
-        d { " route To attackOrRoute attack=$attackPossible can=$canAttack" }
+        d { " route To attackOrRoute attack=$attackPossible can=$canAttack allowBlock=${param.allowBlock}" }
         val theAttack = if (param.useB) {
             attackB
         } else {
@@ -129,7 +130,7 @@ class RouteTo(val params: Param = Param()) {
         val projectileNear = state.projectiles.any { it.point.toRect().intersect(nearLink) }
         val inRangeOf by lazy { AttackActionDecider.inRangeOf(state) }
         val shouldLongAttack by lazy { AttackLongActionDecider.shouldShootSword(state) }
-        val blockReflex = AttackActionBlockDecider.blockReflex(state)
+        val blockReflex = if (param.allowBlock) AttackActionBlockDecider.blockReflex(state) else null
         return when {
             blockReflex != null -> {
                 d { " Route Action -> Block Reflex! $blockReflex" }
