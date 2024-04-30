@@ -1,11 +1,16 @@
 package bot.state.map
 
+/**
+ * any constants related to the map
+ */
 object MapConstants {
     const val MAX_X = 255
     const val MAX_Y = 167
     const val overworld = 0
-    const val halfGrid = 8
+
+    // each grid is 16 pixels. One tile occupies one grid usually. For example link is 1 grid big
     const val oneGrid = 16
+    const val halfGrid = 8
     const val oneGridF = 16.0f
     const val oneGridPoint5 = 24
     const val swordGrid = 10 // size of sword

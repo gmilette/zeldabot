@@ -1,10 +1,11 @@
 package util
 
+import bot.DirectoryConstants
 import com.github.doyaaaaaken.kotlincsv.client.CsvWriter
 
-class LogFile(private val fileNameRoot: String) {
-    private val experimentRoot = "../../zlog/"
-    val outputFileName = "${experimentRoot}/${fileNameRoot}_${System.currentTimeMillis()}.txt"
+class LogFile(fileNameRoot: String) {
+    val outputFileName = DirectoryConstants.file("zlog",
+        "${fileNameRoot}_${System.currentTimeMillis()}.txt")
 
     fun write(vararg message: Any) {
         CsvWriter().open(outputFileName, true) {

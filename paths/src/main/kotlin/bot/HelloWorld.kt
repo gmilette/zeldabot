@@ -6,6 +6,9 @@ import nintaco.api.ApiSource
 import nintaco.api.Colors
 import util.d
 
+/**
+ * sample bot
+ */
 class HelloWorld {
     private val api: API = ApiSource.getAPI()
     private var spriteX = 0
@@ -26,7 +29,7 @@ class HelloWorld {
 
     private fun apiEnabled() {
         d { "Hello d"}
-        println("API enabled GREG kotlin")
+        println("API enabled kotlin")
         Logger.d { "Hello from logger"}
         val sprite = IntArray(SPRITE_SIZE * SPRITE_SIZE)
         for (y in 0 until SPRITE_SIZE) {
@@ -79,7 +82,7 @@ class HelloWorld {
     }
 
     companion object {
-        private const val STRING = "Hello, World! KOTLIN yo"
+        private const val STRING = "Hello, World! KOTLIN"
         private const val SPRITE_ID = 123
         private const val SPRITE_SIZE = 32
         @JvmStatic

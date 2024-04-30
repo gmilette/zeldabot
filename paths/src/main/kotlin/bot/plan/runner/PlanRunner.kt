@@ -1,9 +1,9 @@
 package bot.plan.runner
 
+import bot.DirectoryConstants
 import bot.ZeldaBot
 import bot.plan.action.Action
 import bot.plan.action.DoNothing
-import bot.plan.action.dodge
 import bot.plan.action.moveHistoryAttackAction
 import bot.state.Addresses
 import bot.state.FramePoint
@@ -107,7 +107,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
         runLog = RunActionLog(ex.name)
         if (load) {
             d { "reload" }
-            val root = "../Nintaco_bin_2020-05-01/states/"
+            val root = DirectoryConstants.states
             api.loadState("$root/${startPath}")
         }
         setSword(ex.sword)

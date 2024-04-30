@@ -219,6 +219,8 @@ object EnemyGroup {
         spinCircleEnemy2,
         waterMonsterPair,
         waterMonsterPairUnder, // also it is ghost
-        waterMonsterPairUnder2
+        waterMonsterPairUnder2,
+        shopOwner,
+        shopOwner2
     )
 }

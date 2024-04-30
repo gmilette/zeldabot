@@ -1,5 +1,6 @@
 package bot.state.map.stats
 
+import bot.DirectoryConstants
 import bot.plan.action.PrevBuffer
 import bot.plan.action.ProjectileDirectionCalculator
 import bot.state.Agent
@@ -18,8 +19,20 @@ var gson = GsonBuilder().setPrettyPrinting().create()
 
 data class MapStatsData(
     val mapCoordinates: MapCoordinates,
-    val tileAttributeCount: Map<Int, AttributeCount>
+    val tileAttributeCount: MutableMap<Int, AttributeCount> = mutableMapOf()
 ) {
+    fun add(other: MapStatsData) {
+        for (entry in other.tileAttributeCount) {
+            val otherCount = entry.value
+            val thisCount = tileAttributeCount[entry.key]
+            if (thisCount == null) {
+                tileAttributeCount[entry.key] = otherCount
+            } else {
+                thisCount.add(otherCount)
+            }
+        }
+    }
+
     override fun toString(): String =
         gson.toJson(this)
 }
@@ -95,12 +108,43 @@ class MapStatsTracker {
         if (DEBUG) {
             d { "**Map stats**" }
             d { mapStatsData.toString() }
-            writeJson(mapCoordinates)
         }
+        // read in the old stats and add these new stats
+        val currentMapStats = readStats(mapCoordinates)
+        if (currentMapStats != null) {
+            d { " read stats: $currentMapStats"}
+            d { " current ${mapStatsData}" }
+            mapStatsData.add(currentMapStats)
+            d { " added ${mapStatsData}" }
+        }
+        write(mapCoordinates, mapStatsData.toString())
         previousEnemyLocations.clear()
         tileAttribCount.clear()
         this.mapCoordinates = mapCoordinates
         // read json for this map coordinates
+    }
+
+    private fun statFileName(mapCoordinates: MapCoordinates): String {
+//        val root = DirectoryConstants.outDir("mapStats")
+//        File(root).mkdirs()
+//        return "$root${File.separator}${fileName}.json"
+        val fileName = "${mapCoordinates.level}_${mapCoordinates.loc}_mapstats.json"
+        return DirectoryConstants.file("mapStats", fileName)
+    }
+
+    private fun readStats(mapCoordinates: MapCoordinates): MapStatsData? {
+        val file = File(statFileName(mapCoordinates))
+        if (!file.exists()) {
+            return null
+        }
+        val json = file.readText()
+       return gson.fromJson(json, MapStatsData::class.java)
+    }
+
+    private fun write(mapCoordinates: MapCoordinates, data: String) {
+        val writer = FileWriter(statFileName(mapCoordinates))
+        writer.write(data)
+        writer.close()
     }
 
     private fun writeJson(mapCoordinates: MapCoordinates) {
@@ -122,7 +166,13 @@ class AttributeCount {
         private const val minObservations = 100
     }
 
-    private val attribCount = mutableMapOf<Int, Int>()
+    val attribCount = mutableMapOf<Int, Int>()
+
+    fun add(other: AttributeCount) {
+        for (count in other.attribCount) {
+            attribCount[count.key] = (attribCount[count.key] ?: 0) + count.value
+        }
+    }
 
     private fun sorted() =
         attribCount.entries.toList().sortedBy { it.value }

@@ -37,7 +37,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         // but it has to happen after the API is ready, so execute on callback from
         // listeners
 
-        val root = "../Nintaco_bin_2020-05-01/states/"
+        val root = DirectoryConstants.states
         d { " master plan ${plan.masterPlan.toStringAll()}" }
         val loadZelda by RunOnceLambda {
             d { " load zelda" }

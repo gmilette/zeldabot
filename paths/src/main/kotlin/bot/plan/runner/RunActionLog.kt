@@ -1,5 +1,6 @@
 package bot.plan.runner
 
+import bot.DirectoryConstants
 import bot.plan.action.Action
 import bot.state.GamePad
 import bot.state.MapLocationState
@@ -33,7 +34,7 @@ class RunActionLog(private val fileNameRoot: String) {
         }
     }
 
-    private val experimentRoot = "../../zexperiment/"
+    private val experimentRoot = DirectoryConstants.outDir("zexperiment")
 
     val outputFileName = "${fileNameRoot}_${System.currentTimeMillis()}"
     val outputFile = "$experimentRoot${outputFileName}.csv"
