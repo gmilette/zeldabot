@@ -1,5 +1,6 @@
 package bot.state
 
+import bot.state.map.destination.ZeldaItem
 import util.d
 
 /**
@@ -100,13 +101,19 @@ class HeartsStateCalculator(private val inventory: Inventory) {
         return lifeTotalDecimal
     }
 
-    fun full(): Boolean {
+    fun full(ring: ZeldaItem = ZeldaItem.None): Boolean {
+        val damageThresholdToStillBeFull = when (ring) {
+            // you can have half damage and still be full
+            ZeldaItem.BlueRing -> 0.5
+            ZeldaItem.RedRing -> 0.25
+            else -> 0.0
+        }
         val containers = heartContainers()
         val full = heartContainersFull()
         val damage = damageDecimal()
         // if you have the red ring, it will be 0.875
         // got into weird state where it was stuck at 0.25 and couldnt shoot
-        return (containers == full && damage < 0.5).also {
+        return (containers == full && damage < damageThresholdToStillBeFull).also {
             d { " full cont $containers full $full damage $damage full $it"}
         }
     }

@@ -8,6 +8,13 @@ import util.d
 class InventoryItems(api: API) {
     val hasRing by lazy { api.readCPU(api.readCPU(Addresses.hasRing)) }
     val hasMagicShield by lazy { api.readCpuB(Addresses.hasShield) }
+
+    fun whichRing() =
+        when (hasRing) {
+            1 -> ZeldaItem.BlueRing
+            2 -> ZeldaItem.RedRing
+            else -> ZeldaItem.None
+        }
 }
 
 object InventoryReader {

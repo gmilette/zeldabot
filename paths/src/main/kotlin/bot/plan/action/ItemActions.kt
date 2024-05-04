@@ -99,8 +99,22 @@ class SwitchToItemConditionally(private val inventoryPosition: Int = Inventory.S
         }
     }
 
+    private fun inventoryPositionToName(position: Int): String =
+        when (position) {
+            0 -> "Boomerang"
+            1 -> "Bomb"
+            2 -> "Arrow"
+            4 -> "Candle"
+            5 -> "Whistle"
+            6 -> "Bait"
+            7 -> "Potion"
+            15 -> "letter"
+            8 -> "Wand"
+            else -> position.toString()
+        }
+
     override val name: String
-        get() = "SwitchToItemConditionally $inventoryPosition"
+        get() = "SwitchToItemConditionally to ${inventoryPositionToName(inventoryPosition)}"
 }
 
 class UseItem(private val usedTimes: Int = 5) : Action {

@@ -14,7 +14,9 @@ import kotlin.random.Random
 class RouteTo(val params: Param = Param()) {
     companion object {
         var allowAttack = true
-        fun hardlyReplan(dodgeEnemies: Boolean = true, ignoreProjectiles: Boolean = false) = RouteTo(
+        fun hardlyReplan(dodgeEnemies: Boolean = true,
+                         /** don't try to block or route around projectiles **/
+                         ignoreProjectiles: Boolean = false) = RouteTo(
             Param(
                 planCountMax = 100,
                 whatToAvoid =
@@ -130,7 +132,9 @@ class RouteTo(val params: Param = Param()) {
         val projectileNear = state.projectiles.any { it.point.toRect().intersect(nearLink) }
         val inRangeOf by lazy { AttackActionDecider.inRangeOf(state) }
         val shouldLongAttack by lazy { AttackLongActionDecider.shouldShootSword(state) }
-        val blockReflex = if (param.allowBlock) AttackActionBlockDecider.blockReflex(state) else null
+        // if avoiding just enemies, then no need to block any projectiles
+        // this should help collecting the boomerang and also maybe the traps
+        val blockReflex = if (param.allowBlock && this.params.whatToAvoid != WhatToAvoid.JustEnemies) AttackActionBlockDecider.blockReflex(state) else null
         return when {
             blockReflex != null -> {
                 d { " Route Action -> Block Reflex! $blockReflex" }

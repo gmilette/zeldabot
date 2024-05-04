@@ -11,7 +11,7 @@ class DirectoryConstantsTest {
 
     @Test
     fun testFile() {
-        DirectoryConstants.file ("hope", "test.txt") shouldBe  ("../../botoutput/hope/test.txt")
+        DirectoryConstants.file("hope", "test.txt") shouldBe  ("../../botoutput/hope/test.txt")
     }
 }
 

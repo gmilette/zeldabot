@@ -113,7 +113,7 @@ class RunActionLog(private val fileNameRoot: String) {
         if (SAVE) {
             val csvWriter2 = CsvWriter()
             csvWriter2.open(outputFile, false) {
-                writeRow("index", "time", "totalTime", "action", "bombsUsed", "hits", "damage")
+                writeRow("index", "time", "totalTime", "numFrames", "action", "bombsUsed", "hits", "damage")
                 completedStep.forEachIndexed { index, stepCompleted ->
                     stepCompleted.apply {
                         writeRow(index, time, totalTime, numFrames, action, bombsUsed, hits, damage)

@@ -301,5 +301,5 @@ class MoveTo(
     }
 
     override val name: String
-        get() = "Move from ${this.fromLoc} to ${this.next.mapLoc} $dir $movedIn"
+        get() = "Move from ${this.fromLoc} to ${this.next.mapLoc}" // $dir $movedIn
 }

@@ -13,7 +13,7 @@ object AttackLongActionDecider {
 
     fun shouldShootSword(state: MapLocationState): Boolean {
         val swordIsFlying = false
-        val full = state.frameState.inventory.heartCalc.full()
+        val full = state.frameState.inventory.heartCalc.full(state.frameState.inventory.inventoryItems.whichRing())
         val canShoot = full //state.frameState HeartCalculator.isFull()
         // draw ray from attack point. Does it hi
         return (canShoot && !swordIsFlying && targetInLongRange(state))
