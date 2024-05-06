@@ -95,6 +95,7 @@ class MapStatsTracker {
         savePrevious(enemies)
         for (entry in enemies.groupBy { it.tile }) {
             tileAttribCount.getOrDefault(entry.key, AttributeCount()).apply {
+                d { "attrib ct for ${entry.key}"}
                 for (agent in entry.value) {
                     count(agent.attribute)
                 }
@@ -113,9 +114,12 @@ class MapStatsTracker {
         val currentMapStats = readStats(mapCoordinates)
         if (currentMapStats != null) {
             d { " read stats: $currentMapStats"}
-            d { " current ${mapStatsData}" }
+            for (entry in currentMapStats.tileAttributeCount) {
+                d { " ${entry.key} h: ${entry.key.toString(16)}"}
+            }
+            d { " current $mapStatsData" }
             mapStatsData.add(currentMapStats)
-            d { " added ${mapStatsData}" }
+            d { " added $mapStatsData" }
         }
         write(mapCoordinates, mapStatsData.toString())
         previousEnemyLocations.clear()
@@ -184,7 +188,7 @@ class AttributeCount {
     fun tileString(tile: Int): String {
         var s = ""
         for (entry in sorted()) {
-            s = "$s\n$tile\t${entry.key}\t${entry.value}"
+            s = "$s\n$tile\t${tile.toString(16)}\t${entry.key}\t${entry.value}"
         }
         return s
     }

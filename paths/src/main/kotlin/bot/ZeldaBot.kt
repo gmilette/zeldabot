@@ -398,13 +398,10 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                     // t: $tenth d: $dir
                     //heart
                     val heart = this.frameState.inventory.heartCalc.toString()
-                    val ring = this.frameState.inventory.inventoryItems.whichRing().takeIf { it != ZeldaItem.None } ?: ""
-//                    z: $zapper$z
-//                    val z = if (api.isZapperTrigger) {
-//                        "!"
-//                    } else ""
+                    val ring = this.frameState.inventory.inventoryItems.whichRing().takeIf { it != ZeldaItem.None }
+                    val ringS = if (ring != null) "r: ${ring.toString().take(1)}" else ""
                     try {
-                        drawIt(plan.target(), plan.path(), "$locCoordinates $link t:$tenth h:${heart}_${ring}")
+                        drawIt(plan.target(), plan.path(), "$locCoordinates $link t:$tenth h:${heart}${ringS}")
                     } catch (e: Exception) {
                         d { "ERROR $e" }
                     }

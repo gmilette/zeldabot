@@ -3,6 +3,9 @@ package bot.state.oam
 class Enemies {
 }
 
+private val one = (0x01).toInt()
+private val two = (0x02).toInt()
+
 val deadEnemy2 = (0x64).toInt() // attrib 40, 02 43 3// big splash
 val deadEnemy = (0x62).toInt() // attrib 40, small one
 
@@ -31,6 +34,7 @@ val waterMonsterPairAlt = (0xEE) to (0x03).toInt() // tile address = 0EE0
 val waterMonsterPairAlt2 = (0xEE) to (0x43).toInt()
 val ghostWeak = (0xB8).toInt() // also it is the back of boomerang guy
 val ghostWeak2 = (0xBA).toInt()
+val boomerangGuy = (0xBA).toInt() to two
 val bombSmoke = (0x70).toInt()
 val bombSmokeLess = (0x72).toInt() // 41
 val monsterCloud = (0x70).toInt() // 01 or 41

@@ -50,4 +50,26 @@ class MapStatsDataTest {
             (data1.tileAttributeCount[1]?.attribCount?.get(2) ?: 0) shouldBe 1
         }
     }
+
+    @Test
+    fun testHEx() {
+        val co = MapCoordinates(2, 2)
+        val data1 = MapStatsData(co)
+        val aCount = AttributeCount()
+        aCount.count(10)
+        aCount.count(10)
+        aCount.count(10)
+        val ba = (0xba).toInt()
+        data1.tileAttributeCount[ba] = aCount
+
+        val ount = AttributeCount()
+        ount.count(10)
+        ount.count(10)
+        ount.count(10)
+        data1.tileAttributeCount[186] = ount
+
+        print("data2 $data1")
+    }
+
+
 }
