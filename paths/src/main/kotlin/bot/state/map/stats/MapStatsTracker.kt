@@ -52,7 +52,7 @@ class MapStatsTracker {
     fun isDamaged(enemy: Agent): Boolean = isDamaged(enemy.tile, enemy.attribute)
 
     fun attribFor(tile: Int): AttributeCount {
-        return tileAttribCount.getOrDefault(tile, AttributeCount())
+        return tileAttribCount.getOrDefault(tile, AttributeCount(tile))
     }
 
     fun isDamaged(tile: Int, attribute: Int): Boolean {
@@ -90,21 +90,23 @@ class MapStatsTracker {
 
     fun track(mapCoordinates: MapCoordinates, enemies: List<Agent>) {
         if (mapCoordinates != this.mapCoordinates) {
-            reset(mapCoordinates)
+            reset(this.mapCoordinates)
         }
         savePrevious(enemies)
         for (entry in enemies.groupBy { it.tile }) {
-            tileAttribCount.getOrDefault(entry.key, AttributeCount()).apply {
-                d { "attrib ct for ${entry.key}"}
+            tileAttribCount.getOrDefault(entry.key, AttributeCount(entry.key)).apply {
+//                d { "attrib ct for ${entry.key}"}
                 for (agent in entry.value) {
                     count(agent.attribute)
                 }
                 tileAttribCount[entry.key] = this
             }
         }
+        this.mapCoordinates = mapCoordinates
     }
 
     private fun reset(mapCoordinates: MapCoordinates) {
+        // it is writing the wrong coordinates
         val mapStatsData = MapStatsData(mapCoordinates, tileAttribCount)
         if (DEBUG) {
             d { "**Map stats**" }
@@ -124,7 +126,6 @@ class MapStatsTracker {
         write(mapCoordinates, mapStatsData.toString())
         previousEnemyLocations.clear()
         tileAttribCount.clear()
-        this.mapCoordinates = mapCoordinates
         // read json for this map coordinates
     }
 
@@ -165,7 +166,7 @@ class MapStatsTracker {
         } ?: MovingDirection.UNKNOWN_OR_STATIONARY
 }
 
-class AttributeCount {
+class AttributeCount(tile: Int, val hex: String = tile.toString(16)) {
     companion object {
         private const val minObservations = 100
     }

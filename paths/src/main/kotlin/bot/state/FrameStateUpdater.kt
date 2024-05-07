@@ -84,12 +84,14 @@ class FrameStateUpdater(
         // reset to prevent infinite memory being allocated
         previousNow.previous = null
 
-        val mapCoordinates = MapCoordinates(level, mapLoc)
-        mapStats.track(mapCoordinates, theEnemies)
-
         val seenBoomerang = mapStats.seenBoomerang
         val frame = FrameState(api, theEnemies, theUncombined, level, mapLoc, link, ladder, seenBoomerang)
 
+        if (!frame.isScrolling) {
+            // don't track if the screen is scrolling
+            val mapCoordinates = MapCoordinates(level, mapLoc)
+            mapStats.track(mapCoordinates, theEnemies)
+        }
         state.framesOnScreen++
         state.frameState = frame
     }
