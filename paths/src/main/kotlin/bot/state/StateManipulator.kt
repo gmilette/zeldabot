@@ -23,6 +23,12 @@ class StateManipulator(
         api.writeCPU(Addresses.heartContainersHalf, 0xFF) // make the half heart full too
     }
 
+    fun fillHeartsToFull() {
+        val forFull = state.frameState.inventory.heartCalc.makeHeartsFull()
+        api.writeCPU(Addresses.heartContainers, forFull)
+        api.writeCPU(Addresses.heartContainersHalf, 0xFF) // make the half heart full too
+    }
+
     fun setRing(item: ZeldaItem) {
         val ringId = when (item) {
             ZeldaItem.BlueRing -> 1

@@ -113,7 +113,7 @@ class HeartsStateCalculator(private val inventory: Inventory) {
         val damage = damageDecimal()
         // if you have the red ring, it will be 0.875
         // got into weird state where it was stuck at 0.25 and couldnt shoot
-        return (containers == full && damage < damageThresholdToStillBeFull).also {
+        return (containers == full && (damage == 0.0 || damage < damageThresholdToStillBeFull)).also {
             d { " full cont $containers full $full damage $damage full $it"}
         }
     }
@@ -124,6 +124,12 @@ class HeartsStateCalculator(private val inventory: Inventory) {
 
     private fun info(): String =
         if (full()) "F_${damageDecimal()}" else "${heartContainers() - heartContainersFull() + damageDecimal()}"
+
+    fun makeHeartsFull(): Int {
+        val containers = heartContainers() - 1
+        val twoFull = "${containers}${containers}"
+        return twoFull.toInt(16)
+    }
 
     // empty: FD, 7E, FC (yes it is indeed full), FB, FA, F9, F4(2 full hearts), F3(1 heart)
     // half: 7D, 7C, 7B, 7A, 79, 74 (1.5 hearts), 73, only 0.5 hearts

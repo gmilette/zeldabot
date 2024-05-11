@@ -90,7 +90,7 @@ class FrameStateUpdater(
         if (!frame.isScrolling) {
             // don't track if the screen is scrolling
             val mapCoordinates = MapCoordinates(level, mapLoc)
-            mapStats.track(mapCoordinates, theEnemies)
+            mapStats.track(mapCoordinates, theEnemies, frame)
         }
         state.framesOnScreen++
         state.frameState = frame

@@ -3,14 +3,12 @@ package bot.state.map.stats
 import bot.DirectoryConstants
 import bot.plan.action.PrevBuffer
 import bot.plan.action.ProjectileDirectionCalculator
-import bot.state.Agent
-import bot.state.EnemyState
-import bot.state.FramePoint
-import bot.state.MapCoordinates
+import bot.state.*
 import bot.state.map.MapConstants
 import bot.state.map.MovingDirection
 import bot.state.oam.EnemyGroup.boomerangs
 import com.google.gson.GsonBuilder
+import util.Map2d
 import util.d
 import java.io.File
 import java.io.FileWriter
@@ -40,6 +38,8 @@ data class MapStatsData(
 class MapStatsTracker {
     private val DEBUG = true
     private var mapCoordinates: MapCoordinates = MapCoordinates(0, 0)
+    private var visits: Map2d<Boolean> = Map2d(emptyList())
+    private var moveLog: List<FramePoint> = emptyList()
 
     // the memory
     private val tileAttribCount = mutableMapOf<Int, AttributeCount>()
@@ -88,10 +88,15 @@ class MapStatsTracker {
         previousEnemyLocations.add(enemyCopies)
     }
 
-    fun track(mapCoordinates: MapCoordinates, enemies: List<Agent>) {
+    private fun saveLink(state: FrameState) {
+        visits.set(state.link.point, true)
+    }
+
+    fun track(mapCoordinates: MapCoordinates, enemies: List<Agent>, state: FrameState) {
         if (mapCoordinates != this.mapCoordinates) {
             reset(this.mapCoordinates)
         }
+        saveLink(state)
         savePrevious(enemies)
         for (entry in enemies.groupBy { it.tile }) {
             tileAttribCount.getOrDefault(entry.key, AttributeCount(entry.key)).apply {
@@ -130,9 +135,6 @@ class MapStatsTracker {
     }
 
     private fun statFileName(mapCoordinates: MapCoordinates): String {
-//        val root = DirectoryConstants.outDir("mapStats")
-//        File(root).mkdirs()
-//        return "$root${File.separator}${fileName}.json"
         val fileName = "${mapCoordinates.level}_${mapCoordinates.loc}_mapstats.json"
         return DirectoryConstants.file("mapStats", fileName)
     }

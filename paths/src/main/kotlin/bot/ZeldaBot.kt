@@ -252,16 +252,15 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     inner class Cheater(api: API, frameStateUpdater: FrameStateUpdater) {
         private val stateManipulator = StateManipulator(api, frameStateUpdater)
         fun refillAndSetItems() {
-            // fill hearts
             // not reliable enough
             val life = frameStateUpdater.state.frameState.inventory.heartCalc.lifeInHearts2()
             d { "fill hearts $life" }
             when {
                 life <= 4.0 && invincible -> {
                     d { "*fill*" }
-                    stateManipulator.fillHearts()
+                    stateManipulator.fillHeartsToFull()
                 }
-                maxLife -> stateManipulator.fillHearts()
+                maxLife -> stateManipulator.fillHeartsToFull()
             }
 
             if (addKey) {

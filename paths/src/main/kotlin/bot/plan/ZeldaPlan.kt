@@ -11,6 +11,11 @@ import bot.state.map.level.LevelSpecBuilder
 import bot.state.map.level.LevelStartMapLoc
 
 object ZeldaPlan {
+    enum class PlanOption {
+        MAGIC_SHIELD_EARLY,
+    }
+    val option = PlanOption.MAGIC_SHIELD_EARLY
+
     fun makeMasterPlan(hyrule: Hyrule, mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
         val router = OverworldRouter(hyrule)
         val factory = PlanInputs(mapData, levelData, router)
@@ -35,6 +40,15 @@ object ZeldaPlan {
             startAt(InLocations.Overworld.start)
             phase("Opening sequence")
             obj(Dest.item(ZeldaItem.WoodenSword))
+
+//            // test this level 2 plan
+//            phase("get magic shield")
+//            obj(Dest.Shop.westTreeShopNearWater)
+//            phase("get heart and cash")
+//            obj(Dest.Heart.fireHeart)
+//            obj(Dest.Secrets.fire30GreenSouth)
+//            includeLevelPlan(levelPlan2Boomerang(factory))
+
             obj(Dest.level(2))
             includeLevelPlan(levelPlan2(factory))
             // position by routing
@@ -52,6 +66,14 @@ object ZeldaPlan {
             includeLevelPlan(levelPlan1(factory))
             obj(Dest.Secrets.bomb30Start) // could move later if we can guarantee level 2 provides
             obj(Dest.Shop.candleShopMid)
+
+            if (option == PlanOption.MAGIC_SHIELD_EARLY) {
+                phase("get magic shield")
+                obj(Dest.Shop.westTreeShopNearWater)
+                phase("get heart and cash")
+                obj(Dest.Heart.fireHeart)
+                obj(Dest.Secrets.fire30GreenSouth)
+            }
             obj(Dest.level(3))
             includeLevelPlan(levelPlan3(factory))
             phase(Phases.level3After)
@@ -79,8 +101,10 @@ object ZeldaPlan {
             includeLevelPlan(levelPlan4(factory))
 
             phase("grab hearts")
-            obj(Dest.Secrets.fire30GreenSouth)
-            obj(Dest.Heart.fireHeart)
+            if (option != PlanOption.MAGIC_SHIELD_EARLY) {
+                obj(Dest.Secrets.fire30GreenSouth)
+                obj(Dest.Heart.fireHeart)
+            }
             obj(Dest.Secrets.bombHeartSouth)
             obj(Dest.Secrets.forest100South)
             obj(Dest.Shop.arrowShop)
@@ -116,6 +140,8 @@ object ZeldaPlan {
 //            routeTo(78-16)
 //            obj(Dest.Secrets.level2secret10)
             phase(Phases.afterLevel6)
+            // grab level2 boomerang
+            includeLevelPlan(levelPlan2Boomerang(factory))
             obj(Dest.level(8))
             includeLevelPlan(levelPlan8(factory), Direction.Left)
 
@@ -260,6 +286,32 @@ object ZeldaPlan {
             leftm
             goIn(GamePad.MoveLeft, 20)
             getTri
+        }
+    }
+
+    private fun levelPlan2Boomerang(factory: PlanInputs): MasterPlan {
+        val builder = factory.make("Reenter level2")
+
+        return builder {
+            lev(2)
+            startAt(LevelStartMapLoc.lev(2))
+            seg("go to boomerang")
+            up
+            right
+            up
+            up
+            right
+            seg("get boomerang")
+            kill
+            goAbout(InLocations.Level2.keyMid, 1, 1, true, ignoreProjectiles = true)
+            seg("depart")
+            left
+            down
+            down
+            left
+            down
+            down // should exit
+//            inOverworld
         }
     }
 

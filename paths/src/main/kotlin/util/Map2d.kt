@@ -79,6 +79,14 @@ class Map2d<T>(
         }
     }
 
+    fun set(point: FramePoint, newVal: T) {
+        try {
+            map[point.y][point.x] = newVal
+        } catch (e: IndexOutOfBoundsException) {
+            // just ignore this for now
+        }
+    }
+
     fun modifyTo(point: FramePoint, size: Int = 16, newVal: T) {
         for (y in point.y until point.y + size) {
             for (x in point.x until point.x + size) {
@@ -126,6 +134,10 @@ class Map2d<T>(
             }
             this.close()
         }
+    }
+
+    fun writeJson(name: String) {
+
     }
 
 }

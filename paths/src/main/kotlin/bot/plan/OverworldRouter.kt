@@ -96,11 +96,7 @@ class OverworldRouter(private val hyrule: Hyrule) {
         remove(lostWoods, 97.down, graph)
         // this goes forever
         graph.removeEdge(hyrule.getMapCell(lostWoods), hyrule.getMapCell(lostWoods.left))
-        remove(85, 86, graph) // can't go through to level 4 from here
-//            remove(98, 99, graph)
-        // maybe need?
-//            remove(98, 97, graph) // through 100 secret
-        remove(85, 86, graph) // can't go through to level 4 from here
+//        remove(85, 86, graph) // I think ok. can't go through to level 4 from here
         remove(85, 84, graph) // can't go through to water
         remove(98, 82, graph) // can't go up through 100 secret because you could be on wrong side
 

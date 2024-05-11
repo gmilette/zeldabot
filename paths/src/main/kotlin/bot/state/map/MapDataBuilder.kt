@@ -340,6 +340,11 @@ class MapBuilder {
             "lev7",
             Objective(6.grid, 5.grid, Dest.level(7))
         )
+        val shieldLeft = Objective.ItemLoc.Left
+        objectives[70] = MapCellData(
+            "cornertree",
+            Objective(FramePoint(9.grid, 7.grid), Dest.Shop.westTreeShopNearWater, itemLoc = shieldLeft)
+        )
         objectives[71] = MapCellData(
             "fireHeart",
             Objective(FramePoint(11.grid, 7.grid), Dest.Heart.fireHeart, itemLoc = Objective.ItemLoc.Right)
@@ -348,12 +353,11 @@ class MapBuilder {
             "undergrounddudes",
             Objective(FramePoint(13.grid, 2.grid), Dest.Secrets.fire30GreenSouth)
         )
-        objectives[73] = MapCellData("near fary")
+        objectives[73] = MapCellData("near fairy")
         objectives[75] = MapCellData(
             "tree with fairy",
             Objective(FramePoint(2.grid, 8.grid), Dest.Shop.potionShopForest)
         )
-
         val shopCShieldLoc = Objective.ItemLoc.Right
         objectives[77] = MapCellData(
             "forest before 2",

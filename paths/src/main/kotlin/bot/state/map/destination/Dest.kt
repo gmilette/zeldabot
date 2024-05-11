@@ -52,6 +52,7 @@ object Dest {
         val candleShopMid = DestType.Shop(ShopType.C, EntryType.Walk())
         val arrowShop = DestType.Shop(ShopType.B, EntryType.Walk())
         val eastTreeShop = DestType.Shop(ShopType.C, EntryType.Fire(from = Direction.Left))
+        val westTreeShopNearWater = DestType.Shop(ShopType.C, EntryType.Fire(from = Direction.Up))
         val potionShopForest = DestType.Shop(ShopType.Potion, EntryType.Fire(from = Direction.Left))
         val potionShopWest = DestType.Shop(ShopType.Potion, EntryType.Walk(requireLetter = true))
 

@@ -12,6 +12,7 @@ import bot.state.MapLocationState
 import bot.state.map.destination.ZeldaItem
 import nintaco.api.API
 import util.d
+import java.io.File
 
 class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     var action: Action? = null
@@ -32,7 +33,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        run(name = "level1L") // with ladder
 //        run(name = "level1drag")
 //        run(name = "level1Ladder") // with ladder
-          run(name = "level1")
+//          run(name = "level1")
 //        run(name = "level1dodge")
 //        run(name = "level2dodge")
 //        run(name = "overworlddodge")
@@ -42,7 +43,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        run(name = "level5") // with ladder
 //        runLoc(true, 120, 6)
 //        run(name = "afterLev4")
-//         run(name = "all")
+         run(name = "all")
 //            runLoc(true,91, 0)
 //        run(name = "level7"
 //        run(name = "go to level 9")
@@ -161,11 +162,16 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     }
 
     private fun completedAction(state: MapLocationState, action: Action?) {
-//        val stateName = "${state.frameState.level}_${state.movedTo}"
-//        val stateFileName = "mapstate/mapstate_${stateName}.save"
-//        d { "Saved a state $stateFileName" }
-//        api.saveState(stateFileName)
-//        api.saveScreenshot()
+        val stateName = "${state.frameState.level}_${state.movedTo}"
+        val root = DirectoryConstants.states
+        val stateFileName = "$root/mapstate/mapstate_${stateName}.save"
+        if (!File(stateFileName).exists()) {
+            d { "Saved a state $stateFileName" }
+            api.saveState(stateFileName)
+            api.saveScreenshot()
+        } else {
+            d { "Already saved $stateFileName" }
+        }
     }
 
     fun afterThis() = masterPlan.next()
