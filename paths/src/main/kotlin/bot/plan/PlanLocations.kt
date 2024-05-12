@@ -156,6 +156,7 @@ object InLocations {
 }
 
 object Phases {
+    val reenterLevel2 = "Reenter level 2"
     val grabHearts = "grab hearts"
     val forest30 = "forest 30"
     val level3 = "level 3"

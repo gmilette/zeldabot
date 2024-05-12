@@ -260,7 +260,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                     d { "*fill*" }
                     stateManipulator.fillHeartsToFull()
                 }
-                maxLife -> stateManipulator.fillHeartsToFull()
+                maxLife -> stateManipulator.fillHearts()
             }
 
             if (addKey) {
@@ -281,7 +281,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 //            frameStateUpdater.setSword(ZeldaItem.MagicSword)
 //            frameStateUpdater.setRing(ZeldaItem.BlueRing)
                 stateManipulator.setLadderAndRaft(true)
-//                stateManipulator.setMagicShield()
+                stateManipulator.setMagicShield()
                 stateManipulator.setRedCandle()
                 stateManipulator.setHaveWhistle()
                 stateManipulator.setBait()

@@ -41,16 +41,21 @@ object ZeldaPlan {
             phase("Opening sequence")
             obj(Dest.item(ZeldaItem.WoodenSword))
 
-//            // test this level 2 plan
-//            phase("get magic shield")
-//            obj(Dest.Shop.westTreeShopNearWater)
-//            phase("get heart and cash")
-//            obj(Dest.Heart.fireHeart)
-//            obj(Dest.Secrets.fire30GreenSouth)
-//            includeLevelPlan(levelPlan2Boomerang(factory))
+            val TEST = false
+            if (TEST) {
+                obj(Dest.Shop.candleShopMid)
+                phase("get magic shield")
+                obj(Dest.Shop.westTreeShopNearWater)
+                phase("get heart and cash")
+                obj(Dest.Heart.fireHeart)
+                obj(Dest.Secrets.fire30GreenSouth)
+                obj(Dest.level(2))
+                includeLevelPlan(levelPlan2Boomerang(factory))
+            } else {
+                obj(Dest.level(2))
+                includeLevelPlan(levelPlan2(factory))
+            }
 
-            obj(Dest.level(2))
-            includeLevelPlan(levelPlan2(factory))
             // position by routing
             val sec:MapLoc = 61
             routeTo(sec.up)
@@ -141,6 +146,7 @@ object ZeldaPlan {
 //            obj(Dest.Secrets.level2secret10)
             phase(Phases.afterLevel6)
             // grab level2 boomerang
+            obj(Dest.level(2))
             includeLevelPlan(levelPlan2Boomerang(factory))
             obj(Dest.level(8))
             includeLevelPlan(levelPlan8(factory), Direction.Left)
@@ -290,7 +296,7 @@ object ZeldaPlan {
     }
 
     private fun levelPlan2Boomerang(factory: PlanInputs): MasterPlan {
-        val builder = factory.make("Reenter level2")
+        val builder = factory.make(Phases.reenterLevel2)
 
         return builder {
             lev(2)
@@ -309,7 +315,9 @@ object ZeldaPlan {
             down
             down
             left
+            seg("Go to exit")
             down
+            seg("move out")
             down // should exit
 //            inOverworld
         }

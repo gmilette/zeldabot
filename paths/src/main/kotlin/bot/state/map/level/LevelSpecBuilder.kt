@@ -86,9 +86,10 @@ class LevelSpecBuilder {
 
         val specs = mutableListOf(
             LevelSpec(start, e(u, d, r), "start", LevelMapTemplateReader.Temp.lev_grid),
+            LevelSpec(start.down, e(u, d, r), "out", LevelMapTemplateReader.Temp.lev_grid),
             // key
             LevelSpec(start.right, e(l, u), "right guys", LevelMapTemplateReader.Temp.lev_empty),
-            LevelSpec(start.up, e(l, u, r), "up", LevelMapTemplateReader.Temp.lev_block4out),
+            LevelSpec(start.up, e(l, u, r, d), "up", LevelMapTemplateReader.Temp.lev_block4out),
             //key
             LevelSpec(start.up.left, e(r), "moreguys", LevelMapTemplateReader.Temp.lev_empty),
             LevelSpec(grid, eall, "gridguys", LevelMapTemplateReader.Temp.lev_grid_center),
