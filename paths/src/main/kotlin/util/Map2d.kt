@@ -1,5 +1,6 @@
 package util
 
+import bot.DirectoryConstants
 import bot.state.FramePoint
 import bot.state.distTo
 import bot.state.map.MapConstants
@@ -123,7 +124,7 @@ class Map2d<T>(
 
     fun write(name: String, render: (T, x: Int, y: Int) -> String) {
         val csvWriter2 = CsvWriter()
-        csvWriter2.open("map_${name}.csv", false) {
+        csvWriter2.open(DirectoryConstants.file("navdebug", "map_${name}.csv"), false) {
             // how many rows to read for the first set
             map.forEachIndexed { y, row ->
                 val rowData = mutableListOf<String>()
