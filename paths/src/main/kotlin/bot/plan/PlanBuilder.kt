@@ -10,6 +10,7 @@ import bot.state.map.destination.DestType
 import bot.state.map.destination.EntryType
 import bot.state.map.destination.ZeldaItem
 import bot.state.map.level.LevelMapCellsLookup
+import bot.state.oam.EnemyGroup
 import bot.state.oam.dragon4Head
 import bot.state.oam.dragonHead
 import bot.state.oam.dragonHead2
@@ -227,7 +228,8 @@ class PlanBuilder(
     }
     fun killUntilGetBomb(leftDead: Int): PlanBuilder {
         add(lastMapLoc, lootAndKill(CompleteIfHaveBombs(KillAll(
-            numberLeftToBeDead = leftDead
+            numberLeftToBeDead = leftDead,
+            targetOnly = EnemyGroup.enemiesWhoMightHaveBombs
         ))))
         return this
     }
@@ -250,8 +252,7 @@ class PlanBuilder(
         }
     val killUntilGetBomb: PlanBuilder
         get() {
-            add(lastMapLoc, lootAndKill(CompleteIfHaveBombs(KillAll(
-                needLongWait = false))))
+            killUntilGetBomb(0)
             return this
         }
     val killLongWait: PlanBuilder

@@ -20,7 +20,7 @@ object ZeldaPlan {
         val router = OverworldRouter(hyrule)
         val factory = PlanInputs(mapData, levelData, router)
 //        return real(factory)
-        return realLevel1First(factory)
+        return realLev1(factory)
     }
 
     private fun levelTour(factory: PlanInputs): MasterPlan {
@@ -164,27 +164,62 @@ object ZeldaPlan {
         }
     }
 
+    private fun realLev1(factory: PlanInputs): MasterPlan {
+        val builder = factory.make("begin!")
+        val start: PlanBuilder.() -> Unit = {
+            // 3 chances to get a bomb
+            routeTo(107)
+            killUntilGetBomb
+            up
+            killUntilGetBomb
+            down
+            down
+            rightIfNeedBombs
+            rightIfNeedBombs
+            GoIn(20, GamePad.MoveRight)
+            killUntilGetBomb(1) // the monster in the water
+            leftIfNeedBombs
+            leftIfNeedBombs
+            obj(Dest.Secrets.bombHeartSouth)
+        }
+
+        return masterPlan(factory, start)
+    }
+
     private fun real(factory: PlanInputs): MasterPlan {
+        val builder = factory.make("begin!")
+        val start: PlanBuilder.() -> Unit = {
+            obj(Dest.level(2))
+            includeLevelPlan(levelPlan2(factory))
+        }
+
+        return masterPlan(factory, start,
+            endLevel2BoomerangPickup = true)
+    }
+
+    private fun testPlan(factory: PlanInputs): MasterPlan {
+        val builder = factory.make("begin!")
+        return builder {
+            startAt(InLocations.Overworld.start)
+            obj(Dest.Shop.candleShopMid)
+            phase("get magic shield")
+            obj(Dest.Shop.westTreeShopNearWater)
+            phase("get heart and cash")
+            obj(Dest.Heart.fireHeart)
+            obj(Dest.Secrets.fire30GreenSouth)
+            obj(Dest.level(2))
+            includeLevelPlan(levelPlan2Boomerang(factory))
+        }
+    }
+
+    private fun masterPlan(factory: PlanInputs, start: PlanBuilder.() -> Unit, endLevel2BoomerangPickup: Boolean = false): MasterPlan {
         val builder = factory.make("begin!")
         return builder {
             startAt(InLocations.Overworld.start)
             phase("Opening sequence")
             obj(Dest.item(ZeldaItem.WoodenSword))
 
-            val TEST = false
-            if (TEST) {
-                obj(Dest.Shop.candleShopMid)
-                phase("get magic shield")
-                obj(Dest.Shop.westTreeShopNearWater)
-                phase("get heart and cash")
-                obj(Dest.Heart.fireHeart)
-                obj(Dest.Secrets.fire30GreenSouth)
-                obj(Dest.level(2))
-                includeLevelPlan(levelPlan2Boomerang(factory))
-            } else {
-                obj(Dest.level(2))
-                includeLevelPlan(levelPlan2(factory))
-            }
+            start()
 
             // position by routing
             val sec:MapLoc = 61
@@ -276,8 +311,10 @@ object ZeldaPlan {
 //            obj(Dest.Secrets.level2secret10)
             phase(Phases.afterLevel6)
             // grab level2 boomerang
-            obj(Dest.level(2))
-            includeLevelPlan(levelPlan2Boomerang(factory))
+            if (endLevel2BoomerangPickup) {
+                obj(Dest.level(2))
+                includeLevelPlan(levelPlan2Boomerang(factory))
+            }
             obj(Dest.level(8))
             includeLevelPlan(levelPlan8(factory), Direction.Left)
 

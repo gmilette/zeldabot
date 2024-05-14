@@ -224,12 +224,16 @@ object EnemyGroup {
         shopOwner2
     )
 
-    val enemiesWhoMightHaveBombs = setOf(
+    val enemiesWhoMightHaveBombs = listOf(
         // side
         (0xba).toInt(),
         (0xb8).toInt(),
         // down
         (0xb2).toInt(),
+        (0xb0).toInt(),
+
+        (0xb4).toInt(),
+        (0xb6).toInt(),
 
         // right
         (0xf2).toInt(),
@@ -239,7 +243,7 @@ object EnemyGroup {
         (0xf4).toInt(),
         // facing down
         (0xfa).toInt(),
-        (0xf8).toInt(),
+        (0xf8).toInt(), //02 is the light one, 43 is the blue
         // up
         (0xfc).toInt(),
         (0xfe).toInt(),

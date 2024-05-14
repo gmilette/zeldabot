@@ -23,7 +23,7 @@ class Experiments(masterPlan: MasterPlan) {
             Experiment("all", "start_nothing.save", masterPlan, sword = ZeldaItem.MagicSword, addEquipment = false),
             Experiment("overworlddodge", "overworlddodge.save", masterPlanWith(dodge), sword = ZeldaItem.MagicSword, addEquipment = true),
             Experiment("level2dodge", "level2_dodge_shield.save", masterPlanWith(dodge), sword = ZeldaItem.MagicSword, addEquipment = true),
-            Experiment("level2r", "level2.save", masterPlan.getPlanAfter(Phases.reenterLevel2), sword = ZeldaItem.WoodenSword, addEquipment = true),
+//            Experiment("level2r", "level2.save", masterPlan.getPlanAfter(Phases.reenterLevel2), sword = ZeldaItem.WoodenSword, addEquipment = true),
             Experiment("level2dodgeNoShield", "level2_boom_dead.save", masterPlanWith(dodge), sword = ZeldaItem.MagicSword, addEquipment = true),
             Experiment("level1dodgeb", "level_1_boomerang.save", masterPlanWith(dodge), sword = ZeldaItem.MagicSword, addEquipment = true),
             Experiment("level1dodge", "level1_skele.save", masterPlanWith(dodge), sword = ZeldaItem.MagicSword, addEquipment = true),
