@@ -223,4 +223,25 @@ object EnemyGroup {
         shopOwner,
         shopOwner2
     )
+
+    val enemiesWhoMightHaveBombs = setOf(
+        // side
+        (0xba).toInt(),
+        (0xb8).toInt(),
+        // down
+        (0xb2).toInt(),
+
+        // right
+        (0xf2).toInt(),
+        (0xf0).toInt(),
+        // left
+        (0xf6).toInt(),
+        (0xf4).toInt(),
+        // facing down
+        (0xfa).toInt(),
+        (0xf8).toInt(),
+        // up
+        (0xfc).toInt(),
+        (0xfe).toInt(),
+    )
 }

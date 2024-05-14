@@ -113,7 +113,7 @@ class LevelSpecBuilder {
         val start: MapLoc = LevelStartMapLoc.lev(3)
         val inStart = start.left.up.up
         val specs = mutableListOf(
-            LevelSpec(start, e(l), "start", LevelMapTemplateReader.Temp.lev_grid),
+            LevelSpec(start, e(l, d), "start", LevelMapTemplateReader.Temp.lev_grid),
             // key
             LevelSpec(start.left, e(r, u), "fkey and squishy", LevelMapTemplateReader.Temp.lev_block4out2),
             LevelSpec(start.left.up, e(u, d), "key cross", LevelMapTemplateReader.Temp.lev_cross),
@@ -213,7 +213,7 @@ class LevelSpecBuilder {
         val splitSpot = start.left.up.up.up.up.up.right
         val stairsRight = splitSpot.up.right.right.right.right
         val specs = mutableListOf(
-            LevelSpec(start, e(l, r), "start", LevelMapTemplateReader.Temp.lev_grid),
+            LevelSpec(start, e(l, r, d), "start", LevelMapTemplateReader.Temp.lev_grid),
             LevelSpec(start.right, e(l), "free key", LevelMapTemplateReader.Temp.lev_block4out),
             LevelSpec(start.left, e(u, r), "intro ghosts", LevelMapTemplateReader.Temp.lev_block4out2),
             LevelSpec(start.left.up, e(u, d), "inbetween", LevelMapTemplateReader.Temp.lev_blockside2),

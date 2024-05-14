@@ -43,6 +43,12 @@ fun makeStatuePush(statue: FramePoint, itemLoc: FramePoint = InLocations.Overwor
         ))
     ), restartWhenDone = false, shouldComplete = true)
 
+
+fun killUntilGetBombs(startAt: MapLoc) {
+//    CompleteIfHaveBombs(
+//    OrderedActionSequence(listOf(
+//    ))
+}
 //    // complete only when get the item
 
 //    if (position) {

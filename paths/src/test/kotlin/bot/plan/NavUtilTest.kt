@@ -64,7 +64,7 @@ class NavUtilTest {
 //            cell.zstar.setEnemy(start, enemy)
 //        }
 
-        val near = NearestSafestPoint.nearestSafePoints(FramePoint(101, 32), cell.zstar.costsF, cell.zstar.passable)
+        val near = NearestSafestPoint.nearestSafePoints(FramePoint(101, 32), cell.zstar.costsF, cell.zstar.passable())
         val a = 1
     }
 
@@ -187,6 +187,7 @@ class NavUtilTest {
             when {
                 (x == target.x && y == target.y) -> "T"
                 route.any { it.x == x && it.y == y && it.x == firstPt.x && it.y == firstPt.y } -> "S"
+                (x == from.x && y == from.y) -> "F"
                 route.any { it.x == x && it.y == y } -> "Z"
                 FramePoint(x, y).isTopRightCorner -> "C"
                 v -> if (FramePoint(x, y).onHighway) {
@@ -199,7 +200,7 @@ class NavUtilTest {
             }
         }
 
-        zstar.passable.write("check_1192_rzstar") { v, x, y ->
+        zstar.passable().write("check_1192_rzstar") { v, x, y ->
             val pt = FramePoint(x, y)
             when {
                 (x == target.x && y == target.y) -> "T"
@@ -223,7 +224,7 @@ class NavUtilTest {
                 route.any { it.x == x && it.y == y && it.x == firstPt.x && it.y == firstPt.y } -> "S"
                 route.any { it.x == x && it.y == y } -> "Z"
                 FramePoint(x, y).isTopRightCorner -> "C"
-                !zstar.passable.get(x, y) -> "X"
+                !zstar.passable().get(x, y) -> "X"
                 v == 0 -> ":"
                 v > 100000 -> "!"
                 v > 9000 -> "@"
@@ -525,6 +526,17 @@ class NavUtilTest {
         check(
             98, start, FramePoint(128, 32), GamePad.MoveUp,
             before = start.left, makePassable = passable
+        )
+    }
+
+    @Test
+    fun `test outside stuck`() {
+        ZStar.DEBUG = true
+        val start = FramePoint(96, 22)
+//        val start = FramePoint(96, 36)
+        check(
+            119, start, FramePoint(128, 64), GamePad.MoveUp,
+            before = start.left
         )
     }
 

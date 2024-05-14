@@ -250,7 +250,7 @@ class NeighborFinder(
     private fun onHighwayAndWithin(point: FramePoint) =
         point.onHighway && point.within()
 
-    private fun passableAndWithin(point: FramePoint) =
+    fun passableAndWithin(point: FramePoint) =
         blockPassableMeta(point) && point.within()
         //blockPassable(point) && point.within()
 //        blockPassableHalf(point) && point.within()

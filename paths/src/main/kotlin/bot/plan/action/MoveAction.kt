@@ -82,6 +82,11 @@ class CompleteIfMapChanges(private val wrapped: Action) : Action {
         get() = "Until Change ${wrapped.name}"
 }
 
+class CompleteIfHaveBombs(wrapped: Action) : WrappedAction(wrapped) {
+    override fun complete(state: MapLocationState): Boolean =
+        state.frameState.inventory.numBombs != 0 || super.complete(state)
+}
+
 // move to this location then complete
 class InsideNav(
     private val point: FramePoint,

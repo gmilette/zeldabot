@@ -225,6 +225,12 @@ class PlanBuilder(
         )))
         return this
     }
+    fun killUntilGetBomb(leftDead: Int): PlanBuilder {
+        add(lastMapLoc, lootAndKill(CompleteIfHaveBombs(KillAll(
+            numberLeftToBeDead = leftDead
+        ))))
+        return this
+    }
     val killUntilGetKey: PlanBuilder
         get() {
             add(lastMapLoc, CompleteIfGetItem(KillAll()))
@@ -240,6 +246,12 @@ class PlanBuilder(
     val kill: PlanBuilder
         get() {
             add(lastMapLoc, lootAndKill(KillAll(needLongWait = false)))
+            return this
+        }
+    val killUntilGetBomb: PlanBuilder
+        get() {
+            add(lastMapLoc, lootAndKill(CompleteIfHaveBombs(KillAll(
+                needLongWait = false))))
             return this
         }
     val killLongWait: PlanBuilder
@@ -371,6 +383,16 @@ class PlanBuilder(
     val right: Unit
         get() {
             add(lastMapLoc.right)
+        }
+    val rightIfNeedBombs: Unit
+        get() {
+            val nextLoc = lastMapLoc.right
+            add(nextLoc, lootAndMove(CompleteIfHaveBombs(moveTo(nextLoc))))
+        }
+    val leftIfNeedBombs: Unit
+        get() {
+            val nextLoc = lastMapLoc.left
+            add(nextLoc, lootAndMove(CompleteIfHaveBombs(moveTo(nextLoc))))
         }
     val rightk: Unit
         get() {

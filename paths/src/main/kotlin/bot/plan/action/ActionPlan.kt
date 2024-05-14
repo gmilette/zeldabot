@@ -352,7 +352,7 @@ val moveToKillAllInCenterSpot = DecisionAction(
     state.numEnemies <= state.numEnemiesAliveInCenter()
 }
 
-fun lootAndKill(kill: KillAll) = DecisionAction(Optional(GetLoot()), kill) { state ->
+fun lootAndKill(kill: Action) = DecisionAction(Optional(GetLoot()), kill) { state ->
     state.neededLoot.isNotEmpty()
 }
 
@@ -360,7 +360,7 @@ val lootOrKill = DecisionAction(Optional(GetLoot()), Optional(KillAll())) { stat
     state.neededLoot.isNotEmpty()
 }
 
-fun lootAndMove(moveTo: MoveTo) = DecisionAction(Optional(GetLoot()), moveTo) { state ->
+fun lootAndMove(moveTo: Action) = DecisionAction(Optional(GetLoot()), moveTo) { state ->
     state.neededLoot.isNotEmpty()
 }
 
@@ -670,7 +670,7 @@ class GetLoot(
     private val routeTo = RouteTo(params = RouteTo.Param(whatToAvoid = RouteTo.Param.makeIgnoreProjectiles(adjustInSideLevelBecauseGannon)))
 
     override fun complete(state: MapLocationState): Boolean =
-        state.neededLoot.isEmpty()
+        state.neededLoot.filter { state.currentMapCell.passable.get(it.point) }.isEmpty()
 
     // maybe I should
     private var target: FramePoint = FramePoint(0, 0)
@@ -693,7 +693,7 @@ class GetLoot(
         }
 
         loot.forEach {
-            d { "loot $it dist ${it.point.distTo(state.frameState.link.point)}" }
+            d { "loot to get: loot $it dist ${it.point.distTo(state.frameState.link.point)}" }
         }
 
         val previousTarget = target
@@ -709,14 +709,17 @@ class GetLoot(
         // untested, try to make it easier to navigate to the loot
         // this is the wrong way to target an item, let's try the new way
 //        val targets = target.about()
-        val targets = target.lootTargets
+        val targets = target.lootTargets.filter {
+            // actually it can be half passable
+            state.currentMapCell.passable.get(it)
+        }
+
 //        val targets = NearestSafestPoint.mapNearest(state, target.lootTargets)
 //        // i think this is ok, at least for vis
 //        target = NearestSafestPoint.mapNearest(state, listOf(loot.first().point)).first()
 
-
         // map nearest can cause zelda to get stuck sometimes
-        d { " get loot $target from targets $targets" }
+        d { " get loot for $target from targets $targets" }
         return routeTo.routeTo(
             state, targets,
             RouteTo.RouteParam(forceNew = previousTarget != target) // mapNearest = false

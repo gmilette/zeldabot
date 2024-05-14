@@ -295,7 +295,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         }
 
         private fun refillIfOut() {
-            fillBombs()
+//            fillBombs()
 
 //            refillRupees()
         }

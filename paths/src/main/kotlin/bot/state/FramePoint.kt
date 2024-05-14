@@ -327,6 +327,7 @@ val FramePoint.justLeftBottomHalf
     get() = FramePoint(x, y + 8)
 val FramePoint.justLeftHalf
     get() = FramePoint(x, y + 8)
+
 val FramePoint.justDownFourth
     get() = FramePoint(x, y + 4)
 val FramePoint.justDownThreeFourth
@@ -335,6 +336,16 @@ val FramePoint.justRightFourth
     get() = FramePoint(x + 4, y)
 val FramePoint.justRightThreeFourth
     get() = FramePoint(x + 12, y)
+
+val sizeOfSword = 4
+val FramePoint.justDown6
+    get() = FramePoint(x, y + 6)
+val FramePoint.justDownLast6
+    get() = FramePoint(x, y + 10)
+val FramePoint.justRight6
+    get() = FramePoint(x + 6, y)
+val FramePoint.justRightLast6
+    get() = FramePoint(x + 10, y)
 
 
 fun FramePoint.withX(changeX: Int): FramePoint = FramePoint(changeX, y)

@@ -16,10 +16,14 @@ import java.util.*
  * a star implementations modified for zelda routing
  */
 class ZStar(
-    var passable: Map2d<Boolean>,
-    halfPassable: Boolean = true,
+    private var passable: Map2d<Boolean>,
+    private val halfPassable: Boolean = true,
     isLevel: Boolean = false
 ) {
+    fun passable(): Map2d<Boolean> {
+        return passable
+    }
+    private val allPassable = passable.copy().mapXy { i, i2 -> true }
     companion object {
         var DEBUG = false
         var DEBUG_B = false
@@ -573,7 +577,7 @@ class ZStar(
         fun customize(param: ZRouteParam) {
 //            val startSum = sum()
             d { "Plan: iter = enemies ${param.enemies.size}" }
-            resetPassable()
+            resetPassable(param.start)
             // only if inside a radius
 //            setEnemyCosts(param.start, param.enemies)
             // fails, why?
@@ -588,9 +592,32 @@ class ZStar(
             costsF = initialMap.copy()
         }
 
-        private fun resetPassable() {
-            passable = initialPassable.copy()
+        private fun resetPassable(start: FramePoint) {
+            // and no neighbors
+            val initialNeighbors = neighborFinder.neighbors(start, Direction.None)
+            passable = if (initialNeighbors.isNotEmpty() && neighborFinder.passableAndWithin(start)) {
+                initialPassable.copy()
+            } else {
+                d { " !!! ALL PASSABLE !!! ESCAPE!"}
+                // make current block passable
+                initialPassable.copy().also {
+                    it.modifyTo(start, 16, true)
+                }
+            }
             neighborFinder.passable = passable
+        }
+
+        private fun surroundedByNotPassable(point: FramePoint) {
+//            val surrounded =
+//                passable.get(point.x - 1, point.y) &&
+//                    passable.get(point.x + 1, point.y) &&
+//                    passable.get(point.x, point.y - 1) &&
+//                    passable.get(point.x, point.y + 1)
+//
+            if (!neighborFinder.passableAndWithin(point)) {
+                d { " !! ALL PASSABLE "}
+                passable = allPassable
+            }
         }
 
         fun setEnemy(from: FramePoint, point: FramePoint, size: Int = 16) {

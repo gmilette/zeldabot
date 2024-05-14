@@ -19,7 +19,8 @@ object ZeldaPlan {
     fun makeMasterPlan(hyrule: Hyrule, mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
         val router = OverworldRouter(hyrule)
         val factory = PlanInputs(mapData, levelData, router)
-        return real(factory)
+//        return real(factory)
+        return realLevel1First(factory)
     }
 
     private fun levelTour(factory: PlanInputs): MasterPlan {
@@ -31,6 +32,135 @@ object ZeldaPlan {
                 phase("level $i")
                 obj(Dest.level(i))
             }
+        }
+    }
+
+    private fun realLevel1First(factory: PlanInputs): MasterPlan {
+        // bomb heart, white sword, level 1, level 3, level 4, level 2
+        val builder = factory.make("begin!")
+        // go get bomb hearts and white sword
+        return builder.invoke {
+            startAt(InLocations.Overworld.start)
+            phase("Opening sequence")
+            obj(Dest.item(ZeldaItem.WoodenSword))
+            // 3 chances to get a bomb
+            routeTo(107)
+            killUntilGetBomb
+            up
+            killUntilGetBomb
+            down
+            down
+            rightIfNeedBombs
+            rightIfNeedBombs
+            leftIfNeedBombs
+            leftIfNeedBombs
+            killUntilGetBomb(1) // the monster in the water
+            obj(Dest.Secrets.bombHeartSouth)
+            // position by routing
+            val sec:MapLoc = 61
+            routeTo(sec.up)
+            phase(Phases.forest30)
+            obj(Dest.Secrets.secretForest30NorthEast)
+            phase(Phases.forest30 + "_end")
+            obj(Dest.Secrets.bombSecret30North)
+            obj(ZeldaItem.Letter)
+            obj(Dest.Secrets.walk100)
+            obj(Dest.Secrets.bombHeartNorth)
+            obj(ZeldaItem.WhiteSword)
+            obj(Dest.level(1))
+            includeLevelPlan(levelPlan1(factory))
+            obj(Dest.Secrets.bomb30Start) // could move later if we can guarantee level 2 provides
+            obj(Dest.Shop.candleShopMid)
+
+            if (option == PlanOption.MAGIC_SHIELD_EARLY) {
+                phase("get magic shield")
+                obj(Dest.Shop.westTreeShopNearWater)
+                phase("get heart and cash")
+                obj(Dest.Heart.fireHeart)
+                obj(Dest.Secrets.fire30GreenSouth)
+            }
+            obj(Dest.level(3))
+            includeLevelPlan(levelPlan3(factory))
+            phase(Phases.level3After)
+            val forestNextToLevel3: MapLoc = 115
+            // prevent going down on tile 114
+            seg("position burning")
+            routeTo(forestNextToLevel3)
+            seg("position burning up")
+            routeTo(forestNextToLevel3.up)
+            seg("position burning left")
+            routeTo(forestNextToLevel3.up.left)
+            seg("go to obj 100 brown fire")
+            obj(Dest.Secrets.fire100SouthBrown)
+            // otherwise link might walk back into the secret stairs
+            val forest: MapLoc = 98
+            routeTo(forest.down)
+            routeTo(forest.down.right)
+            obj(Dest.Shop.blueRing, position = true)
+            // avoid accidentally going back in
+            goIn(GamePad.MoveRight, 25) // test it
+//             position place right before level 4
+//             go to the right so when link goes up, it will be the right way
+            routeTo(102)
+            obj(Dest.level(4))
+            includeLevelPlan(levelPlan4(factory))
+
+            phase("grab hearts")
+            if (option != PlanOption.MAGIC_SHIELD_EARLY) {
+                obj(Dest.Secrets.fire30GreenSouth)
+                obj(Dest.Heart.fireHeart)
+            }
+            obj(Dest.Secrets.bombHeartSouth)
+            obj(Dest.Secrets.forest100South)
+            obj(Dest.Shop.arrowShop)
+            phase(Phases.ladderHeart)
+            obj(Dest.Heart.ladderHeart)
+            // exit the heart area
+            goIn(GamePad.MoveLeft, 70, monitor = false)
+            obj(Dest.Heart.raftHeart, itemLoc = Objective.ItemLoc.Right)
+            // go down and make sure to walk off.
+            // something like this
+//            goToAtPoint(33, FramePoint(11.grid, 3.grid))
+            phase("go to level 5")
+            obj(Dest.level(5))
+            includeLevelPlan(levelPlan5(factory))
+            phase("gear for level 6")
+            obj(ZeldaItem.PowerBracelet, itemLoc = Objective.ItemLoc.None)
+            goToAtPoint(33, FramePoint(11.grid, 3.grid))
+            obj(ZeldaItem.MagicSword)
+
+            obj(Dest.level(6))
+            includeLevelPlan(levelPlan6(factory))
+
+            phase("Gear for level 8")
+//            obj(Dest.Shop.potionShopWest, itemLoc = Dest.Shop.ItemLocs.redPotion)
+
+            // is the 10 secret necessary, eh
+//            routeTo(78-16)
+//            obj(Dest.Secrets.level2secret10)
+            phase(Phases.afterLevel6)
+            // grab level2 boomerang
+            obj(Dest.level(2))
+            includeLevelPlan(levelPlan2Boomerang(factory))
+            obj(Dest.level(8))
+            includeLevelPlan(levelPlan8(factory), Direction.Left)
+
+            obj(Dest.Shop.blueRing, itemLoc = Dest.Shop.ItemLocs.bait, position = true)
+            obj(Dest.level(7))
+            // link starts outside the lake, no need to move down
+            includeLevelPlan(levelPlan7(factory), consume = false)
+
+            phase("go to level 9")
+            obj(Dest.level(9))
+            includeLevelPlan(levelPlan9(factory))
+
+            // junk
+            left
+            right
+            right
+            end
+
+//            include(real(factory)) // prevent crash
         }
     }
 

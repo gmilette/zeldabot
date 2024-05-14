@@ -77,10 +77,14 @@ object AttackLongActionDecider {
 
     @VisibleForTesting
     fun swordRectangle(link: FramePoint, to: FramePoint, dir: Direction) = when (dir) {
-        Direction.Left -> Geom.Rectangle(link.justDownFourth.withX(to.x), link.justDownThreeFourth)
-        Direction.Right -> Geom.Rectangle(link.justDownFourth, link.justDownThreeFourth.withX(to.x))
-        Direction.Down -> Geom.Rectangle(link.justRightFourth, link.justRightThreeFourth.withY(to.y))
-        Direction.Up -> Geom.Rectangle(link.justRightFourth.withY(to.y), link.justRightThreeFourth)
+//        Direction.Left -> Geom.Rectangle(link.justDownFourth.withX(to.x), link.justDownThreeFourth)
+//        Direction.Right -> Geom.Rectangle(link.justDownFourth, link.justDownThreeFourth.withX(to.x))
+//        Direction.Down -> Geom.Rectangle(link.justRightFourth, link.justRightThreeFourth.withY(to.y))
+//        Direction.Up -> Geom.Rectangle(link.justRightFourth.withY(to.y), link.justRightThreeFourth)
+        Direction.Left -> Geom.Rectangle(link.justDown6.withX(to.x), link.justDownLast6)
+        Direction.Right -> Geom.Rectangle(link.justDown6, link.justDownLast6.withX(to.x))
+        Direction.Down -> Geom.Rectangle(link.justRight6, link.justRightLast6.withY(to.y))
+        Direction.Up -> Geom.Rectangle(link.justRight6.withY(to.y), link.justRightLast6)
         else -> link.toRect()
     }
 

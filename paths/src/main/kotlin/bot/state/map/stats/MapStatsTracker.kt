@@ -168,7 +168,7 @@ class MapStatsTracker {
         } ?: MovingDirection.UNKNOWN_OR_STATIONARY
 }
 
-class AttributeCount(tile: Int, val hex: String = tile.toString(16)) {
+class AttributeCount(tile: Int = 0, val hex: String = tile.toString(16)) {
     companion object {
         private const val minObservations = 100
     }

@@ -10,10 +10,10 @@ import util.Map2d
 
 object NearestSafestPoint {
     fun isMapSafe(state: MapLocationState, pt: FramePoint) =
-        pt.isSafe(state.currentMapCell.zstar.costsF, state.currentMapCell.zstar.passable)
+        pt.isSafe(state.currentMapCell.zstar.costsF, state.currentMapCell.zstar.passable())
 
     fun mapNearest(state: MapLocationState, pts: List<FramePoint>) =
-        pts.flatMap { nearestSafePoints(it, state.currentMapCell.zstar.costsF, state.currentMapCell.zstar.passable) }
+        pts.flatMap { nearestSafePoints(it, state.currentMapCell.zstar.costsF, state.currentMapCell.zstar.passable()) }
 
     fun nearestSafePoints(point: FramePoint, costs: Map2d<Int>, passable: Map2d<Boolean>): List<FramePoint> =
         Direction.values().map {
