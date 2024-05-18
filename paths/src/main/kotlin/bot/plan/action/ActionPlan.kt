@@ -424,6 +424,10 @@ class GoIn(
     private val dir: GamePad = GamePad.MoveUp,
     private val reset: Boolean = false,
     private val setMonitorEnabled: Boolean = true,
+    /**
+     * dodge if necessary
+     */
+    private val defensive: Boolean = true,
     private val condition: (MapLocationState) -> Boolean = { true }
 ) :
     Action {
@@ -444,7 +448,13 @@ class GoIn(
     override fun nextStep(state: MapLocationState): GamePad {
 //        d { " --> Move $name movements $movements"}
         movements++
-        return if (condition(state)) dir else GamePad.None
+        // if about to get hit, go it
+        return when (
+            val reflex = AttackActionBlockDecider.blockReflex(state)) {
+            null -> if (condition(state)) dir else GamePad.None
+            else -> reflex.also { d { "!! Reflex while go in !!" } }
+        }
+//        return if (condition(state)) dir else GamePad.None
     }
 
     override fun target(): FramePoint {
@@ -646,6 +656,9 @@ val MapLocationState.neededLoot: List<Agent>
 
 object LootKnowledge {
     val keepSet = setOf(heart, fairy, fairy2, bomb) //bigCoin,
+
+    val halfSize = setOf(heart, bomb)
+
     fun keep(tile: Int): Boolean =
         tile in keepSet
 
@@ -667,12 +680,32 @@ class GetLoot(
     // gannon triforce pieces are sometimes projectiles
     // yea but then we are going to route link into the projectiles
     // so now I parameterize this so that it only ignores projectiles when in gannon
-    private val routeTo = RouteTo(params = RouteTo.Param(whatToAvoid = RouteTo.Param.makeIgnoreProjectiles(adjustInSideLevelBecauseGannon)))
+    private val routeTo =
+        RouteTo(params = RouteTo.Param(whatToAvoid = RouteTo.Param.makeIgnoreProjectiles(adjustInSideLevelBecauseGannon)))
 
     override fun complete(state: MapLocationState): Boolean =
-        state.neededLoot.filter { state.currentMapCell.passable.get(it.point) }.isEmpty()
+        state.neededLoot.filter {
+            halfInsidePassable(state, it.point, it.tile in LootKnowledge.halfSize)
+        }.isEmpty()
 
-    // maybe I should
+    // some items are half sized, like hearts
+    // should take into account half passable
+    private fun halfInsidePassable(state: MapLocationState, pt: FramePoint, small: Boolean): Boolean {
+        return with(state.currentMapCell) {
+            val midPassable = passable.get(pt.downHalf) && passable.get(pt.downHalf.justRightHalf)
+            val topPassable = passable.get(pt) && passable.get(pt.justRightHalf)
+            d { " mid pass: $pt $midPassable $topPassable"}
+            if (small) {
+                topPassable || midPassable
+            } else {
+                val bottomPassable = passable.get(pt.downOneGrid) && passable.get(pt.downOneGrid.justRightHalf)
+                (topPassable && midPassable) || bottomPassable && midPassable
+            }
+        }
+    }
+    // it cant be too close to the not passable spot
+    // maybe just make sure all of it is passable
+
     private var target: FramePoint = FramePoint(0, 0)
 
     override fun path(): List<FramePoint> = routeTo.route?.path ?: emptyList()
@@ -710,8 +743,7 @@ class GetLoot(
         // this is the wrong way to target an item, let's try the new way
 //        val targets = target.about()
         val targets = target.lootTargets.filter {
-            // actually it can be half passable
-            state.currentMapCell.passable.get(it)
+            halfInsidePassable(state, it, false)
         }
 
 //        val targets = NearestSafestPoint.mapNearest(state, target.lootTargets)

@@ -44,7 +44,9 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        runLoc(true, 120, 6)
 //        run(name = "afterLev4")
 //        run(name = "level2r")
-         run(name = "all")
+//         run(name = "all")
+        runLoc(true,121, 0) // near start
+
 //            runLoc(true,91, 0)
 //        run(name = "level7"
 //        run(name = "go to level 9")

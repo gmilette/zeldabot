@@ -114,7 +114,7 @@ class HeartsStateCalculator(private val inventory: Inventory) {
         // if you have the red ring, it will be 0.875
         // got into weird state where it was stuck at 0.25 and couldnt shoot
         return (containers == full && (damage == 0.0 || damage < damageThresholdToStillBeFull)).also {
-            d { " full cont $containers full $full damage $damage full $it"}
+            d { " isFull=$it full cont $containers full $full damage $damage full $it thresh: $damageThresholdToStillBeFull ring: $ring"}
         }
     }
 

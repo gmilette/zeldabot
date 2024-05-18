@@ -28,6 +28,8 @@ val movingBlock2 = (0xb3).toInt() to (0x03).toInt()
 // just ignore all of them if it's the overworld, rather than try to route to it
 val waterMonsterPairUnder = (0xbc) to (0x03).toInt()
 val waterMonsterPairUnder2 = (0xbc) to (0x43).toInt()
+val waterMonsterPairUnderE = (0xbe) to (0x03).toInt()
+val waterMonsterPairUnder2E = (0xbe) to (0x43).toInt()
 val waterMonsterPair = (0xEC) to (0x03).toInt() // also is triforce dirt, but it's ok i think
 val waterMonsterPair2 = (0xEC) to (0x43).toInt()
 val waterMonsterPairAlt = (0xEE) to (0x03).toInt() // tile address = 0EE0

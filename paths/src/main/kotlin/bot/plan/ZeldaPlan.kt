@@ -168,6 +168,8 @@ object ZeldaPlan {
         val builder = factory.make("begin!")
         val start: PlanBuilder.() -> Unit = {
             // 3 chances to get a bomb
+            routeTo(107+16)
+            killUntilGetBomb(1) // the monster in the water
             routeTo(107)
             killUntilGetBomb
             up
@@ -176,7 +178,9 @@ object ZeldaPlan {
             down
             rightIfNeedBombs
             rightIfNeedBombs
-            GoIn(20, GamePad.MoveRight)
+            GoIn(30, GamePad.MoveRight)
+            // wait until the monsters appear from smoke
+            GoIn(100, GamePad.None)
             killUntilGetBomb(1) // the monster in the water
             leftIfNeedBombs
             leftIfNeedBombs
@@ -231,6 +235,7 @@ object ZeldaPlan {
             obj(ZeldaItem.Letter)
             obj(Dest.Secrets.walk100)
             obj(Dest.Secrets.bombHeartNorth)
+            // need a special plan for white sword guy to get killed less
             obj(ZeldaItem.WhiteSword)
             obj(Dest.level(1))
             includeLevelPlan(levelPlan1(factory))

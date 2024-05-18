@@ -227,6 +227,8 @@ val FramePoint.upOneGrid
     get() = FramePoint(x, y - 16)
 val FramePoint.downOneGrid
     get() = FramePoint(x, y + 16)
+val FramePoint.downHalf
+    get() = FramePoint(x, y + 8)
 val FramePoint.rightOneGrid
     get() = FramePoint(x + 16, y )
 val FramePoint.leftOneGrid
@@ -277,6 +279,8 @@ val FramePoint.rightEnd
     get() = FramePoint(x + 16 + 1, y)
 val FramePoint.rightEndDown
     get() = FramePoint(x + 16 + 1, y + 15) // why is this 15????
+val FramePoint.rightEndDownHalf
+    get() = FramePoint(x + 8, y + 8)
 
 /**
  * loot can appear inside a grid, but link can pick it up from half a grid away, so allow those targets

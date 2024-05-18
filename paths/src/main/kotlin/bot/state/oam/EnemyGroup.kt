@@ -217,6 +217,8 @@ object EnemyGroup {
     val enemiesToNotAttackInOverworld = setOf(
         spinCircleEnemy,
         spinCircleEnemy2,
+        waterMonsterPairUnderE,
+        waterMonsterPairUnder2E,
         waterMonsterPair,
         waterMonsterPairUnder, // also it is ghost
         waterMonsterPairUnder2,

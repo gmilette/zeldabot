@@ -51,7 +51,8 @@ class OamStateReasoner(
     // calculate isDamaged here
     private fun SpriteData.toAgent(): Agent {
         val tileAttribute = tile to attribute
-        val damaged = mapStatsTracker.isDamaged(tile, attribute)
+        val damaged = DamagedLookup.isDamaged(tile, attribute)
+//        val damaged = mapStatsTracker.isDamaged(tile, attribute)
         val blockable = calcBlockable(tile, tileAttribute)
         val state = toState(damaged)
         // could look up the direction based on tile and sprite
