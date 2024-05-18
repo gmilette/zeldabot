@@ -95,6 +95,14 @@ class FrameStateUpdater(
         state.framesOnScreen++
         state.frameState = frame
     }
+
+    fun updateDecision(gamePad: GamePad) {
+        if (!state.frameState.isScrolling) {
+            // don't track if the screen is scrolling
+            val mapCoordinates = MapCoordinates(state.frameState.level, state.frameState.mapLoc)
+            mapStats.trackDecision(state.link, gamePad)
+        }
+    }
 }
 
 val Boolean.intTrue: Int

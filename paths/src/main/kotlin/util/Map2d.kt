@@ -4,6 +4,7 @@ import bot.DirectoryConstants
 import bot.state.FramePoint
 import bot.state.distTo
 import bot.state.map.MapConstants
+import bot.state.onHighway
 import com.github.doyaaaaaken.kotlincsv.client.CsvWriter
 
 class Map2d<T>(
@@ -100,6 +101,9 @@ class Map2d<T>(
         }
     }
 
+    fun add(other: Map2d<T>) {
+    }
+
     fun get(point: FramePoint): T =
         get(point.x, point.y)
 
@@ -123,8 +127,12 @@ class Map2d<T>(
     }
 
     fun write(name: String, render: (T, x: Int, y: Int) -> String) {
+        writeAt(DirectoryConstants.file("navdebug", "map_${name}.csv"), render)
+    }
+
+    fun writeAt(name: String, render: (T, x: Int, y: Int) -> String) {
         val csvWriter2 = CsvWriter()
-        csvWriter2.open(DirectoryConstants.file("navdebug", "map_${name}.csv"), false) {
+        csvWriter2.open(name, false) {
             // how many rows to read for the first set
             map.forEachIndexed { y, row ->
                 val rowData = mutableListOf<String>()
@@ -136,6 +144,24 @@ class Map2d<T>(
             this.close()
         }
     }
+
+    fun writeAtCondensed(name: String, render: (T, x: Int, y: Int) -> String) {
+        val csvWriter2 = CsvWriter()
+        csvWriter2.open(name, false) {
+            // how many rows to read for the first set
+            map.forEachIndexed { y, row ->
+                val rowData = mutableListOf<String>()
+                row.forEachIndexed { x, item ->
+                    if (FramePoint(x, y).onHighway) {
+                        rowData.add(render(item, x, y))
+                    }
+                }
+                writeRow(rowData)
+            }
+            this.close()
+        }
+    }
+
 
     fun writeJson(name: String) {
 

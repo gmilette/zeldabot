@@ -1,5 +1,6 @@
 package bot.state
 
+import bot.state.map.Direction
 import bot.state.map.MapConstants
 import nintaco.api.GamepadButtons
 import kotlin.random.Random
@@ -25,6 +26,15 @@ enum class GamePad {
 
     val isAttack: Boolean
         get() = this == A || this == B
+
+    fun toDirection(): Direction = when (this) {
+        MoveLeft -> Direction.Left
+        MoveRight -> Direction.Right
+        MoveUp -> Direction.Up
+        MoveDown -> Direction.Down
+        None -> Direction.None
+        else -> Direction.None // a , b
+    }
 
     companion object {
         fun aOrB(useB: Boolean) = if (useB) B else A

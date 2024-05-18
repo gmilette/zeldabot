@@ -4,9 +4,11 @@ import bot.DirectoryConstants
 import bot.plan.action.PrevBuffer
 import bot.plan.action.ProjectileDirectionCalculator
 import bot.state.*
+import bot.state.map.Direction
 import bot.state.map.MapConstants
 import bot.state.map.MovingDirection
 import bot.state.oam.EnemyGroup.boomerangs
+import bot.state.oam.map
 import com.google.gson.GsonBuilder
 import util.Map2d
 import util.d
@@ -14,6 +16,11 @@ import java.io.File
 import java.io.FileWriter
 
 var gson = GsonBuilder().setPrettyPrinting().create()
+
+data class PointAction(
+    val point: FramePoint,
+    val action: GamePad
+)
 
 data class MapStatsData(
     val mapCoordinates: MapCoordinates,
@@ -38,7 +45,9 @@ data class MapStatsData(
 class MapStatsTracker {
     private val DEBUG = true
     private var mapCoordinates: MapCoordinates = MapCoordinates(0, 0)
-    private var visits: Map2d<Boolean> = Map2d(emptyList())
+    private var visits: Map2d<Boolean> = Map2d(
+        MutableList(MapConstants.MAX_Y) { MutableList(MapConstants.MAX_X) { false } })
+    private var movements = mutableListOf<PointAction>()
     private var moveLog: List<FramePoint> = emptyList()
 
     // the memory
@@ -89,7 +98,12 @@ class MapStatsTracker {
     }
 
     private fun saveLink(state: FrameState) {
+        d { " saveq link state ${state.link.point}"}
         visits.set(state.link.point, true)
+    }
+
+    fun trackDecision(link: FramePoint, pad: GamePad) {
+        movements.add(PointAction(link, pad))
     }
 
     fun track(mapCoordinates: MapCoordinates, enemies: List<Agent>, state: FrameState) {
@@ -111,6 +125,12 @@ class MapStatsTracker {
     }
 
     private fun reset(mapCoordinates: MapCoordinates) {
+        writeMapStats(mapCoordinates)
+        writeVisits(mapCoordinates)
+        appendMovements(mapCoordinates)
+    }
+
+    private fun writeMapStats(mapCoordinates: MapCoordinates) {
         // it is writing the wrong coordinates
         val mapStatsData = MapStatsData(mapCoordinates, tileAttribCount)
         if (DEBUG) {
@@ -134,6 +154,57 @@ class MapStatsTracker {
         // read json for this map coordinates
     }
 
+    private fun writeVisits(mapCoordinates: MapCoordinates) {
+        d { " write visits "}
+        val data = gson.toJson(visits)
+
+        val fileName = "${mapCoordinates.level}_${mapCoordinates.loc}_visits.json"
+        val fileNameCsv = "${mapCoordinates.level}_${mapCoordinates.loc}_visits.csv"
+        val fileNameCsvDir = DirectoryConstants.file("visits", fileNameCsv)
+        val dir = DirectoryConstants.file("visits", fileName)
+
+        val fileNameCsvC = "${mapCoordinates.level}_${mapCoordinates.loc}_visitsC.csv"
+        val fileNameCsvDirC = DirectoryConstants.file("visits", fileNameCsvC)
+
+        // read it
+        val current = readMap(dir)
+        if (current != null) {
+            visits.mapXyCurrent { x, y, t ->
+                t || current.get(x, y)
+            }
+        }
+        // merge it
+
+        val writer = FileWriter(dir)
+        writer.write(data)
+        writer.close()
+
+        visits.writeAt(fileNameCsvDir) { v, x, y ->
+            if (v) "X" else "_"
+        }
+
+        visits.writeAtCondensed(fileNameCsvDirC) { v, x, y ->
+            if (v) "X" else "_"
+        }
+
+        visits = Map2d(
+            MutableList(MapConstants.MAX_Y) { MutableList(MapConstants.MAX_X) { false } })
+    }
+
+    private fun appendMovements(mapCoordinates: MapCoordinates) {
+        d { " appendMovements "}
+        val fileNameCsv = "${mapCoordinates.level}_${mapCoordinates.loc}_movements.csv"
+        val fileNameCsvDir = DirectoryConstants.file("visits", fileNameCsv)
+
+        val writer = FileWriter(fileNameCsvDir)
+        for (movement in movements) {
+            writer.append("${movement.point.x},${movement.point.y},${movement.action.name}\n")
+        }
+        writer.close()
+
+        movements = mutableListOf()
+    }
+
     private fun statFileName(mapCoordinates: MapCoordinates): String {
         val fileName = "${mapCoordinates.level}_${mapCoordinates.loc}_mapstats.json"
         return DirectoryConstants.file("mapStats", fileName)
@@ -146,6 +217,15 @@ class MapStatsTracker {
         }
         val json = file.readText()
        return gson.fromJson(json, MapStatsData::class.java)
+    }
+
+    private fun readMap(name: String): Map2d<Boolean>? {
+        val file = File(name)
+        if (!file.exists()) {
+            return null
+        }
+        val json = file.readText()
+        return gson.fromJson(json, Map2d::class.java) as Map2d<Boolean>
     }
 
     private fun write(mapCoordinates: MapCoordinates, data: String) {

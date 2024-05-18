@@ -168,8 +168,8 @@ object ZeldaPlan {
         val builder = factory.make("begin!")
         val start: PlanBuilder.() -> Unit = {
             // 3 chances to get a bomb
-            routeTo(107+16)
-            killUntilGetBomb(1) // the monster in the water
+//            routeTo(107+16)
+//            killUntilGetBomb(1) // the monster in the water
             routeTo(107)
             killUntilGetBomb
             up
@@ -178,13 +178,16 @@ object ZeldaPlan {
             down
             rightIfNeedBombs
             rightIfNeedBombs
-            GoIn(30, GamePad.MoveRight)
+            GoIn(50, GamePad.MoveRight)
             // wait until the monsters appear from smoke
-            GoIn(100, GamePad.None)
+            GoIn(2500, GamePad.None)
             killUntilGetBomb(1) // the monster in the water
             leftIfNeedBombs
             leftIfNeedBombs
             obj(Dest.Secrets.bombHeartSouth)
+            // avoid getting stuck/ go right first?
+            routeTo(107 - 16)
+            routeTo(107 - 16 + 1)
         }
 
         return masterPlan(factory, start)
@@ -226,8 +229,8 @@ object ZeldaPlan {
             start()
 
             // position by routing
-            val sec:MapLoc = 61
-            routeTo(sec.up)
+//            val sec:MapLoc = 61
+//            routeTo(sec.up)
             phase(Phases.forest30)
             obj(Dest.Secrets.secretForest30NorthEast)
             phase(Phases.forest30 + "_end")

@@ -186,6 +186,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 
         val nextGamePad = plan.next(frameStateUpdater.state)
 
+        frameStateUpdater.updateDecision(nextGamePad)
+
         frameStateUpdater.state.previousGamePad = nextGamePad
 
         return if (ZeldaBot.fixLocationToZapper) {
