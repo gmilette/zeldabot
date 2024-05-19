@@ -251,9 +251,9 @@ object AttackActionDecider {
                 d { "enemy: $enemy" }
                 for (sword in swords) {
                     if (sword.value.intersect(enemy)) {
-                        d { "  ${sword.key}: Intersects $enemy" }
+                        d { "  ${sword.key}: Intersects sword ${sword.value}" }
                     } else {
-                        d { "  ${sword.key}: Intersects No $enemy" }
+                        d { "  ${sword.key}: Intersects No ${sword.value}" }
                     }
                 }
             }
@@ -299,23 +299,42 @@ object AttackActionDecider {
 //        val farSize = MapConstants.oneGridPoint5
         // experiment with this number. 2 seems too short
 //        val swordSizeLessThanGrid = 6
-        val swordSizeLessThanGrid = 4
+        val swordSizeLessThanGrid = 4 // sword length
         val nearSize = MapConstants.oneGrid - swordSizeLessThanGrid
         val farSize = MapConstants.twoGrid - swordSizeLessThanGrid
         val leftAttack = Geom.Rectangle(
-            link.justDownFourth.withX(link.x - nearSize), link.justDownThreeFourth
+            link.justDown6.withX(link.x - nearSize), link.justDownLast6
         )
         val rightAttack = Geom.Rectangle(
-            link.justDownFourth.justRightEnd,
-            link.justDownThreeFourth.justRightEnd.withX(link.x + farSize)
+            link.justDown6.justRightEnd,
+            link.justDownLast6.justRightEnd.withX(link.x + farSize)
         )
         val upAttack = Geom.Rectangle(
-            link.justRightFourth.withY(link.y - nearSize), link.justRightThreeFourth
+            link.justRight6.withY(link.y - nearSize), link.justRightLast6
         )
         val downAttack = Geom.Rectangle(
-            link.justRightFourth.justLeftDown,
-            link.justRightThreeFourth.justLeftDown.withY(link.y + farSize)
+            link.justRight6.justLeftDown,
+            link.justRightLast6.justLeftDown.withY(link.y + farSize)
         )
+//        Direction.Left -> Geom.Rectangle(link.justDown6.withX(to.x), link.justDownLast6)
+//        Direction.Right -> Geom.Rectangle(link.justDown6, link.justDownLast6.withX(to.x))
+//        Direction.Down -> Geom.Rectangle(link.justRight6, link.justRightLast6.withY(to.y))
+//        Direction.Up -> Geom.Rectangle(link.justRight6.withY(to.y), link.justRightLast6)
+
+//        val leftAttack = Geom.Rectangle(
+//            link.justDownFourth.withX(link.x - nearSize), link.justDownThreeFourth
+//        )
+//        val rightAttack = Geom.Rectangle(
+//            link.justDownFourth.justRightEnd,
+//            link.justDownThreeFourth.justRightEnd.withX(link.x + farSize)
+//        )
+//        val upAttack = Geom.Rectangle(
+//            link.justRightFourth.withY(link.y - nearSize), link.justRightThreeFourth
+//        )
+//        val downAttack = Geom.Rectangle(
+//            link.justRightFourth.justLeftDown,
+//            link.justRightThreeFourth.justLeftDown.withY(link.y + farSize)
+//        )
 
         val swords = mapOf(
             Direction.Left to leftAttack,

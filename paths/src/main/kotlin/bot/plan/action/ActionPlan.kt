@@ -694,11 +694,12 @@ class GetLoot(
         return with(state.currentMapCell) {
             val midPassable = passable.get(pt.downHalf) && passable.get(pt.downHalf.justRightHalf)
             val topPassable = passable.get(pt) && passable.get(pt.justRightHalf)
-            d { " mid pass: $pt $midPassable $topPassable"}
+            d { " mid pass: $pt mid=$midPassable top=$topPassable"}
             if (small) {
                 topPassable || midPassable
             } else {
                 val bottomPassable = passable.get(pt.downOneGrid) && passable.get(pt.downOneGrid.justRightHalf)
+                d { "         bottom=$bottomPassable"}
                 (topPassable && midPassable) || bottomPassable && midPassable
             }
         }

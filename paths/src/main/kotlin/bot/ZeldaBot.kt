@@ -322,7 +322,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     }
 
     inner class ScreenDraw {
-        private val drawAttackZone = false
+        private val drawAttackZone = true
         private val drawAttackPoints = false
         private val drawEnemyCosts = true
 
