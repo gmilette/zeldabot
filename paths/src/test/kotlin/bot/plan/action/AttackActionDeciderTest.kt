@@ -8,6 +8,18 @@ import io.kotest.matchers.shouldBe
 import org.junit.Test
 
 class AttackActionDeciderTest() {
+    @Test
+    fun att() {
+//        fun inRangeOf(
+//            from: Direction,
+//            link: FramePoint,
+//            enemies: List<FramePoint>,
+//            useB: Boolean
+
+        AttackActionDecider.inRangeOf(Direction.Right, FramePoint(55, 24),
+            listOf(FramePoint(45, 32)), false) shouldBe null
+    }
+
 //    @Test
 //    fun att() {
 //        val attackDirectionGrid = FramePoint(88 + MapConstants.oneGridPoint5, 48)

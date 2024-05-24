@@ -35,7 +35,7 @@ object Geom {
         return xOverlap && yOverlap
     }
 
-    data class Rectangle(val topLeft: FramePoint, val bottomRight: FramePoint) {
+    data class Rectangle(val topLeft: FramePoint = FramePoint(), val bottomRight: FramePoint = FramePoint()) {
         fun intersect(other: Rectangle): Boolean {
             return intersect(this, other)
         }

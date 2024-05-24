@@ -23,6 +23,16 @@ class StateManipulator(
         api.writeCPU(Addresses.heartContainersHalf, 0xFF) // make the half heart full too
     }
 
+    fun setBombs(num: Int) {
+        api.writeCPU(Addresses.numBombs, num)
+    }
+
+    fun setHearts(num: Int) {
+//        val h = (num + 1) + (num + 1) * 16
+        api.writeCPU(Addresses.heartContainers, 32+2) //32 + 2
+        api.writeCPU(Addresses.heartContainersHalf, 0xFF) // make the half heart full too
+    }
+
     fun fillHeartsToFull() {
         val forFull = state.frameState.inventory.heartCalc.makeHeartsFull()
         api.writeCPU(Addresses.heartContainers, forFull)
@@ -79,6 +89,10 @@ class StateManipulator(
     fun addKey() {
         val current = state.frameState.inventory.numKeys
         api.writeCPU(Addresses.numKeys, current + 1)
+    }
+
+    fun setKeys(num: Int) {
+        api.writeCPU(Addresses.numKeys, num)
     }
 
     fun addRupee() {

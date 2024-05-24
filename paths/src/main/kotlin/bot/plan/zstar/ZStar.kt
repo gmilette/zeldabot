@@ -582,8 +582,6 @@ class ZStar(
 //            setEnemyCosts(param.start, param.enemies)
             // fails, why?
             setAllEnemyCosts(param)
-//            setEnemyCostsByIntersect(param.enemies, param.projectiles)
-//            setForceHighCost(param.rParam.forceHighCost)
             setForcePassable(param.rParam.forcePassable)
             setZeroCost(param.rParam.attackTarget)
         }
@@ -697,7 +695,7 @@ class ZStar(
                 }.map { it.toRect() } + (enemies - projectiles.toSet()).map { it.toRect() }
             }
 
-            d { " set enemy cost for intersecting" }
+//            d { " set enemy cost for intersecting" }
             costsF.mapXyCurrent { x, y, current ->
 //                val pt = FramePoint(x,y).toRectPlus(MapConstants.halfGrid)
                 val pt = FramePoint(x,y).toRect() //Plus(MapConstants.oneGrid)
@@ -724,7 +722,8 @@ class ZStar(
         }
 
         private fun setForceHighCost(grids: List<FramePoint> = emptyList()) {
-            for (grid in grids) {
+            // was some repeats
+            for (grid in grids.toSet()) {
                 d { " set highcost $grid" }
                 costsF.modifyTo(grid, MapConstants.oneGrid, ENEMY_COST)
             }

@@ -4,21 +4,33 @@ import bot.plan.Phases
 import bot.plan.action.Action
 import bot.plan.action.KillAll
 import bot.plan.action.dodge
+import bot.state.map.destination.DestType
 import bot.state.map.destination.ZeldaItem
 
-class Experiments(masterPlan: MasterPlan) {
-    companion object {
-        // to rerun
-//        const val current = "level1bat"
-//        const val current = "level2Boom"
-//        const val current = "level2rhino"
-        val current = "level2w"
-    }
+class Experiments(private val masterPlan: MasterPlan) {
+    val current: Experiment
+        get() = evaluation.getOrElse(0) { default }
+
     private val experiments: Map<String, Experiment>
 
     private val default = Experiment("all", "start_nothing.save", masterPlan, sword = ZeldaItem.MagicSword, addEquipment = false)
 
+    private val evaluation: List<Experiment>
+
     init {
+        val one = Experiment("level1", "level1_start_no_ladder.save",
+            masterPlan.getPlanPhase("Destroy level 1"),
+            addEquipment = false,
+            sword = ZeldaItem.WoodenSword)
+
+        val twoBoom = Experiment("level2Boom", "level2_boom_5h.save", masterPlanWith(KillAll.make()))
+
+        evaluation = listOf(
+            one.copy(name = "level1", hearts = 3, bombs = 0),
+            one.copy(name = "lev1white5", hearts = 5, bombs = 4, sword = ZeldaItem.WhiteSword),
+            one.copy(name = "lev1white6", hearts = 6, bombs = 4, sword = ZeldaItem.WhiteSword)
+        ) //.associateBy { it.nameFull }
+
         experiments = listOf(
             Experiment("all", "start_nothing.save", masterPlan, sword = ZeldaItem.MagicSword, addEquipment = false),
             Experiment("overworlddodge", "overworlddodge.save", masterPlanWith(dodge), sword = ZeldaItem.MagicSword, addEquipment = true),
@@ -68,7 +80,13 @@ data class Experiment(
     val startSave: String,
     val plan: MasterPlan,
     val sword: ZeldaItem = ZeldaItem.MagicSword,
+    val hearts: Int? = null,
+    val ring: ZeldaItem = ZeldaItem.None,
+    val bombs: Int = 0,
+    val shield: Boolean = false,
+    val keys: Int = 0,
     val addEquipment: Boolean = false,
-    val startAt: Int = 52
+    val startAt: Int = 52,
+    val nameFull: String = "${name}_s${sword.name.first()}_h${hearts}_r${ring.name.first()}_b${bombs}"
 )
 

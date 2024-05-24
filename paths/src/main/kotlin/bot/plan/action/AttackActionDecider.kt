@@ -239,15 +239,17 @@ object AttackActionDecider {
     ): GamePad {
         val swords = swordRectangles(link)
 
-        d { " link $link from $from" }
+        d { " link $link from direction $from" }
         for (enemy in enemies) {
             d { " enemy $enemy" }
         }
         d { "**check intersect**" }
 
-        val enemiesClose = enemies.filter { link.distTo(it) < MapConstants.twoGrid }.map { it.toRect() }
+        val enemiesClose = enemies.filter { link.distTo(it) < MapConstants.twoGrid }
+            .sortedBy { it.distTo(link) }
+            .map { it.toRect() }
         if (DEBUG) {
-            for (enemy in enemiesClose.sortedBy { it.topLeft.distTo(link) }) {
+            for (enemy in enemiesClose) { // .sortedBy { it.topLeft.distTo(link) }
                 d { "enemy: $enemy" }
                 for (sword in swords) {
                     if (sword.value.intersect(enemy)) {
@@ -260,12 +262,19 @@ object AttackActionDecider {
         }
 
         val linkRect = link.toRectPlus(-2) // make bigger to make sure there is contact
-        val intersectWithLink = enemiesClose.any { it.intersect(linkRect) }
-        if (intersectWithLink) {
+        val intersectWithLink = enemiesClose.firstOrNull { it.intersect(linkRect) }
+        if (intersectWithLink != null) {
             d { " intersects with link $linkRect"}
+            if (intersectWithLink.intersect(swords[from] ?: Geom.Rectangle())) {
+                d { " intersects with link's sword. Attack!"}
+                GamePad.aOrB(useB)
+            } else {
+                d { " doesnt intersect, evade"}
+                return GamePad.None
+            }
         }
 
-        return if (intersectWithLink || enemiesClose.any {
+        return if (enemiesClose.any {
                 it.intersect(
                     swords.getOrDefault(
                         from,

@@ -353,22 +353,22 @@ val moveToKillAllInCenterSpot = DecisionAction(
 }
 
 fun lootAndKill(kill: Action) = DecisionAction(Optional(GetLoot()), kill) { state ->
-    state.neededLoot.isNotEmpty()
+    neededReachableLoot(state).isNotEmpty()
 }
 
 val lootOrKill = DecisionAction(Optional(GetLoot()), Optional(KillAll())) { state ->
-    state.neededLoot.isNotEmpty()
+    neededReachableLoot(state).isNotEmpty()
 }
 
 fun lootAndMove(moveTo: Action) = DecisionAction(Optional(GetLoot()), moveTo) { state ->
-    state.neededLoot.isNotEmpty()
+    neededReachableLoot(state).isNotEmpty()
 }
 
 // do this for all move tasks that are after kill tasks
 // in case the kill all didnt work and there are enemies
 // around, in that case go back to kill mode
 fun killAndMove(moveTo: MoveTo) = DecisionAction(Optional(KillAll()), moveTo) { state ->
-    state.neededLoot.isNotEmpty()
+    neededReachableLoot(state).isNotEmpty()
 }
 
 fun opportunityKillOrMove(next: MapCell, level: Int): Action =
@@ -654,8 +654,35 @@ class PickupDroppedDungeonItemAndKill : Action {
 val MapLocationState.neededLoot: List<Agent>
     get() = frameState.enemies.filter { it.isLoot }.filter { LootKnowledge.needed(this, it) }
 
+fun neededReachableLoot(state: MapLocationState): List<Agent> {
+    return state.neededLoot.filter {
+        // always get the fairy, it will move into accessible area
+        it.tile == fairy || halfInsidePassable(state, it.point, it.tile in LootKnowledge.halfSize)
+    }
+}
+
+// some items are half sized, like hearts
+// should take into account half passable
+private fun halfInsidePassable(state: MapLocationState, pt: FramePoint, small: Boolean): Boolean {
+    return with(state.currentMapCell) {
+        val midPassable = passable.get(pt.downHalf) && passable.get(pt.downHalf.justRightHalf)
+        val topPassable = passable.get(pt) && passable.get(pt.justRightHalf)
+        d { " mid pass: $pt mid=$midPassable top=$topPassable small=${small}"}
+        if (small) {
+            // whole thing needs to be showing
+            topPassable && midPassable
+        } else {
+            // have of it needs to be showing
+            val bottomPassable = passable.get(pt.downOneGrid) && passable.get(pt.downOneGrid.justRightHalf)
+            d { "         bottom=$bottomPassable"}
+            (topPassable && midPassable && bottomPassable) || bottomPassable && midPassable
+        }
+    }
+}
+
+
 object LootKnowledge {
-    val keepSet = setOf(heart, fairy, fairy2, bomb) //bigCoin,
+    val keepSet = setOf(heart, fairy, fairy2, bomb, bigCoin) //bigCoin,
 
     val halfSize = setOf(heart, bomb)
 
@@ -684,26 +711,8 @@ class GetLoot(
         RouteTo(params = RouteTo.Param(whatToAvoid = RouteTo.Param.makeIgnoreProjectiles(adjustInSideLevelBecauseGannon)))
 
     override fun complete(state: MapLocationState): Boolean =
-        state.neededLoot.filter {
-            halfInsidePassable(state, it.point, it.tile in LootKnowledge.halfSize)
-        }.isEmpty()
+        neededReachableLoot(state).isEmpty()
 
-    // some items are half sized, like hearts
-    // should take into account half passable
-    private fun halfInsidePassable(state: MapLocationState, pt: FramePoint, small: Boolean): Boolean {
-        return with(state.currentMapCell) {
-            val midPassable = passable.get(pt.downHalf) && passable.get(pt.downHalf.justRightHalf)
-            val topPassable = passable.get(pt) && passable.get(pt.justRightHalf)
-            d { " mid pass: $pt mid=$midPassable top=$topPassable"}
-            if (small) {
-                topPassable || midPassable
-            } else {
-                val bottomPassable = passable.get(pt.downOneGrid) && passable.get(pt.downOneGrid.justRightHalf)
-                d { "         bottom=$bottomPassable"}
-                (topPassable && midPassable) || bottomPassable && midPassable
-            }
-        }
-    }
     // it cant be too close to the not passable spot
     // maybe just make sure all of it is passable
 

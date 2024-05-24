@@ -78,6 +78,8 @@ object DamagedLookup {
         .add023(0xd6)
         .add02(0xd2)
         .add02(0xda)
+        .add02(0xd2)
+        .add64(0xd4)
 
 
     init {

@@ -20,9 +20,16 @@ class MasterPlan(val segments: List<PlanSegment>) {
 
     private var initialPlanSize: Int = 0
 
-    private val giant = segments.flatMap { seg -> seg.plan.map { PlanStep(seg, it) } }.toMutableList().also {
+    private var giant = segments.flatMap { seg -> seg.plan.map { PlanStep(seg, it) } }.toMutableList().also {
         initialPlanSize = it.size
         d { " created plan with $initialPlanSize actions moves $numMoves" }
+    }
+
+    fun reset() {
+        giant = segments.flatMap { seg -> seg.plan.map { PlanStep(seg, it) } }.toMutableList().also {
+            initialPlanSize = it.size
+            d { " reset: created plan with $initialPlanSize actions moves $numMoves" }
+        }
     }
 
     val actionsLeft: Int

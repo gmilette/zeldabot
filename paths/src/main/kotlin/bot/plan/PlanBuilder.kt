@@ -623,10 +623,10 @@ class PlanBuilder(
         return this
     }
 
-    fun goTo(to: FramePoint, makePassable: FramePoint? = null): PlanBuilder {
+    fun goTo(to: FramePoint, makePassable: FramePoint? = null, ignoreProjectiles: Boolean = false): PlanBuilder {
         // need to add this elsewhere probably
         add(lastMapLoc, StartAtAction(0, -1))
-        goAbout(to, 2, 1, false, makePassable = makePassable)
+        goAbout(to, 2, 1, false, makePassable = makePassable, ignoreProjectiles = ignoreProjectiles)
         return this
     }
 

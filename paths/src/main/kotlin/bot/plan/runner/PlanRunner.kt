@@ -4,11 +4,10 @@ import bot.DirectoryConstants
 import bot.ZeldaBot
 import bot.plan.action.Action
 import bot.plan.action.DoNothing
+import bot.plan.action.KillAll
 import bot.plan.action.moveHistoryAttackAction
-import bot.state.Addresses
-import bot.state.FramePoint
-import bot.state.GamePad
-import bot.state.MapLocationState
+import bot.state.*
+import bot.state.map.Hyrule
 import bot.state.map.destination.ZeldaItem
 import nintaco.api.API
 import util.d
@@ -21,11 +20,14 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     lateinit var masterPlan: MasterPlan
     lateinit var startPath: String
 
-//    private val target = "afterLev4"
+    private val experiments = Experiments(makePlan())
+
+    //    private val target = "afterLev4"
 //    private val target = "level7"
-    private val target = Experiments.current
+    private val target = experiments.current
 
     init {
+//        run(true, target)
 //        run(name = "level1drag")
 //        run(name = "level2Boom")
 //        run(name = "level6start")
@@ -45,7 +47,8 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        run(name = "afterLev4")
 //        run(name = "level2r")
 //         run(name = "all")
-        runLoc(true,121, 0) // near start
+//        runLoc(true,121, 0) // near start
+//        runLoc(true,26, 0) // near start
 
 //            runLoc(true,91, 0)
 //        run(name = "level7"
@@ -59,7 +62,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        run(name = "level2w")
 //        runLoc(true,62, 2) // sand
 //        runLoc(true,94, 2) // before boomerang
-//        runLoc(true,35, 1)
+        runLoc(true,35, 1)
 //        runLoc(true,35+16, 1)
 //        runLoc(true,87, 5)
 //        runLoc(true,48, 4)
@@ -82,7 +85,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     }
 
     private fun rerun() {
-        run(load = true, name = target)
+        run(load = true, ex = target)
     }
 
     private fun runLoc(load: Boolean = false, mapLoc: Int, level: Int = 0) {
@@ -98,24 +101,42 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
         d { " map state $root"}
         startPath = root
         action = withDefaultAction(masterPlan.skipToLocation(mapLoc, level))
-        runLog = RunActionLog("mapstate_${level}_${mapLoc}")
+        runLog = RunActionLog("mapstate_${level}_${mapLoc}", target)
     }
 
-    private fun run(load: Boolean = false, name: String) {
-        val experiments = Experiments(makePlan())
-        val ex = experiments.ex(name)
-        d { "  run experiment ${ex.name}"}
+    private fun run(load: Boolean = false, ex: Experiment) {
+        val ex = Experiment("level1", "level1_start_no_ladder.save",
+            makePlan().getPlanPhase("Destroy level 1"),
+            addEquipment = false,
+            sword = ZeldaItem.WoodenSword).copy(hearts = 3, bombs = 1, keys = 1, shield = true)
+
+        d { "  run experiment ${ex.name} load=$load"}
+
         ZeldaBot.addEquipment = ex.addEquipment
         masterPlan = ex.plan
         startPath = ex.startSave
+//        masterPlan.reset()
         action = withDefaultAction(masterPlan.skipToStart())
-        runLog = RunActionLog(ex.name)
+        runLog = RunActionLog(ex.name, ex)
         if (load) {
+            d { "reset" }
+            api.reset()
             d { "reload" }
             val root = DirectoryConstants.states
             api.loadState("$root/${startPath}")
         }
-        setSword(ex.sword)
+//        val manipulator = StateManipulator(api, FrameStateUpdater(api, Hyrule()))
+//        d { " set sword to ${ex.sword} hearts to ${ex.hearts}"}
+//        manipulator.setSword(ex.sword)
+//        ex.hearts?.let {
+//            manipulator.setHearts(it)
+//        }
+//        manipulator.setRing(ex.ring)
+//        manipulator.setBombs(ex.bombs)
+//        if (ex.shield) {
+//            manipulator.setMagicShield()
+//        }
+//        manipulator.setKeys(ex.keys)
     }
 
     private fun setSword(item: ZeldaItem) {
@@ -136,7 +157,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
         val action = action ?: return GamePad.None
         runLog.frameCompleted(state)
 
-        if (action.complete(state)) {
+        if (action.complete(state) || state.frameState.isDead) {
             runLog.advance(action, state)
             advance(state)
         }
@@ -152,9 +173,9 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
      * advance to the next step
      */
     private fun advance(state: MapLocationState) {
-        if (masterPlan.complete) {
+        if (masterPlan.complete || state.frameState.isDead) {
             d { " complete "}
-            runLog.logFinalComplete(state )
+            runLog.logFinalComplete(state)
             rerun()
         } else {
             d { " complete action ${action?.javaClass?.name ?: ""}"}

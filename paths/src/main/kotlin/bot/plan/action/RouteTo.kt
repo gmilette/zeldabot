@@ -119,7 +119,7 @@ class RouteTo(val params: Param = Param()) {
     ): GamePad {
         val canAttack = param.useB || state.frameState.canUseSword
         val attackPossible by lazy { params.whatToAvoid != WhatToAvoid.None && canAttack }
-        d { " route To attackOrRoute attack=$attackPossible can=$canAttack allowBlock=${param.allowBlock}" }
+        d { " route To attackOrRoute attack=$attackPossible can=$canAttack allowBlock=${param.allowBlock} avoid=${params.whatToAvoid}" }
         val theAttack = if (param.useB) {
             attackB
         } else {
@@ -127,6 +127,7 @@ class RouteTo(val params: Param = Param()) {
         }
 
 
+        val blockReflex = if (param.allowBlock && this.params.whatToAvoid != WhatToAvoid.JustEnemies) AttackActionBlockDecider.blockReflex(state) else null
         val leftCorner = state.link.leftOneGrid.upLeftOneGridALittleLess
         val nearLink = Geom.Rectangle(leftCorner, state.link.downTwoGrid.rightTwoGrid)
         val projectileNear = state.projectiles.any { it.point.toRect().intersect(nearLink) }
@@ -134,7 +135,6 @@ class RouteTo(val params: Param = Param()) {
         val shouldLongAttack by lazy { AttackLongActionDecider.shouldShootSword(state) }
         // if avoiding just enemies, then no need to block any projectiles
         // this should help collecting the boomerang and also maybe the traps
-        val blockReflex = if (param.allowBlock && this.params.whatToAvoid != WhatToAvoid.JustEnemies) AttackActionBlockDecider.blockReflex(state) else null
         return when {
             blockReflex != null -> {
                 d { " Route Action -> Block Reflex! $blockReflex" }
@@ -195,7 +195,7 @@ class RouteTo(val params: Param = Param()) {
         to: List<FramePoint>,
         paramIn: RouteParam
     ): GamePad {
-        d { " DO routeTo TO ${to.size} points first ${to.firstOrNull()} currently at ${state.currentMapCell.mapLoc}" }
+        d { " DO routeTo TO ${to.size} points first ${to.firstOrNull()} currently at ${state.currentMapCell.mapLoc} what to avoid: ${params.whatToAvoid}" }
         val param = paramIn.copy(rParam = paramIn.rParam.copy(attackTarget = null))
         var forceNew = true || param.forceNew
         if (to.isEmpty()) {

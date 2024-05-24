@@ -9,8 +9,9 @@ import util.d
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.exp
 
-class RunActionLog(private val fileNameRoot: String) {
+class RunActionLog(private val fileNameRoot: String, private val experiment: Experiment) {
 
     private val SAVE = true
     val started = System.currentTimeMillis()
@@ -137,7 +138,11 @@ class RunActionLog(private val fileNameRoot: String) {
                 totalHits,
                 totalDamage,
                 bombsUsed.total,
-                state.frameState.gameMode
+                state.frameState.gameMode,
+                experiment.sword,
+                experiment.ring,
+                experiment.hearts,
+                experiment.bombs
             )
         }
     }
@@ -153,7 +158,8 @@ class RunActionLog(private val fileNameRoot: String) {
         val csvWriter2 = CsvWriter()
         if (!File(outputFileAll).exists()) {
             csvWriter2.open(outputFileAll, true) {
-                writeRow("date", "action", "file", "totalTime", "totalFrames", "totalHits", "totalDamage", "bombsUsed", "gamemode")
+                writeRow("date", "action", "file", "totalTime", "totalFrames", "totalHits", "totalDamage", "bombsUsed", "gamemode",
+                    "sword", "ring", "hearts", "bombs")
             }
         }
     }

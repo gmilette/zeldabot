@@ -18,6 +18,27 @@ object EnemyGroup {
         brownBoomerangSpinBendFacingUp,
     )
 
+    val swordProjectile = setOf(
+        (0x84).toInt() to (0x00).toInt(), // tip
+        (0x82).toInt() to (0x00).toInt(), // hilt
+        // white
+        (0x84).toInt() to (0x01).toInt(),
+        (0x82).toInt() to (0x01).toInt(),
+        // white
+        (0x84).toInt() to (0x02).toInt(),
+        (0x82).toInt() to (0x02).toInt(),
+        // dark
+        (0x84).toInt() to (0x03).toInt(),
+        (0x82).toInt() to (0x03).toInt()
+    )
+
+    // link's sword
+    val swordLink = setOf(
+        // brown sword
+        0x82 to 0x40,
+        0x84 to 0x40
+    )
+
     val ignore = setOf(
         18, 16, // link shield shite
         12, 14, // facing up link
@@ -26,8 +47,10 @@ object EnemyGroup {
         88, 10, // mor elink
         90, // brown link small shield
         20, 22, // i think link or maybe movable block
-        (0x80).toInt(), // link sword
-        (0x82).toInt(), // link sword
+//        (0x80).toInt(), // link sword
+//        (0x82).toInt(), // link sword
+//        (0x82).toInt(), // sword hilt
+//        (0x84).toInt(), // sword point
         84, // link i think //(0x54).toInt(), // link with shield
         86, // link i think //(0x54).toInt(), // link with shield
         32, // link's sword
@@ -36,8 +59,6 @@ object EnemyGroup {
         (0x58).toInt(),
         (0x1A).toInt(), (0x18).toInt(), // link about to attack
         //
-        (0x82).toInt(), // sword hilt
-        (0x84).toInt(), // sword point
         90, // not sure what it is maybe link or his sword
         62, // blinking this
         deadEnemy2,
@@ -93,13 +114,13 @@ object EnemyGroup {
         arrowButtShotByEnemy,
         arrowButtShotByEnemy2,
         rockProjectile
-    )
+    ) + swordProjectile
 
     val projectileMagicShieldBlockable = setOf(
         ghostProjectileUpDown,
         ghostProjectileLeft1,
         ghostProjectileLeft2
-    )
+    ) + (swordProjectile.map { it.tile })
 
     val projectileUnblockable = setOf(
         144, 142, // sun
@@ -170,7 +191,7 @@ object EnemyGroup {
         waterMonsterPair2,
         waterMonsterPairAlt, // tile address = 0EE0
         waterMonsterPairAlt2
-    )
+    ) + swordLink
 
     val lootPairs = setOf(
         triforceTile2Pair,

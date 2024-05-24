@@ -35,6 +35,9 @@ class FrameState(
 
     val isLevel = level != MapConstants.overworld
 
+    val isDead: Boolean
+        get() = gameMode == 8
+
     val canUseSword: Boolean = swordUseCountdown == 0
     val isScrolling: Boolean
         get() = gameMode == 7 || gameMode == 6 || gameMode == 4

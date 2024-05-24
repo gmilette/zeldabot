@@ -94,6 +94,9 @@ class FrameStateUpdater(
         }
         state.framesOnScreen++
         state.frameState = frame
+
+        // game mode 8, is the dead screen
+        d { " GAME MODE ${state.frameState.gameMode}"}
     }
 
     fun updateDecision(gamePad: GamePad) {

@@ -9,6 +9,7 @@ import bot.state.map.destination.ZeldaItem
 import bot.state.map.level.LevelMapCellsLookup
 import bot.state.map.level.LevelSpecBuilder
 import bot.state.map.level.LevelStartMapLoc
+import java.awt.Frame
 
 object ZeldaPlan {
     enum class PlanOption {
@@ -387,8 +388,20 @@ object ZeldaPlan {
             seg("push action")
             goIn(GamePad.MoveLeft, MapConstants.oneGridPoint5) // dodge the traps by moving in
             +makeCenterPush(127, makeUp(34))
-            goTo(FramePoint(12.grid, 5.grid)) // make sure to go straight out
-            rightNoP // don't attack // need special sequence here
+            // because of bad routing link still goes back and forth ad just the wrong time
+            // try going up?
+            // maybe i have to fake out the traps
+            val beforeExit = FramePoint(12.grid, 5.grid)
+            val bottomBefore = FramePoint(7.grid, 7.grid)
+            val bottom = FramePoint(7.grid, 8.grid)
+            // fake maneuver
+            goTo(bottomBefore, ignoreProjectiles = true)
+            goTo(bottom, ignoreProjectiles = true)
+            goTo(bottomBefore, ignoreProjectiles = true)
+            goIn(GamePad.None, 100)
+            goTo(beforeExit, ignoreProjectiles = true)
+            goIn(GamePad.MoveRight, MapConstants.twoGrid)
+            rightNoP // don't attack
             seg("snag boomerang", ZeldaItem.Boomerang)
             down.down // at 67 now
             right // boomerang
