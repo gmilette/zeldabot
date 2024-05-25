@@ -62,8 +62,10 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        run(name = "level2w")
 //        runLoc(true,62, 2) // sand
 //        runLoc(true,94, 2) // before boomerang
-        runLoc(true,35, 1)
-//        runLoc(true,35+16, 1)
+//        runLoc(true,35, 1) // before bow
+//        runLoc(true,35+16+16, 1)
+        runLoc(true,69, 1) // dragon
+//        runLoc(true,35+16+16, 1)
 //        runLoc(true,87, 5)
 //        runLoc(true,48, 4)
 //        runLoc(true,50, 4) // push ladder

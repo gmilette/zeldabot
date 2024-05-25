@@ -54,13 +54,14 @@ class FrameStateUpdater(
         val mapLoc = api.readCPU(Addresses.ZeroPage.mapLoc)
         val level = api.readCPU(Addresses.level)
 
-        state.currentMapCell = if (level == MapConstants.overworld) {
+        val isOverworld = level == MapConstants.overworld
+        state.currentMapCell = if (isOverworld) {
             hyrule.getMapCell(mapLoc)
         } else {
             state.hyrule.levelMap.cellOrEmpty(level, mapLoc)
         }
 
-        val oam = OamStateReasoner(api, mapStats)
+        val oam = OamStateReasoner(isOverworld, api, mapStats)
         val theEnemies = oam.agents()
         val theUncombined = oam.agentsUncombined()
         val linkDir = oam.direction

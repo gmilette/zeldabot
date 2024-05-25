@@ -13,6 +13,7 @@ import util.d
  * reason about the sprites
  */
 class OamStateReasoner(
+    private val isOverworld: Boolean,
     private val api: API,
     private val mapStatsTracker: MapStatsTracker = MapStatsTracker()
 ) {
@@ -51,7 +52,7 @@ class OamStateReasoner(
     // calculate isDamaged here
     private fun SpriteData.toAgent(): Agent {
         val tileAttribute = tile to attribute
-        val damaged = DamagedLookup.isDamaged(tile, attribute)
+        val damaged = DamagedLookup.isDamaged(tile, attribute, isOverworld)
 //        val damaged = mapStatsTracker.isDamaged(tile, attribute)
         val blockable = calcBlockable(tile, tileAttribute)
         val state = toState(damaged)

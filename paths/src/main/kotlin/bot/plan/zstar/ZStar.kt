@@ -260,7 +260,7 @@ class ZStar(
         val startIsSafe = costsF.safe(param.start)
 
         // testing
-        if (param.rParam.findNearestSafeIfCurrentlyNotSafe == true && !startIsSafe) {
+        if (false && param.rParam.findNearestSafeIfCurrentlyNotSafe == true && !startIsSafe) {
             d { " dodge! "}
             return routeNearestSafe(param)
         }
@@ -724,14 +724,18 @@ class ZStar(
         private fun setForceHighCost(grids: List<FramePoint> = emptyList()) {
             // was some repeats
             for (grid in grids.toSet()) {
-                d { " set highcost $grid" }
+                if (DEBUG) {
+                    d { " set highcost $grid" }
+                }
                 costsF.modifyTo(grid, MapConstants.oneGrid, ENEMY_COST)
             }
         }
 
         private fun setZeroCost(target: FramePoint?) {
             target?.let {
-                d { "set zero cost $target" }
+                if (DEBUG) {
+                    d { "set zero cost $target" }
+                }
                 // actual enemy higher cost then around the enemy
                 costsF.modifyTo(target, MapConstants.oneGrid, 0)
             }

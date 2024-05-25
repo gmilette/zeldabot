@@ -135,6 +135,7 @@ private val three = (0x03).toInt()
 val dragonHead = (0xCC).toInt()
 val dragonHead2 = (0xC0).toInt()
 val dragonNeck = (0xC4).toInt() to three
+val dragonNeckTile = (0xC4).toInt()
 // do not attack
 // but these are also the pinwheel guys
 //val dragonFeet = (0xC6).toInt() //wheel guy

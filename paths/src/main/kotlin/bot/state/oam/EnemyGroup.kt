@@ -235,6 +235,10 @@ object EnemyGroup {
         magicSword,
     )
 
+    val dragon1 = setOf(
+        dragonHead//, dragonNeckTile
+    )
+
     val enemiesToNotAttackInOverworld = setOf(
         spinCircleEnemy,
         spinCircleEnemy2,

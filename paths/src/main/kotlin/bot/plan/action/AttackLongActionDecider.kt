@@ -11,19 +11,19 @@ import util.d
 
 object AttackLongActionDecider {
 
-    fun shouldShootSword(state: MapLocationState): Boolean {
+    fun shouldShootSword(state: MapLocationState, targets: List<FramePoint>): Boolean {
         val swordIsFlying = false
         val full = state.frameState.inventory.heartCalc.full(state.frameState.inventory.inventoryItems.whichRing())
         val canShoot = full //state.frameState HeartCalculator.isFull()
         // draw ray from attack point. Does it hi
-        return (canShoot && !swordIsFlying && targetInLongRange(state))
+        return (canShoot && !swordIsFlying && targetInLongRange(state, targets))
     }
 
     fun shouldBoomerang(state: MapLocationState): Boolean {
         val shouldShoot = state.frameState.enemies.isNotEmpty()
         val canShoot = false // is boomerang active
         val boomerangeIsFlying = false
-        return (canShoot && !boomerangeIsFlying && targetInLongRange(state))
+        return (canShoot && !boomerangeIsFlying && targetInLongRange(state, emptyList()))
         // there are enemies or loot (allow shooting at loot)
         // if boomerang is active
         // if there are enemies that can be affected by boomerang
@@ -36,8 +36,8 @@ object AttackLongActionDecider {
     // boomerang algorithm
     // since enemies are fro
 
-    private fun targetInLongRange(state: MapLocationState): Boolean {
-        return firstEnemyIntersect(state, longRectangle(state)) != null
+    private fun targetInLongRange(state: MapLocationState, targets: List<FramePoint>): Boolean {
+        return firstEnemyIntersect(state, longRectangle(state), targets) != null
     }
 
     fun longRectangle(state: MapLocationState): Geom.Rectangle {
@@ -52,17 +52,21 @@ object AttackLongActionDecider {
         return swordRectangle
     }
 
-    private fun firstEnemyIntersect(state: MapLocationState, swordRectangle: Geom.Rectangle): Agent? {
+    private fun firstEnemyIntersect(state: MapLocationState, swordRectangle: Geom.Rectangle, targets: List<FramePoint>): Agent? {
         //     0  link
         //     +4 top sword
         // -->
         //     +12 bottom sword (account for size of sword or boomerang)
 
         // depends on direction
-        for (aliveEnemy in state.aliveEnemies) {
-            val inter = swordRectangle.intersect(aliveEnemy.point.toRect())
-            d { "intersect ${aliveEnemy.point} $inter" }
+        for (aliveEnemy in targets) {
+            val inter = swordRectangle.intersect(aliveEnemy.toRect())
+            d { "intersect ${aliveEnemy} $inter" }
         }
+//        for (aliveEnemy in state.aliveEnemies) {
+//            val inter = swordRectangle.intersect(aliveEnemy.point.toRect())
+//            d { "intersect ${aliveEnemy.point} $inter" }
+//        }
 
 //        // don't shoot at front of sword guy
 //        return state.aliveEnemies.affectedByBoomerang().filter {

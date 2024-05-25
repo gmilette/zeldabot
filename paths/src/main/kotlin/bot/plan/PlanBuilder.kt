@@ -10,10 +10,7 @@ import bot.state.map.destination.DestType
 import bot.state.map.destination.EntryType
 import bot.state.map.destination.ZeldaItem
 import bot.state.map.level.LevelMapCellsLookup
-import bot.state.oam.EnemyGroup
-import bot.state.oam.dragon4Head
-import bot.state.oam.dragonHead
-import bot.state.oam.dragonHead2
+import bot.state.oam.*
 import util.d
 
 class PlanBuilder(
@@ -297,8 +294,8 @@ class PlanBuilder(
     val killLev1Dragon: PlanBuilder
         get() {
             add(lastMapLoc, KillAll(needLongWait = false,
-                targetOnly = listOf(dragon4Head, dragonHead, dragonHead2),
-                whatToAvoid = RouteTo.WhatToAvoid.JustProjectiles))
+                //targetOnly = listOf(dragonHead), //, dragonNeckTile
+                whatToAvoid = RouteTo.WhatToAvoid.JustProjectiles))// .JustProjectiles))
             return this
         }
     val startHere: PlanBuilder

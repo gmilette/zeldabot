@@ -416,6 +416,8 @@ object ZeldaPlan {
 //                .go(InLocations.Level1.key114)
             up
             seg("destroy dragon")
+            // avoid first round of fireballs
+            go(FramePoint(6.grid, 3.grid))
             killLev1Dragon // aim for the head
             rightm // triforce
             goIn(GamePad.MoveRight, 20)

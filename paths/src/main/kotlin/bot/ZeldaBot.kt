@@ -77,6 +77,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         println("Status message: $message")
     }
 
+    var once = 0
+
     private var currentGamePad = GamePad.MoveRight
     private val hyrule: Hyrule = Hyrule()
     private val screenDraw = ScreenDraw()
@@ -103,7 +105,18 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 
         monitor.update(frameStateUpdater.state, plan)
 
-        cheater.refillAndSetItems()
+////        cheater.refillAndSetItems()
+        val manipulator = StateManipulator(api, FrameStateUpdater(api, hyrule))
+        if (once < 20) {
+            manipulator.setHearts(4)
+            manipulator.setSword(ZeldaItem.WoodenSword)
+            once++
+        }
+//        manipulator.setRing(ZeldaItem.RedRing)
+//        manipulator.setBombs(1)
+//            manipulator.setMagicShield()
+//        manipulator.setKeys(9)
+
 
         val act = doAct
         if (act) {
@@ -322,7 +335,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     }
 
     inner class ScreenDraw {
-        private val drawAttackZone = true
+        private val drawAttackZone = false
         private val drawAttackPoints = false
         private val drawEnemyCosts = true
 
@@ -477,8 +490,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 //                        (y % 16 % 2 == 0) && (x % 16 % 2 == 0) && attackDirectionGrid.isInHalfFatGrid(FramePoint(x, y), dir.vertical) ->
 //                            if (should) Colors.DARK_GREEN else Colors.LIGHT_BLUE
 
-//                        v > 100000 -> Colors.MAGENTA
-//                        v > 9000 && (y % 16 % 2 == 0) -> Colors.RED
+                        v > 100000 -> Colors.MAGENTA
+                        v > 9000 && (y % 16 % 2 == 0) -> Colors.RED
                         else -> -1
                     }
                     if (color != -1) {

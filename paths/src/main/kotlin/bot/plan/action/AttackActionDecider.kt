@@ -186,6 +186,7 @@ object AttackActionDecider {
         return swords[dir]?.intersect(enemy) ?: false
     }
 
+    // need to filter enemies here too
     fun inRangeOf(state: MapLocationState): GamePad {
         return inRangeOf(
             state.frameState.link.dir,
@@ -195,13 +196,22 @@ object AttackActionDecider {
         )
     }
 
+    fun inRangeOf(state: MapLocationState, targets: List<FramePoint>): GamePad {
+        return inRangeOf(
+            state.frameState.link.dir,
+            state.link,
+            targets,
+            false
+        )
+    }
+
     /**
      * it's annoying to watch link attack the spin guys, ignore those
      */
-    private fun aliveEnemiesCanAttack(state: MapLocationState): List<FramePoint> {
+    fun aliveEnemiesCanAttack(state: MapLocationState): List<FramePoint> {
         val enemies = state.aliveEnemies
         return if (state.frameState.isLevel) {
-            enemies
+            if (state.frameState.level == 1 && state.frameState.mapLoc == 53) enemies.filter { it.tile in EnemyGroup.dragon1} else enemies
         } else {
             enemies.filter { it.tile !in EnemyGroup.enemiesToNotAttackInOverworld }
         }.map { it.point }
