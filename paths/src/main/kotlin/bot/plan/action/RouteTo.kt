@@ -128,7 +128,7 @@ class RouteTo(val params: Param = Param()) {
 
         val attackable = AttackActionDecider.aliveEnemiesCanAttack(state)
 
-        val blockReflex = if (param.allowBlock && this.params.whatToAvoid != WhatToAvoid.JustEnemies) AttackActionBlockDecider.blockReflex(state) else null
+        val blockReflex: GamePad? = if (param.allowBlock && this.params.whatToAvoid != WhatToAvoid.JustEnemies) AttackActionBlockDecider.blockReflex(state) else null
         val leftCorner = state.link.leftOneGrid.upLeftOneGridALittleLess
         val nearLink = Geom.Rectangle(leftCorner, state.link.downTwoGrid.rightTwoGrid)
         val projectileNear = state.projectiles.any { it.point.toRect().intersect(nearLink) }

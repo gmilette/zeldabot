@@ -19,13 +19,18 @@ object DamagedLookup {
         0xc2 to 1,
         0xc2 to h67,
         0xc2 to h66,
-    ).add013(0xb0)
+    )
+        // boomerang guys
+        .add013(0xb0)
         .add013(0xb4)
         .add013(0xb8)
         .add65(0xb2)
         .add65(0xb6)
         .add65(0xba)
         .add013(0xbc)
+        // skeletons
+        .add013(0xa8)
+        .add65(0xaa)
 
     private val damagedPairs = mutableSetOf(
         0xc2 to 0,

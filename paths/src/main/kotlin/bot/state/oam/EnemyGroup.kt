@@ -114,13 +114,13 @@ object EnemyGroup {
         arrowButtShotByEnemy,
         arrowButtShotByEnemy2,
         rockProjectile
-    ) + swordProjectile
+    ) // + swordProjectile
 
     val projectileMagicShieldBlockable = setOf(
         ghostProjectileUpDown,
         ghostProjectileLeft1,
         ghostProjectileLeft2
-    ) + (swordProjectile.map { it.tile })
+    ) // + (swordProjectile.map { it.tile })
 
     val projectileUnblockable = setOf(
         144, 142, // sun

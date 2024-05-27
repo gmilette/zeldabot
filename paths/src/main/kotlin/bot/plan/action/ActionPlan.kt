@@ -694,6 +694,8 @@ object LootKnowledge {
         when (agent.tile) {
             bomb -> (state.frameState.inventory.numBombs < 8)
             bigCoin -> (state.frameState.inventory.numRupees < 250)
+            fairy,
+            heart -> !state.frameState.inventory.heartCalc.noDamage()
             // heart
             // fairy
             else -> true

@@ -20,8 +20,8 @@ object ZeldaPlan {
     fun makeMasterPlan(hyrule: Hyrule, mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
         val router = OverworldRouter(hyrule)
         val factory = PlanInputs(mapData, levelData, router)
-//        return real(factory)
-        return realLev1(factory)
+        return real(factory)
+//        return realLev1(factory)
     }
 
     private fun levelTour(factory: PlanInputs): MasterPlan {
@@ -443,6 +443,7 @@ object ZeldaPlan {
             kill
             left
             goTo(InLocations.Level2.keyMid)
+            loot
             right
             right // grid room
             seg("sprint up from grid")

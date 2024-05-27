@@ -101,6 +101,17 @@ class HeartsStateCalculator(private val inventory: Inventory) {
         return lifeTotalDecimal
     }
 
+    fun noDamage(): Boolean {
+        val containers = heartContainers()
+        val full = heartContainersFull()
+        val damage = damageDecimal()
+        return damage == 0.0 && containers == full
+    }
+
+    fun full(state: MapLocationState): Boolean {
+        return full(state.frameState.inventory.inventoryItems.whichRing())
+    }
+
     fun full(ring: ZeldaItem = ZeldaItem.None): Boolean {
         val damageThresholdToStillBeFull = when (ring) {
             // you can have half damage and still be full

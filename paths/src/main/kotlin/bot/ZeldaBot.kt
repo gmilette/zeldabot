@@ -105,18 +105,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 
         monitor.update(frameStateUpdater.state, plan)
 
-////        cheater.refillAndSetItems()
-        val manipulator = StateManipulator(api, FrameStateUpdater(api, hyrule))
-        if (once < 20) {
-            manipulator.setHearts(4)
-            manipulator.setSword(ZeldaItem.WoodenSword)
-            once++
-        }
-//        manipulator.setRing(ZeldaItem.RedRing)
-//        manipulator.setBombs(1)
-//            manipulator.setMagicShield()
-//        manipulator.setKeys(9)
-
+        plan.runSetup(cheater.stateManipulator)
 
         val act = doAct
         if (act) {
@@ -265,7 +254,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
      * refil, make link invincible, etc..
      */
     inner class Cheater(api: API, frameStateUpdater: FrameStateUpdater) {
-        private val stateManipulator = StateManipulator(api, frameStateUpdater)
+        val stateManipulator = StateManipulator(api, frameStateUpdater)
         fun refillAndSetItems() {
             // not reliable enough
             val life = frameStateUpdater.state.frameState.inventory.heartCalc.lifeInHearts2()
@@ -412,10 +401,12 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                     // t: $tenth d: $dir
                     //heart
                     val heart = this.frameState.inventory.heartCalc.toString()
+                    val noDamage = frameState.inventory.heartCalc.noDamage()
                     val ring = this.frameState.inventory.inventoryItems.whichRing().takeIf { it != ZeldaItem.None }
                     val ringS = if (ring != null) "r: ${ring.toString().take(1)}" else ""
+                    val noD = if (noDamage) " noD" else ""
                     try {
-                        drawIt(plan.target(), plan.path(), "$locCoordinates $link t:$tenth h:${heart}${ringS}")
+                        drawIt(plan.target(), plan.path(), "$locCoordinates $link t:$tenth $noD h:${heart}${ringS}")
                     } catch (e: Exception) {
                         d { "ERROR $e" }
                     }

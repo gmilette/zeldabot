@@ -1,5 +1,6 @@
 package bot.plan.runner
 
+import androidx.compose.runtime.currentComposer
 import bot.DirectoryConstants
 import bot.ZeldaBot
 import bot.plan.action.Action
@@ -26,8 +27,11 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //    private val target = "level7"
     private val target = experiments.current
 
+    private var runCt = 0
+    private var runSetupCt = 0
+
     init {
-//        run(true, target)
+        run(true, target)
 //        run(name = "level1drag")
 //        run(name = "level2Boom")
 //        run(name = "level6start")
@@ -64,7 +68,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
 //        runLoc(true,94, 2) // before boomerang
 //        runLoc(true,35, 1) // before bow
 //        runLoc(true,35+16+16, 1)
-        runLoc(true,69, 1) // dragon
+//        runLoc(true,69, 1) // dragon
 //        runLoc(true,35+16+16, 1)
 //        runLoc(true,87, 5)
 //        runLoc(true,48, 4)
@@ -107,11 +111,6 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     }
 
     private fun run(load: Boolean = false, ex: Experiment) {
-        val ex = Experiment("level1", "level1_start_no_ladder.save",
-            makePlan().getPlanPhase("Destroy level 1"),
-            addEquipment = false,
-            sword = ZeldaItem.WoodenSword).copy(hearts = 3, bombs = 1, keys = 1, shield = true)
-
         d { "  run experiment ${ex.name} load=$load"}
 
         ZeldaBot.addEquipment = ex.addEquipment
@@ -127,18 +126,28 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
             val root = DirectoryConstants.states
             api.loadState("$root/${startPath}")
         }
-//        val manipulator = StateManipulator(api, FrameStateUpdater(api, Hyrule()))
-//        d { " set sword to ${ex.sword} hearts to ${ex.hearts}"}
-//        manipulator.setSword(ex.sword)
-//        ex.hearts?.let {
-//            manipulator.setHearts(it)
-//        }
-//        manipulator.setRing(ex.ring)
-//        manipulator.setBombs(ex.bombs)
-//        if (ex.shield) {
-//            manipulator.setMagicShield()
-//        }
-//        manipulator.setKeys(ex.keys)
+        runCt++
+        runSetupCt = 0
+    }
+
+    fun runSetup(manipulator: StateManipulator) {
+        if (runSetupCt > 20) {
+            return
+        }
+        runSetupCt++
+        val ex = this.target
+        d { " set sword to ${ex.sword} hearts to ${ex.hearts}"}
+        manipulator.setSword(ex.sword)
+        ex.hearts?.let {
+            manipulator.setHearts(it)
+        }
+        manipulator.setRing(ex.ring)
+        manipulator.setBombs(ex.bombs)
+        if (ex.shield) {
+            manipulator.setMagicShield()
+        }
+        manipulator.setBoomerang(ex.boomerang)
+        manipulator.setKeys(ex.keys)
     }
 
     private fun setSword(item: ZeldaItem) {

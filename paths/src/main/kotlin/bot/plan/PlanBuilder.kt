@@ -294,8 +294,9 @@ class PlanBuilder(
     val killLev1Dragon: PlanBuilder
         get() {
             add(lastMapLoc, KillAll(needLongWait = false,
+                targetOnly = EnemyGroup.dragon1.toList(),
                 //targetOnly = listOf(dragonHead), //, dragonNeckTile
-                whatToAvoid = RouteTo.WhatToAvoid.JustProjectiles))// .JustProjectiles))
+                whatToAvoid = RouteTo.WhatToAvoid.JustEnemies))// .JustProjectiles))
             return this
         }
     val startHere: PlanBuilder

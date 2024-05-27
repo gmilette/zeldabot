@@ -24,9 +24,14 @@ class Experiments(private val masterPlan: MasterPlan) {
             sword = ZeldaItem.WoodenSword)
 
         val twoBoom = Experiment("level2Boom", "level2_boom_5h.save", masterPlanWith(KillAll.make()))
+        val two = Experiment("level2", "level2.save",
+            masterPlan.getPlanPhase("Destroy level 2"),
+            addEquipment = false,
+            sword = ZeldaItem.WoodenSword)
 
         evaluation = listOf(
-            one.copy(name = "level1", hearts = 3, bombs = 0),
+            two.copy(name = "level2", hearts = 3, bombs = 0),
+            one.copy(name = "level1", hearts = 3, bombs = 1),
             one.copy(name = "lev1white5", hearts = 5, bombs = 4, sword = ZeldaItem.WhiteSword),
             one.copy(name = "lev1white6", hearts = 6, bombs = 4, sword = ZeldaItem.WhiteSword)
         ) //.associateBy { it.nameFull }
@@ -85,6 +90,7 @@ data class Experiment(
     val bombs: Int = 0,
     val shield: Boolean = false,
     val keys: Int = 0,
+    val boomerang: ZeldaItem = ZeldaItem.None,
     val addEquipment: Boolean = false,
     val startAt: Int = 52,
     val nameFull: String = "${name}_s${sword.name.first()}_h${hearts}_r${ring.name.first()}_b${bombs}"

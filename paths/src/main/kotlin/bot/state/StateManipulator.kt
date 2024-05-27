@@ -2,6 +2,7 @@ package bot.state
 
 import bot.state.map.destination.ZeldaItem
 import nintaco.api.API
+import util.d
 import kotlin.math.max
 
 /**
@@ -29,7 +30,9 @@ class StateManipulator(
 
     fun setHearts(num: Int) {
 //        val h = (num + 1) + (num + 1) * 16
-        api.writeCPU(Addresses.heartContainers, 32+2) //32 + 2
+        d { "set hearts $num" }
+//        api.writeCPU(Addresses.heartContainers, 48 + 3) //32 + 2
+        api.writeCPU(Addresses.heartContainers, (16 * (num-1)) + (num-1)) //32 + 2
         api.writeCPU(Addresses.heartContainersHalf, 0xFF) // make the half heart full too
     }
 
@@ -93,6 +96,18 @@ class StateManipulator(
 
     fun setKeys(num: Int) {
         api.writeCPU(Addresses.numKeys, num)
+    }
+
+    fun setBoomerang(item: ZeldaItem) {
+        when (item) {
+            ZeldaItem.MagicalBoomerang -> api.writeCPU(Addresses.hasMagicBoomerang, 1)
+            ZeldaItem.Boomerang -> api.writeCPU(Addresses.hasBoomerang, 1)
+            else -> {
+                api.writeCPU(Addresses.hasMagicBoomerang, 0)
+                api.writeCPU(Addresses.hasBoomerang, 0)
+            }
+        }
+
     }
 
     fun addRupee() {
