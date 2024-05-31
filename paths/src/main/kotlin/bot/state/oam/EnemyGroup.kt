@@ -35,8 +35,15 @@ object EnemyGroup {
     // link's sword
     val swordLink = setOf(
         // brown sword
+        0x82 to 0x01,
         0x82 to 0x40,
-        0x84 to 0x40
+        0x84 to 0x40,
+        0x82 to 0x41,
+        0x84 to 0x41,
+        // magic sword?
+        0x82 to 0x42,
+        0x84 to 0x42,
+        0x80 to 0x1,
     )
 
     val ignore = setOf(
@@ -87,7 +94,7 @@ object EnemyGroup {
         // keep for now, but I have to make link not attack sometimes
 //            secretEverybodyMonsterOrCircleEnemyLeft,
 //            secretEverybodyMonsterOrCircleEnemyRight
-    )
+    ) + swordProjectile.map { it.tile } + swordLink.map { it.tile }
     val projectiles = setOf(
         144, 142, // sun
         40, orbProjectile, // ganons

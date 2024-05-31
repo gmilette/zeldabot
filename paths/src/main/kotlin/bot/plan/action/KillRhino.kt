@@ -511,7 +511,6 @@ fun weaponFor(state: RhinoState): GamePad =
         else -> GamePad.None
     }
 
-
 private fun MapLocationState.isEatingBomb() =
     frameState.enemies.firstOrNull { eatingBombTile.contains(it.tile) } != null
 

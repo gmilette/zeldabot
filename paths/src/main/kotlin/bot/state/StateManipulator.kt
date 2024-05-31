@@ -110,6 +110,10 @@ class StateManipulator(
 
     }
 
+    fun clearRupee() {
+        api.writeCPU(Addresses.numRupees, 0)
+    }
+
     fun addRupee() {
         val current = state.frameState.inventory.numRupees
         val plus100 = max(252, current + 100)

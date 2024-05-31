@@ -14,24 +14,30 @@ import nintaco.api.API
 import util.d
 import java.io.File
 
-class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
+typealias PlanMaker = () -> MasterPlan
+
+class PlanRunner(private val makePlan: PlanMaker, private val api: API) {
     var action: Action? = null
         private set
     lateinit var runLog: RunActionLog
     lateinit var masterPlan: MasterPlan
     lateinit var startPath: String
 
-    private val experiments = Experiments(makePlan())
+    private val experiments = Experiments(makePlan)
 
     //    private val target = "afterLev4"
 //    private val target = "level7"
-    private val target = experiments.current
+    private val target: Experiment
+        get() = experiments.current
 
     private var runCt = 0
     private var runSetupCt = 0
 
     init {
         run(true, target)
+        if (runCt % 10 == 0) {
+            experiments.experimentIncrement++
+        }
 //        run(name = "level1drag")
 //        run(name = "level2Boom")
 //        run(name = "level6start")
@@ -113,15 +119,17 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     private fun run(load: Boolean = false, ex: Experiment) {
         d { "  run experiment ${ex.name} load=$load"}
 
-        ZeldaBot.addEquipment = ex.addEquipment
-        masterPlan = ex.plan
+//        val ex = experiments.getExp()
+//        ZeldaBot.addEquipment = ex.addEquipment
+        masterPlan = ex.plan()
         startPath = ex.startSave
 //        masterPlan.reset()
         action = withDefaultAction(masterPlan.skipToStart())
+        d { " START AT ${action?.name}"}
         runLog = RunActionLog(ex.name, ex)
         if (load) {
             d { "reset" }
-            api.reset()
+//            api.reset()
             d { "reload" }
             val root = DirectoryConstants.states
             api.loadState("$root/${startPath}")
@@ -134,6 +142,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
         if (runSetupCt > 20) {
             return
         }
+//        api.setSpeed(400)
         runSetupCt++
         val ex = this.target
         d { " set sword to ${ex.sword} hearts to ${ex.hearts}"}
@@ -141,6 +150,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
         ex.hearts?.let {
             manipulator.setHearts(it)
         }
+        manipulator.clearRupee()
         manipulator.setRing(ex.ring)
         manipulator.setBombs(ex.bombs)
         if (ex.shield) {
@@ -148,18 +158,6 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
         }
         manipulator.setBoomerang(ex.boomerang)
         manipulator.setKeys(ex.keys)
-    }
-
-    private fun setSword(item: ZeldaItem) {
-        d  { " SET SWORD $item"}
-        when (item) {
-            ZeldaItem.WoodenSword -> api.writeCPU(Addresses.hasSword, 1)
-            ZeldaItem.WhiteSword -> api.writeCPU(Addresses.hasSword, 2)
-            ZeldaItem.MagicSword -> api.writeCPU(Addresses.hasSword, 3)
-            else -> {
-                api.writeCPU(Addresses.hasSword, 0)
-            }
-        }
     }
 
     private fun withDefaultAction(action: Action) = moveHistoryAttackAction(action)
@@ -186,7 +184,7 @@ class PlanRunner(private val makePlan: () -> MasterPlan, private val api: API) {
     private fun advance(state: MapLocationState) {
         if (masterPlan.complete || state.frameState.isDead) {
             d { " complete "}
-            runLog.logFinalComplete(state)
+            runLog.logFinalComplete(state, masterPlan)
             rerun()
         } else {
             d { " complete action ${action?.javaClass?.name ?: ""}"}

@@ -124,7 +124,15 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         }
     }
 
-    fun logFinalComplete(state: MapLocationState) {
+    fun logFinalComplete(state: MapLocationState, masterPlan: MasterPlan) {
+        // it's possible that link just
+        val result = when {
+            masterPlan.complete -> "complete"
+            state.frameState.isDead -> "dead"
+            else -> "other"
+        }
+        val percentDone = masterPlan.percentDoneInt
+        val finalMapLoc = state.currentMapCell.mapLoc
         writeFinalHeader()
         val stepCompleted = calculateStep(fileNameRoot, state, totalFrames, totalHits, totalDamage)
         val csvWriter2 = CsvWriter()
@@ -138,11 +146,17 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
                 totalHits,
                 totalDamage,
                 bombsUsed.total,
+                state.frameState.inventory.numRupees,
                 state.frameState.gameMode,
+                percentDone,
+                finalMapLoc,
+                result,
                 experiment.sword,
                 experiment.ring,
                 experiment.hearts,
-                experiment.bombs
+                experiment.bombs,
+                experiment.boomerang,
+                experiment.shield,
             )
         }
     }
@@ -158,8 +172,11 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         val csvWriter2 = CsvWriter()
         if (!File(outputFileAll).exists()) {
             csvWriter2.open(outputFileAll, true) {
-                writeRow("date", "action", "file", "totalTime", "totalFrames", "totalHits", "totalDamage", "bombsUsed", "gamemode",
-                    "sword", "ring", "hearts", "bombs")
+                writeRow("date", "action", "file", "totalTime", "totalFrames",
+                    "totalHits", "totalDamage", "bombsUsed", "rupees",
+                    "gamemode", "percent", "mapLoc", "result",
+                    "sword", "ring", "hearts", "bombs",
+                    "boom", "shield")
             }
         }
     }

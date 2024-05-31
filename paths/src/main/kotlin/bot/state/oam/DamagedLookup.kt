@@ -14,20 +14,24 @@ object DamagedLookup {
     private val h129 = 0x81
     private val h128 = 0x80
 
-    private val damagedPairsLevel = mutableSetOf(
+    private val damagedPairsLevel = mutableSetOf(0x01 to 0x01)
+
+    private val damagedPairsLevel2 = mutableSetOf(
         0xc2 to 0,
         0xc2 to 1,
         0xc2 to h67,
         0xc2 to h66,
     )
         // boomerang guys
-        .add013(0xb0)
-        .add013(0xb4)
-        .add013(0xb8)
-        .add65(0xb2)
-        .add65(0xb6)
-        .add65(0xba)
-        .add013(0xbc)
+        // the blue guy is attribute 1
+        .add03(0xb0)
+        .add03(0xb4)
+        .add03(0xb8)
+        .add03(0xbc)
+        // 41 is ok
+        .add65no65(0xb2)
+        .add65no65(0xb6)
+        .add65no65(0xba)
         // skeletons
         .add013(0xa8)
         .add65(0xaa)
@@ -141,12 +145,24 @@ object DamagedLookup {
         return this
     }
 
+    private fun MutableSet<TileAttribute>.add65no65(tile: Int): MutableSet<TileAttribute> {
+        add(tile to h64)
+        add(tile to h67)
+        return this
+    }
+
     private fun MutableSet<TileAttribute>.add023(tile: Int): MutableSet<TileAttribute> {
         add(tile to 0)
         add(tile to 2)
         add(tile to 3)
         return this
     }
+    private fun MutableSet<TileAttribute>.add03(tile: Int): MutableSet<TileAttribute> {
+        add(tile to 0)
+        add(tile to 3)
+        return this
+    }
+
     private fun MutableSet<TileAttribute>.add013(tile: Int): MutableSet<TileAttribute> {
         add(tile to 0)
         add(tile to 1)

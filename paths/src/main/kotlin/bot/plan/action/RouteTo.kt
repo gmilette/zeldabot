@@ -129,11 +129,13 @@ class RouteTo(val params: Param = Param()) {
         val attackable = AttackActionDecider.aliveEnemiesCanAttack(state)
 
         val blockReflex: GamePad? = if (param.allowBlock && this.params.whatToAvoid != WhatToAvoid.JustEnemies) AttackActionBlockDecider.blockReflex(state) else null
-        val leftCorner = state.link.leftOneGrid.upLeftOneGridALittleLess
+        val leftCorner = state.link.upLeftOneGridALittleLess
         val nearLink = Geom.Rectangle(leftCorner, state.link.downTwoGrid.rightTwoGrid)
+        // should only do this for fireball projectiles
         val projectileNear = state.projectiles.any { it.point.toRect().intersect(nearLink) }
         val inRangeOf by lazy { AttackActionDecider.inRangeOf(state, attackable) }
         val shouldLongAttack by lazy { AttackLongActionDecider.shouldShootSword(state, attackable) }
+        val shouldLongBoomerang by lazy { AttackLongActionDecider.shouldBoomerang(state) }
         // if avoiding just enemies, then no need to block any projectiles
         // this should help collecting the boomerang and also maybe the traps
         return when {

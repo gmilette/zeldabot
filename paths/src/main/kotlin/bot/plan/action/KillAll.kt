@@ -144,7 +144,7 @@ class KillAll(
         }
 
         return if (killedAllEnemies(state)) {
-            d { " no enemies" }
+            d { " no enemies all killed ${numberLeftToBeDead}" }
             waitAfterAllKilled--
             return GamePad.None // just wait
         } else {

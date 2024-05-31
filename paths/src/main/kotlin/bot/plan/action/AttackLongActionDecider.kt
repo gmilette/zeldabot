@@ -4,6 +4,7 @@ import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapConstants
 import bot.state.map.pointModifier
+import bot.state.oam.EnemyGroup
 import org.jheaps.annotations.VisibleForTesting
 import util.Geom
 import util.Map2d
@@ -15,15 +16,19 @@ object AttackLongActionDecider {
         val swordIsFlying = false
         val full = state.frameState.inventory.heartCalc.full(state)
         val canShoot = full //state.frameState HeartCalculator.isFull()
-        // draw ray from attack point. Does it hi
         return (canShoot && !swordIsFlying && targetInLongRange(state, targets))
     }
 
     fun shouldBoomerang(state: MapLocationState): Boolean {
+        // includes loot
         val shouldShoot = state.frameState.enemies.isNotEmpty()
-        val canShoot = false // is boomerang active
-        val boomerangeIsFlying = false
-        return (canShoot && !boomerangeIsFlying && targetInLongRange(state, emptyList()))
+        val canShoot = state.boomerangeActive
+        val boomerangeIsFlying = state.frameState.enemies.any { it.tile in EnemyGroup.boomerangs }
+        return (shouldShoot && canShoot && !boomerangeIsFlying &&
+                targetInLongRange(state, emptyList()))
+        // when start a level, if enemies can be boomeranged, switch to it, but not if about
+        // to switch to bomb
+        // should be able to alternate, shooting sword and boomerang
         // there are enemies or loot (allow shooting at loot)
         // if boomerang is active
         // if there are enemies that can be affected by boomerang

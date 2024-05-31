@@ -26,6 +26,7 @@ class MasterPlan(val segments: List<PlanSegment>) {
     }
 
     fun reset() {
+        justRemoved = PlanStep(PlanSegment("", "", emptyList()), EndAction())
         giant = segments.flatMap { seg -> seg.plan.map { PlanStep(seg, it) } }.toMutableList().also {
             initialPlanSize = it.size
             d { " reset: created plan with $initialPlanSize actions moves $numMoves" }
