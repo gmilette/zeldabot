@@ -25,6 +25,10 @@ class PlanRunner(private val makePlan: PlanMaker, private val api: API) {
 
     private val experiments = Experiments(makePlan)
 
+    fun getExp(name: String): Experiment {
+        return experiments.experiments[name] ?: experiments.default
+    }
+
     //    private val target = "afterLev4"
 //    private val target = "level7"
     private val target: Experiment
@@ -34,10 +38,12 @@ class PlanRunner(private val makePlan: PlanMaker, private val api: API) {
     private var runSetupCt = 0
 
     init {
-        run(true, target)
-        if (runCt % 10 == 0) {
-            experiments.experimentIncrement++
-        }
+//        run(true, target)
+//        if (runCt % 10 == 0) {
+//            experiments.experimentIncrement++
+//        }
+        val runIt: Experiment = getExp("level2rhino")
+        run(true, runIt)
 //        run(name = "level1drag")
 //        run(name = "level2Boom")
 //        run(name = "level6start")

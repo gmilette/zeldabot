@@ -57,7 +57,7 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
     // 40 two bomb death
     private val ATTACK_DEATH_TIMING = 20
     private val TWO_BOMB_DEATH_TIMING = 30
-    private val waitBetweenAttacks = ATTACK_DEATH_TIMING
+    private val waitBetweenAttacks = 7 //  ATTACK_DEATH_TIMING
     private val waitBetweenSwordAttacks = 9
     private var keepAttacking = 0
 
@@ -72,7 +72,6 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
     private var targets = listOf<FramePoint>()
     private var target: FramePoint = FramePoint()
     private var strategy: String = ""
-
 
     override fun targets(): List<FramePoint> = targets
 
@@ -216,13 +215,18 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
                 strategy = "attack"
                 target = possibleRhino.point
                 // 2024: use attack points
-                possibleRhino.point.cornersInLevel()
+                AttackActionDecider.attackPoints(target)
+//                possibleRhino.point.cornersInLevel()
             }
-            false && useB -> {
+            useB -> {
                 val targ = params.getTargetGrid(possibleRhino.point, state.rhinoDir())
                 target = targ ?: FramePoint(8.grid, 4.grid)
 
-                val targCorners = targ?.cornersInLevel()
+//                val targCorners = targ?.cornersInLevel()
+//                val targCorners = targ?.let {
+//                    AttackActionDecider.attackPoints(targ)
+//                }
+                val targCorners = listOf(targ ?: FramePoint())
 
                 if (targCorners.isNullOrEmpty()) {
                     d { "targets -> bomb position none, dodge targets dir=${state.rhinoDir()}"}
@@ -249,87 +253,107 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
         if (forceNew) {
             d { "forcenew, was $previousTarget no $target"}
         }
-        val validTarget = possibleRhino?.let {
-            target.distTo(it.point) <= MapConstants.twoGrid
-        } ?: false
-        //if link has gotten into the grid, then attack!
-        val should = AttackActionDecider.shouldAttack(state, target)
-        // but first make sure link is facing the direction of the rhino
-        linkDir = state.frameState.link.dir
-        rDir = state.rhinoDir()
 
-        // does allow aiming elsewhere, but link often misses, disable
-        // revisit this when code is better at aiming
-//        val needsToFaceRhino = possibleRhino?.point?.let {
-//            it.x == state.frameState.link.x || it.y == state.frameState.link.y
-//        } ?: false
-//        val linkFacingRhino = !needsToFaceRhino || state.frameState.link.dir.opposite() == state.rhinoDir() || state.rhinoDir() == null || state.frameState.link.dir == Direction.None
+        // wait between bomb attacks....
 
-        val linkFacingRhino = state.frameState.link.dir.opposite() == state.rhinoDir() || state.rhinoDir() == null || state.frameState.link.dir == Direction.None
-
-        val attack = validTarget && should && linkFacingRhino
-
-        d { " useB $useB attack $validTarget should $should facing $linkFacingRhino" }
-
-        // dodge or still
-        waitCt--
-        keepAttacking--
-        val action = when {
-            waitCt > 0 && keepAttacking <= 0 -> {
-                if (attack && stateTracker.rhinoState is Stopped || stateTracker.rhinoState is Eating) {
-                    // if could attack just wait, but we could be in danger
-                    d { " **do nothing wait to attack again" }
-                    GamePad.None
-                } else {
-                    d { " **route to targets while waiting for attack" }
-                    GamePad.None
-//                    routeTo.routeTo(state, targets,
-//                        RouteTo.RouteParam(forceNew = forceNew, useB = useB)
-//                    )
-                }
-            }
-            attack -> {
-                d { " **do attack"}
-                if (useB) {
-                    if (keepAttacking <= 0) keepAttacking = 3
-                    waitCt = waitBetweenAttacks
-                    GamePad.B
-                } else {
-                    if (keepAttacking <= 0) keepAttacking = 3
-                    waitCt = waitBetweenSwordAttacks
-                    GamePad.A
-                }
-            }
-            // can't attack yet, use normal targets
-            else -> {
-                // is the target the rhino? or near rhino
-                val attackTarget = if (attackRhino) {
-                    possibleRhino?.point
-                } else null
-
-                d { "**attack target " }
-                if (stateTracker.rhinoState is Eating) {
-                    // hack
-                    if (waitCt <= 0) {
-                        if (keepAttacking <= 0) keepAttacking = 3
-                        waitCt = waitBetweenAttacks
-                        GamePad.B
-                    } else if (keepAttacking > 0) {
-                        GamePad.B
-                    } else {
-                        GamePad.None
-                    }
-                } else {
-                    routeTo.routeTo(
-                        state, targets,
-                        RouteTo.RouteParam(forceNew = forceNew,
-                            useB = useB,
-                            rParam = RouteTo.RoutingParamCommon(attackTarget = attackTarget))
-                    )
-                }
-            }
+        val action = routeTo.routeTo(
+            state, targets,
+            RouteTo.RouteParam(forceNew = forceNew,
+                useB = useB && waitCt <= 0,
+                rParam = RouteTo.RoutingParamCommon())
+        ).also {
+            d {" Rhino action --> $it $waitCt $useB"}
         }
+
+        if (action == GamePad.B) {
+            waitCt = waitBetweenAttacks
+        } else {
+            waitCt--
+        }
+
         return action
+
+//        val validTarget = possibleRhino?.let {
+//            target.distTo(it.point) <= MapConstants.twoGrid
+//        } ?: false
+//        //if link has gotten into the grid, then attack!
+//        val should = AttackActionDecider.shouldAttack(state, target)
+//        // but first make sure link is facing the direction of the rhino
+//        linkDir = state.frameState.link.dir
+//        rDir = state.rhinoDir()
+//
+//        // does allow aiming elsewhere, but link often misses, disable
+//        // revisit this when code is better at aiming
+////        val needsToFaceRhino = possibleRhino?.point?.let {
+////            it.x == state.frameState.link.x || it.y == state.frameState.link.y
+////        } ?: false
+////        val linkFacingRhino = !needsToFaceRhino || state.frameState.link.dir.opposite() == state.rhinoDir() || state.rhinoDir() == null || state.frameState.link.dir == Direction.None
+//
+//        val linkFacingRhino = state.frameState.link.dir.opposite() == state.rhinoDir() || state.rhinoDir() == null || state.frameState.link.dir == Direction.None
+//
+//        val attack = validTarget && should && linkFacingRhino
+//
+//        d { " useB $useB attack $validTarget should $should facing $linkFacingRhino" }
+//
+//        // dodge or still
+//        waitCt--
+//        keepAttacking--
+//        val action = when {
+//            waitCt > 0 && keepAttacking <= 0 -> {
+//                if (attack && stateTracker.rhinoState is Stopped || stateTracker.rhinoState is Eating) {
+//                    // if could attack just wait, but we could be in danger
+//                    d { " **do nothing wait to attack again" }
+//                    GamePad.None
+//                } else {
+//                    d { " **route to targets while waiting for attack" }
+//                    GamePad.None
+////                    routeTo.routeTo(state, targets,
+////                        RouteTo.RouteParam(forceNew = forceNew, useB = useB)
+////                    )
+//                }
+//            }
+//            attack -> {
+//                d { " **do attack"}
+//                if (useB) {
+//                    if (keepAttacking <= 0) keepAttacking = 3
+//                    waitCt = waitBetweenAttacks
+//                    GamePad.B
+//                } else {
+//                    if (keepAttacking <= 0) keepAttacking = 3
+//                    waitCt = waitBetweenSwordAttacks
+//                    GamePad.A
+//                }
+//            }
+//            // can't attack yet, use normal targets
+//            else -> {
+//                // is the target the rhino? or near rhino
+//                val attackTarget = if (attackRhino) {
+//                    possibleRhino?.point
+//                } else null
+//
+//                d { "**attack target " }
+//                if (stateTracker.rhinoState is Eating) {
+//                    // hack
+//                    if (waitCt <= 0) {
+//                        if (keepAttacking <= 0) keepAttacking = 3
+//                        waitCt = waitBetweenAttacks
+//                        GamePad.B
+//                    } else if (keepAttacking > 0) {
+//                        GamePad.B
+//                    } else {
+//                        GamePad.None
+//                    }
+//                } else {
+//                    routeTo.routeTo(
+//                        state, targets,
+//                        RouteTo.RouteParam(forceNew = forceNew,
+//                            useB = useB,
+//                            rParam = RouteTo.RoutingParamCommon(attackTarget = attackTarget))
+//                    )
+//                }
+//            }
+//        }
+//        return action
     }
 
     private fun dodgePoints(state: MapLocationState): List<FramePoint> {

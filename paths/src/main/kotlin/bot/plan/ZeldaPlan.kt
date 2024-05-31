@@ -477,9 +477,9 @@ object ZeldaPlan {
             seg(Phases.Segment.lev2Boss)
             killLevel2Rhino
             seg("get the triforce")
-            loot // in case there is a bomb
-            wait
+//            wait // why?
             goTo(InLocations.Level2.heartMid)
+            loot // in case there is a bomb
             leftm
             goIn(GamePad.MoveLeft, 20)
             getTri

@@ -9,14 +9,17 @@ import bot.state.map.destination.DestType
 import bot.state.map.destination.ZeldaItem
 
 class Experiments(private val masterPlan: PlanMaker) {
-    private val default = Experiment("all", "start_nothing.save", masterPlan, sword = ZeldaItem.MagicSword, addEquipment = false)
+    val default = Experiment("all", "start_nothing.save", masterPlan, sword = ZeldaItem.MagicSword, addEquipment = false)
+
+//    var current: Experiment = default
+//        get() = evaluation.getOrElse(0) { default }
 
     var current: Experiment = default
-        get() = evaluation.getOrElse(0) { default }
+        get() = experiments["level2rhino"] ?: default
 
     var experimentIncrement = 0
 
-    private val experiments: Map<String, Experiment>
+    val experiments: Map<String, Experiment>
 
     private val evaluation: List<Experiment>
 
@@ -73,7 +76,7 @@ class Experiments(private val masterPlan: PlanMaker) {
             Experiment("level1dodge", "level1_skele.save", { masterPlanWith(dodge) }, sword = ZeldaItem.MagicSword, addEquipment = true),
             Experiment("level6start", "level6_start.save", { masterPlan().getPlanAfter(Phases.level6) }, sword = ZeldaItem.MagicSword, addEquipment = true),
 //            Experiment("level6end", "level6_done.save", masterPlan.getPlanAfter(Phases.afterLevel6), sword = ZeldaItem.MagicSword, addEquipment = true),
-//            Experiment("level2rhino", "lev2_14_boss.save", masterPlan.getPlanPhase("Destroy level 2", Phases.Segment.lev2Boss), sword = ZeldaItem.WoodenSword, addEquipment = true),
+            Experiment("level2rhino", "lev2_14_boss.save", { masterPlan().getPlanPhase("Destroy level 2", Phases.Segment.lev2Boss) }, sword = ZeldaItem.WoodenSword, addEquipment = true, bombs = 8),
 //            Experiment("level2rhinoAfter", "lev2_14_boss.save", masterPlan.getPlanAfter("Destroy level 2", Phases.Segment.lev2Boss)),
 //            Experiment("level2Boom", "level2_boom_5h.save", masterPlanWith(KillAll.make()), sword = ZeldaItem.WhiteSword),
             Experiment("level2w", "level2.save", { masterPlan().getPlanPhase("Destroy level 2", null) }, sword = ZeldaItem.WoodenSword, addEquipment = true),
