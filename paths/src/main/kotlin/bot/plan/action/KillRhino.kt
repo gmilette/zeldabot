@@ -7,6 +7,9 @@ import bot.state.oam.rhinoHeadHeadWithMouthOpen
 import util.LogFile
 import util.d
 
+// that way if rhine becomes undead link will attack again
+//val KillRhinoThenLeft = DecisionAction(KillRhino(), MoveTo())
+
 data class RhinoStrategyParameters(
     val waitFrames: Int = 100,
     // how many grids ahead of the rhino to target
@@ -212,6 +215,7 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
                 attackRhino = true
                 strategy = "attack"
                 target = possibleRhino.point
+                // 2024: use attack points
                 possibleRhino.point.cornersInLevel()
             }
             false && useB -> {
@@ -304,7 +308,6 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
                 } else null
 
                 d { "**attack target " }
-                // should keep attacking I think why doesn't it?
                 if (stateTracker.rhinoState is Eating) {
                     // hack
                     if (waitCt <= 0) {
