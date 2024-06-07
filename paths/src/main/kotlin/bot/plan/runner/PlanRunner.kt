@@ -1,15 +1,10 @@
 package bot.plan.runner
 
-import androidx.compose.runtime.currentComposer
 import bot.DirectoryConstants
-import bot.ZeldaBot
 import bot.plan.action.Action
 import bot.plan.action.DoNothing
-import bot.plan.action.KillAll
 import bot.plan.action.moveHistoryAttackAction
 import bot.state.*
-import bot.state.map.Hyrule
-import bot.state.map.destination.ZeldaItem
 import nintaco.api.API
 import util.d
 import java.io.File
@@ -38,12 +33,15 @@ class PlanRunner(private val makePlan: PlanMaker, private val api: API) {
     private var runSetupCt = 0
 
     init {
-//        run(true, target)
+        runIt(true, target)
 //        if (runCt % 10 == 0) {
 //            experiments.experimentIncrement++
 //        }
-        val runIt: Experiment = getExp("level2rhino")
-        run(true, runIt)
+//        val runIt: Experiment = getExp("level2rhino")
+//        run(true, runIt)
+
+//        val runIt: Experiment = getExp("allBoom")
+//        runIt(ex = runIt)
 //        run(name = "level1drag")
 //        run(name = "level2Boom")
 //        run(name = "level6start")
@@ -103,7 +101,7 @@ class PlanRunner(private val makePlan: PlanMaker, private val api: API) {
     }
 
     private fun rerun() {
-        run(load = true, ex = target)
+        runIt(load = true, ex = target)
     }
 
     private fun runLoc(load: Boolean = false, mapLoc: Int, level: Int = 0) {
@@ -122,7 +120,7 @@ class PlanRunner(private val makePlan: PlanMaker, private val api: API) {
         runLog = RunActionLog("mapstate_${level}_${mapLoc}", target)
     }
 
-    private fun run(load: Boolean = false, ex: Experiment) {
+    private fun runIt(load: Boolean = false, ex: Experiment) {
         d { "  run experiment ${ex.name} load=$load"}
 
 //        val ex = experiments.getExp()
@@ -145,6 +143,7 @@ class PlanRunner(private val makePlan: PlanMaker, private val api: API) {
     }
 
     fun runSetup(manipulator: StateManipulator) {
+        d { " run setup "}
         if (runSetupCt > 20) {
             return
         }

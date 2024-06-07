@@ -12,7 +12,13 @@ import util.w
 import kotlin.random.Random
 
 class RouteTo(val params: Param = Param()) {
+    private var boomerangCt = 0
+
     companion object {
+        /**
+         * dont shoot the boomerang too much
+         */
+        private val WAIT_BETWEEN_BOOMERANG = 20
         var allowAttack = true
         fun hardlyReplan(dodgeEnemies: Boolean = true,
                          /** don't try to block or route around projectiles **/
@@ -73,6 +79,7 @@ class RouteTo(val params: Param = Param()) {
          */
         val useB: Boolean = false,
         val allowBlock: Boolean = true,
+        val allowSwordAttack: Boolean = true,
         val rParam: RoutingParamCommon = RoutingParamCommon()
     )
 
@@ -119,7 +126,7 @@ class RouteTo(val params: Param = Param()) {
     ): GamePad {
         val canAttack = param.useB || state.frameState.canUseSword
         val attackPossible by lazy { params.whatToAvoid != WhatToAvoid.None && canAttack }
-        d { " route To attackOrRoute attack=$attackPossible can=$canAttack allowBlock=${param.allowBlock} avoid=${params.whatToAvoid}" }
+        d { " route To attackOrRoute attack=$attackPossible can=$canAttack allowBlock=${param.allowBlock} avoid=${params.whatToAvoid} waitBoom=$boomerangCt" }
         val theAttack = if (param.useB) {
             attackB
         } else {
@@ -127,6 +134,7 @@ class RouteTo(val params: Param = Param()) {
         }
 
         val attackable = AttackActionDecider.aliveEnemiesCanAttack(state)
+//        val attackable = to
 
         val blockReflex: GamePad? = if (param.allowBlock && this.params.whatToAvoid != WhatToAvoid.JustEnemies) AttackActionBlockDecider.blockReflex(state) else null
         val leftCorner = state.link.upLeftOneGridALittleLess
@@ -135,7 +143,8 @@ class RouteTo(val params: Param = Param()) {
         val projectileNear = state.projectiles.any { it.point.toRect().intersect(nearLink) }
         val inRangeOf by lazy { AttackActionDecider.inRangeOf(state, attackable) }
         val shouldLongAttack by lazy { AttackLongActionDecider.shouldShootSword(state, attackable) }
-        val shouldLongBoomerang by lazy { AttackLongActionDecider.shouldBoomerang(state) }
+        val shouldLongBoomerang by lazy { boomerangCt <= 0 && AttackLongActionDecider.shouldBoomerang(state) }
+        boomerangCt--
         // if avoiding just enemies, then no need to block any projectiles
         // this should help collecting the boomerang and also maybe the traps
         return when {
@@ -143,7 +152,7 @@ class RouteTo(val params: Param = Param()) {
                 d { " Route Action -> Block Reflex! $blockReflex" }
                 blockReflex
             }
-            allowAttack && !projectileNear && attackPossible && attack.isAttacking() -> {
+            allowAttack && !projectileNear && attackPossible && (attack.isAttacking()) -> {
                 d { " Route Action -> Keep Attacking" }
                 theAttack.nextStep(state)
             }
@@ -151,6 +160,12 @@ class RouteTo(val params: Param = Param()) {
             allowAttack && !projectileNear && attackPossible && canAttack && shouldLongAttack -> {
                 d { " Route Action -> LongAttack" }
                 theAttack.nextStep(state)
+            }
+
+            allowAttack && !projectileNear && attackPossible && canAttack && shouldLongBoomerang -> {
+                d { " Route Action -> LongAttack Boomerang" }
+                boomerangCt = WAIT_BETWEEN_BOOMERANG
+                attackB.nextStep(state)
             }
 
             !allowAttack ||

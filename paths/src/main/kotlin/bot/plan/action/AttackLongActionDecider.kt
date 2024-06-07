@@ -11,10 +11,24 @@ import util.Map2d
 import util.d
 
 object AttackLongActionDecider {
+    fun isSwordLink() {
+        // if it is moving in same direction as link
+        // if it is within 1 grid of link
+    }
 
     fun shouldShootSword(state: MapLocationState, targets: List<FramePoint>): Boolean {
-        val swordIsFlying = false
         val full = state.frameState.inventory.heartCalc.full(state)
+        // sword is more than 1 grid away from link
+        // need more work
+        val swordIsFlying by lazy {
+            state.frameState.enemies.filter { it.tileAttrib in EnemyGroup.swordProjectile }
+                .minByOrNull { it.point.distTo(state.link) }?.let {
+                    it.point.distTo(state.link) > MapConstants.oneGrid
+                } ?: false
+        }
+        if (swordIsFlying) {
+            d { " SWORD IS FLYING ------------"}
+        }
         val canShoot = full //state.frameState HeartCalculator.isFull()
         return (canShoot && !swordIsFlying && targetInLongRange(state, targets))
     }
@@ -22,10 +36,11 @@ object AttackLongActionDecider {
     fun shouldBoomerang(state: MapLocationState): Boolean {
         // includes loot
         val shouldShoot = state.frameState.enemies.isNotEmpty()
-        val canShoot = state.boomerangeActive
-        val boomerangeIsFlying = state.frameState.enemies.any { it.tile in EnemyGroup.boomerangs }
-        return (shouldShoot && canShoot && !boomerangeIsFlying &&
-                targetInLongRange(state, emptyList()))
+        val canShoot = state.boomerangActive
+        val boomerangIsFlying = state.frameState.enemies.any { it.tile in EnemyGroup.boomerangs }
+        val inRange by lazy { targetInLongRange(state, emptyList()) }
+        d { "Shoot boomerang $shouldShoot can=$canShoot flying=$boomerangIsFlying range=$inRange" }
+        return (shouldShoot && canShoot && !boomerangIsFlying && inRange)
         // when start a level, if enemies can be boomeranged, switch to it, but not if about
         // to switch to bomb
         // should be able to alternate, shooting sword and boomerang
@@ -51,13 +66,17 @@ object AttackLongActionDecider {
         // assume go right
         val midLink = link.justDownFourth
         val endReach = rayFrom(state.currentMapCell.passable, midLink, dir)
-        d { " end reach is $endReach $dir"}
+        d { " end reach is $endReach $dir" }
         val swordRectangle = swordRectangle(link, endReach, dir)
-        d { " $link intersect sword rect $swordRectangle"}
+        d { " $link intersect sword rect $swordRectangle" }
         return swordRectangle
     }
 
-    private fun firstEnemyIntersect(state: MapLocationState, swordRectangle: Geom.Rectangle, targets: List<FramePoint>): Agent? {
+    private fun firstEnemyIntersect(
+        state: MapLocationState,
+        swordRectangle: Geom.Rectangle,
+        targets: List<FramePoint>
+    ): Agent? {
         //     0  link
         //     +4 top sword
         // -->
@@ -123,7 +142,7 @@ object AttackLongActionDecider {
         return false
     }
 
-    private val MapLocationState.boomerangeActive: Boolean
+    private val MapLocationState.boomerangActive: Boolean
         get() = this.frameState.inventory.selectedItem == Inventory.Selected.boomerang
 
 }

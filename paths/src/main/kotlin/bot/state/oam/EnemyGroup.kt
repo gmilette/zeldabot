@@ -74,7 +74,7 @@ object EnemyGroup {
         48, // swirly thing
         bombSmoke, // yea but then it attacks its own bomb// 112, // bomb smoke, removed it so I can attack the monsters
         bombSmokeLess,
-        bigHeart, // plan always knows where to go
+//        bigHeart, // plan always knows where to go, why ignore?
                 //164, // not sure, that is a pancake
 //            160, // this happens to be the left side of the snake monster in level 2, snake has attribute 2
         ladder,
@@ -230,6 +230,7 @@ object EnemyGroup {
         120, // not sure maybe something on triforce level , 78
         50,
         heart, // heart
+        bigHeart,
         key, //key
         116, // bomb
         bomb, // bomb

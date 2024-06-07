@@ -11,11 +11,12 @@ import bot.state.map.destination.ZeldaItem
 class Experiments(private val masterPlan: PlanMaker) {
     val default = Experiment("all", "start_nothing.save", masterPlan, sword = ZeldaItem.MagicSword, addEquipment = false)
 
-//    var current: Experiment = default
-//        get() = evaluation.getOrElse(0) { default }
-
     var current: Experiment = default
-        get() = experiments["level2rhino"] ?: default
+        get() = evaluation.getOrElse(0) { default }
+
+//    var current: Experiment = default
+//        get() = experiments["level2rhino"] ?: default
+//      get() = experiments["allBoom"] ?: default
 
     var experimentIncrement = 0
 
@@ -48,6 +49,7 @@ class Experiments(private val masterPlan: PlanMaker) {
         evaluation = listOf(
             // go straight to level1
             // should have 0 bombs though
+            two.copy(name = "level2b", hearts = 3, bombs = 0, sword = ZeldaItem.WoodenSword, boomerang = ZeldaItem.Boomerang),
             two.copy(name = "level2", hearts = 3, bombs = 0, sword = ZeldaItem.WoodenSword),
             twoBomb.copy(name = "level2Bomb4", hearts = 4, bombs = 0, sword = ZeldaItem.WoodenSword),
             twoBomb.copy(name = "level2Bomb5w", hearts = 5, bombs = 0, sword = ZeldaItem.WhiteSword),
@@ -66,7 +68,10 @@ class Experiments(private val masterPlan: PlanMaker) {
             one.copy(name = "level1WhiteFull", hearts = 16, bombs = 1, sword = ZeldaItem.WhiteSword),
         ) //.associateBy { it.nameFull }
 
+        val over = Experiment("allBoom", "start_nothing.save", masterPlan, sword = ZeldaItem.WoodenSword, boomerang = ZeldaItem.Boomerang)
+
         experiments = listOf(
+            over,
             Experiment("all", "start_nothing.save", masterPlan, sword = ZeldaItem.MagicSword, addEquipment = false),
             Experiment("overworlddodge", "overworlddodge.save", { masterPlanWith(dodge) }, sword = ZeldaItem.MagicSword, addEquipment = true),
             Experiment("level2dodge", "level2_dodge_shield.save", { masterPlanWith(dodge) }, sword = ZeldaItem.MagicSword, addEquipment = true),

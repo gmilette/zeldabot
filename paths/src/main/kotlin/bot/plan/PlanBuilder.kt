@@ -204,13 +204,18 @@ class PlanBuilder(
         }
     val killLevel2Rhino: PlanBuilder
         get() {
-            add(lastMapLoc, KillRhino())
+            add(lastMapLoc, killRhinoCollectSeeHeart)
+//            add(lastMapLoc, KillRhino())
 //            add(lastMapLoc, KillAll(useBombs = true, waitAfterAttack = true))
             return this
         }
     val switchToBomb: Unit
         get() {
             switchToBomb()
+        }
+    val switchToBoomerang: Unit
+        get() {
+            switchToBoomerang()
         }
     val killG: PlanBuilder
         get() {
@@ -721,6 +726,10 @@ class PlanBuilder(
         plan.add(SwitchToItemConditionally(Inventory.Selected.bomb))
 //        switchToItem(Inventory.Selected.bomb)
 //        goIn(GamePad.None, 15)
+    }
+
+    private fun switchToBoomerang() {
+        plan.add(SwitchToItemConditionally(Inventory.Selected.boomerang))
     }
 
     fun switchToArrow() {

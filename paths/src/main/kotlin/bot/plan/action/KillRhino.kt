@@ -2,6 +2,7 @@ package bot.plan.action
 
 import bot.state.*
 import bot.state.map.*
+import bot.state.oam.bigHeart
 import bot.state.oam.rhinoHeadHeadWithMouthClosed
 import bot.state.oam.rhinoHeadHeadWithMouthOpen
 import util.LogFile
@@ -22,7 +23,9 @@ data class RhinoStrategyParameters(
     fun getTargetGrid(from: FramePoint, direction: Direction?): FramePoint? {
         if (direction == null) return null
         // ahead
-        val adjusted = direction.pointModifier(MapConstants.oneGrid * targetGridsAhead)
+//        val grids = if (direction.upOrLeft) MapConstants.oneGrid else MapConstants.twoGrid
+        val grids = MapConstants.oneGrid
+        val adjusted = direction.pointModifier(grids * targetGridsAhead)
         val adjustAboveBelow = direction.opposite().pointModifier(MapConstants.oneGrid * targetGridAboveBelow)
 //        return if (from.isInLevelMap) adjusted(from) else null
         return adjusted(from)
@@ -49,6 +52,9 @@ data class RhinoStrategyParameters(
 fun FramePoint.attackPoints(): List<FramePoint> {
     return listOf(this.upTwoGrid, this.downTwoGrid, this.leftTwoGrid, this.rightTwoGrid).filter { it.isInLevelMap }
 }
+
+// Kill until the big heart appears of heart container goes up (if link happens to be on top and it never appears)
+val killRhinoCollectSeeHeart = CompleteIfSeeTileOrHeartChange(wrapped = KillRhino())
 
 // assume switched to arrow
 class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParameters()) : Action {
@@ -202,7 +208,7 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
         target = dodgeTargets.firstOrNull() ?: FramePoint(8.grid, 8.grid)
 
         val useB = weaponSelect(state)
-        var attackRhino = false
+        var attackRhinoWithSword = false
         targets = when {
             possibleRhino == null -> {
                 d { " targets -> dodge (no rhino)"}
@@ -211,22 +217,21 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
             }
             !useB && (stateTracker.rhinoState is Stopped || stateTracker.rhinoState is Eating) -> {
                 d { " targets -> corners of rhino ${possibleRhino.point}"}
-                attackRhino = true
+                attackRhinoWithSword = true
                 strategy = "attack"
                 target = possibleRhino.point
-                // 2024: use attack points
                 AttackActionDecider.attackPoints(target)
 //                possibleRhino.point.cornersInLevel()
             }
             useB -> {
                 val targ = params.getTargetGrid(possibleRhino.point, state.rhinoDir())
-                target = targ ?: FramePoint(8.grid, 4.grid)
+                //target = targ ?: FramePoint(8.grid, 4.grid)
 
 //                val targCorners = targ?.cornersInLevel()
-//                val targCorners = targ?.let {
-//                    AttackActionDecider.attackPoints(targ)
-//                }
-                val targCorners = listOf(targ ?: FramePoint())
+                val targCorners = targ?.let {
+                    AttackActionDecider.attackPoints(targ)
+                }
+//                val targCorners = listOf(targ ?: FramePoint())
 
                 if (targCorners.isNullOrEmpty()) {
                     d { "targets -> bomb position none, dodge targets dir=${state.rhinoDir()}"}
@@ -235,10 +240,11 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
                 } else {
                     d { "targets -> bomb position $target rh ${possibleRhino.point}"}
                     strategy = "target"
-                    targCorners.forEach {
-                        d { "$it dist to rhino ${it.distTo(possibleRhino.point)} in ${possibleRhino.point.isInGrid(it)} "}
+                    for (corner in targCorners) {
+                        d { "$corner dist to rhino ${corner.distTo(possibleRhino.point)} in ${possibleRhino.point.isInGrid(corner)} "}
                     }
-                    targCorners.filter { it.distTo(possibleRhino.point) >= 32}
+//                    targCorners.filter { it.distTo(possibleRhino.point) >= 32}
+                    targCorners
                 }
             }
             else -> {
@@ -249,27 +255,25 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
         }
         d { "targets -> $targets" }
 
-        val forceNew = previousTarget != target && previousTarget.distTo(target) > 3
-        if (forceNew) {
-            d { "forcenew, was $previousTarget no $target"}
-        }
-
-        // wait between bomb attacks....
+//        val forceNew = previousTarget != target && previousTarget.distTo(target) > 3
+//        if (forceNew) {
+//            d { "forcenew, was $previousTarget no $target"}
+//        }
 
         val action = routeTo.routeTo(
             state, targets,
-            RouteTo.RouteParam(forceNew = forceNew,
-                useB = useB && waitCt <= 0,
+            RouteTo.RouteParam(forceNew = true,
+                useB = useB || (waitCt >= 0),
+                allowSwordAttack = attackRhinoWithSword,
                 rParam = RouteTo.RoutingParamCommon())
         ).also {
             d {" Rhino action --> $it $waitCt $useB"}
         }
 
-        if (action == GamePad.B) {
+        if (action == GamePad.B && waitCt <= 0) {
             waitCt = waitBetweenAttacks
-        } else {
-            waitCt--
         }
+        waitCt--
 
         return action
 
@@ -618,4 +622,32 @@ private fun findDir(y: Int, tile: Int, attrib: Int): Direction? {
     if (y == 187) return null
     val tiles = dirs[tile]?: return null
     return tiles[one] ?: tiles[attrib]
+}
+
+class CompleteIfSeeTileOrHeartChange(private val tileToLookFor: Int = bigHeart, private val wrapped: Action) : Action {
+    private var initial: Int? = null
+
+    private fun hasTile(state: MapLocationState): Boolean =
+        state.frameState.enemies.any { it.tile == tileToLookFor } || ((initial != null) && (initial != hearts(state)))
+
+    private fun hearts(state: MapLocationState): Int = state.frameState.inventory.heartCalc.heartContainers()
+
+    override fun reset() {
+        initial = null
+    }
+
+    override fun complete(state: MapLocationState): Boolean =
+        hasTile(state) || wrapped.complete(state)
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        d { " CompleteIfSeeTileOrHeartChange initial $initial current ${hasTile(state)}" }
+        state.frameState.logEnemies()
+        if (initial == null) {
+            initial = hearts(state)
+        }
+        return wrapped.nextStep(state)
+    }
+
+    override val name: String
+        get() = "Until see tile $tileToLookFor do ${wrapped.name}"
 }

@@ -99,6 +99,7 @@ class StateManipulator(
     }
 
     fun setBoomerang(item: ZeldaItem) {
+        d { " set boomerang $item"}
         when (item) {
             ZeldaItem.MagicalBoomerang -> api.writeCPU(Addresses.hasMagicBoomerang, 1)
             ZeldaItem.Boomerang -> api.writeCPU(Addresses.hasBoomerang, 1)
