@@ -94,6 +94,10 @@ class StateManipulator(
         api.writeCPU(Addresses.numKeys, current + 1)
     }
 
+    fun addBomb() {
+        setBombs(8)
+    }
+
     fun setKeys(num: Int) {
         api.writeCPU(Addresses.numKeys, num)
     }

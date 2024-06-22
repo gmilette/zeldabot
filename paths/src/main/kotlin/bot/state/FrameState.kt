@@ -7,7 +7,7 @@ import nintaco.api.API
 import nintaco.api.ApiSource
 import util.d
 
-class FrameState(
+data class FrameState(
     val api: API = ApiSource.getAPI(),
     val enemies: List<Agent>,
     val enemiesUncombined: List<Agent>,
@@ -72,6 +72,12 @@ class FrameState(
 
     val enemiesSorted: List<Agent>
         get() = enemies.sortedBy { it.point.distTo(link.point) }
+
+    fun withEnemyAt(pt: FramePoint): FrameState {
+        return this.copy(enemies = enemies.toMutableList() + Agent(
+            0, pt
+        ))
+    }
 }
 
 private fun API.readCpuB(address: Int): Boolean =

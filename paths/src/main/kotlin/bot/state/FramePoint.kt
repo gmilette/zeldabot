@@ -57,6 +57,12 @@ fun FramePoint.directionToDir(to: FramePoint): Direction {
 fun FramePoint.toRect(): Geom.Rectangle =
     Geom.Rectangle(this, this.justRightEndBottom)
 
+fun FramePoint.toRect16(): Geom.Rectangle =
+    Geom.Rectangle(this, this.justRightEndBottom16)
+
+fun FramePoint.toCenteredRect(): Geom.Rectangle =
+    Geom.Rectangle(this.adjustBy(1), this.justRightEndBottom16.adjustBy(-1))
+
 fun FramePoint.toRectPlus(adjustment: Int): Geom.Rectangle =
     Geom.Rectangle(this.adjustBy((-1 * adjustment)), this.justRightEndBottom.adjustBy(adjustment))
 
@@ -325,6 +331,8 @@ val FramePoint.justRightHalf
     get() = FramePoint(x + 8, y)
 val FramePoint.justRightEndBottom
     get() = FramePoint(x + 15, y + 15)
+val FramePoint.justRightEndBottom16
+    get() = FramePoint(x + 16, y + 16)
 val FramePoint.justLeftBottom
     get() = FramePoint(x, y + 15)
 val FramePoint.justLeftBottomHalf

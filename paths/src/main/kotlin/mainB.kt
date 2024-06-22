@@ -236,6 +236,14 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
                 Text("+K")
             }
 
+            Button(
+                modifier = Modifier.padding(8.dp),
+                onClick = {
+                    model.addBomb()
+                }) {
+                Text("+B")
+            }
+
             Image(
                 painter = painterResource("icon_coin.png"),
                 modifier = Modifier.size(40.dp).background(Color.LightGray).clickable {
@@ -467,6 +475,10 @@ class ZeldaModel : ZeldaBot.ZeldaMonitor {
 
     fun addKey() {
         ZeldaBot.addKey = true
+    }
+
+    fun addBomb() {
+        ZeldaBot.addBomb = true
     }
 
     fun addRupee() {

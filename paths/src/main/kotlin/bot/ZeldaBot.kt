@@ -1,8 +1,7 @@
 package bot
 
 import bot.plan.ZeldaPlan
-import bot.plan.action.AttackActionDecider
-import bot.plan.action.AttackLongActionDecider
+import bot.plan.action.*
 import bot.plan.runner.MasterPlan
 import bot.plan.runner.PlanRunner
 import bot.state.*
@@ -211,6 +210,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         var doAct = true
         var draw = true
         var addKey = false
+        var addBomb = false
         var addRupee = false
         var unstick = 0
         var forcedDirection = GamePad.None
@@ -271,6 +271,10 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                 stateManipulator.addKey()
                 addKey = false
             }
+            if (addBomb) {
+                stateManipulator.addBomb()
+                addBomb = false
+            }
             if (addRupee) {
                 stateManipulator.addRupee()
                 addRupee = false
@@ -324,9 +328,9 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     }
 
     inner class ScreenDraw {
-        private val drawAttackZone = false
-        private val drawAttackPoints = false
-        private val drawEnemyCosts = true
+        private val drawAttackZone = true
+        private val drawAttackPoints = true
+        private val drawEnemyCosts = false
 
         private val rhinoHeadLeftUp = 0xFA // foot up
         private val rhinoHeadLeftUp2 = 0xFC // foot down
@@ -429,7 +433,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 
                     if (drawAttackPoints) {
                         for (enemy in frameState.enemies) {
-                            api.color = Colors.CYAN
+                            api.color = Colors.BLACK2
                             val pts = AttackActionDecider.attackPoints(enemy.point)
                             for (pt in pts) {
                                 api.drawOval(pt.x, pt.y + MapConstants.yAdjust, 2, 2)
@@ -453,13 +457,28 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                         }
                     }
 
+                    val drawRhinoAttack = true
+                    if (drawRhinoAttack) {
+                        RhinoStrategyParameters().getTargetGrid(frameStateUpdater.state.rhino()?.point ?: FramePoint(),
+                            frameStateUpdater.state.rhinoDir())?.toRect()?.apply {
+                            api.color = Colors.GRAY
+                            api.drawRect(topLeft.x, topLeft.y + MapConstants.yAdjust, width, height)
+                        }
+
+//                        val longAttack = AttackLongActionDecider.longRectangle(this)
+//                        longAttack.apply {
+//                            api.color = Colors.GRAY
+//                            api.drawRect(topLeft.x, topLeft.y + MapConstants.yAdjust, width, height)
+//                        }
+                    }
+
                 }
             }
         }
 
-        private fun MapLocationState.rhino(): Agent? =
-            // pick the left most head
-            frameState.enemies.filter { it.y != 187 && head.contains(it.tile) }.minByOrNull { it.x }
+//        private fun MapLocationState.rhino(): Agent? =
+//            // pick the left most head
+//            frameState.enemies.filter { it.y != 187 && head.contains(it.tile) }.minByOrNull { it.x }
 
         private fun drawMap(cell: MapCell) {
             for (x in 0..255) {

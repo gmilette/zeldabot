@@ -2,9 +2,8 @@ package bot.plan.action
 
 import bot.state.*
 import bot.state.map.*
-import bot.state.oam.bigHeart
-import bot.state.oam.rhinoHeadHeadWithMouthClosed
-import bot.state.oam.rhinoHeadHeadWithMouthOpen
+import bot.state.oam.*
+import util.Geom
 import util.LogFile
 import util.d
 
@@ -24,7 +23,9 @@ data class RhinoStrategyParameters(
         if (direction == null) return null
         // ahead
 //        val grids = if (direction.upOrLeft) MapConstants.oneGrid else MapConstants.twoGrid
-        val grids = MapConstants.oneGrid
+        //val grids = MapConstants.oneGrid // to trigger two bomb combo
+//        val grids = 12 // good for two bomb
+        val grids = 20 //  MapConstants.oneGridPoint5 // got for the one bomb drop
         val adjusted = direction.pointModifier(grids * targetGridsAhead)
         val adjustAboveBelow = direction.opposite().pointModifier(MapConstants.oneGrid * targetGridAboveBelow)
 //        return if (from.isInLevelMap) adjusted(from) else null
@@ -54,7 +55,8 @@ fun FramePoint.attackPoints(): List<FramePoint> {
 }
 
 // Kill until the big heart appears of heart container goes up (if link happens to be on top and it never appears)
-val killRhinoCollectSeeHeart = CompleteIfSeeTileOrHeartChange(wrapped = KillRhino())
+val killRhinoCollectSeeHeart: Action
+    get() = CompleteIfSeeTileOrHeartChange(wrapped = KillRhino())
 
 // assume switched to arrow
 class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParameters()) : Action {
@@ -63,7 +65,7 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
     // 40 two bomb death
     private val ATTACK_DEATH_TIMING = 20
     private val TWO_BOMB_DEATH_TIMING = 30
-    private val waitBetweenAttacks = 7 //  ATTACK_DEATH_TIMING
+    private val waitBetweenAttacks = 10 //  ATTACK_DEATH_TIMING
     private val waitBetweenSwordAttacks = 9
     private var keepAttacking = 0
 
@@ -91,6 +93,9 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
 
     private fun weaponSelect(state: MapLocationState): Boolean =
         bombHead(stateTracker.rhinoState)
+
+    private fun shouldAttack(): Boolean =
+        weaponFor(stateTracker.rhinoState) != GamePad.None
 
     private fun inFront(state: MapLocationState): FramePoint? =
         state.rhino()?.let {
@@ -161,6 +166,8 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
         }
     }
 
+    private var ct = 0
+
     private fun updateState(state: MapLocationState) {
         val isEatingBomb = state.isEatingBomb() // reliable
         val dir = state.rhinoDir()
@@ -171,21 +178,22 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
         where?.let {
             moveBuffer.add(it.point)
         }
-        val moved = !moveBuffer.isFull || !moveBuffer.allSame()
+        ct++
+        val moved = ct < 50 || !moveBuffer.isFull || !moveBuffer.allSame()
 
         stateTracker.update(isEatingBomb, moved)
         d { "Kill Rhino state ${stateTracker.rhinoState.name} moved $moved eating $isEatingBomb dir = $dir where = ${where?.point ?: ""}"}
 //        d { " move buffer $moveBuffer"}
-//        rhinoLog.write(
-//            where?.tile?.toString(16) ?: "noti",
-//            if (isEatingBomb) "eat" else "noe",
-//            dir?.toString() ?: "nodir",
-//            where?.point?.oneStr ?: "non_pts",
-//            if (moved) "moved" else "nomove",
-//            if (isStationary(where?.point)) "stationary" else "notstation",
-//            if (isBlinking(where != null)) "blink" else "nobli",
-//            stateTracker.rhinoState.javaClass.simpleName
-//        )
+        rhinoLog.write(
+            where?.tile?.toString(16) ?: "noti",
+            if (isEatingBomb) "eat" else "noe",
+            dir?.toString() ?: "nodir",
+            where?.point?.oneStr ?: "non_pts",
+            if (moved) "moved" else "nomove",
+            if (isStationary(where?.point)) "stationary" else "notstation",
+            if (isBlinking(where != null)) "blink" else "nobli",
+            stateTracker.rhinoState.javaClass.simpleName
+        )
     }
 
     private var rDir: Direction? = null
@@ -201,37 +209,87 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
         d { "ACTION" }
 
         val possibleRhino = state.rhino()
-        d { " rhino at $possibleRhino"}
 
         // pick a spot near the rhino
         val dodgeTargets = dodgePoints(state)
         target = dodgeTargets.firstOrNull() ?: FramePoint(8.grid, 8.grid)
 
+        d { " Rhino is  dir = $rDir at ${possibleRhino?.point}" }
+
+        var targ: FramePoint? = null
         val useB = weaponSelect(state)
+        val shouldAttack = shouldAttack()
         var attackRhinoWithSword = false
+        val isStoppedOrEating by lazy {
+            (stateTracker.rhinoState is Stopped || stateTracker.rhinoState is Eating)
+        }
+        val isDangerous = stateTracker.rhinoState is OneState || stateTracker.rhinoState is ZeroState
+
+        // if not moving or eating no need to dodge
+//        val inFrontOfRhino = emptyList<FramePoint>()
+        val inFrontOfRhino = if (isDangerous && rDir != null) {
+            possibleRhino?.let {
+//                val attackpt: FramePoint = params.getTargetGrid(it.point, state.rhinoDir()) ?: FramePoint()
+                rDir?.let { ir ->
+                    val mo2 = ir.pointModifier(MapConstants.twoGrid)
+                    val mo15 = ir.pointModifier(MapConstants.oneGridPoint5)
+                    val mo = ir.pointModifier(MapConstants.oneGrid)
+                    // added this as a hack fix
+                    val moHalf = ir.pointModifier(MapConstants.halfGrid)
+                    listOf(mo(it.point), moHalf(it.point), mo2(it.point), mo15(it.point))
+                } ?: emptyList()
+            } ?: emptyList()
+        } else {
+            emptyList()
+        }
+//        val inFrontRect = inFrontOfRhino.map { it.toRect() }
+        val inFrontRect = emptyList<Geom.Rectangle>()
+
+        d { " rhino inf=${inFrontOfRhino.size} state=${stateTracker.rhinoState.name} at ${possibleRhino?.point} useB=$useB stoppedOrEat=$isStoppedOrEating"}
         targets = when {
             possibleRhino == null -> {
                 d { " targets -> dodge (no rhino)"}
                 strategy = "dodgeN"
                 dodgeTargets
             }
-            !useB && (stateTracker.rhinoState is Stopped || stateTracker.rhinoState is Eating) -> {
-                d { " targets -> corners of rhino ${possibleRhino.point}"}
+            shouldAttack && !useB && isStoppedOrEating -> {
+                d { " targets -> attack head ${possibleRhino.point}"}
                 attackRhinoWithSword = true
                 strategy = "attack"
                 target = possibleRhino.point
-                AttackActionDecider.attackPoints(target)
+                AttackActionDecider.attackPointsNoCorner(target).filter { it.isInLevelMap }.ifEmpty { dodgeTargets }
 //                possibleRhino.point.cornersInLevel()
             }
-            useB -> {
-                val targ = params.getTargetGrid(possibleRhino.point, state.rhinoDir())
-                //target = targ ?: FramePoint(8.grid, 4.grid)
-
-//                val targCorners = targ?.cornersInLevel()
-                val targCorners = targ?.let {
-                    AttackActionDecider.attackPoints(targ)
+            shouldAttack && useB -> {
+                targ = if (isStoppedOrEating) {
+                    possibleRhino.point
+                } else {
+                  params.getTargetGrid(possibleRhino.point, state.rhinoDir())
+//                    possibleRhino.point // just always attack rhino
                 }
-//                val targCorners = listOf(targ ?: FramePoint())
+                val rh = possibleRhino.point.toRect()
+
+                val targCornersBomb = targ?.let { t ->
+                    AttackActionDecider.attackPoints(t, not = rDir ?: Direction.None).filter { it.isInLevelMap }.filter { !rh.pointInside(it) }.filter { target ->
+                        inFrontRect.any { !it.pointInside(target) }
+                    }
+                }
+                val targCornersRhino = AttackActionDecider.attackPoints(possibleRhino.point)
+                val targCorners = if (isStoppedOrEating) {
+                    targCornersRhino
+                } else {
+                    targCornersBomb
+                }
+                d { "*ATTACK rhino ${possibleRhino.point} attack targ $targ"}
+                if (targCorners != null) {
+                    for (p in targCorners) {
+                        d { "*ATTACK $p inside=${inFrontRect.any { !it.pointInside(target) }}"}
+                    }
+                }
+                d { " front "}
+                for (framePoint in inFrontOfRhino) {
+                    d { "*front $framePoint"}
+                }
 
                 if (targCorners.isNullOrEmpty()) {
                     d { "targets -> bomb position none, dodge targets dir=${state.rhinoDir()}"}
@@ -240,10 +298,6 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
                 } else {
                     d { "targets -> bomb position $target rh ${possibleRhino.point}"}
                     strategy = "target"
-                    for (corner in targCorners) {
-                        d { "$corner dist to rhino ${corner.distTo(possibleRhino.point)} in ${possibleRhino.point.isInGrid(corner)} "}
-                    }
-//                    targCorners.filter { it.distTo(possibleRhino.point) >= 32}
                     targCorners
                 }
             }
@@ -253,21 +307,26 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
                 dodgeTargets
             }
         }
-        d { "targets -> $targets" }
+        d { "targets -> ($strategy) $targets" }
 
-//        val forceNew = previousTarget != target && previousTarget.distTo(target) > 3
-//        if (forceNew) {
-//            d { "forcenew, was $previousTarget no $target"}
-//        }
-
+        val allowAttack = shouldAttack && (waitCt <= 0)
         val action = routeTo.routeTo(
             state, targets,
             RouteTo.RouteParam(forceNew = true,
-                useB = useB || (waitCt >= 0),
-                allowSwordAttack = attackRhinoWithSword,
-                rParam = RouteTo.RoutingParamCommon())
-        ).also {
-            d {" Rhino action --> $it $waitCt $useB"}
+                useB = useB,
+//                allowAttack = attackRhinoWithSword,
+                allowAttack = shouldAttack && (waitCt <= 0),
+                // no need to shoot swords or whatever at it
+                allowRangedAttack = false,
+                rParam = RouteTo.RoutingParamCommon(
+                    forceHighCost = inFrontOfRhino,
+                    // can get stuck
+//                    findNearestSafeIfCurrentlyNotSafe = false
+                ),
+                ),
+            targ?.let { listOf(targ) } ?: emptyList()
+         ).also {
+            d {" Rhino action --> $it $waitCt $useB allow=$allowAttack"}
         }
 
         if (action == GamePad.B && waitCt <= 0) {
@@ -545,10 +604,10 @@ fun weaponFor(state: RhinoState): GamePad =
 private fun MapLocationState.isEatingBomb() =
     frameState.enemies.firstOrNull { eatingBombTile.contains(it.tile) } != null
 
-private fun MapLocationState.rhinoDir(): Direction? =
+fun MapLocationState.rhinoDir(): Direction? =
     frameState.enemies.firstNotNullOfOrNull{ findDir(it.y, it.tile, it.attribute) }
 
-private fun MapLocationState.rhino(): Agent? =
+fun MapLocationState.rhino(): Agent? =
     // pick the left most head
     frameState.enemies.filter { it.y != 187 && head.contains(it.tile) }.minByOrNull { it.x }
 
@@ -580,8 +639,9 @@ private val rhinoHeadLeftUp2 = 0xFC // foot down
 private val rhinoHeadLeftDown = 0xF6 // foot up
 // not that
 private val rhinoHeadLeftDown2 = 0xF4 // foot down
-//val rhinoHead = (0xE2).toInt() // mouth open
-//val rhinoHead2 = (0xE0).toInt()
+// need these
+val rhinoHead = (0xE2).toInt() // mouth open
+val rhinoHead2 = (0xE0).toInt()
 // rhinoHeadMouthClosed
 
 // these are the mouth parts
@@ -594,9 +654,14 @@ private val head = setOf(
     rhinoHeadHeadWithMouthOpen, rhinoHeadHeadWithMouthClosed,
     rhinoHeadLeftUp, rhinoHeadLeftUp2,
     rhinoHeadLeftDown, rhinoHeadLeftDown2,
+    rhinoHeadMouthClosed.first, // added this so that targetting is correct
     eatingHead,
     eatingHeadDown,
-    eatingUp)
+    eatingUp,
+    rhinoHead,
+    rhinoHead2
+    )
+
 // dont use, just use dir
 //    private val head = setOf(rhinoHead, rhinoHead2, rhinoHeadLeftUp, rhinoHeadLeftUp2, rhinoHeadLeftDown, rhinoHeadLeftDown2)
 
@@ -608,23 +673,29 @@ private val dirs = mapOf(
 //        0x34 to Direction.Down,
     rhinoHeadLeftDown2 to mapOf(one to Direction.Down),
     rhinoHeadLeftDown to mapOf(one to Direction.Down),
+    // eatingHeadDown
+    0xf8 to mapOf(one to Direction.Down),
     //rhinoHeadHeadWithMouthClosed with attrib 03 is right
     0xE0 to mapOf (0x03 to Direction.Right, 0x43 to Direction.Left), // 03
     0xE2 to mapOf (0x03 to Direction.Right, 0x43 to Direction.Left), // 03
     // necessary?
     // no, just use one
+    // 0xEA is reused
     0xEA to mapOf (0x03 to Direction.Right, 0x43 to Direction.Left), // 03
+    0xE8 to mapOf (0x03 to Direction.Right, 0x43 to Direction.Left), // HEAD
+    // these are the tail
     0xDE to mapOf (0x03 to Direction.Right, 0x43 to Direction.Left), // 03
     0xDC to mapOf (0x03 to Direction.Right, 0x43 to Direction.Left), // 03
 )
 
 private fun findDir(y: Int, tile: Int, attrib: Int): Direction? {
     if (y == 187) return null
+    d { " findDir $y ${tile.toString(16)} ${attrib.toString(16)} ${dirs[tile]}"}
     val tiles = dirs[tile]?: return null
     return tiles[one] ?: tiles[attrib]
 }
 
-class CompleteIfSeeTileOrHeartChange(private val tileToLookFor: Int = bigHeart, private val wrapped: Action) : Action {
+class CompleteIfSeeTileOrHeartChange(private val tileToLookFor: Int = bigHeart, wrapped: Action) : WrappedAction(wrapped) {
     private var initial: Int? = null
 
     private fun hasTile(state: MapLocationState): Boolean =

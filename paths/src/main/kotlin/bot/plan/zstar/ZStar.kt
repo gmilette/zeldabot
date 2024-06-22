@@ -280,7 +280,7 @@ class ZStar(
             .ifEmpty { targets.toList() }
 
         // stil getting NO ROUTE
-        d { "From safe: $startIsSafe cost = ${costsF.get(param.start)} targets size = ${target.size}"}
+        d { "From safe: $startIsSafe cost = ${costsF.get(param.start)} targets size = ${target.size} routeToSafe=${routeToSafe}"}
 
         val openList: PriorityQueue<FramePoint> = PriorityQueue<FramePoint> { cell1, cell2 ->
             val cell1Val = (totalCosts[cell1] ?: 0) + (distanceToGoal[cell1] ?: 0)
@@ -320,19 +320,22 @@ class ZStar(
 
             // enemy target is always null currently, this is going to route to nearest
             // which is what we want anyway I think
+            var doneBecause = "strike"
             val done = if (param.rParam.finishWithinStrikingRange) {
                 val inLongRange = param.rParam.finishWithinLongStrikingRange &&
                         // hard to do without direction..
                         AttackLongActionDecider.inStrikingRange(point, enemies = param.enemies)
                 AttackActionDecider.inStrikingRange(point, enemies = param.enemies)
             } else if (routeToSafe && costsF.safe(point)) {
+                doneBecause = "safe"
                 true
             } else {
+                doneBecause = "at target"
                 target.contains(point) // && costsF.safe(point)
             }
             if (done) {
                 if (DEBUG) {
-                    d { " explore found: $point" }
+                    d { " explore found: $point done because $doneBecause" }
                 }
                 closedList.add(point)
                 break

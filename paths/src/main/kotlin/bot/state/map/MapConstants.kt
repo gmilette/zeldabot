@@ -13,12 +13,16 @@ object MapConstants {
     const val halfGrid = 8
     const val oneGridF = 16.0f
     const val oneGridPoint5 = 24
-    const val swordGrid = 10 // size of sword
+    const val swordGrid = 8 // width of a sword I think
     // one grid accounts for size of link, 8 accounts for sword, but it should be 10
-    const val swordGridPlusOne = 8 + oneGrid
+    // no i think it should be 8, maybe 10 because that is what we use for the sword
+    // length
+    const val swordGridPlusOne = swordGrid + oneGrid
     const val twoGrid = oneGrid * 2
     const val twoGridPoint5 = 40
     const val threeGrid = oneGrid * 3
+    const val fourGrid = oneGrid * 4
+    const val sixGrid = oneGrid * 6
     const val gridMaxX = 16
     const val gridMaxY = 16
 

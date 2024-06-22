@@ -280,12 +280,15 @@ class AttackOnce(useB: Boolean = false, private val freq: Int = 5) :
 
 class AlwaysAttack(useB: Boolean = false, private val freq: Int = 5, private val otherwiseRandom: Boolean = false) :
     Action {
-    private var frames = attackLength // was 0
-    private val gameAction = if (useB) GamePad.B else GamePad.A
+    private var frames = attackLength
+    val gameAction = if (useB) GamePad.B else GamePad.A
 
     companion object {
         private const val attackLength = 10
     }
+
+    fun attackWaiting(): Boolean =
+        frames < 0
 
     override fun nextStep(state: MapLocationState): GamePad {
         // just always do it

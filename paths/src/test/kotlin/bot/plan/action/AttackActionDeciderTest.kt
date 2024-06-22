@@ -1,21 +1,32 @@
 package bot.plan.action
 
+import bot.plan.action.AttackActionDecider.leftPoint
+import bot.plan.action.AttackActionDecider.rightPoints
 import bot.state.FramePoint
 import bot.state.map.Direction
 import bot.state.map.MapConstants
 import bot.state.map.vertical
+import bot.state.right
 import io.kotest.matchers.shouldBe
 import org.junit.Test
 
 class AttackActionDeciderTest() {
     @Test
-    fun att() {
-//        fun inRangeOf(
-//            from: Direction,
-//            link: FramePoint,
-//            enemies: List<FramePoint>,
-//            useB: Boolean
+    fun att2() {
+        val pt1 = AttackActionDecider.attackPointsNoCorner(FramePoint(120, 99))
+        val pt2 = AttackActionDecider.attackPointsNoCorner(FramePoint(112, 99))
+        val ptl = FramePoint(112, 99).rightPoints()
+        for (framePoint in ptl) {
+            println("Pt $framePoint")
+        }
 
+        val move = AttackActionDecider.inRangeOf(Direction.Left, FramePoint(88, 109),
+            listOf(FramePoint(112, 99), FramePoint(120, 99)), false)
+        val a = 1
+    }
+
+    @Test
+    fun att() {
         AttackActionDecider.inRangeOf(Direction.Right, FramePoint(55, 24),
             listOf(FramePoint(45, 32)), false) shouldBe null
     }

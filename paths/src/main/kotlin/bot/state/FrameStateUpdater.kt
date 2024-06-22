@@ -61,7 +61,10 @@ class FrameStateUpdater(
             state.hyrule.levelMap.cellOrEmpty(level, mapLoc)
         }
 
-        val oam = OamStateReasoner(isOverworld, api, mapStats)
+        // combining sprites messes up rhino analysis because when the rhino goes right,
+        // everything gets combined to the back
+        val isRhino = mapLoc == 14 && level == 2
+        val oam = OamStateReasoner(isOverworld, api, mapStats, combine = !isRhino)
         val theEnemies = oam.agents()
         val theUncombined = oam.agentsUncombined()
         val linkDir = oam.direction

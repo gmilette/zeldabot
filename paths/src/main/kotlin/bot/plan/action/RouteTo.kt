@@ -79,7 +79,8 @@ class RouteTo(val params: Param = Param()) {
          */
         val useB: Boolean = false,
         val allowBlock: Boolean = true,
-        val allowSwordAttack: Boolean = true,
+        val allowAttack: Boolean = true,
+        val allowRangedAttack: Boolean = true,
         val rParam: RoutingParamCommon = RoutingParamCommon()
     )
 
@@ -123,30 +124,32 @@ class RouteTo(val params: Param = Param()) {
         state: MapLocationState,
         to: List<FramePoint>,
         param: RouteParam = RouteParam(),
+        // pass in attack targets
+        attackableSpec: List<FramePoint> = emptyList()
     ): GamePad {
-        val canAttack = param.useB || state.frameState.canUseSword
+        val canAttack = param.allowAttack && (param.useB || state.frameState.canUseSword)
         val attackPossible by lazy { params.whatToAvoid != WhatToAvoid.None && canAttack }
-        d { " route To attackOrRoute attack=$attackPossible can=$canAttack allowBlock=${param.allowBlock} avoid=${params.whatToAvoid} waitBoom=$boomerangCt" }
+        d { " route To attackOrRoute attack=$attackPossible can=$canAttack allowBlock=${param.allowBlock} avoid=${params.whatToAvoid} waitBoom=$boomerangCt useB=${param.useB}" }
         val theAttack = if (param.useB) {
             attackB
         } else {
             attack
         }
 
-        val attackable = AttackActionDecider.aliveEnemiesCanAttack(state)
-//        val attackable = to
+        val attackable = attackableSpec.ifEmpty {
+            AttackActionDecider.aliveEnemiesCanAttack(state)
+        }
 
         val blockReflex: GamePad? = if (param.allowBlock && this.params.whatToAvoid != WhatToAvoid.JustEnemies) AttackActionBlockDecider.blockReflex(state) else null
         val leftCorner = state.link.upLeftOneGridALittleLess
         val nearLink = Geom.Rectangle(leftCorner, state.link.downTwoGrid.rightTwoGrid)
         // should only do this for fireball projectiles
         val projectileNear = state.projectiles.any { it.point.toRect().intersect(nearLink) }
-        val inRangeOf by lazy { AttackActionDecider.inRangeOf(state, attackable) }
-        val shouldLongAttack by lazy { AttackLongActionDecider.shouldShootSword(state, attackable) }
-        val shouldLongBoomerang by lazy { boomerangCt <= 0 && AttackLongActionDecider.shouldBoomerang(state) }
+        val inRangeOf by lazy { AttackActionDecider.inRangeOf(state, attackable, param.useB) }
+        val shouldLongAttack by lazy { param.allowRangedAttack && AttackLongActionDecider.shouldShootSword(state, attackable) }
+        val shouldLongBoomerang by lazy { param.allowRangedAttack && boomerangCt <= 0 && AttackLongActionDecider.shouldBoomerang(state) }
         boomerangCt--
-        // if avoiding just enemies, then no need to block any projectiles
-        // this should help collecting the boomerang and also maybe the traps
+
         return when {
             blockReflex != null -> {
                 d { " Route Action -> Block Reflex! $blockReflex" }
@@ -170,18 +173,20 @@ class RouteTo(val params: Param = Param()) {
 
             !allowAttack ||
                     !attackPossible ||
+                    (inRangeOf.isAttack && theAttack.attackWaiting()) || //rhino
 //                    !canAttack || // redundant
                     (state.frameState.clockActivated && Random.nextInt(10) == 1) ||
-                    AttackActionDecider.getInFrontOfGrids(state) ||
+                    // this is weird, no need to do this yet
+//                    AttackActionDecider.getInFrontOfGrids(state) ||
                     inRangeOf == GamePad.None -> {
                 attack.reset()
                 attackB.reset()
-                d { " Route Action -> No Attack" }
+                d { " Route Action -> No Attack allow=${allowAttack} possible=${attackPossible}" }
                 doRouteTo(state, to, param)
             }
 
             else -> {
-                d { " Route Action -> RangeAction $inRangeOf" }
+                d { " Route Action -> RangeAction $inRangeOf use ${theAttack.gameAction} is=${inRangeOf.isAttack}" }
                 if (inRangeOf.isAttack) {
                     theAttack.nextStep(state)
                 } else {

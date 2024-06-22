@@ -473,8 +473,8 @@ object ZeldaPlan {
             kill // blocked before going // allow bombs
             goTo(InLocations.Level2.bombItemRight)
             up
-            switchToBomb
             seg(Phases.Segment.lev2Boss)
+            switchToBomb
             killLevel2Rhino
             seg("get the triforce")
 //            wait // why?

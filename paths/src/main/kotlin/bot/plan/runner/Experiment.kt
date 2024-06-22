@@ -11,11 +11,11 @@ import bot.state.map.destination.ZeldaItem
 class Experiments(private val masterPlan: PlanMaker) {
     val default = Experiment("all", "start_nothing.save", masterPlan, sword = ZeldaItem.MagicSword, addEquipment = false)
 
-    var current: Experiment = default
-        get() = evaluation.getOrElse(0) { default }
-
 //    var current: Experiment = default
-//        get() = experiments["level2rhino"] ?: default
+//        get() = evaluation.getOrElse(0) { default }
+
+    var current: Experiment = default
+        get() = experiments["level2rhino"] ?: default
 //      get() = experiments["allBoom"] ?: default
 
     var experimentIncrement = 0

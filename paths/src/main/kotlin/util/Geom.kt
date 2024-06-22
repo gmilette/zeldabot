@@ -51,6 +51,10 @@ object Geom {
             return abs(sqrt(dx * dx + dy * dy))
         }
 
+        fun pointInside(other: FramePoint): Boolean {
+            return valueInRange(other.x, topLeft.x, topLeft.x + width) && valueInRange(other.y, topLeft.y, topLeft.y + width)
+        }
+
         fun dist2(rectangle2: Rectangle): Double {
             val dx = max(0, max(this.topLeft.x - rectangle2.bottomRight.x, rectangle2.topLeft.x - this.bottomRight.x)).toDouble()
             val dy = max(0, max(this.topLeft.y - rectangle2.bottomRight.y, rectangle2.topLeft.y - this.bottomRight.y)).toDouble()

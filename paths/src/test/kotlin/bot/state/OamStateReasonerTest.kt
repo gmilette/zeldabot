@@ -11,7 +11,7 @@ import util.d
 class OamStateReasonerTest {
     @Test
     fun `test keep`() {
-        val reasoner = OamStateReasoner(mock())
+        val reasoner = OamStateReasoner(mock(), mock())
         val sprites = listOf(
             SpriteData(176, FramePoint(85, 102), 176, 3),
             SpriteData(178, FramePoint(77, 118), 178, 3)
@@ -38,7 +38,7 @@ class OamStateReasonerTest {
 //    Debug: (Kermit)  enemy Agent(index=170, point=(128, 39)
 @Test
 fun `test some more`() {
-    val reasoner = OamStateReasoner(mock())
+    val reasoner = OamStateReasoner(mock(), mock())
     val sprites = listOf(
         SpriteData(176, FramePoint(136, 39), 176, 3),
         SpriteData(178, FramePoint(128, 39), 178, 3)
@@ -50,7 +50,7 @@ fun `test some more`() {
 }
     @Test
     fun `test delete skeli`() {
-        val reasoner = OamStateReasoner(mock())
+        val reasoner = OamStateReasoner(mock(), mock())
         val sprites = listOf(
             SpriteData(176, FramePoint(56, 90), 168, 3),
             SpriteData(178, FramePoint(48, 90), 170, 3)
@@ -63,7 +63,7 @@ fun `test some more`() {
 
     @Test
     fun `test delete samex`() {
-        val reasoner = OamStateReasoner(mock())
+        val reasoner = OamStateReasoner(mock(), mock())
         val sprites = listOf(
             SpriteData(176, FramePoint(141, 64), 168, 3),
             SpriteData(176, FramePoint(149, 64), 168, 3),
@@ -86,7 +86,7 @@ fun `test some more`() {
 //        Debug: (Kermit) 6: SpriteData(index=45, point=(192, 123), tile=164, attribute=2)
 //        Debug: (Kermit) 7: SpriteData(index=50, point=(147, 64), tile=164, attribute=2)
 //        Debug: (Kermit) 8: SpriteData(index=51, point=(151, 96), tile=164, attribute=2)
-        val reasoner = OamStateReasoner(mock())
+        val reasoner = OamStateReasoner(mock(), mock())
         val sprites = listOf(
             SpriteData(176, FramePoint(200, 123), 166, 2),
             SpriteData(176, FramePoint(168, 66), 166, 2),

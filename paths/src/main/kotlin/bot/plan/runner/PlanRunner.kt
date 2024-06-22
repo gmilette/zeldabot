@@ -33,12 +33,12 @@ class PlanRunner(private val makePlan: PlanMaker, private val api: API) {
     private var runSetupCt = 0
 
     init {
-        runIt(true, target)
+//        runIt(true, target)
 //        if (runCt % 10 == 0) {
 //            experiments.experimentIncrement++
 //        }
-//        val runIt: Experiment = getExp("level2rhino")
-//        run(true, runIt)
+//        val runIt: Experiment =
+        runIt("level2rhino")
 
 //        val runIt: Experiment = getExp("allBoom")
 //        runIt(ex = runIt)
@@ -120,6 +120,10 @@ class PlanRunner(private val makePlan: PlanMaker, private val api: API) {
         runLog = RunActionLog("mapstate_${level}_${mapLoc}", target)
     }
 
+    private fun runIt(ex: String) {
+        runIt(true, getExp(ex))
+    }
+
     private fun runIt(load: Boolean = false, ex: Experiment) {
         d { "  run experiment ${ex.name} load=$load"}
 
@@ -127,13 +131,16 @@ class PlanRunner(private val makePlan: PlanMaker, private val api: API) {
 //        ZeldaBot.addEquipment = ex.addEquipment
         masterPlan = ex.plan()
         startPath = ex.startSave
-//        masterPlan.reset()
+        masterPlan.reset()
         action = withDefaultAction(masterPlan.skipToStart())
         d { " START AT ${action?.name}"}
         runLog = RunActionLog(ex.name, ex)
         if (load) {
             d { "reset" }
-//            api.reset()
+            Thread( {
+                api.reset()
+            }).start()
+            Thread.sleep(100)
             d { "reload" }
             val root = DirectoryConstants.states
             api.loadState("$root/${startPath}")

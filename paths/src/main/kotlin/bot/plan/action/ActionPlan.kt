@@ -51,7 +51,7 @@ interface Action {
         get() = this.javaClass.simpleName
 }
 
-abstract class WrappedAction(private val wrapped: Action) : Action {
+abstract class WrappedAction(val wrapped: Action) : Action {
     override fun reset() {
         wrapped.reset()
     }

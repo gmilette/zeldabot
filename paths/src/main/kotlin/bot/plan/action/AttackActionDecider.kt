@@ -13,12 +13,26 @@ object AttackActionDecider {
     var DEBUG = true
 
     private val longExtra = MapConstants.swordGridPlusOne
+    // if link is half way into a grid, can he swing and hit the target
     private val shortExtra = MapConstants.swordGrid
 
     fun attackPoints(point: FramePoint) =
         point.upPoints() + point.rightPoints() + point.leftPoint() + point.downPoint() + point.cornersIn()
 
-    // don't swing if there is projectile near by!
+    fun attackPointsNoCorner(point: FramePoint) =
+        point.upPoints() + point.rightPoints() + point.leftPoint() + point.downPoint()
+
+    fun attackPoints(point: FramePoint, not: Direction): List<FramePoint> {
+        return when (not) {
+            Direction.Up -> point.upPoints() + point.rightPoints() + point.leftPoint() // + point.downPoint()
+            Direction.Down -> point.rightPoints() + point.leftPoint() + point.downPoint()
+            Direction.Left -> point.upPoints() + point.leftPoint() + point.downPoint()
+            Direction.Right -> point.upPoints() + point.rightPoints() + point.downPoint()
+            else -> attackPointsNoCorner(point)
+        }
+    }
+
+
     fun FramePoint.upPoints(): List<FramePoint> =
         FramePointBuilder.hasL(
             listOf(
@@ -26,14 +40,14 @@ object AttackActionDecider {
                 // for now
 //            x - MapConstants.halfGrid to (y + MapConstants.oneGridPoint5),
                 // this -1 should allow link to chase
-                x to (y + longExtra) - 2,
-                x to (y + longExtra) - 1,
+//                x to (y + longExtra) - 2,
+//                x to (y + longExtra) - 1,
                 x to (y + longExtra),
                 // to do add all the points in between
                 // i don't think so
                 x + shortExtra to (y + longExtra),
-                x + shortExtra to (y + longExtra) - 1,
-                x + shortExtra to (y + longExtra) - 2,
+//                x + shortExtra to (y + longExtra) - 1,
+//                x + shortExtra to (y + longExtra) - 2,
             )
         )
 
@@ -45,11 +59,11 @@ object AttackActionDecider {
 //            x - shortExtra to (y + longExtra),
                 // this -1 should allow link to chase
                 (x - longExtra) to y,
-                (x - longExtra + 1) to y,
-                (x - longExtra + 2) to y,
+//                (x - longExtra + 1) to y,
+//                (x - longExtra + 2) to y,
                 (x - longExtra) to (y + shortExtra),
-                (x - longExtra + 1) to (y + shortExtra),
-                (x - longExtra + 2) to (y + shortExtra),
+//                (x - longExtra + 1) to (y + shortExtra),
+//                (x - longExtra + 2) to (y + shortExtra),
             )
         )
 
@@ -58,14 +72,13 @@ object AttackActionDecider {
             listOf(
                 // up points
                 // for now
-//            x - shortExtra to (y + longExtra),
                 // this -1 should allow link to chase
                 (x + longExtra) to y,
-                (x + longExtra - 1) to y,
-                (x + longExtra - 2) to y,
+//                (x + longExtra - 1) to y,
+//                (x + longExtra - 2) to y,
                 (x + longExtra) to y + shortExtra,
-                (x + longExtra - 1) to y + shortExtra,
-                (x + longExtra - 2) to y + shortExtra,
+//                (x + longExtra - 1) to y + shortExtra,
+//                (x + longExtra - 2) to y + shortExtra,
             )
         )
 
@@ -196,12 +209,12 @@ object AttackActionDecider {
         )
     }
 
-    fun inRangeOf(state: MapLocationState, targets: List<FramePoint>): GamePad {
+    fun inRangeOf(state: MapLocationState, targets: List<FramePoint>, useB: Boolean = false): GamePad {
         return inRangeOf(
             state.frameState.link.dir,
             state.link,
             targets,
-            false
+            useB
         )
     }
 
@@ -251,13 +264,13 @@ object AttackActionDecider {
 
         d { " link $link from direction $from" }
         for (enemy in enemies) {
-            d { " enemy $enemy" }
+            d { " enemy $enemy dist=${enemy.distTo(link)}" }
         }
-        d { "**check intersect**" }
-
-        val enemiesClose = enemies.filter { link.distTo(it) < MapConstants.twoGrid }
+        val smallTarget = useB //for bombing
+        val enemiesClose = enemies.filter { link.distTo(it) < MapConstants.sixGrid }
             .sortedBy { it.distTo(link) }
-            .map { it.toRect() }
+            .map { if (smallTarget) it.toCenteredRect() else it.toRect16() }
+        d { "**check intersect** small=$smallTarget numClose=${enemiesClose.size}" }
         if (DEBUG) {
             for (enemy in enemiesClose) { // .sortedBy { it.topLeft.distTo(link) }
                 d { "enemy: $enemy" }
@@ -272,6 +285,8 @@ object AttackActionDecider {
         }
 
         val linkRect = link.toRectPlus(-2) // make bigger to make sure there is contact
+//        val intersectWithLink = false
+        // need?
         val intersectWithLink = enemiesClose.firstOrNull { it.intersect(linkRect) }
         if (intersectWithLink != null) {
             d { " intersects with link $linkRect"}

@@ -1,9 +1,18 @@
 package util
 
 import bot.state.FramePoint
+import io.kotest.matchers.shouldBe
 import org.junit.Test
 
 class GeomTest {
+    @Test
+    fun ptInside() {
+        Geom.Rectangle(FramePoint(1, 1), FramePoint(5, 5)).apply {
+            pointInside(FramePoint(2, 2)) shouldBe true
+            pointInside(FramePoint(10, 2)) shouldBe false
+            pointInside(FramePoint(2, 10)) shouldBe false
+        }
+    }
 
     @Test
     fun `test it`() {

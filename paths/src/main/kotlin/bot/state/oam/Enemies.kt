@@ -79,7 +79,7 @@ val triforceTilePair = (0xF4).toInt() to (0x01).toInt()
 val triforceTile2Pair = (0xF2).toInt() to (0x01).toInt()
 val triforceTile2PairAlt = (0xF2).toInt() to (0x02).toInt()
 val triforceDirt = (0xEC).toInt() // attrib 03 //236 // also part of fourMonster
-val triforceDirt2 = (0xFA).toInt() // also circle enemy center
+val triforceDirt2 = (0xFA).toInt() // also circle enemy center, also rhino up
 val triforceDirt3 = (0xEA).toInt() // attrib 03
 
 val triforceDirt3Pair = (0xEA).toInt() to (0x03).toInt() // attrib 03
@@ -163,10 +163,11 @@ val spiderHeadRightClosed = (0xFE).toInt() to (0x42).toInt()
 
 val rhinoHeadDown = (0xF4).toInt()
 val rhinoHeadDown2 = (0xF6).toInt()
+val rhinoEatingHeadDown = (0xF8).toInt()
 val rhinoHeadMouthOpen = (0xE2).toInt()
 val rhinoHeadHeadWithMouthOpen = (0xE0).toInt()
 val rhinoHeadHeadWithMouthClosed = (0xE8).toInt()
-val rhinoHeadMouthClosed = (0xEA).toInt()
+val rhinoHeadMouthClosed = (0xEA).toInt() to (0x03).toInt()
 val rhinoHead2 = (0xE0).toInt()
 
 val fourMonster = (0xE2).toInt() to (0x41).toInt()
@@ -178,6 +179,7 @@ val fourMonster5 = (0xE8).toInt() to (0x01).toInt()
 
 val rhinoTail = (0xDC).toInt()
 val rhinoMid = (0xDE).toInt()
+val rhinoUpLeft = (0xFA).toInt() to (0x03).toInt()
 
 val circleMonster = (0xFC).toInt()
 val circleMonster2 = (0xFE).toInt()

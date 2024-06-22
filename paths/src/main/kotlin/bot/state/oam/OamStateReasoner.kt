@@ -15,7 +15,8 @@ import util.d
 class OamStateReasoner(
     private val isOverworld: Boolean,
     private val api: API,
-    private val mapStatsTracker: MapStatsTracker = MapStatsTracker()
+    private val mapStatsTracker: MapStatsTracker = MapStatsTracker(),
+    private val combine: Boolean = true
 ) {
     private val sprites: List<SpriteData>
     private var spritesUncombined: List<SpriteData> = emptyList()
@@ -151,7 +152,7 @@ class OamStateReasoner(
         val y = api.readOAM(at)
         val tile = api.readOAM(at + 0x0001)
         val attrib = api.readOAM(at + 0x0002)
-        return SpriteData(at / 4, FramePoint(x, y - MapConstants.yAdjust), tile, attrib)
+        return SpriteData(at / 4, FramePoint(x, y - MapConstants.yAdjust), tile, attrib, combine = combine)
     }
 
     private fun readOam(): List<SpriteData> {
@@ -183,7 +184,12 @@ class OamStateReasoner(
         }
 
         spritesUncombined = alive.toMutableList()
-        return combine(alive)
+        return if (combine) {
+            combine(alive)
+        } else {
+            // combine only the rhino head
+            spritesUncombined
+        }
     }
 
     private fun setLadder(spritesRaw: List<SpriteData>) {
@@ -213,7 +219,8 @@ data class SpriteData(
     val tile: Int,
     val attribute: Int,
     val tileByte: String = tile.toString(16),
-    val attributeByte: String = attribute.toString(16)
+    val attributeByte: String = attribute.toString(16),
+    val combine: Boolean = true
 ) {
     val tilePair = tile to attribute
 
@@ -231,7 +238,8 @@ data class SpriteData(
 
     // keep
     // Debug: (Kermit) 49: SpriteData(index=49, point=(177, 128), tile=160, attribute=2) None
-    val hidden: Boolean = point.y >= 248 || attribute == 32 || EnemyGroup.ignore.contains(tile) ||
+    val hidden: Boolean = point.y >= 248 || attribute == 32 || (!EnemyGroup.keepPairs.contains(tilePair) && EnemyGroup.ignore.contains(tile)) ||
+//            ( (combine && tile != rhinoUpLeft.tile) && EnemyGroup.ignore.contains(tile)) ||
             EnemyGroup.ignorePairs.contains(tilePair)
             //|| point.y < 60  dont need that because the y coordinate is adjusted
             //|| projectiles.contains(tile) //|| loot.contains(tile) // should be separate
@@ -242,6 +250,7 @@ data class SpriteData(
             || ( (tile == 164) && point.y == 187)
             || point.y >= 187 // this keeps coming up, make sense ,because we translated it 61
             || point.y < 0
+            || (combine && (tile == rhinoTail || tile == rhinoMid))
 
     val isLoot = !hidden && (EnemyGroup.loot.contains(tile) || EnemyGroup.lootPairs.contains(tilePair))
 

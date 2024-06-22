@@ -95,6 +95,7 @@ object EnemyGroup {
 //            secretEverybodyMonsterOrCircleEnemyLeft,
 //            secretEverybodyMonsterOrCircleEnemyRight
     ) + swordProjectile.map { it.tile } + swordLink.map { it.tile }
+
     val projectiles = setOf(
         144, 142, // sun
         40, orbProjectile, // ganons
@@ -173,6 +174,10 @@ object EnemyGroup {
     // triforce: F2, F4
     // but also a
     // blue rhino soldier f4, attribute 3
+    val keepPairs = setOf(
+        rhinoUpLeft,
+        rhinoHeadMouthClosed
+    )
 
     val ignorePairs = setOf(
         movingBlock,
