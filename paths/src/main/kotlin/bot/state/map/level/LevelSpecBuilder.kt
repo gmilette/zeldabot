@@ -101,7 +101,8 @@ class LevelSpecBuilder {
 //            LevelSpec(grid.up.up.up.up, e(u,d,r), "blocked need to kill", LevelMapTemplateReader.Temp.lev_blockcenter),
             LevelSpec(grid.up.up.up.up.up, e(u,d,r), "enddrid", LevelMapTemplateReader.Temp.lev_grid_center),
             // remove down so link doesn't go
-            LevelSpec(grid.up.up.up.up.up.up, e(l), "boss", LevelMapTemplateReader.Temp.lev_empty), //?
+            // but keep it so link can move in
+            LevelSpec(grid.up.up.up.up.up.up, e(l, d), "boss", LevelMapTemplateReader.Temp.lev_empty), //?
             LevelSpec(grid.up.up.up.up.up.up.left, e(r, d), "triforce", LevelMapTemplateReader.Temp.lev_triforce),
         )
 

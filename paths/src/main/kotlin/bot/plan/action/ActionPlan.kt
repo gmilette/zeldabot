@@ -364,6 +364,10 @@ fun lootAndMove(moveTo: Action) = DecisionAction(Optional(GetLoot()), moveTo) { 
     neededReachableLoot(state).isNotEmpty()
 }
 
+//fun lootAndMove(moveTo: Action) = DecisionAction(GetLoot(), moveTo) { state ->
+//    neededReachableLoot(state).isNotEmpty()
+//}
+
 // do this for all move tasks that are after kill tasks
 // in case the kill all didnt work and there are enemies
 // around, in that case go back to kill mode

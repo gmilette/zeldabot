@@ -15,14 +15,14 @@ class Experiments(private val masterPlan: PlanMaker) {
 //        get() = evaluation.getOrElse(0) { default }
 
     var current: Experiment = default
-        get() = experiments["level2rhino"] ?: default
-//      get() = experiments["allBoom"] ?: default
+//        get() = experiments["level2rhino"] ?: default
+      get() = experiments["allBoom"] ?: default
 
     var experimentIncrement = 0
 
     val experiments: Map<String, Experiment>
 
-    private val evaluation: List<Experiment>
+    val evaluation: Map<String, Experiment>
 
     fun getExp(): Experiment {
         val one = Experiment("level1", "level1_start_no_ladder.save",
@@ -51,6 +51,7 @@ class Experiments(private val masterPlan: PlanMaker) {
             // should have 0 bombs though
             two.copy(name = "level2b", hearts = 3, bombs = 0, sword = ZeldaItem.WoodenSword, boomerang = ZeldaItem.Boomerang),
             two.copy(name = "level2", hearts = 3, bombs = 0, sword = ZeldaItem.WoodenSword),
+            two.copy(name = "level25h", hearts = 5, bombs = 0, sword = ZeldaItem.WoodenSword),
             twoBomb.copy(name = "level2Bomb4", hearts = 4, bombs = 0, sword = ZeldaItem.WoodenSword),
             twoBomb.copy(name = "level2Bomb5w", hearts = 5, bombs = 0, sword = ZeldaItem.WhiteSword),
             twoBomb.copy(name = "level2Bomb6ws", hearts = 6, bombs = 0, sword = ZeldaItem.WhiteSword, shield = true),
@@ -66,7 +67,7 @@ class Experiments(private val masterPlan: PlanMaker) {
             // controls
             one.copy(name = "level1Full", hearts = 16, bombs = 1),
             one.copy(name = "level1WhiteFull", hearts = 16, bombs = 1, sword = ZeldaItem.WhiteSword),
-        ) //.associateBy { it.nameFull }
+        ).associateBy { it.name }
 
         val over = Experiment("allBoom", "start_nothing.save", masterPlan, sword = ZeldaItem.WoodenSword, boomerang = ZeldaItem.Boomerang)
 
