@@ -25,4 +25,16 @@ class Map2dTest {
             c
         }
     }
+
+    @Test
+    fun `xy mapXyCurrent boolean`() {
+        val mapInt = Map2d(mutableListOf(mutableListOf(false,false,false), mutableListOf(true, true, true)))
+        val mapInt2 = Map2d(mutableListOf(mutableListOf(true, true, true), mutableListOf(true, false, true)))
+
+        mapInt.mapXyCurrent { x, y, t ->
+            t || mapInt2.get(x, y)
+        }
+        mapInt.map { x -> println(x) }
+        mapInt.map { x -> x shouldBe true }
+    }
 }

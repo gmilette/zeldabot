@@ -4,11 +4,9 @@ import bot.DirectoryConstants
 import bot.plan.action.PrevBuffer
 import bot.plan.action.ProjectileDirectionCalculator
 import bot.state.*
-import bot.state.map.Direction
 import bot.state.map.MapConstants
 import bot.state.map.MovingDirection
 import bot.state.oam.EnemyGroup.boomerangs
-import bot.state.oam.map
 import com.google.gson.GsonBuilder
 import util.Map2d
 import util.d
@@ -156,36 +154,36 @@ class MapStatsTracker {
 
     private fun writeVisits(mapCoordinates: MapCoordinates) {
         d { " write visits "}
-        val data = gson.toJson(visits)
-
         val fileName = "${mapCoordinates.level}_${mapCoordinates.loc}_visits.json"
         val fileNameCsv = "${mapCoordinates.level}_${mapCoordinates.loc}_visits.csv"
         val fileNameCsvDir = DirectoryConstants.file("visits", fileNameCsv)
         val dir = DirectoryConstants.file("visits", fileName)
 
-        val fileNameCsvC = "${mapCoordinates.level}_${mapCoordinates.loc}_visitsC.csv"
-        val fileNameCsvDirC = DirectoryConstants.file("visits", fileNameCsvC)
+//        val fileNameCsvC = "${mapCoordinates.level}_${mapCoordinates.loc}_visitsC.csv"
+//        val fileNameCsvDirC = DirectoryConstants.file("visits", fileNameCsvC)
 
         // read it
         val current = readMap(dir)
+        // merge it
         if (current != null) {
             visits.mapXyCurrent { x, y, t ->
                 t || current.get(x, y)
             }
         }
-        // merge it
 
+        // write the merged visits, not just the most recent run
+        val data = gson.toJson(visits)
         val writer = FileWriter(dir)
         writer.write(data)
         writer.close()
 
-        visits.writeAt(fileNameCsvDir) { v, x, y ->
+        visits.writeAt(fileNameCsvDir) { v, _, _ ->
             if (v) "X" else "_"
         }
 
-        visits.writeAtCondensed(fileNameCsvDirC) { v, x, y ->
-            if (v) "X" else "_"
-        }
+//        visits.writeAtCondensed(fileNameCsvDirC) { v, x, y ->
+//            if (v) "X" else "_"
+//        }
 
         visits = Map2d(
             MutableList(MapConstants.MAX_Y) { MutableList(MapConstants.MAX_X) { false } })
@@ -196,7 +194,7 @@ class MapStatsTracker {
         val fileNameCsv = "${mapCoordinates.level}_${mapCoordinates.loc}_movements.csv"
         val fileNameCsvDir = DirectoryConstants.file("visits", fileNameCsv)
 
-        val writer = FileWriter(fileNameCsvDir)
+        val writer = FileWriter(fileNameCsvDir, true)
         for (movement in movements) {
             writer.append("${movement.point.x},${movement.point.y},${movement.action.name}\n")
         }
