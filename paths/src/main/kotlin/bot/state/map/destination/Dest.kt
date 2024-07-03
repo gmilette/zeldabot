@@ -32,6 +32,9 @@ object Dest {
         val bomb20 = DestType.SecretToEverybody(20, entry = EntryType.Bomb)
         // forest
         val walk100 = DestType.SecretToEverybody(100)
+        val forest30NearDesertForest = DestType.SecretToEverybody(30, EntryType.Fire(Direction.Right))
+        val forest10Mid = DestType.SecretToEverybody(10, EntryType.Fire(Direction.Right))
+        val forest20NearStart = DestType.SecretToEverybody(20, EntryType.Fire(Direction.Down))
         val forest100South = DestType.SecretToEverybody(100, EntryType.Fire(from = Direction.Down))
         val secretForest30NorthEast = DestType.SecretToEverybody(30, EntryType.Statue)
         val bombSecret30North = DestType.SecretToEverybody(30, EntryType.Bomb)
@@ -51,6 +54,7 @@ object Dest {
     object Shop {
         val blueRing = DestType.Shop(ShopType.BlueRing, EntryType.Statue)
         val candleShopMid = DestType.Shop(ShopType.C, EntryType.Walk())
+        val candleShopEast = DestType.Shop(ShopType.B, EntryType.Walk())
         val arrowShop = DestType.Shop(ShopType.B, EntryType.Walk())
         val eastTreeShop = DestType.Shop(ShopType.C, EntryType.Fire(from = Direction.Left))
         val westTreeShopNearWater = DestType.Shop(ShopType.C, EntryType.Fire(from = Direction.Up))

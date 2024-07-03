@@ -17,7 +17,8 @@ var gson = GsonBuilder().setPrettyPrinting().create()
 
 data class PointAction(
     val point: FramePoint,
-    val action: GamePad
+    val action: GamePad,
+    val skipCoordinates: SkipCoordinates
 )
 
 data class MapStatsData(
@@ -100,8 +101,8 @@ class MapStatsTracker {
         visits.set(state.link.point, true)
     }
 
-    fun trackDecision(link: FramePoint, pad: GamePad) {
-        movements.add(PointAction(link, pad))
+    fun trackDecision(link: FramePoint, pad: GamePad, skipCoordinates: SkipCoordinates) {
+        movements.add(PointAction(link, pad, skipCoordinates))
     }
 
     fun track(mapCoordinates: MapCoordinates, enemies: List<Agent>, state: FrameState) {
@@ -196,7 +197,7 @@ class MapStatsTracker {
 
         val writer = FileWriter(fileNameCsvDir, true)
         for (movement in movements) {
-            writer.append("${movement.point.x},${movement.point.y},${movement.action.name}\n")
+            writer.append("${movement.point.x},${movement.point.y},${movement.action.name},${movement.skipCoordinates.subPixel},${movement.skipCoordinates.subTile},${movement.skipCoordinates.linkDir}\n")
         }
         writer.close()
 
@@ -223,7 +224,7 @@ class MapStatsTracker {
             return null
         }
         val json = file.readText()
-        return gson.fromJson(json, Map2d::class.java) as Map2d<Boolean>
+        return gson.fromJson<Map2d<Boolean>>(json, Map2d::class.java) as Map2d<Boolean>
     }
 
     private fun write(mapCoordinates: MapCoordinates, data: String) {

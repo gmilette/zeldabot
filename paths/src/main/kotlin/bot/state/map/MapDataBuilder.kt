@@ -243,7 +243,7 @@ class MapBuilder {
         objectives[40] = CellBuilder().invoke {
             aka("forestneardesert")
             e(l, r, d)
-            this has DestType.SecretToEverybody(30, EntryType.Fire(Direction.Right)) at 100 a 100
+            this has Dest.Secrets.forest30NearDesertForest at 13.grid a 6.grid
         }
         objectives[41] = CellBuilder().invoke {
             aka("grounddesert")
@@ -370,8 +370,17 @@ class MapBuilder {
     }
 
     private fun addRow5(objectives: MutableMap<MapLoc, MapCellData>) {
+        objectives[86] = MapCellData(
+            "squareforest",
+            Objective(FramePoint(10.grid, 4.grid), Dest.Secrets.forest10Mid)
+        )
         objectives[88] = MapCellData(
             "boringForest",
+        )
+        objectives[94] = MapCellData(
+            "candelshop",
+            // candle
+            Objective(FramePoint(7.grid, 1.grid), Dest.Shop.candleShopEast, Objective.ItemLoc.Right)
         )
         objectives[95] = MapCellData(
             "ladderHeart",
@@ -406,10 +415,8 @@ class MapBuilder {
         objectives[104] = MapCellData(
             "upForest",
             Objective(
-                FramePoint(100, 100), DestType.SecretToEverybody
-                    (20, EntryType.Fire())
+                FramePoint(100, 100), Dest.Secrets.forest20NearStart)
             )
-        )
         objectives[107] = MapCellData(
             "forest burn 100",
             // need to check this

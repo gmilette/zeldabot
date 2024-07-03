@@ -13,6 +13,31 @@ object Addresses {
 
    const val triforce = 0x0671
 
+   // alternates between -128 and 0
+   const val subPixel = 0x03A8
+   // 0, 1, 3, 4, 6, 7
+   // 0,0 x
+   // 1,- x
+   // 3,0 x
+   // 4,- s
+   // 6,0 x
+   // 7,- s
+   // 0,0 x
+   // 1,- s
+   // 3,0 x
+   // 4,- s
+   // 6,0 x
+   // 7,- x
+
+   // start at 55
+   // how many moves to get move to 155
+   // 75 or 76 moves to move 100
+   // calculate link's speed
+   // how many moves to go 100
+
+   const val subTile = 0x0394
+   const val collidingTile = 0x049E
+
    //Low Nibble = how many hearts are filled. High Nybble = No. of heart containers - 1
    //                                    Ex: $22 = 3 Heart Containers with all 3 filled
    //$FF = Full.
@@ -34,7 +59,7 @@ object Addresses {
    const val linkX = 0x0070
    const val linkY = 0x0084
    // $08=North, $04=South, $01=East, $02=West
-   const val linkDir = 0x0089
+//   const val linkDir = 0x0089 //it's 98
    const val moveDir = 0x0F // 01 or FF // Link's Move Direction
    // enemy location is still set when the enemy is dead
    // or if link goes to another screen and there are no enemies
@@ -52,6 +77,8 @@ object Addresses {
     */
    // not correct
    const val linkDirReal = 0x00FA
+   //  $08=North, $04=South, $01=East, $02=West
+   const val linkDir = 0x0098
 
    // i found
    // 5F if ladder deployed

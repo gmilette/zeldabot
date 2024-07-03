@@ -154,6 +154,35 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
         Row(
             modifier = Modifier.align(Alignment.Start)
         ) {
+
+            Button(
+                modifier = Modifier.padding(8.dp),
+                onClick = {
+                    model.addKey()
+                }) {
+                Text("+K")
+            }
+
+            Button(
+                modifier = Modifier.padding(8.dp),
+                onClick = {
+                    model.addBomb()
+                }) {
+                Text("+B")
+            }
+
+            Image(
+                painter = painterResource("icon_coin.png"),
+                modifier = Modifier.size(40.dp).background(Color.LightGray).clickable {
+                    model.addRupee()
+                },
+                contentDescription = ""
+            )
+        }
+
+        Row(
+            modifier = Modifier.align(Alignment.Start)
+        ) {
             Row {
                 Text("Invincible")
                 Checkbox(
@@ -227,38 +256,6 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
                     }
                 )
             }
-
-            Button(
-                modifier = Modifier.padding(8.dp),
-                onClick = {
-                    model.addKey()
-                }) {
-                Text("+K")
-            }
-
-            Button(
-                modifier = Modifier.padding(8.dp),
-                onClick = {
-                    model.addBomb()
-                }) {
-                Text("+B")
-            }
-
-            Image(
-                painter = painterResource("icon_coin.png"),
-                modifier = Modifier.size(40.dp).background(Color.LightGray).clickable {
-                    model.addRupee()
-                },
-                contentDescription = ""
-            )
-
-            Image(
-                painter = painterResource("icon_coin.png"),
-                modifier = Modifier.size(40.dp).background(Color.LightGray).clickable {
-                    model.addRupee()
-                },
-                contentDescription = ""
-            )
         }
 
         Row {
@@ -456,7 +453,7 @@ class ZeldaModel : ZeldaBot.ZeldaMonitor {
         }
     }
 
-    fun forceDir(forcedDirection: GamePad, num: Int = 100) {
+    fun forceDir(forcedDirection: GamePad, num: Int = 10) {
         ZeldaBot.unstick += num
         ZeldaBot.forcedDirection = forcedDirection
     }

@@ -6,11 +6,13 @@ import bot.plan.runner.MasterPlan
 import bot.plan.runner.PlanSegment
 import bot.state.*
 import bot.state.map.*
+import bot.state.map.destination.Dest
 import bot.state.map.destination.DestType
 import bot.state.map.destination.EntryType
 import bot.state.map.destination.ZeldaItem
 import bot.state.map.level.LevelMapCellsLookup
 import bot.state.oam.*
+import sequence.findpaths.Plan
 import util.d
 
 class PlanBuilder(
@@ -45,6 +47,12 @@ class PlanBuilder(
         }
     }
 
+    fun whiteSwordDodgeRoutine() {
+        val moveUp = makeUp(lastMapLoc.down.up)
+        val moveDown = makeDown(lastMapLoc.down)
+        add(lastMapLoc, whiteSwordManeuverSneakManeuver(moveDown, moveUp))
+    }
+
     fun routeTo(loc: MapLoc, name: String = ""): PlanBuilder {
         //d { " path from $lastMapLoc to $loc"}
         val path = optimizer.findPath(lastMapLoc, loc) ?: return this
@@ -74,6 +82,32 @@ class PlanBuilder(
 
     fun add(other: PlanBuilder.() -> Unit) {
         other()
+    }
+
+    infix fun Int.using(levelActions: PlanBuilder.() -> Unit) {
+        val level = this
+        add {
+            includeLevelObjPlan(level, levelActions)
+            inOverworld
+        }
+    }
+
+    private fun PlanBuilder.includeLevelObjPlan(level: Int, levelActions: PlanBuilder.() -> Unit, exitDirection: Direction = Direction.Down, consume: Boolean = true) {
+        add {
+            obj(Dest.level(level))
+            makeSegment()
+            remember
+            levelActions()
+//            segments.addAll(other.segments)
+            // exit the level so dont accidently go back in
+            // have to wait for the triforce animation
+            // useless
+//        goIn(GamePad.None, 500)
+            if (consume) {
+                goInConsume(exitDirection.toGamePad(), 20)
+            }
+            recall
+        }
     }
 
     fun includeLevelPlan(other: MasterPlan, exitDirection: Direction = Direction.Down, consume: Boolean = true): PlanBuilder {
@@ -148,8 +182,11 @@ class PlanBuilder(
         return this
     }
 
-    fun makeUp(nextLoc: MapLoc): Action =
+    fun makeUp(nextLoc: MapLoc): MoveTo =
         MoveTo(lastMapLoc, mapCell(nextLoc), level, Direction.Up)
+
+    fun makeDown(nextLoc: MapLoc): MoveTo =
+        MoveTo(lastMapLoc, mapCell(nextLoc), level, Direction.Down)
 
     val loot: PlanBuilder
         get() {

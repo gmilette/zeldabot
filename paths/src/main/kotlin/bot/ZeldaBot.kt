@@ -104,6 +104,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 
         monitor.update(frameStateUpdater.state, plan)
 
+        cheater.addRequestedItems()
+
         plan.runSetup(cheater.stateManipulator)
 
         val act = doAct
@@ -171,6 +173,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             return if (forcedDirection == GamePad.None) {
                 GamePad.randomDirection()
             } else {
+                d { "force direction $forcedDirection"}
                 forcedDirection
             }
         }
@@ -255,18 +258,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
      */
     inner class Cheater(api: API, frameStateUpdater: FrameStateUpdater) {
         val stateManipulator = StateManipulator(api, frameStateUpdater)
-        fun refillAndSetItems() {
-            // not reliable enough
-            val life = frameStateUpdater.state.frameState.inventory.heartCalc.lifeInHearts2()
-            d { "fill hearts $life" }
-            when {
-                life <= 4.0 && invincible -> {
-                    d { "*fill*" }
-                    stateManipulator.fillHeartsToFull()
-                }
-                maxLife -> stateManipulator.fillHearts()
-            }
 
+        fun addRequestedItems() {
             if (addKey) {
                 stateManipulator.addKey()
                 addKey = false
@@ -279,11 +272,23 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                 stateManipulator.addRupee()
                 addRupee = false
             }
+            if (invincible || maxLife) {
+//                stateManipulator.setRing(ZeldaItem.RedRing)
+                val life = frameStateUpdater.state.frameState.inventory.heartCalc.lifeInHearts2()
+                d { "fill hearts $life" }
+                when {
+                    life <= 4.0 && invincible -> {
+                        d { "*fill*" }
+                        stateManipulator.fillHeartsToFull()
+                    }
+                    maxLife -> stateManipulator.fillHearts()
+                }
+            }
+        }
+        fun refillAndSetItems() {
+            // not reliable enough
             refillIfOut()
 //            stateManipulator.setSword(ZeldaItem.WoodenSword)
-            if (invincible) {
-                stateManipulator.setRing(ZeldaItem.RedRing)
-            }
             if (setEquipmentCt > 0 && addEquipment) {
                 d { " Set equip" }
 //            frameStateUpdater.setSword(ZeldaItem.MagicSword)
@@ -328,8 +333,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     }
 
     inner class ScreenDraw {
-        private val drawAttackZone = true
-        private val drawAttackPoints = true
+        private val drawAttackZone = false
+        private val drawAttackPoints = false
         private val drawEnemyCosts = false
 
         private val rhinoHeadLeftUp = 0xFA // foot up

@@ -62,14 +62,15 @@ object DamagedLookup {
         0xb6 to h64,
         0xb6 to h67,
         0xb6 to h66,
+        // overworld firegrunt thing
         0xb0 to 0,
-        0xb0 to 2,
+//        0xb0 to 2, // could be the normal red one
         0xb0 to 3,
         0xb8 to 0,
-        0xb8 to 2,
+//        0xb8 to 2,
         0xb4 to 3,
         0xb4 to 0,
-        0xb4 to 2,
+//        0xb4 to 2,
         0xfc to 0,
         0xfc to 1,
         0xba to h67,

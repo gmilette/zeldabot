@@ -15,7 +15,7 @@ class Experiments(private val masterPlan: PlanMaker) {
 
     var current: Experiment = default
 //        get() = experiments["level2rhino"] ?: default
-      get() = experiments["allBoom"] ?: default
+      get() = experiments["level2Bomb6ws"] ?: default
 
     var experimentIncrement = 0
 
@@ -54,6 +54,7 @@ class Experiments(private val masterPlan: PlanMaker) {
             twoBomb.copy(name = "level2Bomb4", hearts = 4, bombs = 0, sword = ZeldaItem.WoodenSword),
             twoBomb.copy(name = "level2Bomb5w", hearts = 5, bombs = 0, sword = ZeldaItem.WhiteSword),
             twoBomb.copy(name = "level2Bomb6ws", hearts = 6, bombs = 0, sword = ZeldaItem.WhiteSword, shield = true),
+            twoBomb.copy(name = "level2Bomb6wws", hearts = 5, bombs = 0, sword = ZeldaItem.WoodenSword, shield = true),
             twoBomb.copy(name = "level2Bomb5", hearts = 5, bombs = 0, sword = ZeldaItem.WoodenSword),
             twoBomb.copy(name = "level2Bomb", hearts = 3, bombs = 0, sword = ZeldaItem.WoodenSword),
             one.copy(name = "level1", hearts = 3, bombs = 1),

@@ -23,7 +23,7 @@ data class FramePoint(val x: Int = 0, val y: Int = 0, val direction: Direction? 
         get() = "${x}_$y"
 
     override fun toString(): String {
-        return "($x, $y)"
+        return "($x, $y) ${direction?.toArrow() ?: ""} "
     }
 }
 
@@ -101,6 +101,9 @@ val Int.notOnEdge: Boolean
     get() = this in (MapConstants.oneGrid + 4)..(MapConstants.MAX_X - MapConstants.oneGrid)
 val FramePoint.onHighway: Boolean
     get() = onHighwayX || onHighwayY
+
+val FramePoint.onHighwayVertex: Boolean
+    get() = onHighwayX && onHighwayY
 
 val FramePoint.onHighwayX: Boolean
     get() = x % 8 == 0

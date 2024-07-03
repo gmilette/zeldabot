@@ -385,7 +385,8 @@ class RouteTo(val params: Param = Param()) {
 //                    finishWithinStrikingRange = param.finishWithinStrikingRange
                 )
             )
-        )
+        ) //.cornerSoon(state.link.oneStr, state.frameState.link.dir)
+
 
 //        route?.path?.lastOrNull()?.let { lastPt ->
 //            // if it is just projectile then don't try to route towards the projectiles

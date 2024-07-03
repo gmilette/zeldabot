@@ -161,6 +161,29 @@ val spiderHeadRight = (0xFC).toInt() to (0x42).toInt()
 val spiderHeadLeftClosed = (0xFE).toInt() to (0x02).toInt()
 val spiderHeadRightClosed = (0xFE).toInt() to (0x42).toInt()
 
+val lynelSwordGuy = (0xD4).toInt() to (0x41).toInt()
+val lynelSwordGuy2 = (0xD2).toInt() to (0x41).toInt()
+val lynelSwordGuyStride = (0xD0).toInt() to (0x41).toInt()
+val lynelSwordGuyStride2 = (0xCE).toInt() to (0x41).toInt()
+val lynelSwordGuyDown = (0xD8).toInt() to (0x01).toInt() // or 41
+val lynelSwordGuyDown2 = (0xD6).toInt() to (0x01).toInt() // or 41
+
+val lynels = setOf(
+    lynelSwordGuy,
+    lynelSwordGuy2,
+    lynelSwordGuyStride,
+    lynelSwordGuyStride2,
+    lynelSwordGuyDown,
+    lynelSwordGuyDown2
+)
+
+val lynelsTile = setOf(
+    lynelSwordGuy,
+    lynelSwordGuy2,
+    lynelSwordGuyStride,
+    lynelSwordGuyStride2
+).map { it.tile }
+
 val rhinoHeadDown = (0xF4).toInt()
 val rhinoHeadDown2 = (0xF6).toInt()
 val rhinoEatingHeadDown = (0xF8).toInt()

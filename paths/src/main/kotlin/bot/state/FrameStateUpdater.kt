@@ -2,13 +2,17 @@ package bot.state
 
 import bot.plan.action.PreviousMove
 import bot.plan.action.ProjectileDirectionCalculator
+import bot.state.map.Direction
 import bot.state.map.Hyrule
 import bot.state.map.MapConstants
 import bot.state.map.stats.MapStatsTracker
+import bot.state.map.upOrLeft
 import bot.state.oam.LinkDirectionFinder
 import bot.state.oam.OamStateReasoner
 import nintaco.api.API
+import org.apache.commons.math3.analysis.function.Add
 import util.d
+import kotlin.math.abs
 
 class FrameStateUpdater(
     private val api: API,
@@ -89,6 +93,8 @@ class FrameStateUpdater(
         previousNow.previous = null
 
         val seenBoomerang = mapStats.seenBoomerang
+        val willSkip = SkipDetector.willSkip(api)
+
         val frame = FrameState(api, theEnemies, theUncombined, level, mapLoc, link, ladder, seenBoomerang)
 
         if (!frame.isScrolling) {
@@ -100,14 +106,18 @@ class FrameStateUpdater(
         state.frameState = frame
 
         // game mode 8, is the dead screen
-        d { " GAME MODE ${state.frameState.gameMode}"}
+        d { " GAME MODE ${state.frameState.gameMode} $willSkip"}
     }
 
     fun updateDecision(gamePad: GamePad) {
         if (!state.frameState.isScrolling) {
             // don't track if the screen is scrolling
             val mapCoordinates = MapCoordinates(state.frameState.level, state.frameState.mapLoc)
-            mapStats.trackDecision(state.link, gamePad)
+            val subPixel = api.readCPU(Addresses.subPixel)
+            val subTile = api.readCPU(Addresses.subTile)
+            val linkDir = api.readCPU(Addresses.linkDir)
+            val skip = SkipDetector.getSkip(this.api)
+            mapStats.trackDecision(state.link, gamePad, skip)
         }
     }
 }
