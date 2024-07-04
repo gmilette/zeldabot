@@ -82,6 +82,7 @@ object ZeldaPlan {
                 obj(Dest.Heart.fireHeart)
                 obj(Dest.Secrets.fire30GreenSouth)
             }
+            phase("Destroy level 3")
             3 using level3
             phase(Phases.level3After)
             val forestNextToLevel3: MapLoc = 115
@@ -775,6 +776,7 @@ object ZeldaPlan {
 
     private val level3: PlanBuilder.() -> Unit
         get() = {
+            phase("Destroy level 3")
             lev(3)
             startAt(LevelStartMapLoc.lev(3))
             seg("grab key")

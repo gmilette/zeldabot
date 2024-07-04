@@ -22,6 +22,9 @@ class MasterPlan(val segments: List<PlanSegment>) {
 
     private var giant = segments.flatMap { seg -> seg.plan.map { PlanStep(seg, it) } }.toMutableList().also {
         initialPlanSize = it.size
+//        if (initialPlanSize == 0) {
+//            throw RuntimeException("Ahh")
+//        }
         d { " created plan with $initialPlanSize actions moves $numMoves" }
     }
 

@@ -15,7 +15,7 @@ class Experiments(private val masterPlan: PlanMaker) {
 
     var current: Experiment = default
 //        get() = experiments["level2rhino"] ?: default
-      get() = experiments["level2Bomb6ws"] ?: default
+      get() = experiments["level3plan"] ?: evaluation["level3plan"] ?: default
 
     var experimentIncrement = 0
 
@@ -23,14 +23,14 @@ class Experiments(private val masterPlan: PlanMaker) {
 
     val evaluation: Map<String, Experiment>
 
-    fun getExp(): Experiment {
-        val one = Experiment("level1", "level1_start_no_ladder.save",
-            { masterPlan().getPlanPhase("Destroy level 1") },
-            addEquipment = false,
-            sword = ZeldaItem.WoodenSword)
-        return one.copy(name = "lev1white5", hearts = 5, bombs = 4, sword = ZeldaItem.WhiteSword)
-    }
-
+//    fun getExp(): Experiment {
+//        val one = Experiment("level1", "level1_start_no_ladder.save",
+//            { masterPlan().getPlanPhase("Destroy level 1") },
+//            addEquipment = false,
+//            sword = ZeldaItem.WoodenSword)
+//        return one.copy(name = "lev1white5", hearts = 5, bombs = 4, sword = ZeldaItem.WhiteSword)
+//    }
+//
     init {
         val one = Experiment("level1", "level1_start_no_ladder.save",
             { masterPlan().getPlanPhase("Destroy level 1") },
@@ -45,7 +45,13 @@ class Experiments(private val masterPlan: PlanMaker) {
             addEquipment = false,
             sword = ZeldaItem.WoodenSword)
 
+        val three = Experiment("level3", "level3.save",
+            { masterPlan().getPlanPhase("Destroy level 3") },
+            addEquipment = false,
+            sword = ZeldaItem.WhiteSword)
+
         evaluation = listOf(
+            three.copy(name = "level3plan", hearts = 7, bombs = 4, boomerang = ZeldaItem.Boomerang, shield = true),
             // go straight to level1
             // should have 0 bombs though
             two.copy(name = "level2b", hearts = 3, bombs = 0, sword = ZeldaItem.WoodenSword, boomerang = ZeldaItem.Boomerang),
