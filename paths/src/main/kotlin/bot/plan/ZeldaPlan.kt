@@ -5,6 +5,8 @@ import bot.plan.runner.MasterPlan
 import bot.state.*
 import bot.state.map.*
 import bot.state.map.destination.Dest
+import bot.state.map.destination.DestType
+import bot.state.map.destination.EntryType
 import bot.state.map.destination.ZeldaItem
 import bot.state.map.level.LevelMapCellsLookup
 import bot.state.map.level.LevelSpecBuilder
@@ -56,7 +58,7 @@ object ZeldaPlan {
             leftIfNeedBombs
             leftIfNeedBombs
             killUntilGetBomb(1) // the monster in the water
-            obj(Dest.Secrets.bombHeartSouth)
+            obj(Dest.Heart.bombHeartSouth)
             // position by routing
             val sec: MapLoc = 61
             routeTo(sec.up)
@@ -66,7 +68,7 @@ object ZeldaPlan {
             obj(Dest.Secrets.bombSecret30North)
             obj(ZeldaItem.Letter)
             obj(Dest.Secrets.walk100)
-            obj(Dest.Secrets.bombHeartNorth)
+            obj(Dest.Heart.bombHeartNorth)
             obj(ZeldaItem.WhiteSword)
             obj(Dest.level(1))
             includeLevelPlan(levelPlan1(factory))
@@ -109,7 +111,7 @@ object ZeldaPlan {
                 obj(Dest.Secrets.fire30GreenSouth)
                 obj(Dest.Heart.fireHeart)
             }
-            obj(Dest.Secrets.bombHeartSouth)
+            obj(Dest.Heart.bombHeartSouth)
             obj(Dest.Secrets.forest100South)
             obj(Dest.Shop.arrowShop)
             phase(Phases.ladderHeart)
@@ -172,12 +174,13 @@ object ZeldaPlan {
             gatherBombsFirstPhase()
 
             "gather heart".seg()
-            obj(Dest.Secrets.bombHeartNorth)
+            obj(Dest.Heart.bombHeartNorth)
             2 using level2
 
-            itemsNearLevel2CandleShieldPhase()
-
+            // need the cash to get the candle
             afterLevel2ItemsLetterEtcPhase(false)
+
+            itemsNearLevel2CandleShieldPhase()
 
             whiteSword()
 
@@ -194,10 +197,11 @@ object ZeldaPlan {
 
             // collect loot loop
             obj(Dest.Secrets.forest10Mid)
-
-            // could move later if we can guarantee level 2 provides
-            obj(Dest.Secrets.forest20NearStart)
             obj(Dest.Secrets.bomb30Start)
+            ringLevels()
+            arrowHearts()
+
+            // then potion?
         }
     }
 
@@ -221,7 +225,7 @@ object ZeldaPlan {
             obj(ZeldaItem.Letter)
             obj(Dest.Secrets.walk100)
             if (withBombHeart) {
-                obj(Dest.Secrets.bombHeartNorth)
+                obj(Dest.Heart.bombHeartNorth)
             }
         }
     }
@@ -245,7 +249,7 @@ object ZeldaPlan {
         }
     }
 
-    private fun PlanBuilder.ringLevels() {
+    private fun PlanBuilder.fireBurn100() {
         add {
             val forestNextToLevel3: MapLoc = 115
             // prevent going down on tile 114
@@ -261,6 +265,17 @@ object ZeldaPlan {
             val forest: MapLoc = 98
             routeTo(forest.down)
             routeTo(forest.down.right)
+        }
+    }
+
+    private fun PlanBuilder.ringLevels() {
+        add {
+            fireBurn100()
+            // maybe need these to get ring
+            // todo need to add
+//            obj(Dest.Secrets.bombSecret30SouthWest)
+//            obj(Dest.Secrets.forest10BurnBrown)
+
             obj(Dest.Shop.blueRing, position = true)
             // avoid accidentally going back in
             goIn(GamePad.MoveRight, 25) // test it
@@ -273,6 +288,34 @@ object ZeldaPlan {
             4 using level4
         }
     }
+
+    private fun PlanBuilder.arrowHearts() {
+        add {
+            obj(Dest.Shop.arrowShop)
+            phase(Phases.ladderHeart)
+            obj(Dest.Heart.ladderHeart)
+            // exit the heart area
+            goIn(GamePad.MoveLeft, 70, monitor = false)
+            obj(Dest.Heart.raftHeart, itemLoc = Objective.ItemLoc.Right)
+        }
+    }
+
+    private fun PlanBuilder.remaining() {
+        add {
+
+        }
+    }
+
+    private fun PlanBuilder.end() {
+        add {
+            // junk
+            left
+            right
+            right
+            end
+        }
+    }
+
 
     private fun PlanBuilder.gatherBombsFirstPhase() {
         this.add {
@@ -291,7 +334,7 @@ object ZeldaPlan {
             killUntilGetBomb(1) // the monster in the water
             leftIfNeedBombs
             leftIfNeedBombs
-            obj(Dest.Secrets.bombHeartSouth)
+            obj(Dest.Heart.bombHeartSouth)
             // avoid getting stuck/ go right first?
 //            routeTo(107 - 16)
 //            routeTo(107 - 16 + 1)
@@ -382,14 +425,9 @@ object ZeldaPlan {
                 obj(Dest.Secrets.fire30GreenSouth)
                 obj(Dest.Heart.fireHeart)
             }
-            obj(Dest.Secrets.bombHeartSouth)
+            obj(Dest.Heart.bombHeartSouth)
             obj(Dest.Secrets.forest100South)
-            obj(Dest.Shop.arrowShop)
-            phase(Phases.ladderHeart)
-            obj(Dest.Heart.ladderHeart)
-            // exit the heart area
-            goIn(GamePad.MoveLeft, 70, monitor = false)
-            obj(Dest.Heart.raftHeart, itemLoc = Objective.ItemLoc.Right)
+            arrowHearts()
             // go down and make sure to walk off.
             // something like this
 //            goToAtPoint(33, FramePoint(11.grid, 3.grid))
@@ -433,12 +471,7 @@ object ZeldaPlan {
             phase("go to level 9")
             obj(Dest.level(9))
             includeLevelPlan(levelPlan9(factory))
-
-            // junk
-            left
-            right
-            right
-            end
+            end()
         }
     }
 
@@ -516,7 +549,9 @@ object ZeldaPlan {
                 up
                 seg("destroy dragon")
                 // avoid first round of fireballs
-                go(FramePoint(6.grid, 3.grid))
+                // no go up near the edge
+//                go(FramePoint(6.grid, 3.grid))
+                go(FramePoint(11 .grid, 6.grid))
                 killLev1Dragon // aim for the head
                 rightm // triforce
                 goIn(GamePad.MoveRight, 20)

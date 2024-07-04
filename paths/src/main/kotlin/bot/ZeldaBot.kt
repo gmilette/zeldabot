@@ -215,6 +215,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         var addKey = false
         var addBomb = false
         var addRupee = false
+        var addCandle = false
         var unstick = 0
         var forcedDirection = GamePad.None
         var addEquipment: Boolean = false
@@ -271,6 +272,10 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             if (addRupee) {
                 stateManipulator.addRupee()
                 addRupee = false
+            }
+            if (addCandle) {
+                stateManipulator.setRedCandle()
+                addCandle = false
             }
             if (invincible || maxLife) {
 //                stateManipulator.setRing(ZeldaItem.RedRing)

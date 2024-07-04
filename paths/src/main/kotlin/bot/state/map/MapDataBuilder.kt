@@ -259,7 +259,7 @@ class MapBuilder {
         }
         objectives[44] = MapCellData(
             "Bomb heart north",
-            Objective(FramePoint(144, 96), Dest.Secrets.bombHeartNorth, itemLoc = Objective.ItemLoc.Right)
+            Objective(FramePoint(144, 96), Dest.Heart.bombHeartNorth, itemLoc = Objective.ItemLoc.Right)
         )
         //            ,
         objectives[45] = CellBuilder().invoke {
@@ -358,7 +358,7 @@ class MapBuilder {
             "tree with fairy",
             Objective(FramePoint(2.grid, 8.grid), Dest.Shop.potionShopForest)
         )
-        val shopCShieldLoc = Objective.ItemLoc.Right
+        val shopCShieldLoc = Objective.ItemLoc.Left
         objectives[77] = MapCellData(
             "forest before 2",
             Objective(FramePoint(13.grid, 6.grid), Dest.Shop.eastTreeShop, itemLoc = shopCShieldLoc)
@@ -372,7 +372,7 @@ class MapBuilder {
     private fun addRow5(objectives: MutableMap<MapLoc, MapCellData>) {
         objectives[86] = MapCellData(
             "squareforest",
-            Objective(FramePoint(10.grid, 4.grid), Dest.Secrets.forest10Mid)
+            Objective(FramePoint(8.grid, 6.grid), Dest.Secrets.forest10Mid)
         )
         objectives[88] = MapCellData(
             "boringForest",
@@ -415,7 +415,7 @@ class MapBuilder {
         objectives[104] = MapCellData(
             "upForest",
             Objective(
-                FramePoint(100, 100), Dest.Secrets.forest20NearStart)
+                FramePoint(2.grid, 6.grid), Dest.SecretsNegative.forest20NearStart)
             )
         objectives[107] = MapCellData(
             "forest burn 100",
@@ -490,7 +490,7 @@ class MapBuilder {
         )
         objectives[123] = MapCellData(
             "bombHeartSouth",
-            Objective(FramePoint(9.grid, 1.grid), Dest.Secrets.bombHeartSouth, itemLoc = Objective.ItemLoc.Right),
+            Objective(FramePoint(9.grid, 1.grid), Dest.Heart.bombHeartSouth, itemLoc = Objective.ItemLoc.Right),
         )
     }
 }

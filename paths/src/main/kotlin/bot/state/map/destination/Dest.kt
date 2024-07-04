@@ -27,28 +27,33 @@ object Dest {
     fun item(item: ZeldaItem): DestType =
         itemLookup[item] ?: DestType.Item(ZeldaItem.None)
 
+    object SecretsNegative {
+        val forest20NearStart = DestType.SecretToEverybody(20, EntryType.Fire(Direction.Down))
+    }
+
     object Secrets {
         val bomb30Start = DestType.SecretToEverybody(30, entry = EntryType.Bomb)
         val bomb20 = DestType.SecretToEverybody(20, entry = EntryType.Bomb)
         // forest
         val walk100 = DestType.SecretToEverybody(100)
         val forest30NearDesertForest = DestType.SecretToEverybody(30, EntryType.Fire(Direction.Right))
-        val forest10Mid = DestType.SecretToEverybody(10, EntryType.Fire(Direction.Right))
-        val forest20NearStart = DestType.SecretToEverybody(20, EntryType.Fire(Direction.Down))
+        val forest10Mid = DestType.SecretToEverybody(10, EntryType.Fire(Direction.Left))
         val forest100South = DestType.SecretToEverybody(100, EntryType.Fire(from = Direction.Down))
         val secretForest30NorthEast = DestType.SecretToEverybody(30, EntryType.Statue)
         val bombSecret30North = DestType.SecretToEverybody(30, EntryType.Bomb)
+        val bombSecret30SouthWest = DestType.SecretToEverybody(30, EntryType.Bomb)
+        val forest10BurnBrown = DestType.SecretToEverybody(10, EntryType.Fire(from = Direction.Down))
         val fire100SouthBrown = DestType.SecretToEverybody(100, EntryType.Fire(from = Direction.Right)) // or right
         val fire30GreenSouth = DestType.SecretToEverybody(30, EntryType.Fire(from = Direction.Left))
         val level2secret10 = DestType.SecretToEverybody(10, EntryType.Statue)
-        val bombHeartNorth = DestType.Heart(entry = EntryType.Bomb)
-        val bombHeartSouth = DestType.Heart(entry = EntryType.Bomb)
     }
 
     object Heart {
         val fireHeart = DestType.Heart(entry = EntryType.Fire(from = Direction.Up))
         val raftHeart = DestType.Heart(entry = EntryType.Walk())
         val ladderHeart = DestType.Heart(entry = EntryType.WalkInLadder)
+        val bombHeartNorth = DestType.Heart(entry = EntryType.Bomb)
+        val bombHeartSouth = DestType.Heart(entry = EntryType.Bomb)
     }
 
     object Shop {

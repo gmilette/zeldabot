@@ -40,8 +40,8 @@ class PlanRunner(private val makePlan: PlanMaker, private val api: API) {
 //        val runIt: Experiment =
 //        runIt("level2rhino")
 //        runIt("level25h")
-//        runIt("all")
-        runLoc(true,94, 0) // near start
+        runIt("all")
+//        runLoc(true,94, 0) // near start
 //        runLoc(true,120, 0) // near start
 //        runLoc(true,10, 0) // near start
 //        runLoc(true,26, 0) // near start
