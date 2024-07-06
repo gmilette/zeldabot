@@ -100,7 +100,8 @@ class KillAll(
             needLongWait = false
         } else {
             // once set to true, do not change it back
-            if (!needLongWait && !considerEnemiesInCenter) {
+            // added level check just because sword guys and ghost appear same
+            if (!needLongWait && !considerEnemiesInCenter && state.frameState.level != 3) {
                 needLongWait = state.longWait.isNotEmpty()
             }
         }

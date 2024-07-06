@@ -795,7 +795,7 @@ object ZeldaPlan {
             level3TriggerDoorThen // it's not great but ok
             goIn(GamePad.MoveLeft, 10)
             seg("fight swords")
-            kill
+            kill // don't attack half
             downk
             seg("get raft")
             goIn(GamePad.MoveDown, 10)
@@ -807,12 +807,14 @@ object ZeldaPlan {
             upTo(105)
             seg("get to back to center")
             upm
-            kill
-            goTo(InLocations.Level3.keyElbowSquishy)
             right
+            seg("right no p")
             rightNoP
             seg("get to boss")
             upm // option to get key up, but skip
+            seg("Keys from squishy")
+            kill
+            goTo(InLocations.Level3.keyElbowSquishy)
             // walk past trap ??
             rightm
             seg("BOMB RIGHT")
