@@ -29,7 +29,18 @@ object EnemyGroup {
         (0x82).toInt() to (0x02).toInt(),
         // dark
         (0x84).toInt() to (0x03).toInt(),
-        (0x82).toInt() to (0x03).toInt()
+        (0x82).toInt() to (0x03).toInt(),
+
+        // flying white
+        (0x84).toInt() to (0x42).toInt(), // tip
+        (0x82).toInt() to (0x42).toInt(), // hilt
+        (0x84).toInt() to (0x40).toInt(),
+        (0x82).toInt() to (0x40).toInt(),
+        (0x84).toInt() to (0x41).toInt(),
+        (0x82).toInt() to (0x41).toInt(),
+        (0x84).toInt() to (0x43).toInt(),
+        (0x82).toInt() to (0x43).toInt(),
+
     )
 
     // link's sword

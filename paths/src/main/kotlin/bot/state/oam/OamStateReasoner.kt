@@ -20,6 +20,7 @@ class OamStateReasoner(
 ) {
     private val sprites: List<SpriteData>
     private var spritesUncombined: List<SpriteData> = emptyList()
+    private var spritesRaw: List<SpriteData> = emptyList()
 
     var ladderSprite: Agent? = null
     var direction: Direction = Direction.None
@@ -49,6 +50,9 @@ class OamStateReasoner(
 
     fun agentsUncombined(): List<Agent> =
         spritesUncombined.map { it.toAgent() }
+
+    fun agentsRaw(): List<Agent> =
+        spritesRaw.map { it.toAgent() }
 
     // calculate isDamaged here
     private fun SpriteData.toAgent(): Agent {
@@ -156,7 +160,7 @@ class OamStateReasoner(
     }
 
     private fun readOam(): List<SpriteData> {
-        val spritesRaw = (0..63).map {
+        spritesRaw = (0..63).map {
             readOam(0x0001 * (it * 4))
         }
 

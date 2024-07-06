@@ -5,6 +5,7 @@ import bot.state.map.Direction
 import bot.state.map.MapConstants
 import bot.state.map.pointModifier
 import bot.state.oam.EnemyGroup
+import bot.state.oam.toHex
 import org.jheaps.annotations.VisibleForTesting
 import util.Geom
 import util.Map2d
@@ -21,13 +22,18 @@ object AttackLongActionDecider {
         // sword is more than 1 grid away from link
         // need more work
         val swordIsFlying by lazy {
-            state.frameState.enemies.filter { it.tileAttrib in EnemyGroup.swordProjectile }
+            state.frameState.enemiesRaw.filter { it.tileAttrib in EnemyGroup.swordProjectile }
                 .minByOrNull { it.point.distTo(state.link) }?.let {
                     it.point.distTo(state.link) > MapConstants.oneGrid
                 } ?: false
         }
+        val thereIsASword by lazy {
+            state.frameState.enemiesRaw.any { it.tileAttrib in EnemyGroup.swordProjectile }
+        }
         if (swordIsFlying) {
             d { " SWORD IS FLYING ------------"}
+        } else if (thereIsASword) {
+            d { " SWORD IS THERE ------------"}
         }
         val canShoot = full //state.frameState HeartCalculator.isFull()
         return (canShoot && !swordIsFlying && targetInLongRange(state, targets))

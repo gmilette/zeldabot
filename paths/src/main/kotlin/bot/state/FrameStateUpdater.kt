@@ -71,6 +71,7 @@ class FrameStateUpdater(
         val oam = OamStateReasoner(isOverworld, api, mapStats, combine = !isRhino)
         val theEnemies = oam.agents()
         val theUncombined = oam.agentsUncombined()
+        val theRaw = oam.agentsRaw()
         val linkDir = oam.direction
         val ladderMem = api.readCPU(Addresses.ladderDeployed) != 0
         // check ladder memory first
@@ -95,7 +96,7 @@ class FrameStateUpdater(
         val seenBoomerang = mapStats.seenBoomerang
         val willSkip = SkipDetector.willSkip(api)
 
-        val frame = FrameState(api, theEnemies, theUncombined, level, mapLoc, link, ladder, seenBoomerang)
+        val frame = FrameState(api, theEnemies, theUncombined, theRaw, level, mapLoc, link, ladder, seenBoomerang)
 
         if (!frame.isScrolling) {
             // don't track if the screen is scrolling

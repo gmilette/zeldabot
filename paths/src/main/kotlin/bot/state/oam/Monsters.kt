@@ -126,6 +126,8 @@ fun TileAttribute.matches(other: TileAttribute) =
 fun TileAttribute.toHex() =
     "${tile.toString(16)} (${attribute.toString(16)}) "
 
+fun TileAttribute.toSmallString(): String = "${tile}_$attribute"
+
 // need
 
 object MonsterDirection {

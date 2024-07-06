@@ -38,6 +38,7 @@ class MapLocationState(
     var frameState: FrameState = FrameState(ApiSource.getAPI(),
         emptyList(),
         emptyList(),
+        emptyList(),
         0,
         0,
         emptyAgent,

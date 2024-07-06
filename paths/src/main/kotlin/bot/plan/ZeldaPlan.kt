@@ -788,6 +788,8 @@ object ZeldaPlan {
             loot
             up
             leftm
+            // get past trap
+            goIn(GamePad.MoveLeft, 30)
             seg("past the compass")
             killUntil2
             level3TriggerDoorThen // it's not great but ok
@@ -809,6 +811,7 @@ object ZeldaPlan {
             rightNoP
             seg("get to boss")
             upm // option to get key up, but skip
+            // walk past trap ??
             rightm
             seg("BOMB RIGHT")
             switchToBomb
