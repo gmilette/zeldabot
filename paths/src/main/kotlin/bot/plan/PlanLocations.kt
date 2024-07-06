@@ -108,6 +108,7 @@ object InLocations {
     }
 
     object Level3 {
+        val keyElbowSquishy = FramePoint(8.grid, 5.grid)
         val heartMid = FramePoint(128, 88)
         // requires then moving up / needed?
         val triforce = FramePoint(7.grid, 6.grid) // get the middle of the triangle at the top

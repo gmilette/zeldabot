@@ -19,6 +19,7 @@ object DirectoryConstants {
     fun file(dir: String, filename: String) = "${outDir(dir)}$filename"
 
     val states = "../Nintaco_bin_2020-05-01/states/"
+    val statesFromExecuting = "../$states"
 
     private fun generateDateFilename(): String {
         val now = LocalDateTime.now()

@@ -42,6 +42,7 @@ class PlanRunner(private val makePlan: PlanMaker, private val api: API) {
 //        runIt("level25h")
 //        runIt("all")
         runIt("level3plan")
+//        runLoc(true,91, 3) // lev 3 sword guys
 //        runLoc(true,94, 0) // near start
 //        runLoc(true,120, 0) // near start
 //        runLoc(true,10, 0) // near start
@@ -216,13 +217,17 @@ class PlanRunner(private val makePlan: PlanMaker, private val api: API) {
     private fun completedAction(state: MapLocationState, action: Action?) {
         val stateName = "${state.frameState.level}_${state.movedTo}"
         val root = DirectoryConstants.states
-        val stateFileName = "$root/mapstate/mapstate_${stateName}.save"
-        if (!File(stateFileName).exists()) {
-            d { "Saved a state $stateFileName" }
+        val filePath = "mapstate/mapstate_${stateName}.save"
+        // this path is for nintaco
+        val stateFileName = "${root}$filePath"
+        // this path is for checking file existence
+        val stateFile = "${DirectoryConstants.statesFromExecuting}$filePath"
+        if (File(stateFile).exists()) {
+            d { "Already saved $stateFileName" }
+        } else {
+            d { "Saved a state" }
             api.saveState(stateFileName)
             api.saveScreenshot()
-        } else {
-            d { "Already saved $stateFileName" }
         }
     }
 

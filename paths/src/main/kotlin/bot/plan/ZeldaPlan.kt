@@ -807,6 +807,8 @@ object ZeldaPlan {
             upTo(105)
             seg("get to back to center")
             upm
+            kill
+            goTo(InLocations.Level3.keyElbowSquishy)
             right
             rightNoP
             seg("get to boss")
