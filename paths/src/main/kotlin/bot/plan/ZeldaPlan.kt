@@ -809,6 +809,8 @@ object ZeldaPlan {
             upm
             rightNoP
             seg("right no p")
+            goTo(FramePoint(12.grid, 5.grid))
+            goIn(GamePad.MoveRight, MapConstants.twoGrid)
             rightNoP
             seg("get to boss")
             upm // option to get key up, but skip

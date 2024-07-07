@@ -444,7 +444,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                     if (drawAttackPoints) {
                         for (enemy in frameState.enemies) {
                             api.color = Colors.BLACK2
-                            val pts = AttackActionDecider.attackPoints(enemy.point)
+                            val pts = AttackActionDecider.attackPointsNoCorner(enemy.point)
                             for (pt in pts) {
                                 api.drawOval(pt.x, pt.y + MapConstants.yAdjust, 2, 2)
                             }
