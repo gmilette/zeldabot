@@ -77,7 +77,8 @@ class OamStateReasoner(
                 found
             }
         } else {
-            Direction.None
+            // maybe calculate the dir here for alive enemies
+            DirectionLookup.getDir(tileAttribute)
         }
         if (state == EnemyState.Projectile) {
             d { " Move dir for d:$damaged ${tileAttribute.toHex()} $point is ${movingDirection.toArrow()} and ${findDir.toArrow()}" }

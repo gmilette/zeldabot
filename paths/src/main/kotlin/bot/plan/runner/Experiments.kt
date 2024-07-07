@@ -51,7 +51,7 @@ class Experiments(private val masterPlan: PlanMaker) {
             sword = ZeldaItem.WhiteSword)
 
         evaluation = listOf(
-            three.copy(name = "level3plan", hearts = 7, bombs = 4, boomerang = ZeldaItem.Boomerang, shield = true),
+            three.copy(name = "level3plan", hearts = 7, bombs = 4, boomerang = ZeldaItem.Boomerang, shield = true, ring = ZeldaItem.BlueRing),
             // go straight to level1
             // should have 0 bombs though
             two.copy(name = "level2b", hearts = 3, bombs = 0, sword = ZeldaItem.WoodenSword, boomerang = ZeldaItem.Boomerang),

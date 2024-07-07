@@ -34,6 +34,7 @@ class KillAll(
      */
 //    ignoreEnemies: Boolean = false,
     private var firstAttackBomb: Boolean = false,
+    private var allowBlock: Boolean = true,
 //    ignoreProjectilesRoute: Boolean = false,
     whatToAvoid: RouteTo.WhatToAvoid = RouteTo.WhatToAvoid.All
 ) : Action {
@@ -50,6 +51,7 @@ class KillAll(
 
     private var previousAttack = false
     private var pressACount = 0
+    private var numPressB = 0
     private var target: FramePoint = FramePoint(0, 0)
 
     private var frameCount = 0
@@ -208,7 +210,7 @@ class KillAll(
                     val forceNew = previousTarget.oneStr != target.oneStr
                     d { "Plan: target changed was $previousTarget now ${target} forceNew = $forceNew" }
 
-                    val targetsToAttack: List<FramePoint> = AttackActionDecider.attackPoints(target)
+                    val targetsToAttack = AttackActionDecider.attackPointsNoCorner(target)
 
                     if (link.point in targetsToAttack) {
                         d { " !On Target " }
@@ -218,14 +220,24 @@ class KillAll(
                     routeTo.routeTo(
                         state, targetsToAttack,
                         RouteTo.RouteParam(
+                            useB = firstAttackBomb,
                             forceNew = forceNew,
+                            allowBlock = allowBlock,
                             rParam = RouteTo.RoutingParamCommon(
                                 attackTarget = target,
                                 mapNearest = true,
                                 finishWithinStrikingRange = true
                             ),
                         )
-                    )
+                    ).also {
+                        if (it == GamePad.B && firstAttackBomb) {
+                            d {"USE BOMB!" }
+                            numPressB++
+                            if (numPressB > 3) {
+                                firstAttackBomb = false
+                            }
+                        }
+                    }
                 } ?: GamePad.None
             }
         }

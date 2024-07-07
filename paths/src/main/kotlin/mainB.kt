@@ -288,7 +288,7 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
 //                            + " " + tileLine
                             val moving = if (enemy.moving == MovingDirection.UNKNOWN_OR_STATIONARY) "" else enemy.moving.toArrow()
                             Text(
-                                "$index: (${enemy.tile.toString(16)}_${enemy.attribute.toString(16)}) ${enemy.state.name} ${enemy.point} ${enemy.point.toG} " +
+                                "$index: (${enemy.tile.toString(16)}_${enemy.attribute.toString(16)}) ${enemy.state.name} ${enemy.point} ${enemy.point.toG} ${enemy.dir.toArrow()}" +
                                         enemy.damagedString + " $moving"
                             )
                         }

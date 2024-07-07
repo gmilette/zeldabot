@@ -4,6 +4,7 @@ import bot.state.map.Direction
 import bot.state.map.MovingDirection
 import bot.state.oam.EnemyGroup
 import bot.state.oam.TileAttribute
+import bot.state.oam.swordDir
 import util.CalculateDirection
 
 val List<Agent>.points: List<FramePoint>
@@ -37,6 +38,8 @@ data class Agent(
 
     val y: Int
         get() = point.y
+
+    val canAttackFront by lazy { !swordDir.inAny(tile) }
 }
 
 enum class EnemyState {

@@ -780,7 +780,7 @@ object ZeldaPlan {
             lev(3)
             startAt(LevelStartMapLoc.lev(3))
             seg("grab key")
-            leftm
+            left
             goTo(InLocations.Level2.keyMid)
             seg("walk round corner")
             up // grab key it's easy
@@ -800,14 +800,14 @@ object ZeldaPlan {
             seg("get raft")
             goIn(GamePad.MoveDown, 10)
             // drop clearing bomb
-            goIn(GamePad.B, 2)
+            goIn(GamePad.B, 6)
             goTo(InLocations.rightStair)
             startAt(15)
             go(InLocations.getItem)
             upTo(105)
             seg("get to back to center")
             upm
-            right
+            rightNoP
             seg("right no p")
             rightNoP
             seg("get to boss")
@@ -817,12 +817,12 @@ object ZeldaPlan {
             goTo(InLocations.Level3.keyElbowSquishy)
             // walk past trap ??
             rightm
+            goIn(GamePad.MoveRight, MapConstants.threeGrid)
             seg("BOMB RIGHT")
             switchToBomb
             level3BombThenRight
             seg("kill boss")
             starKill
-            //killFirstAttackBomb
             go(InLocations.Level3.heartMid)
             upm
             getTri
@@ -837,6 +837,7 @@ private val level4: PlanBuilder.() -> Unit
         seg("go go go")
         //key to left but dont bother
         up
+        switchToBoomerang
         up // no get it because it is in the middle of the room
         goTo(InLocations.Level4.batKey)
         leftm
@@ -848,6 +849,7 @@ private val level4: PlanBuilder.() -> Unit
         rightm
         kill
         right
+        // watch out for pancakes
         kill // there will be 2 suns still running around
         seg("push")
         +makePush(

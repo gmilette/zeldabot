@@ -339,7 +339,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 
     inner class ScreenDraw {
         private val drawAttackZone = false
-        private val drawAttackPoints = false
+        private val drawAttackPoints = true
         private val drawEnemyCosts = true
 
         private val rhinoHeadLeftUp = 0xFA // foot up
@@ -467,7 +467,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                         }
                     }
 
-                    val drawRhinoAttack = true
+                    val drawRhinoAttack = false
                     if (drawRhinoAttack) {
                         RhinoStrategyParameters().getTargetGrid(frameStateUpdater.state.rhino()?.point ?: FramePoint(),
                             frameStateUpdater.state.rhinoDir())?.toRect()?.apply {

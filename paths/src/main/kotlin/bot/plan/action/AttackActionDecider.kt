@@ -222,11 +222,18 @@ object AttackActionDecider {
      * it's annoying to watch link attack the spin guys, ignore those
      */
     fun aliveEnemiesCanAttack(state: MapLocationState): List<FramePoint> {
+        val oppositeFrom by lazy { state.frameState.link.dir.opposite() }
+
         val enemies = state.aliveEnemies
         return if (state.frameState.isLevel) {
-            if (state.frameState.level == 1 && state.frameState.mapLoc == 53) enemies.filter { it.tile in EnemyGroup.dragon1} else enemies
+            if (state.frameState.level == 1 && state.frameState.mapLoc == 53) enemies.filter { it.tile in EnemyGroup.dragon1} else enemies.filter { it.canAttackFront || it.dir != oppositeFrom }
         } else {
             enemies.filter { it.tile !in EnemyGroup.enemiesToNotAttackInOverworld }
+//        }.also {
+//            d { " attackable opposite from $oppositeFrom" }
+//            for (agent in it) {
+//                d { " attackable: $agent"}
+//            }
         }.map { it.point }
     }
 
@@ -327,6 +334,8 @@ object AttackActionDecider {
             attackMove
         }
     }
+
+    fun facing(dir: Direction, other: Direction) = dir.opposite() == other
 
     fun swordRectangles(link: FramePoint): Map<Direction, Geom.Rectangle> {
 //        val nearSize = MapConstants.halfGrid

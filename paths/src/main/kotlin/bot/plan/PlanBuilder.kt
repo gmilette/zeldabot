@@ -312,10 +312,11 @@ class PlanBuilder(
                     KillAll(
                         needLongWait = false,
                         firstAttackBomb = true,
+                        allowBlock = false,
                         // ignore just projectiles I think
 //                        ignoreEnemies = true,
 //                        ignoreProjectilesRoute = true
-                        whatToAvoid = RouteTo.WhatToAvoid.JustEnemies,
+                        whatToAvoid = RouteTo.WhatToAvoid.All, // was enemies..
                     )
                 )
             )
@@ -406,7 +407,7 @@ class PlanBuilder(
     val level3TriggerDoorThen: PlanBuilder
         get() {
             val nextLoc = lastMapLoc.left
-            add(nextLoc, level3TriggerDoorTrapThenDo(moveTo(nextLoc)))
+            add(nextLoc, level3TriggerDoorTrapThenDo(moveTo(nextLoc, ignoreProjectiles = true)))
             return this
         }
     val level3BombThenRight: PlanBuilder
@@ -982,8 +983,8 @@ class PlanBuilder(
         add(nextLoc, killAndMove(moveTo(nextLoc)))
     }
 
-    private fun moveTo(next: Int, allowBlocking: Boolean = true): MoveTo =
-        MoveTo(lastMapLoc, mapCell(next), level, ignoreProjectiles = false, allowBlocking = allowBlocking)
+    private fun moveTo(next: Int, allowBlocking: Boolean = true, ignoreProjectiles: Boolean = false): MoveTo =
+        MoveTo(lastMapLoc, mapCell(next), level, ignoreProjectiles = ignoreProjectiles, allowBlocking = allowBlocking)
 
     private fun add(loc: MapLoc, action: Action): PlanBuilder {
         lastMapLoc = loc

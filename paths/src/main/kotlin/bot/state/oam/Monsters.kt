@@ -39,12 +39,16 @@ data class DirectionMap(
 ) {
     val all = up + down + left + right
 
-    fun dirFront(agent: Agent): Direction? =
-        when {
-            agent.tile in up -> Direction.Up
-            agent.tile in down -> Direction.Down
-            agent.tile in left -> Direction.Left
-            agent.tile in right -> Direction.Right
+    fun dirFront(agent: Agent): Direction? = dirFront(agent.tile)
+
+    fun inAny(tile: Int): Boolean = tile in all
+
+    fun dirFront(tile: Int): Direction? =
+        when (tile) {
+            in up -> Direction.Up
+            in down -> Direction.Down
+            in left -> Direction.Left
+            in right -> Direction.Right
             else -> null
         }
 }
