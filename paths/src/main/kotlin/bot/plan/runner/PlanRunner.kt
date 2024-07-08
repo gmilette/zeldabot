@@ -36,10 +36,19 @@ class PlanRunner(private val makePlan: PlanMaker,
     private var runCt = 0
     private var runSetupCt = 0
 
-    init {
-        if (experiment != "default") {
-            runIt(experiment)
+    private fun runFrom(exp: String) {
+        if (exp.contains("_") || exp.contains(",")) {
+            val split = exp.split("_", ",")
+            val mapLoc = split.first().toInt()
+            val level = split[1].toInt()
+            runLoc(true, mapLoc, level)
+        } else {
+            runIt(exp)
         }
+    }
+
+    init {
+        runFrom(experiment)
 //        if (runCt % 10 == 0) {
 //            experiments.experimentIncrement++
 //        }
@@ -50,9 +59,9 @@ class PlanRunner(private val makePlan: PlanMaker,
 //        runIt("level3plan")
 //        runLoc(true,91, 3) // lev 3 sword guys
     //
-        val loc: MapLoc = 64+16+1+16
+//        val loc: MapLoc = 64+16+1+16
 
-        runLoc(true,loc, 4) // near start
+//        runLoc(true,loc, 4) // near start
         // pancake
 //        runLoc(true,18, 4) // dragon
 //        runLoc(true,120, 0) // near start
