@@ -13,9 +13,9 @@ class Experiments(private val masterPlan: PlanMaker) {
 //    var current: Experiment = default
 //        get() = evaluation.getOrElse(0) { default }
 
-    var current: Experiment = default
-//        get() = experiments["level2rhino"] ?: default
-      get() = experiments["level3plan"] ?: evaluation["level3plan"] ?: default
+//    var current: Experiment = default
+////        get() = experiments["level2rhino"] ?: default
+//      get() = experiments["level3plan"] ?: evaluation["level3plan"] ?: default
 
     var experimentIncrement = 0
 
@@ -50,7 +50,18 @@ class Experiments(private val masterPlan: PlanMaker) {
             addEquipment = false,
             sword = ZeldaItem.WhiteSword)
 
+        val four = Experiment("level4", "level4.save",
+            { masterPlan().getPlanPhase(Phases.lev(4)) },
+            addEquipment = false,
+            sword = ZeldaItem.WhiteSword,
+            hearts = 8,
+            boomerang = ZeldaItem.Boomerang,
+            ring = ZeldaItem.BlueRing,
+            shield = true
+            )
+
         evaluation = listOf(
+            four.copy(name = "level4plan", hearts = 8, bombs = 4, keys = 2),
             three.copy(name = "level3plan", hearts = 7, bombs = 4, boomerang = ZeldaItem.Boomerang, shield = true, ring = ZeldaItem.BlueRing),
             // go straight to level1
             // should have 0 bombs though
@@ -118,7 +129,5 @@ class Experiments(private val masterPlan: PlanMaker) {
         val segment = PlanSegment("phase", "set", action.toList())
         return MasterPlan(listOf(segment))
     }
-
-    fun ex(name: String) = experiments[name] ?: default
 }
 

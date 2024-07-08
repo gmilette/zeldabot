@@ -11,7 +11,10 @@ import java.io.File
 
 typealias PlanMaker = () -> MasterPlan
 
-class PlanRunner(private val makePlan: PlanMaker, private val api: API) {
+class PlanRunner(private val makePlan: PlanMaker,
+                 private val api: API,
+                 private val experiment: String = "default"
+) {
     var action: Action? = null
         private set
     lateinit var runLog: RunActionLog
@@ -20,20 +23,23 @@ class PlanRunner(private val makePlan: PlanMaker, private val api: API) {
 
     private val experiments = Experiments(makePlan)
 
-    fun getExp(name: String): Experiment {
+    private fun getExp(name: String): Experiment {
         return experiments.experiments[name] ?: experiments.evaluation[name] ?: experiments.default
     }
 
     //    private val target = "afterLev4"
 //    private val target = "level7"
     private val target: Experiment
-        get() = experiments.current
+        get() = getExp(experiment)
 //        get() = experiments.evaluation["level2Bomb6wws"] ?: experiments.current
 
     private var runCt = 0
     private var runSetupCt = 0
 
     init {
+        if (experiment != "default") {
+            runIt(experiment)
+        }
 //        if (runCt % 10 == 0) {
 //            experiments.experimentIncrement++
 //        }
@@ -41,10 +47,14 @@ class PlanRunner(private val makePlan: PlanMaker, private val api: API) {
 //        runIt("level2rhino")
 //        runIt("level25h")
 //        runIt("all")
-        runIt("level3plan")
+//        runIt("level3plan")
 //        runLoc(true,91, 3) // lev 3 sword guys
+    //
+        val loc: MapLoc = 64+16+1+16
 
-    //        runLoc(true,94, 0) // near start
+        runLoc(true,loc, 4) // near start
+        // pancake
+//        runLoc(true,18, 4) // dragon
 //        runLoc(true,120, 0) // near start
 //        runLoc(true,10, 0) // near start
 //        runLoc(true,26, 0) // near start

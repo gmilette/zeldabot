@@ -30,12 +30,17 @@ import kotlinx.coroutines.launch
 import ui.FollowView
 import util.d
 
-fun main() = application {
+fun main(vararg args: String) = application {
     Window(
         onCloseRequest = ::exitApplication,
         state = WindowState(width = 800.dp, height = 500.dp),
         title = "Zelda"
     ) {
+        d { "ARGS! $args"}
+        for (arg in args) {
+            d { " ARG: $arg"}
+        }
+        ZeldaBot.experiment = args.getOrNull(0)
         val model = remember { ZeldaModel() }
         val debugView = remember { mutableStateOf(true) }
         if (debugView.value) {

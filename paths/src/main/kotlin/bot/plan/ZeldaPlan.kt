@@ -479,7 +479,6 @@ object ZeldaPlan {
     private val level1: PlanBuilder.() -> Unit
         get() = {
             add {
-                phase("Destroy level 1")
                 inLevel
                 startAt(LevelStartMapLoc.lev(1))
                 objective(ZeldaItem.Bow)

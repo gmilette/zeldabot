@@ -163,6 +163,7 @@ object Phases {
     val level3 = "level 3"
     val level3After = "level 3"
     val afterLevel6 = "after level 6"
+    val level4 = "level 4"
     val level5 = "level 5"
     val level6 = "level 6"
     val level7 = "level 7"
@@ -170,6 +171,7 @@ object Phases {
     val level9 = "level 9"
     val level9before = "level 9before"
     val ladderHeart = "ladder heart"
+    fun lev(level: Int) = "Destroy level $level"
 
     object Segment {
         val lev2Boss = "kill boss"

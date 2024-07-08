@@ -87,6 +87,7 @@ class PlanBuilder(
     infix fun Int.using(levelActions: PlanBuilder.() -> Unit) {
         val level = this
         add {
+            phase(Phases.lev(level))
             includeLevelObjPlan(level, levelActions)
             inOverworld
         }

@@ -84,7 +84,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     private var setEquipmentCt = 200
     private var frameStateUpdater: FrameStateUpdater = FrameStateUpdater(api, hyrule)
     private val cheater = Cheater(api, frameStateUpdater)
-    val plan = PlanRunner(::makePlan, api)
+    val plan = PlanRunner(::makePlan, api, ZeldaBot.experiment ?: "default")
 
     private fun makePlan(): MasterPlan {
         // make sure to reset any state here
@@ -222,6 +222,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         var invincible: Boolean = false
         var maxLife: Boolean = false
         var fixLocationToZapper: Boolean = false
+        var experiment: String? = null
 
         @JvmStatic
         fun startIt(monitor: ZeldaMonitor): ZeldaBot {
