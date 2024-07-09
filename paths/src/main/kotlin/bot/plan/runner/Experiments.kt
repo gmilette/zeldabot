@@ -46,7 +46,7 @@ class Experiments(private val masterPlan: PlanMaker) {
             sword = ZeldaItem.WoodenSword)
 
         val three = Experiment("level3", "level3.save",
-            { masterPlan().getPlanPhase("Destroy level 3") },
+            { masterPlan().getPlanPhase(Phases.lev(3)) },
             addEquipment = false,
             sword = ZeldaItem.WhiteSword)
 

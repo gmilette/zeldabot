@@ -36,19 +36,21 @@ class PlanRunner(private val makePlan: PlanMaker,
     private var runCt = 0
     private var runSetupCt = 0
 
-    private fun runFrom(exp: String) {
+    private fun runFrom() {
+        val exp = experiment
+        d { " run from $exp"}
         if (exp.contains("_") || exp.contains(",")) {
             val split = exp.split("_", ",")
             val mapLoc = split.first().toInt()
             val level = split[1].toInt()
-            runLoc(true, mapLoc, level)
+            runLoc(mapLoc, level)
         } else {
             runIt(exp)
         }
     }
 
     init {
-        runFrom(experiment)
+        runFrom()
 //        if (runCt % 10 == 0) {
 //            experiments.experimentIncrement++
 //        }
@@ -129,10 +131,11 @@ class PlanRunner(private val makePlan: PlanMaker,
     }
 
     private fun rerun() {
-        runIt(load = true, ex = target)
+        runFrom()
+//        runIt(load = true, ex = target)
     }
 
-    private fun runLoc(load: Boolean = false, mapLoc: Int, level: Int = 0) {
+    private fun runLoc(mapLoc: Int, level: Int = 0) {
         val plan = makePlan()
 //        val ex = experiments.ex(name)
 //        d { "  run experiment ${ex.name}"}
@@ -142,7 +145,7 @@ class PlanRunner(private val makePlan: PlanMaker,
 
         val root = "mapstate/mapstate_${level}_${mapLoc}.save"
 
-        d { " map state $root"}
+        d { " run loc $mapLoc lev $level for map $root"}
         startPath = root
         action = withDefaultAction(masterPlan.skipToLocation(mapLoc, level))
         runLog = RunActionLog("mapstate_${level}_${mapLoc}", target)

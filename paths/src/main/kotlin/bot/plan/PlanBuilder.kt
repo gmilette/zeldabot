@@ -87,7 +87,6 @@ class PlanBuilder(
     infix fun Int.using(levelActions: PlanBuilder.() -> Unit) {
         val level = this
         add {
-            phase(Phases.lev(level))
             includeLevelObjPlan(level, levelActions)
             inOverworld
         }
@@ -332,6 +331,7 @@ class PlanBuilder(
     val killLev4Dragon: PlanBuilder
         get() {
             add(lastMapLoc, KillAll(needLongWait = false,
+                whatToAvoid = RouteTo.WhatToAvoid.JustEnemies,
                 targetOnly = listOf(dragon4Head, dragonHead, dragonHead2)))
             return this
         }

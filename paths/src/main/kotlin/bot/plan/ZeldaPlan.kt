@@ -82,7 +82,7 @@ object ZeldaPlan {
                 obj(Dest.Heart.fireHeart)
                 obj(Dest.Secrets.fire30GreenSouth)
             }
-            phase("Destroy level 3")
+            phase(Phases.lev(3))
             3 using level3
             phase(Phases.level3After)
             val forestNextToLevel3: MapLoc = 115
@@ -749,6 +749,7 @@ object ZeldaPlan {
         val builder = factory.make(Phases.reenterLevel2)
 
         return builder {
+            phase(Phases.lev(2))
             lev(2)
             startAt(LevelStartMapLoc.lev(2))
             seg("go to boomerang")
@@ -775,7 +776,7 @@ object ZeldaPlan {
 
     private val level3: PlanBuilder.() -> Unit
         get() = {
-            phase("Destroy level 3")
+            phase(Phases.lev(3))
             lev(3)
             startAt(LevelStartMapLoc.lev(3))
             seg("grab key")
@@ -832,7 +833,7 @@ object ZeldaPlan {
 
 private val level4: PlanBuilder.() -> Unit
     get() = {
-        phase("Destroy level 4")
+        phase(Phases.lev(4))
         lev(4)
         startAt(113)
         seg("go go go")
