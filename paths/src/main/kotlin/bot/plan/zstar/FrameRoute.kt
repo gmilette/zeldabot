@@ -1,12 +1,8 @@
 package bot.plan.zstar
 
-import bot.state.FramePoint
-import bot.state.isTopRightCorner
-import bot.state.map.Direction
-import bot.state.map.opposite
-import bot.state.map.pointModifier
-import bot.state.onHighway
-import bot.state.onHighwayVertex
+import bot.plan.action.PrevBuffer
+import bot.state.*
+import bot.state.map.*
 import util.d
 import kotlin.math.min
 
@@ -95,6 +91,70 @@ class FrameRoute(val path: List<FramePoint>) {
             }
         }
         return this
+    }
+
+    fun cornering(linkPt: FramePoint, linkDir: Direction?): FrameRoute {
+        d { "VERTEX: cornering $linkPt $linkDir" }
+        if (pathStack.size < 4) return this
+        val linkDir = linkDir ?: return this
+
+        // if there is more than one direction
+        // pick the second direction
+        val dirs = PrevBuffer<Direction>(size = 4)
+        dirs.add(linkDir)
+        pathStack.take(4).zipWithNext().forEach { (first, second) ->
+            println("Pair: $first, $second")
+            dirs.add(first.dirTo(second))
+        }
+//        pathStack.take(4).forEachIndexed { index, pt ->
+//            if (index == 0) {
+//                dirs.add(linkDir)
+//            } else {
+//                dirs.add(prev.dirTo(pt))
+//            }
+//            prev = pt
+//        }
+
+        if (dirs.allSame()) {
+            d { "all same no change " }
+        } else {
+            dirs.buffer.firstOrNull { linkDir.perpendicularTo(it) }?.let { dir ->
+                val modifier = linkDir.pointModifier(1)
+                var secondPoint = modifier(linkPt)
+                d { "corner go: $dir to $secondPoint" }
+                val ptList = mutableListOf<FramePoint>()
+                repeat(3) {
+                    ptList.add(secondPoint)
+                    secondPoint = modifier(secondPoint)
+                }
+                pathStack.addAll(1, ptList)
+            }
+        }
+        return this
+    }
+
+    fun decideDirection(linkPt: FramePoint, linkDir: Direction?): Direction? {
+        d { "VERTEX: cornering $linkPt $linkDir" }
+        if (pathStack.size < 4) return null
+        val linkDir = linkDir ?: return null
+
+        // if there is more than one direction
+        // pick the second direction
+        val dirs = PrevBuffer<Direction>(size = 4)
+        dirs.add(linkDir)
+        pathStack.take(4).zipWithNext().forEach { (first, second) ->
+            println("Pair: $first, $second")
+            dirs.add(first.dirTo(second))
+        }
+
+        return if (dirs.allSame()) {
+            d { "all same no change " }
+            null
+        } else {
+            dirs.buffer.firstOrNull { linkDir.perpendicularTo(it) }.also {
+                d { "moving corner in direction $it" }
+            }
+        }
     }
 
     fun cornerSoon(linkPt: String, linkDir: Direction?): FrameRoute {

@@ -868,6 +868,7 @@ private val level4: PlanBuilder.() -> Unit
         bombRightExactly
         //skip key that is up
         bombRight
+        switchToBoomerang
         kill
         seg("push near")
         pushActionThenGoRight(InLocations.Push.moveLeftOfTwo)

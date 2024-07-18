@@ -255,7 +255,7 @@ data class SpriteData(
             || ( (tile == 164) && point.y == 187)
             || point.y >= 187 // this keeps coming up, make sense ,because we translated it 61
             || point.y < 0
-            || (combine && (tile == rhinoTail || tile == rhinoMid))
+            || (!combine && (tile == rhinoTail || tile == rhinoMid))
 
     val isLoot = !hidden && (EnemyGroup.loot.contains(tile) || EnemyGroup.lootPairs.contains(tilePair))
 

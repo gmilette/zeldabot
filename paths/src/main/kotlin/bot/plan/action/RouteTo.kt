@@ -385,7 +385,7 @@ class RouteTo(val params: Param = Param()) {
 //                    finishWithinStrikingRange = param.finishWithinStrikingRange
                 )
             )
-        ) //.cornerSoon(state.link.oneStr, state.frameState.link.dir)
+        ) //.cornering(state.link, state.frameState.link.dir) //.cornerSoon(state.link.oneStr, state.frameState.link.dir)
 
 
 //        route?.path?.lastOrNull()?.let { lastPt ->
@@ -400,10 +400,12 @@ class RouteTo(val params: Param = Param()) {
         if (nextPoint1.isZero) {
             d { "NO ROUTE" }
         }
-        d { " next is $nextPoint1 of ${route?.numPoints ?: 0}" }
         route?.next5()
         planCount = 0
-        return nextPoint1
+        val pointDir = nextPoint1.direction ?:
+            route?.decideDirection(linkPt, state.frameState.link.dir)
+        d { " next is $nextPoint1 of ${route?.numPoints ?: 0}" }
+        return nextPoint1.copy(direction = pointDir)
     }
 
     private fun exitOfScreen(linkPt: FramePoint, to: List<FramePoint>): GamePad {
