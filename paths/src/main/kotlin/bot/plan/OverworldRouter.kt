@@ -130,12 +130,11 @@ class OverworldRouter(private val hyrule: Hyrule) {
 //            shortestPath = DijkstraShortestPath(graph)
         shortestPath = FloydWarshallShortestPaths(graph)
 
-        val path = shortestPath.getPath(hyrule.getMapCell(3.levToMap), hyrule.getMapCell(1.levToMap))
-
-        d { " path ${path?.length}" }
-        for (mapCell in path.vertexList) {
-            d { "${mapCell.mapLoc}" }
-        }
+//        val path = shortestPath.getPath(hyrule.getMapCell(3.levToMap), hyrule.getMapCell(1.levToMap))
+//        d { " path ${path?.length}" }
+//        for (mapCell in path.vertexList) {
+//            d { "${mapCell.mapLoc}" }
+//        }
     }
 
     fun correct(path: List<MapCell>): List<MapCell> {

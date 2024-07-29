@@ -803,7 +803,7 @@ class PlanBuilder(
         val opposite = from.opposite()
         goTo(burnFrom)
         // turn in proper direction
-        d { " burn from $burnFrom to $to op $opposite"}
+//        d { " burn from $burnFrom to $to op $opposite"}
         goIn(opposite.toGamePad(), 4)
 
         // execute burn

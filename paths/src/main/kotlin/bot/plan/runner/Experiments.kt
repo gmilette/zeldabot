@@ -60,7 +60,58 @@ class Experiments(private val masterPlan: PlanMaker) {
             shield = true
             )
 
-        evaluation = listOf(
+    val five = Experiment("level5", "level5_start_in.save",
+        { masterPlan().getPlanPhase(Phases.lev(5)) },
+        addEquipment = false,
+        sword = ZeldaItem.WhiteSword,
+        hearts = 9,
+        boomerang = ZeldaItem.Boomerang,
+        ring = ZeldaItem.BlueRing,
+        shield = true
+    )
+
+    val six = Experiment("level6", "level6_start_in.save",
+        { masterPlan().getPlanPhase(Phases.lev(6)) },
+        addEquipment = false,
+        sword = ZeldaItem.MagicSword,
+        hearts = 10,
+        boomerang = ZeldaItem.Boomerang,
+        ring = ZeldaItem.BlueRing,
+        shield = true
+    )
+
+    val seven = Experiment("level7", "level7_start.save",
+        { masterPlan().getPlanPhase(Phases.lev(7)) },
+        addEquipment = false,
+        sword = ZeldaItem.MagicSword,
+        hearts = 13,
+        boomerang = ZeldaItem.Boomerang,
+        ring = ZeldaItem.BlueRing,
+        shield = true
+    )
+
+    val eight = Experiment("level8", "level8_start.save",
+        { masterPlan().getPlanPhase(Phases.lev(8)) },
+        addEquipment = false,
+        sword = ZeldaItem.MagicSword,
+        hearts = 12,
+        boomerang = ZeldaItem.Boomerang,
+        ring = ZeldaItem.BlueRing,
+        shield = true
+    )
+
+    val nine = Experiment("level9", "level9_start.save",
+        { masterPlan().getPlanPhase(Phases.lev(8)) },
+        addEquipment = false,
+        sword = ZeldaItem.WhiteSword,
+        hearts = 9,
+        boomerang = ZeldaItem.Boomerang,
+        ring = ZeldaItem.BlueRing,
+        shield = true
+    )
+
+    evaluation = listOf(
+            five.copy(name = "level5plan", bombs = 4, keys = 2),
             four.copy(name = "level4plan", hearts = 8, bombs = 4, keys = 2),
             three.copy(name = "level3plan", hearts = 7, bombs = 4, boomerang = ZeldaItem.Boomerang, shield = true, ring = ZeldaItem.BlueRing),
             // go straight to level1

@@ -5,8 +5,6 @@ import bot.plan.runner.MasterPlan
 import bot.state.*
 import bot.state.map.*
 import bot.state.map.destination.Dest
-import bot.state.map.destination.DestType
-import bot.state.map.destination.EntryType
 import bot.state.map.destination.ZeldaItem
 import bot.state.map.level.LevelMapCellsLookup
 import bot.state.map.level.LevelSpecBuilder
@@ -124,15 +122,12 @@ object ZeldaPlan {
             // something like this
 //            goToAtPoint(33, FramePoint(11.grid, 3.grid))
             phase("go to level 5")
-            obj(Dest.level(5))
-            includeLevelPlan(levelPlan5(factory))
+            5 using level5
             phase("gear for level 6")
             obj(ZeldaItem.PowerBracelet, itemLoc = Objective.ItemLoc.None)
             goToAtPoint(33, FramePoint(11.grid, 3.grid))
             obj(ZeldaItem.MagicSword)
-
-            obj(Dest.level(6))
-            includeLevelPlan(levelPlan6(factory))
+            6 using level6
 
             phase("Gear for level 8")
 //            obj(Dest.Shop.potionShopWest, itemLoc = Dest.Shop.ItemLocs.redPotion)
@@ -142,19 +137,14 @@ object ZeldaPlan {
 //            obj(Dest.Secrets.level2secret10)
             phase(Phases.afterLevel6)
             // grab level2 boomerang
-            obj(Dest.level(2))
-            includeLevelPlan(levelPlan2Boomerang(factory))
-            obj(Dest.level(8))
-            includeLevelPlan(levelPlan8(factory), Direction.Left)
+            2 using levelPlan2Boomerang
+            8 using level8
 
             obj(Dest.Shop.blueRing, itemLoc = Dest.Shop.ItemLocs.bait, position = true)
-            obj(Dest.level(7))
-            // link starts outside the lake, no need to move down
-            includeLevelPlan(levelPlan7(factory), consume = false)
+            7 using level7
 
             phase("go to level 9")
-            obj(Dest.level(9))
-            includeLevelPlan(levelPlan9(factory))
+            9 using level9
 
             // junk
             left
@@ -200,9 +190,11 @@ object ZeldaPlan {
             obj(Dest.Secrets.forest10Mid)
             obj(Dest.Secrets.bomb30Start)
             ringLevels()
-            arrowHearts()
+            arrowAndHearts()
 
             // then potion?
+            phase("level 5 sequence")
+            level5sequence()
         }
     }
 
@@ -290,7 +282,7 @@ object ZeldaPlan {
         }
     }
 
-    private fun PlanBuilder.arrowHearts() {
+    private fun PlanBuilder.arrowAndHearts() {
         add {
             obj(Dest.Shop.arrowShop)
             phase(Phases.ladderHeart)
@@ -366,21 +358,6 @@ object ZeldaPlan {
         )
     }
 
-    private fun testPlan(factory: PlanInputs): MasterPlan {
-        val builder = factory.make("begin!")
-        return builder {
-            startAt(InLocations.Overworld.start)
-            obj(Dest.Shop.candleShopMid)
-            phase("get magic shield")
-            obj(Dest.Shop.westTreeShopNearWater)
-            phase("get heart and cash")
-            obj(Dest.Heart.fireHeart)
-            obj(Dest.Secrets.fire30GreenSouth)
-            obj(Dest.level(2))
-            includeLevelPlan(levelPlan2Boomerang(factory))
-        }
-    }
-
     private fun masterPlan(
         factory: PlanInputs, start: PlanBuilder.() -> Unit,
         level2Later: Boolean = true,
@@ -428,52 +405,48 @@ object ZeldaPlan {
             }
             obj(Dest.Heart.bombHeartSouth)
             obj(Dest.Secrets.forest100South)
-            arrowHearts()
+            arrowAndHearts()
             // go down and make sure to walk off.
             // something like this
 //            goToAtPoint(33, FramePoint(11.grid, 3.grid))
-            phase("go to level 5")
-            obj(Dest.level(5))
-            includeLevelPlan(levelPlan5(factory))
-            phase("gear for level 6")
-            // i think this is not needed,  maybe it's after level5?
+        }
+    }
+
+    private fun PlanBuilder.level5sequence(endLevel2BoomerangPickup: Boolean = true) {
+        phase("go to level 5")
+        5 using level5
+        phase("gear for level 6")
+        // i think this is not needed,  maybe it's after level5?
 //            routeTo(83) // position so we don't go through the 100 secret forest and get stuck
 //
-            obj(ZeldaItem.PowerBracelet, itemLoc = Objective.ItemLoc.None)
+        obj(ZeldaItem.PowerBracelet, itemLoc = Objective.ItemLoc.None)
 //            // make up and objective to walk to high up
 ////            routeTo(32)
-            goToAtPoint(33, FramePoint(11.grid, 3.grid))
+        goToAtPoint(33, FramePoint(11.grid, 3.grid))
 //            // hard to get into position when its passable, maybe position it
-            obj(ZeldaItem.MagicSword)
+        obj(ZeldaItem.MagicSword)
 //
-            obj(Dest.level(6))
-            includeLevelPlan(levelPlan6(factory))
+        6 using level6
 
-            phase("Gear for level 8")
+        phase("Gear for level 8")
 //            obj(Dest.Shop.potionShopWest, itemLoc = Dest.Shop.ItemLocs.redPotion)
 
-            // is the 10 secret necessary, eh
+        // is the 10 secret necessary, eh
 //            routeTo(78-16)
 //            obj(Dest.Secrets.level2secret10)
-            phase(Phases.afterLevel6)
-            // grab level2 boomerang
-            if (endLevel2BoomerangPickup) {
-                obj(Dest.level(2))
-                includeLevelPlan(levelPlan2Boomerang(factory))
-            }
-            obj(Dest.level(8))
-            includeLevelPlan(levelPlan8(factory), Direction.Left)
-
-            obj(Dest.Shop.blueRing, itemLoc = Dest.Shop.ItemLocs.bait, position = true)
-            obj(Dest.level(7))
-            // link starts outside the lake, no need to move down
-            includeLevelPlan(levelPlan7(factory), consume = false)
-
-            phase("go to level 9")
-            obj(Dest.level(9))
-            includeLevelPlan(levelPlan9(factory))
-            end()
+        phase(Phases.afterLevel6)
+        // grab level2 boomerang
+        if (endLevel2BoomerangPickup) {
+            2 using levelPlan2Boomerang
         }
+        8 using level8
+
+        obj(Dest.Shop.blueRing, itemLoc = Dest.Shop.ItemLocs.bait, position = true)
+        7 using level7
+
+        phase("go to level 9")
+        9 using level9
+        end()
     }
 
     private val level1: PlanBuilder.() -> Unit
@@ -745,11 +718,9 @@ object ZeldaPlan {
         }
     }
 
-    private fun levelPlan2Boomerang(factory: PlanInputs): MasterPlan {
-        val builder = factory.make(Phases.reenterLevel2)
-
-        return builder {
-            phase(Phases.lev(2))
+    private val levelPlan2Boomerang: PlanBuilder.() -> Unit
+        get() = {
+            phase(Phases.reenterLevel2)
             lev(2)
             startAt(LevelStartMapLoc.lev(2))
             seg("go to boomerang")
@@ -829,7 +800,6 @@ object ZeldaPlan {
             upm
             getTri
         }
-}
 
 private val level4: PlanBuilder.() -> Unit
     get() = {
@@ -880,9 +850,9 @@ private val level4: PlanBuilder.() -> Unit
         getTri
     }
 
-private fun levelPlan5(factory: PlanInputs): MasterPlan {
-    val builder = factory.make(Phases.level5)
-    return builder {
+private val level5: PlanBuilder.() -> Unit
+    get() = {
+        phase(Phases.lev(5))
         lev(5)
         startAt(LevelStartMapLoc.lev(5))
         seg("move to level 5")
@@ -953,11 +923,10 @@ private fun levelPlan5(factory: PlanInputs): MasterPlan {
         upm
         getTri
     }
-}
 
-private fun levelPlan6(factory: PlanInputs): MasterPlan {
-    val builder = factory.make(Phases.level6)
-    return builder {
+private val level6: PlanBuilder.() -> Unit
+    get() = {
+        phase(Phases.lev(6))
         lev(6)
         startAt(LevelStartMapLoc.lev(6))
         seg("move to level 6")
@@ -1025,11 +994,10 @@ private fun levelPlan6(factory: PlanInputs): MasterPlan {
         upm
         getTri
     }
-}
 
-private fun levelPlan7(factory: PlanInputs): MasterPlan {
-    val builder = factory.make(Phases.level7)
-    return builder {
+private val level7: PlanBuilder.() -> Unit
+    get() = {
+        phase(Phases.lev(7))
         lev(7)
         startAt(LevelStartMapLoc.lev(7))
         upm
@@ -1088,11 +1056,10 @@ private fun levelPlan7(factory: PlanInputs): MasterPlan {
         rightm
         getTri
     }
-}
 
-private fun levelPlan8(factory: PlanInputs): MasterPlan {
-    val builder = factory.make(Phases.level8)
-    return builder {
+private val level8: PlanBuilder.() -> Unit
+    get() = {
+        phase(Phases.lev(8))
         lev(8)
         startAt(LevelStartMapLoc.lev(8))
         seg("run past")
@@ -1151,7 +1118,6 @@ private fun levelPlan8(factory: PlanInputs): MasterPlan {
         upm
         getTri
     }
-}
 
 private fun PlanBuilder.levelPlan9PhaseRedRing() {
     this.add {
@@ -1293,13 +1259,12 @@ private fun PlanBuilder.levelPlan9PhaseGannon() {
     }
 }
 
-private fun levelPlan9(factory: PlanInputs): MasterPlan {
-    val builder = factory.make(Phases.level9)
-    return builder {
+private val level9: PlanBuilder.() -> Unit
+    get() = {
+        phase(Phases.lev(9))
         lev(9)
         levelPlan9PhaseRedRing()
         levelPlan9PhaseSilverArrow()
         levelPlan9PhaseGannon()
         end
     }
-}

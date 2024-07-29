@@ -25,14 +25,14 @@ class MasterPlan(val segments: List<PlanSegment>) {
 //        if (initialPlanSize == 0) {
 //            throw RuntimeException("Ahh")
 //        }
-        d { " created plan with $initialPlanSize actions moves $numMoves" }
+        d { " created plan with $initialPlanSize actions" }
     }
 
     fun reset() {
         justRemoved = PlanStep(PlanSegment("", "", emptyList()), EndAction())
         giant = segments.flatMap { seg -> seg.plan.map { PlanStep(seg, it) } }.toMutableList().also {
             initialPlanSize = it.size
-            d { " reset: created plan with $initialPlanSize actions moves $numMoves" }
+            d { " reset: created plan with $initialPlanSize actions" }
         }
     }
 
