@@ -40,14 +40,16 @@ object AttackActionDecider {
                 // for now
 //            x - MapConstants.halfGrid to (y + MapConstants.oneGridPoint5),
                 // this -1 should allow link to chase
-//                x to (y + longExtra) - 2,
-//                x to (y + longExtra) - 1,
+                x to (y + longExtra) - 3,
+                x to (y + longExtra) - 2,
+                x to (y + longExtra) - 1,
                 x to (y + longExtra),
                 // to do add all the points in between
                 // i don't think so
                 x + shortExtra to (y + longExtra),
-//                x + shortExtra to (y + longExtra) - 1,
-//                x + shortExtra to (y + longExtra) - 2,
+                x + shortExtra to (y + longExtra) - 1,
+                x + shortExtra to (y + longExtra) - 2,
+                x + shortExtra to (y + longExtra) - 3,
             )
         )
 
@@ -59,11 +61,13 @@ object AttackActionDecider {
 //            x - shortExtra to (y + longExtra),
                 // this -1 should allow link to chase
                 (x - longExtra) to y,
-//                (x - longExtra + 1) to y,
-//                (x - longExtra + 2) to y,
+                (x - longExtra + 1) to y,
+                (x - longExtra + 2) to y,
+                (x - longExtra + 3) to y,
                 (x - longExtra) to (y + shortExtra),
-//                (x - longExtra + 1) to (y + shortExtra),
-//                (x - longExtra + 2) to (y + shortExtra),
+                (x - longExtra + 1) to (y + shortExtra),
+                (x - longExtra + 2) to (y + shortExtra),
+                (x - longExtra + 3) to (y + shortExtra),
             )
         )
 
@@ -74,24 +78,27 @@ object AttackActionDecider {
                 // for now
                 // this -1 should allow link to chase
                 (x + longExtra) to y,
-//                (x + longExtra - 1) to y,
-//                (x + longExtra - 2) to y,
+                (x + longExtra - 1) to y,
+                (x + longExtra - 2) to y,
+                (x + longExtra - 3) to y,
                 (x + longExtra) to y + shortExtra,
-//                (x + longExtra - 1) to y + shortExtra,
-//                (x + longExtra - 2) to y + shortExtra,
+                (x + longExtra - 1) to y + shortExtra,
+                (x + longExtra - 2) to y + shortExtra,
+                (x + longExtra - 3) to y + shortExtra,
             )
         )
 
     fun FramePoint.downPoint(): List<FramePoint> =
         FramePointBuilder.hasL(
             listOf(
-                // i think these should be -1.5
-//            x to (y - longExtra) - 2,
-//            x to (y - longExtra) - 1,
+                x to (y - longExtra) - 3,
+                x to (y - longExtra) - 2,
+                x to (y - longExtra) - 1,
                 x to (y - longExtra),
                 x + shortExtra to (y - longExtra),
-//            x + shortExtra to (y - MapConstants.oneGridPoint5) - 1,
-//            x + shortExtra to (y - MapConstants.oneGridPoint5) - 2,
+                x + shortExtra to (y - longExtra) - 1,
+                x + shortExtra to (y - longExtra) - 2,
+                x + shortExtra to (y - longExtra) - 3,
             )
         )
 
