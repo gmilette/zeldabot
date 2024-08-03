@@ -932,7 +932,7 @@ private val level6: PlanBuilder.() -> Unit
         seg("move to level 6")
         left
         seg("first ghost")
-        upm // skip
+        up // capture any loot dropped, there is usually some bombs
         seg("squishies")
         up // todo grab key in center
         seg("kill bats")

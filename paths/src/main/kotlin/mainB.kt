@@ -288,7 +288,7 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
                 Text("Enemies", fontSize = 20.sp)
                 state?.enemiesInfo?.let { enemies ->
                     if (enemies.isNotEmpty()) {
-                        enemies.filter { it.state != EnemyState.Dead }.forEachIndexed { index, enemy ->
+                        enemies.sortedBy { it.point.y } .filter { it.state != EnemyState.Dead }.forEachIndexed { index, enemy ->
 //                            val tileLine = MapStatsTracker.attribFor(enemy.tile).tileStringLine()
 //                            + " " + tileLine
                             val moving = if (enemy.moving == MovingDirection.UNKNOWN_OR_STATIONARY) "" else enemy.moving.toArrow()

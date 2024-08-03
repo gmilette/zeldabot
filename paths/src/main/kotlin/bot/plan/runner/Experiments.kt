@@ -74,7 +74,7 @@ class Experiments(private val masterPlan: PlanMaker) {
         { masterPlan().getPlanPhase(Phases.lev(6)) },
         addEquipment = false,
         sword = ZeldaItem.MagicSword,
-        hearts = 10,
+        hearts = 13,
         boomerang = ZeldaItem.Boomerang,
         ring = ZeldaItem.BlueRing,
         shield = true
@@ -84,7 +84,7 @@ class Experiments(private val masterPlan: PlanMaker) {
         { masterPlan().getPlanPhase(Phases.lev(7)) },
         addEquipment = false,
         sword = ZeldaItem.MagicSword,
-        hearts = 13,
+        hearts = 14,
         boomerang = ZeldaItem.Boomerang,
         ring = ZeldaItem.BlueRing,
         shield = true
@@ -94,7 +94,7 @@ class Experiments(private val masterPlan: PlanMaker) {
         { masterPlan().getPlanPhase(Phases.lev(8)) },
         addEquipment = false,
         sword = ZeldaItem.MagicSword,
-        hearts = 12,
+        hearts = 15,
         boomerang = ZeldaItem.Boomerang,
         ring = ZeldaItem.BlueRing,
         shield = true
@@ -111,6 +111,7 @@ class Experiments(private val masterPlan: PlanMaker) {
     )
 
     evaluation = listOf(
+            six.copy(name = "level6plan", bombs = 4, keys = 4),
             five.copy(name = "level5plan", bombs = 4, keys = 2),
             four.copy(name = "level4plan", hearts = 8, bombs = 4, keys = 2),
             three.copy(name = "level3plan", hearts = 7, bombs = 4, boomerang = ZeldaItem.Boomerang, shield = true, ring = ZeldaItem.BlueRing),
