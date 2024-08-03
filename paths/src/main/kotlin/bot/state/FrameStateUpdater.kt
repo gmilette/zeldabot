@@ -69,7 +69,9 @@ class FrameStateUpdater(
         // everything gets combined to the back
         val isRhino = mapLoc == 14 && level == 2
         val oam = OamStateReasoner(isOverworld, api, mapStats, combine = !isRhino)
-        val theEnemies = oam.agents()
+        val dirLookup = DirectionByMemoryLookup(api)
+        val theEnemies = oam.agents(dirLookup)
+
         val theUncombined = oam.agentsUncombined()
         val theRaw = oam.agentsRaw()
         val linkDir = oam.direction
@@ -121,6 +123,7 @@ class FrameStateUpdater(
             mapStats.trackDecision(state.link, gamePad, skip)
         }
     }
+
 }
 
 val Boolean.intTrue: Int

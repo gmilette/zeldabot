@@ -265,6 +265,8 @@ val FramePoint.upLeftOneGrid
     get() = FramePoint(x - 16, y - 16)
 val FramePoint.upLeftOneGridALittleLess
     get() = FramePoint(x - 15, y - 16) // get within sword range, hopefully don't get hit
+fun FramePoint.dir(dir: Direction?): FramePoint =
+    this.copy(direction = dir)
 val FramePoint.up
     get() = FramePoint(x, y - 1)
 val FramePoint.up2

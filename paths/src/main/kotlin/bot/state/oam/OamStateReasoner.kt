@@ -45,8 +45,8 @@ class OamStateReasoner(
     val allDead: Boolean
         get() = alive.isEmpty()
 
-    fun agents(): List<Agent> =
-        sprites.map { it.toAgent() }
+    fun agents(lookup: DirectionByMemoryLookup): List<Agent> =
+        sprites.map { it.toAgent(lookup) }
 
     fun agentsUncombined(): List<Agent> =
         spritesUncombined.map { it.toAgent() }
@@ -55,7 +55,7 @@ class OamStateReasoner(
         spritesRaw.map { it.toAgent() }
 
     // calculate isDamaged here
-    private fun SpriteData.toAgent(): Agent {
+    private fun SpriteData.toAgent(lookup: DirectionByMemoryLookup? = null): Agent {
         val tileAttribute = tile to attribute
         val damaged = DamagedLookup.isDamaged(tile, attribute, isOverworld)
 //        val damaged = mapStatsTracker.isDamaged(tile, attribute)
@@ -78,7 +78,7 @@ class OamStateReasoner(
             }
         } else {
             // maybe calculate the dir here for alive enemies
-            DirectionLookup.getDir(tileAttribute)
+            lookup?.lookupDirection(point) ?: DirectionLookup.getDir(tileAttribute)
         }
         if (state == EnemyState.Projectile) {
             d { " Move dir for d:$damaged ${tileAttribute.toHex()} $point is ${movingDirection.toArrow()} and ${findDir.toArrow()}" }

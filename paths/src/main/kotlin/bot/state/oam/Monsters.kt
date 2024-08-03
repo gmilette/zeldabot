@@ -20,7 +20,7 @@ import bot.state.map.Direction
 // attribute 42 is hit, I think
 
 data class Monster(
-    val name: String = ""
+    val name: String = "",
     // sprite ids
     val parts:Set<Int> = setOf(0xb6, 0xb4),
     // attributes while monster is in normal state
@@ -33,7 +33,11 @@ data class Monster(
     val tile: Set<Int> = emptySet(),
     val affectedByBoomerang: Boolean = true,
     val overworld: Boolean = true
-)
+) {
+    fun inL() = this.copy(overworld = false)
+    fun immuneToB() = this.copy(affectedByBoomerang = false)
+}
+
 
 val waterMonster = Monster(tile = setOf(0x0EE0, 0x0EC0))
 
@@ -125,7 +129,7 @@ object MonstersOverworld {
     val ghini = Monster(name = "worldghost")
     val moblin = Monster(name = "arrowguy")
     val peahat = Monster(name = "spin")
-    val zora = Monster(name = "waterguy", affectedByBoomerang = false)
+    val zora = Monster(name = "waterguy").immuneToB()
 }
 
 object Monsters {
@@ -133,23 +137,23 @@ object Monsters {
         parts = setOf(0xb6, 0xb4),
         normal = setOf(),
         damaged = setOf(0x01, 0x43))
-    val wizzrobe = Monster(name = "ghost", affectedByBoomerang = false)
-    val darknut = Monster("swordguy", affectedByBoomerang = false)
-    val gel = Monster(name = "babysquishy")
-    val gibdo = Monster(name = "mummy")
-    val goriya = Monster(name = "boomerangguy")
-    val keese = Monster(name = "bat")
-    val lanmoia = Monster(name = "eyeworm")
-    val likelike = Monster(name = "pancake")
-    val manhandla = Monster(name = "star", affectedByBoomerang = false)
-    val moldorm = Monster(name = "cirleworm", affectedByBoomerang = false)
-    val patra = Monster(name = "eyecircle", affectedByBoomerang = false)
-    val polsVoice = Monster(name = "bunny", affectedByBoomerang = false)
-    val rope = Monster("fastWorm")
-    val stalfos = Monster("skeleton")
-    val vire = Monster("batparent")
-    val wallmaster = Monster("grabby")
-    val zol = Monster("squishy")
+    val wizzrobe = Monster(name = "ghost").immuneToB().inL()
+    val darknut = Monster("swordguy").immuneToB().inL()
+    val gel = Monster(name = "babysquishy").inL()
+    val gibdo = Monster(name = "mummy").inL()
+    val goriya = Monster(name = "boomerangguy").inL()
+    val keese = Monster(name = "bat").inL()
+    val lanmoia = Monster(name = "eyeworm").inL()
+    val likelike = Monster(name = "pancake").inL()
+    val manhandla = Monster(name = "star").immuneToB().inL()
+    val moldorm = Monster(name = "cirleworm").immuneToB().inL()
+    val patra = Monster(name = "eyecircle").immuneToB().inL()
+    val polsVoice = Monster(name = "bunny").immuneToB().inL()
+    val rope = Monster("fastWorm").inL()
+    val stalfos = Monster("skeleton").inL()
+    val vire = Monster("batparent").inL()
+    val wallmaster = Monster("grabby").inL()
+    val zol = Monster("squishy").inL()
 }
 
 typealias TileAttribute = Pair<Int, Int>
