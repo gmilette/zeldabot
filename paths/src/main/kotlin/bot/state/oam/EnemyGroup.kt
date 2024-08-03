@@ -275,6 +275,10 @@ object EnemyGroup {
         shopOwner2
     )
 
+    val notAffectedByBoomerang = setOf(
+        ghost
+    )
+
     val enemiesWhoMightHaveBombs = listOf(
         // side
         (0xba).toInt(),

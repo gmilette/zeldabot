@@ -42,7 +42,7 @@ object AttackLongActionDecider {
     fun shouldBoomerang(state: MapLocationState): Boolean {
         // includes loot
         val shouldShoot = state.frameState.enemies.isNotEmpty()
-        val canShoot = state.boomerangActive
+        val canShoot = state.boomerangActive && state.frameState.enemies.any { it.affectedByBoomerang() }
         val boomerangIsFlying = state.frameState.enemies.any { it.tile in EnemyGroup.boomerangs }
         val inRange by lazy { targetInLongRange(state, emptyList()) }
         d { "Shoot boomerang $shouldShoot can=$canShoot flying=$boomerangIsFlying "} // range=$inRange" }
@@ -116,7 +116,10 @@ object AttackLongActionDecider {
 //        }
 
         // should be targets
-        return state.aliveEnemies.affectedByBoomerang().firstOrNull {
+//        return state.aliveEnemies.affectedByBoomerang().firstOrNull {
+//            swordRectangle.intersect(it.point.toRect())
+//        }
+        return state.aliveEnemies.firstOrNull {
             swordRectangle.intersect(it.point.toRect())
         }
     }

@@ -930,6 +930,7 @@ private val level6: PlanBuilder.() -> Unit
         lev(6)
         startAt(LevelStartMapLoc.lev(6))
         seg("move to level 6")
+        switchToBoomerang
         left
         seg("first ghost")
         up // capture any loot dropped, there is usually some bombs
@@ -950,9 +951,10 @@ private val level6: PlanBuilder.() -> Unit
 //            killUntil(5) // leave some alive, just do some damage so bomb is successful
         bombRightExactly
         seg("go up to get wand")
+        switchToBoomerang // so i can get the pancakes
         // dont need this key
 //            kill
-//            loot // another key, this is hard though because of ladder
+//            loot // another key,  this is hard though because of ladder
         up
         up
         seg("get want")

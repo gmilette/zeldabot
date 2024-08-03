@@ -20,13 +20,19 @@ import bot.state.map.Direction
 // attribute 42 is hit, I think
 
 data class Monster(
+    val name: String = ""
     // sprite ids
     val parts:Set<Int> = setOf(0xb6, 0xb4),
     // attributes while monster is in normal state
     val normal: Set<Int> = emptySet(),
     // attributes that indicate damage
     val damaged:Set<Int> = setOf(0x01, 0x43),
-    val tile: Set<Int> = emptySet()
+    /**
+     * the tiles representing the monster
+     */
+    val tile: Set<Int> = emptySet(),
+    val affectedByBoomerang: Boolean = true,
+    val overworld: Boolean = true
 )
 
 val waterMonster = Monster(tile = setOf(0x0EE0, 0x0EC0))
@@ -110,11 +116,40 @@ val ghostDir = DirectionMapGhosts(
     ), //02, 012
 )
 
+object MonstersOverworld {
+    val armos = Monster(name = "statue")
+    val leever = Monster(name = "undergroundguy")
+    val lynel = Monster(name = "swordshooter")
+    val octorok = Monster(name = "overworldgrunt")
+    val tektite = Monster(name = "spider")
+    val ghini = Monster(name = "worldghost")
+    val moblin = Monster(name = "arrowguy")
+    val peahat = Monster(name = "spin")
+    val zora = Monster(name = "waterguy", affectedByBoomerang = false)
+}
+
 object Monsters {
     val boomerang = Monster(
         parts = setOf(0xb6, 0xb4),
         normal = setOf(),
         damaged = setOf(0x01, 0x43))
+    val wizzrobe = Monster(name = "ghost", affectedByBoomerang = false)
+    val darknut = Monster("swordguy", affectedByBoomerang = false)
+    val gel = Monster(name = "babysquishy")
+    val gibdo = Monster(name = "mummy")
+    val goriya = Monster(name = "boomerangguy")
+    val keese = Monster(name = "bat")
+    val lanmoia = Monster(name = "eyeworm")
+    val likelike = Monster(name = "pancake")
+    val manhandla = Monster(name = "star", affectedByBoomerang = false)
+    val moldorm = Monster(name = "cirleworm", affectedByBoomerang = false)
+    val patra = Monster(name = "eyecircle", affectedByBoomerang = false)
+    val polsVoice = Monster(name = "bunny", affectedByBoomerang = false)
+    val rope = Monster("fastWorm")
+    val stalfos = Monster("skeleton")
+    val vire = Monster("batparent")
+    val wallmaster = Monster("grabby")
+    val zol = Monster("squishy")
 }
 
 typealias TileAttribute = Pair<Int, Int>
