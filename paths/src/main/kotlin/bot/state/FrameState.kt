@@ -101,6 +101,12 @@ data class Inventory(
     val hasPotion: Boolean
         get() = items.contains(ZeldaItem.Potion) || items.contains(ZeldaItem.SecondPotion)
 
+    val hasFullPotion: Boolean
+        get() = items.contains(ZeldaItem.SecondPotion)
+
+    val hasLetter: Boolean
+        get() = items.contains(ZeldaItem.Letter)
+
     val percentComplete: Float
         get() = items.size.toFloat() / zeldaItemsRequired.size.toFloat()
 
