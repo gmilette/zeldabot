@@ -75,7 +75,6 @@ class SwitchToItemConditionally(private val inventoryPosition: Int = Inventory.S
 
     private val positionShoot = OrderedActionSequence(switchSequence)
 
-
     override fun complete(state: MapLocationState): Boolean {
         return (positionShoot.done || startedWithItem).also { d { "SwitchToItemConditionally complete $it" } }
     }
@@ -88,7 +87,7 @@ class SwitchToItemConditionally(private val inventoryPosition: Int = Inventory.S
     private var startedWithItem = false
 
     override fun nextStep(state: MapLocationState): GamePad {
-        d {"SwitchToItemConditionallyZ ${state.frameState.inventory.selectedItem} complete ${complete(state)} positionShoot ${positionShoot.stepName}"}
+        d {"SwitchToItemConditionallyZ selected: ${state.frameState.inventory.selectedItem} complete ${complete(state)} positionShoot ${positionShoot.stepName}"}
         return if (firstStep && state.frameState.inventory.selectedItem == inventoryPosition) {
             d {"Already have"}
             startedWithItem = true

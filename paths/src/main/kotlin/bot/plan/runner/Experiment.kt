@@ -12,6 +12,7 @@ data class Experiment(
     val bombs: Int = 0,
     val shield: Boolean = false,
     val keys: Int = 0,
+    val potion: Boolean = false,
     val boomerang: ZeldaItem = ZeldaItem.None,
     val addEquipment: Boolean = false,
     val startAt: Int = 52,

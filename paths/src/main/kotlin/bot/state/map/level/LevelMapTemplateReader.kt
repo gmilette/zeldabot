@@ -42,6 +42,7 @@ class LevelMapTemplateReader {
         lev_water_line_path,
         lev_water_circle,
         lev_water_circle_path,
+        lev_water_circle_path_up_down,
         lev_water_line_right,
         lev_water_line_right_path,
         lev_triple_line,

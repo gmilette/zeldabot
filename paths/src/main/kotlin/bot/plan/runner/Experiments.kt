@@ -77,7 +77,8 @@ class Experiments(private val masterPlan: PlanMaker) {
         hearts = 13,
         boomerang = ZeldaItem.Boomerang,
         ring = ZeldaItem.BlueRing,
-        shield = true
+        shield = true,
+        potion = true
     )
 
     val seven = Experiment("level7", "level7_start.save",
@@ -87,7 +88,8 @@ class Experiments(private val masterPlan: PlanMaker) {
         hearts = 14,
         boomerang = ZeldaItem.Boomerang,
         ring = ZeldaItem.BlueRing,
-        shield = true
+        shield = true,
+        potion = true
     )
 
     val eight = Experiment("level8", "level8_start.save",
@@ -97,7 +99,8 @@ class Experiments(private val masterPlan: PlanMaker) {
         hearts = 15,
         boomerang = ZeldaItem.Boomerang,
         ring = ZeldaItem.BlueRing,
-        shield = true
+        shield = true,
+        potion = true
     )
 
     val nine = Experiment("level9", "level9_start.save",

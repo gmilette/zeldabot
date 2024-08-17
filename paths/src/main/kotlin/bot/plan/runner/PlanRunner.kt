@@ -201,6 +201,7 @@ class PlanRunner(private val makePlan: PlanMaker,
         }
         manipulator.setBoomerang(ex.boomerang)
         manipulator.setKeys(ex.keys)
+        manipulator.setPotion(ex.potion)
     }
 
     private fun withDefaultAction(action: Action) = moveHistoryAttackAction(action)

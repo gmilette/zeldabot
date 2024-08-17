@@ -27,7 +27,11 @@ fun moveHistoryAttackAction(wrapped: Action): Action {
         }
     }
 
-    return combinedAction
+    val potionDecision = DecisionAction(UsePotion(), combinedAction) {
+        PotionUsageReasoner.shouldUsePotion(it.frameState)
+    }
+
+    return potionDecision
 }
 
 private class MinDistTotalFramesCount {

@@ -930,15 +930,20 @@ private val level6: PlanBuilder.() -> Unit
         lev(6)
         startAt(LevelStartMapLoc.lev(6))
         seg("move to level 6")
-        switchToBoomerang
+//        switchToBoomerang
         left
         seg("first ghost")
+        switchToBoomerang
         up // capture any loot dropped, there is usually some bombs
+        usePotionIfNeed()
         seg("squishies")
+        usePotionIfNeed()
         up // todo grab key in center
         seg("kill bats")
+        usePotionIfNeed()
         // have to kill them to go up
         kill // can't there too many fireballs, just move on
+        usePotionIfNeed()
         // get key after kill, not needed because kill gets loot
 //            goTo(FramePoint(8.grid, 5.grid))
         up

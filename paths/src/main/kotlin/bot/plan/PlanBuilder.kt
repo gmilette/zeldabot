@@ -895,6 +895,10 @@ class PlanBuilder(
         return this
     }
 
+    fun usePotionIfNeed() {
+        add(lastMapLoc, UsePotion())
+    }
+
     fun goInConsume(dir: GamePad = GamePad.MoveUp, num: Int): PlanBuilder {
         add(lastMapLoc, GoInConsume(num, dir))
         return this

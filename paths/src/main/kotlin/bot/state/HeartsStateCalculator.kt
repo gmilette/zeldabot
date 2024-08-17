@@ -110,8 +110,12 @@ class HeartsStateCalculator(private val inventory: Inventory) {
         return damage == 0.0 && containers == full
     }
 
+    fun full(state: FrameState): Boolean {
+        return full(state.inventory.inventoryItems.whichRing())
+    }
+
     fun full(state: MapLocationState): Boolean {
-        return full(state.frameState.inventory.inventoryItems.whichRing())
+        return full(state.frameState)
     }
 
     fun full(ring: ZeldaItem = ZeldaItem.None): Boolean {

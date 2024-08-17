@@ -102,6 +102,11 @@ class StateManipulator(
         api.writeCPU(Addresses.numKeys, num)
     }
 
+    fun setPotion(add: Boolean) {
+        // set to both potions
+        api.writeCPU(Addresses.hasPotion, if (add) 2 else 0)
+    }
+
     fun setBoomerang(item: ZeldaItem) {
         d { " set boomerang $item"}
         when (item) {
