@@ -129,7 +129,7 @@ class RouteTo(val params: Param = Param()) {
     ): GamePad {
         val canAttack = param.allowAttack && (param.useB || state.frameState.canUseSword)
         val attackPossible by lazy { params.whatToAvoid != WhatToAvoid.None && canAttack }
-        d { " route To attackOrRoute attack=$attackPossible can=$canAttack allowBlock=${param.allowBlock} avoid=${params.whatToAvoid} waitBoom=$boomerangCt useB=${param.useB}" }
+        d { " route To attackOrRoute attack=$attackPossible can=$canAttack allowBlock=${param.allowBlock} avoid=${params.whatToAvoid} waitBoom=$boomerangCt useB=${param.useB} canUseSword=${state.frameState.canUseSword}" }
         val theAttack = if (param.useB) {
             attackB
         } else {

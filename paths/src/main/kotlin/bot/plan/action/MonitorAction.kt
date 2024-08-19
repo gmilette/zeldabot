@@ -5,6 +5,7 @@ import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapCell
+import bot.state.map.toGamePad
 import util.d
 import util.w
 import kotlin.math.max
@@ -478,6 +479,8 @@ class LadderAction: Action {
         if (!state.frameState.ladderDeployed) {
             d { " !! ladder not deployed "}
             ladderDeployedForFrames = 0
+//            ladderDirection = null
+//            ladderDirectionCount = 0
             return GamePad.None
         } else {
             d { " !! ladder deployed "}
@@ -486,8 +489,13 @@ class LadderAction: Action {
         }
 
         return if (ladderDirectionCount < LADDER_ESCAPE_MOVEMENTS) {
+            // what direction is link facing?
             if (ladderDirection == null) {
-                ladderDirection = GamePad.randomDirection(state.link)
+                ladderDirection = state.frameState.link.dir.toGamePad()
+                if (ladderDirection == GamePad.None) {
+                    ladderDirection = GamePad.randomDirection()
+                }
+                d {"!! Ladder direction!! start at $ladderDirection"}
             }
             d {"!! Ladder direction!! $ladderDirection"}
             ladderDirectionCount++

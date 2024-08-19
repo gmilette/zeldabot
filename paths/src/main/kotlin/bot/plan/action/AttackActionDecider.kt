@@ -285,7 +285,7 @@ object AttackActionDecider {
             .sortedBy { it.distTo(link) }
             .map { if (smallTarget) it.toCenteredRect() else it.toRect16() }
         d { "**check intersect** small=$smallTarget numClose=${enemiesClose.size}" }
-        if (DEBUG) {
+        if (DEBUG || true) {
             for (enemy in enemiesClose) { // .sortedBy { it.topLeft.distTo(link) }
                 d { "enemy: $enemy" }
                 for (sword in swords) {

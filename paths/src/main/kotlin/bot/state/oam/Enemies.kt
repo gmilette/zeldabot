@@ -16,6 +16,8 @@ val grabbyHands2 = (0xAC).toInt() // 172
 
 val graveyardGhost = (0xe4).toInt() to (0x01).toInt()
 val ghost = (0xBC).toInt()
+val ghost2 = (0xB6).toInt()
+val ghost3 = (0xB4).toInt()
 val ghostProjectileUp = (0x7a).toInt() to (0x01).toInt()
 val ghostProjectileUp2 = (0x7a).toInt() to (0x41).toInt()
 const val ghostProjectileUpDown = (0x7a).toInt() // 1 and 41, 02/42, down 81,c1, 83, c3, 82,c2

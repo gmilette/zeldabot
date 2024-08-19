@@ -6,6 +6,11 @@ object EnemyGroup {
     val longWaitEnemies = setOf(
         ghost,
         ghostWeak2,
+        ghostProjectileUpDown,
+        ghostProjectileLeft1,
+        ghostProjectileLeft2,
+        ghost2,
+        ghost3
 //        ghostWeak, // do not use because it it same as boomerang guy
 //        rhinoHeadDown, rhinoHeadDown2, rhinoHeadMouthOpen, rhinoHead2,
 //        bat,

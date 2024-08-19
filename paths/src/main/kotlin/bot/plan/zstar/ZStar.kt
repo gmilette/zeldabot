@@ -281,10 +281,10 @@ class ZStar(
 
         // stil getting NO ROUTE
         d { "From safe: $startIsSafe cost = ${costsF.get(param.start)} targets size = ${target.size} routeToSafe=${routeToSafe}"}
-        d { " targets zstar: "}
-        for (framePoint in target) {
-            d { "$framePoint"}
-        }
+//        d { " targets zstar: "}
+//        for (framePoint in target) {
+//            d { "$framePoint"}
+//        }
 
         val openList: PriorityQueue<FramePoint> = PriorityQueue<FramePoint> { cell1, cell2 ->
             val cell1Val = (totalCosts[cell1] ?: 0) + (distanceToGoal[cell1] ?: 0)

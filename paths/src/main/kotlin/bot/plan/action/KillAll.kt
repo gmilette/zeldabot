@@ -98,13 +98,19 @@ class KillAll(
         val numEnemiesInCenter = state.numEnemiesAliveInCenter()
         // dont have to wait on any levels that have boomerangs
         // which gets confused with ghosts
-        if (state.frameState.seenBoomerang) {
+        // if you are throwing boomerangs, this isnt going to work
+        if (false && state.frameState.seenBoomerang) {
             needLongWait = false
         } else {
             // once set to true, do not change it back
             // added level check just because sword guys and ghost appear same
             if (!needLongWait && !considerEnemiesInCenter && state.frameState.level != 3) {
                 needLongWait = state.longWait.isNotEmpty()
+                if (needLongWait) {
+                    d { " set long waited "}
+                } else {
+                    d { " no long wait "}
+                }
             }
         }
 //        needLongWait = false
