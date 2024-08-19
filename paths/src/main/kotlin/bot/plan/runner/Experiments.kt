@@ -76,7 +76,7 @@ class Experiments(private val masterPlan: PlanMaker) {
         sword = ZeldaItem.MagicSword,
         hearts = 13,
         boomerang = ZeldaItem.Boomerang,
-        ring = ZeldaItem.None,
+        ring = ZeldaItem.BlueRing,
         shield = true,
         potion = true
     )
