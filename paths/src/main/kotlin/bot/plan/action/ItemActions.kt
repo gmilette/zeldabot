@@ -7,7 +7,7 @@ import util.d
 import kotlin.random.Random
 
 
-class SwitchToItem(private val inventoryPosition: Int = Inventory.Selected.candle) : Action {
+class SwitchToItem(private val inventoryPosition: () -> Int = { Inventory.Selected.candle }) : Action {
 
     private var pressCountdown = 0
     private var last: GamePad = GamePad.None
@@ -16,10 +16,10 @@ class SwitchToItem(private val inventoryPosition: Int = Inventory.Selected.candl
         selectedItem(state)// && pressCountdown <= 0
 
     private fun selectedItem(state: MapLocationState): Boolean =
-        state.frameState.inventory.selectedItem == inventoryPosition // how does this map
+        state.frameState.inventory.selectedItem == inventoryPosition() // how does this map
 
     private fun directionToSelection(state: MapLocationState): GamePad =
-        if (state.frameState.inventory.selectedItem < inventoryPosition) {
+        if (state.frameState.inventory.selectedItem < inventoryPosition()) {
             GamePad.MoveRight
         } else {
             GamePad.MoveLeft
@@ -63,7 +63,9 @@ class SwitchToItem(private val inventoryPosition: Int = Inventory.Selected.candl
 //        state.frameState.isSelecting
 //}
 
-class SwitchToItemConditionally(private val inventoryPosition: Int = Inventory.Selected.candle) : Action {
+class SwitchToItemConditionally(private val inventoryPosition: () -> Int = { Inventory.Selected.candle }) : Action {
+    constructor(inventory: Int) : this({ inventory })
+
     private val switchSequence = mutableListOf(
         GoIn(2, GamePad.Start),
         GoIn(30, GamePad.None),
@@ -88,7 +90,7 @@ class SwitchToItemConditionally(private val inventoryPosition: Int = Inventory.S
 
     override fun nextStep(state: MapLocationState): GamePad {
         d {"SwitchToItemConditionallyZ selected: ${state.frameState.inventory.selectedItem} complete ${complete(state)} positionShoot ${positionShoot.stepName}"}
-        return if (firstStep && state.frameState.inventory.selectedItem == inventoryPosition) {
+        return if (firstStep && state.frameState.inventory.selectedItem == inventoryPosition()) {
             d {"Already have"}
             startedWithItem = true
             GamePad.None
@@ -113,7 +115,7 @@ class SwitchToItemConditionally(private val inventoryPosition: Int = Inventory.S
         }
 
     override val name: String
-        get() = "SwitchToItemConditionally to ${inventoryPositionToName(inventoryPosition)}"
+        get() = "SwitchToItemConditionally to ${inventoryPositionToName(inventoryPosition())}"
 }
 
 class UseItem(private val usedTimes: Int = 5) : Action {

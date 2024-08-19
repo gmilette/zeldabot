@@ -747,7 +747,7 @@ class PlanBuilder(
         // prevent accidental go back
 //        startAt(0)
         toggleMenu()
-        plan.add(SwitchToItem(item))
+        plan.add(SwitchToItem { item } )
         goIn(GamePad.None, 100)
         toggleMenu()
     }

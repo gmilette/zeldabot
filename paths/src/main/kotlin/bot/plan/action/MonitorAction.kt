@@ -27,8 +27,15 @@ fun moveHistoryAttackAction(wrapped: Action): Action {
         }
     }
 
-    val potionDecision = DecisionAction(UsePotion(), combinedAction) {
-        PotionUsageReasoner.shouldUsePotion(it.frameState)
+    val usePotion = UsePotion()
+    val potionDecision = DecisionAction(usePotion, combinedAction, completeIf = {
+        combinedAction.complete(it)
+    }) {
+        if (usePotion.hasBegun) {
+            !usePotion.complete(it)
+        } else {
+            PotionUsageReasoner.shouldUsePotion(it.frameState)
+        }
     }
 
     return potionDecision

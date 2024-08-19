@@ -164,7 +164,7 @@ class OrderedActionSequence(
         return currentAction?.path() ?: emptyList()
     }
 
-    private var hasBegun = false
+    var hasBegun = false
 
     override fun nextStep(state: MapLocationState): GamePad {
         hasBegun = true
@@ -190,6 +190,62 @@ class OrderedActionSequence(
 
     override val name: String
         get() = "oSeq: $tag doing ${currentAction?.name}"
+}
+
+/**
+ * maintains a stack of actions, and moves to the next, once one is complete
+ */
+class OneTimeActionSequence(
+    private val actions: List<Action>,
+    private val tag: String = ""
+) : Action {
+    var stepName: String = ""
+
+    private var stack = actions.toMutableList()
+
+    var currentAction: Action? = null
+
+    val done: Boolean
+        get() = hasBegun && stack.isEmpty()
+
+    private fun pop(): Action? = stack.removeFirstOrNull().also {
+        currentAction = it
+    }
+
+    // never complete
+    override fun complete(state: MapLocationState): Boolean = done && currentAction?.complete(state) == true
+
+    private var target: FramePoint = actions.first().target()
+
+    override fun target(): FramePoint {
+        return currentAction?.target() ?: stack.firstOrNull()?.target() ?: target
+    }
+
+    override fun path(): List<FramePoint> {
+        d { " current action ${currentAction?.name ?: ""}" }
+        return currentAction?.path() ?: emptyList()
+    }
+
+    var hasBegun = false
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        hasBegun = true
+        d { "OneTimeActionSequence begin ${currentAction?.name ?: "none"}" }
+        d { " current: ${currentAction?.name} complete = ${currentAction?.complete(state)}"}
+        val current = currentAction ?: pop() ?: return GamePad.None
+        // check all complete to prevent infinite loop
+        if (current.complete(state)) { // causes bomb one to fail && !allComplete(state)
+            d { " sequence complete ${stack.size}" }
+            pop()
+            return nextStep(state)
+        }
+        d { " DO --> ${current.name}" }
+        stepName = current.name
+        return current.nextStep(state)
+    }
+
+    override val name: String
+        get() = "oneSeq: $tag doing ${currentAction?.name}"
 }
 
 class CompleteIfGetItem(

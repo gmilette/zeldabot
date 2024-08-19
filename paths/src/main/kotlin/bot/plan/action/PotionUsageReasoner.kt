@@ -1,5 +1,6 @@
 package bot.plan.action
 
+import androidx.compose.ui.res.useResource
 import bot.state.*
 import util.d
 
@@ -19,17 +20,41 @@ fun UsePotionAction(wrapped: Action): () -> Action = {
 //        state.frameState.inventory.heartCalc.full(state) || super.complete(state)
 //}
 
-fun makeUsePotionAction(): Action =
-    OrderedActionSequence(listOf(
-        SwitchToItemConditionally(inventoryPosition = Inventory.Selected.potion),
-        GoIn(20, GamePad.MoveUp),        // use it
-        GoIn(20, GamePad.B),        // use it
-        GoIn(20, GamePad.MoveUp),        // use it
-        GoIn(20, GamePad.B),        // use it
-//        SwitchToItemConditionally(inventoryPosition = Inventory.Selected.potion),
-        GoIn(50, GamePad.None), // wait until full
-    ), tag = "use potion", shouldComplete = true)
+class SaveItemAction: Action {
+    var currentItem: Int = -1
+    override fun complete(state: MapLocationState): Boolean {
+        currentItem = state.frameState.inventory.selectedItem
+        d{ " save item $currentItem"}
+        return true
+    }
+}
 
+class CompleteIfGameModeNormal : Action {
+    override fun complete(state: MapLocationState): Boolean =
+        state.frameState.gameMode == 5
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        d { " GAME MODE is ${state.frameState.gameMode}"}
+        return super.nextStep(state)
+    }
+}
+
+fun makeUsePotionAction(): OneTimeActionSequence {
+    val save = SaveItemAction()
+    return OneTimeActionSequence(
+        listOf(
+//            save,
+            SwitchToItemConditionally(Inventory.Selected.potion),
+            // wait until the screen scrolls down, but not too long
+//            CompleteIfGameModeNormal(),
+            GoIn(80, GamePad.None),        // use it
+            UseItem(),
+            GoIn(80, GamePad.None), // wait until full
+//            SwitchToItemConditionally(inventoryPosition = { save.currentItem }),
+            SwitchToItemConditionally(inventoryPosition = { 0 }),
+            GoIn(80, GamePad.None)
+        ), tag = "use potion")
+}
 
 class UsePotionW(wrapped: Action) : WrappedAction(wrapped) {
     private val usePotion = makeUsePotionAction()
@@ -51,20 +76,27 @@ class UsePotionW(wrapped: Action) : WrappedAction(wrapped) {
 }
 
 class UsePotion : Action {
-    private val usePotion = makeUsePotionAction()
+    private val usePotion: OneTimeActionSequence = makeUsePotionAction()
 
+    val done: Boolean
+        get() = usePotion.done && usePotion.hasBegun
+
+    val hasBegun: Boolean
+        get() = usePotion.hasBegun
+
+    // don't complete
     override fun complete(state: MapLocationState): Boolean =
-//        state.frameState.inventory.heartCalc.full(state)
-        (!PotionUsageReasoner.shouldUsePotion(state.frameState) || usePotion.complete(state)).also {
-            d { " is complete potion $it ${PotionUsageReasoner.shouldUsePotion(state.frameState)} ${usePotion.complete(state)}"}
-        }
+        usePotion.complete(state) && done
 
     override fun nextStep(state: MapLocationState): GamePad {
-        d { " use potion use potion:    ${PotionUsageReasoner.shouldUsePotion(state.frameState)}"}
-        if (complete(state)) {
-            return GamePad.None
+        d { " potion nextstep potion: ${usePotion.complete(state)} done=${done}" }
+        return if (complete(state)) {
+            d { " potion complete "}
+            GamePad.None
+        } else {
+            d { " use potion"}
+            usePotion.nextStep(state)
         }
-        return usePotion.nextStep(state)
     }
 }
 
@@ -85,7 +117,7 @@ object PotionUsageReasoner {
             isLevel -> "in level"
             else -> ""
         }
-        d { " life $message ${state.inventory.heartCalc.lifeInHearts()} d:$damage $almostDead $havePotion"}
+        d { " life $message ${state.inventory.heartCalc.lifeInHearts()} d:$damage $almostDead $havePotion $full"}
 
 //        if (haveEnough && almostDead && havePotion) {
 //            d { "!!need potion!!"}
@@ -94,7 +126,8 @@ object PotionUsageReasoner {
 //            goGet(state)
 //        }
 
-        return isLevel && !full && havePotion
+//        return isLevel && !full && havePotion
+        return isLevel && almostDead && havePotion
     }
 
     fun usePotion() {
