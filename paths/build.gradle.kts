@@ -10,7 +10,7 @@ buildscript {
 //    val composeVersion: String = "1.5.0"
 //    val kotlinVersion: String = "1.9.0"
     val composeVersion: String = "1.4.3"
-    val kotlinVersion: String = "1.8.22"
+    val kotlinVersion: String = "1.9.24" //"1.8.22"
 
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
@@ -20,16 +20,23 @@ buildscript {
 }
 
 plugins {
-    id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
+    val kotlinVersion = "2.0.20" //
+
+//    id("org.jetbrains.compose:compose-plugin") version kotlinVersion
+    id("org.jetbrains.kotlin.plugin.compose") version kotlinVersion
+
+///    id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
 //    id("org.jetbrains.kotlinx.dataframe")
     //    kotlin("jvm") version "1.6.10"
 //    id("org.jetbrains.kotlinx.dataframe") version "0.10.0"
-    val kotlinVersion = "1.8.22"
+//    val kotlinVersion = "1.8.22" // 1.9.24 i
+//    val kotlinVersion = "1.9.24" // 1.9.24
     kotlin("jvm") version kotlinVersion
     kotlin("kapt") version kotlinVersion
 //    id("org.jetbrains.compose") version "1.1.1"
 //    id("org.jetbrains.compose") version "1.5.0"
-    id("org.jetbrains.compose") version "1.4.3"
+//    id("org.jetbrains.compose") version "1.4.3"
+    id("org.jetbrains.compose") version "1.6.10"
 }
 
 group = "me.greg"
@@ -70,7 +77,8 @@ compose.desktop {
 
 tasks.withType<KotlinCompile> {
 //    kotlinOptions.jvmTarget = "1.8"
-    kotlinOptions.jvmTarget = "11"
+//    kotlinOptions.jvmTarget = "11"
+//    kotlinOptions.jvmTarget = "17"
 }
 
 tasks.withType<Jar> {

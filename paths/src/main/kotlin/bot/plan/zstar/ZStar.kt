@@ -166,8 +166,9 @@ class ZStar(
     private fun breadthSearch(
         param: ZRouteParam,
         current: FramePoint,
-                              targets: List<FramePoint>,
-                              visited: MutableSet<FramePoint> = mutableSetOf()): List<FramePoint> {
+        targets: List<FramePoint>,
+        visited: MutableSet<FramePoint> = mutableSetOf()
+    ): List<FramePoint> {
         val toExplore = neighborFinder.neighbors(current).toMutableList()
         val cameFrom = mutableMapOf<FramePoint, FramePoint>()
         var finalPoint = FramePoint()
@@ -199,6 +200,7 @@ class ZStar(
                     for (neighbor in neighbors) {
                         cameFrom[neighbor] = nearPoint
                     }
+                    // evaluate all the neighbors, and randomly pick minimal cost
                     toExplore.addAll(neighbors)
                 }
                 i++
@@ -690,8 +692,10 @@ class ZStar(
                                              progress: Int = 0) {
             reset()
 //            val enemyRect = enemies.map { it.toRectPlus(MapConstants.halfGrid) }
+            // it takes about 4 to turn around
+            val turnAroundTolerance = 0 // eh, maybe helps a little but no
             val enemyRect = if (progress == 0) {
-                enemies.map { it.toRect() }
+                enemies.map { it.toRectPlus(turnAroundTolerance) }
             } else {
                 projectiles.map { pt ->
                     pt.direction?.pointModifier(progress)?.let { mod ->

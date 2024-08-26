@@ -167,7 +167,8 @@ class RouteTo(val params: Param = Param()) {
 
             allowAttack && !projectileNear && attackPossible && canAttack && shouldLongBoomerang -> {
                 d { " Route Action -> LongAttack Boomerang" }
-                boomerangCt = WAIT_BETWEEN_BOOMERANG
+                // it's possible to get stuck doing the boomerang over and over never attacking
+                boomerangCt = typically(WAIT_BETWEEN_BOOMERANG, WAIT_BETWEEN_BOOMERANG * 4)
                 attackB.nextStep(state)
             }
 
@@ -195,6 +196,13 @@ class RouteTo(val params: Param = Param()) {
             }
         }
     }
+
+    private fun typically(typical: Int, everySoOften: Int): Int =
+        if (Random.nextInt(6) == 1) {
+            everySoOften
+        } else {
+            typical
+        }
 
     private fun writeFile(
         to: List<FramePoint>,

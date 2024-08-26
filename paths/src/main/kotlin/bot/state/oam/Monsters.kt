@@ -21,10 +21,8 @@ import bot.state.map.Direction
 
 data class Monster(
     val name: String = "",
-    // sprite ids
-    val parts:Set<Int> = setOf(0xb6, 0xb4),
-    // attributes while monster is in normal state
-    val normal: Set<Int> = emptySet(),
+//    // sprite ids
+//    val parts:Set<Int> = setOf(0xb6, 0xb4),
     // attributes that indicate damage
     val damaged:Set<Int> = setOf(0x01, 0x43),
     /**
@@ -134,8 +132,6 @@ object MonstersOverworld {
 
 object Monsters {
     val boomerang = Monster(
-        parts = setOf(0xb6, 0xb4),
-        normal = setOf(),
         damaged = setOf(0x01, 0x43))
     val wizzrobe = Monster(name = "ghost").immuneToB().inL()
     val darknut = Monster("swordguy").immuneToB().inL()

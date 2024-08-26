@@ -930,11 +930,10 @@ private val level6: PlanBuilder.() -> Unit
         lev(6)
         startAt(LevelStartMapLoc.lev(6))
         seg("move to level 6")
-//        switchToBoomerang
         left
         seg("first ghost")
-        switchToBoomerang
         up // capture any loot dropped, there is usually some bombs
+        switchToBoomerang
         seg("squishies")
         up // todo grab key in center
         seg("kill bats")

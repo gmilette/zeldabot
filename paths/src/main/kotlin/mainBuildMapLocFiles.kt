@@ -1,6 +1,6 @@
 import sequence.findpaths.FindPaths
 
-fun main(args: Array<String>) {
+fun main() {
     println("buildMapLocFiles")
     FindPaths().buildMapLocFiles()
 }

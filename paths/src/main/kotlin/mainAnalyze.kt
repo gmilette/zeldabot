@@ -1,7 +1,7 @@
 import bot.state.map.Hyrule
 import sequence.AnalysisPlanBuilder
 
-fun main(args: Array<String>) {
+fun main() {
     println("Analyze")
 
     val hyrule: Hyrule = Hyrule()
