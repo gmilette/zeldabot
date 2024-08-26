@@ -51,7 +51,7 @@ repositories {
 //kotlin.sourceSets.getByName("main").kotlin.srcDir("build/generated/ksp/main/kotlin/")
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:dataframe:0.10.0")
+    implementation("org.jetbrains.kotlinx:dataframe:0.13.1")
 //    implementation(compose.desktop.currentOs)
     implementation(compose.desktop.macos_arm64)
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.6.0")
@@ -59,7 +59,7 @@ dependencies {
     implementation("org.jgrapht:jgrapht-core:1.5.1")
     implementation(files("libs/Nintaco.jar"))
     testImplementation(kotlin("test"))
-    implementation("co.touchlab:kermit:1.1.3")
+    implementation("co.touchlab:kermit:2.0.4")
     testImplementation("io.kotest:kotest-assertions-core-jvm:5.5.0")
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
     implementation("com.google.code.gson:gson:2.10.1")

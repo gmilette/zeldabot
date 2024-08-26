@@ -85,10 +85,9 @@ class MasterPlan(val segments: List<PlanSegment>) {
         var current = pop()
         while(keepGoing && giant.isNotEmpty()) {
             val first = giant.first().action
-            d { " SEARCH one ${first.actionLoc}"}
-//            if (first.actionLoc == mapLoc && first.toLevel == level) {
+//            d { " SEARCH one ${first.actionLoc}"}
              if (first.actionLoc == mapLoc && first.levelLoc == level) {
-                d { " search plan move ${first.actionLoc} " } // lev ${first.toLevel}"}
+//                d { " search plan move ${first.actionLoc} " } // lev ${first.toLevel}"}
                 // stop
                 keepGoing = false
                  current = pop()
@@ -96,7 +95,7 @@ class MasterPlan(val segments: List<PlanSegment>) {
                 current = pop()
             }
         }
-        d { " done search plan "}
+//        d { " done search plan "}
         return current
     }
 

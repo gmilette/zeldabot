@@ -36,7 +36,6 @@ fun main(vararg args: String) = application {
         state = WindowState(width = 800.dp, height = 500.dp),
         title = "Zelda"
     ) {
-        d { "ARGS! $args"}
         for (arg in args) {
             d { " ARG: $arg"}
         }
