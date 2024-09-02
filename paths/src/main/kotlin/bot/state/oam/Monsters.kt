@@ -24,7 +24,7 @@ data class Monster(
 //    // sprite ids
 //    val parts:Set<Int> = setOf(0xb6, 0xb4),
     // attributes that indicate damage
-    val damaged:Set<Int> = setOf(0x01, 0x43),
+    val damaged:Map<Int, Set<Int>> = emptyMap(),
     /**
      * the tiles representing the monster
      */
@@ -130,13 +130,31 @@ object MonstersOverworld {
     val zora = Monster(name = "waterguy").immuneToB()
 }
 
+//val swordDir = DirectionMap(
+//    up = setOf(0xb4, //02, 42
+//        0xb6), //42x
+//    down = setOf(0xac, 0xb0, 0xB2), //02
+//    left = setOf(0xbe, //42
+////        0xBC, // was left
+//        0xba
+//    ), //42
+//    right = setOf(0xB8, //02
+//        0xBC, // was left
+//        0xBA), //02
+//)
+
 object Monsters {
-    val boomerang = Monster(
-        damaged = setOf(0x01, 0x43))
+    val boomerang = Monster()
     val wizzrobe = Monster(name = "ghost").immuneToB().inL()
-    val darknut = Monster("swordguy").immuneToB().inL()
+    val darknut = Monster("swordguy",
+        tile = setOf(0xbe, 0xb6, 0xBA, 0xb4, 0xac, 0xb0, 0xB8, 0xBC)).immuneToB().inL()
     val gel = Monster(name = "babysquishy").inL()
-    val gibdo = Monster(name = "mummy").inL()
+    val gibdo = Monster(name = "mummy",
+        tile = setOf(0xa6, 0xa4),
+        damaged = mapOf(
+            0xa4 to h123(),
+            0xa6 to h64())
+    ).inL()
     val goriya = Monster(name = "boomerangguy").inL()
     val keese = Monster(name = "bat").inL()
     val lanmoia = Monster(name = "eyeworm").inL()
@@ -151,6 +169,18 @@ object Monsters {
     val wallmaster = Monster("grabby").inL()
     val zol = Monster("squishy").inL()
 }
+
+private val h0 = 0x00
+private val h1 = 0x01
+private val h2 = 0x02
+private val h3 = 0x03
+fun h123() = setOf(h0, h1, h2, h3)
+
+private val h67 = 0x43
+private val h66 = 0x42
+private val h65 = 0x41
+private val h64 = 0x40
+fun h64() = setOf(h64, h65, h66, h67)
 
 typealias TileAttribute = Pair<Int, Int>
 val TileAttribute.tile: Int

@@ -209,7 +209,7 @@ class MapStatsTracker {
         return DirectoryConstants.file("mapStats", fileName)
     }
 
-    private fun readStats(mapCoordinates: MapCoordinates): MapStatsData? {
+    fun readStats(mapCoordinates: MapCoordinates): MapStatsData? {
         val file = File(statFileName(mapCoordinates))
         if (!file.exists()) {
             return null
@@ -259,6 +259,8 @@ class AttributeCount(tile: Int = 0, val hex: String = tile.toString(16)) {
             attribCount[count.key] = (attribCount[count.key] ?: 0) + count.value
         }
     }
+
+    fun total() = attribCount.entries.sumOf { it.value }
 
     private fun sorted() =
         attribCount.entries.toList().sortedBy { it.value }

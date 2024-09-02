@@ -120,51 +120,51 @@ object DamagedLookup {
         // use the same set as last time
     }
 
-    private fun MutableSet<TileAttribute>.add(tile: Int, attrib: Int): MutableSet<TileAttribute> {
+    fun MutableSet<TileAttribute>.add(tile: Int, attrib: Int): MutableSet<TileAttribute> {
         add(tile to attrib)
         return this
     }
 
-    private fun MutableSet<TileAttribute>.add128(tile: Int): MutableSet<TileAttribute> {
+    fun MutableSet<TileAttribute>.add128(tile: Int): MutableSet<TileAttribute> {
         add(tile to h128)
         add(tile to h131)
         add(tile to h130)
         return this
     }
 
-    private fun MutableSet<TileAttribute>.add64(tile: Int): MutableSet<TileAttribute> {
+    fun MutableSet<TileAttribute>.add64(tile: Int): MutableSet<TileAttribute> {
         add(tile to h64)
         add(tile to h67)
         add(tile to h66)
         return this
     }
 
-    private fun MutableSet<TileAttribute>.add65(tile: Int): MutableSet<TileAttribute> {
+    fun MutableSet<TileAttribute>.add65(tile: Int): MutableSet<TileAttribute> {
         add(tile to h64)
         add(tile to h67)
         add(tile to h65)
         return this
     }
 
-    private fun MutableSet<TileAttribute>.add65no65(tile: Int): MutableSet<TileAttribute> {
+    fun MutableSet<TileAttribute>.add65no65(tile: Int): MutableSet<TileAttribute> {
         add(tile to h64)
         add(tile to h67)
         return this
     }
 
-    private fun MutableSet<TileAttribute>.add023(tile: Int): MutableSet<TileAttribute> {
+    fun MutableSet<TileAttribute>.add023(tile: Int): MutableSet<TileAttribute> {
         add(tile to 0)
         add(tile to 2)
         add(tile to 3)
         return this
     }
-    private fun MutableSet<TileAttribute>.add03(tile: Int): MutableSet<TileAttribute> {
+    fun MutableSet<TileAttribute>.add03(tile: Int): MutableSet<TileAttribute> {
         add(tile to 0)
         add(tile to 3)
         return this
     }
 
-    private fun MutableSet<TileAttribute>.add013(tile: Int): MutableSet<TileAttribute> {
+    fun MutableSet<TileAttribute>.add013(tile: Int): MutableSet<TileAttribute> {
         add(tile to 0)
         add(tile to 1)
         add(tile to 3)
