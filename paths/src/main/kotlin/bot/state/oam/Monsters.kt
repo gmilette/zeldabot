@@ -25,6 +25,11 @@ data class Monster(
 //    val parts:Set<Int> = setOf(0xb6, 0xb4),
     // attributes that indicate damage
     val damaged:Map<Int, Set<Int>> = emptyMap(),
+    val damagedA:Set<Int> = emptySet(),
+    // attributes that mean its read, otherwise assume blue
+    val red:Set<Int> = emptySet(),
+    val blue:Set<Int> = emptySet(),
+    val colors:Set<Int> = emptySet(),
     /**
      * the tiles representing the monster
      */
@@ -126,8 +131,11 @@ object MonstersOverworld {
     val tektite = Monster(name = "spider")
     val ghini = Monster(name = "worldghost")
     val moblin = Monster(name = "arrowguy")
-    val peahat = Monster(name = "spin")
-    val zora = Monster(name = "waterguy").immuneToB()
+    val peahat = Monster(name = "spin",
+        tile = setOf())
+    val zora = Monster(name = "waterguy",
+        tile = setOf(0xbc, 0xbe, 0xEC, 0xEE)
+    ).immuneToB()
 }
 
 //val swordDir = DirectionMap(
@@ -144,30 +152,56 @@ object MonstersOverworld {
 //)
 
 object Monsters {
+    fun MutableMap<Int, Monster>.add(monster: Monster): MutableMap<Int, Monster> {
+        for (t in monster.tile) {
+            this[t] = monster
+        }
+        return this
+    }
+
     val boomerang = Monster()
-    val wizzrobe = Monster(name = "ghost").immuneToB().inL()
+    //6_56
+    val wizzrobe = Monster(name = "ghost",
+        damagedA = setOf(h0, h3, h64, h67),
+        red = setOf(h2, h65), //confirm
+        tile = setOf(0xb4, 0xb6, 0xb8, 0xba)).immuneToB().inL()
+    // 3_105 red
+    // 5_100 blue
     val darknut = Monster("swordguy",
+        // meed tp remove red
+        damagedA = setOf(h0, h3, h64, h67),
+        blue = setOf(h65, h1),
+        red = setOf(h66, h2),
+        // bc might not have a 3
         tile = setOf(0xbe, 0xb6, 0xBA, 0xb4, 0xac, 0xb0, 0xB8, 0xBC)).immuneToB().inL()
-    val gel = Monster(name = "babysquishy").inL()
+    val gel = Monster(name = "babysquixxshy").inL()
     val gibdo = Monster(name = "mummy",
         tile = setOf(0xa6, 0xa4),
+        damagedA = h64No5() + h023(),
         damaged = mapOf(
             0xa4 to h123(),
             0xa6 to h64())
     ).inL()
     val goriya = Monster(name = "boomerangguy").inL()
-    val keese = Monster(name = "bat").inL()
+    val keese = Monster(name = "bat", tile=setOf(0x9c), colors=setOf(20)).inL()
     val lanmoia = Monster(name = "eyeworm").inL()
     val likelike = Monster(name = "pancake").inL()
     val manhandla = Monster(name = "star").immuneToB().inL()
     val moldorm = Monster(name = "cirleworm").immuneToB().inL()
     val patra = Monster(name = "eyecircle").immuneToB().inL()
-    val polsVoice = Monster(name = "bunny").immuneToB().inL()
+    val polsVoice = Monster(name = "bunny",
+        tile = setOf(0x00)
+    ).immuneToB().inL()
     val rope = Monster("fastWorm").inL()
     val stalfos = Monster("skeleton").inL()
     val vire = Monster("batparent").inL()
     val wallmaster = Monster("grabby").inL()
-    val zol = Monster("squishy").inL()
+    val zol = Monster("squishy", tile = setOf(0xaa)).inL()
+
+    val lookup: Map<Int, Monster> = mutableMapOf<Int, Monster>()
+        .add(wizzrobe)
+        .add(zol)
+        .add(darknut)
 }
 
 private val h0 = 0x00
@@ -175,12 +209,14 @@ private val h1 = 0x01
 private val h2 = 0x02
 private val h3 = 0x03
 fun h123() = setOf(h0, h1, h2, h3)
+fun h023() = setOf(h0, h2, h3)
 
 private val h67 = 0x43
 private val h66 = 0x42
 private val h65 = 0x41
 private val h64 = 0x40
 fun h64() = setOf(h64, h65, h66, h67)
+fun h64No5() = setOf(h64, h66, h67)
 
 typealias TileAttribute = Pair<Int, Int>
 val TileAttribute.tile: Int

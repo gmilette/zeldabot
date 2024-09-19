@@ -5,7 +5,9 @@ import bot.plan.action.Action
 import bot.plan.action.DoNothing
 import bot.plan.action.moveHistoryAttackAction
 import bot.state.*
+import bot.state.map.destination.ZeldaItem
 import nintaco.api.API
+import org.apache.commons.math3.analysis.function.Exp
 import util.d
 import java.io.File
 
@@ -36,6 +38,8 @@ class PlanRunner(private val makePlan: PlanMaker,
     private var runCt = 0
     private var runSetupCt = 0
 
+    private var levelExperiment: Experiment? = null
+
     private fun runFrom() {
         val exp = experiment
         d { " run from $exp"}
@@ -43,6 +47,26 @@ class PlanRunner(private val makePlan: PlanMaker,
             val split = exp.split("_", ",")
             val mapLoc = split.first().toInt()
             val level = split[1].toInt()
+            // w = white, m = magic, d="none"
+            val s = split.getOrElse(2, { "d" })
+            // b = blue, r=red, g=none
+            val ring = split.getOrElse(3, { "g" })
+            levelExperiment = Experiment(
+                name = exp,
+                startSave = "",
+                { MasterPlan(emptyList()) },
+                addEquipment = false,
+                sword = when (s) {
+                    "w" -> ZeldaItem.WhiteSword
+                    "m" -> ZeldaItem.MagicSword
+                    else -> ZeldaItem.WoodenSword
+                },
+                ring = when (ring) {
+                    "b" -> ZeldaItem.BlueRing
+                    "r" -> ZeldaItem.RedRing
+                    else -> ZeldaItem.None
+                },
+            )
             runLoc(mapLoc, level)
         } else {
             runIt(exp)
@@ -187,7 +211,7 @@ class PlanRunner(private val makePlan: PlanMaker,
         }
 //        api.setSpeed(400)
         runSetupCt++
-        val ex = this.target
+        val ex = levelExperiment ?: this.target
         d { " set sword to ${ex.sword} hearts to ${ex.hearts}"}
         manipulator.setSword(ex.sword)
         ex.hearts?.let {

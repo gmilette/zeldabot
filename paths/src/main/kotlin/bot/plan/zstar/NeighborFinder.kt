@@ -1,10 +1,7 @@
 package bot.plan.zstar
 
 import bot.state.*
-import bot.state.map.Direction
-import bot.state.map.horizontal
-import bot.state.map.pointModifier
-import bot.state.map.vertical
+import bot.state.map.*
 import util.Map2d
 import util.d
 import kotlin.random.Random
@@ -69,10 +66,18 @@ class NeighborFinder(
     }
 
     // need to know the previous point
-    fun neighbors(point: FramePoint, direction: Direction? = null, dist: Int = 1, ladderSpec: ZStar.LadderSpec? = null): List<FramePoint> {
+    fun neighbors(point: FramePoint, direction: Direction? = null, dist: Int = 1, ladderSpec: ZStar.LadderSpec? = null, from: FramePoint? = null): List<FramePoint> {
         val neigh = mutableListOf<FramePoint>()
 
-        val validDirections = ladderSpec?.directions(point) ?: Direction.all
+        //val validDirections = ladderSpec?.directions(point) ?: Direction.all
+
+        val dontTurnAround = true
+        val dirMovingIn: Direction = if (dontTurnAround) {
+            from?.dirTo(point)?.opposite() ?: Direction.None
+        } else {
+            Direction.None
+        }
+        val validDirections = (ladderSpec?.directions(point) ?: Direction.all) - dirMovingIn
 
 //        var validDirections = okDirections(point, direction, dist)
 //        if (GStar.DEBUG) {

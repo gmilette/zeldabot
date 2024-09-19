@@ -233,7 +233,18 @@ object AttackActionDecider {
 
         val enemies = state.aliveEnemies
         return if (state.frameState.isLevel) {
-            if (state.frameState.level == 1 && state.frameState.mapLoc == 53) enemies.filter { it.tile in EnemyGroup.dragon1} else enemies.filter { it.canAttackFront || it.dir != oppositeFrom }
+            if (state.frameState.level == 1 && state.frameState.mapLoc == 53) {
+                enemies.filter { it.tile in EnemyGroup.dragon1}
+            } else {
+                if (enemies.any { !it.canAttackFront }) {
+                    for (dont in enemies.filter { !it.canAttackFront && it.dir == oppositeFrom }) {
+                        d { "DONT CHECK ${dont.point} can't attack from ${dont.dir} link facing ${state.frameState.link.dir}"}
+                    }
+                }
+                enemies.filter {
+                    it.canAttackFront || it.dir != oppositeFrom
+                }
+            }
         } else {
             enemies.filter { it.tile !in EnemyGroup.enemiesToNotAttackInOverworld }
 //        }.also {

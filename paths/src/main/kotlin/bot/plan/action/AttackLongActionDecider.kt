@@ -5,6 +5,7 @@ import bot.state.map.Direction
 import bot.state.map.MapConstants
 import bot.state.map.pointModifier
 import bot.state.oam.EnemyGroup
+import bot.state.oam.Monsters
 import bot.state.oam.toHex
 import org.jheaps.annotations.VisibleForTesting
 import util.Geom
@@ -22,7 +23,8 @@ object AttackLongActionDecider {
         // sword is more than 1 grid away from link
         // need more work
         val swordIsFlying by lazy {
-            state.frameState.enemiesRaw.filter { it.tileAttrib in EnemyGroup.swordProjectile }
+            // looks like a sword that is hiddent has y = 2
+            state.frameState.enemiesRaw.filter { it.y != 248 && it.tileAttrib in EnemyGroup.swordProjectile }
                 .minByOrNull { it.point.distTo(state.link) }?.let {
                     it.point.distTo(state.link) > MapConstants.oneGrid
                 } ?: false
@@ -31,7 +33,7 @@ object AttackLongActionDecider {
             state.frameState.enemiesRaw.any { it.tileAttrib in EnemyGroup.swordProjectile }
         }
         if (swordIsFlying) {
-            d { " SWORD IS FLYING ------------"}
+            d { " SWORD IS FLYING -->-->-->-->"}
         } else if (thereIsASword) {
             d { " SWORD IS THERE ------------"}
         }
@@ -141,8 +143,8 @@ object AttackLongActionDecider {
         this.filter { it.affectedByBoomerang() }
 
     // enemy group for immunie to boomerang
-    private fun Agent.affectedByBoomerang() = true
-//        this.tile !in immuneToBoomerang
+    private fun Agent.affectedByBoomerang() =
+        Monsters.lookup[tile]?.affectedByBoomerang ?: true // most monsters can be boomeranged
 
     private fun rayFrom(map: Map2d<Boolean>, point: FramePoint, dir: Direction): FramePoint {
         if (dir == Direction.None) return FramePoint()

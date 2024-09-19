@@ -150,22 +150,23 @@ class RouteTo(val params: Param = Param()) {
         val shouldLongBoomerang by lazy { param.allowRangedAttack && boomerangCt <= 0 && AttackLongActionDecider.shouldBoomerang(state) }
         boomerangCt--
 
+        val considerAttacks = allowAttack && !projectileNear && attackPossible
         return when {
             blockReflex != null -> {
                 d { " Route Action -> Block Reflex! $blockReflex" }
                 blockReflex
             }
-            allowAttack && !projectileNear && attackPossible && (attack.isAttacking()) -> {
+            considerAttacks && (attack.isAttacking()) -> {
                 d { " Route Action -> Keep Attacking" }
                 theAttack.nextStep(state)
             }
 
-            allowAttack && !projectileNear && attackPossible && canAttack && shouldLongAttack -> {
+            considerAttacks && canAttack && shouldLongAttack -> {
                 d { " Route Action -> LongAttack" }
                 theAttack.nextStep(state)
             }
 
-            allowAttack && !projectileNear && attackPossible && canAttack && shouldLongBoomerang -> {
+            considerAttacks && canAttack && shouldLongBoomerang -> {
                 d { " Route Action -> LongAttack Boomerang" }
                 // it's possible to get stuck doing the boomerang over and over never attacking
                 boomerangCt = typically(WAIT_BETWEEN_BOOMERANG, WAIT_BETWEEN_BOOMERANG * 4)
@@ -174,6 +175,7 @@ class RouteTo(val params: Param = Param()) {
 
             !allowAttack ||
                     !attackPossible ||
+                    projectileNear ||
                     (inRangeOf.isAttack && theAttack.attackWaiting()) || //rhino
 //                    !canAttack || // redundant
                     (state.frameState.clockActivated && Random.nextInt(10) == 1) ||

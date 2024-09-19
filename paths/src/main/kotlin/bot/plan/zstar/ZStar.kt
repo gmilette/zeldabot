@@ -136,7 +136,8 @@ class ZStar(
         param: ZRouteParam
     ): List<FramePoint> {
         customizer.customize(param)
-        return breadthSearch(param, param.start, param.targets)
+        return breadthSearch(param, param.start, targets = param.targets,
+            pointBeforeStart = param.pointBeforeStart)
     }
 
     // if safe needed
@@ -167,9 +168,10 @@ class ZStar(
         param: ZRouteParam,
         current: FramePoint,
         targets: List<FramePoint>,
+        pointBeforeStart: FramePoint?,
         visited: MutableSet<FramePoint> = mutableSetOf()
     ): List<FramePoint> {
-        val toExplore = neighborFinder.neighbors(current).toMutableList()
+        val toExplore = neighborFinder.neighbors(current, from = pointBeforeStart).toMutableList()
         val cameFrom = mutableMapOf<FramePoint, FramePoint>()
         var finalPoint = FramePoint()
 
@@ -196,7 +198,7 @@ class ZStar(
                     break;
                 } else {
                     visited.add(nearPoint)
-                    val neighbors = neighborFinder.neighbors(nearPoint) - visited
+                    val neighbors = neighborFinder.neighbors(nearPoint, from = current) - visited
                     for (neighbor in neighbors) {
                         cameFrom[neighbor] = nearPoint
                     }
@@ -365,8 +367,9 @@ class ZStar(
             }
 
             neighborFinder.costF = costsF
+            val fromPoint = cameFrom[point]
             val neighbors =
-                (neighborFinder.neighbors(point, dir, dist ?: 0, param.rParam.ladderSpec) - closedList - avoid).shuffled()
+                (neighborFinder.neighbors(point, dir, dist ?: 0, param.rParam.ladderSpec, from = fromPoint) - closedList - avoid).shuffled()
             for (toPoint in neighbors) {
                 // raw cost of this cell
                 val cost = costsF.get(toPoint)

@@ -6,6 +6,7 @@ import bot.state.map.MapConstants
 import bot.state.map.MovingDirection
 import bot.state.map.stats.MapStatsTracker
 import nintaco.api.API
+import nintaco.util.BitUtil
 import org.jheaps.annotations.VisibleForTesting
 import util.d
 
@@ -51,8 +52,9 @@ class OamStateReasoner(
     fun agentsUncombined(): List<Agent> =
         spritesUncombined.map { it.toAgent() }
 
+    // but also filter anything that isn'
     fun agentsRaw(): List<Agent> =
-        spritesRaw.map { it.toAgent() }
+        spritesRaw.filter { it.point.y < 248 }.map { it.toAgent() }
 
     // calculate isDamaged here
     private fun SpriteData.toAgent(lookup: DirectionByMemoryLookup? = null): Agent {
@@ -90,7 +92,8 @@ class OamStateReasoner(
             tileByte = tile.toString(16), attributeByte = attribute.toString(16),
             damaged = damaged,
             blockable = blockable,
-            moving = movingDirection
+            moving = movingDirection,
+            color = paletteIndex
         )
     }
 
@@ -152,12 +155,28 @@ class OamStateReasoner(
     // use the lower x value
     // then subtract 61 from the y, value
 
+    fun getBitBool(x: Int, bit: Int): Boolean {
+        return BitUtil.getBit(x, bit) == 1
+    }
+
     private fun readOam(at: Int): SpriteData {
         val x = api.readOAM(at + 0x0003)
         val y = api.readOAM(at)
         val tile = api.readOAM(at + 0x0001)
         val attrib = api.readOAM(at + 0x0002)
-        return SpriteData(at / 4, FramePoint(x, y - MapConstants.yAdjust), tile, attrib, combine = combine)
+//        val tileAddress = if (ppu.isSpriteSize8x16()) (((tile and 1) shl 12)
+//                or ((tile and 0xFE) shl 4)) else (ppu.getSpritePatternTableAddress()
+//                or (tile shl 4))
+        // if priority is false, then maybe ignore it
+        // OAM data frame
+
+        // damaged ghost is only pallette 28.. the palette 24 could be, but it is also the live ghost, depending
+        val paletteIndex = 0x10 or ((attrib and 0x03) shl 2)
+        val priority = getBitBool(attrib, 5)
+        val xFlip = BitUtil.getBitBool(attrib, 6)
+        val yFlip = BitUtil.getBitBool(attrib, 7)
+        return SpriteData(at / 4, FramePoint(x, y - MapConstants.yAdjust), tile, attrib,
+            priority = priority, xFlip = xFlip, yFlip = yFlip, paletteIndex = paletteIndex, combine = combine)
     }
 
     private fun readOam(): List<SpriteData> {
@@ -225,6 +244,10 @@ data class SpriteData(
     val attribute: Int,
     val tileByte: String = tile.toString(16),
     val attributeByte: String = attribute.toString(16),
+    val priority: Boolean, // appears true when the monster is hidden
+    val xFlip: Boolean,
+    val yFlip: Boolean,
+    val paletteIndex: Int,
     val combine: Boolean = true
 ) {
     val tilePair = tile to attribute
@@ -243,7 +266,7 @@ data class SpriteData(
 
     // keep
     // Debug: (Kermit) 49: SpriteData(index=49, point=(177, 128), tile=160, attribute=2) None
-    val hidden: Boolean = point.y >= 248 || attribute == 32 || (!EnemyGroup.keepPairs.contains(tilePair) && EnemyGroup.ignore.contains(tile)) ||
+    val hidden: Boolean = priority || point.y >= 248 || attribute == 32 || (!EnemyGroup.keepPairs.contains(tilePair) && EnemyGroup.ignore.contains(tile)) ||
 //            ( (combine && tile != rhinoUpLeft.tile) && EnemyGroup.ignore.contains(tile)) ||
             EnemyGroup.ignorePairs.contains(tilePair)
             //|| point.y < 60  dont need that because the y coordinate is adjusted

@@ -64,8 +64,9 @@ class Experiments(private val masterPlan: PlanMaker) {
         { masterPlan().getPlanPhase(Phases.lev(5)) },
         addEquipment = false,
         sword = ZeldaItem.WhiteSword,
-        hearts = 9,
+        hearts = 14, //9,
         boomerang = ZeldaItem.Boomerang,
+        potion = true,
         ring = ZeldaItem.BlueRing,
         shield = true
     )
