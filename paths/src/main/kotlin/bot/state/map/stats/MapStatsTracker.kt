@@ -267,7 +267,7 @@ class AttributeCount(tile: Int = 0, val hex: String = tile.toString(16)) {
     private fun sorted() =
         attribCount.entries.toList().sortedBy { it.value }
 
-    fun count(attrib: Int, color: Int) {
+    fun count(attrib: Int, color: Int = 0) {
         attribCount[attrib] = (attribCount[attrib] ?: 0) + 1
         colorCount[attrib] = (colorCount[attrib] ?: 0) + 1
     }

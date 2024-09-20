@@ -59,7 +59,7 @@ class OamStateReasoner(
     // calculate isDamaged here
     private fun SpriteData.toAgent(lookup: DirectionByMemoryLookup? = null): Agent {
         val tileAttribute = tile to attribute
-        val damaged = DamagedLookup.isDamaged(tile, attribute, isOverworld)
+        val damaged = DamagedLookup.isDamaged(tileAttribute, isOverworld)
 //        val damaged = mapStatsTracker.isDamaged(tile, attribute)
         val blockable = calcBlockable(tile, tileAttribute)
         val state = toState(damaged)
@@ -241,13 +241,13 @@ data class SpriteData(
     val index: Int,
     val point: FramePoint,
     val tile: Int,
-    val attribute: Int,
+    val attribute: Int = 0,
     val tileByte: String = tile.toString(16),
     val attributeByte: String = attribute.toString(16),
-    val priority: Boolean, // appears true when the monster is hidden
-    val xFlip: Boolean,
-    val yFlip: Boolean,
-    val paletteIndex: Int,
+    val priority: Boolean = false, // appears true when the monster is hidden
+    val xFlip: Boolean = false,
+    val yFlip: Boolean = false,
+    val paletteIndex: Int = 0,
     val combine: Boolean = true
 ) {
     val tilePair = tile to attribute

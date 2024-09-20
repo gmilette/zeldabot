@@ -152,6 +152,11 @@ object MonstersOverworld {
 //)
 
 object Monsters {
+    fun damaged(tileAttribute: TileAttribute) =
+        lookup[tileAttribute.tile]?.let {
+            tileAttribute.attribute in it.damagedA
+        } ?: false
+
     fun MutableMap<Int, Monster>.add(monster: Monster): MutableMap<Int, Monster> {
         for (t in monster.tile) {
             this[t] = monster
@@ -202,6 +207,7 @@ object Monsters {
         .add(wizzrobe)
         .add(zol)
         .add(darknut)
+        .add(gibdo)
 }
 
 private val h0 = 0x00
