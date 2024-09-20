@@ -201,7 +201,7 @@ object Monsters {
     val stalfos = Monster("skeleton").inL()
     val vire = Monster("batparent").inL()
     val wallmaster = Monster("grabby").inL()
-    val zol = Monster("squishy", tile = setOf(0xaa)).inL()
+    val zol = Monster("squishy", tile = setOf(0xaa, 0xa8)).inL()
 
     val lookup: Map<Int, Monster> = mutableMapOf<Int, Monster>()
         .add(wizzrobe)
