@@ -207,14 +207,14 @@ object AttackActionDecider {
     }
 
     // need to filter enemies here too
-    fun inRangeOf(state: MapLocationState): GamePad {
-        return inRangeOf(
-            state.frameState.link.dir,
-            state.link,
-            aliveEnemiesCanAttack(state),
-            false
-        )
-    }
+//    fun inRangeOf(state: MapLocationState): GamePad {
+//        return inRangeOf(
+//            state.frameState.link.dir,
+//            state.link,
+//            aliveEnemiesCanAttack(state),
+//            false
+//        )
+//    }
 
     fun inRangeOf(state: MapLocationState, targets: List<FramePoint>, useB: Boolean = false): GamePad {
         return inRangeOf(
@@ -228,7 +228,7 @@ object AttackActionDecider {
     /**
      * it's annoying to watch link attack the spin guys, ignore those
      */
-    fun aliveEnemiesCanAttack(state: MapLocationState): List<FramePoint> {
+    fun aliveEnemiesCanAttack(state: MapLocationState): List<Agent> {
         val oppositeFrom by lazy { state.frameState.link.dir.opposite() }
 
         val enemies = state.aliveEnemies
@@ -252,7 +252,7 @@ object AttackActionDecider {
 //            for (agent in it) {
 //                d { " attackable: $agent"}
 //            }
-        }.map { it.point }
+        }
     }
 
     fun inStrikingRange(from: FramePoint, enemies: List<FramePoint>): Boolean {
@@ -310,17 +310,21 @@ object AttackActionDecider {
         }
 
         val linkRect = link.toRectPlus(-2) // make bigger to make sure there is contact
-//        val intersectWithLink = false
-        // need?
-        val intersectWithLink = enemiesClose.firstOrNull { it.intersect(linkRect) }
-        if (intersectWithLink != null) {
-            d { " intersects with link $linkRect"}
-            if (intersectWithLink.intersect(swords[from] ?: Geom.Rectangle())) {
-                d { " intersects with link's sword. Attack!"}
-                GamePad.aOrB(useB)
-            } else {
-                d { " doesnt intersect, evade"}
-                return GamePad.None
+
+        // i donno, it seems like it isn't good for fighting sword guys
+        val checkIntersectWithLink = true
+        if (checkIntersectWithLink) {
+            // need?
+            val intersectWithLink = enemiesClose.firstOrNull { it.intersect(linkRect) }
+            if (intersectWithLink != null) {
+                d { " intersects with link $linkRect" }
+                if (intersectWithLink.intersect(swords[from] ?: Geom.Rectangle())) {
+                    d { " intersects with link's sword. Attack!" }
+                    GamePad.aOrB(useB)
+                } else {
+                    d { " doesnt intersect, evade" }
+                    return GamePad.None
+                }
             }
         }
 

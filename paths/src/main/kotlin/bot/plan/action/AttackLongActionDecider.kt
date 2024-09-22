@@ -41,12 +41,12 @@ object AttackLongActionDecider {
         return (canShoot && !swordIsFlying && targetInLongRange(state, targets))
     }
 
-    fun shouldBoomerang(state: MapLocationState): Boolean {
+    fun shouldBoomerang(state: MapLocationState, targets: List<FramePoint>): Boolean {
         // includes loot
-        val shouldShoot = state.frameState.enemies.isNotEmpty()
-        val canShoot = state.boomerangActive && state.frameState.enemies.any { it.affectedByBoomerang() }
+        val shouldShoot = targets.isNotEmpty()
+        val canShoot = state.boomerangActive
         val boomerangIsFlying = state.frameState.enemies.any { it.tile in EnemyGroup.boomerangs }
-        val inRange by lazy { targetInLongRange(state, emptyList()) }
+        val inRange by lazy { targetInLongRange(state, targets) }
         d { "Shoot boomerang $shouldShoot can=$canShoot flying=$boomerangIsFlying "} // range=$inRange" }
         return (shouldShoot && canShoot && !boomerangIsFlying && inRange)
         // when start a level, if enemies can be boomeranged, switch to it, but not if about
@@ -74,8 +74,12 @@ object AttackLongActionDecider {
     // boomerang algorithm
     // since enemies are fro
 
+//    private fun targetInLongRange(state: MapLocationState): Boolean {
+//        return firstEnemyIntersect(state, longRectangle(state), state.aliveEnemies.map { it.point }) != null
+//    }
+
     private fun targetInLongRange(state: MapLocationState, targets: List<FramePoint>): Boolean {
-        return firstEnemyIntersect(state, longRectangle(state), targets) != null
+        return firstEnemyIntersect(longRectangle(state), targets) != null
     }
 
     fun longRectangle(state: MapLocationState): Geom.Rectangle {
@@ -91,10 +95,9 @@ object AttackLongActionDecider {
     }
 
     private fun firstEnemyIntersect(
-        state: MapLocationState,
         swordRectangle: Geom.Rectangle,
         targets: List<FramePoint>
-    ): Agent? {
+    ): FramePoint? {
         //     0  link
         //     +4 top sword
         // -->
@@ -105,24 +108,12 @@ object AttackLongActionDecider {
             val inter = swordRectangle.intersect(aliveEnemy.toRect())
             d { "intersect $aliveEnemy $inter" }
         }
-//        for (aliveEnemy in state.aliveEnemies) {
-//            val inter = swordRectangle.intersect(aliveEnemy.point.toRect())
-//            d { "intersect ${aliveEnemy.point} $inter" }
-//        }
 
-//        // don't shoot at front of sword guy
-//        return state.aliveEnemies.affectedByBoomerang().filter {
-//            swordRectangle.intersect(it.point.toRect())
-//        }.minByOrNull {
-//            it.point.distTo(link)
-//        }
-
-        // should be targets
-//        return state.aliveEnemies.affectedByBoomerang().firstOrNull {
+//        return state.aliveEnemies.firstOrNull {
 //            swordRectangle.intersect(it.point.toRect())
 //        }
-        return state.aliveEnemies.firstOrNull {
-            swordRectangle.intersect(it.point.toRect())
+        return targets.firstOrNull {
+            swordRectangle.intersect(it.toRect())
         }
     }
 
@@ -143,8 +134,6 @@ object AttackLongActionDecider {
         this.filter { it.affectedByBoomerang() }
 
     // enemy group for immunie to boomerang
-    private fun Agent.affectedByBoomerang() =
-        Monsters.lookup[tile]?.affectedByBoomerang ?: true // most monsters can be boomeranged
 
     private fun rayFrom(map: Map2d<Boolean>, point: FramePoint, dir: Direction): FramePoint {
         if (dir == Direction.None) return FramePoint()
@@ -171,3 +160,6 @@ object AttackLongActionDecider {
     private val MapLocationState.wandActive: Boolean
         get() = this.frameState.inventory.selectedItem == Inventory.Selected.wand
 }
+
+fun Agent.affectedByBoomerang() =
+    Monsters.lookup[tile]?.affectedByBoomerang ?: true // most monsters can be boomeranged AND loot

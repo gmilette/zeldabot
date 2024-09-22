@@ -136,8 +136,18 @@ class RouteTo(val params: Param = Param()) {
             attack
         }
 
+        val attackableAgents: List<Agent> = AttackActionDecider.aliveEnemiesCanAttack(state)
         val attackable = attackableSpec.ifEmpty {
-            AttackActionDecider.aliveEnemiesCanAttack(state)
+            attackableAgents.map { it.point }
+        }
+        val boomerangable: List<FramePoint> = attackableSpec.ifEmpty {
+            (attackableAgents.filter { it.affectedByBoomerang() } + state.loot).map { it.point }
+        }
+        for (framePoint in attackable) {
+            d { " attackable: $framePoint" }
+        }
+        for (framePoint in boomerangable) {
+            d { " boomerangable: $framePoint" }
         }
 
         val blockReflex: GamePad? = if (param.allowBlock && this.params.whatToAvoid != WhatToAvoid.JustEnemies) AttackActionBlockDecider.blockReflex(state) else null
@@ -147,7 +157,7 @@ class RouteTo(val params: Param = Param()) {
         val projectileNear = state.projectiles.any { it.point.toRect().intersect(nearLink) }
         val inRangeOf by lazy { AttackActionDecider.inRangeOf(state, attackable, param.useB) }
         val shouldLongAttack by lazy { param.allowRangedAttack && AttackLongActionDecider.shouldShootSword(state, attackable) }
-        val shouldLongBoomerang by lazy { param.allowRangedAttack && boomerangCt <= 0 && AttackLongActionDecider.shouldBoomerang(state) }
+        val shouldLongBoomerang by lazy { param.allowRangedAttack && boomerangCt <= 0 && AttackLongActionDecider.shouldBoomerang(state, boomerangable) }
         boomerangCt--
 
         val considerAttacks = allowAttack && !projectileNear && attackPossible
@@ -488,4 +498,5 @@ class RouteTo(val params: Param = Param()) {
                 )
             } ?: emptyList()
         }
+
 }
