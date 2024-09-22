@@ -24,8 +24,7 @@ data class Agent(
     val damaged: Boolean = false,
     val blockable: Blockable = Blockable.No,
     val moving: MovingDirection = MovingDirection.UNKNOWN_OR_STATIONARY,
-    val color: Int = 0,
-    val colorByte: String = color.toString(16)
+    val color: Int = 0
 ) {
     val tileAttrib = TileAttribute(tile, attribute)
 

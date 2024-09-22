@@ -93,7 +93,7 @@ class OamStateReasoner(
             damaged = damaged,
             blockable = blockable,
             moving = movingDirection,
-            color = paletteIndex
+            color = color
         )
     }
 
@@ -171,12 +171,13 @@ class OamStateReasoner(
         // OAM data frame
 
         // damaged ghost is only pallette 28.. the palette 24 could be, but it is also the live ghost, depending
-        val paletteIndex = 0x10 or ((attrib and 0x03) shl 2)
+//        val paletteIndex = 0x10 or ((attrib and 0x03) shl 2)
+        val color = attrib.monsterColor()
         val priority = getBitBool(attrib, 5)
         val xFlip = BitUtil.getBitBool(attrib, 6)
         val yFlip = BitUtil.getBitBool(attrib, 7)
         return SpriteData(at / 4, FramePoint(x, y - MapConstants.yAdjust), tile, attrib,
-            priority = priority, xFlip = xFlip, yFlip = yFlip, paletteIndex = paletteIndex, combine = combine)
+            priority = priority, xFlip = xFlip, yFlip = yFlip, color = color, combine = combine)
     }
 
     private fun readOam(): List<SpriteData> {
@@ -247,7 +248,7 @@ data class SpriteData(
     val priority: Boolean = false, // appears true when the monster is hidden
     val xFlip: Boolean = false,
     val yFlip: Boolean = false,
-    val paletteIndex: Int = 0,
+    val color: Int = 0,
     val combine: Boolean = true
 ) {
     val tilePair = tile to attribute
