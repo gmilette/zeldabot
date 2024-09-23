@@ -51,4 +51,8 @@ sealed class MovingDirection {
             is DOWN -> Direction.Down
             else -> Direction.None
         }
+
+    override fun toString(): String {
+        return toArrow()
+    }
 }

@@ -67,4 +67,8 @@ sealed class Blockable(val blockable: Boolean, val requiresMagicShield: Boolean)
     object No : Blockable(blockable = false, requiresMagicShield = false)
     object WithSmallShield : Blockable(blockable = true, requiresMagicShield = false)
     object WithMagicShield : Blockable(blockable = true, requiresMagicShield = true)
+
+    override fun toString(): String {
+        return this.javaClass.simpleName.toString()
+    }
 }

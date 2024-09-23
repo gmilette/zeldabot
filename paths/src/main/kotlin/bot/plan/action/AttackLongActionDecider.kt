@@ -163,3 +163,5 @@ object AttackLongActionDecider {
 
 fun Agent.affectedByBoomerang() =
     Monsters.lookup[tile]?.affectedByBoomerang ?: true // most monsters can be boomeranged AND loot
+
+fun Agent.lootNeeded(state: MapLocationState) = LootKnowledge.needed(state, this)

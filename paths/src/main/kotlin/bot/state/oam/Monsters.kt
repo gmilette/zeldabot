@@ -208,9 +208,9 @@ object Monsters {
         // bc might not have a 3
         tile = setOf(0xbe, 0xb6, 0xBA, 0xb4, 0xac, 0xb0, 0xB8, 0xBC)).immuneToB().inL()
     val gel = Monster(name = "babysquixxshy").inL()
-    val gibdo = Monster(name = "mummy",
+    val gibdoOrLikeLike = Monster(name = "mummy/pancake",
         tile = setOf(0xa6, 0xa4),
-        color = Blue,
+        color = BlueAndRed, // red for the pancake
         damagedA = h64No5() + h023(),
         damaged = mapOf(
             0xa4 to h123(),
@@ -219,9 +219,12 @@ object Monsters {
     val goriya = Monster(name = "boomerangguy",
         color = BlueAndRed // guess
     ).inL()
-    val keese = Monster(name = "bat", tile=setOf(0x9c)).inL()
+    val keese = Monster(name = "bat", tile=setOf(0x9c, 0x9a)).inL()
     val lanmoia = Monster(name = "eyeworm").inL()
-    val likelike = Monster(name = "pancake").inL()
+//    val likelike = Monster(name = "pancake",
+//        tile = setOf(0xa6, 0xa4),
+//        color = BlueAndRed, // red for the pancake
+//    ).inL()
     val manhandla = Monster(name = "star").immuneToB().inL()
     val moldorm = Monster(name = "cirleworm").immuneToB().inL()
     val patra = Monster(name = "eyecircle").immuneToB().inL()
@@ -240,7 +243,7 @@ object Monsters {
         .add(wizzrobe)
         .add(zol)
         .add(darknut)
-        .add(gibdo)
+        .add(gibdoOrLikeLike)
 }
 
 private val h0 = 0x00
@@ -249,6 +252,7 @@ private val h2 = 0x02
 private val h3 = 0x03
 fun h123() = setOf(h0, h1, h2, h3)
 fun h023() = setOf(h0, h2, h3)
+private val Red = setOf(MonsterColor.red)
 private val Blue = setOf(MonsterColor.blue)
 private val BlueAndRed = setOf(MonsterColor.blue, MonsterColor.red)
 
