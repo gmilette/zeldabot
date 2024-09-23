@@ -60,6 +60,10 @@ class OamStateReasoner(
     private fun SpriteData.toAgent(lookup: DirectionByMemoryLookup? = null): Agent {
         val tileAttribute = tile to attribute
         val damaged = DamagedLookup.isDamaged(tileAttribute, isOverworld)
+//        if (damaged) {
+//            d { "DDDD $tile to $attribute is damaged"}
+//            d { "info ${Monsters.lookup[tileAttribute.tile]} "}
+//        }
 //        val damaged = mapStatsTracker.isDamaged(tile, attribute)
         val blockable = calcBlockable(tile, tileAttribute)
         val state = toState(damaged)

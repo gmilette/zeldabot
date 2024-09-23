@@ -216,7 +216,12 @@ class KillAll(
                     val forceNew = previousTarget.oneStr != target.oneStr
                     d { "Plan: target changed was $previousTarget now ${target} forceNew = $forceNew" }
 
-                    val targetsToAttack = AttackActionDecider.attackPointsNoCorner(target)
+                    // possibly remove some attack points in front of the enemy
+                    val targetsToAttack = if (firstEnemy.canAttackFront) {
+                        AttackActionDecider.attackPointsNoCorner(target)
+                    } else {
+                        AttackActionDecider.attackPoints(target, not = firstEnemy.dir)
+                    }
 
                     if (link.point in targetsToAttack) {
                         d { " !On Target " }

@@ -177,8 +177,10 @@ object EnemyGroup {
         swordDir.up.first()
     )
 
+    val projectilesAttackIfNear = setOf(sun, sun2)
+
     val largeProjectiles = setOf(
-        144, 142, // sun
+        sun, sun2, // sun
         fire,
         trap, // trap,
         boulder, boulder2,

@@ -236,9 +236,13 @@ object AttackActionDecider {
             if (state.frameState.level == 1 && state.frameState.mapLoc == 53) {
                 enemies.filter { it.tile in EnemyGroup.dragon1}
             } else {
+                // nuance here
+                // for sword guys, absolutely don't attach
+                // for ghosts, it's ok to attack in front, as long as you are not DIRECTLY in front
+                // problem: ghosts and swords use the same tile, making them indistinguishable
                 if (enemies.any { !it.canAttackFront }) {
                     for (dont in enemies.filter { !it.canAttackFront && it.dir == oppositeFrom }) {
-                        d { "DONT CHECK ${dont.point} can't attack from ${dont.dir} link facing ${state.frameState.link.dir}"}
+                        d { "SWORD FRONT DONT CHECK ${dont.point} can't attack from ${dont.dir} link facing ${state.frameState.link.dir}"}
                     }
                 }
                 enemies.filter {

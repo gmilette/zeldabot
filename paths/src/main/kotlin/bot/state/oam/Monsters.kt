@@ -192,6 +192,7 @@ object Monsters {
 
     val boomerang = Monster()
     //6_56
+    // also same as sword guy
     val wizzrobe = Monster(name = "ghost",
         color = BlueAndRed,
         damagedA = setOf(h0, h3, h64, h67),
