@@ -141,12 +141,15 @@ class RouteTo(val params: Param = Param()) {
             attackableAgents.map { it.point }
         }
         val boomerangable: List<FramePoint> = attackableSpec.ifEmpty {
-            (attackableAgents.filter { it.affectedByBoomerang() } + state.loot).map { it.point }
+            (attackableAgents.filter { it.affectedByBoomerang() } +
+                    state.loot.filter { it.lootNeeded(state) }  // won't boomerang for useless stuff like keys, compass, etc.
+            ).map { it.point }
         }
         for (framePoint in attackable) {
             d { " attackable: $framePoint" }
         }
-        for (framePoint in boomerangable) {
+        val onlyBoomerangagle = (boomerangable - attackable)
+        for (framePoint in onlyBoomerangagle) {
             d { " boomerangable: $framePoint" }
         }
 
@@ -185,7 +188,7 @@ class RouteTo(val params: Param = Param()) {
 
             !allowAttack ||
                     !attackPossible ||
-                    projectileNear ||
+                    projectileNear || // ignore sun
                     (inRangeOf.isAttack && theAttack.attackWaiting()) || //rhino
 //                    !canAttack || // redundant
                     (state.frameState.clockActivated && Random.nextInt(10) == 1) ||
@@ -194,7 +197,7 @@ class RouteTo(val params: Param = Param()) {
                     inRangeOf == GamePad.None -> {
                 attack.reset()
                 attackB.reset()
-                d { " Route Action -> No Attack allow=${allowAttack} possible=${attackPossible}" }
+                d { " Route Action -> No Attack allow=${allowAttack} possible=${attackPossible} projNear=$projectileNear clock=${state.frameState.clockActivated} inRangeOf=${inRangeOf == GamePad.None} rh=${(inRangeOf.isAttack && theAttack.attackWaiting())}" }
                 doRouteTo(state, to, param)
             }
 
