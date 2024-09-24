@@ -174,6 +174,8 @@ object MonsterColor {
 //}
 
 object Monsters {
+    val levelsWithWizzrobes = setOf(6, 9)
+
     fun damaged(tileAttribute: TileAttribute) =
         lookup[tileAttribute.tile]?.let {
             tileAttribute.color !in it.color
@@ -195,8 +197,7 @@ object Monsters {
     // also same as sword guy
     val wizzrobe = Monster(name = "ghost",
         color = BlueAndRed,
-        damagedA = setOf(h0, h3, h64, h67),
-        red = setOf(h2, h65), //confirm
+        // missing some tiles?
         tile = setOf(0xb4, 0xb6, 0xb8, 0xba)).immuneToB().inL()
     // 3_105 red
     // 5_100 blue

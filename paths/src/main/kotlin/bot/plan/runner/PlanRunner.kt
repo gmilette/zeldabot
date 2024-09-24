@@ -218,6 +218,7 @@ class PlanRunner(private val makePlan: PlanMaker,
             manipulator.setHearts(it)
         }
         manipulator.clearRupee()
+        d { "set ring to ${ex.ring}" }
         manipulator.setRing(ex.ring)
         manipulator.setBombs(ex.bombs)
         if (ex.shield) {

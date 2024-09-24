@@ -154,6 +154,10 @@ class RouteTo(val params: Param = Param()) {
             d { " boomerangable: $framePoint" }
         }
 
+        if (attackable.isEmpty()) {
+            d { "No attackable" }
+        }
+
         val blockReflex: GamePad? = if (param.allowBlock && this.params.whatToAvoid != WhatToAvoid.JustEnemies) AttackActionBlockDecider.blockReflex(state) else null
         val leftCorner = state.link.upLeftOneGridALittleLess
         val nearLink = Geom.Rectangle(leftCorner, state.link.downTwoGrid.rightTwoGrid)

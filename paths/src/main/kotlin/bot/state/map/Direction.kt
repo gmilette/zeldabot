@@ -14,6 +14,10 @@ enum class Direction {
             get() = listOf(Up, Right, Down, Left)
     }
 
+    fun vertical() = this in Companion.vertical
+
+    fun horizontal() = this in Companion.horizontal
+
     fun toArrow(): String =
         when (this) {
             Left -> "<--"

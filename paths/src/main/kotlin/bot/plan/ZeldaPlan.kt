@@ -128,6 +128,8 @@ object ZeldaPlan {
             goToAtPoint(33, FramePoint(11.grid, 3.grid))
             obj(ZeldaItem.MagicSword)
             6 using level6
+            // link keeps going back in
+            goInConsume(GamePad.MoveDown, 20)
 
             phase("Gear for level 8")
 //            obj(Dest.Shop.potionShopWest, itemLoc = Dest.Shop.ItemLocs.redPotion)

@@ -253,12 +253,12 @@ class AttributeCount(tile: Int = 0, val hex: String = tile.toString(16)) {
     }
 
     val attribCount = mutableMapOf<Int, Int>()
-    val colorCount = mutableMapOf<Int, Int>()
+//    val colorCount = mutableMapOf<Int, Int>()
 
     fun add(other: AttributeCount) {
         for (count in other.attribCount) {
             attribCount[count.key] = (attribCount[count.key] ?: 0) + count.value
-            colorCount[count.key] = (colorCount[count.key] ?: 0) + count.value
+//            colorCount[count.key] = (colorCount[count.key] ?: 0) + count.value
         }
     }
 
@@ -269,7 +269,7 @@ class AttributeCount(tile: Int = 0, val hex: String = tile.toString(16)) {
 
     fun count(attrib: Int, color: Int = 0) {
         attribCount[attrib] = (attribCount[attrib] ?: 0) + 1
-        colorCount[attrib] = (colorCount[attrib] ?: 0) + 1
+//        colorCount[color] = (colorCount[color] ?: 0) + 1
     }
 
     fun tileString(tile: Int): String {
