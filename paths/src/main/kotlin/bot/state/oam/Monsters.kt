@@ -175,7 +175,9 @@ object MonsterColor {
 //}
 
 object Monsters {
-    val levelsWithWizzrobes = setOf(6, 9)
+    val levelsWithBoomerangAndSword = setOf(7) // 7 also has swords
+    val levelsWithBoomerang = setOf(1, 2) // 7 also has swords
+    val levelsWithWizzrobes = setOf(6, 9) + levelsWithBoomerang
 
     fun damaged(tileAttribute: TileAttribute) =
         lookup[tileAttribute.tile]?.let {
@@ -220,8 +222,8 @@ object Monsters {
             0xa6 to h64())
     ).inL()
     val goriya = Monster(name = "boomerangguy",
-        color = BlueAndRed // guess
-    ).inL()
+        color = BlueAndRed, // guess
+        tile = setOf(0xbe, 0xb6, 0xBA, 0xb4, 0xac, 0xb0, 0xB8, 0xBC)).inL()
     val keese = Monster(name = "bat", tile=setOf(0x9c, 0x9a)).inL()
     val lanmoia = Monster(name = "eyeworm").inL()
 //    val likelike = Monster(name = "pancake",
