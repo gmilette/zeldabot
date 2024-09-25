@@ -3,6 +3,7 @@ package bot.plan.action
 import bot.state.*
 import bot.state.map.MapConstants
 import bot.state.map.grid
+import bot.state.oam.Monsters
 import util.LogFile
 import util.d
 
@@ -103,8 +104,8 @@ class KillAll(
             needLongWait = false
         } else {
             // once set to true, do not change it back
-            // added level check just because sword guys and ghost appear same
-            if (!needLongWait && !considerEnemiesInCenter && state.frameState.level != 3) {
+            // only the wizzrobes
+            if (!needLongWait && !considerEnemiesInCenter && state.frameState.level in Monsters.levelsWithWizzrobes) {
                 needLongWait = state.longWait.isNotEmpty()
                 if (needLongWait) {
                     d { " set long waited "}

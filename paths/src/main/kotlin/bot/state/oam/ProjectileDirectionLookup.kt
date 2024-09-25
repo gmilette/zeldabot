@@ -27,29 +27,6 @@ object ProjectileDirectionLookup {
         } else {
             Direction.None
         }
-        // 7e
-//        when {
-//            tileAttrib.matches(ghostProjectileRightPair) -> Direction.Right
-//            tileAttrib.matches(ghostProjectileRightPair2) -> Direction.Right
-//            tileAttrib.tile == ghostProjectileLeft2 ||
-//                    tileAttrib.tile == ghostProjectileLeft1 -> Direction.Left
-//            tileAttrib.matches(ghostProjectileUp) -> Direction.Up
-//            tileAttrib.matches(ghostProjectileUp2) -> Direction.Up
-//            tileAttrib.tile ==  ghostProjectileUpDown -> Direction.Down
-//            else -> Direction.None
-//        }
-
-    private fun findDirWizo(tileAttrib: TileAttribute) =
-        when {
-            tileAttrib.matches(ghostProjectileRightPair) -> Direction.Right
-            tileAttrib.matches(ghostProjectileRightPair2) -> Direction.Right
-            tileAttrib.tile == ghostProjectileLeft2 ||
-            tileAttrib.tile == ghostProjectileLeft1 -> Direction.Left
-            tileAttrib.matches(ghostProjectileUp) -> Direction.Up
-            tileAttrib.matches(ghostProjectileUp2) -> Direction.Up
-            tileAttrib.tile ==  ghostProjectileUpDown -> Direction.Down
-            else -> Direction.None
-        }
 
     private fun findElse(tileAttrib: TileAttribute,
                  finders: List<(TileAttribute) -> Direction>): Direction {

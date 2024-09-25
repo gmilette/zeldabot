@@ -34,6 +34,11 @@ class FrameStateUpdater(
     fun updateFrame(currentFrame: Int, currentGamePad: GamePad, forcedLinkPoint: FramePoint? = null) {
         val previous = state.frameState
 
+        // read the hearts by pixel
+//        val screen = IntArray(256*256)
+//        api.getPixels(screen)
+        // plot it?
+
         if (currentFrame > 10) {
             this.state.previousLocation = previous.link.point
             this.state.previousHeart = previous.life

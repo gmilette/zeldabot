@@ -18,13 +18,9 @@ val graveyardGhost = (0xe4).toInt() to (0x01).toInt()
 val ghost = (0xBC).toInt()
 val ghost2 = (0xB6).toInt()
 val ghost3 = (0xB4).toInt()
-val ghostProjectileUp = (0x7a).toInt() to (0x01).toInt()
-val ghostProjectileUp2 = (0x7a).toInt() to (0x41).toInt()
 const val ghostProjectileUpDown = (0x7a).toInt() // 1 and 41, 02/42, down 81,c1, 83, c3, 82,c2
 const val ghostProjectileLeft1 = (0x7e).toInt() // right is 03
 const val ghostProjectileLeft2 = (0x7c).toInt() // right is 03
-val ghostProjectileRightPair = (0x7e).toInt() to (0x03).toInt() // right is 03
-val ghostProjectileRightPair2 = (0x7c).toInt() to (0x03).toInt() // right is 03
 val movingBlock = (0xb1).toInt() to (0x03).toInt()
 val movingBlock2 = (0xb3).toInt() to (0x03).toInt()
 // just ignore all of them if it's the overworld, rather than try to route to it
@@ -38,7 +34,6 @@ val waterMonsterPairAlt = (0xEE) to (0x03).toInt() // tile address = 0EE0
 val waterMonsterPairAlt2 = (0xEE) to (0x43).toInt()
 val ghostWeak = (0xB8).toInt() // also it is the back of boomerang guy
 val ghostWeak2 = (0xBA).toInt()
-val boomerangGuy = (0xBA).toInt() to two
 val bombSmoke = (0x70).toInt() // 01
 val bombSmokeLess = (0x72).toInt() // 41
 val monsterCloud = (0x70).toInt() // 01 or 41

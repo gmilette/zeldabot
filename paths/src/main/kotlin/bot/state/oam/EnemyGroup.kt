@@ -4,11 +4,12 @@ object EnemyGroup {
     const val oldWoman = (0x9a).toInt()
 
     val longWaitEnemies = setOf(
-        ghost,
-        ghostWeak2,
+        // only if in level 6, 9
         ghostProjectileUpDown,
         ghostProjectileLeft1,
         ghostProjectileLeft2,
+        ghost,
+        ghostWeak2,
         ghost2,
         ghost3
 //        ghostWeak, // do not use because it it same as boomerang guy
