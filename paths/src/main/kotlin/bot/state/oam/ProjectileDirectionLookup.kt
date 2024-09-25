@@ -16,7 +16,30 @@ object ProjectileDirectionLookup {
 //            else -> Direction.None
 //        }
 
-    private fun findDirWiz(tileAttrib: TileAttribute) =
+    private fun findDirWiz(projectile: TileAttribute): Direction =
+        if (projectile.tile in setOf(ghostProjectileUpDown, ghostProjectileLeft1, ghostProjectileLeft2)) {
+            when (projectile.tile) {
+                ghostProjectileLeft1,
+                ghostProjectileLeft2 -> if (projectile.xFlip) Direction.Left else Direction.Right
+                ghostProjectileUpDown -> if (projectile.yFlip) Direction.Down else Direction.Up
+                else -> Direction.None
+            }
+        } else {
+            Direction.None
+        }
+        // 7e
+//        when {
+//            tileAttrib.matches(ghostProjectileRightPair) -> Direction.Right
+//            tileAttrib.matches(ghostProjectileRightPair2) -> Direction.Right
+//            tileAttrib.tile == ghostProjectileLeft2 ||
+//                    tileAttrib.tile == ghostProjectileLeft1 -> Direction.Left
+//            tileAttrib.matches(ghostProjectileUp) -> Direction.Up
+//            tileAttrib.matches(ghostProjectileUp2) -> Direction.Up
+//            tileAttrib.tile ==  ghostProjectileUpDown -> Direction.Down
+//            else -> Direction.None
+//        }
+
+    private fun findDirWizo(tileAttrib: TileAttribute) =
         when {
             tileAttrib.matches(ghostProjectileRightPair) -> Direction.Right
             tileAttrib.matches(ghostProjectileRightPair2) -> Direction.Right

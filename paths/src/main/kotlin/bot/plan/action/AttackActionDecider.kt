@@ -3,6 +3,7 @@ package bot.plan.action
 import bot.state.*
 import bot.state.map.*
 import bot.state.oam.EnemyGroup
+import bot.state.oam.Monsters
 import bot.state.oam.swordDir
 import util.Geom
 import util.d
@@ -240,13 +241,18 @@ object AttackActionDecider {
                 // for sword guys, absolutely don't attach
                 // for ghosts, it's ok to attack in front, as long as you are not DIRECTLY in front
                 // problem: ghosts and swords use the same tile, making them indistinguishable
+                val haveWizzRobe = (state.frameState.level in Monsters.levelsWithWizzrobes)
                 if (enemies.any { !it.canAttackFront }) {
                     for (dont in enemies.filter { !it.canAttackFront && it.dir == oppositeFrom }) {
-                        d { "SWORD FRONT DONT CHECK ${dont.point} can't attack from ${dont.dir} link facing ${state.frameState.link.dir}"}
+                        d { "SWORD FRONT $haveWizzRobe DONT CHECK ${dont.point} can't attack from ${dont.dir} link facing ${state.frameState.link.dir}"}
                     }
                 }
+                // allow attacking as long as not directly in line with the wizzrobe!
                 enemies.filter {
-                    it.canAttackFront || it.dir != oppositeFrom
+                    it.canAttackFront ||
+                            (!haveWizzRobe && it.dir != oppositeFrom) ||
+                            (haveWizzRobe && (it.dir.vertical && state.frameState.link.y != it.y)) ||
+                            (haveWizzRobe && (it.dir.horizontal && state.frameState.link.x != it.x))
                 }
             }
         } else {

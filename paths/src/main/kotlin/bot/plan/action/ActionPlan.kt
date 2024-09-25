@@ -749,17 +749,23 @@ object LootKnowledge {
     fun keep(tile: Int): Boolean =
         tile in keepSet
 
-    fun needed(state: MapLocationState, agent: Agent) =
-        // get all the loot
+    fun needed(state: MapLocationState, agent: Agent, takeOther: Boolean = true) =
         when (agent.tile) {
             bomb -> (state.frameState.inventory.numBombs < 8)
             bigCoin -> (state.frameState.inventory.numRupees < 254)
             fairy,
+            fairy2,
             heart -> !state.frameState.inventory.heartCalc.noDamage()
-            // heart
-            // fairy
-            else -> true
+            else -> takeOther
         }
+
+    /**
+     * if its not something I need take it, otherwise not worth getting
+     * won't get things like keys, but that we dont want here
+     * we just want to know what to boomerang
+     */
+    fun neededValuable(state: MapLocationState, agent: Agent) =
+        needed(state, agent, false)
 }
 
 class GetLoot(

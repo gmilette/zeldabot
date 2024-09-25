@@ -2,6 +2,7 @@ package bot.state.oam
 
 import bot.state.Agent
 import bot.state.map.Direction
+import nintaco.util.BitUtil
 
 //18, 16, // link shield shite
 //12, 14, // facing up link
@@ -268,6 +269,12 @@ fun h64No5() = setOf(h64, h66, h67)
 typealias TileAttribute = Pair<Int, Int>
 val TileAttribute.color: Int
     get() = attribute.monsterColor()
+
+val TileAttribute.xFlip: Boolean
+    get() = BitUtil.getBitBool(attribute, 6)
+
+val TileAttribute.yFlip: Boolean
+    get() = BitUtil.getBitBool(attribute, 7)
 
 val TileAttribute.tile: Int
     get() = first
