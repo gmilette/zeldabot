@@ -177,7 +177,8 @@ object MonsterColor {
 object Monsters {
     val levelsWithBoomerangAndSword = setOf(7) // 7 also has swords
     val levelsWithBoomerang = setOf(1, 2) // 7 also has swords
-    val levelsWithWizzrobes = setOf(6, 9) + levelsWithBoomerang
+    val levelsWithWizzrobes = setOf(6, 9)
+    val levelsWithNotSword = levelsWithWizzrobes + levelsWithBoomerang
 
     fun damaged(tileAttribute: TileAttribute) =
         lookup[tileAttribute.tile]?.let {

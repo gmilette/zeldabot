@@ -159,7 +159,10 @@ class KillAll(
             return GamePad.None // just wait
         } else {
             // first kill the enemies not in center
-            var aliveEnemies: MutableList<Agent> = state.frameState.enemiesClosestToLink().toMutableList()
+            // but if there is a heart prefer that!
+            var aliveEnemies = state.frameState.heartsClosestToLink().ifEmpty {
+                state.frameState.enemiesClosestToLink()
+            }.toMutableList()
             // if you have clock enabled, the ghost can get stuck on a location that is not passable
             // we should try to route to it still with the nearest
 //            aliveEnemies = aliveEnemies.filter { state.currentMapCell.passable.get(it.point) }.toMutableList()
@@ -218,10 +221,12 @@ class KillAll(
                     d { "Plan: target changed was $previousTarget now ${target} forceNew = $forceNew" }
 
                     // possibly remove some attack points in front of the enemy
-                    val targetsToAttack = if (firstEnemy.canAttackFront) {
-                        AttackActionDecider.attackPointsNoCorner(target)
-                    } else {
-                        AttackActionDecider.attackPoints(target, not = firstEnemy.dir)
+                    val targetsToAttack = when {
+                        (firstEnemy.state == EnemyState.Loot) -> target.lootTargets
+                        (firstEnemy.canAttackFront) ->
+                            AttackActionDecider.attackPointsNoCorner(target)
+
+                        else -> AttackActionDecider.attackPoints(target, not = firstEnemy.dir)
                     }
 
                     if (link.point in targetsToAttack) {

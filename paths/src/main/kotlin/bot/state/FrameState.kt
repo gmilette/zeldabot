@@ -1,5 +1,6 @@
 package bot.state
 
+import bot.plan.action.LootKnowledge
 import bot.state.map.MapConstants
 import bot.state.map.destination.ZeldaItem
 import bot.state.map.destination.zeldaItemsRequired
@@ -52,6 +53,14 @@ data class FrameState(
     fun enemiesClosestToLink(stateOfEnemy: EnemyState = EnemyState.Alive): List<Agent> {
         return enemies.filter {
             it.state == stateOfEnemy
+        }.sortedBy {
+            it.point.distTo(link.point)
+        }
+    }
+
+    fun heartsClosestToLink(): List<Agent> {
+        return enemies.filter {
+            it.state == EnemyState.Loot && it.tile in LootKnowledge.heartSet
         }.sortedBy {
             it.point.distTo(link.point)
         }

@@ -241,7 +241,7 @@ object AttackActionDecider {
                 // for sword guys, absolutely don't attach
                 // for ghosts, it's ok to attack in front, as long as you are not DIRECTLY in front
                 // problem: ghosts and swords use the same tile, making them indistinguishable
-                val haveWizzRobe = (state.frameState.level in Monsters.levelsWithWizzrobes)
+                val haveWizzRobe = (state.frameState.level in Monsters.levelsWithNotSword)
                 if (enemies.any { !it.canAttackFront }) {
                     for (dont in enemies.filter { !it.canAttackFront && it.dir == oppositeFrom }) {
                         d { "SWORD FRONT $haveWizzRobe DONT CHECK ${dont.point} can't attack from ${dont.dir} link facing ${state.frameState.link.dir}"}

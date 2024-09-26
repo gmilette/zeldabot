@@ -24,7 +24,13 @@ object AttackLongActionDecider {
         // need more work
         val swordIsFlying by lazy {
             // looks like a sword that is hiddent has y = 2
-            state.frameState.enemiesRaw.filter { it.y != 248 && it.tileAttrib in EnemyGroup.swordProjectile }
+            d { " raw sword tiles "}
+            for (agent in state.frameState.enemiesRaw.filter {
+                it.tileAttrib in EnemyGroup.swordProjectile
+            }) {
+                d { " raw sword $agent ${agent.point.distTo(state.link)}"}
+            }
+            state.frameState.enemiesRaw.filter { it.y != 187 && it.y != 248 && it.tileAttrib in EnemyGroup.swordProjectile}
                 .minByOrNull { it.point.distTo(state.link) }?.let {
                     it.point.distTo(state.link) > MapConstants.oneGrid
                 } ?: false

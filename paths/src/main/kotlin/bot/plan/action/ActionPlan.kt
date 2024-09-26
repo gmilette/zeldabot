@@ -742,7 +742,9 @@ private fun halfInsidePassable(state: MapLocationState, pt: FramePoint, small: B
 
 
 object LootKnowledge {
-    val keepSet = setOf(heart, fairy, fairy2, bomb, bigCoin, clockTile) //bigCoin,
+    val heartSet = setOf(heart, fairy, fairy2)
+
+    val keepSet = setOf(bomb, bigCoin, clockTile) + heartSet //bigCoin,
 
     val halfSize = setOf(heart, bomb)
 

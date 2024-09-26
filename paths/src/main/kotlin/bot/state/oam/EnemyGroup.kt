@@ -144,7 +144,8 @@ object EnemyGroup {
     val projectileMagicShieldBlockable = setOf(
         ghostProjectileUpDown,
         ghostProjectileLeft1,
-        ghostProjectileLeft2
+        ghostProjectileLeft2,
+        orbProjectile // only magic shield, unless from a dragon
     ) // + (swordProjectile.map { it.tile })
 
     val projectileUnblockable = setOf(
