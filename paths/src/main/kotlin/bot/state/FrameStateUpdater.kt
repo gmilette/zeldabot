@@ -78,7 +78,7 @@ class FrameStateUpdater(
         val theEnemies = oam.agents(dirLookup)
 
         val theUncombined = oam.agentsUncombined()
-        val theRaw = oam.agentsRaw()
+        val theRaw = oam.agentsRaw(dirLookup)
         val linkDir = oam.direction
         val ladderMem = api.readCPU(Addresses.ladderDeployed) != 0
         // check ladder memory first

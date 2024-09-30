@@ -158,11 +158,13 @@ class RouteTo(val params: Param = Param()) {
             d { "No attackable" }
         }
 
+        val dodgeReflex: GamePad = GamePad.None //idea
         val blockReflex: GamePad? = if (param.allowBlock && this.params.whatToAvoid != WhatToAvoid.JustEnemies) AttackActionBlockDecider.blockReflex(state) else null
         val leftCorner = state.link.upLeftOneGridALittleLess
-        val nearLink = Geom.Rectangle(leftCorner, state.link.downTwoGrid.rightTwoGrid)
+//        val nearLink = Geom.Rectangle(leftCorner, state.link.downTwoGrid.rightTwoGrid)
+//        val nearLink = Geom.Rectangle(leftCorner, state.link.downOneGrid.rightOneGrid)
         // should only do this for fireball projectiles
-        val projectileNear = false //state.projectiles.filter { !state.frameState.isLevel || it.tile !in EnemyGroup.projectilesAttackIfNear }.any { it.point.toRect().intersect(nearLink) }
+        val projectileNear = false // state.projectiles.filter { !state.frameState.isLevel || it.tile !in EnemyGroup.projectilesAttackIfNear }.any { it.point.toRect().intersect(nearLink) }
         val inRangeOf by lazy { AttackActionDecider.inRangeOf(state, attackable, param.useB) }
         val shouldLongAttack by lazy { param.allowRangedAttack && AttackLongActionDecider.shouldShootSword(state, attackable) }
         val shouldLongBoomerang by lazy { param.allowRangedAttack && boomerangCt <= 0 && AttackLongActionDecider.shouldBoomerang(state, boomerangable) }

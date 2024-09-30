@@ -23,7 +23,6 @@ object AttackLongActionDecider {
         // sword is more than 1 grid away from link
         // need more work
         val swordIsFlying by lazy {
-            // looks like a sword that is hiddent has y = 2
             d { " raw sword tiles "}
             for (agent in state.frameState.enemiesRaw.filter {
                 it.tileAttrib in EnemyGroup.swordProjectile

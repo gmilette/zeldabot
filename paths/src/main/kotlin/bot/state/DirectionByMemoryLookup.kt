@@ -3,6 +3,7 @@ package bot.state
 import bot.state.map.Direction
 import bot.state.map.MapConstants
 import nintaco.api.API
+import util.d
 
 class DirectionByMemoryLookup(
     private val api: API
@@ -11,6 +12,9 @@ class DirectionByMemoryLookup(
 
     init {
         enemyPoints = readEnemyPointDir().associateBy { it.oneStr }
+//        for (enemyPoint in enemyPoints.values) {
+//            d { " enemyPoints: $enemyPoint" }
+//        }
     }
 
     fun lookupDirection(point: FramePoint): Direction = enemyPoints[point.oneStr]?.direction ?: Direction.None

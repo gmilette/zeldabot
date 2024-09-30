@@ -40,6 +40,8 @@ data class Agent(
     val y: Int
         get() = point.y
 
+    // tileAttribute.tile in Monsters.darknut.tile
+    // look up monster, then check attribute
     val canAttackFront by lazy { !swordDir.inAny(tile) }
 }
 

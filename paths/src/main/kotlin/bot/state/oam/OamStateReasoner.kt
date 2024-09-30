@@ -53,8 +53,8 @@ class OamStateReasoner(
         spritesUncombined.map { it.toAgent() }
 
     // but also filter anything that isn'
-    fun agentsRaw(): List<Agent> =
-        spritesRaw.filter { it.point.y < 248 }.map { it.toAgent() }
+    fun agentsRaw(lookup: DirectionByMemoryLookup): List<Agent> =
+        spritesRaw.filter { it.point.y < 248 }.map { it.toAgent(lookup) }
 
     // calculate isDamaged here
     private fun SpriteData.toAgent(lookup: DirectionByMemoryLookup? = null): Agent {
@@ -87,7 +87,7 @@ class OamStateReasoner(
             lookup?.lookupDirection(point) ?: DirectionLookup.getDir(tileAttribute)
         }
         if (state == EnemyState.Projectile) {
-            d { " Move dir for d:$damaged ${tileAttribute.toHex()} $point is ${movingDirection.toArrow()} and ${findDir.toArrow()}" }
+            d { " Move dir for tile:${tileAttribute.toHex()} $point is ${movingDirection.toArrow()} and ${findDir.toArrow()}" }
         }
         return Agent(
             index = index, point = point,
@@ -199,14 +199,14 @@ class OamStateReasoner(
         // ahh there are twice as many sprites because each sprite is two big
         val alive = spritesRaw.filter { !it.hidden }
         if (DEBUG || true) {
-            d { " alive sprites" }
+            d { " alive sprites OAM" }
             alive.forEachIndexed { index, sprite ->
                 d { "$index: $sprite" }
             }
         }
 
         if (DEBUG) {
-            d { " sprites" }
+            d { " raw sprites " }
             spritesRaw.forEachIndexed { index, sprite ->
                 d { "$index: $sprite ${LinkDirectionFinder.dirFor(sprite)}" }
             }

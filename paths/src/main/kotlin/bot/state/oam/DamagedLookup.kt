@@ -106,9 +106,9 @@ object DamagedLookup {
 
 
     init {
-        for (damagedPair in damagedPairs) {
-            d { " damaged pair ${damagedPair.tile} to ${damagedPair.attribute}"}
-        }
+//        for (damagedPair in damagedPairs) {
+//            d { " damaged pair ${damagedPair.tile} to ${damagedPair.attribute}"}
+//        }
     }
 
     fun build() {
