@@ -1,8 +1,10 @@
 package bot.plan.action
 
 import bot.state.*
+import bot.state.map.Direction
 import bot.state.map.MapConstants
 import bot.state.map.grid
+import bot.state.map.toGamePad
 import bot.state.oam.Monsters
 import util.LogFile
 import util.d
@@ -333,7 +335,16 @@ class AlwaysAttack(useB: Boolean = false, private val freq: Int = 5, private val
                 }
                 else -> {
                     d { "* do attack now wait $attackLength $otherwiseRandom" }
-                    if (otherwiseRandom) GamePad.randomDirection(state.link) else GamePad.None
+                    if (otherwiseRandom) {
+                        val dir = state.bestDirection()
+                        if (dir == Direction.None) {
+                            GamePad.randomDirection(state.link)
+                        } else {
+                            dir.toGamePad()
+                        }
+                    } else {
+                        GamePad.None
+                    }
                 }
             }
         }

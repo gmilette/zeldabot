@@ -407,16 +407,12 @@ class RouteTo(val params: Param = Param()) {
 
         if (state.frameState.ladderDeployed) {
             d { " make new route ladder deployed "}
-            val lastDirections = state.lastPoints.buffer.zipWithNext { a, b -> a.dirTo(b) }
-            val sorted = lastDirections.groupBy { it.ordinal }.mapValues { it.value.size }.toSortedMap()
-            val keyWithMostItems = lastDirections.groupBy { it.ordinal }.maxByOrNull { it.value.size }?.key ?: 0
-            val dirToGo = Direction.entries[keyWithMostItems]
+            val dirToGo = state.bestDirection()
             val modifier = if (dirToGo == Direction.None) {
-                Direction.randomDirection().pointModifier(1)
+                GamePad.randomDirection(state.link).toDirection().pointModifier()
             } else {
-                dirToGo.pointModifier(1)
+                dirToGo.pointModifier()
             }
-            d { " sorted dirs $keyWithMostItems ${Direction.entries[keyWithMostItems]}"}
             return modifier(linkPt)
         }
 

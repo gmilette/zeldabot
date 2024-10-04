@@ -3,9 +3,12 @@ package bot.state
 import bot.plan.action.MoveBuffer
 import bot.plan.action.PrevBuffer
 import bot.plan.action.PreviousMove
+import bot.state.map.Direction
 import bot.state.map.Hyrule
 import bot.state.map.MapCell
+import bot.state.map.pointModifier
 import nintaco.api.ApiSource
+import util.d
 
 /**
  * persists between frames
@@ -62,6 +65,19 @@ class MapLocationState(
 
     val link: FramePoint
         get() = frameState.link.point
+
+    /**
+     * get most frequent direction, it will be one that was successful
+     * if link is not moving, then it will be forced to try something random
+     */
+    fun bestDirection(): Direction {
+        val lastDirections = lastPoints.buffer.zipWithNext { a, b -> a.dirTo(b) }
+        val keyWithMostItems = lastDirections.groupBy { it.ordinal }.maxByOrNull { it.value.size }?.key ?: 0
+        // idea: if there are two directions counts that are equal, link is oscillating, maybe do something different
+        val direction = Direction.entries[keyWithMostItems]
+        d { " sorted dirs $keyWithMostItems $direction"}
+        return direction
+    }
 
     fun clearHistory() {
         framesOnScreen = 0
