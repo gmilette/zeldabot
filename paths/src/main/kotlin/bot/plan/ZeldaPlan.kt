@@ -1132,6 +1132,7 @@ private fun PlanBuilder.levelPlan9PhaseRedRing() {
         leftm
         bombUp
         kill
+        switchToBoomerang
         addNext(
             20,
             makeCenterPush(
@@ -1165,8 +1166,9 @@ private fun PlanBuilder.levelPlan9PhaseSilverArrow() {
         "go in next room".seg()
         upm
         bombLeft
-        GoIn(5, GamePad.MoveLeft)
+        GoIn(10, GamePad.MoveLeft)
         "kill travel 1".seg()
+        switchToWand // maybe can attack with it while the sun guys are running around
         kill
         // trigger trap first
         addNext(
@@ -1222,6 +1224,7 @@ private fun PlanBuilder.levelPlan9PhaseGannon() {
         upm
         "bomb left ok".seg()
         bombLeft
+        switchToBoomerang
         kill
         "push to inbetween travel".seg()
         addNext(
@@ -1236,6 +1239,7 @@ private fun PlanBuilder.levelPlan9PhaseGannon() {
 
         "get to final stair".seg() // save7
         bombLeft
+        switchToBoomerang
         kill
         addNext(
             82, makeCenterPush(

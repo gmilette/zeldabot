@@ -90,7 +90,8 @@ class Experiments(private val masterPlan: PlanMaker) {
         boomerang = ZeldaItem.Boomerang,
         ring = ZeldaItem.BlueRing,
         shield = true,
-        potion = true
+        potion = true,
+        wand = true
     )
 
     val eight = Experiment("level8", "level8_start.save",
@@ -101,18 +102,20 @@ class Experiments(private val masterPlan: PlanMaker) {
         boomerang = ZeldaItem.Boomerang,
         ring = ZeldaItem.BlueRing,
         shield = true,
-        potion = true
+        potion = true,
+        wand = true
     )
 
     val nine = Experiment("level9", "level9_start.save",
         { masterPlan().getPlanPhase(Phases.lev(9)) },
         addEquipment = false,
         sword = ZeldaItem.MagicSword,
-        hearts = 15,
+        hearts = 16,
         boomerang = ZeldaItem.Boomerang,
         ring = ZeldaItem.BlueRing,
         shield = true,
-        potion = true
+        potion = true,
+        wand = true
     )
 
     evaluation = listOf(

@@ -6,6 +6,7 @@ import bot.state.map.MapConstants
 import bot.state.map.pointModifier
 import bot.state.oam.EnemyGroup
 import bot.state.oam.Monsters
+import bot.state.oam.ProjectileDirectionLookup
 import bot.state.oam.toHex
 import org.jheaps.annotations.VisibleForTesting
 import util.Geom
@@ -23,7 +24,6 @@ object AttackLongActionDecider {
         // sword is more than 1 grid away from link
         // need more work
         val swordIsFlying by lazy {
-            d { " raw sword tiles "}
             for (agent in state.frameState.enemiesRaw.filter {
                 it.tileAttrib in EnemyGroup.swordProjectile
             }) {
@@ -49,8 +49,12 @@ object AttackLongActionDecider {
     fun shouldBoomerang(state: MapLocationState, targets: List<FramePoint>): Boolean {
         // includes loot
         val shouldShoot = targets.isNotEmpty()
-        val canShoot = state.boomerangActive
-        val boomerangIsFlying = state.frameState.enemies.any { it.tile in EnemyGroup.boomerangs }
+        val canShoot = state.boomerangActive || state.wandActive
+        val boomerangIsFlying = if (state.boomerangActive) {
+            state.frameState.enemies.any { it.tile in EnemyGroup.boomerangs }
+        } else {
+            state.frameState.enemies.any { it.tile in ProjectileDirectionLookup.ghostProjectiles }
+        }
         val inRange by lazy { targetInLongRange(state, targets) }
         d { "Shoot boomerang $shouldShoot can=$canShoot flying=$boomerangIsFlying "} // range=$inRange" }
         return (shouldShoot && canShoot && !boomerangIsFlying && inRange)

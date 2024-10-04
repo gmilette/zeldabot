@@ -9,6 +9,7 @@ data class Experiment(
     val sword: ZeldaItem = ZeldaItem.MagicSword,
     val hearts: Int? = null,
     val ring: ZeldaItem = ZeldaItem.None,
+    val wand: Boolean = false,
     val bombs: Int = 0,
     val shield: Boolean = false,
     val keys: Int = 0,

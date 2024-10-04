@@ -21,12 +21,14 @@ fun moveHistoryAttackAction(wrapped: Action): Action {
         d { " no escape enabled "}
         wrapped
     }
-    val ladderAction = LadderAction()
-    val combinedAction = DecisionAction(ladderAction, StayInCurrentMapCell(moveHistoryAction)) {
-        !ladderAction.complete(it).also {
-            d { "ladder decision $it"}
-        }
-    }
+//    val ladderAction = LadderAction()
+//    val combinedAction = DecisionAction(ladderAction, StayInCurrentMapCell(moveHistoryAction)) {
+//        !ladderAction.complete(it).also {
+//            d { "ladder decision $it"}
+//        }
+//    }
+
+    val combinedAction = StayInCurrentMapCell(moveHistoryAction)
 
     val usePotion = UsePotion()
     val potionDecision = DecisionAction(usePotion, combinedAction, completeIf = {
@@ -39,7 +41,8 @@ fun moveHistoryAttackAction(wrapped: Action): Action {
         }
     }
 
-    return potionDecision
+//    return potionDecision
+    return combinedAction
 }
 
 private class MinDistTotalFramesCount {

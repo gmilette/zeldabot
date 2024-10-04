@@ -1,5 +1,6 @@
 package bot.state
 
+import bot.plan.action.MoveBuffer
 import bot.plan.action.PrevBuffer
 import bot.plan.action.PreviousMove
 import bot.state.map.Hyrule
@@ -13,6 +14,8 @@ class MapLocationState(
     var hyrule: Hyrule,
 
     var lastGamePad: GamePad = GamePad.MoveUp,
+
+    val lastPoints: MoveBuffer = MoveBuffer(10),
 
     var previousMove: PreviousMove = PreviousMove(
         previous = null,

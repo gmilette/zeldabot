@@ -120,6 +120,11 @@ class StateManipulator(
 
     }
 
+    fun setWandNoBook() {
+        api.writeCPU(Addresses.hasRod, 1)
+        api.writeCPU(Addresses.hasBook, 0)
+    }
+
     fun clearRupee() {
         api.writeCPU(Addresses.numRupees, 0)
     }

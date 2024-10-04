@@ -77,7 +77,7 @@ object EnemyGroup {
 //        (0x84).toInt(), // sword point
         84, // link i think //(0x54).toInt(), // link with shield
         86, // link i think //(0x54).toInt(), // link with shield
-        32, // link's sword
+        /////32, // link's sword // 0x20 link sword is flying //// TEST!!
         96, // link again
         largeShield,
         (0x58).toInt(),
@@ -96,8 +96,8 @@ object EnemyGroup {
 //            160, // this happens to be the left side of the snake monster in level 2, snake has attribute 2
         ladder,
         wizard,
-        flame1,
-        flame2,
+//        flame1,
+//        flame2,
         clockTile,
 //            triforceDirt,
         triforceDirt2,
@@ -114,6 +114,8 @@ object EnemyGroup {
     ) + swordProjectile.map { it.tile } + swordLink.map { it.tile }
 
     val projectiles = setOf(
+        flame1,
+        flame2,
         144, 142, // sun
         40, orbProjectile, // ganons
         arrowTipShotByEnemy,

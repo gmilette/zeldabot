@@ -427,7 +427,12 @@ fun lootAndMove(moveTo: Action) = DecisionAction(Optional(GetLoot()), moveTo) { 
 // do this for all move tasks that are after kill tasks
 // in case the kill all didnt work and there are enemies
 // around, in that case go back to kill mode
-fun killAndMove(moveTo: MoveTo) = DecisionAction(Optional(KillAll()), moveTo) { state ->
+
+// Why is it optional?
+//fun killAndMove(moveTo: MoveTo) = DecisionAction(Optional(KillAll()), moveTo) { state ->
+//    neededReachableLoot(state).isNotEmpty()
+//}
+fun killAndMove(moveTo: MoveTo) = DecisionAction(KillAll(), moveTo) { state ->
     neededReachableLoot(state).isNotEmpty()
 }
 

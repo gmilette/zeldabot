@@ -2,11 +2,8 @@ package bot.state
 
 import bot.plan.action.PreviousMove
 import bot.plan.action.ProjectileDirectionCalculator
-import bot.state.map.Direction
-import bot.state.map.Hyrule
-import bot.state.map.MapConstants
+import bot.state.map.*
 import bot.state.map.stats.MapStatsTracker
-import bot.state.map.upOrLeft
 import bot.state.oam.LinkDirectionFinder
 import bot.state.oam.OamStateReasoner
 import nintaco.api.API
@@ -105,6 +102,7 @@ class FrameStateUpdater(
         )
         // reset to prevent infinite memory being allocated
         previousNow.previous = null
+        state.lastPoints.add(linkPoint)
 
         val seenBoomerang = mapStats.seenBoomerang
         val willSkip = SkipDetector.willSkip(api)

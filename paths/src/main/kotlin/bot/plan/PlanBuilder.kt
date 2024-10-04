@@ -254,6 +254,10 @@ class PlanBuilder(
         get() {
             switchToBoomerang()
         }
+    val switchToWand: Unit
+        get() {
+            switchToWand()
+        }
     val killG: PlanBuilder
         get() {
             add(lastMapLoc, KillGannon())
@@ -769,6 +773,10 @@ class PlanBuilder(
 
     private fun switchToBoomerang() {
         plan.add(SwitchToItemConditionally(Inventory.Selected.boomerang))
+    }
+
+    private fun switchToWand() {
+        plan.add(SwitchToItemConditionally(Inventory.Selected.wand))
     }
 
     fun switchToArrow() {

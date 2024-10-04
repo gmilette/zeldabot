@@ -7,7 +7,6 @@ import bot.plan.action.moveHistoryAttackAction
 import bot.state.*
 import bot.state.map.destination.ZeldaItem
 import nintaco.api.API
-import org.apache.commons.math3.analysis.function.Exp
 import util.d
 import java.io.File
 
@@ -223,6 +222,9 @@ class PlanRunner(private val makePlan: PlanMaker,
         manipulator.setBombs(ex.bombs)
         if (ex.shield) {
             manipulator.setMagicShield()
+        }
+        if (ex.wand) {
+            manipulator.setWandNoBook()
         }
         manipulator.setBoomerang(ex.boomerang)
         manipulator.setKeys(ex.keys)

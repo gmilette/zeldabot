@@ -39,7 +39,7 @@ class HeartsStateCalculator(private val inventory: Inventory) {
         // will be a decreasing number, it's not completely equal when comparing values
         // the max is F, but then D, B, 8, 7, 5, 3, 1
         val reversed = "${whole.padIfLessThan()}${fraction.padIfLessThan()}"
-//        d { "aaaa $damage $whole $fraction $reversed"}
+        d { "aaaa $damage $whole $fraction $reversed"}
 //        255 15 15 1515
         return Integer.parseInt(reversed, 16)
     }

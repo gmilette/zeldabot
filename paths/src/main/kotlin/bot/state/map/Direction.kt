@@ -2,7 +2,12 @@ package bot.state.map
 
 import bot.state.FramePoint
 import bot.state.GamePad
+import bot.state.GamePad.MoveDown
+import bot.state.GamePad.MoveLeft
+import bot.state.GamePad.MoveRight
+import bot.state.GamePad.MoveUp
 import util.Geom
+import kotlin.random.Random
 
 enum class Direction {
     Left, Right, Up, Down, None;
@@ -12,6 +17,14 @@ enum class Direction {
         val vertical: List<Direction> = listOf(Up, Down)
         val all: List<Direction>
             get() = listOf(Up, Right, Down, Left)
+        fun randomDirection(): Direction =
+            when (Random.nextInt(4)) {
+                1 -> Direction.Up
+                2 -> Direction.Down
+                3 -> Direction.Left
+                4 -> Direction.Right
+                else -> Direction.Down
+            }
     }
 
     fun vertical() = this in Companion.vertical

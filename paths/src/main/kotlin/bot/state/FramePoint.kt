@@ -297,7 +297,7 @@ val FramePoint.rightEndDownHalf
  * loot can appear inside a grid, but link can pick it up from half a grid away, so allow those targets
  */
 val FramePoint.lootTargets: List<FramePoint>
-    get() = listOf(this, this.leftHalf, this.upHalf, this.leftUpHalf, this.nearestGrid) //, this.nearestBigGrid) // round to nearest grid? // big grid too far
+    get() = listOf(this, this.leftHalf, this.upHalf,this.nearestGrid) // this.leftUpHalf(prevented me getting the final triforce), , this.nearestBigGrid) // round to nearest grid? // big grid too far
 
 val FramePoint.nearestGrid: FramePoint
     get() {

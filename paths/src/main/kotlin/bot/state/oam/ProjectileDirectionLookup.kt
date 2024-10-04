@@ -16,8 +16,10 @@ object ProjectileDirectionLookup {
 //            else -> Direction.None
 //        }
 
+    val ghostProjectiles = setOf(ghostProjectileUpDown, ghostProjectileLeft1, ghostProjectileLeft2)
+
     private fun findDirWiz(projectile: TileAttribute): Direction =
-        if (projectile.tile in setOf(ghostProjectileUpDown, ghostProjectileLeft1, ghostProjectileLeft2)) {
+        if (projectile.tile in ghostProjectiles) {
             when (projectile.tile) {
                 ghostProjectileLeft1,
                 ghostProjectileLeft2 -> if (projectile.xFlip) Direction.Left else Direction.Right

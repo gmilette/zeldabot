@@ -129,9 +129,18 @@ class RouteTo(val params: Param = Param()) {
         attackableSpec: List<FramePoint> = emptyList()
     ): GamePad {
         val canAttack = param.allowAttack && (param.useB || state.frameState.canUseSword)
+
+        // attack with wand as if it is a sword
+        val attackWithWand = param.allowAttack && !state.frameState.canUseSword && state.frameState.inventory.selectedItem == Inventory.Selected.wand
+        val useB = if (attackWithWand) {
+            true
+        } else {
+            param.useB
+        }
+
         val attackPossible by lazy { params.whatToAvoid != WhatToAvoid.None && canAttack }
-        d { " route To attackOrRoute attack=$attackPossible can=$canAttack allowBlock=${param.allowBlock} avoid=${params.whatToAvoid} waitBoom=$boomerangCt useB=${param.useB} canUseSword=${state.frameState.canUseSword}" }
-        val theAttack = if (param.useB) {
+        d { " route To attackOrRoute attack=$attackPossible can=$canAttack allowBlock=${param.allowBlock} avoid=${params.whatToAvoid} waitBoom=$boomerangCt useB=${useB} canUseSword=${state.frameState.canUseSword}" }
+        val theAttack = if (useB) {
             attackB
         } else {
             attack
@@ -141,6 +150,7 @@ class RouteTo(val params: Param = Param()) {
         val attackable = attackableSpec.ifEmpty {
             attackableAgents.map { it.point }
         }
+        // same with wand? not quite but close
         val boomerangable: List<FramePoint> = attackableSpec.ifEmpty {
             (attackableAgents.filter { it.affectedByBoomerang() } +
                     state.loot.filter { it.lootNeeded(state) }  // won't boomerang for useless stuff like keys, compass, etc.
@@ -165,7 +175,7 @@ class RouteTo(val params: Param = Param()) {
 //        val nearLink = Geom.Rectangle(leftCorner, state.link.downOneGrid.rightOneGrid)
         // should only do this for fireball projectiles
         val projectileNear = false // state.projectiles.filter { !state.frameState.isLevel || it.tile !in EnemyGroup.projectilesAttackIfNear }.any { it.point.toRect().intersect(nearLink) }
-        val inRangeOf by lazy { AttackActionDecider.inRangeOf(state, attackable, param.useB) }
+        val inRangeOf by lazy { AttackActionDecider.inRangeOf(state, attackable, useB) }
         val shouldLongAttack by lazy { param.allowRangedAttack && AttackLongActionDecider.shouldShootSword(state, attackable) }
         val shouldLongBoomerang by lazy { param.allowRangedAttack && boomerangCt <= 0 && AttackLongActionDecider.shouldBoomerang(state, boomerangable) }
         boomerangCt--
@@ -394,6 +404,21 @@ class RouteTo(val params: Param = Param()) {
         val mapCell = param.overrideMapCell ?: state.currentMapCell
 
         val inFrontOfGrids = getInFrontOfGrids(state)
+
+        if (state.frameState.ladderDeployed) {
+            d { " make new route ladder deployed "}
+            val lastDirections = state.lastPoints.buffer.zipWithNext { a, b -> a.dirTo(b) }
+            val sorted = lastDirections.groupBy { it.ordinal }.mapValues { it.value.size }.toSortedMap()
+            val keyWithMostItems = lastDirections.groupBy { it.ordinal }.maxByOrNull { it.value.size }?.key ?: 0
+            val dirToGo = Direction.entries[keyWithMostItems]
+            val modifier = if (dirToGo == Direction.None) {
+                Direction.randomDirection().pointModifier(1)
+            } else {
+                dirToGo.pointModifier(1)
+            }
+            d { " sorted dirs $keyWithMostItems ${Direction.entries[keyWithMostItems]}"}
+            return modifier(linkPt)
+        }
 
         route = FrameRoute(
             mapCell.zstar.route(

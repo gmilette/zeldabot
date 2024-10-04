@@ -97,6 +97,7 @@ data class Inventory(
     val api: API = ApiSource.getAPI()
 ) {
     val selectedItem by lazy { api.readCPU(Addresses.selectedItem) }
+    val hasWand by lazy { api.readCpuB(Addresses.hasRod) }
     val numBombs by lazy { api.readCPU(Addresses.numBombs) }
     val numRupees by lazy { api.readCPU(Addresses.numRupees) }
     val numKeys by lazy { api.readCPU(Addresses.numKeys) }
