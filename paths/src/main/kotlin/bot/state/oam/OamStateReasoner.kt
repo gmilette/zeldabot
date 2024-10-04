@@ -66,7 +66,7 @@ class OamStateReasoner(
 //        }
 //        val damaged = mapStatsTracker.isDamaged(tile, attribute)
         val blockable = calcBlockable(tile, tileAttribute)
-        val state = toState(damaged)
+        val state = toState(damaged, isOverworld)
         // could look up the direction based on tile and sprite
         // arrow
         // wizard
@@ -92,7 +92,7 @@ class OamStateReasoner(
         return Agent(
             index = index, point = point,
             dir = findDir,
-            state = toState(damaged), tile = tile, attribute = attribute,
+            state = toState(damaged, isOverworld), tile = tile, attribute = attribute,
             tileByte = tile.toString(16), attributeByte = attribute.toString(16),
             damaged = damaged,
             blockable = blockable,
@@ -141,11 +141,12 @@ class OamStateReasoner(
         return mutable
     }
 
-    private fun SpriteData.toState(damaged: Boolean): EnemyState =
+    private fun SpriteData.toState(damaged: Boolean, isOverworld: Boolean): EnemyState =
         when {
             this.hidden -> EnemyState.Dead
             isLoot -> EnemyState.Loot
-            isProjectile -> EnemyState.Projectile
+            isOverworld && isProjectile -> EnemyState.Projectile
+            !isOverworld && isProjectileLevel -> EnemyState.Projectile
             // treat as projectile for now
             damaged -> EnemyState.Projectile
             else -> EnemyState.Alive
@@ -195,7 +196,7 @@ class OamStateReasoner(
 
         setLadder(spritesRaw)
 
-        d { " sprites ** alive ** ${spritesRaw.filter { !it.hidden }.size} dir ${direction}" }
+        d { " sprites ** alive ** ${spritesRaw.filter { !it.hidden }.size}" }
         // ahh there are twice as many sprites because each sprite is two big
         val alive = spritesRaw.filter { !it.hidden }
         if (DEBUG || true) {
@@ -288,6 +289,8 @@ data class SpriteData(
     val isLoot = !hidden && (EnemyGroup.loot.contains(tile) || EnemyGroup.lootPairs.contains(tilePair))
 
     val isProjectile = !hidden && (EnemyGroup.projectiles.contains(tile) || EnemyGroup.projectilePairs.contains(tilePair))
+
+    val isProjectileLevel = !hidden && (EnemyGroup.projectilesLevel.contains(tile) || EnemyGroup.projectilePairsLevel.contains(tilePair))
 
     val projectileType = when {
         EnemyGroup.projectileMagicShieldBlockable.contains(tile) -> EnemyStates.Projectile.BlockableWithMagicShield

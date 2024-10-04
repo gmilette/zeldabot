@@ -105,16 +105,20 @@ class Experiments(private val masterPlan: PlanMaker) {
     )
 
     val nine = Experiment("level9", "level9_start.save",
-        { masterPlan().getPlanPhase(Phases.lev(8)) },
+        { masterPlan().getPlanPhase(Phases.lev(9)) },
         addEquipment = false,
-        sword = ZeldaItem.WhiteSword,
-        hearts = 9,
+        sword = ZeldaItem.MagicSword,
+        hearts = 15,
         boomerang = ZeldaItem.Boomerang,
         ring = ZeldaItem.BlueRing,
-        shield = true
+        shield = true,
+        potion = true
     )
 
     evaluation = listOf(
+            nine.copy(name = "level9plan", bombs = 4, keys = 4),
+            eight.copy(name = "level8plan", bombs = 4, keys = 4),
+            seven.copy(name = "level7plan", bombs = 4, keys = 4),
             six.copy(name = "level6plan", bombs = 4, keys = 4),
             five.copy(name = "level5plan", bombs = 4, keys = 2),
             four.copy(name = "level4plan", hearts = 8, bombs = 4, keys = 2),

@@ -131,6 +131,8 @@ object EnemyGroup {
         rockProjectile.tile
     )
 
+    val projectilesLevel = projectiles - rockProjectile.tile
+
     val projectilePairs = setOf(
         arrowPair,
         boulder4Pair,
@@ -140,6 +142,8 @@ object EnemyGroup {
         arrowButtShotByEnemy2,
         rockProjectile
     ) // + swordProjectile
+
+    val projectilePairsLevel = projectilePairs - rockProjectile
 
     val projectileMagicShieldBlockable = setOf(
         ghostProjectileUpDown,

@@ -58,6 +58,8 @@ object Addresses {
       // relative to each screen which is maybe 240 x 240?
    const val linkX = 0x0070
    const val linkY = 0x0084
+   const val linkSwordProjectile = 0x007E
+
    // $08=North, $04=South, $01=East, $02=West
 //   const val linkDir = 0x0089 //it's 98
    const val moveDir = 0x0F // 01 or FF // Link's Move Direction

@@ -5,10 +5,7 @@ import bot.plan.action.*
 import bot.plan.runner.MasterPlan
 import bot.plan.runner.PlanRunner
 import bot.state.*
-import bot.state.map.Direction
-import bot.state.map.Hyrule
-import bot.state.map.MapCell
-import bot.state.map.MapConstants
+import bot.state.map.*
 import bot.state.map.destination.ZeldaItem
 import bot.state.oam.rhinoHeadHeadWithMouthClosed
 import bot.state.oam.rhinoHeadHeadWithMouthOpen
@@ -420,8 +417,9 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                     val ring = this.frameState.inventory.inventoryItems.whichRing().takeIf { it != ZeldaItem.None }
                     val ringS = if (ring != null) "r: ${ring.toString().take(1)}" else ""
                     val noD = if (noDamage) " noD" else ""
+                    val linkDir = this.frameState.link.dir
                     try {
-                        drawIt(plan.target(), plan.path(), "$locCoordinates $link t:$tenth $noD h:${heart}${ringS}")
+                        drawIt(plan.target(), plan.path(), "$locCoordinates $link ${linkDir.ifHave(linkDir.toArrow())} t:$tenth $noD h:${heart}${ringS}")
                     } catch (e: Exception) {
                         d { "ERROR $e" }
                     }

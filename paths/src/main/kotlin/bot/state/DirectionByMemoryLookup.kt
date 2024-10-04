@@ -35,6 +35,11 @@ class DirectionByMemoryLookup(
         return x.zip(y).zip(dirs).map { FramePoint(it.first.first, it.first.second - MapConstants.yAdjust, mapDir(it.second)) }.expandX()
     }
 
+    fun readLinkPointDir(): Direction {
+        val dirs = api.readCPU(Addresses.linkDir)
+        return mapDir(dirs)
+    }
+
     private fun mapDir(dir: Int) = when (dir) {
         2 -> Direction.Left
         1 -> Direction.Right

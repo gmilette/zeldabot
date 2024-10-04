@@ -200,13 +200,13 @@ object Monsters {
     //6_56
     // also same as sword guy
     val wizzrobe = Monster(name = "ghost",
-        color = BlueAndRed,
+        color = blueAndRed,
         // missing some tiles?
         tile = setOf(0xb4, 0xb6, 0xb8, 0xba)).immuneToB().inL()
     // 3_105 red
     // 5_100 blue
     val darknut = Monster("swordguy",
-        color = BlueAndRed,
+        color = blueAndRed,
         // meed tp remove red
         damagedA = setOf(h0, h3, h64, h67),
         blue = setOf(h65, h1),
@@ -216,14 +216,14 @@ object Monsters {
     val gel = Monster(name = "babysquixxshy").inL()
     val gibdoOrLikeLike = Monster(name = "mummy/pancake",
         tile = setOf(0xa6, 0xa4),
-        color = BlueAndRed, // red for the pancake
+        color = blueAndRed, // red for the pancake
         damagedA = h64No5() + h023(),
         damaged = mapOf(
             0xa4 to h123(),
             0xa6 to h64())
     ).inL()
     val goriya = Monster(name = "boomerangguy",
-        color = BlueAndRed, // guess
+        color = blueAndRed, // guess
         tile = setOf(0xbe, 0xb6, 0xBA, 0xb4, 0xac, 0xb0, 0xB8, 0xBC)).inL()
     val keese = Monster(name = "bat", tile=setOf(0x9c, 0x9a)).inL()
     val lanmoia = Monster(name = "eyeworm").inL()
@@ -232,7 +232,9 @@ object Monsters {
 //        color = BlueAndRed, // red for the pancake
 //    ).inL()
     val manhandla = Monster(name = "star").immuneToB().inL()
-    val moldorm = Monster(name = "cirleworm").immuneToB().inL()
+    val moldorm = Monster(name = "cirleworm",
+        tile = setOf(0x9E, 0xA0),
+        color = blueAndRed).immuneToB().inL()
     val patra = Monster(name = "eyecircle").immuneToB().inL()
     val polsVoice = Monster(name = "bunny",
         tile = setOf(0x00)
@@ -258,9 +260,9 @@ private val h2 = 0x02
 private val h3 = 0x03
 fun h123() = setOf(h0, h1, h2, h3)
 fun h023() = setOf(h0, h2, h3)
-private val Red = setOf(MonsterColor.red)
-private val Blue = setOf(MonsterColor.blue)
-private val BlueAndRed = setOf(MonsterColor.blue, MonsterColor.red)
+private val red = setOf(MonsterColor.red)
+private val blue = setOf(MonsterColor.blue)
+private val blueAndRed = setOf(MonsterColor.blue, MonsterColor.red)
 
 private val h67 = 0x43
 private val h66 = 0x42
@@ -272,6 +274,9 @@ fun h64No5() = setOf(h64, h66, h67)
 typealias TileAttribute = Pair<Int, Int>
 val TileAttribute.color: Int
     get() = attribute.monsterColor()
+
+fun TileAttribute.toFlagString(): String =
+    "x: $xFlip y: $yFlip color: $color"
 
 val TileAttribute.xFlip: Boolean
     get() = BitUtil.getBitBool(attribute, 6)

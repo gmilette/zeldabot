@@ -185,7 +185,6 @@ object ZeldaPlan {
             // now go back to level 1 with 6 hearts
 
             // bomb secret.. later
-
             1 using level1
 
             // collect loot loop

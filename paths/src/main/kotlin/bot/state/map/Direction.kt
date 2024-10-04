@@ -28,6 +28,8 @@ enum class Direction {
         }
 }
 
+fun Direction.ifHave(message: String): String = if (this != Direction.None) message else ""
+
 //fun FramePoint.facing(rect: Geom.Rectangle): Boolean = when (this) {
 //    Direction.Left -> x
 //    Direction.Right -> x < rect.topLeft.x
