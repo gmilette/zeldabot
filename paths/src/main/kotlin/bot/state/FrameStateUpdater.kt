@@ -121,7 +121,7 @@ class FrameStateUpdater(
         d { " GAME MODE ${state.frameState.gameMode} $willSkip"}
         if (state.frameState.gameMode == 5) {
             try {
-                percentBlack()
+//                percentBlack()
             } catch (e: Exception) {
 
             }
@@ -140,21 +140,31 @@ class FrameStateUpdater(
         }
     }
 
+
+    val allPixels by lazy { IntArray(256 * 240) }
+
+    fun isShowingSelectInventory(): Boolean {
+        api.getPixels(allPixels)
+        return allPixels.count { it == 0 } == 40
+    }
+
     fun percentBlack() {
-        api.getPixels(somePixels)
-        val numBlack = somePixels.count { it == 0 }
-        somePixels.forEachIndexed { index, i ->
-            print("${i} ")
-            if (i % 256 == 0) {
-                println()
-            }
+        api.getPixels(allPixels)
+        val numBlack = allPixels.count { it == 0 }
+        d { " num black $numBlack"}
+        if (numBlack == 40) {
+            // on the start screen
         }
+//        allPixels.forEachIndexed { index, i ->
+//            if (i < (256 * 10)) {
+//                print("${i} ")
+//                if (i % 256 == 0) {
+//                    println()
+//                }
+//            }
+//        }
     }
 }
-
-// val allPixels = IntArray(64000)
-
-val somePixels = IntArray(256 * 2)
 
 val Boolean.intTrue: Int
     get() = if (this) 1 else 0

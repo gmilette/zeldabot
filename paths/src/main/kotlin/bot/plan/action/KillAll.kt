@@ -194,7 +194,8 @@ class KillAll(
                 d { " ignore only $ignoreUntilOnly"}
                 if (aliveEnemies.any { it.tile !in circleMonsterCenters }) {
                     d { " ignore only have other monsters remove center"}
-                    aliveEnemies.removeIf { it.tile in circleMonsterCenters }
+                    // disable until this works
+///                    aliveEnemies.removeIf { it.tile in circleMonsterCenters }
                 } else {
                     d { " ignore only its just the center"}
                 }

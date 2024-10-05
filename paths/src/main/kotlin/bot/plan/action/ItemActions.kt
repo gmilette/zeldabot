@@ -3,6 +3,8 @@ package bot.plan.action
 import bot.state.*
 import bot.state.oam.oldWoman
 import bot.state.oam.potion
+import nintaco.api.API
+import nintaco.api.ApiSource
 import util.d
 import kotlin.random.Random
 
@@ -69,6 +71,7 @@ class SwitchToItemConditionally(private val inventoryPosition: () -> Int = { Inv
     private val switchSequence = mutableListOf(
         GoIn(2, GamePad.Start),
         GoIn(30, GamePad.None),
+        WaitUntilDisplayingInventory(), // does this work?
         SwitchToItem(inventoryPosition),
         GoIn(100, GamePad.None),
         GoIn(2, GamePad.Start),
@@ -156,6 +159,27 @@ class WaitForOldWoman : Action {
 
 private val FrameState.hasOldWoman
     get() = enemies.any { it.tile == oldWoman }
+
+class WaitUntilDisplayingInventory : Action {
+    val allPixels by lazy { IntArray(256 * 240) }
+
+    private fun isShowingSelectInventory(): Boolean {
+        // somehow get this value via API
+        ApiSource.getAPI().getPixels(allPixels)
+        return allPixels.count { it == 0 } == 40
+    }
+
+    override fun complete(state: MapLocationState): Boolean {
+        return isShowingSelectInventory()
+    }
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        return GamePad.None
+    }
+
+    override val name: String
+        get() = "WaitUntilDisplayingInventory"
+}
 
 private val FrameState.hasPotion
     get() = enemies.any { it.tile == potion }
