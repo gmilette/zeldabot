@@ -293,6 +293,11 @@ class PlanBuilder(
             add(lastMapLoc, lootAndKill(KillAll(needLongWait = false)))
             return this
         }
+    val killCenterMonster: PlanBuilder
+        get() {
+            add(lastMapLoc, KillAll(needLongWait = false, ignoreUntilOnly = circleMonsterCenters))
+            return this
+        }
     val killUntilGetBomb: PlanBuilder
         get() {
             killUntilGetBomb(0)

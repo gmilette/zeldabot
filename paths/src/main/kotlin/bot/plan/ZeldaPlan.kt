@@ -1151,6 +1151,7 @@ private fun PlanBuilder.levelPlan9PhaseRedRing() {
         bombUp
         bombUp
         "ring spot".seg()
+//        switchToWand // it doesnt wait and gets to pushing
         kill
         "ring spot push".seg()
         +makeCenterPush(LevelSpecBuilder.getItemLoc8, makeUp(lastMapLoc))
@@ -1168,7 +1169,6 @@ private fun PlanBuilder.levelPlan9PhaseSilverArrow() {
         bombLeft
         GoIn(10, GamePad.MoveLeft)
         "kill travel 1".seg()
-        switchToWand // maybe can attack with it while the sun guys are running around
         kill
         // trigger trap first
         addNext(
@@ -1195,6 +1195,8 @@ private fun PlanBuilder.levelPlan9PhaseSilverArrow() {
         )
         bombUp
         "acquire arrow".seg()
+        switchToWand
+        GoIn(10, GamePad.None) // does this help wand switch?
         kill
         "set the arrow".seg()
         +makeStairsItemPush(
@@ -1217,6 +1219,7 @@ private fun PlanBuilder.levelPlan9PhaseGannon() {
                 out = InLocations.OutLocation.outRight
             )
         )
+        // maybe it would be ok to use boomerang here
         upm
         "past first pancake".seg()
         upm
@@ -1224,7 +1227,6 @@ private fun PlanBuilder.levelPlan9PhaseGannon() {
         upm
         "bomb left ok".seg()
         bombLeft
-        switchToBoomerang
         kill
         "push to inbetween travel".seg()
         addNext(
@@ -1248,7 +1250,7 @@ private fun PlanBuilder.levelPlan9PhaseGannon() {
             )
         )
         "doorstep of gannon".seg()
-        kill
+        killCenterMonster
         upk
         "seg kill gannon".seg()
         goIn(GamePad.None, 100)

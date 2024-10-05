@@ -1,6 +1,7 @@
 package bot.state
 
 import bot.state.map.destination.ZeldaItem
+import bot.state.oam.heart
 import util.d
 
 /**
@@ -139,8 +140,17 @@ class HeartsStateCalculator(private val inventory: Inventory) {
         return info()
     }
 
+    fun logData() {
+        d { "heartContainers: ${heartContainers()}"}
+        d { "heartContainersFull: ${heartContainersFull()}"}
+        d { "damage: ${damageDecimal()}"}
+        d { "less hearts: ${lessHearts()}"}
+    }
+
     private fun info(): String =
         if (full()) "F_${damageDecimal()}" else "${heartContainers() - heartContainersFull() + damageDecimal()}"
+
+    fun lessHearts() = heartContainers() - heartContainersFull() + damageDecimal()
 
     fun makeHeartsFull(): Int {
         val containers = heartContainers() - 1

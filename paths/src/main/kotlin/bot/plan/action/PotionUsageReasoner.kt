@@ -24,7 +24,7 @@ class SaveItemAction: Action {
     var currentItem: Int = -1
     override fun complete(state: MapLocationState): Boolean {
         currentItem = state.frameState.inventory.selectedItem
-        d{ " save item $currentItem"}
+        d{ " potion save item $currentItem"}
         return true
     }
 }
@@ -43,15 +43,15 @@ fun makeUsePotionAction(): OneTimeActionSequence {
     val save = SaveItemAction()
     return OneTimeActionSequence(
         listOf(
-//            save,
+            save,
             SwitchToItemConditionally(Inventory.Selected.potion),
             // wait until the screen scrolls down, but not too long
 //            CompleteIfGameModeNormal(),
             GoIn(80, GamePad.None),        // use it
             UseItem(),
-            GoIn(80, GamePad.None), // wait until full
-//            SwitchToItemConditionally(inventoryPosition = { save.currentItem }),
-            SwitchToItemConditionally(inventoryPosition = { 0 }),
+            GoIn(800, GamePad.None), //500 ok for 8
+            SwitchToItemConditionally(inventoryPosition = { save.currentItem }),
+            //SwitchToItemConditionally(inventoryPosition = { 0 }),
             GoIn(80, GamePad.None)
         ), tag = "use potion")
 }
@@ -101,11 +101,15 @@ class UsePotion : Action {
 }
 
 object PotionUsageReasoner {
+    val USE_POTION_HEART_LIMIT = 4.0
+
     var diversionNeed: DiversionState = DiversionState.noNeed
 
     fun shouldUsePotion(state: FrameState): Boolean {
         val damage = state.inventory.heartCalc.damageInHearts()
-        val almostDead by lazy { state.inventory.heartCalc.lifeInHearts() <= 8.25f }
+        val heart = state.inventory.heartCalc.lessHearts()
+        val almostDead = (state.inventory.heartCalc.heartContainers() - heart) <= USE_POTION_HEART_LIMIT
+        //val almostDead by lazy { state.inventory.heartCalc.lifeInHearts() <= 8.25f }
         val full by lazy { state.inventory.heartCalc.full(state) }
 //        val full = false
         val haveEnough by lazy { state.inventory.heartCalc.heartContainers() >= 8 }
@@ -117,7 +121,9 @@ object PotionUsageReasoner {
             isLevel -> "in level"
             else -> ""
         }
-        d { " life $message ${state.inventory.heartCalc.lifeInHearts()} d:$damage $almostDead $havePotion $full"}
+
+        d { " life $message ${state.inventory.heartCalc.toString()} d:$damage $almostDead $havePotion $full heart: $heart "}
+        state.inventory.heartCalc.logData()
 
 //        if (haveEnough && almostDead && havePotion) {
 //            d { "!!need potion!!"}

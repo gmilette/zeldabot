@@ -119,6 +119,13 @@ class FrameStateUpdater(
 
         // game mode 8, is the dead screen
         d { " GAME MODE ${state.frameState.gameMode} $willSkip"}
+        if (state.frameState.gameMode == 5) {
+            try {
+                percentBlack()
+            } catch (e: Exception) {
+
+            }
+        }
     }
 
     fun updateDecision(gamePad: GamePad) {
@@ -133,7 +140,21 @@ class FrameStateUpdater(
         }
     }
 
+    fun percentBlack() {
+        api.getPixels(somePixels)
+        val numBlack = somePixels.count { it == 0 }
+        somePixels.forEachIndexed { index, i ->
+            print("${i} ")
+            if (i % 256 == 0) {
+                println()
+            }
+        }
+    }
 }
+
+// val allPixels = IntArray(64000)
+
+val somePixels = IntArray(256 * 2)
 
 val Boolean.intTrue: Int
     get() = if (this) 1 else 0

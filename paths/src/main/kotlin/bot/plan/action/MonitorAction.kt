@@ -41,8 +41,8 @@ fun moveHistoryAttackAction(wrapped: Action): Action {
         }
     }
 
-//    return potionDecision
-    return combinedAction
+    return potionDecision
+//    return combinedAction
 }
 
 private class MinDistTotalFramesCount {

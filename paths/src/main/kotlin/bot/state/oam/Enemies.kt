@@ -207,6 +207,7 @@ val circleMonster = (0xFC).toInt()
 val circleMonster2 = (0xFE).toInt()
 val circleMonsterCenter = (0xFA).toInt()
 val circleMonsterCenter2 = (0xF8).toInt()
+val circleMonsterCenters = setOf(circleMonsterCenter, circleMonsterCenter2)
 val shopOwner = (0xF8).toInt() to (0x02).toInt()
 val shopOwner2 = (0xFA).toInt() to (0x02).toInt()
 // on map locations (anywhere in overworld) 31, map 29

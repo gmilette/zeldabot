@@ -4,6 +4,7 @@ import bot.state.*
 import bot.state.map.*
 import bot.state.oam.EnemyGroup
 import bot.state.oam.Monsters
+import bot.state.oam.circleMonsterCenters
 import bot.state.oam.swordDir
 import util.Geom
 import util.d
@@ -232,11 +233,18 @@ object AttackActionDecider {
     fun aliveEnemiesCanAttack(state: MapLocationState): List<Agent> {
         val oppositeFrom by lazy { state.frameState.link.dir.opposite() }
 
-        val enemies = state.aliveEnemies
+        var enemies = state.aliveEnemies
         return if (state.frameState.isLevel) {
             if (state.frameState.level == 1 && state.frameState.mapLoc == 53) {
                 enemies.filter { it.tile in EnemyGroup.dragon1}
             } else {
+                // doesnt really work
+//                if (state.frameState.level == 9) {
+//                    // unless you actually have to kill it
+//                    if (state.frameState.mapLoc != 97 && state.frameState.mapLoc != 82) {
+//                        enemies = enemies.filter { it.tile !in circleMonsterCenters }
+//                    }
+//                }
                 // nuance here
                 // for sword guys, absolutely don't attach
                 // for ghosts, it's ok to attack in front, as long as you are not DIRECTLY in front

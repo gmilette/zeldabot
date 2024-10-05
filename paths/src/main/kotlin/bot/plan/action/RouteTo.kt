@@ -156,7 +156,7 @@ class RouteTo(val params: Param = Param()) {
                     state.loot.filter { it.lootNeeded(state) }  // won't boomerang for useless stuff like keys, compass, etc.
             ).map { it.point }
         }
-        for (framePoint in attackable) {
+        for (framePoint in attackableAgents) {
             d { " attackable: $framePoint" }
         }
         val onlyBoomerangagle = (boomerangable - attackable)

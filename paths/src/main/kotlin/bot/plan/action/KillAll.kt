@@ -6,6 +6,7 @@ import bot.state.map.MapConstants
 import bot.state.map.grid
 import bot.state.map.toGamePad
 import bot.state.oam.Monsters
+import bot.state.oam.circleMonsterCenters
 import util.LogFile
 import util.d
 
@@ -38,6 +39,7 @@ class KillAll(
 //    ignoreEnemies: Boolean = false,
     private var firstAttackBomb: Boolean = false,
     private var allowBlock: Boolean = true,
+    private val ignoreUntilOnly: Set<Int> = emptySet(),
 //    ignoreProjectilesRoute: Boolean = false,
     whatToAvoid: RouteTo.WhatToAvoid = RouteTo.WhatToAvoid.All
 ) : Action {
@@ -185,6 +187,17 @@ class KillAll(
             if (targetOnly.isNotEmpty()) {
                 d { " target only $targetOnly" }
                 aliveEnemies = aliveEnemies.filter { targetOnly.contains(it.tile) }.toMutableList()
+            }
+
+            // specially handling for level 8 spinning center guy
+            if (ignoreUntilOnly.isNotEmpty()) {
+                d { " ignore only $ignoreUntilOnly"}
+                if (aliveEnemies.any { it.tile !in circleMonsterCenters }) {
+                    d { " ignore only have other monsters remove center"}
+                    aliveEnemies.removeIf { it.tile in circleMonsterCenters }
+                } else {
+                    d { " ignore only its just the center"}
+                }
             }
 
             // for rhino, adjust target location

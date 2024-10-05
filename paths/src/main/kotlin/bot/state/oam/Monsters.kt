@@ -235,7 +235,8 @@ object Monsters {
     val moldorm = Monster(name = "cirleworm",
         tile = setOf(0x9E, 0xA0),
         color = blueAndRed).immuneToB().inL()
-    val patra = Monster(name = "eyecircle").immuneToB().inL()
+    val patra = Monster(name = "eyecircle",
+        tile = setOf(0xfe, 0xfc, 0xf8, 0xfa)).immuneToB().inL()
     val polsVoice = Monster(name = "bunny",
         tile = setOf(0x00)
     ).immuneToB().inL()
@@ -252,6 +253,7 @@ object Monsters {
         .add(zol)
         .add(darknut)
         .add(gibdoOrLikeLike)
+        .add(patra)
 }
 
 private val h0 = 0x00

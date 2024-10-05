@@ -96,7 +96,8 @@ object AttackLongActionDecider {
         val link = state.link
         // assume go right
         val midLink = link.justDownFourth
-        val endReach = rayFrom(state.currentMapCell.passable, midLink, dir)
+        val bottomLink = link.justDownThreeFourth
+        val endReach = rayFrom(state.currentMapCell.passable, bottomLink, dir)
         d { " end reach is $endReach $dir" }
         val swordRectangle = swordRectangle(link, endReach, dir)
         d { " $link intersect sword rect $swordRectangle" }
