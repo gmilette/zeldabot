@@ -71,7 +71,7 @@ class SwitchToItemConditionally(private val inventoryPosition: () -> Int = { Inv
     private val switchSequence = mutableListOf(
         GoIn(2, GamePad.Start),
         GoIn(30, GamePad.None),
-        WaitUntilDisplayingInventory(), // does this work?
+        OnceAction(WaitUntilDisplayingInventory()), // does this work?
         SwitchToItem(inventoryPosition),
         GoIn(100, GamePad.None),
         GoIn(2, GamePad.Start),
@@ -160,17 +160,33 @@ class WaitForOldWoman : Action {
 private val FrameState.hasOldWoman
     get() = enemies.any { it.tile == oldWoman }
 
+class OnceAction(action: Action) : WrappedAction(action) {
+    private var completed = false
+
+    override fun complete(state: MapLocationState): Boolean {
+        completed = completed || wrapped.complete(state)
+        d { "OnceAction complete $completed"}
+        return completed
+    }
+}
+
 class WaitUntilDisplayingInventory : Action {
-    val allPixels by lazy { IntArray(256 * 240) }
+    private val allPixels by lazy { IntArray(256 * 240) }
 
     private fun isShowingSelectInventory(): Boolean {
         // somehow get this value via API
         ApiSource.getAPI().getPixels(allPixels)
-        return allPixels.count { it == 0 } == 40
+        val count = allPixels.count { it == 0 }
+        d { " showing count $count"}
+        return count < 60 // was == 40
     }
 
     override fun complete(state: MapLocationState): Boolean {
-        return isShowingSelectInventory()
+        return isShowingSelectInventory().also {
+            if (!it) {
+                d { " waiting to show inventory "}
+            }
+        }
     }
 
     override fun nextStep(state: MapLocationState): GamePad {

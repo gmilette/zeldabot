@@ -1131,6 +1131,9 @@ private fun PlanBuilder.levelPlan9PhaseRedRing() {
         upm
         leftm
         bombUp
+        // doesn't wait for the wait for some reason
+//        switchToWand
+//        wait(1000)
         kill
         switchToBoomerang
         addNext(

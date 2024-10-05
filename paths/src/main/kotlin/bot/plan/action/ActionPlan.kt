@@ -235,7 +235,7 @@ class OneTimeActionSequence(
         val current = currentAction ?: pop() ?: return GamePad.None
         // check all complete to prevent infinite loop
         if (current.complete(state)) { // causes bomb one to fail && !allComplete(state)
-            d { " sequence complete ${stack.size}" }
+            d { " onetime sequence complete ${stack.size}" }
             pop()
             return nextStep(state)
         }
@@ -856,6 +856,7 @@ class Wait(val howLong: Int) : Action {
 
     override fun nextStep(state: MapLocationState): GamePad {
         frames++
+        d { " waiting... $frames until $howLong" }
         return GamePad.None
     }
 

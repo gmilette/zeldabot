@@ -236,7 +236,9 @@ object Monsters {
         tile = setOf(0x9E, 0xA0),
         color = blueAndRed).immuneToB().inL()
     val patra = Monster(name = "eyecircle",
-        tile = setOf(0xfe, 0xfc, 0xf8, 0xfa)).immuneToB().inL()
+        tile = setOf(0xfe, 0xfc, 0xf8, 0xfa),
+        color = blueAndRed
+    ).immuneToB().inL()
     val polsVoice = Monster(name = "bunny",
         tile = setOf(0x00)
     ).immuneToB().inL()
