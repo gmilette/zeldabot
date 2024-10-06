@@ -82,16 +82,19 @@ class SwitchToItemConditionally(private val inventoryPosition: () -> Int = { Inv
 
     private val switchSequence = mutableListOf(
         // to do repeat pressing start then waiting
-        GoIn(2, GamePad.Start),
-        GoIn(30, GamePad.None),
-        OnceAction(WaitUntilDisplayingInventory()),
+//        GoIn(2, GamePad.Start),
+//        GoIn(30, GamePad.None),
+        OnceAction(HitStartUntilItemScreenChanges()),
+        OnceAction(WaitUntilDisplayingInventory2()),
         SwitchToItem(inventoryPosition),
         GoIn(100, GamePad.None),
         GoIn(2, GamePad.Start),
-        GoIn(30, GamePad.None),
+        GoIn(10, GamePad.None),
+        OnceAction(WaitUntilItemMenuClosed()),
+        GoIn(5, GamePad.None),
     )
 
-    private val positionShoot = OrderedActionSequence(switchSequence)
+    private val positionShoot = OrderedActionSequence(switchSequence, restartWhenDone = false)
 
     override fun complete(state: MapLocationState): Boolean {
         return (positionShoot.done || startedWithItem).also { d { "SwitchToItemConditionally complete $it" } }
@@ -181,6 +184,55 @@ class OnceAction(action: Action) : WrappedAction(action) {
         d { "OnceAction complete $completed"}
         return completed
     }
+}
+
+class WaitUntilItemMenuClosed : Action {
+    override fun complete(state: MapLocationState): Boolean {
+        return state.frameState.inventory.isItemMenuOpenOrOpening.also {
+            if (!it) {
+                d { " waiting item menu to close "}
+            }
+        }
+    }
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        return GamePad.None
+    }
+
+    override val name: String
+        get() = "WaitUntilItemMenuClosed"
+}
+
+class HitStartUntilItemScreenChanges : Action {
+    private var frames = 0
+    override fun complete(state: MapLocationState): Boolean {
+        return state.frameState.inventory.isItemMenuChanging
+    }
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        frames++
+        return if (state.frameState.inventory.isItemMenuChanging || frames % 4 < 1) {
+            GamePad.None
+        } else {
+            GamePad.Start
+        }
+    }
+
+    override val name: String
+        get() = "HitStartUntilItemScreenChanges"
+}
+
+class WaitUntilDisplayingInventory2 : Action {
+    override fun complete(state: MapLocationState): Boolean {
+        return state.frameState.inventory.isItemMenuOpen
+    }
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        return GamePad.None
+    }
+
+    override val name: String
+        get() = "WaitUntilDisplayingInventory2"
 }
 
 class WaitUntilDisplayingInventory : Action {

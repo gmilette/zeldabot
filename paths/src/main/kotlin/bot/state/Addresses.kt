@@ -9,6 +9,13 @@ object Addresses {
    E=Registration        F=Elimination
     */
    const val gameMode = 0x0012 // Game Mode
+
+   /**
+    * 0 no item screen
+    * 7 on item screen
+    * 8 exit scrolling
+    */
+   const val itemSelectionScroll = 0x00E1
    const val level = 0x0010 // level 0 overworld
 
    const val triforce = 0x0671
@@ -81,6 +88,8 @@ object Addresses {
    const val linkDirReal = 0x00FA
    //  $08=North, $04=South, $01=East, $02=West
    const val linkDir = 0x0098
+
+
 
    // i found
    // 5F if ladder deployed

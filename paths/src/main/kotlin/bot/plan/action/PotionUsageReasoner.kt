@@ -50,7 +50,7 @@ fun makeUsePotionAction(): OneTimeActionSequence {
             GoIn(80, GamePad.None),        // use it
             UseItem(),
             // i dont think we need this if inventory thing keeps pressing statr
-            GoIn(800, GamePad.None), //500 ok for 8
+//            GoIn(800, GamePad.None), //500 ok for 8
             SwitchToItemConditionally(inventoryPosition = { save.currentItem }),
             //SwitchToItemConditionally(inventoryPosition = { 0 }),
             GoIn(80, GamePad.None)

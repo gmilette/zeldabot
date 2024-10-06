@@ -96,6 +96,12 @@ private fun API.readCpuB(address: Int): Boolean =
 data class Inventory(
     val api: API = ApiSource.getAPI()
 ) {
+    val itemMenu: Int by lazy { api.readCPU(Addresses.itemSelectionScroll)}
+
+    // 8 is scrolling out, 1-6 is scrolling in
+    val isItemMenuChanging by lazy { itemMenu in 1..6 || itemMenu == 8 }
+    val isItemMenuOpenOrOpening by lazy { itemMenu > 0 }
+    val isItemMenuOpen by lazy { itemMenu == 7 }
     val selectedItem by lazy { api.readCPU(Addresses.selectedItem) }
     val hasWand by lazy { api.readCpuB(Addresses.hasRod) }
     val numBombs by lazy { api.readCPU(Addresses.numBombs) }

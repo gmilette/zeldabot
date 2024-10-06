@@ -1243,7 +1243,8 @@ private fun PlanBuilder.levelPlan9PhaseGannon() {
 
         "get to final stair".seg() // save7
         bombLeft
-        switchToBoomerang
+        // not really needed but it would be nice
+//        switchToBoomerang
         kill
         addNext(
             82, makeCenterPush(
@@ -1252,7 +1253,8 @@ private fun PlanBuilder.levelPlan9PhaseGannon() {
             )
         )
         "doorstep of gannon".seg()
-        killCenterMonster
+//        kill
+//        killCenterMonster
         upk
         "seg kill gannon".seg()
         goIn(GamePad.None, 100)
