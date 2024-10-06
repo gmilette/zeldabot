@@ -137,6 +137,7 @@ data class Inventory(
         val whistle = 5
         val bait = 6 //?
         val potion = 7
+        // what if we just make letter the 7th position?
         val letter = 15
         val wand = 8 //?
     }

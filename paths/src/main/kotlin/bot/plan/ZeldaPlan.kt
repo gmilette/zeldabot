@@ -1127,13 +1127,12 @@ private fun PlanBuilder.levelPlan9PhaseRedRing() {
         lev(9)
         startAt(LevelStartMapLoc.lev(9))
         // really dont want to accidently exit because link can't find way back to the entrance
-        GoInConsume(30, GamePad.MoveUp)
+        goInConsume(GamePad.MoveUp, 30)
         upm
         leftm
         bombUp
-        // doesn't wait for the wait for some reason
-//        switchToWand
-//        wait(1000)
+        switchToWand
+        wait(100)
         kill
         switchToBoomerang
         addNext(
@@ -1199,7 +1198,7 @@ private fun PlanBuilder.levelPlan9PhaseSilverArrow() {
         bombUp
         "acquire arrow".seg()
         switchToWand
-        GoIn(10, GamePad.None) // does this help wand switch?
+        wait(100)
         kill
         "set the arrow".seg()
         +makeStairsItemPush(

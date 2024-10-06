@@ -852,7 +852,7 @@ class GetLoot(
 class Wait(val howLong: Int) : Action {
     private var frames = 0
     override fun complete(state: MapLocationState): Boolean =
-        frames < howLong
+        frames > howLong
 
     override fun nextStep(state: MapLocationState): GamePad {
         frames++
@@ -861,7 +861,7 @@ class Wait(val howLong: Int) : Action {
     }
 
     override val name: String
-        get() = "Wait for $howLong"
+        get() = "Wait for $frames of $howLong"
 }
 
 /**

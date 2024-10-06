@@ -20,19 +20,31 @@ class SwitchToItem(private val inventoryPosition: () -> Int = { Inventory.Select
     private fun selectedItem(state: MapLocationState): Boolean =
         state.frameState.inventory.selectedItem == inventoryPosition() // how does this map
 
-    private fun directionToSelection(state: MapLocationState): GamePad =
-        if (state.frameState.inventory.selectedItem < inventoryPosition()) {
+    private fun directionToSelection(state: MapLocationState): GamePad {
+        // doesn't work if you have the letter
+        val item = state.frameState.inventory.selectedItem
+
+        // for purposes of determining which way to move the cursor
+        // use the potion position
+        val selected = if (item == Inventory.Selected.letter) {
+            Inventory.Selected.potion
+        } else {
+            item
+        }
+
+        return  if (selected < inventoryPosition()) {
             GamePad.MoveRight
         } else {
             GamePad.MoveLeft
         }
+    }
 
     override fun nextStep(state: MapLocationState): GamePad {
         d {
             " selecting item selected=${selectedItem(state)} state=${
                 state.frameState.inventory
                     .selectedItem
-            }"
+            } try to select ${inventoryPosition()}"
         }
         // this is weird, link cannot just keep pressing left for right, it has to
         // press none inbetween sometimes. Whatever this works
@@ -52,7 +64,7 @@ class SwitchToItem(private val inventoryPosition: () -> Int = { Inventory.Select
     }
 
     override val name: String
-        get() = "SwitchToItem to ${inventoryPosition}"
+        get() = "SwitchToItem to ${inventoryPosition()}"
 }
 
 //private class DoneWhenNotSelecting : Action {
@@ -69,9 +81,10 @@ class SwitchToItemConditionally(private val inventoryPosition: () -> Int = { Inv
     constructor(inventory: Int) : this({ inventory })
 
     private val switchSequence = mutableListOf(
+        // to do repeat pressing start then waiting
         GoIn(2, GamePad.Start),
         GoIn(30, GamePad.None),
-        OnceAction(WaitUntilDisplayingInventory()), // does this work?
+        OnceAction(WaitUntilDisplayingInventory()),
         SwitchToItem(inventoryPosition),
         GoIn(100, GamePad.None),
         GoIn(2, GamePad.Start),
@@ -92,7 +105,7 @@ class SwitchToItemConditionally(private val inventoryPosition: () -> Int = { Inv
     private var startedWithItem = false
 
     override fun nextStep(state: MapLocationState): GamePad {
-        d {"SwitchToItemConditionallyZ selected: ${state.frameState.inventory.selectedItem} complete ${complete(state)} positionShoot ${positionShoot.stepName}"}
+        d {"SwitchToItemConditionallyZ selected: ${state.frameState.inventory.selectedItem} try to select ${inventoryPosition()} complete ${complete(state)} positionShoot ${positionShoot.stepName}"}
         return if (firstStep && state.frameState.inventory.selectedItem == inventoryPosition()) {
             d {"Already have"}
             startedWithItem = true
@@ -190,6 +203,7 @@ class WaitUntilDisplayingInventory : Action {
     }
 
     override fun nextStep(state: MapLocationState): GamePad {
+        // maybe hit start while waiting
         return GamePad.None
     }
 
