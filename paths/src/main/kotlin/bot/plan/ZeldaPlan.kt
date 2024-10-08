@@ -1183,6 +1183,7 @@ private fun PlanBuilder.levelPlan9PhaseSilverArrow() {
             )
         )
         "travel to arrow".seg()
+        kill // kill the squishies looking for hearts
         left
         "past bats".seg()
         leftm  //bats
@@ -1201,7 +1202,7 @@ private fun PlanBuilder.levelPlan9PhaseSilverArrow() {
         wait(100)
         kill
         "set the arrow".seg()
-        goTo(FramePoint(13.grid, 5.grid)) // other side
+        goTo(FramePoint(13.grid, 5.grid), ignoreProjectiles = true) // other side
         +makeStairsItemPush(
             startAt = LevelSpecBuilder.Companion.Nine.silverArrow,
             makeUp(lastMapLoc)

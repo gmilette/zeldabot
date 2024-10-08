@@ -36,7 +36,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         val root = DirectoryConstants.states
         d { " master plan ${plan.masterPlan.toStringAll()}" }
         val loadZelda by RunOnceLambda {
-            d { " load zelda" }
+            d { " load zelda ${plan.startPath}" }
 //            api.quickLoadState(1)
             api.loadState("$root/${plan.startPath}")
         }
