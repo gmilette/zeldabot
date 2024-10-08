@@ -1,6 +1,7 @@
 package bot.plan.action
 
 import bot.state.*
+import bot.state.map.toGamePad
 import bot.state.oam.oldWoman
 import bot.state.oam.potion
 import nintaco.api.API
@@ -85,7 +86,7 @@ class SwitchToItemConditionally(private val inventoryPosition: () -> Int = { Inv
 //        GoIn(2, GamePad.Start),
 //        GoIn(30, GamePad.None),
         OnceAction(HitStartUntilItemScreenChanges()),
-        OnceAction(WaitUntilDisplayingInventory2()),
+        OnceAction(WaitUntilDisplayingInventory()),
         SwitchToItem(inventoryPosition),
         GoIn(100, GamePad.None),
         GoIn(2, GamePad.Start),
@@ -211,10 +212,22 @@ class HitStartUntilItemScreenChanges : Action {
 
     override fun nextStep(state: MapLocationState): GamePad {
         frames++
-        return if (state.frameState.inventory.isItemMenuChanging || frames % 4 < 1) {
+        return if (state.frameState.inventory.isItemMenuChanging) {
+            d { " hit start until not changing"}
             GamePad.None
         } else {
-            GamePad.Start
+            val r = frames % 10
+            if (r < 3) {
+                d { " hit start until START" }
+                GamePad.Start
+            } else if (r < 6) {
+                GamePad.None
+            } else if (r < 9) {
+                d { " hit start until random"}
+                state.bestDirection().toGamePad()
+            } else {
+                GamePad.None
+            }
         }
     }
 
@@ -222,7 +235,7 @@ class HitStartUntilItemScreenChanges : Action {
         get() = "HitStartUntilItemScreenChanges"
 }
 
-class WaitUntilDisplayingInventory2 : Action {
+class WaitUntilDisplayingInventory : Action {
     override fun complete(state: MapLocationState): Boolean {
         return state.frameState.inventory.isItemMenuOpen
     }
@@ -232,10 +245,10 @@ class WaitUntilDisplayingInventory2 : Action {
     }
 
     override val name: String
-        get() = "WaitUntilDisplayingInventory2"
+        get() = "WaitUntilDisplayingInventory"
 }
 
-class WaitUntilDisplayingInventory : Action {
+class WaitUntilDisplayingInventoryByPixels : Action {
     private val allPixels by lazy { IntArray(256 * 240) }
 
     private fun isShowingSelectInventory(): Boolean {

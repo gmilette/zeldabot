@@ -316,10 +316,12 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
 @Composable
 private fun SwitchViewButton(debugView: MutableState<Boolean>) {
     val show = debugView.value
-    Button(onClick = {
+    Button(
+        modifier = Modifier.background(Color.LightGray),
+        onClick = {
         debugView.value = !show
     }) {
-        Text("${show}")
+        Text("X")
     }
 }
 

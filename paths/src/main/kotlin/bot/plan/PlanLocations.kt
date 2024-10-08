@@ -65,6 +65,7 @@ object InLocations {
             highCost = listOf(FramePoint(5.grid, 5.grid))),
         right(
             FramePoint(12.grid, 5.grid),
+            // maybe push only from right
             PushDirection(horizontal = true, vertical = false),
             position = FramePoint(3.grid, 5.grid),
             ignoreProjectiles = true

@@ -96,8 +96,8 @@ object EnemyGroup {
 //            160, // this happens to be the left side of the snake monster in level 2, snake has attribute 2
         ladder,
         wizard,
-//        flame1,
-//        flame2,
+        flame1,
+        flame2,
         clockTile,
 //            triforceDirt,
         triforceDirt2,

@@ -1201,6 +1201,7 @@ private fun PlanBuilder.levelPlan9PhaseSilverArrow() {
         wait(100)
         kill
         "set the arrow".seg()
+        goTo(FramePoint(13.grid, 5.grid)) // other side
         +makeStairsItemPush(
             startAt = LevelSpecBuilder.Companion.Nine.silverArrow,
             makeUp(lastMapLoc)
@@ -1253,9 +1254,10 @@ private fun PlanBuilder.levelPlan9PhaseGannon() {
             )
         )
         "doorstep of gannon".seg()
-//        kill
+        goInConsume(GamePad.MoveLeft, 10)
+        kill
 //        killCenterMonster
-        upk
+        up
         "seg kill gannon".seg()
         goIn(GamePad.None, 100)
         switchToArrow()
