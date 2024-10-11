@@ -94,6 +94,7 @@ class PlanBuilder(
 
     private fun PlanBuilder.includeLevelObjPlan(level: Int, levelActions: PlanBuilder.() -> Unit, exitDirection: Direction = Direction.Down, consume: Boolean = true) {
         add {
+//            phase("Destroy level $level")
             obj(Dest.level(level))
             makeSegment()
             remember

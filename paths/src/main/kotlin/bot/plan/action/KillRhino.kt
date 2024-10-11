@@ -614,7 +614,7 @@ fun MapLocationState.rhino(): Agent? =
 private val criteria = DeadForAWhile(limit = 100, reset = true) {
     it.clearedWithMinIgnoreLoot(0).also {result ->
         if (result) {
-            d { " DONE!!! num alive: ${it.frameState.enemies.filter { it.state == EnemyState.Alive }.size} "}
+            d { " $result DONE!!! num alive: ${it.frameState.enemies.filter { it.state == EnemyState.Alive }.size} "}
             it.frameState.logAliveEnemies()
         }
     }

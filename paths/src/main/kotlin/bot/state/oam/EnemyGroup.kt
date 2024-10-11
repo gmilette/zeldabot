@@ -11,9 +11,9 @@ object EnemyGroup {
         ghost,
         ghostWeak2,
         ghost2,
-        ghost3
+        ghost3,
 //        ghostWeak, // do not use because it it same as boomerang guy
-//        rhinoHeadDown, rhinoHeadDown2, rhinoHeadMouthOpen, rhinoHead2,
+        rhinoHeadDown, rhinoHeadDown2 // head should be enough
 //        bat,
 //        254, 248 // the circle monster because I dont know why im stuck here
     )

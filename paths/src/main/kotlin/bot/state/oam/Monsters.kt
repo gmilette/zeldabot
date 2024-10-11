@@ -235,9 +235,9 @@ object Monsters {
     val moldorm = Monster(name = "cirleworm",
         tile = setOf(0x9E, 0xA0),
         color = blueAndRed).immuneToB().inL()
-    val patra = Monster(name = "eyecircle",
+    val patra = Monster(name = "eyecircleAndRhino",
         tile = setOf(0xfe, 0xfc, 0xf8, 0xfa),
-        color = blueAndRed
+        color = blueAndRedAndGrey
     ).immuneToB().inL()
     val polsVoice = Monster(name = "bunny",
         tile = setOf(0x00)
@@ -267,6 +267,7 @@ fun h023() = setOf(h0, h2, h3)
 private val red = setOf(MonsterColor.red)
 private val blue = setOf(MonsterColor.blue)
 private val blueAndRed = setOf(MonsterColor.blue, MonsterColor.red)
+private val blueAndRedAndGrey = setOf(MonsterColor.blue, MonsterColor.red, MonsterColor.grey)
 
 private val h67 = 0x43
 private val h66 = 0x42
