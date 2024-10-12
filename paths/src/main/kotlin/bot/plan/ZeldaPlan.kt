@@ -322,12 +322,15 @@ object ZeldaPlan {
             down
             rightIfNeedBombs
             rightIfNeedBombs
-            GoIn(100, GamePad.MoveRight)
             // wait until the monsters appear from smoke
-            GoIn(2500, GamePad.None)
+            goIn(GamePad.MoveRight, 25)
+            killUntilGetBomb(1) // the monster in the water
+            rightIfNeedBombs
             killUntilGetBomb(1) // the monster in the water
             leftIfNeedBombs
             leftIfNeedBombs
+            leftIfNeedBombs
+            routeTo(bombLoc)
             obj(Dest.Heart.bombHeartSouth)
             // avoid getting stuck/ go right first?
 //            routeTo(107 - 16)
