@@ -36,7 +36,7 @@ object Dest {
         val bomb20 = DestType.SecretToEverybody(20, entry = EntryType.Bomb)
         // forest
         val walk100 = DestType.SecretToEverybody(100)
-        val forest30NearDesertForest = DestType.SecretToEverybody(30, EntryType.Fire(Direction.Right))
+        val forest30NearDesertForest = DestType.SecretToEverybody(30, EntryType.Fire(Direction.Left))
         val forest10Mid = DestType.SecretToEverybody(10, EntryType.Fire(Direction.Left))
         val forest100South = DestType.SecretToEverybody(100, EntryType.Fire(from = Direction.Down))
         val secretForest30NorthEast = DestType.SecretToEverybody(30, EntryType.Statue)

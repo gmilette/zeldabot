@@ -42,6 +42,14 @@ data class Monster(
 ) {
     fun inL() = this.copy(overworld = false)
     fun immuneToB() = this.copy(affectedByBoomerang = false)
+    operator fun plus(other: Monster): Monster {
+        return Monster("${this.name}_${other.name}",
+            tile = this.tile + other.tile,
+            color = this.color + other.color,
+            affectedByBoomerang = this.affectedByBoomerang || other.affectedByBoomerang,
+            overworld = this.overworld
+        )
+    }
 }
 
 
@@ -217,10 +225,10 @@ object Monsters {
     val gibdoOrLikeLike = Monster(name = "mummy/pancake",
         tile = setOf(0xa6, 0xa4),
         color = blueAndRed, // red for the pancake
-        damagedA = h64No5() + h023(),
-        damaged = mapOf(
-            0xa4 to h123(),
-            0xa6 to h64())
+//        damagedA = h64No5() + h023(),
+//        damaged = mapOf(
+//            0xa4 to h123(),
+//            0xa6 to h64())
     ).inL()
     val goriya = Monster(name = "boomerangguy",
         color = blueAndRed, // guess
@@ -243,16 +251,20 @@ object Monsters {
         tile = setOf(0x00)
     ).immuneToB().inL()
     val rope = Monster("fastWorm").inL()
-    val stalfos = Monster("skeleton").inL()
+    val stalfos = Monster("skeleton",
+        color = setOf(MonsterColor.red),
+        // 0,3,1 are damaged
+    ).inL()
     val vire = Monster("batparent").inL()
     val wallmaster = Monster("grabby").inL()
     val zol = Monster("squishy",
         color = setOf(MonsterColor.grey),
         tile = setOf(0xaa, 0xa8)).inL()
+    val zolAndStalfos = zol + stalfos
 
     val lookup: Map<Int, Monster> = mutableMapOf<Int, Monster>()
         .add(wizzrobe)
-        .add(zol)
+        .add(zolAndStalfos)
         .add(darknut)
         .add(gibdoOrLikeLike)
         .add(patra)
