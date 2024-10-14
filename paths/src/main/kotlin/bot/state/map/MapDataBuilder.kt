@@ -374,7 +374,7 @@ class MapBuilder {
     private fun addRow5(objectives: MutableMap<MapLoc, MapCellData>) {
         objectives[86] = MapCellData(
             "squareforest",
-            Objective(FramePoint(8.grid, 6.grid), Dest.Secrets.forest10Mid)
+            Objective(FramePoint(10.grid, 6.grid), Dest.Secrets.forest10Mid)
         )
         objectives[88] = MapCellData(
             "boringForest",

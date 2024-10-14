@@ -22,15 +22,6 @@ import nintaco.util.BitUtil
 
 data class Monster(
     val name: String = "",
-//    // sprite ids
-//    val parts:Set<Int> = setOf(0xb6, 0xb4),
-    // attributes that indicate damage
-    val damaged:Map<Int, Set<Int>> = emptyMap(),
-    val damagedA:Set<Int> = emptySet(),
-    // attributes that mean its read, otherwise assume blue
-    val red:Set<Int> = emptySet(),
-    val blue:Set<Int> = emptySet(),
-//    val colors:Set<Int> = emptySet(),
     // valid monster colors
     val color:Set<Int> = emptySet(),
     /**
@@ -143,7 +134,8 @@ object MonstersOverworld {
     val ghini = Monster(name = "worldghost")
     val moblin = Monster(name = "arrowguy")
     val peahat = Monster(name = "spin",
-        tile = setOf())
+        tile = setOf(0xc6),
+        color = red)
     val zora = Monster(name = "waterguy",
         tile = setOf(0xbc, 0xbe, 0xEC, 0xEE)
     ).immuneToB()
@@ -203,8 +195,6 @@ object Monsters {
         }
         return this
     }
-
-    val boomerang = Monster()
     //6_56
     // also same as sword guy
     val wizzrobe = Monster(name = "ghost",
@@ -215,30 +205,21 @@ object Monsters {
     // 5_100 blue
     val darknut = Monster("swordguy",
         color = blueAndRed,
-        // meed tp remove red
-        damagedA = setOf(h0, h3, h64, h67),
-        blue = setOf(h65, h1),
-        red = setOf(h66, h2),
-        // bc might not have a 3
         tile = setOf(0xbe, 0xb6, 0xBA, 0xb4, 0xac, 0xb0, 0xB8, 0xBC)).immuneToB().inL()
     val gel = Monster(name = "babysquixxshy").inL()
-    val gibdoOrLikeLike = Monster(name = "mummy/pancake",
+    val gibdo = Monster(name = "mummy",
         tile = setOf(0xa6, 0xa4),
-        color = blueAndRed, // red for the pancake
-//        damagedA = h64No5() + h023(),
-//        damaged = mapOf(
-//            0xa4 to h123(),
-//            0xa6 to h64())
+        color = blue
     ).inL()
     val goriya = Monster(name = "boomerangguy",
         color = blueAndRed, // guess
         tile = setOf(0xbe, 0xb6, 0xBA, 0xb4, 0xac, 0xb0, 0xB8, 0xBC)).inL()
     val keese = Monster(name = "bat", tile=setOf(0x9c, 0x9a)).inL()
     val lanmoia = Monster(name = "eyeworm").inL()
-//    val likelike = Monster(name = "pancake",
-//        tile = setOf(0xa6, 0xa4),
-//        color = BlueAndRed, // red for the pancake
-//    ).inL()
+    val likelike = Monster(name = "pancake",
+        tile = setOf(0xa6, 0xa4),
+        color = red, // red for the pancake
+    ).inL()
     val manhandla = Monster(name = "star").immuneToB().inL()
     val moldorm = Monster(name = "cirleworm",
         tile = setOf(0x9E, 0xA0),
@@ -260,12 +241,15 @@ object Monsters {
     val zol = Monster("squishy",
         color = setOf(MonsterColor.grey),
         tile = setOf(0xaa, 0xa8)).inL()
+    val darknutGroup = darknut + wizzrobe + goriya
     val zolAndStalfos = zol + stalfos
+    val gibdoOrLikeLike = gibdo + likelike
 
     val lookup: Map<Int, Monster> = mutableMapOf<Int, Monster>()
-        .add(wizzrobe)
+//        .add(wizzrobe)
+//        .add(darknut)
+        .add(darknutGroup)
         .add(zolAndStalfos)
-        .add(darknut)
         .add(gibdoOrLikeLike)
         .add(patra)
 }
