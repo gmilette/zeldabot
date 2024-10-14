@@ -280,6 +280,7 @@ object ZeldaPlan {
             // why risk it? get the blue ring first
             3 using level3
             phase(Phases.level3After)
+            // get the potion here if have enough cash
             routeTo(102)
             4 using level4
         }
@@ -287,6 +288,7 @@ object ZeldaPlan {
 
     private fun PlanBuilder.arrowAndHearts() {
         add {
+            cheatRupee
             obj(Dest.Shop.arrowShop)
             phase(Phases.ladderHeart)
             obj(Dest.Heart.ladderHeart)
@@ -322,17 +324,18 @@ object ZeldaPlan {
             killUntilGetBomb
             down
             down
-            rightIfNeedBombs
-            rightIfNeedBombs
-            // wait until the monsters appear from smoke
-            goIn(GamePad.MoveRight, 25)
-            killUntilGetBomb(1) // the monster in the water
-            rightIfNeedBombs
-            killUntilGetBomb(1) // the monster in the water
-            leftIfNeedBombs
-            leftIfNeedBombs
-            leftIfNeedBombs
-            routeTo(bombLoc)
+            cheatBombs
+//            rightIfNeedBombs
+//            rightIfNeedBombs
+//            // wait until the monsters appear from smoke
+//            goIn(GamePad.MoveRight, 25)
+//            killUntilGetBomb(1) // the monster in the water
+//            rightIfNeedBombs
+//            killUntilGetBomb(1) // the monster in the water
+//            leftIfNeedBombs
+//            leftIfNeedBombs
+//            leftIfNeedBombs
+//            routeTo(bombLoc)
             obj(Dest.Heart.bombHeartSouth)
             // avoid getting stuck/ go right first?
 //            routeTo(107 - 16)
@@ -903,6 +906,7 @@ private val level5: PlanBuilder.() -> Unit
         seg("kill all zombie to open get key")
         killUntilGetKey
         seg("kill all zombie up move up to rhino")
+        kill // have to kill all to move up
         up
         seg("kill all zombie up move right")
         rightm //85

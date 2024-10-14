@@ -324,8 +324,9 @@ object Addresses {
    const val hasMagicBoomerang = 0x0675
    const val hasShield = 0x0676
 
-   //TODO
-   const val enemiesKilledAlt = 0x052A
+   // useful for predicting item drops
+   // https://www.zeldaspeedruns.com/loz/generalknowledge/item-drops-chart
+   const val enemiesKilledCount = 0x052A
    const val enemiesKilledWithoutTakingDamage = 0x0627
 
    object Ram {

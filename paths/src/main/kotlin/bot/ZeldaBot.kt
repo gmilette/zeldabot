@@ -16,6 +16,7 @@ import nintaco.api.GamepadButtons
 import util.Map2d
 import util.RunOnceLambda
 import util.d
+import util.ifTrue
 
 class ZeldaBot(private val monitor: ZeldaMonitor) {
     private val api: API = ApiSource.getAPI()
@@ -412,14 +413,17 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
 //                    d: $damage
                     // t: $tenth d: $dir
                     //heart
+                    val killCt = ItemDropPrediction()
                     val heart = this.frameState.inventory.heartCalc.toString()
                     val noDamage = frameState.inventory.heartCalc.noDamage()
                     val ring = this.frameState.inventory.inventoryItems.whichRing().takeIf { it != ZeldaItem.None }
                     val ringS = if (ring != null) "r: ${ring.toString().take(1)}" else ""
                     val noD = if (noDamage) " noD" else ""
                     val linkDir = this.frameState.link.dir
+                    // $noD h:${heart}${ringS}
+                    // ${linkDir.ifHave(linkDir.toArrow())}
                     try {
-                        drawIt(plan.target(), plan.path(), "$locCoordinates $link ${linkDir.ifHave(linkDir.toArrow())} t:$tenth $noD h:${heart}${ringS}")
+                        drawIt(plan.target(), plan.path(), "$locCoordinates $link t:$tenth k:${killCt.killCt}${killCt.bombsLikely().ifTrue("*")}")
                     } catch (e: Exception) {
                         d { "ERROR $e" }
                     }

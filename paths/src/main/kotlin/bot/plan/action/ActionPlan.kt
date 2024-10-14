@@ -416,7 +416,10 @@ val lootOrKill = DecisionAction(Optional(GetLoot()), Optional(KillAll())) { stat
     neededReachableLoot(state).isNotEmpty()
 }
 
-fun lootAndMove(moveTo: Action) = DecisionAction(Optional(GetLoot()), moveTo) { state ->
+//fun lootAndMove(moveTo: Action) = DecisionAction(Optional(GetLoot()), moveTo) { state ->
+//    neededReachableLoot(state).isNotEmpty()
+//}
+fun lootAndMove(moveTo: Action) = DecisionAction(GetLoot(), moveTo) { state ->
     neededReachableLoot(state).isNotEmpty()
 }
 

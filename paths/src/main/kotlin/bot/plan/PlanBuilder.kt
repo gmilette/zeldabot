@@ -379,6 +379,16 @@ class PlanBuilder(
             add(lastMapLoc.down)
             return this
         }
+    val cheatBombs: PlanBuilder
+        get() {
+            add(lastMapLoc, CheatGetBombs())
+            return this
+        }
+    val cheatRupee: PlanBuilder
+        get() {
+            add(lastMapLoc, CheatRupee())
+            return this
+        }
     val downm: PlanBuilder
         get() {
             val nextLoc = lastMapLoc.down

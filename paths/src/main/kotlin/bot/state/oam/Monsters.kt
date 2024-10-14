@@ -29,16 +29,19 @@ data class Monster(
      */
     val tile: Set<Int> = emptySet(),
     val affectedByBoomerang: Boolean = true,
+    val arrowKillable: Boolean = false,
     val overworld: Boolean = true
 ) {
     fun inL() = this.copy(overworld = false)
     fun immuneToB() = this.copy(affectedByBoomerang = false)
+    fun arrowKillable() = this.copy(arrowKillable = false)
     operator fun plus(other: Monster): Monster {
         return Monster("${this.name}_${other.name}",
             tile = this.tile + other.tile,
             color = this.color + other.color,
             affectedByBoomerang = this.affectedByBoomerang || other.affectedByBoomerang,
-            overworld = this.overworld
+            overworld = this.overworld,
+            arrowKillable = this.arrowKillable || other.arrowKillable
         )
     }
 }
@@ -127,7 +130,9 @@ val ghostDir = DirectionMapGhosts(
 
 object MonstersOverworld {
     val armos = Monster(name = "statue")
-    val leever = Monster(name = "undergroundguy")
+    val leever = Monster(name = "undergroundguy",
+        tile = setOf(0xc4),
+        color = blueAndRed)
     val lynel = Monster(name = "swordshooter")
     val octorok = Monster(name = "overworldgrunt")
     val tektite = Monster(name = "spider")
@@ -229,11 +234,12 @@ object Monsters {
         color = blueAndRedAndGrey
     ).immuneToB().inL()
     val polsVoice = Monster(name = "bunny",
-        tile = setOf(0x00)
-    ).immuneToB().inL()
+        tile = setOf(0xa2, 0xa0),
+        color = setOf(MonsterColor.other)
+    ).immuneToB().inL().arrowKillable()
     val rope = Monster("fastWorm").inL()
     val stalfos = Monster("skeleton",
-        color = setOf(MonsterColor.red),
+        color = red,
         // 0,3,1 are damaged
     ).inL()
     val vire = Monster("batparent").inL()
@@ -252,6 +258,7 @@ object Monsters {
         .add(zolAndStalfos)
         .add(gibdoOrLikeLike)
         .add(patra)
+        .add(MonstersOverworld.leever)
 }
 
 private val h0 = 0x00

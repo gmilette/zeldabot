@@ -7,6 +7,7 @@ import bot.state.map.destination.zeldaItemsRequired
 import nintaco.api.API
 import nintaco.api.ApiSource
 import util.d
+import kotlin.math.max
 
 data class FrameState(
     val api: API = ApiSource.getAPI(),
@@ -134,6 +135,18 @@ data class Inventory(
 
     val hasCandle: Boolean
         get() = items.contains(ZeldaItem.BlueCandle) || items.contains((ZeldaItem.RedCandle))
+
+    fun setBombs() {
+        if (numBombs < 4) {
+            api.writeCPU(Addresses.numBombs, 4)
+        }
+    }
+
+    fun addRupee(state: FrameState) {
+        val current = state.inventory.numRupees
+        val plus100 = max(252, current + 100)
+        api.writeCPU(Addresses.numRupees, plus100)
+    }
 
     object Selected {
         val boomerang = 0
