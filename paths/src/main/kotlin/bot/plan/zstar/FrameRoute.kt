@@ -103,8 +103,9 @@ class FrameRoute(val path: List<FramePoint>) {
         val dirs = PrevBuffer<Direction>(size = 4)
         dirs.add(linkDir)
         pathStack.take(4).zipWithNext().forEach { (first, second) ->
-            println("Pair: $first, $second")
-            dirs.add(first.dirTo(second))
+            val dir = first.dirTo(second)
+            println("Pair: $first, $second ${dir.toArrow()}")
+            dirs.add(dir)
         }
 //        pathStack.take(4).forEachIndexed { index, pt ->
 //            if (index == 0) {

@@ -1,5 +1,6 @@
 package bot.state.map.destination
 
+import bot.state.MapLoc
 import bot.state.map.Direction
 import bot.state.map.Objective
 
@@ -26,6 +27,14 @@ object Dest {
 
     fun item(item: ZeldaItem): DestType =
         itemLookup[item] ?: DestType.Item(ZeldaItem.None)
+
+    object Fairy {
+        private val greenForestMapLoc: MapLoc = 57
+        private val brownForestMapLoc: MapLoc = 67
+
+        val greenForest = DestType.Fairy(greenForestMapLoc)
+        val brownForest = DestType.Fairy(brownForestMapLoc)
+    }
 
     object SecretsNegative {
         val forest20NearStart = DestType.SecretToEverybody(20, EntryType.Fire(Direction.Down))
@@ -96,7 +105,7 @@ sealed class DestType(val entry: EntryType = EntryType.Walk(), val name: String 
 
     object Woman : DestType()
     object MoneyGame : DestType()
-    object Fairy : DestType()
+    class Fairy(loc: MapLoc) : DestType(EntryType.WalkUp)
     object Travel : DestType()
     class Heart(entry: EntryType = EntryType.Walk()) : DestType(entry, "heart by ${entry.name}")
     class SecretToEverybody(
@@ -114,6 +123,7 @@ enum class ShopType {
 
 sealed class EntryType(val name: String) {
     data class Walk(val requireLetter: Boolean = false) : EntryType("walk")
+    object WalkUp : EntryType("walkUp")
     object WalkIn : EntryType("walkIn")
     // requires special handling because of the laddder
     object WalkInLadder : EntryType("walkInLadder")

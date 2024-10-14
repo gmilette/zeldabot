@@ -581,6 +581,10 @@ class PlanBuilder(
                 }.point
 //                itemLocOverride?.point ?: itemLoc.point
             when (this.type.entry) {
+                is EntryType.WalkUp -> {
+                    goInConsume(GamePad.MoveUp, 20)
+                    goIn(GamePad.MoveUp, 50)
+                }
                 // for levels you dont need to get an item
                 // if item loc is n
                 is EntryType.Walk -> {

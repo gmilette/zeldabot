@@ -307,10 +307,8 @@ class MapBuilder {
             "desertbottomleft",
         )
         objectives[57] = MapCellData(
-            "lev1fairy",
-            Objective(
-                FramePoint(100, 100), DestType.Fairy
-            )
+            "greenFairy",
+            Objective(type = Dest.Fairy.greenForest)
         )
         objectives[56] = MapCellData(
             "lev1Entrybefore"
@@ -339,6 +337,10 @@ class MapBuilder {
         objectives[66] = MapCellData(
             "lev7",
             Objective(6.grid, 5.grid, Dest.level(7))
+        )
+        objectives[67] = MapCellData(
+            "brownFairy",
+            Objective(type = Dest.Fairy.brownForest)
         )
         val shieldLeft = Objective.ItemLoc.Left
         objectives[70] = MapCellData(
@@ -506,8 +508,7 @@ private class CellBuilder {
     private var exitSet: ExitSet = ExitSetAll
 
     class DestTypeBuilder(
-        private var destType: DestType = DestType
-            .Fairy, private val builder: CellBuilder
+        private var destType: DestType = DestType.Princess, private val builder: CellBuilder
     ) {
         private var point: FramePoint = FramePoint(0, 0)
         private var x: Int = 0

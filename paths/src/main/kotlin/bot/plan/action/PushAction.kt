@@ -14,7 +14,7 @@ fun makeStatuePushGo(statue: FramePoint): Action =
             InsideNav(statue.upOneGrid, highCost = listOf(statue.downOneGrid, statue), tag = "push position"),
             GoIn(20, GamePad.MoveDown, reset = true),
             GoIn(75, GamePad.None, reset = true),
-            Timeout(InsideNav(statue, ignoreProjectiles = false, tag = "go in"))
+            Timeout(InsideNav(statue, makePassable = statue, ignoreProjectiles = false, tag = "go in"))
         ), restartWhenDone = false, shouldComplete = true, tag = "push") // fine if this restarts, it will end once user exits
 
 fun makeStatuePush(statue: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem): Action =
@@ -23,7 +23,7 @@ fun makeStatuePush(statue: FramePoint, itemLoc: FramePoint = InLocations.Overwor
             InsideNav(statue.upOneGrid, highCost = listOf(statue.downOneGrid, statue), tag = "push position"),
             GoIn(20, GamePad.MoveDown, reset = true),
             GoIn(75, GamePad.None, reset = true),
-            Timeout(InsideNav(statue, ignoreProjectiles = false, tag = "go in"))
+            Timeout(InsideNav(statue, makePassable = statue, ignoreProjectiles = false, tag = "go in"))
         ), restartWhenDone = false, shouldComplete = true, tag = "push") // fine if this restarts, it will end once user exits
         ), CompleteIfChangeShopOwner(false, OrderedActionSequence(
             listOfNotNull(

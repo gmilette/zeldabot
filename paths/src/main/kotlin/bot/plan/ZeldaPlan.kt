@@ -184,6 +184,8 @@ object ZeldaPlan {
             obj(Dest.Heart.fireHeart) // heart
             // now go back to level 1 with 6 hearts
 
+            obj(Dest.Fairy.greenForest)
+
             // bomb secret.. later
             1 using level1
 
@@ -456,6 +458,8 @@ object ZeldaPlan {
     private val level1: PlanBuilder.() -> Unit
         get() = {
             add {
+                phase(Phases.lev(1))
+                lev(1)
                 inLevel
                 startAt(LevelStartMapLoc.lev(1))
                 objective(ZeldaItem.Bow)
@@ -548,6 +552,7 @@ object ZeldaPlan {
     private val level2: PlanBuilder.() -> Unit
         get() = {
             add {
+                phase(Phases.lev(2))
                 lev(2)
                 startAt(LevelStartMapLoc.lev(2))
                 seg("gather 3 keys")
