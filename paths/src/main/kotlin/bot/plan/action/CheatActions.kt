@@ -8,8 +8,13 @@ class CheatGetBombs : Action {
     }
 }
 
-class CheatRupee : Action {
+class CheatRupee(val enoughFor: Int = 100) : Action {
     override fun complete(state: MapLocationState): Boolean = (true).also {
-        state.frameState.inventory.addRupee(state.frameState)
+        state.frameState.inventory.addRupee(state.frameState, enoughFor)
     }
 }
+
+val EnoughForPotion
+    get() = CheatRupee(68)
+val EnoughForArrow
+    get() = CheatRupee(88)

@@ -2,6 +2,11 @@ package bot.state.oam
 
 import bot.state.Agent
 import bot.state.map.Direction
+import bot.state.oam.Monsters.add
+import bot.state.oam.Monsters.darknutGroup
+import bot.state.oam.Monsters.gibdoOrLikeLike
+import bot.state.oam.Monsters.patra
+import bot.state.oam.Monsters.zolAndStalfos
 import nintaco.util.BitUtil
 
 //18, 16, // link shield shite
@@ -134,16 +139,28 @@ object MonstersOverworld {
         tile = setOf(0xc4),
         color = blueAndRed)
     val lynel = Monster(name = "swordshooter")
-    val octorok = Monster(name = "overworldgrunt")
+    val octorok = Monster(name = "overworldgrunt",
+        tile = setOf(0xb2, 0xb4, 0xb6, 0xb8, 0xba, 0xb0),
+        color = blueAndRed
+    )
     val tektite = Monster(name = "spider")
     val ghini = Monster(name = "worldghost")
-    val moblin = Monster(name = "arrowguy")
+    val moblin = Monster(name = "arrowguy",
+        tile = setOf(0xf0, 0xf2, 0xf4, 0xf6, 0xf8, 0xfa, 0xfe, ), // need to double check
+        color = blueAndRed
+    )
     val peahat = Monster(name = "spin",
         tile = setOf(0xc6),
         color = red)
     val zora = Monster(name = "waterguy",
         tile = setOf(0xbc, 0xbe, 0xEC, 0xEE)
     ).immuneToB()
+
+    val toHuntForBombs: Map<Int, Monster> = mutableMapOf<Int, Monster>()
+        .add(octorok)
+        .add(moblin)
+
+    val toHuntForBombsTiles: Set<Int> = toHuntForBombs.values.flatMap { it.tile }.toSet()
 }
 
 //val swordDir = DirectionMap(

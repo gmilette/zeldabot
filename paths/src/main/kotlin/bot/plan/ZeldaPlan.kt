@@ -192,7 +192,11 @@ object ZeldaPlan {
             // collect loot loop
             obj(Dest.Secrets.forest10Mid)
             obj(Dest.Secrets.bomb30Start)
+            enoughForPotion
+            obj(Dest.Shop.potionShopWest, Objective.ItemLoc.Right)
             ringLevels()
+            enoughForPotion
+            obj(Dest.Shop.potionShopWest, Objective.ItemLoc.Right)
             arrowAndHearts()
 
             // then potion?
@@ -288,7 +292,7 @@ object ZeldaPlan {
 
     private fun PlanBuilder.arrowAndHearts() {
         add {
-            cheatRupee
+            enoughForArrow
             obj(Dest.Shop.arrowShop)
             phase(Phases.ladderHeart)
             obj(Dest.Heart.ladderHeart)
@@ -603,7 +607,7 @@ object ZeldaPlan {
                 switchToBomb
                 killLevel2Rhino
                 seg("get the triforce")
-//            wait // why?
+                wait(200) // there might be a bomb appearing that I want
                 goTo(InLocations.Level2.heartMid)
                 loot // in case there is a bomb
                 leftm
@@ -723,6 +727,7 @@ object ZeldaPlan {
             seg("get the triforce")
 //            wait // why?
             goTo(InLocations.Level2.heartMid)
+            wait(200) // wait for a bomb to appear?
             loot // in case there is a bomb
             leftm
             goIn(GamePad.MoveLeft, 20)

@@ -2,9 +2,9 @@ package bot.plan.action
 
 import bot.state.*
 import bot.state.map.Direction
-import bot.state.map.MapConstants
 import bot.state.map.grid
 import bot.state.map.toGamePad
+import bot.state.oam.MonsterColor
 import bot.state.oam.Monsters
 import bot.state.oam.circleMonsterCenters
 import util.LogFile
@@ -40,6 +40,7 @@ class KillAll(
     private var firstAttackBomb: Boolean = false,
     private var allowBlock: Boolean = true,
     private val ignoreUntilOnly: Set<Int> = emptySet(),
+    private val lookForBombs: Boolean = false,
 //    ignoreProjectilesRoute: Boolean = false,
     whatToAvoid: RouteTo.WhatToAvoid = RouteTo.WhatToAvoid.All
 ) : Action {
@@ -201,6 +202,29 @@ class KillAll(
                 }
             }
 
+            var attackOnlySpecified = false
+            if (state.frameState.isOverworld &&
+                (lookForBombs || state.frameState.inventory.numBombs == 0)) {
+                if (ItemDropPrediction().bombsLikely()) {
+                    // todo: also have to make all other enemies into projectiles somehow
+                    val enemiesThatMightProduceBombs =
+                        aliveEnemies.filter { it.color == MonsterColor.blue }
+                    if (enemiesThatMightProduceBombs.isNotEmpty()) {
+                        d { " !! only target enemies that might produce bombs" }
+                        aliveEnemies = enemiesThatMightProduceBombs.toMutableList()
+                        attackOnlySpecified = true
+                    }
+                } else {
+                    val enemiesThatWillNotProduceBombs =
+                        aliveEnemies.filter { it.color == MonsterColor.red }
+                    if (enemiesThatWillNotProduceBombs.isNotEmpty()) {
+                        d { " !! only target enemies that will not produce bombs" }
+                        aliveEnemies = enemiesThatWillNotProduceBombs.toMutableList()
+                        attackOnlySpecified = true
+                    }
+                }
+            }
+
             // for rhino, adjust target location
             // action
 
@@ -261,7 +285,8 @@ class KillAll(
                                 mapNearest = true,
                                 finishWithinStrikingRange = true
                             ),
-                        )
+                        ),
+                        attackableSpec = if (attackOnlySpecified) aliveEnemies.map { it.point } else emptyList()
                     ).also {
                         if (it == GamePad.B && firstAttackBomb) {
                             d {"USE BOMB!" }

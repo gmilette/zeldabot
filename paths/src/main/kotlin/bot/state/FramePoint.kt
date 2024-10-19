@@ -146,7 +146,7 @@ fun FramePoint.dirTo(to: FramePoint): Direction {
             if (x < to.x) Direction.Right else Direction.Left
         }
 
-        else -> Direction.Down
+        else -> Direction.None // none direction makes sense
     }
 }
 

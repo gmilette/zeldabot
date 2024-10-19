@@ -273,7 +273,8 @@ class PlanBuilder(
     fun killUntilGetBomb(leftDead: Int): PlanBuilder {
         add(lastMapLoc, lootAndKill(CompleteIfHaveBombs(KillAll(
             numberLeftToBeDead = leftDead,
-            targetOnly = EnemyGroup.enemiesWhoMightHaveBombs
+            lookForBombs = true
+//            targetOnly = EnemyGroup.enemiesWhoMightHaveBombs
         ))))
         return this
     }
@@ -387,6 +388,16 @@ class PlanBuilder(
     val cheatRupee: PlanBuilder
         get() {
             add(lastMapLoc, CheatRupee())
+            return this
+        }
+    val enoughForPotion: PlanBuilder
+        get() {
+            add(lastMapLoc, EnoughForPotion)
+            return this
+        }
+    val enoughForArrow: PlanBuilder
+        get() {
+            add(lastMapLoc, EnoughForArrow)
             return this
         }
     val downm: PlanBuilder

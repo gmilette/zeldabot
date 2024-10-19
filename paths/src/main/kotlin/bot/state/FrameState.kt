@@ -37,6 +37,7 @@ data class FrameState(
     private val swordUseCountdown: Int by lazy { api.readCPU(Addresses.swordUseCountdown) }
 
     val isLevel = level != MapConstants.overworld
+    val isOverworld = !isLevel
 
     val isDead: Boolean
         get() = gameMode == 8
@@ -142,9 +143,20 @@ data class Inventory(
         }
     }
 
-    fun addRupee(state: FrameState) {
+    fun addRupeeEnough(state: FrameState, cost: Int) {
         val current = state.inventory.numRupees
-        val plus100 = max(252, current + 100)
+        if (current < cost) {
+            addRupee(state, cost)
+        }
+    }
+
+    fun addRupee(state: FrameState) {
+        addRupee(state, 100)
+    }
+
+    fun addRupee(state: FrameState, add: Int) {
+        val current = state.inventory.numRupees
+        val plus100 = max(252, current + add)
         api.writeCPU(Addresses.numRupees, plus100)
     }
 

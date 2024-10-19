@@ -466,7 +466,7 @@ class ZeldaModel : ZeldaBot.ZeldaMonitor {
         }
     }
 
-    fun forceDir(forcedDirection: GamePad, num: Int = 10) {
+    fun forceDir(forcedDirection: GamePad, num: Int = MapConstants.oneGrid * 4) {
         ZeldaBot.unstick += num
         ZeldaBot.forcedDirection = forcedDirection
     }
