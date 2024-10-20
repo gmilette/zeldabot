@@ -385,6 +385,11 @@ class PlanBuilder(
             add(lastMapLoc, CheatGetBombs())
             return this
         }
+    val enoughForRing: PlanBuilder
+        get() {
+            add(lastMapLoc, EnoughForRing)
+            return this
+        }
     val enoughForPotion: PlanBuilder
         get() {
             add(lastMapLoc, EnoughForPotion)
@@ -767,7 +772,6 @@ class PlanBuilder(
             }
             goShop(itemLoc)
             if (itemLoc != Objective.ItemLoc.Enter.point) {
-                switchToBoomerang
                 exitShop()
                 goIn(GamePad.MoveDown, 5)
             }

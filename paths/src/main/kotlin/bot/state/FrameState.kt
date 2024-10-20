@@ -8,6 +8,7 @@ import nintaco.api.API
 import nintaco.api.ApiSource
 import util.d
 import kotlin.math.max
+import kotlin.math.min
 
 data class FrameState(
     val api: API = ApiSource.getAPI(),
@@ -161,6 +162,13 @@ data class Inventory(
         val current = state.inventory.numRupees
         val plus100 = max(252, current + add)
         api.writeCPU(Addresses.numRupees, plus100)
+    }
+
+    fun addRupeeIfNeed(state: FrameState, upTo: Int) {
+        val current = state.inventory.numRupees
+        if (current < upTo) {
+            api.writeCPU(Addresses.numRupees, upTo)
+        }
     }
 
     object Selected {

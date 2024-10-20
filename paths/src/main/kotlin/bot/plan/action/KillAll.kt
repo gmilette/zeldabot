@@ -204,7 +204,8 @@ class KillAll(
 
             var attackOnlySpecified = false
             if (state.frameState.isOverworld &&
-                (lookForBombs || state.frameState.inventory.numBombs == 0)) {
+                (lookForBombs && state.frameState.inventory.numBombs == 0)) {
+//                (lookForBombs || state.frameState.inventory.numBombs == 0)) {
                 if (ItemDropPrediction().bombsLikely()) {
                     // todo: also have to make all other enemies into projectiles somehow
                     val enemiesThatMightProduceBombs =

@@ -272,6 +272,7 @@ object ZeldaPlan {
         add {
             // why risk it? get the blue ring first
             fireBurn100()
+            enoughForRing
             obj(Dest.Shop.blueRing, position = true)
             // avoid accidentally going back in
             goIn(GamePad.MoveRight, 25) // test it

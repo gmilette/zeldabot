@@ -99,14 +99,14 @@ class OverworldRouter(private val hyrule: Hyrule) {
 //        remove(85, 86, graph) // I think ok. can't go through to level 4 from here
         remove(85, 84, graph) // can't go through to water
         remove(98, 82, graph) // can't go up through 100 secret because you could be on wrong side
+        remove(98, 82, graph) // can't go up through 100 secret because you could be on wrong side
 
         // trees near level 8
         removeJust(108, 107, graph)
         // going up into a place where you are in an elbow of trees
         removeJust(107, 92, graph)
 
-        // can go from 99 to 98 though
-        removeJust(98, 99, graph) // can't go through the secret hole and to the right, approach from the bottom
+        remove(98, 114, graph) // cant go down from secret place
 
         // go through green forest spot
         remove(108, 109, graph)
