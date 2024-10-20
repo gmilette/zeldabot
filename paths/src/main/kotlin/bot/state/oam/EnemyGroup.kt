@@ -63,6 +63,8 @@ object EnemyGroup {
         0x80 to 0x1,
     )
 
+    val flame = setOf(flame1, flame2)
+
     val ignore = setOf(
         18, 16, // link shield shite
         12, 14, // facing up link

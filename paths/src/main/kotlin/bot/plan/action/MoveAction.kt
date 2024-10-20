@@ -4,6 +4,8 @@ import bot.plan.action.NavUtil.directionToDir
 import bot.plan.zstar.FrameRoute
 import bot.state.*
 import bot.state.map.*
+import bot.state.oam.EnemyGroup
+import bot.state.oam.flame1
 import bot.state.oam.shopOwner
 import bot.state.oam.shopkeeperAndBat
 import util.d
@@ -292,9 +294,14 @@ class MoveTo(
         if (state.currentMapCell.exitsFor(dir) == null) {
             d { " default move " }
         }
-        val exits = state.currentMapCell.exitsFor(dir) ?: return NavUtil.randomDir()
+        val exits = state.currentMapCell.exitsFor(dir) ?: secretRoomExit(state) ?: return NavUtil.randomDir()
 
         targets = exits
+
+        // next.. need an escape plan
+        // detect if link is inside a secret room, but somewhere else, in which case, push an escape action
+        // also can I start from after first fairy rather than rerunning it
+        // two 5e or two 5c tiles indicate it
 
         checkArrived(state, previousDir)
 
@@ -307,5 +314,16 @@ class MoveTo(
     }
 
     override val name: String
-        get() = "Move from ${this.fromLoc} to ${this.next.mapLoc}" // $dir $movedIn
+        get() = "Move from ${this.fromLoc} to ${this.next.mapLoc}"
+
+    // untested
+    private fun secretRoomExit(state: MapLocationState): List<FramePoint>? =
+        when {
+            (state.frameState.isLevel) -> null
+            (state.frameState.enemiesRaw.count { it.tile in EnemyGroup.flame} >= 2) -> {
+                d { " in secret room "}
+                state.hyrule.shopMapCell.exitsFor(Direction.Down)
+            }
+            else -> null
+        }
 }
