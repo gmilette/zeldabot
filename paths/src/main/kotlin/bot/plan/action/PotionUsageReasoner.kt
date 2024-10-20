@@ -102,7 +102,8 @@ class UsePotion : Action {
 }
 
 object PotionUsageReasoner {
-    val USE_POTION_HEART_LIMIT = 4.0
+    val USE_POTION_HEART_LIMIT = 2.0
+    val USE_POTION_MINIMIM_LIMIT = 7.0
 
     var diversionNeed: DiversionState = DiversionState.noNeed
 
@@ -113,7 +114,7 @@ object PotionUsageReasoner {
         //val almostDead by lazy { state.inventory.heartCalc.lifeInHearts() <= 8.25f }
         val full by lazy { state.inventory.heartCalc.full(state) }
 //        val full = false
-        val haveEnough by lazy { state.inventory.heartCalc.heartContainers() >= 8 }
+        val haveEnough by lazy { (state.inventory.heartCalc.heartContainers() - heart) > USE_POTION_MINIMIM_LIMIT }
         val havePotion by lazy { state.inventory.hasPotion }
         val isLevel = state.isLevel
         val message = when {

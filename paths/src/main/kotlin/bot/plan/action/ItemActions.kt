@@ -98,7 +98,7 @@ class SwitchToItemConditionally(private val inventoryPosition: () -> Int = { Inv
     private val positionShoot = OrderedActionSequence(switchSequence, restartWhenDone = false)
 
     override fun complete(state: MapLocationState): Boolean {
-        return (positionShoot.done || startedWithItem).also { d { "SwitchToItemConditionally complete $it" } }
+        return (positionShoot.done || startedWithItem || !haveItem).also { d { "SwitchToItemConditionally complete $it" } }
     }
 
     override fun target(): FramePoint {
@@ -107,6 +107,7 @@ class SwitchToItemConditionally(private val inventoryPosition: () -> Int = { Inv
 
     private var firstStep = true
     private var startedWithItem = false
+    private var haveItem = true
 
     override fun nextStep(state: MapLocationState): GamePad {
         d {"SwitchToItemConditionallyZ selected: ${state.frameState.inventory.selectedItem} try to select ${inventoryPosition()} complete ${complete(state)} positionShoot ${positionShoot.stepName}"}
@@ -114,11 +115,17 @@ class SwitchToItemConditionally(private val inventoryPosition: () -> Int = { Inv
             d {"Already have"}
             startedWithItem = true
             GamePad.None
+        } else if (firstStep && !haveItem(state)) {
+            haveItem = false
+            GamePad.None
         } else {
             firstStep = false
             positionShoot.nextStep(state)
         }
     }
+
+    private fun haveItem(state: MapLocationState): Boolean =
+        inventoryPositionToHave(inventoryPosition(), state)
 
     private fun inventoryPositionToName(position: Int): String =
         when (position) {
@@ -132,6 +139,21 @@ class SwitchToItemConditionally(private val inventoryPosition: () -> Int = { Inv
             15 -> "letter"
             8 -> "Wand"
             else -> position.toString()
+        }
+
+    private fun inventoryPositionToHave(position: Int, state: MapLocationState): Boolean =
+        // doesn't need to have all the potions really
+        when (position) {
+            0 -> state.frameState.inventory.hasBoomerang
+            1 -> state.frameState.inventory.numBombs > 0
+            2 -> true
+            4 -> state.frameState.inventory.hasCandle
+            5 -> true
+            6 -> true
+            7 -> state.frameState.inventory.hasPotion
+            15 -> state.frameState.inventory.hasLetter
+            8 -> state.frameState.inventory.hasWand
+            else -> true
         }
 
     override val name: String

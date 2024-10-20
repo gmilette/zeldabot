@@ -257,6 +257,8 @@ class MoveTo(
                 movedIn = 0
                 arrivedDir = dir
                 d { " arrived! $arrived dir $arrivedDir" }
+            } else {
+                d { " not arrived! $arrived dir $arrivedDir" }
             }
         }
     }
@@ -304,6 +306,7 @@ class MoveTo(
         // two 5e or two 5c tiles indicate it
 
         checkArrived(state, previousDir)
+        d { " arrived! is $arrived"}
 
         return if (!arrived) {
             routeTo.routeTo(state, exits, RouteTo.RouteParam(allowBlock = allowBlocking))

@@ -173,30 +173,30 @@ object ZeldaPlan {
             // need the cash to get the candle
             afterLevel2ItemsLetterEtcPhase(false)
 
+            // should hae enough for candle and shield
             itemsNearLevel2CandleShieldPhase()
 
             whiteSword()
 
             phase("get heart and cash")
             // higher forest secret
-            obj(Dest.Secrets.forest30NearDesertForest)
-            obj(Dest.Secrets.fire30GreenSouth)
+            obj(Dest.Secrets.forest30NearDesertForest) // 180
+            obj(Dest.Secrets.fire30GreenSouth) //213
             obj(Dest.Heart.fireHeart) // heart
             // now go back to level 1 with 6 hearts
 
             obj(Dest.Fairy.greenForest)
 
             // bomb secret.. later
-            1 using level1
+            1 using level1 // 238
 
             // collect loot loop
             obj(Dest.Secrets.forest10Mid)
-            obj(Dest.Secrets.bomb30Start)
+            // probably don't need this, but the margin is about 15 so yea get it
+            obj(Dest.Secrets.bomb30Start) // 253
             enoughForPotion
             obj(Dest.Shop.potionShopWest, Objective.ItemLoc.Right)
             ringLevels()
-            enoughForPotion
-            obj(Dest.Shop.potionShopWest, Objective.ItemLoc.Right)
             arrowAndHearts()
 
             // then potion?
@@ -209,10 +209,10 @@ object ZeldaPlan {
         add {
             "candle".seg()
             // more money
-            obj(Dest.Shop.candleShopEast)
+            obj(Dest.Shop.candleShopEast) // 199
             "get shield".seg()
-            obj(Dest.Secrets.forest100South)
-            obj(Dest.Shop.eastTreeShop)
+            obj(Dest.Secrets.forest100South) // 239
+            obj(Dest.Shop.eastTreeShop) // 149
         }
     }
 
@@ -270,21 +270,32 @@ object ZeldaPlan {
 
     private fun PlanBuilder.ringLevels() {
         add {
+            // why risk it? get the blue ring first
             fireBurn100()
-            // maybe need these to get ring
-            // todo need to add
-//            obj(Dest.Secrets.bombSecret30SouthWest)
-//            obj(Dest.Secrets.forest10BurnBrown)
-
             obj(Dest.Shop.blueRing, position = true)
             // avoid accidentally going back in
             goIn(GamePad.MoveRight, 25) // test it
 //             position place right before level 4
 //             go to the right so when link goes up, it will be the right way
-            // why risk it? get the blue ring first
+
+            // grab this cash now, then get fairy so ready to kill level 3
+            obj(Dest.Secrets.bombSecret30SouthWest)
+            obj(Dest.Secrets.forest10BurnBrown)
+            obj(Dest.Fairy.brownForest)
+
             3 using level3
             phase(Phases.level3After)
+
+            // TODO: ideally if don't need, don't go, if need only half, buy only half
+            // route to the potion spot
+//            routeTo(100)
+            // getPotionConditionally()
+            // for now just always buy the big potion
+            enoughForPotion
+            obj(Dest.Shop.potionShopWest, Objective.ItemLoc.Right)
+
             // get the potion here if have enough cash
+            // possibly only need to refill
             routeTo(102)
             4 using level4
         }

@@ -496,6 +496,7 @@ class GoIn(
      * dodge if necessary
      */
     private val defensive: Boolean = true,
+    private val desiredDirection: Direction? = null,
     private val condition: (MapLocationState) -> Boolean = { true }
 ) :
     Action {
@@ -505,7 +506,8 @@ class GoIn(
         get() = setMonitorEnabled
 
     override fun complete(state: MapLocationState): Boolean {
-        val complete = movements >= moves
+        val linkInDesiredDirection = state.frameState.link.dir == desiredDirection
+        val complete = movements >= moves || linkInDesiredDirection
         if (complete && reset) {
 //            d { " --> RESET $name $movements"}
             movements = 0

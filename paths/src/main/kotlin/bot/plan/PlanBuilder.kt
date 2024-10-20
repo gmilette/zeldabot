@@ -385,11 +385,6 @@ class PlanBuilder(
             add(lastMapLoc, CheatGetBombs())
             return this
         }
-    val cheatRupee: PlanBuilder
-        get() {
-            add(lastMapLoc, CheatRupee())
-            return this
-        }
     val enoughForPotion: PlanBuilder
         get() {
             add(lastMapLoc, EnoughForPotion)
@@ -772,6 +767,7 @@ class PlanBuilder(
             }
             goShop(itemLoc)
             if (itemLoc != Objective.ItemLoc.Enter.point) {
+                switchToBoomerang
                 exitShop()
                 goIn(GamePad.MoveDown, 5)
             }
@@ -843,7 +839,11 @@ class PlanBuilder(
         goTo(burnFrom)
         // turn in proper direction
 //        d { " burn from $burnFrom to $to op $opposite"}
-        goIn(opposite.toGamePad(), 4)
+        // go until facing the correct direction
+//        goIn(opposite.toGamePad(), 4)
+        // need test, idea is that link should stop when facing correct direction
+        // but he might get distracted by attacking something else
+        goInTowards(opposite.toGamePad(), 4)
 
         // execute burn
         plan.add(UseItem())
@@ -931,6 +931,14 @@ class PlanBuilder(
 
     fun goIn(dir: GamePad = GamePad.MoveUp, num: Int, monitor: Boolean = true): PlanBuilder {
         add(lastMapLoc, GoIn(num, dir, setMonitorEnabled = monitor))
+        return this
+    }
+
+    /**
+     * end when achieved desired direction
+     */
+    fun goInTowards(dir: GamePad = GamePad.MoveUp, num: Int): PlanBuilder {
+        add(lastMapLoc, GoIn(num, dir, desiredDirection = dir.toDirection()))
         return this
     }
 

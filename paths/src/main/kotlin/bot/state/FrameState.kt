@@ -137,6 +137,9 @@ data class Inventory(
     val hasCandle: Boolean
         get() = items.contains(ZeldaItem.BlueCandle) || items.contains((ZeldaItem.RedCandle))
 
+    val hasBoomerang: Boolean
+        get() = items.contains(ZeldaItem.Boomerang) || items.contains((ZeldaItem.MagicalBoomerang))
+
     fun setBombs() {
         if (numBombs < 4) {
             api.writeCPU(Addresses.numBombs, 4)

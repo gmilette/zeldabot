@@ -343,6 +343,32 @@ class ReBombIfNecessary(private val wrapped: Action): Action {
     }
 }
 
+class ReBurnIfNecessary(private val wrapped: Action): Action {
+    private var frameCt = 0
+    private var attack = AlwaysAttack(useB = true)
+
+    override fun complete(state: MapLocationState): Boolean =
+        wrapped.complete(state)
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        frameCt++
+
+        // it worked! it took a while though at 1000
+        return if (frameCt > 600) {
+            d { "Reburn!!!" }
+            if (frameCt > 700) {
+                frameCt = 0
+                d { "ah well restart" }
+            }
+            // TODO: this requires leaving the spot and returning
+            attack.nextStep(state)
+        } else {
+            wrapped.nextStep(state)
+        }
+    }
+}
+
+
 class StayInCurrentMapCell(private val wrapped: Action) : Action {
     private val routeTo = RouteTo(params = RouteTo.Param())
 
