@@ -103,6 +103,7 @@ class StateManipulator(
     }
 
     fun setPotion(add: Boolean) {
+        setLetter()
         // set to both potions
         api.writeCPU(Addresses.hasPotion, if (add) 2 else 0)
     }
