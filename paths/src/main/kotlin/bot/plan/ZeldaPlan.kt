@@ -163,6 +163,18 @@ object ZeldaPlan {
         return builder {
             woodenSwordPhase()
 
+            routeTo(115)
+            goTo(FramePoint(12.grid, 7.grid))
+            // position self to take bottom exit
+            // grab this cash now, then get fairy so ready to kill level 3
+            obj(Dest.Secrets.bombSecret30SouthWest)
+            // it's out of te way to get here
+            routeTo(115)
+            routeTo(99)
+            routeTo(83)
+            obj(Dest.Secrets.forest10BurnBrown)
+            obj(Dest.Fairy.brownForest)
+
             "gather bombs".seg()
             gatherBombsFirstPhase()
 
@@ -276,12 +288,11 @@ object ZeldaPlan {
             obj(Dest.Shop.blueRing, position = true)
             // avoid accidentally going back in
             goIn(GamePad.MoveRight, 25) // test it
-//             position place right before level 4
-//             go to the right so when link goes up, it will be the right way
 
+            routeTo(115)
+            goTo(FramePoint(12.grid, 7.grid))
             // grab this cash now, then get fairy so ready to kill level 3
             obj(Dest.Secrets.bombSecret30SouthWest)
-            // it's out of te way to get here
             routeTo(115)
             routeTo(99)
             routeTo(83)

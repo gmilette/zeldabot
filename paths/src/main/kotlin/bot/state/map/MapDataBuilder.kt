@@ -450,7 +450,7 @@ class MapBuilder {
         objectives[113] = CellBuilder().invoke {
             aka("bottomforestsecret")
             // 8 is a guess
-            this has Dest.Secrets.bombSecret30SouthWest at 8.grid a 1.grid
+            this has Dest.Secrets.bombSecret30SouthWest at 5.grid a 1.grid
         }
         objectives[114] =
             MapCellData(

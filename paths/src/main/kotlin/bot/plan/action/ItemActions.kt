@@ -145,9 +145,9 @@ class SwitchToItemConditionally(private val inventoryPosition: () -> Int = { Inv
         // doesn't need to have all the potions really
         when (position) {
             0 -> state.frameState.inventory.hasBoomerang
-            1 -> state.frameState.inventory.numBombs > 0
+            1 -> true // state.frameState.inventory.numBombs > 0
             2 -> true
-            4 -> state.frameState.inventory.hasCandle
+            4 -> true // state.frameState.inventory.hasCandle
             5 -> true
             6 -> true
             7 -> state.frameState.inventory.hasPotion
