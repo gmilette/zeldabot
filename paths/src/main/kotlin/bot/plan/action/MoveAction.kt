@@ -296,7 +296,7 @@ class MoveTo(
         if (state.currentMapCell.exitsFor(dir) == null) {
             d { " default move " }
         }
-        val exits = state.currentMapCell.exitsFor(dir) ?: secretRoomExit(state) ?: return NavUtil.randomDir()
+        val exits = secretRoomExit(state) ?: state.currentMapCell.exitsFor(dir) ?: return NavUtil.randomDir()
 
         targets = exits
 

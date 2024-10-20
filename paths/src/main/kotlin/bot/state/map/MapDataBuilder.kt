@@ -369,6 +369,11 @@ class MapBuilder {
             "forest before 2 10 secret",
             Objective(FramePoint(10.grid, 4.grid), Dest.Secrets.level2secret10)
         )
+        objectives[81] = MapCellData(
+            "forest burn secret",
+            // unknown grid
+            Objective(FramePoint(10.grid, 6.grid), Dest.Secrets.forest10BurnBrown)
+        )
     }
 
     private fun addRow5(objectives: MutableMap<MapLoc, MapCellData>) {
@@ -436,19 +441,17 @@ class MapBuilder {
             Objective(FramePoint(48, 16), Dest.Shop.arrowShop, itemLoc = Objective.ItemLoc.Right)
         )
         objectives[112] = MapCellData(
-            "useless end has shop?",
+            "useless end has shop",
             Objective(
                 FramePoint(100, 100), DestType
                     .Shop()
             )
         )
-        objectives[113] =
-            MapCellData(
-                "top bottom forest",
-                Objective(
-                    FramePoint(100, 100), DestType.SecretToEverybody(30, EntryType.Bomb)
-                )
-            )
+        objectives[113] = CellBuilder().invoke {
+            aka("bottomforestsecret")
+            // 8 is a guess
+            this has Dest.Secrets.bombSecret30SouthWest at 8.grid a 1.grid
+        }
         objectives[114] =
             MapCellData(
                 "top bottom forest"

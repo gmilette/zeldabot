@@ -162,6 +162,7 @@ object ZeldaPlan {
         val builder = factory.make("begin!")
         return builder {
             woodenSwordPhase()
+            obj(Dest.Secrets.forest10Mid)
 
             "gather bombs".seg()
             gatherBombsFirstPhase()
@@ -185,10 +186,10 @@ object ZeldaPlan {
             obj(Dest.Heart.fireHeart) // heart
             // now go back to level 1 with 6 hearts
 
-            obj(Dest.Fairy.greenForest)
+            obj(Dest.Fairy.greenForest) // 205
 
             // bomb secret.. later
-            1 using level1 // 238
+            1 using level1 // 238, 219 (after)
 
             // collect loot loop
             obj(Dest.Secrets.forest10Mid)
@@ -280,6 +281,10 @@ object ZeldaPlan {
 
             // grab this cash now, then get fairy so ready to kill level 3
             obj(Dest.Secrets.bombSecret30SouthWest)
+            // it's out of te way to get here
+            routeTo(115)
+            routeTo(99)
+            routeTo(83)
             obj(Dest.Secrets.forest10BurnBrown)
             obj(Dest.Fairy.brownForest)
 

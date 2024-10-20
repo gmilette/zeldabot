@@ -9,9 +9,8 @@ object MapMaker {
     fun createMapCells(data: Map<MapLoc, MapCellData>): Map<MapLoc, MapCell> {
         val emptyMapData = MapCellData("", Objective.empty)
 
-        // now read in mapTile2
         val fileContent =
-            this::class.java.classLoader.getResource("mapTile4.csv").readText()
+            this::class.java.classLoader.getResource("mapTile5.csv").readText()
 //        val replaced = fileContent.replace(" ", ",")
         val rows: List<List<String>> = CsvReader().readAll(fileContent)
         val passableMap = mutableListOf<List<Boolean>>()

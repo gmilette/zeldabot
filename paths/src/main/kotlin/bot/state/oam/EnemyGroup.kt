@@ -283,13 +283,13 @@ object EnemyGroup {
     val enemiesToNotAttackInOverworld = setOf(
         spinCircleEnemy,
         spinCircleEnemy2,
-        waterMonsterPairUnderE,
-        waterMonsterPairUnder2E,
-        waterMonsterPair,
-        waterMonsterPairUnder, // also it is ghost
-        waterMonsterPairUnder2,
-        shopOwner,
-        shopOwner2
+        waterMonsterPairUnderE.tile,
+        waterMonsterPairUnder2E.tile,
+        waterMonsterPair.tile,
+        waterMonsterPairUnder.tile, // also it is ghost
+        waterMonsterPairUnder2.tile,
+        shopOwner.tile,
+        shopOwner2.tile
     )
 
     val notAffectedByBoomerang = setOf(

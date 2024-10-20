@@ -64,7 +64,7 @@ class FindPaths {
         // mapTile3.csv: contains bomb holes
         // this works, just need to make sure the bottom is cut off
         val csvWriter2 = CsvWriter()
-        csvWriter2.open("mapTile4.csv", false) {
+        csvWriter2.open("mapTile5.csv", false) {
             // how many rows to read for the first set
             rows.forEachIndexed { x, row ->
                 val rowData = mutableListOf<String>()
