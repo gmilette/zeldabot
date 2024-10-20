@@ -162,7 +162,6 @@ object ZeldaPlan {
         val builder = factory.make("begin!")
         return builder {
             woodenSwordPhase()
-            obj(Dest.Secrets.forest10Mid)
 
             "gather bombs".seg()
             gatherBombsFirstPhase()
