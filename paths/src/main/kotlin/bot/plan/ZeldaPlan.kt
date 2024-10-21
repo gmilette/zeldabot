@@ -206,9 +206,9 @@ object ZeldaPlan {
             obj(Dest.Secrets.forest10Mid)
             // probably don't need this, but the margin is about 15 so yea get it
             obj(Dest.Secrets.bomb30Start) // 253
-            enoughForPotion
-            obj(Dest.Shop.potionShopWest, Objective.ItemLoc.Right)
+            greenPotion()
             ringLevels()
+            greenPotion()
             arrowAndHearts()
 
             // then potion?
@@ -280,6 +280,27 @@ object ZeldaPlan {
         }
     }
 
+    private fun PlanBuilder.greenPotion() {
+        add {
+            enoughForPotion
+            obj(Dest.Shop.potionShopWest, Objective.ItemLoc.Right)
+        }
+    }
+
+    private fun PlanBuilder.potionLevel6() {
+        add {
+            enoughForPotion
+            obj(Dest.Shop.potionShopLevel6, Objective.ItemLoc.Right)
+        }
+    }
+
+    private fun PlanBuilder.potionLevel6NoBomb() {
+        add {
+            enoughForPotion
+            obj(Dest.Shop.potionShopLevel6, Objective.ItemLoc.Right, action = false)
+        }
+    }
+
     private fun PlanBuilder.ringLevels() {
         add {
             // why risk it? get the blue ring first
@@ -307,8 +328,7 @@ object ZeldaPlan {
 //            routeTo(100)
             // getPotionConditionally()
             // for now just always buy the big potion
-            enoughForPotion
-            obj(Dest.Shop.potionShopWest, Objective.ItemLoc.Right)
+            greenPotion()
 
             // get the potion here if have enough cash
             // possibly only need to refill
@@ -460,13 +480,16 @@ object ZeldaPlan {
 //            routeTo(83) // position so we don't go through the 100 secret forest and get stuck
 //
         obj(ZeldaItem.PowerBracelet, itemLoc = Objective.ItemLoc.None)
-//            // make up and objective to walk to high up
+
+        // level6 potion
+        potionLevel6()
 ////            routeTo(32)
         goToAtPoint(33, FramePoint(11.grid, 3.grid))
 //            // hard to get into position when its passable, maybe position it
         obj(ZeldaItem.MagicSword)
 //
         6 using level6
+        potionLevel6NoBomb()
 
         phase("Gear for level 8")
 //            obj(Dest.Shop.potionShopWest, itemLoc = Dest.Shop.ItemLocs.redPotion)
@@ -481,8 +504,11 @@ object ZeldaPlan {
         }
         8 using level8
 
+        enoughForBait
         obj(Dest.Shop.blueRing, itemLoc = Dest.Shop.ItemLocs.bait, position = true)
+        greenPotion()
         7 using level7
+        greenPotion()
 
         phase("go to level 9")
         9 using level9

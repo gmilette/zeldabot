@@ -395,6 +395,11 @@ class PlanBuilder(
             add(lastMapLoc, EnoughForPotion)
             return this
         }
+    val enoughForBait: PlanBuilder
+        get() {
+            add(lastMapLoc, EnoughForBait)
+            return this
+        }
     val enoughForArrow: PlanBuilder
         get() {
             add(lastMapLoc, EnoughForArrow)
@@ -578,15 +583,16 @@ class PlanBuilder(
     }
 
     fun obj(dest: DestType, itemLoc: Objective.ItemLoc? = null, position: Boolean =
-        false) {
+        false, action: Boolean = true) {
 //        seg("get ${dest.javaClass.simpleName} for ${dest.name} at ${dest.entry.javaClass.simpleName}")
         seg("get ${dest.name}")
-        captureObjective(mapData.findObjective(dest), itemLoc, position)
+        captureObjective(mapData.findObjective(dest), itemLoc, position, action)
     }
 
     private fun captureObjective(mapCell: MapCell,
                                  itemLocOverride: Objective.ItemLoc? = null,
-                                 position: Boolean = false) {
+                                 position: Boolean = false,
+                                 action: Boolean = true) {
         val objective = mapCell.mapData.objective
         if (objective.type !is DestType.None) {
             setObjective(objective)
@@ -614,7 +620,7 @@ class PlanBuilder(
                 }
                 EntryType.WalkInLadder -> goToNotMonitored(point)
                 EntryType.WalkIn -> goTo(point)
-                EntryType.Bomb -> bombThenGoIn(point, itemLocPoint)
+                EntryType.Bomb -> if (action) bombThenGoIn(point, itemLocPoint) else goInGetCenterItem(point, itemLocPoint)
                 is EntryType.Fire -> burnFromGo(point, this.type.entry.from, itemLocPoint)
                 is EntryType.Push -> pushDownGetItem(point, itemLocPoint)
                 is EntryType.Statue -> pushDownGetItem(point, itemLocPoint, position)

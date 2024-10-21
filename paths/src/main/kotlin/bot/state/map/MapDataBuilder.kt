@@ -67,12 +67,10 @@ class MapBuilder {
                     (20, EntryType.Bomb)
             )
         )
-        objectives[4] = MapCellData(
-            "nexttolev9woman",
-            Objective(
-                FramePoint(100, 100), DestType.Woman
-            )
-        )
+        objectives[4] = CellBuilder().invoke {
+            aka("level9 potion")
+            this has Dest.Shop.potionShopLevel9 at 9.grid a 1.grid //todo
+        }
         objectives[5] = MapCellData(
             "lev9",
             Objective(FramePoint(5.grid, 6.grid), Dest.level(9))
@@ -327,6 +325,10 @@ class MapBuilder {
             "blueringshop",
             Objective(FramePoint(4.grid, 4.grid), Dest.Shop.blueRing),
         )
+        objectives[51] = CellBuilder().invoke {
+            aka("level6 potion")
+            this has Dest.Shop.potionShopLevel6 at 9.grid a 1.grid //todo
+        }
     }
 
     private fun addRow4(objectives: MutableMap<MapLoc, MapCellData>) {

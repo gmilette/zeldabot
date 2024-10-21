@@ -20,3 +20,5 @@ val EnoughForPotion
     get() = CheatRupee(68)
 val EnoughForArrow
     get() = CheatRupee(88)
+val EnoughForBait
+    get() = CheatRupee(80)
