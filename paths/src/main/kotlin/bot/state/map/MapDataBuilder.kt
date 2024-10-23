@@ -373,8 +373,7 @@ class MapBuilder {
         )
         objectives[81] = MapCellData(
             "forest burn secret",
-            // unknown grid
-            Objective(FramePoint(10.grid, 6.grid), Dest.Secrets.forest10BurnBrown)
+            Objective(FramePoint(9.grid, 6.grid), Dest.Secrets.forest10BurnBrown)
         )
     }
 

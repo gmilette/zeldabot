@@ -162,18 +162,11 @@ object ZeldaPlan {
         val builder = factory.make("begin!")
         return builder {
             woodenSwordPhase()
+            switchToBomb
 
+            greenPotion()
             routeTo(115)
-            goTo(FramePoint(12.grid, 7.grid))
-            // position self to take bottom exit
-            // grab this cash now, then get fairy so ready to kill level 3
-            obj(Dest.Secrets.bombSecret30SouthWest)
-            // it's out of te way to get here
-            routeTo(115)
-            routeTo(99)
-            routeTo(83)
-            obj(Dest.Secrets.forest10BurnBrown)
-            obj(Dest.Fairy.brownForest)
+            greenPotion()
 
             "gather bombs".seg()
             gatherBombsFirstPhase()
@@ -306,6 +299,7 @@ object ZeldaPlan {
             // why risk it? get the blue ring first
             fireBurn100()
             enoughForRing
+            routeTo(98 - 16) // go up so it routes ok
             obj(Dest.Shop.blueRing, position = true)
             // avoid accidentally going back in
             goIn(GamePad.MoveRight, 25) // test it
@@ -837,7 +831,7 @@ object ZeldaPlan {
             goIn(GamePad.MoveLeft, 10)
             seg("fight swords")
             kill // don't attack half
-            downk
+            down  // downk, i think it as causing no completing
             seg("get raft")
             goIn(GamePad.MoveDown, 10)
             // drop clearing bomb

@@ -242,6 +242,11 @@ object Monsters {
         tile = setOf(0xa6, 0xa4),
         color = red, // red for the pancake
     ).inL()
+
+    val dragon = Monster(name = "dragon",
+        tile = setOf(0xCA, 0xC2, 0xc8, 0xcc, 0xce, 0xc0, 0xdc, 0xda, 0xd4, 0xd2, 0xd8, 0xd0, 0xd6, 0xc6, 0xde),
+        color = grey
+    ).immuneToB().inL()
     val manhandla = Monster(name = "star").immuneToB().inL()
     val moldorm = Monster(name = "cirleworm",
         tile = setOf(0x9E, 0xA0),
@@ -276,6 +281,7 @@ object Monsters {
         .add(gibdoOrLikeLike)
         .add(patra)
         .add(MonstersOverworld.leever)
+        .add(dragon)
 }
 
 private val h0 = 0x00
@@ -284,6 +290,7 @@ private val h2 = 0x02
 private val h3 = 0x03
 fun h123() = setOf(h0, h1, h2, h3)
 fun h023() = setOf(h0, h2, h3)
+private val grey = setOf(MonsterColor.grey)
 private val red = setOf(MonsterColor.red)
 private val blue = setOf(MonsterColor.blue)
 private val blueAndRed = setOf(MonsterColor.blue, MonsterColor.red)

@@ -1,6 +1,7 @@
 package bot.plan.action
 
 import bot.state.*
+import bot.state.map.MapConstants
 import bot.state.map.toGamePad
 import bot.state.oam.oldWoman
 import bot.state.oam.potion
@@ -151,7 +152,7 @@ class SwitchToItemConditionally(private val inventoryPosition: () -> Int = { Inv
             5 -> true
             6 -> true
             7 -> state.frameState.inventory.hasPotion
-            15 -> state.frameState.inventory.hasLetter
+            15 -> true //state.frameState.inventory.hasLetter
             8 -> state.frameState.inventory.hasWand
             else -> true
         }
@@ -305,13 +306,15 @@ private val FrameState.hasPotion
 // any time enter shop add this action just in case
 class ShowLetterConditionally : Action {
     private val switchSequence = mutableListOf(
-        GoIn(120, GamePad.MoveUp),
+        GoInConsume(MapConstants.twoGrid, GamePad.MoveUp),
         GoIn(50, GamePad.None),
 //        WaitForPotionOrOldWoman(),
         WaitForOldWoman(),
 //        SwitchToItem(Inventory.Selected.potionletter),
         SwitchToItemConditionally(Inventory.Selected.letter),
-//        GoIn(50, GamePad.None),
+        // the ait until the menu item is closed doesn't work here
+        // so do regular wait
+        GoIn(100, GamePad.None),
         UseItem(),
         // wait for the lady to display the potions
         // need these both for some reason

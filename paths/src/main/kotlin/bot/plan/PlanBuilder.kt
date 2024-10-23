@@ -757,7 +757,7 @@ class PlanBuilder(
     private fun goInGetCenterItem(to: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, showLetter: Boolean = false): PlanBuilder {
         goTo(to)
         // move in the door
-        goIn(GamePad.MoveUp, 5)
+        goInConsume(GamePad.MoveUp, 5)
         if (showLetter) {
             d { " LETTER REQUIRED "}
             showLetterIfRequired()
@@ -779,7 +779,8 @@ class PlanBuilder(
             goShop(itemLoc)
             if (itemLoc != Objective.ItemLoc.Enter.point) {
                 exitShop()
-                goIn(GamePad.MoveDown, 5)
+                // help exit after exiting
+                goInConsume(GamePad.MoveDown, MapConstants.halfGrid)
             }
         }
     }

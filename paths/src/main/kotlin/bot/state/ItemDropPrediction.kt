@@ -8,6 +8,7 @@ class ItemDropPrediction(
 ) {
     val killCt: Int by lazy { api.readCPU(Addresses.enemiesKilledCount) }
 
+    // see https://www.zeldaspeedruns.com/loz/generalknowledge/item-drops-chart
     private val bombDropCounts = setOf(0, 5, 7)
 
     // cheap hack is, outside, color is blue, it can give a bomb

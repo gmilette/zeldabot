@@ -282,7 +282,7 @@ class MoveTo(
     private var start: MapCell? = null
 
     override fun nextStep(state: MapLocationState): GamePad {
-        d { " DO MOVE TO cell ${next.mapLoc} arrived=${arrived} $movedIn allow: $allowBlocking" }
+        d { " DO MOVE TO cell ${next.mapLoc} arrived=${arrived} movedIn=$movedIn" }
 
         val current = state.currentMapCell
         if (start == null) {
