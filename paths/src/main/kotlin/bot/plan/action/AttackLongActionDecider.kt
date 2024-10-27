@@ -151,9 +151,6 @@ object AttackLongActionDecider {
         else -> link.toRect()
     }
 
-    private fun List<Agent>.affectedByBoomerang() =
-        this.filter { it.affectedByBoomerang() }
-
     // enemy group for immunie to boomerang
 
     private fun rayFrom(map: Map2d<Boolean>, point: FramePoint, dir: Direction): FramePoint {
@@ -185,7 +182,7 @@ object AttackLongActionDecider {
         get() = this.frameState.inventory.selectedItem == Inventory.Selected.arrow
 }
 
-fun Agent.affectedByBoomerang() =
-    Monsters.lookup[tile]?.affectedByBoomerang ?: true // most monsters can be boomeranged AND loot
+fun Agent.affectedByBoomerang(level: Int) =
+    Monsters.lookup(level)[tile]?.affectedByBoomerang ?: true // most monsters can be boomeranged AND loot
 
 fun Agent.lootNeeded(state: MapLocationState) = LootKnowledge.neededValuable(state, this)

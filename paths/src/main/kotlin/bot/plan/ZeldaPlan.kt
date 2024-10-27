@@ -1064,11 +1064,13 @@ private val level6: PlanBuilder.() -> Unit
 
 private val level7: PlanBuilder.() -> Unit
     get() = {
+        // all boomerang
         phase(Phases.lev(7))
         lev(7)
         startAt(LevelStartMapLoc.lev(7))
         upm
         bombUp
+        switchToBoomerang
         upm
         seg("past water")
         kill //2
@@ -1082,6 +1084,7 @@ private val level7: PlanBuilder.() -> Unit
         goIn(GamePad.MoveUp, 20) // move more in
         goTo(FramePoint(8.grid, 7.grid))
         useItem()
+        switchToBoomerang
         upm
         rightm
         bombRight
@@ -1099,9 +1102,11 @@ private val level7: PlanBuilder.() -> Unit
         goIn(GamePad.MoveRight, 20) // move more in
         useItem()
         wait(300)
+        kill
         upk
         bombRight
         seg("Kill hands")
+        switchToWand
         killHandsInLevel7
         goTo(FramePoint(2.grid, 8.grid))
         addNext(
@@ -1157,6 +1162,7 @@ private val level8: PlanBuilder.() -> Unit
         bombUp
         upm
         killArrowSpider // kill arrow guy
+        loot // spider tends to generate loot sometimes
         rightm
         seg("get key")
         killAllInCenter
@@ -1167,8 +1173,9 @@ private val level8: PlanBuilder.() -> Unit
         down
         kill // master battle
         seg("take stair to end")
-        rightk
-        killUntil(3) // kill some, otherwise link just tries to run through them, which is not good
+        right // master battle
+        killUntil(4) // kill some, otherwise link just tries to run through them, which is not good
+        // 31, 46, 62
         addNext(
             76, goNoPush(
                 makeUp(76),
@@ -1178,6 +1185,7 @@ private val level8: PlanBuilder.() -> Unit
             )
         )
 
+        switchToArrowConditionally()
         // give time to enter so that switching to bomb works
         goTo(FramePoint(11.grid, 2.grid))
         "bomb to get dragon".seg()

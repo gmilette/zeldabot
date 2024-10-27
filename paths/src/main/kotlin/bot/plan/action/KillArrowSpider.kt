@@ -67,7 +67,8 @@ class KillArrowSpider : Action {
 // ill be good for a shoot from distance
 // doesn't quite do what i want or properly stop
 fun killSpider(): Action {
-    val kill = KillAll(useBombs = true)
+    val kill = KillAll(useBombs = true,
+        targetOnly = listOf(spiderHeadOpen, spiderHeadOpening))
     return DecisionAction(kill, Optional(HideFromSpider())) {
         it.vulnerable() || it.aliveEnemies.isEmpty()
     }

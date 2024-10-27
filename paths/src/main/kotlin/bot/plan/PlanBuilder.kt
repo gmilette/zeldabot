@@ -817,6 +817,10 @@ class PlanBuilder(
         plan.add(SwitchToItemConditionally(Inventory.Selected.wand))
     }
 
+    fun switchToArrowConditionally() {
+        plan.add(SwitchToItemConditionally(Inventory.Selected.arrow))
+    }
+
     fun switchToArrow() {
         switchToItem(Inventory.Selected.arrow)
     }

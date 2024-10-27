@@ -191,14 +191,14 @@ object MonsterColor {
 }
 //enum class MonsterColor(color: Int, colorT: Int) {
 //    Blue(1, 20), //01 //
-//    Red(2, 24),  //10
+//    Red(2, 24)  //10
 //    Other(0, 16),//00
 //    Grey(3, 28)  //11 // like squishy
 //}
 
 object Monsters {
-    val levelsWithBoomerangAndSword = setOf(7) // 7 also has swords
-    val levelsWithBoomerang = setOf(1, 2) // 7 also has swords
+    val levelsWithBoomerangAndSword = setOf(7)
+    val levelsWithBoomerang = setOf(1, 2, 7)
     val levelsWithWizzrobes = setOf(6, 9)
     val levelsWithNotSword = levelsWithWizzrobes + levelsWithBoomerang
 
@@ -273,16 +273,30 @@ object Monsters {
     val zolAndStalfos = zol + stalfos
     val gibdoOrLikeLike = gibdo + likelike
 
-    val lookup: Map<Int, Monster> = mutableMapOf<Int, Monster>()
-//        .add(wizzrobe)
-//        .add(darknut)
-        .add(darknutGroup)
+    val lookupBase: Map<Int, Monster> = mutableMapOf<Int, Monster>()
         .add(zolAndStalfos)
         .add(gibdoOrLikeLike)
         .add(patra)
         .add(MonstersOverworld.leever)
         .add(dragon)
         .add(polsVoice)
+
+    val lookup: Map<Int, Monster> = lookupBase + mutableMapOf<Int, Monster>()
+        .add(darknutGroup)
+
+    val lookupLevel7: Map<Int, Monster> = lookupBase + mutableMapOf<Int, Monster>()
+        .add(goriya)
+
+    val lookupLevel6: Map<Int, Monster> = lookupBase + mutableMapOf<Int, Monster>()
+        .add(wizzrobe)
+
+    fun lookup(level: Int) =
+        when (level) {
+            7 -> lookupLevel7
+            6 -> lookupLevel6
+            else -> lookup
+        }
+
 }
 
 private val h0 = 0x00

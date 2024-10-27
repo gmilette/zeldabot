@@ -429,11 +429,11 @@ fun lootAndMove(moveTo: Action) = DecisionAction(GetLoot(), moveTo) { state ->
 // in case the kill all didnt work and there are enemies
 // around, in that case go back to kill mode
 
-// Why is it optional?
+// Why is it optional? because otherwise it doesnt complete and user has moved on
 //fun killAndMove(moveTo: MoveTo) = DecisionAction(Optional(KillAll()), moveTo) { state ->
 //    neededReachableLoot(state).isNotEmpty()
 //}
-fun killAndMove(moveTo: MoveTo) = DecisionAction(KillAll(), moveTo) { state ->
+fun killAndMove(moveTo: MoveTo) = DecisionAction(Optional(KillAll()), moveTo) { state ->
     neededReachableLoot(state).isNotEmpty()
 }
 

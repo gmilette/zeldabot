@@ -150,9 +150,11 @@ class RouteTo(val params: Param = Param()) {
         val attackable = attackableSpec.ifEmpty {
             attackableAgents.map { it.point }
         }
+
+        val level = state.frameState.level
         // same with wand? not quite but close
         val boomerangable: List<FramePoint> = attackableSpec.ifEmpty {
-            (attackableAgents.filter { it.affectedByBoomerang() } +
+            (attackableAgents.filter { it.affectedByBoomerang(level) } +
                     state.loot.filter { it.lootNeeded(state) }  // won't boomerang for useless stuff like keys, compass, etc.
             ).map { it.point }
         }
