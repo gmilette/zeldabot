@@ -153,12 +153,9 @@ val dragon4BodySide = (0xD6).toInt()
 val dragon4BodySpinePair = (0xC6).toInt() to (0x03).toInt() // attribute 3
 val dragon4FlamingHead = (0xDE).toInt()
 
-val spiderBlueHeadLeft = (0xFC).toInt() to (0x01).toInt()
-val spiderBlueHeadRight = (0xFC).toInt() to (0x41).toInt()
-val spiderHeadLeft = (0xFC).toInt() to (0x02).toInt()
-val spiderHeadRight = (0xFC).toInt() to (0x42).toInt()
-val spiderHeadLeftClosed = (0xFE).toInt() to (0x02).toInt()
-val spiderHeadRightClosed = (0xFE).toInt() to (0x42).toInt()
+val spiderHeadOpen = (0xFC).toInt()
+val spiderHeadOpening = (0xFE).toInt()
+val spiderHeadClosed = (0xF4).toInt()
 
 val lynelSwordGuy = (0xD4).toInt() to (0x41).toInt()
 val lynelSwordGuy2 = (0xD2).toInt() to (0x41).toInt()

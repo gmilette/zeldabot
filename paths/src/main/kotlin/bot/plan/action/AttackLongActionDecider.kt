@@ -49,11 +49,22 @@ object AttackLongActionDecider {
     fun shouldBoomerang(state: MapLocationState, targets: List<FramePoint>): Boolean {
         // includes loot
         val shouldShoot = targets.isNotEmpty()
-        val canShoot = state.boomerangActive || state.wandActive
-        val boomerangIsFlying = if (state.boomerangActive) {
-            state.frameState.enemies.any { it.tile in EnemyGroup.boomerangs }
-        } else {
-            state.frameState.enemies.any { it.tile in ProjectileDirectionLookup.ghostProjectiles }
+        var canShoot = false // state.boomerangActive || state.wandActive || state.arrowActive
+        val boomerangIsFlying = when {
+            (state.boomerangActive) -> {
+                canShoot = true
+                state.frameState.enemies.any { it.tile in EnemyGroup.boomerangs }
+            }
+            (state.wandActive) -> {
+                canShoot = true
+                state.frameState.enemies.any { it.tile in ProjectileDirectionLookup.ghostProjectiles }
+            }
+            (state.arrowActive) -> {
+                canShoot = true
+                false
+//                state.frameState.enemies.any { it.tile in ProjectileDirectionLookup.ghostProjectiles }
+            }
+            else -> false
         }
         val inRange by lazy { targetInLongRange(state, targets) }
         d { "Shoot boomerang $shouldShoot can=$canShoot flying=$boomerangIsFlying "} // range=$inRange" }
@@ -169,6 +180,9 @@ object AttackLongActionDecider {
 
     private val MapLocationState.wandActive: Boolean
         get() = this.frameState.inventory.selectedItem == Inventory.Selected.wand
+
+    private val MapLocationState.arrowActive: Boolean
+        get() = this.frameState.inventory.selectedItem == Inventory.Selected.arrow
 }
 
 fun Agent.affectedByBoomerang() =

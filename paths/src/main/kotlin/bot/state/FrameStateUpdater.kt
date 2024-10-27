@@ -69,7 +69,10 @@ class FrameStateUpdater(
         // combining sprites messes up rhino analysis because when the rhino goes right,
         // everything gets combined to the back
         val isRhino = mapLoc == 14 && level == 2
-        val oam = OamStateReasoner(isOverworld, api, mapStats, combine = !isRhino)
+        val isSpiderLevel8 = mapLoc == 30 && level == 8
+        val isSpiderLevel6 = false && level == 6 // todo
+        val combine = !isRhino && !isSpiderLevel8 && !isSpiderLevel6
+        val oam = OamStateReasoner(isOverworld, api, mapStats, combine = combine)
         val dirLookup = DirectionByMemoryLookup(api)
         val theEnemies = oam.agents(dirLookup)
 

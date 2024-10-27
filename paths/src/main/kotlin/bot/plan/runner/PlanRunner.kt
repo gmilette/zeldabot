@@ -44,8 +44,8 @@ class PlanRunner(private val makePlan: PlanMaker,
         d { " run from $exp"}
         if (exp.contains("_") || exp.contains(",")) {
             val split = exp.split("_", ",")
-            val mapLoc = split.first().toInt()
-            val level = split[1].toInt()
+            val level = split.first().toInt()
+            val mapLoc = split[1].toInt()
             // w = white, m = magic, d="none"
             val s = split.getOrElse(2, { "d" })
             // b = blue, r=red, g=none
@@ -65,6 +65,10 @@ class PlanRunner(private val makePlan: PlanMaker,
                     "r" -> ZeldaItem.RedRing
                     else -> ZeldaItem.None
                 },
+                keys = 4,
+                bombs = 4,
+                rupees = 250,
+                potion = true
             )
             runLoc(mapLoc, level)
         } else {
@@ -225,6 +229,9 @@ class PlanRunner(private val makePlan: PlanMaker,
         }
         if (ex.wand) {
             manipulator.setWandNoBook()
+        }
+        if (ex.rupees > 0) {
+            manipulator.addRupee()
         }
         manipulator.setBoomerang(ex.boomerang)
         manipulator.setKeys(ex.keys)

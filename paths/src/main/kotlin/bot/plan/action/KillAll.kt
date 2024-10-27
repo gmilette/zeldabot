@@ -93,8 +93,9 @@ class KillAll(
     override fun complete(state: MapLocationState): Boolean =
 //        criteria.complete(state)
         (waitAfterAllKilled <= 0 && frameCount > 33 && killedAllEnemies(state)).also {
-            d { " kill all complete $it ${state.numEnemies} or ${numberLeftToBeDead}" }
-            d { "result $it ${state.clearedWithMin(numberLeftToBeDead)} ct $frameCount wait $waitAfterAllKilled" }
+            val killedAll = killedAllEnemies(state)
+            d { " kill all complete $it ${state.numEnemies} or ${numberLeftToBeDead} killedAll=$killedAll $frameCount $waitAfterAllKilled" }
+//            d { "result $it ${state.clearedWithMin(numberLeftToBeDead)} ct $frameCount wait $waitAfterAllKilled" }
             state.frameState.enemies.filter { it.state == EnemyState.Alive }.forEach {
                 d { "enemy $it dist ${it.point.distTo(state.link)}" }
             }
@@ -278,7 +279,7 @@ class KillAll(
                     routeTo.routeTo(
                         state, targetsToAttack,
                         RouteTo.RouteParam(
-                            useB = firstAttackBomb,
+                            useB = firstAttackBomb || useBombs,
                             forceNew = forceNew,
                             allowBlock = allowBlock,
                             rParam = RouteTo.RoutingParamCommon(
@@ -289,7 +290,7 @@ class KillAll(
                         ),
                         attackableSpec = if (attackOnlySpecified) aliveEnemies.map { it.point } else emptyList()
                     ).also {
-                        if (it == GamePad.B && firstAttackBomb) {
+                        if (it == GamePad.B && (firstAttackBomb || useBombs)) {
                             d {"USE BOMB!" }
                             numPressB++
                             if (numPressB > 3) {

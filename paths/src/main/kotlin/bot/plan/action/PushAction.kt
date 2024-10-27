@@ -115,7 +115,7 @@ fun goNoPush(upTo: Action,
         CompleteIfMapChanges(InsideNav(stairs.point)),
         CompleteIfMapChanges(OrderedActionSequence(listOf(
             StartAtAction(startAt),
-            InsideNav(out.point),
+            InsideNav(out.point, tag = "go to no push point"),
             upTo,
         ), restartWhenDone = false, shouldComplete = true)) // fine if this restarts, it will end once user exits
     ), restartWhenDone = false, shouldComplete = true)

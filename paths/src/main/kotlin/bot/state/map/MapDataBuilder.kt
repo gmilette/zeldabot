@@ -5,7 +5,10 @@ import bot.state.MapLoc
 import bot.state.map.destination.*
 
 val Int.grid
-    get() = this * 16
+    get() = this * MapConstants.oneGrid
+
+val Int.andAHalf
+    get() = this + MapConstants.halfGrid
 
 /**
  * constructs the overworld mapCells

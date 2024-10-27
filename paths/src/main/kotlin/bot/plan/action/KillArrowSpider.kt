@@ -4,9 +4,10 @@ import bot.state.FramePoint
 import bot.state.GamePad
 import bot.state.MapLocationState
 import bot.state.map.MapConstants
+import bot.state.map.andAHalf
 import bot.state.map.grid
-import bot.state.oam.spiderBlueHeadLeft
-import bot.state.oam.spiderHeadLeft
+import bot.state.oam.spiderHeadOpen
+import bot.state.oam.spiderHeadOpening
 import util.d
 
 // assume switched to arrow
@@ -15,6 +16,7 @@ class KillArrowSpider : Action {
         // should be the middle of the attack area
         val attackAreaLeftSideMiddleVertical = FramePoint(8.grid, 7.grid)
         val attackAreaLeftSideMiddleVerticalBottom = FramePoint(8.grid, 8.grid)
+        val safeArea = FramePoint(7.grid.andAHalf, 9.grid)
     }
 
     private val positionShootActions = mutableListOf<Action>(
@@ -29,8 +31,7 @@ class KillArrowSpider : Action {
             list.add(GoIn(3, GamePad.MoveUp, reset = true))
             // only shoot if the nose is open
             list.add(GoIn(3, GamePad.B, reset = true) { state ->
-                state.frameState.enemiesUncombined
-                    .any { it.tile == spiderHeadLeft.first || it.tile == spiderBlueHeadLeft.first }
+                state.vulnerable()
             })
             list.add(GoIn(3, GamePad.None, reset = true))
         }
@@ -60,4 +61,33 @@ class KillArrowSpider : Action {
 
     override val name: String
         get() = "KillArrowSpider ${criteria.frameCount}"
+}
+
+
+// ill be good for a shoot from distance
+// doesn't quite do what i want or properly stop
+fun killSpider(): Action {
+    val kill = KillAll(useBombs = true)
+    return DecisionAction(kill, Optional(HideFromSpider())) {
+        it.vulnerable() || it.aliveEnemies.isEmpty()
+    }
+}
+
+// either
+// 1. hide
+// 2. get into vertical position
+// 3. shoot!
+
+private fun MapLocationState.vulnerable(): Boolean = frameState.enemiesUncombined
+    .any { it.tile == spiderHeadOpen || it.tile == spiderHeadOpening }
+
+class HideFromSpider : Action {
+    private val goTo = InsideNav(KillArrowSpider.KillArrowSpiderData.safeArea, tag = "hide from spider")
+    override fun complete(state: MapLocationState): Boolean {
+        return goTo.complete(state)
+    }
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        return goTo.nextStep(state)
+    }
 }

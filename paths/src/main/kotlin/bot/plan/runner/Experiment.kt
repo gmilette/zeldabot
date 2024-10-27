@@ -15,6 +15,7 @@ data class Experiment(
     val keys: Int = 0,
     val potion: Boolean = false,
     val boomerang: ZeldaItem = ZeldaItem.None,
+    val rupees: Int = 0,
     val addEquipment: Boolean = false,
     val startAt: Int = 52,
     val nameFull: String = "${name}_s${sword.name.first()}_h${hearts}_r${ring.name.first()}_b${bombs}"

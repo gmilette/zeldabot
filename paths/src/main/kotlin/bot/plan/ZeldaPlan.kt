@@ -1130,9 +1130,10 @@ private val level8: PlanBuilder.() -> Unit
         lev(8)
         startAt(LevelStartMapLoc.lev(8))
         seg("run past")
+        goIn(GamePad.MoveUp, 10)
+        switchToBomb
         left
         seg("bomb guy")
-        switchToBomb
         killFirstAttackBomb
         // get the coin
         goTo(FramePoint(8.grid, 5.grid))
@@ -1151,6 +1152,8 @@ private val level8: PlanBuilder.() -> Unit
         goTo(InLocations.Level8.keySpot)
         upm
         upm // master battle
+        // clear out a little before moving on
+        killUntil(4)
         bombUp
         upm
         killArrowSpider // kill arrow guy
@@ -1165,6 +1168,7 @@ private val level8: PlanBuilder.() -> Unit
         kill // master battle
         seg("take stair to end")
         rightk
+        killUntil(3) // kill some, otherwise link just tries to run through them, which is not good
         addNext(
             76, goNoPush(
                 makeUp(76),

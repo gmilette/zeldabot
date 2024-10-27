@@ -30,4 +30,6 @@ object MapConstants {
      * subtract from any y's to convert to 0 coordinates
      */
     const val yAdjust = 61
+
+    fun frac(percent: Float): Int = (oneGrid.toFloat() * percent).toInt()
 }

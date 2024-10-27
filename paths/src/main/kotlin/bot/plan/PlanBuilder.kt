@@ -221,7 +221,7 @@ class PlanBuilder(
     val killArrowSpider: PlanBuilder
         get() {
             switchToArrow()
-            add(lastMapLoc, KillArrowSpider())
+            add(lastMapLoc, killSpider())
             return this
         }
     val killAllInCenter: PlanBuilder

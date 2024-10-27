@@ -289,11 +289,9 @@ class DecisionAction(
         val completeIf = completeIf(state)
         val complete1 = action1.complete(state)
         val complete2 = action2.complete(state)
+        d { " decision complete act1: ${action1.complete(state)} act2: ${action2.complete(state)}"}
         return completeIf || (complete1 && complete2)
     }
-//            .also {
-//            d { " decision complete $it ${action1.complete(state)} ${action2.complete(state)}"}
-//        }
 
     private var target: FramePoint = FramePoint(0, 0)
     private var path: List<FramePoint> = emptyList()

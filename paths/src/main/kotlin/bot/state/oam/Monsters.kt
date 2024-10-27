@@ -39,7 +39,7 @@ data class Monster(
 ) {
     fun inL() = this.copy(overworld = false)
     fun immuneToB() = this.copy(affectedByBoomerang = false)
-    fun arrowKillable() = this.copy(arrowKillable = false)
+    fun arrowKillable() = this.copy(arrowKillable = true)
     operator fun plus(other: Monster): Monster {
         return Monster("${this.name}_${other.name}",
             tile = this.tile + other.tile,
@@ -258,7 +258,7 @@ object Monsters {
     val polsVoice = Monster(name = "bunny",
         tile = setOf(0xa2, 0xa0),
         color = setOf(MonsterColor.other)
-    ).immuneToB().inL().arrowKillable()
+    ).inL().arrowKillable() // .immuneToB(), let us shoot boomerang too
     val rope = Monster("fastWorm").inL()
     val stalfos = Monster("skeleton",
         color = red,
@@ -282,6 +282,7 @@ object Monsters {
         .add(patra)
         .add(MonstersOverworld.leever)
         .add(dragon)
+        .add(polsVoice)
 }
 
 private val h0 = 0x00
