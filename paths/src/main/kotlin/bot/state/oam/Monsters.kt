@@ -35,7 +35,7 @@ data class Monster(
     val tile: Set<Int> = emptySet(),
     val affectedByBoomerang: Boolean = true,
     val arrowKillable: Boolean = false,
-    val overworld: Boolean = true
+    val overworld: Boolean = true,
 ) {
     fun inL() = this.copy(overworld = false)
     fun immuneToB() = this.copy(affectedByBoomerang = false)
@@ -88,49 +88,6 @@ val swordDir = DirectionMap(
     right = setOf(0xB8, //02
         0xBC, // was left
         0xBA), //02
-)
-
-data class DirectionMapGhosts(
-    val up: Set<TileAttribute> = setOf(),
-    val left: Set<TileAttribute> = setOf(),
-    val rightOrDown: Set<TileAttribute> = setOf(),
-) {
-    val all = up + left + rightOrDown
-
-    fun dirFront(agent: Agent): Direction? =
-        when {
-            agent.tileAttrib in up -> Direction.Up
-            agent.tileAttrib in rightOrDown -> Direction.Right
-            agent.tileAttrib in left -> Direction.Left
-            else -> null
-        }
-}
-
-private val one = 0x01
-private val fone = 0x41
-private val ftwo = 0x42
-
-val ghostDir = DirectionMapGhosts(
-    // could be diagonal too, but if diagonal, they aren't going to shoot
-    up = setOf(
-        0xbe to one, //b01
-        0xbc to one//b41, b01
-    ),
-    // left can't be down
-    left = setOf(
-        0xb6 to fone, //b,r 41, 42y
-        0xba to fone, //yellow, 42, yep, b41
-        0xb8 to fone,
-        0xb6 to ftwo, //b,r 41, 42y
-        0xba to ftwo, //yellow, 42, yep, b41
-        0xb8 to ftwo
-    ), //attrib 41
-    // left or right could be down!
-    // right or down
-    rightOrDown = setOf(
-        0xb6 to one,
-        0xba to one
-    ), //02, 012
 )
 
 object MonstersOverworld {
@@ -357,3 +314,64 @@ fun Int.colorOf() =
 
 fun Int.monsterColor() =
     this and 0x03
+
+//val projectiles = setOf(
+//    flame1,
+//    flame2,
+//    144, 142, // sun
+//    40, orbProjectile, // ganons
+//    arrowTipShotByEnemy,
+//    arrowTipShotByEnemy2,
+//    fire,
+//    brownBoomerang, // but it is also an item to be gotten, not avoided, oy!
+//    brownBoomerangSpin,
+//    brownBoomerangSpinBendFacingUp,
+//    trap, // trap,
+//    dragon4FlamingHead,
+//    spinCircleEnemy,
+//    ghostProjectileUpDown,
+//    ghostProjectileLeft1,
+//    ghostProjectileLeft2,
+//    rockProjectile.tile
+//)
+
+const val ghostProjectileUpDown = (0x7a).toInt() // 1 and 41, 02/42, down 81,c1, 83, c3, 82,c2
+const val ghostProjectileLeft1 = (0x7e).toInt() // right is 03
+const val ghostProjectileLeft2 = (0x7c).toInt() // right is 03
+val rockProjectileTile = (0x9e).toInt()
+
+object Projectiles {
+    // list all the projectiles
+    val bubble = Monster().unblockable()
+    val bolder = Monster().unblockable()
+    val arrow = Monster().byShield()
+    val wizardWand = Monster(
+        tile = setOf(ghostProjectileLeft1,
+            ghostProjectileLeft2,
+            ghostProjectileUpDown
+        )
+    ).byMagic()
+    val rock = Monster(
+        tile = setOf(rockProjectileTile)
+    ).byShield()
+    val trap = Monster().unblockable()
+    val boomerang = Monster().byShield()
+    //
+    val orb = Monster().byMagic()
+    // shot by dragon
+    val dragonOrb = Monster().unblockable()
+    // from candle
+    val fire = Monster().unblockable()
+}
+
+fun Monster.unblockable(): Monster {
+    return this
+}
+
+fun Monster.byShield(): Monster {
+    return this
+}
+
+fun Monster.byMagic(): Monster {
+    return this
+}

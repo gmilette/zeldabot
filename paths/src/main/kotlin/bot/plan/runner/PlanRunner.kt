@@ -233,6 +233,9 @@ class PlanRunner(private val makePlan: PlanMaker,
         if (ex.rupees > 0) {
             manipulator.addRupee()
         }
+        //
+//        manipulator.setLetter()
+//        manipulator.setLadderAndRaft(true)
         manipulator.setBoomerang(ex.boomerang)
         manipulator.setKeys(ex.keys)
         manipulator.setPotion(ex.potion)

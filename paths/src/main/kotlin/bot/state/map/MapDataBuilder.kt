@@ -72,7 +72,7 @@ class MapBuilder {
         )
         objectives[4] = CellBuilder().invoke {
             aka("level9 potion")
-            this has Dest.Shop.potionShopLevel9 at 9.grid a 1.grid //todo
+            this has Dest.Shop.potionShopLevel9 at 12.grid a 1.grid
         }
         objectives[5] = MapCellData(
             "lev9",
@@ -113,12 +113,10 @@ class MapBuilder {
                 100, 100, DestType.Shop()
             )
         )
-        objectives[13] = MapCellData(
-            "nowherepotion",
-            Objective(
-                100, 100, DestType.Woman
-            )
-        )
+        objectives[13] = CellBuilder().invoke {
+            aka("nowherepotion")
+            this has Dest.Shop.potionShopTop at 9.grid a 1.grid
+        }
         objectives[14] = MapCellData(
             "letter",
             Objective(
@@ -238,8 +236,8 @@ class MapBuilder {
         }
         objectives[39] = CellBuilder().invoke {
             aka("downfromboulder")
-            e(u, r) // special
-            this has DestType.Shop(ShopType.Potion) at 100 a 100
+            e(u, r)
+            this has Dest.Shop.potionShopCornerNear1 at 14.grid a 1.grid
         }
         objectives[40] = CellBuilder().invoke {
             aka("forestneardesert")
@@ -330,7 +328,7 @@ class MapBuilder {
         )
         objectives[51] = CellBuilder().invoke {
             aka("level6 potion")
-            this has Dest.Shop.potionShopLevel6 at 9.grid a 1.grid //todo
+            this has Dest.Shop.potionShopLevel6 at 10.grid a 1.grid //todo
         }
     }
 
@@ -361,10 +359,10 @@ class MapBuilder {
             Objective(FramePoint(13.grid, 2.grid), Dest.Secrets.fire30GreenSouth)
         )
         objectives[73] = MapCellData("near fairy")
-        objectives[75] = MapCellData(
-            "tree with fairy",
-            Objective(FramePoint(2.grid, 8.grid), Dest.Shop.potionShopForest)
-        )
+        objectives[75] = CellBuilder().invoke {
+            aka("tree with fairy")
+            this has Dest.Shop.potionShopForest at 11.grid a 2.grid
+        }
         val shopCShieldLoc = Objective.ItemLoc.Left
         objectives[77] = MapCellData(
             "forest before 2",
@@ -487,10 +485,10 @@ class MapBuilder {
                 "start",
                 Objective(FramePoint(64, 17), Dest.item(ZeldaItem.WoodenSword))
             )
-        objectives[120] = MapCellData(
-            "startRight",
-            Objective(FramePoint(100, 100), DestType.Woman)
-        )
+        objectives[120] = CellBuilder().invoke {
+            aka("startRight")
+            this has Dest.Shop.potionShopNearStart at 4.grid a 6.grid
+        }
         objectives[121] = MapCellData(
             "lostwoods travel spot",
         )

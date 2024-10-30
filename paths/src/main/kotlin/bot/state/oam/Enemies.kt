@@ -1,8 +1,5 @@
 package bot.state.oam
 
-class Enemies {
-}
-
 private val one = (0x01).toInt()
 private val two = (0x02).toInt()
 
@@ -18,9 +15,6 @@ val graveyardGhost = (0xe4).toInt() to (0x01).toInt()
 val ghost = (0xBC).toInt()
 val ghost2 = (0xB6).toInt()
 val ghost3 = (0xB4).toInt()
-const val ghostProjectileUpDown = (0x7a).toInt() // 1 and 41, 02/42, down 81,c1, 83, c3, 82,c2
-const val ghostProjectileLeft1 = (0x7e).toInt() // right is 03
-const val ghostProjectileLeft2 = (0x7c).toInt() // right is 03
 val movingBlock = (0xb1).toInt() to (0x03).toInt()
 val movingBlock2 = (0xb3).toInt() to (0x03).toInt()
 // just ignore all of them if it's the overworld, rather than try to route to it

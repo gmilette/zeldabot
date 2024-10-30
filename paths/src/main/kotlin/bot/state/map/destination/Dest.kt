@@ -72,10 +72,13 @@ object Dest {
         val arrowShop = DestType.Shop(ShopType.B, EntryType.Walk())
         val eastTreeShop = DestType.Shop(ShopType.C, EntryType.Fire(from = Direction.Left))
         val westTreeShopNearWater = DestType.Shop(ShopType.C, EntryType.Fire(from = Direction.Up))
-        val potionShopForest = DestType.Shop(ShopType.Potion, EntryType.Fire(from = Direction.Left))
+        val potionShopForest = DestType.Shop(ShopType.Potion, EntryType.Fire(from = Direction.Right))
         val potionShopWest = DestType.Shop(ShopType.Potion, EntryType.Walk(requireLetter = true))
+        val potionShopCornerNear1 = DestType.Shop(ShopType.Potion, EntryType.Bomb)
+        val potionShopTop = DestType.Shop(ShopType.Potion, EntryType.Bomb)
         val potionShopLevel6 = DestType.Shop(ShopType.Potion, EntryType.Bomb)
         val potionShopLevel9 = DestType.Shop(ShopType.Potion, EntryType.Bomb)
+        val potionShopNearStart = DestType.Shop(ShopType.Potion, EntryType.Fire(from = Direction.Down))
 
         object ItemLocs {
             val redPotion = Objective.ItemLoc.Right
