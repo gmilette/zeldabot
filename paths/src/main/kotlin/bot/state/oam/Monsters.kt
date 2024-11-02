@@ -216,7 +216,9 @@ object Monsters {
         tile = setOf(0xa2, 0xa0),
         color = setOf(MonsterColor.other)
     ).inL().arrowKillable() // .immuneToB(), let us shoot boomerang too
-    val rope = Monster("fastWorm").inL()
+    val rope = Monster("fastWorm",
+        tile = setOf(0xa0, 0xa2, 0xa4, 0xa6),
+        color = red).inL()
     val stalfos = Monster("skeleton",
         color = red,
         // 0,3,1 are damaged
@@ -229,6 +231,7 @@ object Monsters {
     val darknutGroup = darknut + wizzrobe + goriya
     val zolAndStalfos = zol + stalfos
     val gibdoOrLikeLike = gibdo + likelike
+    val ropeOrPolsVoice = rope + polsVoice
 
     val lookupBase: Map<Int, Monster> = mutableMapOf<Int, Monster>()
         .add(zolAndStalfos)
@@ -236,7 +239,7 @@ object Monsters {
         .add(patra)
         .add(MonstersOverworld.leever)
         .add(dragon)
-        .add(polsVoice)
+        .add(ropeOrPolsVoice)
 
     val lookup: Map<Int, Monster> = lookupBase + mutableMapOf<Int, Monster>()
         .add(darknutGroup)

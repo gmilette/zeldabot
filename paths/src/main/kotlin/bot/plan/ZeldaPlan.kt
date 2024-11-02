@@ -160,13 +160,11 @@ object ZeldaPlan {
 
     private fun safety(factory: PlanInputs): MasterPlan {
         val builder = factory.make("begin!")
+
+        val safeLevel1 = true
         return builder {
             woodenSwordPhase()
-            switchToBomb
-
-            greenPotion()
-            routeTo(115)
-            greenPotion()
+            fireBurn100()
 
             "gather bombs".seg()
             gatherBombsFirstPhase()
@@ -178,10 +176,17 @@ object ZeldaPlan {
             // need the cash to get the candle
             afterLevel2ItemsLetterEtcPhase(false)
 
-            // should hae enough for candle and shield
-            itemsNearLevel2CandleShieldPhase()
-
-            whiteSword()
+            if (safeLevel1) {
+                // should hae enough for candle and shield
+                whiteSword()
+                routeTo(39)
+                obj(Dest.Fairy.greenForest) // 205
+                1 using level1
+                itemsNearLevel2CandleShieldPhase()
+            } else {
+                itemsNearLevel2CandleShieldPhase()
+                whiteSword()
+            }
 
             phase("get heart and cash")
             // higher forest secret
@@ -191,9 +196,8 @@ object ZeldaPlan {
             // now go back to level 1 with 6 hearts
 
             obj(Dest.Fairy.greenForest) // 205
-
             // bomb secret.. later
-            1 using level1 // 238, 219 (after)
+//            1 using level1 // 238, 219 (after)
 
             // collect loot loop
             obj(Dest.Secrets.forest10Mid)
@@ -266,10 +270,13 @@ object ZeldaPlan {
             routeTo(forestNextToLevel3.up.left)
             seg("go to obj 100 brown fire")
             obj(Dest.Secrets.fire100SouthBrown)
+            // works fine
+            up
+            right
             // otherwise link might walk back into the secret stairs
-            val forest: MapLoc = 98
-            routeTo(forest.down)
-            routeTo(forest.down.right)
+//            val forest: MapLoc = 98
+//            routeTo(forest.down)
+//            routeTo(forest.down.right)
         }
     }
 
@@ -299,7 +306,9 @@ object ZeldaPlan {
             // why risk it? get the blue ring first
             fireBurn100()
             enoughForRing
-            routeTo(98 - 16) // go up so it routes ok
+            up
+            right
+//            routeTo(98 - 16) // go up so it routes ok
             obj(Dest.Shop.blueRing, position = true)
             // avoid accidentally going back in
             goIn(GamePad.MoveRight, 25) // test it
