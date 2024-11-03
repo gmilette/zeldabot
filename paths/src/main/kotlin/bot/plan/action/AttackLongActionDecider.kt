@@ -19,6 +19,13 @@ object AttackLongActionDecider {
         // if it is within 1 grid of link
     }
 
+    fun isInsideEnoughToShoot(state: MapLocationState) =
+        if (state.frameState.isLevel) {
+            state.link.isInLevelMap
+        } else {
+            true
+        }
+
     fun shouldShootSword(state: MapLocationState, targets: List<FramePoint>): Boolean {
         val full = state.frameState.inventory.heartCalc.full(state)
         // sword is more than 1 grid away from link
@@ -43,7 +50,8 @@ object AttackLongActionDecider {
             d { " SWORD IS THERE ------------"}
         }
         val canShoot = full //state.frameState HeartCalculator.isFull()
-        return (canShoot && !swordIsFlying && targetInLongRange(state, targets))
+        val isInEnoughToShoot = isInsideEnoughToShoot(state)
+        return (canShoot && !swordIsFlying && isInEnoughToShoot && targetInLongRange(state, targets))
     }
 
     fun shouldBoomerang(state: MapLocationState, targets: List<FramePoint>): Boolean {

@@ -164,7 +164,6 @@ object ZeldaPlan {
         val safeLevel1 = true
         return builder {
             woodenSwordPhase()
-            fireBurn100()
 
             "gather bombs".seg()
             gatherBombsFirstPhase()

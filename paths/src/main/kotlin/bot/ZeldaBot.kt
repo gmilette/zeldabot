@@ -423,7 +423,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                     // $noD h:${heart}${ringS}
                     // ${linkDir.ifHave(linkDir.toArrow())}
                     try {
-                        drawIt(plan.target(), plan.path(), "$locCoordinates $link t:$tenth k:${killCt.killCt}${killCt.bombsLikely().ifTrue("*")}")
+                        drawIt(plan.target(), plan.path(), "$locCoordinates $link t:$tenth k:${killCt.killCt}_${killCt.whatLikely()}")
                     } catch (e: Exception) {
                         d { "ERROR $e" }
                     }

@@ -3,10 +3,6 @@ package bot.state.oam
 import bot.state.Agent
 import bot.state.map.Direction
 import bot.state.oam.Monsters.add
-import bot.state.oam.Monsters.darknutGroup
-import bot.state.oam.Monsters.gibdoOrLikeLike
-import bot.state.oam.Monsters.patra
-import bot.state.oam.Monsters.zolAndStalfos
 import nintaco.util.BitUtil
 
 //18, 16, // link shield shite
@@ -36,7 +32,23 @@ data class Monster(
     val affectedByBoomerang: Boolean = true,
     val arrowKillable: Boolean = false,
     val overworld: Boolean = true,
+    val type: MutableMap<Int, MonsterItemsType> = mutableMapOf()
 ) {
+    fun typeA(color: Int): Monster {
+        this.type[color] = MonsterItemsType.A
+        return this
+    }
+    fun typeB(color: Int): Monster {
+        this.type[color] = MonsterItemsType.B
+        return this
+    }
+    fun typeD(color: Int): Monster {
+        this.type[color] = MonsterItemsType.D
+        return this
+    }
+//    fun typeB() = this.copy(type = MonsterItemsType.B)
+//    fun typeC() = this.copy(type = MonsterItemsType.C)
+//    fun typeD() = this.copy(type = MonsterItemsType.D)
     fun inL() = this.copy(overworld = false)
     fun immuneToB() = this.copy(affectedByBoomerang = false)
     fun arrowKillable() = this.copy(arrowKillable = true)
@@ -95,11 +107,11 @@ object MonstersOverworld {
     val leever = Monster(name = "undergroundguy",
         tile = setOf(0xc4),
         color = blueAndRed)
-    val lynel = Monster(name = "swordshooter")
+    val lynel = Monster(name = "swordshooter").typeD(MonsterColor.red).typeD(MonsterColor.blue)
     val octorok = Monster(name = "overworldgrunt",
         tile = setOf(0xb2, 0xb4, 0xb6, 0xb8, 0xba, 0xb0),
-        color = blueAndRed
-    )
+        color = blueAndRed,
+    ).typeA(MonsterColor.red).typeB(MonsterColor.blue)
     val tektite = Monster(name = "spider")
     val ghini = Monster(name = "worldghost")
     val moblin = Monster(name = "arrowguy",
@@ -146,6 +158,17 @@ object MonsterColor {
         else -> "O"
     }
 }
+
+val coin = 0x01
+enum class MonsterItemsType(
+    val sequence: List<Int>
+) {
+    A(listOf(coin, heart, coin, fairy, coin, heart, heart, coin, coin, heart)),
+    B(listOf(bomb, coin, clockTile, coin, heart, bomb, coin, bomb, heart, heart)),
+    C(listOf(coin, heart, coin, bigCoin, heart, clockTile, coin, coin, coin, bigCoin)),
+    D(listOf(heart, fairy, coin, heart, fairy, heart, heart, heart, coin, heart)), None(emptyList())
+}
+
 //enum class MonsterColor(color: Int, colorT: Int) {
 //    Blue(1, 20), //01 //
 //    Red(2, 24)  //10
@@ -265,6 +288,11 @@ private val h2 = 0x02
 private val h3 = 0x03
 fun h123() = setOf(h0, h1, h2, h3)
 fun h023() = setOf(h0, h2, h3)
+private val typeA = MonsterItemsType.A
+private val typeB = MonsterItemsType.B
+private val typeC = MonsterItemsType.C
+private val typeD = MonsterItemsType.D
+
 private val grey = setOf(MonsterColor.grey)
 private val red = setOf(MonsterColor.red)
 private val blue = setOf(MonsterColor.blue)
