@@ -161,7 +161,6 @@ object ZeldaPlan {
     private fun safety(factory: PlanInputs): MasterPlan {
         val builder = factory.make("begin!")
 
-        val safeLevel1 = true
         return builder {
             woodenSwordPhase()
 
@@ -170,22 +169,22 @@ object ZeldaPlan {
 
             "gather heart".seg()
             obj(Dest.Heart.bombHeartNorth)
-            2 using level2
+//            2 using level2
+            // need the cash to get the candle
+//            afterLevel2ItemsLetterEtcPhase(false)
 
+            // should hae enough for candle and shield
+            whiteSword()
+            routeTo(39)
+            obj(Dest.Fairy.greenForest) // 205
+            1 using level1
+            2 using level2
             // need the cash to get the candle
             afterLevel2ItemsLetterEtcPhase(false)
+            itemsNearLevel2CandleShieldPhase()
 
-            if (safeLevel1) {
-                // should hae enough for candle and shield
-                whiteSword()
-                routeTo(39)
-                obj(Dest.Fairy.greenForest) // 205
-                1 using level1
-                itemsNearLevel2CandleShieldPhase()
-            } else {
-                itemsNearLevel2CandleShieldPhase()
-                whiteSword()
-            }
+            startHereAt
+            // it' not the right save state
 
             phase("get heart and cash")
             // higher forest secret
@@ -194,7 +193,7 @@ object ZeldaPlan {
             obj(Dest.Heart.fireHeart) // heart
             // now go back to level 1 with 6 hearts
 
-            obj(Dest.Fairy.greenForest) // 205
+//            obj(Dest.Fairy.greenForest) // 205
             // bomb secret.. later
 //            1 using level1 // 238, 219 (after)
 
@@ -210,6 +209,7 @@ object ZeldaPlan {
             // then potion?
             phase("level 5 sequence")
             level5sequence()
+
         }
     }
 
@@ -274,8 +274,8 @@ object ZeldaPlan {
             right
             // otherwise link might walk back into the secret stairs
 //            val forest: MapLoc = 98
-//            routeTo(forest.down)
-//            routeTo(forest.down.right)
+//            routeTo(forest.up)
+//            routeTo(forest.up.right)
         }
     }
 
@@ -303,10 +303,13 @@ object ZeldaPlan {
     private fun PlanBuilder.ringLevels() {
         add {
             // why risk it? get the blue ring first
-            fireBurn100()
+            // just skip this crap
+            // it's currently buggy
+            // todo: put back in
+//            fireBurn100()
+//            up
+//            right
             enoughForRing
-            up
-            right
 //            routeTo(98 - 16) // go up so it routes ok
             obj(Dest.Shop.blueRing, position = true)
             // avoid accidentally going back in
@@ -477,6 +480,7 @@ object ZeldaPlan {
     private fun PlanBuilder.level5sequence(endLevel2BoomerangPickup: Boolean = true) {
         phase("go to level 5")
         5 using level5
+
         phase("gear for level 6")
         // i think this is not needed,  maybe it's after level5?
 //            routeTo(83) // position so we don't go through the 100 secret forest and get stuck
@@ -962,16 +966,17 @@ private val level5: PlanBuilder.() -> Unit
 
         seg("get back")
         rightm
+        seg("get back extra")
         right // possibly kill until get bomb IF need bombs
         seg("kill all zombie to open get key")
         killUntilGetKey
-        seg("kill all zombie up move up to rhino")
+        seg("rhino bypass")
         kill // have to kill all to move up
         up
         seg("kill all zombie up move right")
-        rightm //85
+        rightm //dont shoot
         seg("no head up to victory")
-        upm // impossible maze
+        up // impossible maze with the squishies
         seg("zombie1")
         upm
         seg("zombie2")
@@ -989,6 +994,7 @@ private val level5: PlanBuilder.() -> Unit
         goIn(GamePad.MoveLeft, 20) // move more in
         useItem()
         wait(100) // wait for whistle to happen, otherwise bot will route uselessly
+        switchToBoomerang
         seg("Now destroy him")
         kill // problem the projectiles are considered enemies
         seg("Get 5 triforce")

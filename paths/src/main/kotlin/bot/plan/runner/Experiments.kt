@@ -46,9 +46,11 @@ class Experiments(private val masterPlan: PlanMaker) {
             sword = ZeldaItem.WoodenSword)
 
         val three = Experiment("level3", "level3.save",
-            { masterPlan().getPlanPhase(Phases.lev(3)) },
+            { masterPlan().getPlanAfter(Phases.lev(3)) },
             addEquipment = false,
-            sword = ZeldaItem.WhiteSword)
+            sword = ZeldaItem.WhiteSword,
+            rupees = 255,
+        )
 
         val four = Experiment("level4", "level4.save",
             { masterPlan().getPlanPhase(Phases.lev(4)) },
@@ -58,7 +60,8 @@ class Experiments(private val masterPlan: PlanMaker) {
             boomerang = ZeldaItem.Boomerang,
             ring = ZeldaItem.BlueRing,
             shield = true,
-            potion = true
+            potion = true,
+            rupees = 255,
             )
 
     val five = Experiment("level5", "level5_start_in.save",

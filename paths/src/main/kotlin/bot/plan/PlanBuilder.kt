@@ -359,6 +359,11 @@ class PlanBuilder(
             add(lastMapLoc, StartHereAction())
             return this
         }
+    val startHereAt: PlanBuilder
+        get() {
+            add(lastMapLoc, StartHereByLocationAction(lastMapLoc))
+            return this
+        }
     val upm: PlanBuilder
         get() {
             // don't try to fight
@@ -864,6 +869,7 @@ class PlanBuilder(
         plan.add(UseItem())
         // do not walk into the fire
         goIn(GamePad.None, 75)
+        // if link gets pushed through the stair, then it triggers complete
         goToOrMapChanges(to, to) // that should be passable now
 
         goIn(opposite.toGamePad(), 16)

@@ -42,7 +42,9 @@ class PlanRunner(private val makePlan: PlanMaker,
     private fun runFrom() {
         val exp = experiment
         d { " run from $exp"}
-        if (exp.contains("_") || exp.contains(",")) {
+        if (exp.contains("run")) {
+            runHere()
+        } else if (exp.contains("_") || exp.contains(",")) {
             val split = exp.split("_", ",")
             val level = split.first().toInt()
             val mapLoc = split[1].toInt()
@@ -161,6 +163,21 @@ class PlanRunner(private val makePlan: PlanMaker,
         runFrom()
 //        runIt(load = true, ex = target)
     }
+
+    private fun runHere() {
+        val plan = makePlan()
+        masterPlan = plan
+        val start = masterPlan.findStartHere() ?: return
+        val mapLoc = start.getStartLoc()
+        val level = 0
+        val root = "mapstate/mapstate_${level}_${mapLoc}.save"
+
+        d { " run runHere $mapLoc lev $level for map $root"}
+        startPath = root
+        action = masterPlan.skipToStartAt()
+        runLog = RunActionLog("mapstate_${level}_${mapLoc}", target)
+    }
+
 
     private fun runLoc(mapLoc: Int, level: Int = 0) {
         val plan = makePlan()

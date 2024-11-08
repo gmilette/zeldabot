@@ -3,6 +3,7 @@ package bot.plan.runner
 import bot.plan.action.Action
 import bot.plan.action.EndAction
 import bot.plan.action.StartHereAction
+import bot.plan.action.StartHereActionInterface
 import bot.state.MapLoc
 import bot.state.MapLocationState
 import bot.state.map.Objective
@@ -72,6 +73,9 @@ class MasterPlan(val segments: List<PlanSegment>) {
         }
     }
 
+    fun findStartHere(): StartHereActionInterface? =
+        giant.map { it.action }.firstOrNull { it is StartHereActionInterface } as? StartHereActionInterface
+
     fun getPlanPhase(phaseName: String, segment: String? = null): MasterPlan =
         MasterPlan(segments.filter { segment == null || it.name == segment }.filter { it.phase == phaseName })
 
@@ -97,6 +101,22 @@ class MasterPlan(val segments: List<PlanSegment>) {
         }
 //        d { " done search plan "}
         return current
+    }
+
+    fun skipToStartAt(): Action {
+        var ct = 0
+        return if (true) {
+            var action = pop()
+            while (action !is StartHereActionInterface) {
+                action = pop()
+                d { " skip ${action.name}" }
+                ct++
+            }
+            d { " advanced $ct steps" }
+            action
+        } else {
+            pop()
+        }
     }
 
     /**

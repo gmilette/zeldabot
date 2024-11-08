@@ -867,6 +867,10 @@ class Wait(val howLong: Int) : Action {
         get() = "Wait for $frames of $howLong"
 }
 
+interface StartHereActionInterface: Action {
+    fun getStartLoc(): MapLoc
+}
+
 /**
  * just use to mark where the plan should start
  */
@@ -880,6 +884,23 @@ class StartHereAction(private val saveSlot: Int? = null) : Action {
             i { " load save slot $saveSlot" }
             ApiSource.getAPI().quickLoadState(saveSlot)
         }
+    }
+
+    override fun complete(state: MapLocationState): Boolean {
+        return true
+    }
+}
+
+/**
+ * just use to mark where the plan should start
+ */
+class StartHereByLocationAction(private val mapLoc: MapLoc) : StartHereActionInterface {
+    companion object {
+        val name = "StartHereByLocationAction"
+    }
+
+    override fun getStartLoc(): MapLoc {
+        return mapLoc
     }
 
     override fun complete(state: MapLocationState): Boolean {

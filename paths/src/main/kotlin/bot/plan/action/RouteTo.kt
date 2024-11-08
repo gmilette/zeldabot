@@ -508,8 +508,10 @@ class RouteTo(val params: Param = Param()) {
     private fun getInFrontOfGrids(state: MapLocationState): List<FramePoint> =
         getInFrontOfGridsSword(state) + getInFrontOfGridsForProjectiles(state)
 
-    fun getInFrontOfGridsSword(state: MapLocationState): List<FramePoint> =
+    private fun getInFrontOfGridsSword(state: MapLocationState): List<FramePoint> =
         state.frameState.enemies.flatMap { agent: Agent ->
+            // sames as just agent.dir
+//            d { " sword agent dir ${agent.dir} calc ${swordDir.dirFront(agent)}"}
             swordDir.dirFront(agent)?.let { dir ->
                 val pt = dir.pointModifier(MapConstants.oneGrid)(agent.point)
                 listOf(

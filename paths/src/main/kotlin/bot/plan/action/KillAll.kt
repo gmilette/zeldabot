@@ -183,12 +183,17 @@ class KillAll(
                     d { "Attack center enemies" }
                 }
             }
+
+            var attackOnlySpecified = false
+
             // NEW
 //            aliveEnemies = aliveEnemies.filter { !it.damaged }
             // need special handling, cant route into center
             if (targetOnly.isNotEmpty()) {
                 d { " target only $targetOnly" }
                 aliveEnemies = aliveEnemies.filter { targetOnly.contains(it.tile) }.toMutableList()
+                // test on the dragon i think
+                attackOnlySpecified = true
             }
 
             // specially handling for level 8 spinning center guy
@@ -203,7 +208,6 @@ class KillAll(
                 }
             }
 
-            var attackOnlySpecified = false
             if (state.frameState.isOverworld &&
                 (lookForBombs && state.frameState.inventory.numBombs == 0)) {
 //                (lookForBombs || state.frameState.inventory.numBombs == 0)) {
