@@ -867,10 +867,6 @@ class Wait(val howLong: Int) : Action {
         get() = "Wait for $frames of $howLong"
 }
 
-interface StartHereActionInterface: Action {
-    fun getStartLoc(): MapLoc
-}
-
 /**
  * just use to mark where the plan should start
  */
@@ -894,12 +890,12 @@ class StartHereAction(private val saveSlot: Int? = null) : Action {
 /**
  * just use to mark where the plan should start
  */
-class StartHereByLocationAction(private val mapLoc: MapLoc) : StartHereActionInterface {
+class StartHereByLocationAction(private val mapLoc: MapLoc) : Action {
     companion object {
         val name = "StartHereByLocationAction"
     }
 
-    override fun getStartLoc(): MapLoc {
+    fun getStartLoc(): MapLoc {
         return mapLoc
     }
 
