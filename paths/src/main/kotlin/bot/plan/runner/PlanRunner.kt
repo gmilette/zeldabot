@@ -168,8 +168,8 @@ class PlanRunner(private val makePlan: PlanMaker,
         val plan = makePlan()
         masterPlan = plan
         val start = masterPlan.findStartHere() ?: return
-        val mapLoc = start.getStartLoc()
-        val level = 0
+        val (level, mapLoc) = start.mapCoordinates
+        levelExperiment = start.experiment
         val root = "mapstate/mapstate_${level}_${mapLoc}.save"
 
         d { " run runHere $mapLoc lev $level for map $root"}
@@ -251,6 +251,9 @@ class PlanRunner(private val makePlan: PlanMaker,
             manipulator.addRupee()
         }
         //
+        if (ex.ladderAndRaft) {
+            manipulator.setLadderAndRaft(ex.ladderAndRaft)
+        }
 //        manipulator.setLetter()
 //        manipulator.setLadderAndRaft(true)
         manipulator.setBoomerang(ex.boomerang)

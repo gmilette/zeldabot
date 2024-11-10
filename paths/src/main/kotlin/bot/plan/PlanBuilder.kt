@@ -2,6 +2,7 @@ package bot.plan
 
 import KillHandsInLevel7
 import bot.plan.action.*
+import bot.plan.runner.Experiment
 import bot.plan.runner.MasterPlan
 import bot.plan.runner.PlanSegment
 import bot.state.*
@@ -361,9 +362,13 @@ class PlanBuilder(
         }
     val startHereAt: PlanBuilder
         get() {
-            add(lastMapLoc, StartHereByLocationAction(lastMapLoc))
+            add(lastMapLoc, StartHereByLocationAction(MapCoordinates(level, lastMapLoc)))
             return this
         }
+    fun startHereAt(experiment: Experiment): PlanBuilder {
+        add(lastMapLoc, StartHereByLocationAction(MapCoordinates(level, lastMapLoc), experiment))
+        return this
+    }
     val upm: PlanBuilder
         get() {
             // don't try to fight

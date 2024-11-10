@@ -1,5 +1,6 @@
 package bot.plan.action
 
+import bot.plan.runner.Experiment
 import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.Direction
@@ -890,13 +891,11 @@ class StartHereAction(private val saveSlot: Int? = null) : Action {
 /**
  * just use to mark where the plan should start
  */
-class StartHereByLocationAction(private val mapLoc: MapLoc) : Action {
+class StartHereByLocationAction(
+    val mapCoordinates: MapCoordinates,
+    val experiment: Experiment = Experiment()) : Action {
     companion object {
         val name = "StartHereByLocationAction"
-    }
-
-    fun getStartLoc(): MapLoc {
-        return mapLoc
     }
 
     override fun complete(state: MapLocationState): Boolean {

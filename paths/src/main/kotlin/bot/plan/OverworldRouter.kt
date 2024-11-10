@@ -101,6 +101,8 @@ class OverworldRouter(private val hyrule: Hyrule) {
         remove(98, 82, graph) // can't go up through 100 secret because you could be on wrong side
         remove(98, 82, graph) // can't go up through 100 secret because you could be on wrong side
 
+        // looks like app is trying to do impossible route going right from fairy
+//        remove(67, 68, graph)
         // trees near level 8
         removeJust(108, 107, graph)
         // going up into a place where you are in an elbow of trees

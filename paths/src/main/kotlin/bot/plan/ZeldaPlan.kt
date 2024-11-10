@@ -1,6 +1,7 @@
 package bot.plan
 
 import bot.plan.action.*
+import bot.plan.runner.Experiment
 import bot.plan.runner.MasterPlan
 import bot.state.*
 import bot.state.map.*
@@ -183,7 +184,14 @@ object ZeldaPlan {
             afterLevel2ItemsLetterEtcPhase(false)
             itemsNearLevel2CandleShieldPhase()
 
-            startHereAt
+//            startHereAt(
+//                Experiment(
+//                    sword = ZeldaItem.WhiteSword,
+//                    keys = 4,
+//                    bombs = 4,
+//                    rupees = 250
+//                )
+//            )
             // it' not the right save state
 
             phase("get heart and cash")
@@ -204,14 +212,24 @@ object ZeldaPlan {
             greenPotion()
             ringLevels()
             greenPotion()
+//            startHereAt(raftLadderSetup)
             arrowAndHearts()
 
             // then potion?
             phase("level 5 sequence")
             level5sequence()
-
         }
     }
+
+    private val raftLadderSetup: Experiment =
+        Experiment(
+            sword = ZeldaItem.WhiteSword,
+            keys = 4,
+            bombs = 4,
+            rupees = 250,
+            hearts = 8,
+            ladderAndRaft = true,
+        )
 
     private fun PlanBuilder.itemsNearLevel2CandleShieldPhase() {
         add {
@@ -270,6 +288,7 @@ object ZeldaPlan {
             seg("go to obj 100 brown fire")
             obj(Dest.Secrets.fire100SouthBrown)
             // works fine
+            seg("away from fire secret")
             up
             right
             // otherwise link might walk back into the secret stairs
@@ -306,9 +325,7 @@ object ZeldaPlan {
             // just skip this crap
             // it's currently buggy
             // todo: put back in
-//            fireBurn100()
-//            up
-//            right
+            fireBurn100()
             enoughForRing
 //            routeTo(98 - 16) // go up so it routes ok
             obj(Dest.Shop.blueRing, position = true)
@@ -504,10 +521,17 @@ object ZeldaPlan {
 //            routeTo(78-16)
 //            obj(Dest.Secrets.level2secret10)
         phase(Phases.afterLevel6)
+        startHereAt(raftLadderSetup.copy(
+                hearts = 14,
+                sword = ZeldaItem.MagicSword,
+                potion = true
+            )
+        )
         // grab level2 boomerang
         if (endLevel2BoomerangPickup) {
             2 using levelPlan2Boomerang
         }
+        seg("and now level 8")
         8 using level8
 
         enoughForBait
@@ -810,14 +834,17 @@ object ZeldaPlan {
             goAbout(InLocations.Level2.keyMid, 1, 1, true, ignoreProjectiles = true)
             seg("depart")
             left
+            kill // door is locked until all killed
             down
             down
             left
             seg("Go to exit")
             down
             seg("move out")
-            down // should exit
-//            inOverworld
+            // try inside nav instead
+            down
+            inOverworld
+//            GoInConsume(MapConstants.oneGrid*12, GamePad.MoveDown)
         }
     }
 

@@ -16,7 +16,7 @@ import util.i
 //  - plan segment (sub route
 //  -- plan objective (per screen)
 
-class MasterPlan(val segments: List<PlanSegment>) {
+class MasterPlan(val segments: List<PlanSegment> = emptyList()) {
     private var justRemoved: PlanStep = PlanStep(PlanSegment("", "", emptyList()), EndAction())
 
     private var initialPlanSize: Int = 0
