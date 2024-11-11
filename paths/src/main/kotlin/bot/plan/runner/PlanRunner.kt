@@ -250,6 +250,9 @@ class PlanRunner(private val makePlan: PlanMaker,
         if (ex.rupees > 0) {
             manipulator.addRupee()
         }
+        if (ex.candle) {
+            manipulator.setRedCandle()
+        }
         //
         if (ex.ladderAndRaft) {
             manipulator.setLadderAndRaft(ex.ladderAndRaft)

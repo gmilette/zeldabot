@@ -390,6 +390,10 @@ class PlanBuilder(
             add(lastMapLoc.down)
             return this
         }
+    fun downTo(to: MapLoc): PlanBuilder {
+        add(to, lootAndMove(moveTo(to)))
+        return this
+    }
     val cheatBombs: PlanBuilder
         get() {
             add(lastMapLoc, CheatGetBombs())

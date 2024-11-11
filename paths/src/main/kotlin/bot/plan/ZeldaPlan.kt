@@ -165,6 +165,7 @@ object ZeldaPlan {
         return builder {
             woodenSwordPhase()
 
+            2 using levelPlan2Boomerang
             "gather bombs".seg()
             gatherBombsFirstPhase()
 
@@ -520,18 +521,25 @@ object ZeldaPlan {
         // is the 10 secret necessary, eh
 //            routeTo(78-16)
 //            obj(Dest.Secrets.level2secret10)
-        phase(Phases.afterLevel6)
-        startHereAt(raftLadderSetup.copy(
-                hearts = 14,
-                sword = ZeldaItem.MagicSword,
-                potion = true
-            )
-        )
         // grab level2 boomerang
         if (endLevel2BoomerangPickup) {
             2 using levelPlan2Boomerang
         }
+        startHereAt(raftLadderSetup.copy(
+            hearts = 14,
+            sword = ZeldaItem.MagicSword,
+            potion = true,
+            candle = true
+        )
+        )
         seg("and now level 8")
+        // make sure approach from left
+        // rather than right
+        val aboveLevel8: MapLoc = 93
+        routeTo(aboveLevel8)
+        left
+        down
+        right
         8 using level8
 
         enoughForBait
@@ -842,9 +850,9 @@ object ZeldaPlan {
             down
             seg("move out")
             // try inside nav instead
-            down
-            inOverworld
-//            GoInConsume(MapConstants.oneGrid*12, GamePad.MoveDown)
+//            downTo(60)
+            goInConsume(GamePad.MoveDown,82)
+            startAt(60)
         }
     }
 
