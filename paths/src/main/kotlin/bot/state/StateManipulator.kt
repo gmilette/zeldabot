@@ -68,7 +68,9 @@ class StateManipulator(
     fun setArrow() {
         api.writeCPU(Addresses.hasBow, 1)
         // silver arrow of course, let's be luxurious
-        api.writeCPU(Addresses.hasArrow, 2)
+        // let's not
+        api.writeCPU(Addresses.hasArrow, 2) // silver
+        api.writeCPU(Addresses.hasArrow, 1)
     }
 
     fun deactivateClock() {

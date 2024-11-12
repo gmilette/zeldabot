@@ -6,6 +6,8 @@ import bot.state.MapLocationState
 import bot.state.map.MapConstants
 import bot.state.map.andAHalf
 import bot.state.map.grid
+import bot.state.oam.spiderClaw
+import bot.state.oam.spiderClaw2
 import bot.state.oam.spiderHeadOpen
 import bot.state.oam.spiderHeadOpening
 import util.d
@@ -68,7 +70,7 @@ class KillArrowSpider : Action {
 // doesn't quite do what i want or properly stop
 fun killSpider(): Action {
     val kill = KillAll(useBombs = true,
-        targetOnly = listOf(spiderHeadOpen, spiderHeadOpening))
+        targetOnly = listOf(spiderHeadOpen, spiderHeadOpening, spiderClaw2, spiderClaw))
     return DecisionAction(kill, Optional(HideFromSpider())) {
         it.vulnerable() || it.aliveEnemies.isEmpty()
     }

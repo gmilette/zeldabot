@@ -179,16 +179,16 @@ object AttackLongActionDecider {
     fun inStrikingRange(point: FramePoint, enemies: List<FramePoint>): Boolean {
         return false
     }
-
-    private val MapLocationState.boomerangActive: Boolean
-        get() = this.frameState.inventory.selectedItem == Inventory.Selected.boomerang
-
-    private val MapLocationState.wandActive: Boolean
-        get() = this.frameState.inventory.selectedItem == Inventory.Selected.wand
-
-    private val MapLocationState.arrowActive: Boolean
-        get() = this.frameState.inventory.selectedItem == Inventory.Selected.arrow
 }
+
+val MapLocationState.boomerangActive: Boolean
+    get() = this.frameState.inventory.selectedItem == Inventory.Selected.boomerang
+
+val MapLocationState.wandActive: Boolean
+    get() = this.frameState.inventory.selectedItem == Inventory.Selected.wand
+
+val MapLocationState.arrowActive: Boolean
+    get() = this.frameState.inventory.selectedItem == Inventory.Selected.arrow
 
 fun Agent.affectedByBoomerang(level: Int) =
     Monsters.lookup(level)[tile]?.affectedByBoomerang ?: true // most monsters can be boomeranged AND loot

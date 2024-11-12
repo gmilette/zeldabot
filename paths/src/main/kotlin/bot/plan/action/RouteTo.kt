@@ -20,6 +20,7 @@ class RouteTo(val params: Param = Param()) {
          * dont shoot the boomerang too much
          */
         private val WAIT_BETWEEN_BOOMERANG = 20
+        private val WAIT_BETWEEN_NOT_BOOMERANG = 2
         var allowAttack = true
         fun hardlyReplan(dodgeEnemies: Boolean = true,
                          /** don't try to block or route around projectiles **/
@@ -139,7 +140,7 @@ class RouteTo(val params: Param = Param()) {
         }
 
         val attackPossible by lazy { params.whatToAvoid != WhatToAvoid.None && canAttack }
-        d { " route To attackOrRoute attack=$attackPossible can=$canAttack allowBlock=${param.allowBlock} avoid=${params.whatToAvoid} waitBoom=$boomerangCt useB=${useB} canUseSword=${state.frameState.canUseSword}" }
+        d { " route To attackOrRoute attack=$attackPossible can=$canAttack allowBlock=${param.allowBlock} avoid=${params.whatToAvoid} waitBoom=$boomerangCt useB=${useB} canUseSword=${state.frameState.canUseSword} spec`${attackableSpec}" }
         val theAttack = if (useB) {
             attackB
         } else {
@@ -159,7 +160,13 @@ class RouteTo(val params: Param = Param()) {
             ).map { it.point }
         }
         for (framePoint in attackableAgents) {
+            d { " attackable agent: $framePoint" }
+        }
+        for (framePoint in attackable) {
             d { " attackable: $framePoint" }
+        }
+        for (framePoint in boomerangable) {
+            d { " boomerangable: $framePoint" }
         }
         val onlyBoomerangagle = (boomerangable - attackable)
         for (framePoint in onlyBoomerangagle) {
@@ -200,8 +207,13 @@ class RouteTo(val params: Param = Param()) {
 
             considerAttacks && canAttack && shouldLongBoomerang -> {
                 d { " Route Action -> LongAttack Boomerang" }
-                // it's possible to get stuck doing the boomerang over and over never attacking
-                boomerangCt = typically(WAIT_BETWEEN_BOOMERANG, WAIT_BETWEEN_BOOMERANG * 4)
+                boomerangCt = if (state.arrowActive) {
+                    // shoot the arrow alot when active
+                    WAIT_BETWEEN_NOT_BOOMERANG
+                } else {
+                    // it's possible to get stuck doing the boomerang over and over never attacking
+                    typically(WAIT_BETWEEN_BOOMERANG, WAIT_BETWEEN_BOOMERANG * 2) // was 4
+                }
                 attackB.nextStep(state)
             }
 

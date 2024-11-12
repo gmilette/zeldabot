@@ -229,6 +229,7 @@ object ZeldaPlan {
             bombs = 4,
             rupees = 250,
             hearts = 8,
+            shield = true,
             ladderAndRaft = true,
         )
 
@@ -529,7 +530,8 @@ object ZeldaPlan {
             hearts = 14,
             sword = ZeldaItem.MagicSword,
             potion = true,
-            candle = true
+            candle = true,
+            arrowAndBow = true,
         )
         )
         seg("and now level 8")

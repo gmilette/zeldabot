@@ -253,6 +253,9 @@ class PlanRunner(private val makePlan: PlanMaker,
         if (ex.candle) {
             manipulator.setRedCandle()
         }
+        if (ex.arrowAndBow) {
+            manipulator.setArrow()
+        }
         //
         if (ex.ladderAndRaft) {
             manipulator.setLadderAndRaft(ex.ladderAndRaft)
