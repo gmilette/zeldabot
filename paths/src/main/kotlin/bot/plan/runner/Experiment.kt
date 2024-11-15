@@ -19,6 +19,8 @@ data class Experiment(
     val arrowAndBow: Boolean = true,
     val candle: Boolean = false,
     val ladderAndRaft: Boolean = false,
+    val whistle: Boolean = false,
+    val magicKey: Boolean = false,
     val addEquipment: Boolean = false,
     val startAt: Int = 52,
     val nameFull: String = "${name}_s${sword.name.first()}_h${hearts}_r${ring.name.first()}_b${bombs}"

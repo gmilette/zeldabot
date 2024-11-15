@@ -256,9 +256,15 @@ class PlanRunner(private val makePlan: PlanMaker,
         if (ex.arrowAndBow) {
             manipulator.setArrow()
         }
+        if (ex.magicKey) {
+            manipulator.setMagicKey()
+        }
         //
         if (ex.ladderAndRaft) {
             manipulator.setLadderAndRaft(ex.ladderAndRaft)
+        }
+        if (ex.whistle) {
+            manipulator.setHaveWhistle()
         }
 //        manipulator.setLetter()
 //        manipulator.setLadderAndRaft(true)

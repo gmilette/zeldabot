@@ -289,7 +289,8 @@ object EnemyGroup {
         waterMonsterPairUnder.tile, // also it is ghost
         waterMonsterPairUnder2.tile,
         shopOwner.tile,
-        shopOwner2.tile
+        shopOwner2.tile,
+        shopkeeperAndBat.tile
     )
 
     val notAffectedByBoomerang = setOf(

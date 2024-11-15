@@ -323,6 +323,7 @@ object Addresses {
    const val hasBoomerang = 0x0674
    const val hasMagicBoomerang = 0x0675
    const val hasShield = 0x0676
+   const val hasMagicKey = 0x0664
 
    // useful for predicting item drops
    // https://www.zeldaspeedruns.com/loz/generalknowledge/item-drops-chart

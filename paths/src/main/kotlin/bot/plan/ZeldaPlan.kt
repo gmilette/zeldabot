@@ -226,7 +226,7 @@ object ZeldaPlan {
         Experiment(
             sword = ZeldaItem.WhiteSword,
             keys = 4,
-            bombs = 4,
+            bombs = 8,
             rupees = 250,
             hearts = 8,
             shield = true,
@@ -526,14 +526,6 @@ object ZeldaPlan {
         if (endLevel2BoomerangPickup) {
             2 using levelPlan2Boomerang
         }
-        startHereAt(raftLadderSetup.copy(
-            hearts = 14,
-            sword = ZeldaItem.MagicSword,
-            potion = true,
-            candle = true,
-            arrowAndBow = true,
-        )
-        )
         seg("and now level 8")
         // make sure approach from left
         // rather than right
@@ -548,7 +540,20 @@ object ZeldaPlan {
         obj(Dest.Shop.blueRing, itemLoc = Dest.Shop.ItemLocs.bait, position = true)
         greenPotion()
         7 using level7
+        startHereAt(raftLadderSetup.copy(
+            hearts = 15,
+            ring = ZeldaItem.BlueRing,
+            sword = ZeldaItem.MagicSword,
+            potion = true,
+            candle = true,
+            arrowAndBow = true,
+            magicKey = true,
+            whistle = true
+        )
+        )
         greenPotion()
+        right
+        right
 
         phase("go to level 9")
         9 using level9
