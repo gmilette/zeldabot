@@ -66,8 +66,7 @@ class KillArrowSpider : Action {
 }
 
 
-// ill be good for a shoot from distance
-// doesn't quite do what i want or properly stop
+// start 8_62_m_b
 fun killSpider(): Action {
     val kill = KillAll(useBombs = true,
         allowBlock = true, // but if spider head isn't open, do block
