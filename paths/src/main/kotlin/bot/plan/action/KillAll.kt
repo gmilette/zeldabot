@@ -59,6 +59,7 @@ class KillAll(
     private var pressACount = 0
     private var numPressB = 0
     private var target: FramePoint = FramePoint(0, 0)
+    private var forceBPress = 0
 
     private var frameCount = 0
     private var waitAfterPressing = 0
@@ -293,13 +294,21 @@ class KillAll(
                             ),
                         ),
                         attackableSpec = if (attackOnlySpecified) aliveEnemies.map { it.point } else emptyList()
-                    ).also {
-                        if (it == GamePad.B && (firstAttackBomb || useBombs)) {
-                            d {"USE BOMB!" }
+                    ).let {
+                        if (numPressB > 0) {
+                            numPressB--
+                            GamePad.B
+                        } else if (it == GamePad.B && (firstAttackBomb || useBombs)) {
+                            numPressB = 3
+                            d { "USE BOMB!" }
                             numPressB++
                             if (numPressB > 3) {
                                 firstAttackBomb = false
                             }
+                            GamePad.B
+                        } else {
+                            d { "USE BOMB! Not yet" }
+                            it
                         }
                     }
                 } ?: GamePad.None

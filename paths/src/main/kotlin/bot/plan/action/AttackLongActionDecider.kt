@@ -27,6 +27,7 @@ object AttackLongActionDecider {
         }
 
     fun shouldShootSword(state: MapLocationState, targets: List<FramePoint>): Boolean {
+        d { "X-> should shoot sword" }
         val full = state.frameState.inventory.heartCalc.full(state)
         // sword is more than 1 grid away from link
         // need more work
@@ -55,6 +56,7 @@ object AttackLongActionDecider {
     }
 
     fun shouldBoomerang(state: MapLocationState, targets: List<FramePoint>): Boolean {
+        d { "X-> should boomerang targets=$targets " }
         // includes loot
         val shouldShoot = targets.isNotEmpty()
         var canShoot = false // state.boomerangActive || state.wandActive || state.arrowActive
@@ -75,7 +77,7 @@ object AttackLongActionDecider {
             else -> false
         }
         val inRange by lazy { targetInLongRange(state, targets) }
-        d { "Shoot boomerang $shouldShoot can=$canShoot flying=$boomerangIsFlying "} // range=$inRange" }
+        d { "Shoot boomerang $shouldShoot can=$canShoot flying=$boomerangIsFlying range=$inRange"} // range=$inRange" }
         return (shouldShoot && canShoot && !boomerangIsFlying && inRange)
         // when start a level, if enemies can be boomeranged, switch to it, but not if about
         // to switch to bomb
@@ -90,6 +92,7 @@ object AttackLongActionDecider {
     }
 
     fun shouldWand(state: MapLocationState, targets: List<FramePoint>): Boolean {
+        d { "X-> should wand" }
         // only alive enemies
         // should use the targets list for this
         val shouldShoot = state.aliveEnemies.isNotEmpty()
@@ -135,7 +138,7 @@ object AttackLongActionDecider {
         // depends on direction
         for (aliveEnemy in targets) {
             val inter = swordRectangle.intersect(aliveEnemy.toRect())
-            d { "intersect $aliveEnemy $inter" }
+            d { "long intersect $aliveEnemy $inter" }
         }
 
 //        return state.aliveEnemies.firstOrNull {

@@ -195,7 +195,7 @@ class LevelSpecBuilder {
             LevelSpec(farup.left.left.left, e(u, r, d), "whistle guy", LevelMapTemplateReader.Temp.lev_corner),
             LevelSpec(farup.left.left.left.up, e(d), "triforce", LevelMapTemplateReader.Temp.lev_triforce),
 
-            LevelSpec(farup.left.up.up, e(l, d), "get stuff", LevelMapTemplateReader.Temp.lev_stairs_center),
+            LevelSpec(farup.left.up.up, e(l, d), "get stuff", LevelMapTemplateReader.Temp.lev_stairs_center_blocked),
             LevelSpec(farup.left.up.up.left, e(r), "push spot", LevelMapTemplateReader.Temp.lev_block1mid),
 
 //            LevelSpec(getItemLoc4, e(u), "", LevelMapTemplateReader.Temp.lev_getitem, isGetItem = true),
@@ -288,7 +288,7 @@ class LevelSpecBuilder {
         val specs = mutableListOf(
             LevelSpec(start, e(l, u, d, r), "start", LevelMapTemplateReader.Temp.lev_grid),
             LevelSpec(start.left, e(l, r), "bomb dude", LevelMapTemplateReader.Temp.lev_block2center),
-            LevelSpec(start.left.left, e(l, r), "stair to book", LevelMapTemplateReader.Temp.lev_stairs_center),
+            LevelSpec(start.left.left, e(l, r), "stair to book", LevelMapTemplateReader.Temp.lev_stairs_center_blocked),
 
             LevelSpec(start.up, e(l, u, d, r), "star dude", LevelMapTemplateReader.Temp.lev_empty),
             LevelSpec(start.up.up, e(l, u, d, r), "mixed battle", LevelMapTemplateReader.Temp.lev_corner),
@@ -296,7 +296,7 @@ class LevelSpecBuilder {
             LevelSpec(masterbattle, e(u, d, r), "master battle", LevelMapTemplateReader.Temp.lev_block2center),
             LevelSpec(masterbattle.up, e(l, u, d, r), "four bomb guy", LevelMapTemplateReader.Temp.lev_corner),
             LevelSpec(masterbattle.up.up, e(l, u, d, r), "arrow guy", LevelMapTemplateReader.Temp.lev_corner),
-            LevelSpec(masterbattle.up.up.right, e(l), "key stairs", LevelMapTemplateReader.Temp.lev_stairs_center),
+            LevelSpec(masterbattle.up.up.right, e(l), "key stairs", LevelMapTemplateReader.Temp.lev_stairs_center_blocked),
 
             LevelSpec(masterbattle.right, e(l), "stairs to boss", LevelMapTemplateReader.Temp.lev_stair_side),
 
@@ -362,7 +362,7 @@ class LevelSpecBuilder {
             // lev_block2center NOT lev_stairs_center
             LevelSpec(arrowstair.up.left.up.up, e(d, r), "stair to last stair", LevelMapTemplateReader.Temp.lev_block2center),
 
-            LevelSpec(stairbeforestair, e(l), "bomb left", LevelMapTemplateReader.Temp.lev_stairs_center),
+            LevelSpec(stairbeforestair, e(l), "bomb left", LevelMapTemplateReader.Temp.lev_stairs_center_blocked),
             LevelSpec(stairbeforestair.left, e(r), "last path stair", LevelMapTemplateReader.Temp.lev_stairs_center_blocked),
 
             LevelSpec(second.left.up, e(u), "last path stair", LevelMapTemplateReader.Temp.lev_stair_side),

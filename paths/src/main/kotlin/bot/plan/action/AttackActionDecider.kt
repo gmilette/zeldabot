@@ -323,7 +323,7 @@ object AttackActionDecider {
         val enemiesClose = enemies.filter { link.distTo(it) < MapConstants.sixGrid }
             .sortedBy { it.distTo(link) }
             .map { if (smallTarget) it.toCenteredRect() else it.toRect16() }
-        d { "**check intersect** small=$smallTarget numClose=${enemiesClose.size}" }
+        d { "**check intersect** near small=$smallTarget numClose=${enemiesClose.size}" }
         if (DEBUG || true) {
             for (enemy in enemiesClose) { // .sortedBy { it.topLeft.distTo(link) }
                 d { "enemy: $enemy" }

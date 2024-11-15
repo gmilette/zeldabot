@@ -70,7 +70,9 @@ class KillArrowSpider : Action {
 // doesn't quite do what i want or properly stop
 fun killSpider(): Action {
     val kill = KillAll(useBombs = true,
-        targetOnly = listOf(spiderHeadOpen, spiderHeadOpening, spiderClaw2, spiderClaw))
+        allowBlock = true, // but if spider head isn't open, do block
+        targetOnly = listOf(spiderHeadOpen, spiderHeadOpening))
+//        targetOnly = listOf(spiderHeadOpen, spiderHeadOpening, spiderClaw2, spiderClaw))
     return DecisionAction(kill, Optional(HideFromSpider())) {
         it.vulnerable() || it.aliveEnemies.isEmpty()
     }
