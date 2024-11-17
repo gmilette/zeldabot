@@ -5,6 +5,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 object DirectoryConstants {
+    const val enable = false
+
     private val botOutputDir = "botoutput"
 
     private val outDir = "..${File.separator}..${File.separator}$botOutputDir${File.separator}".also {

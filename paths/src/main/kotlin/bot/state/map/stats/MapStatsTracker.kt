@@ -154,6 +154,8 @@ class MapStatsTracker {
     }
 
     private fun writeVisits(mapCoordinates: MapCoordinates) {
+        if (!DirectoryConstants.enable) return
+
         d { " write visits "}
         val fileName = "${mapCoordinates.level}_${mapCoordinates.loc}_visits.json"
         val fileNameCsv = "${mapCoordinates.level}_${mapCoordinates.loc}_visits.csv"
@@ -191,6 +193,7 @@ class MapStatsTracker {
     }
 
     private fun appendMovements(mapCoordinates: MapCoordinates) {
+        if (!DirectoryConstants.enable) return
         d { " appendMovements "}
         val fileNameCsv = "${mapCoordinates.level}_${mapCoordinates.loc}_movements.csv"
         val fileNameCsvDir = DirectoryConstants.file("visits", fileNameCsv)

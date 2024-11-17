@@ -165,7 +165,6 @@ object ZeldaPlan {
         return builder {
             woodenSwordPhase()
 
-            2 using levelPlan2Boomerang
             "gather bombs".seg()
             gatherBombsFirstPhase()
 
