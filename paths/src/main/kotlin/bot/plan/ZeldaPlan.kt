@@ -140,6 +140,8 @@ object ZeldaPlan {
 //            obj(Dest.Secrets.level2secret10)
             phase(Phases.afterLevel6)
             // grab level2 boomerang
+            // for traveling around, boomerang is nice
+            switchToBoomerang
             2 using levelPlan2Boomerang
             8 using level8
 
@@ -335,6 +337,8 @@ object ZeldaPlan {
 
             routeTo(115)
             goTo(FramePoint(12.grid, 7.grid))
+            // then get closer
+            goTo(FramePoint(8.grid, 7.grid))
             // grab this cash now, then get fairy so ready to kill level 3
             obj(Dest.Secrets.bombSecret30SouthWest)
             routeTo(115)
@@ -1007,6 +1011,7 @@ private val level5: PlanBuilder.() -> Unit
 
         seg("get back")
         rightm
+        switchToBoomerang
         seg("get back extra")
         right // possibly kill until get bomb IF need bombs
         seg("kill all zombie to open get key")
@@ -1035,7 +1040,7 @@ private val level5: PlanBuilder.() -> Unit
         goIn(GamePad.MoveLeft, 20) // move more in
         useItem()
         wait(100) // wait for whistle to happen, otherwise bot will route uselessly
-        switchToBoomerang
+//        switchToBoomerang // broke waiting
         seg("Now destroy him")
         kill // problem the projectiles are considered enemies
         seg("Get 5 triforce")
@@ -1110,6 +1115,7 @@ private val level6: PlanBuilder.() -> Unit
         down
         left
         level6TriggerDoorThenUp
+        enoughForArrow
         killArrowSpider
         goTo(InLocations.Level6.triforceHeart)
         // need

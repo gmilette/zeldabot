@@ -131,6 +131,8 @@ object MonstersOverworld {
         tile = setOf(0xbc, 0xbe, 0xEC, 0xEE)
     ).immuneToB()
 
+    val all: List<Monster> = listOf(zora, peahat, moblin, ghini, tektite, octorok, lynel, leever, armos)
+
     val toHuntForBombs: Map<Int, Monster> = mutableMapOf<Int, Monster>()
         .add(octorok)
         .add(moblin)
@@ -195,9 +197,11 @@ object Monsters {
             tileAttribute.color !in it.color
         } ?: false
 
-//        lookup[tileAttribute.tile]?.let {
-//            tileAttribute.attribute in it.damagedA
-//        } ?: false
+    private fun MutableMap<Int, Monster>.addAll(monsters: List<Monster>): MutableMap<Int, Monster> {
+        this.add(*(monsters.toTypedArray()))
+        return this
+    }
+
     fun MutableMap<Int, Monster>.add(vararg monsters: Monster): MutableMap<Int, Monster> {
         for (monster in monsters) {
             for (t in monster.tile) {
@@ -244,7 +248,10 @@ object Monsters {
     val manhandla = Monster(name = "star").immuneToB().inL()
     val aquamentus = Monster(name = "dragon").immuneToB().inL().typeD()
     val ganon = Monster(name = "ganon").immuneToB().inL().typeD()
-    val gleeok = Monster(name = "hydradragon").immuneToB().inL().typeD()
+    val gleeok = Monster(name = "hydradragon",
+        tile = setOf(0xCA, 0xC2, 0xc8, 0xcc, 0xce, 0xc0, 0xdc, 0xda, 0xd4, 0xd2, 0xd8, 0xd0, 0xd6, 0xc6, 0xde),
+        color = grey
+    ).immuneToB().inL().typeD()
     val gohma = Monster(name = "spider").immuneToB().inL().typeD()
     val moldorm = Monster(name = "cirleworm",
         tile = setOf(0x9E, 0xA0),
@@ -283,6 +290,9 @@ object Monsters {
         .add(dragon)
 //        .add(ropeOrPolsVoice)
 
+    val lookupOverworld: Map<Int, Monster> = mutableMapOf<Int, Monster>()
+        .addAll(MonstersOverworld.all)
+
     val lookup: Map<Int, Monster> = lookupBase + mutableMapOf<Int, Monster>()
         .add(darknutGroup)
 
@@ -297,7 +307,6 @@ object Monsters {
 
     private val lookupLevel4: Map<Int, Monster> = mutableMapOf<Int, Monster>()
         .add(keese, vire, likelike, zol, manhandla, gleeok)
-
 
     private val lookupLevel5: Map<Int, Monster> = mutableMapOf<Int, Monster>()
         .add(keese, zol, gibdo, polsVoice, darknut, dodongo, digdogger)
@@ -316,6 +325,7 @@ object Monsters {
 
     fun lookup(level: Int): Map<Int, Monster> =
         when (level) {
+            0 -> lookupOverworld
             1 -> lookupLevel1
             2 -> lookupLevel2
             3 -> lookupLevel3

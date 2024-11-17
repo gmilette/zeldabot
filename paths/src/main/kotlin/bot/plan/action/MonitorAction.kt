@@ -5,6 +5,7 @@ import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapCell
+import bot.state.map.MapConstants
 import bot.state.map.toGamePad
 import util.d
 import util.w
@@ -69,8 +70,10 @@ private class MinDistTotalFramesCount {
         }
         maxY = max(maxY, point.y)
         maxY = max(maxX, point.x)
-        return (frames > 10000) || (frames > 5000 && (maxY - minY < 50))
+        return (frames > 5000 && (maxY - minY < MapConstants.twoGrid))
     }
+
+    fun distance() = maxY - minY
 
     fun reset() {
         count = 0
@@ -117,6 +120,9 @@ class MoveBuffer(val size: Int = 2) {
 
     fun allSame(): Boolean =
         buffer.distinct().size == 1
+
+    fun allSameAndFull(): Boolean =
+        allSame() && isFull
 
     fun allDifferent(): Boolean =
         buffer.distinct().size == size
@@ -251,7 +257,9 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
     private var escapeActionCt = 0
     private val escapeActionTimes = 50
     private val cycleDetector = CycleDetector()
+    private var history: MoveBuffer = MoveBuffer(MapConstants.twoGrid)
     private var whyEscape = ""
+    private var frames = 0
 
     override fun target(): FramePoint {
         return wrapped.target()
@@ -276,6 +284,7 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
 
     override fun nextStep(state: MapLocationState): GamePad {
 //        d { "MoveHistoryAction" }
+        frames++
         return when {
             escapeActionCt > 0 -> {
                 d { " ESCAPE ACTION $escapeActionCt left because $whyEscape" }
@@ -295,7 +304,20 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
             else -> {
                 val nextStep = wrapped.nextStep(state)
                 val ct = same.record(nextStep)
-                val notChanged = changed.record(state.link)
+                //val notChanged = changed.record(state.link)
+                history.add(state.link)
+
+                if (frames > 5000) { // stuck
+                    val minDist = MinDistTotalFramesCount()
+                    for (framePoint in history.buffer) {
+                        minDist.record(framePoint)
+                    }
+                    val notChanged = (minDist.distance() < MapConstants.twoGrid)
+
+                    if (notChanged) {
+                        d { " ESCAPE ACTION NOT CHANGED (disabled)" }
+                    }
+                }
                 // keep saving link's location
 //                cycleDetector.save(state.link)
 //                d { " ESCAPE ACTION not same $nextStep + $ct last ${same.last}" }

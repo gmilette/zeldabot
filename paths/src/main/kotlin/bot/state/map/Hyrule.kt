@@ -125,7 +125,7 @@ class MapCell(
     val mapData: MapCellData,
     val passable: Map2d<Boolean> = Map2d(emptyList()),
     halfPassable: Boolean = true,
-    isLevel: Boolean = false
+    isLevel: Boolean = false,
 ) {
     override fun toString(): String {
         return "Map $mapLoc $point"

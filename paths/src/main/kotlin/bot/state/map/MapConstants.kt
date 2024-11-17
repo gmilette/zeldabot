@@ -33,3 +33,6 @@ object MapConstants {
 
     fun frac(percent: Float): Int = (oneGrid.toFloat() * percent).toInt()
 }
+
+val Int.isOverworld: Boolean
+    get() = this == MapConstants.overworld

@@ -17,7 +17,7 @@ class OamStateReasoner(
     private val isOverworld: Boolean,
     private val api: API,
     private val mapStatsTracker: MapStatsTracker = MapStatsTracker(),
-    private val combine: Boolean = true
+    private val combine: Boolean = true,
 ) {
     private val sprites: List<SpriteData>
     private var spritesUncombined: List<SpriteData> = emptyList()
@@ -182,7 +182,7 @@ class OamStateReasoner(
         val xFlip = BitUtil.getBitBool(attrib, 6)
         val yFlip = BitUtil.getBitBool(attrib, 7)
         return SpriteData(at / 4, FramePoint(x, y - MapConstants.yAdjust), tile, attrib,
-            priority = priority, xFlip = xFlip, yFlip = yFlip, color = color, combine = combine)
+            priority = priority, xFlip = xFlip, yFlip = yFlip, color = color, combine = combine, isOverworld = isOverworld)
     }
 
     private fun readOam(): List<SpriteData> {
@@ -254,7 +254,8 @@ data class SpriteData(
     val xFlip: Boolean = false,
     val yFlip: Boolean = false,
     val color: Int = 0,
-    val combine: Boolean = true
+    val combine: Boolean = true,
+    val isOverworld: Boolean
 ) {
     val tilePair = tile to attribute
 
@@ -272,7 +273,8 @@ data class SpriteData(
 
     // keep
     // Debug: (Kermit) 49: SpriteData(index=49, point=(177, 128), tile=160, attribute=2) None
-    val hidden: Boolean = priority || point.y >= 248 || attribute == 32 || (!EnemyGroup.keepPairs.contains(tilePair) && EnemyGroup.ignore.contains(tile)) ||
+    val hidden: Boolean = priority || point.y >= 248 || attribute == 32 ||
+            (!EnemyGroup.keepPairs.contains(tilePair) && EnemyGroup.ignoreFor(isOverworld).contains(tile)) ||
 //            ( (combine && tile != rhinoUpLeft.tile) && EnemyGroup.ignore.contains(tile)) ||
             EnemyGroup.ignorePairs.contains(tilePair)
             //|| point.y < 60  dont need that because the y coordinate is adjusted

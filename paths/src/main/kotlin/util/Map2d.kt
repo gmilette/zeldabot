@@ -161,10 +161,4 @@ class Map2d<T>(
             this.close()
         }
     }
-
-
-    fun writeJson(name: String) {
-
-    }
-
 }

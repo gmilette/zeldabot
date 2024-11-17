@@ -70,7 +70,7 @@ class FrameStateUpdater(
         // everything gets combined to the back
         val isRhino = mapLoc == 14 && level == 2
         val isSpiderLevel8 = mapLoc == 30 && level == 8
-        val isSpiderLevel6 = false && level == 6 // todo
+        val isSpiderLevel6 = mapLoc == 28 && level == 6
         val combine = !isRhino && !isSpiderLevel8 && !isSpiderLevel6
         val oam = OamStateReasoner(isOverworld, api, mapStats, combine = combine)
         val dirLookup = DirectionByMemoryLookup(api)

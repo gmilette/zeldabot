@@ -1,5 +1,8 @@
 package bot.state.oam
 
+import bot.state.map.MapConstants
+import bot.state.map.isOverworld
+
 object EnemyGroup {
     const val oldWoman = (0x9a).toInt()
 
@@ -65,6 +68,8 @@ object EnemyGroup {
 
     val flame = setOf(flame1, flame2)
 
+    fun ignoreFor(isOverworld: Boolean) = if (isOverworld) ignore else ignoreLevel
+
     val ignore = setOf(
         18, 16, // link shield shite
         12, 14, // facing up link
@@ -91,10 +96,7 @@ object EnemyGroup {
         deadEnemy,
         (0x48).toInt(), // magic sword
         48, // swirly thing
-        bombSmoke, // yea but then it attacks its own bomb// 112, // bomb smoke, removed it so I can attack the monsters
-        bombSmokeLess,
-//        bigHeart, // plan always knows where to go, why ignore?
-                //164, // not sure, that is a pancake
+            //164, // not sure, that is a pancake
 //            160, // this happens to be the left side of the snake monster in level 2, snake has attribute 2
         ladder,
         wizard,
@@ -115,6 +117,11 @@ object EnemyGroup {
 //            secretEverybodyMonsterOrCircleEnemyRight
     ) + swordProjectile.map { it.tile } + swordLink.map { it.tile }
 
+    val ignoreLevel = ignore + setOf(
+        bombSmoke,
+        bombSmokeLess,
+    )
+
     val projectiles = setOf(
         flame1,
         flame2,
@@ -132,7 +139,10 @@ object EnemyGroup {
         ghostProjectileUpDown,
         ghostProjectileLeft1,
         ghostProjectileLeft2,
-        rockProjectile.tile
+        rockProjectile.tile,
+        // not in level though
+        bombSmoke,
+        bombSmokeLess,
     )
 
     val projectilesLevel = projectiles - rockProjectile.tile
