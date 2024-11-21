@@ -124,26 +124,10 @@ object PotionUsageReasoner {
             else -> ""
         }
 
-        d { " life $message ${state.inventory.heartCalc.toString()} d:$damage $almostDead $havePotion $full heart: $heart "}
-        state.inventory.heartCalc.logData()
+//        d { " life $message ${state.inventory.heartCalc.toString()} d:$damage $almostDead $havePotion $full heart: $heart "}
+//        state.inventory.heartCalc.logData()
 
-//        if (haveEnough && almostDead && havePotion) {
-//            d { "!!need potion!!"}
-//            diversionNeed = DiversionState.usePotion
-//        } else {
-//            goGet(state)
-//        }
-
-//        return isLevel && !full && havePotion
         return isLevel && almostDead && havePotion
-    }
-
-    fun usePotion() {
-        // remember menu selection
-        // open menu
-        // select potion
-        // use potion
-        // restore menu selection
     }
 
     fun goGet(state: FrameState) {

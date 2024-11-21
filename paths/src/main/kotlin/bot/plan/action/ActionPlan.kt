@@ -500,13 +500,18 @@ class GoIn(
 ) :
     Action {
     private var movements = 0
+    private var numInDesiredDirection = 0
 
     override val monitorEnabled: Boolean
         get() = setMonitorEnabled
 
     override fun complete(state: MapLocationState): Boolean {
         val linkInDesiredDirection = state.frameState.link.dir == desiredDirection
-        val complete = movements >= moves || linkInDesiredDirection
+        if (linkInDesiredDirection) {
+            numInDesiredDirection++
+        }
+        val linkInDesiredDirectionEnoughTimes = numInDesiredDirection >= 2
+        val complete = movements >= moves || linkInDesiredDirectionEnoughTimes
         if (complete && reset) {
 //            d { " --> RESET $name $movements"}
             movements = 0

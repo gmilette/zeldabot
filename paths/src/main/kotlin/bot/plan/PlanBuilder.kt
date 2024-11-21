@@ -773,7 +773,6 @@ class PlanBuilder(
         // move in the door
         goInConsume(GamePad.MoveUp, 5)
         if (showLetter) {
-            d { " LETTER REQUIRED "}
             showLetterIfRequired()
         }
         goGetItem(itemLoc)

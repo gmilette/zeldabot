@@ -146,6 +146,8 @@ class MapStatsTracker {
             d { " current $mapStatsData" }
             mapStatsData.add(currentMapStats)
             d { " added $mapStatsData" }
+        } else {
+            d { " new map stats "}
         }
         write(mapCoordinates, mapStatsData.toString())
         previousEnemyLocations.clear()

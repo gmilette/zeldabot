@@ -176,7 +176,7 @@ class ZStar(
         var finalPoint = FramePoint()
 
         // doesn't work. more testing needed
-        d { "start dodge targets $targets start $current toExplore: ${toExplore.size}" }
+        // d { "start dodge targets $targets start $current toExplore: ${toExplore.size}" }
         var i = 0
         while (toExplore.isNotEmpty() && i < MAX_ITER) {
             if (DEBUG_B) {
@@ -284,7 +284,7 @@ class ZStar(
             .ifEmpty { targets.toList() }
 
         // stil getting NO ROUTE
-        d { "From safe: $startIsSafe cost = ${costsF.get(param.start)} targets size = ${target.size} routeToSafe=${routeToSafe}"}
+//        d { "From safe: $startIsSafe cost = ${costsF.get(param.start)} targets size = ${target.size} routeToSafe=${routeToSafe}"}
 //        d { " targets zstar: "}
 //        for (framePoint in target) {
 //            d { "$framePoint"}

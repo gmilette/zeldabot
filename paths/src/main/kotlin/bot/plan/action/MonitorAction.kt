@@ -324,8 +324,8 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
                 if (ct >= histSize) { // || notChanged
                     escapeActionCt = escapeActionTimes
                     // if not changed to the reset screen
-                    whyEscape = "not $notChanged ${ct >= histSize}"
-                    d { " ESCAPE ACTION RESET * not changed: $notChanged" }
+                    whyEscape = "histsize=$histSize ct: ${ct >= histSize}"
+                    d { " ESCAPE ACTION RESET" }
                     same.reset()
                     changed.reset()
                 }
