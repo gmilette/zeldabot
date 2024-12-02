@@ -325,6 +325,8 @@ object Addresses {
    const val hasShield = 0x0676
    const val hasMagicKey = 0x0664
 
+   const val tunicColor = 0x6804
+
    // useful for predicting item drops
    // https://www.zeldaspeedruns.com/loz/generalknowledge/item-drops-chart
    const val enemiesKilledCount = 0x052A

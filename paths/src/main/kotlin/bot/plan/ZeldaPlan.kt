@@ -178,6 +178,7 @@ object ZeldaPlan {
 
             // should hae enough for candle and shield
             whiteSword()
+            seg("get fairy before level 1")
             routeTo(39)
             obj(Dest.Fairy.greenForest) // 205
             1 using level1
@@ -232,7 +233,7 @@ object ZeldaPlan {
             hearts = 8,
             shield = true,
             ladderAndRaft = true,
-            ring = ZeldaItem.BlueRing,
+//            ring = ZeldaItem.BlueRing,
             potion = true,
             candle = true,
             arrowAndBow = true,
@@ -335,6 +336,7 @@ object ZeldaPlan {
             // todo: put back in
             fireBurn100()
             enoughForRing
+//            startHereAt(raftLadderSetup)
 //            routeTo(98 - 16) // go up so it routes ok
             obj(Dest.Shop.blueRing, position = true)
             // avoid accidentally going back in
@@ -362,7 +364,7 @@ object ZeldaPlan {
             // getPotionConditionally()
             // for now just always buy the big potion
             greenPotion()
-            startHereAt(raftLadderSetup)
+//            startHereAt(raftLadderSetup)
 
             // get the potion here if have enough cash
             // possibly only need to refill
@@ -508,6 +510,14 @@ object ZeldaPlan {
 
     private fun PlanBuilder.level5sequence(endLevel2BoomerangPickup: Boolean = true) {
         phase("go to level 5")
+        startHereAt(raftLadderSetup.copy(
+            hearts = 14,
+            ring = ZeldaItem.BlueRing,
+            sword = ZeldaItem.WhiteSword,
+            potion = true,
+            candle = true,
+            arrowAndBow = true,
+        ))
         5 using level5
 
         phase("gear for level 6")
@@ -524,6 +534,7 @@ object ZeldaPlan {
         obj(ZeldaItem.MagicSword)
 //
         6 using level6
+        // maybe switch to boomerang here
         potionLevel6NoBomb()
 
         phase("Gear for level 8")
@@ -1107,10 +1118,10 @@ private val level6: PlanBuilder.() -> Unit
         // pick up key in center
         goTo(InLocations.Level6.keyCenter)
         down //57
-        startAt(57)
+//        startAt(57)
         kill
         rightk
-        startAt(58)//save6
+//        startAt(58)//save6
         seg("center move stair")
         kill
         addNext(

@@ -234,12 +234,12 @@ class PlanRunner(private val makePlan: PlanMaker,
         val ex = levelExperiment ?: this.target
         d { " set sword to ${ex.sword} hearts to ${ex.hearts}"}
         manipulator.setSword(ex.sword)
+        d { "set ring to ${ex.ring}" }
+        manipulator.setRing(ex.ring)
         ex.hearts?.let {
             manipulator.setHearts(it)
         }
         manipulator.clearRupee()
-        d { "set ring to ${ex.ring}" }
-        manipulator.setRing(ex.ring)
         manipulator.setBombs(ex.bombs)
         if (ex.shield) {
             manipulator.setMagicShield()

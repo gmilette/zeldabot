@@ -2,8 +2,12 @@ package bot.plan.runner
 
 import bot.DirectoryConstants
 import bot.plan.action.Action
+import bot.plan.action.UsePotion
+import bot.plan.action.UsePotionAction
 import bot.state.GamePad
+import bot.state.MapLoc
 import bot.state.MapLocationState
+import bot.state.map.MapCell
 import com.github.doyaaaaaken.kotlincsv.client.CsvWriter
 import util.d
 import java.io.File
@@ -46,6 +50,9 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
     // time
     // damage taken
     data class StepCompleted(
+        val level: Int,
+        val mapLoc: MapLoc,
+        val name: String,
         val action: String,
         val time: Long,
         val totalTime: Long,
@@ -114,10 +121,10 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         if (SAVE) {
             val csvWriter2 = CsvWriter()
             csvWriter2.open(outputFile, false) {
-                writeRow("index", "time", "totalTime", "numFrames", "action", "bombsUsed", "hits", "damage")
+                writeRow("index", "level", "mapLoc", "name", "time", "totalTime", "numFrames", "action", "bombsUsed", "hits", "damage")
                 completedStep.forEachIndexed { index, stepCompleted ->
                     stepCompleted.apply {
-                        writeRow(index, time, totalTime, numFrames, action, bombsUsed, hits, damage)
+                        writeRow(index, level, mapLoc, name, time, totalTime, numFrames, action, bombsUsed, hits, damage)
                     }
                 }
             }
@@ -197,6 +204,9 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         }
     }
 
+    private val potionOrReplace = "${UsePotion::javaClass.javaClass.simpleName} or "
+    private val potionReplace = "UsePotion "
+
     private fun calculateStep(
         name: String,
         state: MapLocationState,
@@ -206,8 +216,13 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
     ): StepCompleted {
         val time = (System.currentTimeMillis() - startedStep) / 1000
         val totalTime = (System.currentTimeMillis() - started) / 1000
+        val cellName = state.getCell().mapData.name
         return StepCompleted(
-            name.replace("\"", ""),
+            state.frameState.level,
+            state.frameState.mapLoc,
+            cellName.substring(0, minOf(8, cellName.length)),
+            //.replace(potionOrReplace, "").
+            name.replace("\"", "").replace(potionReplace, ""),
             time,
             totalTime,
             bombsUsed.perStep,
@@ -215,6 +230,12 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
             hits = hits,
             damage = damage
         )
+    }
+
+    private fun MapLocationState.getCell(): MapCell = if (frameState.isOverworld) {
+        hyrule.getMapCell(frameState.mapLoc)
+    } else {
+        hyrule.levelMap.cellOrEmpty(frameState.level, frameState.mapLoc)
     }
 }
 

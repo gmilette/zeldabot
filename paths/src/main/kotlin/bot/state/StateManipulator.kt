@@ -50,6 +50,17 @@ class StateManipulator(
         }
         // doesnt change visual but affects damage
         api.writeCPU(Addresses.hasRing, ringId)
+//        setTunic(item)
+    }
+
+    // this is still incorrect
+    fun setTunic(item: ZeldaItem) {
+        val color = when (item) {
+            ZeldaItem.BlueRing -> 22
+            ZeldaItem.RedRing -> 50
+            else -> 41
+        }
+        api.writeCPU(Addresses.tunicColor, color)
     }
 
     fun setLadderAndRaft(enable: Boolean) {

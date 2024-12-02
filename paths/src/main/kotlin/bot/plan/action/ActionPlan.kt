@@ -11,6 +11,7 @@ import bot.state.oam.*
 import nintaco.api.ApiSource
 import util.d
 import util.i
+import kotlin.random.Random
 
 interface Action {
     /**
@@ -458,6 +459,15 @@ class AlwaysDo(private val dir: GamePad = GamePad.MoveUp) : Action {
         get() = "AlwaysDo $dir"
 }
 
+class WaitUntilCloudIsGone : Action {
+    override val escapeActionEnabled: Boolean
+        get() = false
+
+    override fun complete(state: MapLocationState): Boolean =
+        state.frameState.enemiesRaw.firstOrNull { it.tile == bombSmoke } == null &&
+                state.frameState.enemiesRaw.firstOrNull { it.tile in EnemyGroup.shopOwners } != null
+}
+
 class GoInConsume(private val moves: Int = 5, private val dir: GamePad = GamePad.MoveUp) :
     Action {
     private var movements = 0
@@ -496,6 +506,7 @@ class GoIn(
      */
     private val defensive: Boolean = true,
     private val desiredDirection: Direction? = null,
+    private val randomlyMoveHalf: Boolean = false,
     private val condition: (MapLocationState) -> Boolean = { true }
 ) :
     Action {
@@ -519,7 +530,12 @@ class GoIn(
         val complete = movements >= moves || linkInDesiredDirectionEnoughTimes
         if (complete && reset) {
 //            d { " --> RESET $name $movements"}
-            movements = 0
+            if (randomlyMoveHalf && Random.nextInt(4) > 3) {
+                d { " do less"}
+                movements = moves / 2
+            } else {
+                movements = 0
+            }
         }
         return complete
     }

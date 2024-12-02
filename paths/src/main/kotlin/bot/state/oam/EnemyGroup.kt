@@ -303,6 +303,14 @@ object EnemyGroup {
         shopkeeperAndBat.tile
     )
 
+    val shopOwners = setOf(
+        shopkeeperAndBat.tile,
+        shopOwner.tile,
+        shopOwner2.tile,
+        oldWoman,
+        wizard
+    )
+
     val notAffectedByBoomerang = setOf(
         ghost
     )

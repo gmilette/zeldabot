@@ -785,6 +785,8 @@ class PlanBuilder(
             // too much for bait
             goInConsume(GamePad.MoveUp, 15)
 
+            waitUntilCloudIsGone()
+
             // avoid accidently picking the center item
             if (itemLoc != InLocations.Overworld.centerItem) {
                 goShop(itemLoc.downTwoGrid)
@@ -977,6 +979,11 @@ class PlanBuilder(
 
     fun goInConsume(dir: GamePad = GamePad.MoveUp, num: Int): PlanBuilder {
         add(lastMapLoc, GoInConsume(num, dir))
+        return this
+    }
+
+    fun waitUntilCloudIsGone(): PlanBuilder {
+        add(lastMapLoc, WaitUntilCloudIsGone())
         return this
     }
 
