@@ -2,6 +2,7 @@ package bot.plan.action
 
 import bot.state.*
 import bot.state.map.Direction
+import bot.state.map.MapConstants
 import bot.state.map.grid
 import bot.state.map.toGamePad
 import bot.state.oam.MonsterColor
@@ -9,6 +10,7 @@ import bot.state.oam.Monsters
 import bot.state.oam.circleMonsterCenters
 import util.LogFile
 import util.d
+import kotlin.random.Random
 
 class KillAll(
     /**
@@ -363,6 +365,27 @@ class AttackOnce(useB: Boolean = false, private val freq: Int = 5) :
         frames >= 10
 
 }
+
+val CycleAction = OrderedActionSequence(
+    listOf(
+        GoIn(3, GamePad.A, reset = true),
+        GoIn(3, GamePad.None, reset = true),
+        GoIn(3, GamePad.A, reset = true),
+        GoIn(3, GamePad.None, reset = true),
+        GoIn(3, GamePad.A, reset = true),
+        GoIn(3, GamePad.None, reset = true),
+        GoIn(3, GamePad.A, reset = true),
+        GoIn(3, GamePad.None, reset = true),
+        GoIn(3, GamePad.A, reset = true),
+        GoIn(3, GamePad.None, reset = true),
+        GoIn(3, GamePad.A, reset = true),
+        GoIn(3, GamePad.None, reset = true),
+        GoIn(MapConstants.twoGrid, GamePad.MoveDown, reset = true),
+        GoIn(MapConstants.twoGrid, GamePad.MoveRight, reset = true),
+        GoIn(MapConstants.twoGrid, GamePad.MoveLeft, reset = true),
+        GoIn(MapConstants.twoGrid,GamePad.MoveUp, reset = true)
+    )
+)
 
 class AlwaysAttack(useB: Boolean = false, private val freq: Int = 5, private val otherwiseRandom: Boolean = false) :
     Action {

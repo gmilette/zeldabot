@@ -32,6 +32,7 @@ data class Monster(
     val affectedByBoomerang: Boolean = true,
     val arrowKillable: Boolean = false,
     val overworld: Boolean = true,
+    val avoidFront: Boolean = false,
     val type: MutableMap<Int, MonsterItemsType> = mutableMapOf()
 ) {
     fun typeA(color: Int): Monster {
@@ -58,13 +59,15 @@ data class Monster(
     fun inL() = this.copy(overworld = false)
     fun immuneToB() = this.copy(affectedByBoomerang = false)
     fun arrowKillable() = this.copy(arrowKillable = true)
+    fun avoidFront() = this.copy(avoidFront = true)
     operator fun plus(other: Monster): Monster {
         return Monster("${this.name}_${other.name}",
             tile = this.tile + other.tile,
             color = this.color + other.color,
             affectedByBoomerang = this.affectedByBoomerang || other.affectedByBoomerang,
             overworld = this.overworld,
-            arrowKillable = this.arrowKillable || other.arrowKillable
+            arrowKillable = this.arrowKillable || other.arrowKillable,
+            avoidFront = this.avoidFront || other.avoidFront
         )
     }
 }
@@ -113,7 +116,12 @@ object MonstersOverworld {
     val leever = Monster(name = "undergroundguy",
         tile = setOf(0xc4),
         color = blueAndRed)
-    val lynel = Monster(name = "swordshooter").typeD(MonsterColor.red).typeD(MonsterColor.blue)
+    val lynel = Monster(name = "swordshooter",
+        tile = setOf(0xD0, 0xD2, 0xD4, 0xD6, 0xD8, 0xCE), //, 0xCE),
+        color = blueAndRed)
+        .avoidFront()
+        .typeD(MonsterColor.red)
+        .typeD(MonsterColor.blue)
     val octorok = Monster(name = "overworldgrunt",
         tile = setOf(0xb2, 0xb4, 0xb6, 0xb8, 0xba, 0xb0),
         color = blueAndRed,
@@ -179,17 +187,11 @@ enum class MonsterItemsType(
     D(listOf(heart, fairy, coin, heart, fairy, heart, heart, heart, coin, heart)), None(emptyList())
 }
 
-//enum class MonsterColor(color: Int, colorT: Int) {
-//    Blue(1, 20), //01 //
-//    Red(2, 24)  //10
-//    Other(0, 16),//00
-//    Grey(3, 28)  //11 // like squishy
-//}
-
 object Monsters {
     val levelsWithBoomerangAndSword = setOf(7)
     val levelsWithBoomerang = setOf(1, 2, 7)
     val levelsWithWizzrobes = setOf(6, 9)
+    val overworldLevel = setOf(0)
     val levelsWithNotSword = levelsWithWizzrobes + levelsWithBoomerang
 
     fun damaged(tileAttribute: TileAttribute) =
@@ -220,7 +222,9 @@ object Monsters {
     // 5_100 blue
     val darknut = Monster("swordguy",
         color = blueAndRed,
-        tile = setOf(0xbe, 0xb6, 0xBA, 0xb4, 0xac, 0xb0, 0xB8, 0xBC)).immuneToB().inL()
+        tile = setOf(0xbe, 0xb6, 0xBA, 0xb4, 0xac, 0xb0, 0xB8, 0xBC))
+        .avoidFront()
+        .immuneToB().inL()
     val gel = Monster(name = "babysquixxshy").inL()
     val gibdo = Monster(name = "mummy",
         tile = setOf(0xa6, 0xa4),

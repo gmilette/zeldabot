@@ -232,6 +232,10 @@ object ZeldaPlan {
             hearts = 8,
             shield = true,
             ladderAndRaft = true,
+            ring = ZeldaItem.BlueRing,
+            potion = true,
+            candle = true,
+            arrowAndBow = true,
         )
 
     private fun PlanBuilder.itemsNearLevel2CandleShieldPhase() {
@@ -270,6 +274,7 @@ object ZeldaPlan {
     private fun PlanBuilder.whiteSword() {
         add {
             routeTo(10)
+//            startHereAt(raftLadderSetup)
             down
             up
             whiteSwordDodgeRoutine()
@@ -338,7 +343,8 @@ object ZeldaPlan {
             routeTo(115)
             goTo(FramePoint(12.grid, 7.grid))
             // then get closer
-            goTo(FramePoint(8.grid, 7.grid))
+            goTo(FramePoint(8.grid, 8.grid))
+            goTo(FramePoint(2.grid, 8.grid))
             // grab this cash now, then get fairy so ready to kill level 3
             obj(Dest.Secrets.bombSecret30SouthWest)
             routeTo(115)
@@ -356,6 +362,7 @@ object ZeldaPlan {
             // getPotionConditionally()
             // for now just always buy the big potion
             greenPotion()
+            startHereAt(raftLadderSetup)
 
             // get the potion here if have enough cash
             // possibly only need to refill
@@ -975,6 +982,7 @@ private val level5: PlanBuilder.() -> Unit
     get() = {
         phase(Phases.lev(5))
         lev(5)
+        cheatBombs
         startAt(LevelStartMapLoc.lev(5))
         seg("move to level 5")
         upm
@@ -1030,8 +1038,10 @@ private val level5: PlanBuilder.() -> Unit
         seg("go left to victory")
         // key??
         goTo(FramePoint(8.grid, 6.grid))
-        leftm
-        leftm
+        left
+        left
+        seg("get past bunnies")
+        switchToArrow() // is it in right spot?
         leftm
         seg("Use Whistle")
         goIn(GamePad.MoveLeft, 10) // more in a bit before whistlin'

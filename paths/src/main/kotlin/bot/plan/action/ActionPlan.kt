@@ -502,6 +502,11 @@ class GoIn(
     private var movements = 0
     private var numInDesiredDirection = 0
 
+    override fun reset() {
+        movements = 0
+        numInDesiredDirection = 0
+    }
+
     override val monitorEnabled: Boolean
         get() = setMonitorEnabled
 

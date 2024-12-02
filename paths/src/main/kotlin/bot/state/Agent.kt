@@ -3,6 +3,7 @@ package bot.state
 import bot.state.map.Direction
 import bot.state.map.MovingDirection
 import bot.state.oam.EnemyGroup
+import bot.state.oam.MonstersOverworld
 import bot.state.oam.TileAttribute
 import bot.state.oam.swordDir
 import util.CalculateDirection
@@ -42,7 +43,9 @@ data class Agent(
 
     // tileAttribute.tile in Monsters.darknut.tile
     // look up monster, then check attribute
-    val canAttackFront by lazy { !swordDir.inAny(tile) }
+    val canAttackFront by lazy {
+        !swordDir.inAny(tile) && tile !in MonstersOverworld.lynel.tile
+    }
 }
 
 enum class EnemyState {

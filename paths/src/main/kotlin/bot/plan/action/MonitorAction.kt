@@ -9,7 +9,9 @@ import bot.state.map.MapConstants
 import bot.state.map.toGamePad
 import util.d
 import util.w
+import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.min
 
 // try to detect when link is stuck and then get unstuck
 
@@ -17,7 +19,8 @@ fun moveHistoryAttackAction(wrapped: Action): Action {
     if (!wrapped.monitorEnabled) return wrapped
 
     val moveHistoryAction = if (wrapped.escapeActionEnabled) {
-        MoveHistoryAction(wrapped, AlwaysAttack(otherwiseRandom = true))
+//        MoveHistoryAction(wrapped, AlwaysAttack(otherwiseRandom = true))
+        MoveHistoryAction(wrapped, CycleAction)
     } else {
         d { " no escape enabled "}
         wrapped
@@ -46,7 +49,7 @@ fun moveHistoryAttackAction(wrapped: Action): Action {
 //    return combinedAction
 }
 
-private class MinDistTotalFramesCount {
+class MinDistTotalFramesCount {
     private var count: Int = 0
     private var frames: Int = 0
     private var minX = 0
@@ -54,26 +57,21 @@ private class MinDistTotalFramesCount {
     private var maxX = 0
     private var maxY = 0
 
-    fun record(point: FramePoint): Boolean {
-        frames++
+    fun record(point: FramePoint) {
+//        frames++
         if (minX == 0 && minY == 0) {
             minX = point.x
             minY = point.y
             maxX = point.x
             maxY = point.y
         }
-        if (point.x < minX) {
-            minX = point.x
-        }
-        if (point.y < minY) {
-            minY = point.y
-        }
+        minX = min(minX, point.x)
+        minY = min(minY, point.y)
         maxY = max(maxY, point.y)
-        maxY = max(maxX, point.x)
-        return (frames > 5000 && (maxY - minY < MapConstants.twoGrid))
+        maxX = max(maxX, point.x)
     }
 
-    fun distance() = maxY - minY
+    fun distance() = abs(maxY - minY) + abs(maxX - minX)
 
     fun reset() {
         count = 0
@@ -81,6 +79,10 @@ private class MinDistTotalFramesCount {
         minY = 0
         maxX = 0
         maxY = 0
+    }
+
+    override fun toString(): String {
+        return "Dist: ${distance()} Y: $maxY $minY X: $maxX $minX"
     }
 }
 
@@ -260,6 +262,7 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
     private var history: MoveBuffer = MoveBuffer(MapConstants.twoGrid)
     private var whyEscape = ""
     private var frames = 0
+    private val framesPerEscape = 2000
 
     override fun target(): FramePoint {
         return wrapped.target()
@@ -307,25 +310,31 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
                 //val notChanged = changed.record(state.link)
                 history.add(state.link)
 
-                if (frames > 5000) { // stuck
-                    val minDist = MinDistTotalFramesCount()
-                    for (framePoint in history.buffer) {
-                        minDist.record(framePoint)
-                    }
-                    val notChanged = (minDist.distance() < MapConstants.twoGrid)
+                val minDist = MinDistTotalFramesCount()
+                for (framePoint in history.buffer) {
+                    minDist.record(framePoint)
+                }
+                val dists = history.buffer.map { it.oneStr }.joinToString(" ")
+                d { "min dist for escape: $frames $minDist $dists"}
+                val notChanged = if (frames > framesPerEscape) { // stuck
+                    val notChangedResult = (minDist.distance() < MapConstants.twoGrid)
 
-                    if (notChanged) {
-                        d { " ESCAPE ACTION NOT CHANGED (disabled)" }
+                    if (notChangedResult) {
+                        d { " ESCAPE ACTION NOT CHANGED $frames dist=${minDist.distance()}" }
                     }
+                    notChangedResult
+                } else {
+                    false
                 }
                 // keep saving link's location
 //                cycleDetector.save(state.link)
 //                d { " ESCAPE ACTION not same $nextStep + $ct last ${same.last}" }
-                if (ct >= histSize) { // || notChanged
+                if (ct >= histSize || notChanged) { // || notChanged
                     escapeActionCt = escapeActionTimes
                     // if not changed to the reset screen
-                    whyEscape = "histsize=$histSize ct: ${ct >= histSize}"
+                    whyEscape = "histsize=$histSize ct: ${ct >= histSize} notChanged=$notChanged"
                     d { " ESCAPE ACTION RESET" }
+                    frames = 0
                     same.reset()
                     changed.reset()
                 }

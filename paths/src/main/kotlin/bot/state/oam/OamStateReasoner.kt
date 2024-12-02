@@ -255,7 +255,7 @@ data class SpriteData(
     val yFlip: Boolean = false,
     val color: Int = 0,
     val combine: Boolean = true,
-    val isOverworld: Boolean
+    val isOverworld: Boolean = false
 ) {
     val tilePair = tile to attribute
 
