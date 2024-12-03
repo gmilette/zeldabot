@@ -350,6 +350,36 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
         get() = wrapped.name
 }
 
+/**
+ * say you tried to burn a tree and missed, the only thing you can do is leave
+ * the screen and come back
+ */
+class ExitReturnIfNecessary(private val wrapped: Action): Action {
+    private var frameCt = 0
+    private var attack = AlwaysAttack(useB = true)
+
+    override fun complete(state: MapLocationState): Boolean =
+        wrapped.complete(state)
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        frameCt++
+
+        // it worked! it took a while though at 1000
+        return if (frameCt > 600) {
+            d { "REBOMB!!!" }
+            if (frameCt > 700) {
+                frameCt = 0
+                d { "ah well restart" }
+            }
+            attack.nextStep(state)
+        } else {
+            wrapped.nextStep(state)
+        }
+    }
+}
+
+
+
 class ReBombIfNecessary(private val wrapped: Action): Action {
     private var frameCt = 0
     private var attack = AlwaysAttack(useB = true)
@@ -596,5 +626,40 @@ class Timeout(action: Action) : WrappedAction(action) {
 
     override val name: String
         get() = "Timeout of $frames ${super.name}"
+}
+
+class TimeoutThen(action: Action, private val contingency: Action) : WrappedAction(action) {
+    private val frameLimit = 200
+    private var frames = 0
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        d { " timeout ct $frames"}
+        frames++
+        return if (frames > frameLimit) {
+            d { " timeout do contingency"}
+            contingency.nextStep(state)
+        } else {
+            super.nextStep(state)
+        }
+    }
+
+    override fun reset() {
+        frames = 0
+        super.reset()
+    }
+
+    override fun complete(state: MapLocationState): Boolean =
+        if (frames > frameLimit) {
+            contingency.complete(state)
+        } else {
+            super.complete(state)
+        }.also {
+            if (it) {
+                frames = 0
+            }
+        }
+
+    override val name: String
+        get() = "Timeout Then of $frames ${super.name}"
 }
 

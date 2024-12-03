@@ -1,7 +1,6 @@
 package bot.state.map
 
-import bot.state.FramePoint
-import bot.state.GamePad
+import bot.state.*
 import bot.state.GamePad.MoveDown
 import bot.state.GamePad.MoveLeft
 import bot.state.GamePad.MoveRight
@@ -82,6 +81,17 @@ fun Direction.pointModifier(adjustment: Int = 1): (FramePoint) -> FramePoint {
         Direction.None -> { p -> FramePoint(p.x, p.y) }
     }
 }
+
+fun Direction.mapLocModifier(): (MapLoc) -> MapLoc {
+    return when (this) {
+        Direction.Up -> { p: MapLoc -> p.up }
+        Direction.Down -> { p: MapLoc -> p.down }
+        Direction.Left -> { p: MapLoc -> p.left }
+        Direction.Right -> { p: MapLoc -> p.right }
+        Direction.None -> { p: MapLoc -> p }
+    }
+}
+
 
 val Direction.isLeftUp: Boolean
     get() = when (this) {

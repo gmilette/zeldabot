@@ -460,12 +460,15 @@ class AlwaysDo(private val dir: GamePad = GamePad.MoveUp) : Action {
 }
 
 class WaitUntilCloudIsGone : Action {
+    private var frames: Int = 0
     override val escapeActionEnabled: Boolean
         get() = false
 
-    override fun complete(state: MapLocationState): Boolean =
-        state.frameState.enemiesRaw.firstOrNull { it.tile == bombSmoke } == null &&
-                state.frameState.enemiesRaw.firstOrNull { it.tile in EnemyGroup.shopOwners } != null
+    override fun complete(state: MapLocationState): Boolean {
+        frames++
+        return frames > 1000 || (state.frameState.enemiesRaw.firstOrNull { it.tile == bombSmoke } == null &&
+                state.frameState.enemiesRaw.firstOrNull { it.tile in EnemyGroup.shopOwners } != null)
+    }
 }
 
 class GoInConsume(private val moves: Int = 5, private val dir: GamePad = GamePad.MoveUp) :

@@ -187,14 +187,7 @@ object ZeldaPlan {
             afterLevel2ItemsLetterEtcPhase(false)
             itemsNearLevel2CandleShieldPhase()
 
-//            startHereAt(
-//                Experiment(
-//                    sword = ZeldaItem.WhiteSword,
-//                    keys = 4,
-//                    bombs = 4,
-//                    rupees = 250
-//                )
-//            )
+
             // it' not the right save state
 
             phase("get heart and cash")

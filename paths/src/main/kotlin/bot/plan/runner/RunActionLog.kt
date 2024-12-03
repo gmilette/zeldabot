@@ -84,17 +84,20 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         val previousDamage = state.previousDamageNumber
 
         if (previousDamage > 0 && (previousDamage > currentDamage)) {
-            val csvWriter2 = CsvWriter()
-            // damage, hearts, damageIn, life, life2, damage number
-            csvWriter2.open(heartLog, true) {
-                writeRow(
-                    state.frameState.inventory.damage.toString(16),
-                    state.frameState.inventory.hearts.toString(16),
-                    state.frameState.inventory.heartCalc.damageInHearts(),
-                    state.frameState.inventory.heartCalc.lifeInHearts(),
-                    state.frameState.inventory.heartCalc.lifeInHearts2(),
-                    state.frameState.inventory.heartCalc.damageNumber()
-                )
+            val WRITE_HEART = false
+            if (WRITE_HEART) {
+                val csvWriter2 = CsvWriter()
+                // damage, hearts, damageIn, life, life2, damage number
+                csvWriter2.open(heartLog, true) {
+                    writeRow(
+                        state.frameState.inventory.damage.toString(16),
+                        state.frameState.inventory.hearts.toString(16),
+                        state.frameState.inventory.heartCalc.damageInHearts(),
+                        state.frameState.inventory.heartCalc.lifeInHearts(),
+                        state.frameState.inventory.heartCalc.lifeInHearts2(),
+                        state.frameState.inventory.heartCalc.damageNumber()
+                    )
+                }
             }
             totalHits++
             val damage = previousHeart - currentHeart
@@ -205,7 +208,7 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
     }
 
     private val potionOrReplace = "${UsePotion::javaClass.javaClass.simpleName} or "
-    private val potionReplace = "UsePotion "
+    private val potionReplace = "UsePotion or "
 
     private fun calculateStep(
         name: String,
@@ -222,7 +225,7 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
             state.frameState.mapLoc,
             cellName.substring(0, minOf(8, cellName.length)),
             //.replace(potionOrReplace, "").
-            name.replace("\"", "").replace(potionReplace, ""),
+            name.replace("\"", "").replace(potionReplace, "").trim(),
             time,
             totalTime,
             bombsUsed.perStep,

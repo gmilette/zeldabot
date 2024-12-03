@@ -13,8 +13,6 @@ import bot.state.map.destination.EntryType
 import bot.state.map.destination.ZeldaItem
 import bot.state.map.level.LevelMapCellsLookup
 import bot.state.oam.*
-import sequence.findpaths.Plan
-import util.d
 
 class PlanBuilder(
     private val mapData: MapCells,
@@ -866,45 +864,60 @@ class PlanBuilder(
         switchToCandle()
         val burnFrom = from.pointModifier(MapConstants.twoGrid)(to)
         val opposite = from.opposite()
-        goTo(burnFrom)
-        // turn in proper direction
-//        d { " burn from $burnFrom to $to op $opposite"}
-        // go until facing the correct direction
-//        goIn(opposite.toGamePad(), 4)
-        // need test, idea is that link should stop when facing correct direction
-        // but he might get distracted by attacking something else
-        goInTowards(opposite.toGamePad(), 4)
+//        goTo(burnFrom)
+//        // turn in proper direction
+////        d { " burn from $burnFrom to $to op $opposite"}
+//        // go until facing the correct direction
+////        goIn(opposite.toGamePad(), 4)
+//        // need test, idea is that link should stop when facing correct direction
+//        // but he might get distracted by attacking something else
+//        goInTowards(opposite.toGamePad(), MapConstants.fourthGrid)
+//
+//        // execute burn
+//        plan.add(UseItem())
+//        // do not walk into the fire
+//        goIn(GamePad.None, 75)
+//        // if link gets pushed through the stair, then it triggers complete
+//        goToOrMapChanges(to, to) // that should be passable now
 
-        // execute burn
-        plan.add(UseItem())
-        // do not walk into the fire
-        goIn(GamePad.None, 75)
-        // if link gets pushed through the stair, then it triggers complete
-        goToOrMapChanges(to, to) // that should be passable now
+        val directionExit: Direction = mapCell(lastMapLoc).exits.keys.firstNotNullOf {
+            if (mapCell(lastMapLoc).exits[it]?.isNotEmpty() == true) it else null
+        }
+        val mod = directionExit.mapLocModifier()
+        val exitLoc = mod(lastMapLoc)
+        plan.add(makePositionBurn(burnFrom, opposite.toGamePad(), to, exitLoc))
 
-        goIn(opposite.toGamePad(), 16)
+//        goIn(opposite.toGamePad(), 16)
         goGetItem(itemLoc)
         return this
     }
 
-    class PushDownGet(to: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, position: Boolean = false) {
-    // until map changes or time runs out
-    val seq = OrderedActionSequence(
-        listOf(
-            InsideNavAbout(to.upOneGrid.justRightEnd, about = 2),
-            InsideNavAbout(to.upOneGrid, about = 2),
-            GoIn(20, GamePad.MoveDown),
-            GoIn(75,GamePad.None),
-            InsideNavAbout(to, about = 2),
-//            GoGetItem(itemLoc)
-        ), restartWhenDone = false)
-    }
+    private fun makePositionBurn(burnFrom: FramePoint, direction: GamePad, to: FramePoint, exitLoc: MapLoc, retry: Boolean = true): Action =
+        OrderedActionSequence(listOf(
+            InsideNav(burnFrom, tag = "burn position"),
+            GoIn(MapConstants.fourthGrid, direction, desiredDirection = direction.toDirection(), reset = true),
+            GoIn(2, GamePad.B, reset = true),
+            GoIn(75, GamePad.None, reset = true),
+            if (retry) {
+                TimeoutThen(
+                    action = CompleteIfMapChanges(InsideNav(to, makePassable = to, ignoreProjectiles = false, tag = "go in")),
+                    contingency = exitReturnAction(burnFrom, direction, to, exitLoc)
+                )
+            } else {
+                CompleteIfMapChanges(
+                    Timeout(
+                        action = InsideNav(to, makePassable = to, ignoreProjectiles = false, tag = "go in"),
+                    )
+                )
+            },
+        ), restartWhenDone = true, shouldComplete = true, tag = "burn") // fine if this restarts, it will end once user exits
 
-    // run this sequence until map changes or timeout
-    class SequenceRunner(untilMapChanged: Boolean = true, timeoutMax: Int? = 600,
-        sequence: OrderedActionSequence) {
-
-    }
+    private fun exitReturnAction(burnFrom: FramePoint, direction: GamePad, to: FramePoint, exitLoc: MapLoc): Action =
+        OrderedActionSequence(listOf(
+            MoveTo(fromLoc = lastMapLoc, next = mapCell(exitLoc), toLevel = 0),
+            MoveTo(fromLoc = exitLoc, next = mapCell(lastMapLoc), toLevel = 0),
+            makePositionBurn(burnFrom, direction, to, exitLoc, false)
+        ), restartWhenDone = false, shouldComplete = true, tag = "exit then return") // fine if this restarts, it will end once user exits
 
     private fun PlanBuilder.pushDownGetItem(to: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, position: Boolean = false):
             PlanBuilder {
@@ -913,32 +926,6 @@ class PlanBuilder(
         } else {
             +makeStatuePush(statue = to, itemLoc = itemLoc)
         }
-        return this
-    }
-
-    private fun pushDownGetItemo(to: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, position: Boolean = false):
-            PlanBuilder {
-        if (position) {
-            goTo(to.upOneGrid.justRightEnd)
-        }
-        val pushSpot = to.upOneGrid
-        // doesn't work, need to use push spot
-        goTo(pushSpot)
-        // maybe just keep trying to get to a location in center of the push
-        // needed to make this much lower for the pushing of magic sword
-        goIn(GamePad.MoveDown, 20)
-        // wait for it to move
-        goIn(GamePad.None, 75)
-
-        goToOrMapChanges(to)
-
-        // this means link could escape from the map
-        // do a few random movements in case link narrowly missed the entrance
-//        repeat(10) {
-//            goIn(GamePad.randomDirection(), 1)
-//        }
-
-        goGetItem(itemLoc)
         return this
     }
 
