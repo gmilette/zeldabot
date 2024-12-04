@@ -767,7 +767,7 @@ class PlanBuilder(
     }
 
     private fun goInGetCenterItem(to: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, showLetter: Boolean = false): PlanBuilder {
-        goTo(to)
+        goTo(to, makePassable = to)
         // move in the door
         goInConsume(GamePad.MoveUp, 5)
         if (showLetter) {

@@ -76,6 +76,10 @@ class StateManipulator(
         api.writeCPU(Addresses.hasLetter, 1)
     }
 
+    fun setLetterShownToWoman() {
+        api.writeCPU(Addresses.hasLetter, 2)
+    }
+
     fun setArrow() {
         api.writeCPU(Addresses.hasBow, 1)
         // silver arrow of course, let's be luxurious
@@ -122,7 +126,7 @@ class StateManipulator(
     fun setPotion(add: Boolean) {
         // if you have potion you have letter too
         if (add) {
-            setLetter()
+            setLetterShownToWoman()
         }
         // set to both potions
         api.writeCPU(Addresses.hasPotion, if (add) 2 else 0)

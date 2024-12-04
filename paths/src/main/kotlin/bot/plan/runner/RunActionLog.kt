@@ -13,6 +13,7 @@ import util.d
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.abs
 import kotlin.math.exp
 
 class RunActionLog(private val fileNameRoot: String, private val experiment: Experiment) {
@@ -27,6 +28,8 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
     var totalDamage = 0.0
     var stepHits = 0
     var stepDamage = 0.0
+    var stepHeal = 0.0
+    var totalHeal = 0.0
     val bombsUsed = DataCount()
 
     private val dataCounts = listOf(bombsUsed)
@@ -59,7 +62,8 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         val bombsUsed: Int,
         val numFrames: Int = 0,
         val hits: Int = 0,
-        val damage: Double = 0.0
+        val damage: Double = 0.0,
+        val heal: Double = 0.0
     )
 
     val completedStep = mutableListOf<StepCompleted>()
@@ -73,17 +77,17 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         setHearts(state)
         setBombs(state)
     }
-    
+
     private fun setHearts(state: MapLocationState) {
         // always decreases, but isn't always exactly accurate for some reason
         val currentHeart = state.frameState.inventory.heartCalc.lifeInHearts()
         val previousHeart = state.previousHeart
-        d { " previous heart $previousHeart current heart $currentHeart"}
+        d { " previous heart $previousHeart current heart $currentHeart" }
         // should just check if
         val currentDamage = state.frameState.damageNumber
         val previousDamage = state.previousDamageNumber
-
-        if (previousDamage > 0 && (previousDamage > currentDamage)) {
+        val damage = previousHeart - currentHeart
+        if (damage != 0.0) {
             val WRITE_HEART = false
             if (WRITE_HEART) {
                 val csvWriter2 = CsvWriter()
@@ -99,11 +103,15 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
                     )
                 }
             }
-            totalHits++
-            val damage = previousHeart - currentHeart
-            totalDamage += damage
-            stepHits++
-            stepDamage += damage
+            if (damage > 0) {
+                totalHits++
+                totalDamage += damage
+                stepHits++
+                stepDamage += damage
+            } else {
+                stepHeal += -damage
+                totalHeal += -damage
+            }
         }
     }
     
@@ -124,10 +132,10 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         if (SAVE) {
             val csvWriter2 = CsvWriter()
             csvWriter2.open(outputFile, false) {
-                writeRow("index", "level", "mapLoc", "name", "time", "totalTime", "numFrames", "action", "bombsUsed", "hits", "damage")
+                writeRow("index", "level", "mapLoc", "name", "time", "totalTime", "numFrames", "action", "bombsUsed", "hits", "damage", "heal")
                 completedStep.forEachIndexed { index, stepCompleted ->
                     stepCompleted.apply {
-                        writeRow(index, level, mapLoc, name, time, totalTime, numFrames, action, bombsUsed, hits, damage)
+                        writeRow(index, level, mapLoc, name, time, totalTime, numFrames, action, bombsUsed, hits, damage, heal)
                     }
                 }
             }
@@ -144,7 +152,7 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         val percentDone = masterPlan.percentDoneInt
         val finalMapLoc = state.currentMapCell.mapLoc
         writeFinalHeader()
-        val stepCompleted = calculateStep(fileNameRoot, state, totalFrames, totalHits, totalDamage)
+        val stepCompleted = calculateStep(fileNameRoot, state, totalFrames, totalHits, totalDamage, totalHeal)
         val csvWriter2 = CsvWriter()
         csvWriter2.open(outputFileAll, true) {
             writeRow(
@@ -155,6 +163,7 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
                 totalFrames,
                 totalHits,
                 totalDamage,
+                totalHeal,
                 bombsUsed.total,
                 state.frameState.inventory.numRupees,
                 state.frameState.gameMode,
@@ -183,7 +192,7 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         if (!File(outputFileAll).exists()) {
             csvWriter2.open(outputFileAll, true) {
                 writeRow("date", "action", "file", "totalTime", "totalFrames",
-                    "totalHits", "totalDamage", "bombsUsed", "rupees",
+                    "totalHits", "totalDamage", "totalHeal", "bombsUsed", "rupees",
                     "gamemode", "percent", "mapLoc", "result",
                     "sword", "ring", "hearts", "bombs",
                     "boom", "shield")
@@ -194,11 +203,12 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
     fun advance(action: Action, state: MapLocationState) {
         d { "*** advance time" }
         logCompletedStep()
-        completedStep.add(calculateStep(action.name, state, framesForStep, stepHits, stepDamage))
+        completedStep.add(calculateStep(action.name, state, framesForStep, stepHits, stepDamage, stepHeal))
         startedStep = System.currentTimeMillis()
         framesForStep = 0
         stepDamage = 0.0
         stepHits = 0
+        stepHeal = 0.0
         for (dataCount in dataCounts) {
             dataCount.actionDone()
         }
@@ -215,7 +225,8 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         state: MapLocationState,
         frameCt: Int,
         hits: Int,
-        damage: Double
+        damage: Double,
+        heal: Double
     ): StepCompleted {
         val time = (System.currentTimeMillis() - startedStep) / 1000
         val totalTime = (System.currentTimeMillis() - started) / 1000
@@ -231,7 +242,8 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
             bombsUsed.perStep,
             frameCt,
             hits = hits,
-            damage = damage
+            damage = damage,
+            heal = heal
         )
     }
 

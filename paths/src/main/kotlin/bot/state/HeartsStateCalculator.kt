@@ -9,6 +9,8 @@ import util.d
  * I also want to know when lint has taken damage and how much
  */
 class HeartsStateCalculator(private val inventory: Inventory) {
+    fun actualHearts(): Double =
+        inventory.heartCalc.heartContainers() - inventory.heartCalc.lessHearts()
     fun downToOne() = lifeInHearts() <= 1.0f
 
     fun calc() {
@@ -55,7 +57,8 @@ class HeartsStateCalculator(private val inventory: Inventory) {
     }
 
     fun lifeInHearts(damage: Double = damageInHearts()): Double =
-        heartContainers().toDouble() - damage
+        actualHearts()
+//        heartContainers().toDouble() - damage
 
     private fun damageDecimal(): Double {
         val half = inventory.damage

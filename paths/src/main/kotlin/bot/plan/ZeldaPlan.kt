@@ -503,16 +503,16 @@ object ZeldaPlan {
 
     private fun PlanBuilder.level5sequence(endLevel2BoomerangPickup: Boolean = true) {
         phase("go to level 5")
+        5 using level5
+
         startHereAt(raftLadderSetup.copy(
-            hearts = 14,
+            hearts = 13,
             ring = ZeldaItem.BlueRing,
             sword = ZeldaItem.WhiteSword,
             potion = true,
             candle = true,
             arrowAndBow = true,
         ))
-        5 using level5
-
         phase("gear for level 6")
         // i think this is not needed,  maybe it's after level5?
 //            routeTo(83) // position so we don't go through the 100 secret forest and get stuck
@@ -1084,6 +1084,7 @@ private val level6: PlanBuilder.() -> Unit
         seg("kill and push to continue")
         goIn(GamePad.MoveUp, 6.grid, monitor = false) // custom action avoid traps, just walk straight
         upm
+        switchToBoomerang
         killLongWait
         pushActionThenGoUp(InLocations.Push.moveLeftOfTwo)
         // don't need thisP

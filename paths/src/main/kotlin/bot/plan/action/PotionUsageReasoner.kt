@@ -110,6 +110,7 @@ object PotionUsageReasoner {
     fun shouldUsePotion(state: FrameState): Boolean {
         val damage = state.inventory.heartCalc.damageInHearts()
         val heart = state.inventory.heartCalc.lessHearts()
+
         val almostDead = (state.inventory.heartCalc.heartContainers() - heart) <= USE_POTION_HEART_LIMIT
         //val almostDead by lazy { state.inventory.heartCalc.lifeInHearts() <= 8.25f }
         val full by lazy { state.inventory.heartCalc.full(state) }
