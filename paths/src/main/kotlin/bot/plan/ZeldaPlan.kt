@@ -505,14 +505,6 @@ object ZeldaPlan {
         phase("go to level 5")
         5 using level5
 
-        startHereAt(raftLadderSetup.copy(
-            hearts = 13,
-            ring = ZeldaItem.BlueRing,
-            sword = ZeldaItem.WhiteSword,
-            potion = true,
-            candle = true,
-            arrowAndBow = true,
-        ))
         phase("gear for level 6")
         // i think this is not needed,  maybe it's after level5?
 //            routeTo(83) // position so we don't go through the 100 secret forest and get stuck
@@ -537,9 +529,22 @@ object ZeldaPlan {
 //            routeTo(78-16)
 //            obj(Dest.Secrets.level2secret10)
         // grab level2 boomerang
+        startHereAt(raftLadderSetup.copy(
+            hearts = 15,
+            ring = ZeldaItem.BlueRing,
+            sword = ZeldaItem.MagicSword,
+            potion = true,
+            candle = true,
+            arrowAndBow = true,
+            magicKey = true,
+            whistle = true,
+            bait = true
+        )
+        )
+
         if (endLevel2BoomerangPickup) {
             2 using levelPlan2Boomerang
-        }
+        } //7.5, 8
         seg("and now level 8")
         // make sure approach from left
         // rather than right
@@ -553,18 +558,8 @@ object ZeldaPlan {
         enoughForBait
         obj(Dest.Shop.blueRing, itemLoc = Dest.Shop.ItemLocs.bait, position = true)
         greenPotion()
+        obj(Dest.Fairy.brownForest)
         7 using level7
-        startHereAt(raftLadderSetup.copy(
-            hearts = 15,
-            ring = ZeldaItem.BlueRing,
-            sword = ZeldaItem.MagicSword,
-            potion = true,
-            candle = true,
-            arrowAndBow = true,
-            magicKey = true,
-            whistle = true
-        )
-        )
         greenPotion()
         right
         right
@@ -870,9 +865,11 @@ object ZeldaPlan {
             seg("Go to exit")
             down
             seg("move out")
+            goTo(FramePoint(7.grid + MapConstants.halfGrid, 8.grid))
+            goInConsume(GamePad.MoveDown,MapConstants.threeGrid)
             // try inside nav instead
 //            downTo(60)
-            goInConsume(GamePad.MoveDown,82)
+//            goInConsume(GamePad.MoveDown,90)
             startAt(60)
         }
     }

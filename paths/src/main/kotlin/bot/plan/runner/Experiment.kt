@@ -20,6 +20,7 @@ data class Experiment(
     val candle: Boolean = false,
     val ladderAndRaft: Boolean = false,
     val whistle: Boolean = false,
+    val bait: Boolean = false,
     val magicKey: Boolean = false,
     val addEquipment: Boolean = false,
     val startAt: Int = 52,
