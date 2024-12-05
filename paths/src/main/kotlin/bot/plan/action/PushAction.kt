@@ -97,7 +97,7 @@ fun makePush(push: InLocations.Push = InLocations.Push.diamondLeft,
         CompleteIfMapChanges(
             PushAction(push, InsideNav(stairs.point,
                 push.ignoreProjectiles,
-                makePassable = if (push == InLocations.Push.right) null else push.point,
+                makePassable = if (push == InLocations.Push.right) push.point else push.point, // was null if right..
                 highCost = push.highCost
                 ))),
         CompleteIfMapChanges(OrderedActionSequence(listOf(

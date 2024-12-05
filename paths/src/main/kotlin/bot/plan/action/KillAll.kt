@@ -494,6 +494,18 @@ class KillInCenter : Action {
             positionShootActions.add(GoIn(10, GamePad.MoveUp, true))
             positionShootActions.add(GoIn(3, GamePad.A, true))
             positionShootActions.add(GoIn(3, GamePad.None, true))
+            positionShootActions.add(GoIn(3, GamePad.A, true))
+            positionShootActions.add(GoIn(3, GamePad.None, true))
+            positionShootActions.add(GoIn(10, GamePad.MoveUp, true))
+            positionShootActions.add(GoIn(3, GamePad.A, true))
+            positionShootActions.add(GoIn(3, GamePad.None, true))
+            positionShootActions.add(GoIn(3, GamePad.A, true))
+            positionShootActions.add(GoIn(10, GamePad.MoveUp, true))
+            positionShootActions.add(GoIn(3, GamePad.None, true))
+            positionShootActions.add(GoIn(3, GamePad.B, true))
+            positionShootActions.add(GoIn(3, GamePad.None, true))
+            positionShootActions.add(GoIn(3, GamePad.A, true))
+            positionShootActions.add(GoIn(3, GamePad.None, true))
         }
     }
 

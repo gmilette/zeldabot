@@ -1,11 +1,8 @@
 package bot.plan
 
 import bot.plan.action.PushDirection
-import bot.state.FramePoint
-import bot.state.MapLoc
-import bot.state.down
+import bot.state.*
 import bot.state.map.grid
-import bot.state.upOneGrid
 
 
 object InLocations {
@@ -68,6 +65,9 @@ object InLocations {
             // maybe push only from right
             PushDirection(horizontal = true, vertical = false),
             position = FramePoint(3.grid, 5.grid),
+            highCost = listOf(FramePoint(12.grid, 5.grid).rightOneGrid,
+                FramePoint(12.grid, 5.grid).rightOneGrid.upOneGrid,
+                FramePoint(12.grid, 5.grid).rightOneGrid.upOneGrid.upOneGrid),
             ignoreProjectiles = true
         ),
         none(

@@ -231,6 +231,7 @@ class PlanBuilder(
 //            goTo(FramePoint(7.grid, 7.grid)) // second to bottom
             goTo(FramePoint(8.grid, 8.grid)) // bottom center
             // shoot with arrows?
+            switchToArrow()
             add(lastMapLoc, KillInCenter())
             return this
         }
