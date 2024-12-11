@@ -91,9 +91,10 @@ class SwitchToItemConditionally(private val inventoryPosition: () -> Int = { Inv
         SwitchToItem(inventoryPosition),
         GoIn(100, GamePad.None),
         GoIn(2, GamePad.Start),
-        GoIn(10, GamePad.None),
+        GoIn(20, GamePad.None), // was 10
         OnceAction(WaitUntilItemMenuClosed()),
-        GoIn(5, GamePad.None),
+        // sometimes is just skip the killall
+        GoIn(25, GamePad.None),
     )
 
     private val positionShoot = OrderedActionSequence(switchSequence, restartWhenDone = false)
@@ -205,16 +206,19 @@ class OnceAction(action: Action) : WrappedAction(action) {
 
     override fun complete(state: MapLocationState): Boolean {
         completed = completed || wrapped.complete(state)
-        d { "OnceAction complete $completed"}
+        d { "OnceAction complete ${wrapped.name} $completed"}
         return completed
     }
 }
 
 class WaitUntilItemMenuClosed : Action {
     override fun complete(state: MapLocationState): Boolean {
-        return state.frameState.inventory.isItemMenuOpenOrOpening.also {
+        // waiting for it to go to zero i think
+        return !state.frameState.inventory.isItemMenuOpenOrOpening.also {
             if (!it) {
-                d { " waiting item menu to close "}
+                d { " waiting item menu to close current itemMenu = ${state.frameState.inventory.itemMenu} ${state.framesOnScreen}"}
+            } else {
+                d { " it is closed! "}
             }
         }
     }

@@ -103,7 +103,7 @@ class PlanBuilder(
             // have to wait for the triforce animation
             // useless
 //        goIn(GamePad.None, 500)
-            if (consume) {
+            if (consume && level != 7) {
                 goInConsume(exitDirection.toGamePad(), 20)
             }
             recall

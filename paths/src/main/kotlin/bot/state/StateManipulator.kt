@@ -123,6 +123,12 @@ class StateManipulator(
         api.writeCPU(Addresses.numKeys, num)
     }
 
+    fun setTriforceAll() {
+        // 15 = 1111 (4 pieces)
+        // 31 = 11111 (5 pieces)
+        api.writeCPU(Addresses.triforce, 255)
+    }
+
     fun setPotion(add: Boolean) {
         // if you have potion you have letter too
         if (add) {

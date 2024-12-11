@@ -538,7 +538,8 @@ object ZeldaPlan {
             arrowAndBow = true,
             magicKey = true,
             whistle = true,
-            bait = true
+            bait = true,
+            boomerang = ZeldaItem.MagicalBoomerang
         )
         )
 
@@ -967,6 +968,8 @@ private val level4: PlanBuilder.() -> Unit
         bombRightExactly
         //skip key that is up
         bombRight
+        // give space or boomerang?
+        goIn(GamePad.MoveRight, 10)
         switchToBoomerang
         kill
         seg("push near")
@@ -1351,7 +1354,8 @@ private fun PlanBuilder.levelPlan9PhaseSilverArrow() {
         wait(100)
         kill
         "set the arrow".seg()
-        goTo(FramePoint(13.grid, 5.grid), ignoreProjectiles = true) // other side
+        // dont need it I think
+//        goTo(FramePoint(13.grid, 5.grid), ignoreProjectiles = true) // other side
         +makeStairsItemPush(
             startAt = LevelSpecBuilder.Companion.Nine.silverArrow,
             makeUp(lastMapLoc)

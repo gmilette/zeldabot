@@ -70,7 +70,9 @@ class PlanRunner(private val makePlan: PlanMaker,
                 keys = 4,
                 bombs = 4,
                 rupees = 250,
-                potion = true
+                potion = true,
+                boomerang = ZeldaItem.MagicalBoomerang,
+                arrowAndBow = true
             )
             runLoc(mapLoc, level)
         } else {
@@ -244,6 +246,7 @@ class PlanRunner(private val makePlan: PlanMaker,
         if (ex.shield) {
             manipulator.setMagicShield()
         }
+        manipulator.setTriforceAll()
         if (ex.wand) {
             manipulator.setWandNoBook()
         }

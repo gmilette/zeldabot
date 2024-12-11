@@ -57,6 +57,7 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         val mapLoc: MapLoc,
         val name: String,
         val action: String,
+        val hearts: Double,
         val time: Long,
         val totalTime: Long,
         val bombsUsed: Int,
@@ -132,10 +133,10 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         if (SAVE) {
             val csvWriter2 = CsvWriter()
             csvWriter2.open(outputFile, false) {
-                writeRow("index", "level", "mapLoc", "name", "time", "totalTime", "numFrames", "action", "bombsUsed", "hits", "damage", "heal")
+                writeRow("index", "level", "mapLoc", "name", "time", "totalTime", "numFrames", "action", "hearts", "bombsUsed", "hits", "damage", "heal")
                 completedStep.forEachIndexed { index, stepCompleted ->
                     stepCompleted.apply {
-                        writeRow(index, level, mapLoc, name, time, totalTime, numFrames, action, bombsUsed, hits, damage, heal)
+                        writeRow(index, level, mapLoc, name, time, totalTime, numFrames, action, hearts, bombsUsed, hits, damage, heal)
                     }
                 }
             }
@@ -237,6 +238,7 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
             cellName.substring(0, minOf(8, cellName.length)),
             //.replace(potionOrReplace, "").
             name.replace("\"", "").replace(potionReplace, "").trim(),
+            state.frameState.inventory.heartCalc.lifeInHearts(),
             time,
             totalTime,
             bombsUsed.perStep,
