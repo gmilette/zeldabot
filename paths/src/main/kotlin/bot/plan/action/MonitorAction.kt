@@ -151,6 +151,37 @@ class MoveBuffer(val size: Int = 2) {
 }
 
 class PrevBuffer<T>(val size: Int = 2) {
+    val buffer = ArrayDeque<T>(size) // More efficient than MutableList for this use case
+
+    fun clear() {
+        buffer.clear()
+    }
+
+    val isFull: Boolean
+        get() = buffer.size == size
+
+    fun add(pt: T) {
+        if (buffer.size >= size) {
+            buffer.removeFirst()
+        }
+        buffer.addLast(pt)
+    }
+
+    fun allSame(): Boolean =
+        buffer.size == size && buffer.toSet().size == 1
+
+    fun compare(other: MoveBuffer): Boolean {
+        if (buffer.size != other.buffer.size) return false
+        if (buffer.isEmpty()) return true
+
+        // Check if all elements are not the same and sequences match
+        return buffer.toSet().size > 1 &&
+               buffer.zip(other.buffer).all { (a, b) -> a == b }
+    }
+}
+
+
+class PrevBufferA<T>(val size: Int = 2) {
     var buffer = mutableListOf<T>()
 
     fun clear() {
@@ -226,24 +257,6 @@ private class CycleDetector(val cyclesLimit: Int = 20) {
                     buffer.reset()
                 }
             }
-        }
-    }
-}
-
-/**
- * when link has done the last same set of 3-4 moves X times
- * keep history of moves, iterate looking for a loop
- */
-private class CycleDetectorInList() {
-    val buffer = MoveBuffer(100)
-
-    fun save(pt: FramePoint) {
-        buffer.add(pt)
-        buffer.buffer.forEachIndexed { index, framePoint ->
-            buffer.buffer[index % 2] == framePoint
-            buffer.buffer[index % 3] == framePoint
-            buffer.buffer[index % 4] == framePoint
-            buffer.buffer[index % 5] == framePoint
         }
     }
 }

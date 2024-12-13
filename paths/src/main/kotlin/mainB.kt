@@ -189,6 +189,13 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
                 },
                 contentDescription = ""
             )
+            Image(
+                painter = painterResource("icon_candle.png"),
+                modifier = Modifier.padding(horizontal = 8.dp).size(40.dp).background(Color.LightGray).clickable {
+                    model.addPotion()
+                },
+                contentDescription = ""
+            )
         }
 
         Row(
@@ -497,6 +504,10 @@ class ZeldaModel : ZeldaBot.ZeldaMonitor {
 
     fun addCandle() {
         ZeldaBot.addCandle = true
+    }
+
+    fun addPotion() {
+        ZeldaBot.addPotion = true
     }
 
     fun ladder(act: Boolean) {

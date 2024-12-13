@@ -214,6 +214,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         var addBomb = false
         var addRupee = false
         var addCandle = false
+        var addPotion = false
+        var addBoomerang = false
         var unstick = 0
         var forcedDirection = GamePad.None
         var addEquipment: Boolean = false
@@ -275,6 +277,14 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             if (addCandle) {
                 stateManipulator.setRedCandle()
                 addCandle = false
+            }
+            if (addBoomerang) {
+                stateManipulator.setBoomerang(ZeldaItem.MagicalBoomerang)
+                addBoomerang = false
+            }
+            if (addPotion) {
+                stateManipulator.setPotion(true)
+                addPotion = false
             }
             if (invincible || maxLife) {
 //                stateManipulator.setRing(ZeldaItem.RedRing)
