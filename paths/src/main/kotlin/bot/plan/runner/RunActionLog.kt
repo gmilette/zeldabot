@@ -55,6 +55,7 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
     data class StepCompleted(
         val level: Int,
         val mapLoc: MapLoc,
+        val seg: String,
         val name: String,
         val action: String,
         val hearts: Double,
@@ -153,7 +154,7 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         val percentDone = masterPlan.percentDoneInt
         val finalMapLoc = state.currentMapCell.mapLoc
         writeFinalHeader()
-        val stepCompleted = calculateStep(fileNameRoot, state, totalFrames, totalHits, totalDamage, totalHeal)
+        val stepCompleted = calculateStep(fileNameRoot, masterPlan.toStringCurrentSeg(), state, totalFrames, totalHits, totalDamage, totalHeal)
         val csvWriter2 = CsvWriter()
         csvWriter2.open(outputFileAll, true) {
             writeRow(
@@ -201,10 +202,10 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         }
     }
 
-    fun advance(action: Action, state: MapLocationState) {
+    fun advance(action: Action, state: MapLocationState, masterPlan: MasterPlan) {
         d { "*** advance time" }
         logCompletedStep()
-        completedStep.add(calculateStep(action.name, state, framesForStep, stepHits, stepDamage, stepHeal))
+        completedStep.add(calculateStep(action.name, masterPlan.toStringCurrentSeg(), state, framesForStep, stepHits, stepDamage, stepHeal))
         startedStep = System.currentTimeMillis()
         framesForStep = 0
         stepDamage = 0.0
@@ -223,6 +224,7 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
 
     private fun calculateStep(
         name: String,
+        seg: String,
         state: MapLocationState,
         frameCt: Int,
         hits: Int,
@@ -235,7 +237,8 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         return StepCompleted(
             state.frameState.level,
             state.frameState.mapLoc,
-            cellName.substring(0, minOf(8, cellName.length)),
+            seg.take(8),
+            cellName.take(8),
             //.replace(potionOrReplace, "").
             name.replace("\"", "").replace(potionReplace, "").trim(),
             state.frameState.inventory.heartCalc.lifeInHearts(),

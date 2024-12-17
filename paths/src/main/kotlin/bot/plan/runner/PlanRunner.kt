@@ -286,7 +286,7 @@ class PlanRunner(private val makePlan: PlanMaker,
         runLog.frameCompleted(state)
 
         if (action.complete(state) || state.frameState.isDead) {
-            runLog.advance(action, state)
+            runLog.advance(action, state, masterPlan)
             advance(state)
         }
 

@@ -899,6 +899,7 @@ class PlanBuilder(
             GoIn(MapConstants.fourthGrid, direction, desiredDirection = direction.toDirection(), reset = true),
             GoIn(2, GamePad.B, reset = true),
             GoIn(75, GamePad.None, reset = true),
+            WaitUntilFireIsGone(),
             if (retry) {
                 TimeoutThen(
                     action = CompleteIfMapChanges(InsideNav(to, makePassable = to, ignoreProjectiles = false, tag = "go in")),

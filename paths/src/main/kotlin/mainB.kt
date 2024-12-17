@@ -18,7 +18,6 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
 import bot.ZeldaBot
-import bot.plan.action.AttackActionDecider
 import bot.plan.action.RouteTo
 import bot.plan.runner.PlanRunner
 import bot.state.*
@@ -186,13 +185,6 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
                 painter = painterResource("icon_candle.png"),
                 modifier = Modifier.padding(horizontal = 8.dp).size(40.dp).background(Color.LightGray).clickable {
                     model.addCandle()
-                },
-                contentDescription = ""
-            )
-            Image(
-                painter = painterResource("icon_candle.png"),
-                modifier = Modifier.padding(horizontal = 8.dp).size(40.dp).background(Color.LightGray).clickable {
-                    model.addPotion()
                 },
                 contentDescription = ""
             )
@@ -504,10 +496,6 @@ class ZeldaModel : ZeldaBot.ZeldaMonitor {
 
     fun addCandle() {
         ZeldaBot.addCandle = true
-    }
-
-    fun addPotion() {
-        ZeldaBot.addPotion = true
     }
 
     fun ladder(act: Boolean) {

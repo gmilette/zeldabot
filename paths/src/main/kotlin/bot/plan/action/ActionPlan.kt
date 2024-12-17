@@ -471,6 +471,15 @@ class WaitUntilCloudIsGone : Action {
     }
 }
 
+class WaitUntilFireIsGone : Action {
+    override val escapeActionEnabled: Boolean
+        get() = false
+
+    override fun complete(state: MapLocationState): Boolean {
+        return (state.frameState.enemiesRaw.none { it.tile == fire })
+    }
+}
+
 class GoInConsume(private val moves: Int = 5, private val dir: GamePad = GamePad.MoveUp) :
     Action {
     private var movements = 0

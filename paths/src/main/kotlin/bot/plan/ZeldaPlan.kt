@@ -1280,6 +1280,7 @@ private fun PlanBuilder.levelPlan9PhaseRedRing() {
         startAt(LevelStartMapLoc.lev(9))
         // really dont want to accidently exit because link can't find way back to the entrance
         goInConsume(GamePad.MoveUp, 30)
+        cheatBombs // for now
         upm
         leftm
         bombUp
