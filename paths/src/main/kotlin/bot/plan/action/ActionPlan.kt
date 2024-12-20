@@ -436,8 +436,16 @@ fun lootAndMove(moveTo: Action) = DecisionAction(GetLoot(), moveTo) { state ->
 //    neededReachableLoot(state).isNotEmpty()
 //}
 fun killAndMove(moveTo: MoveTo) = DecisionAction(Optional(KillAll()), moveTo) { state ->
-    neededReachableLoot(state).isNotEmpty()
+    state.hasEnemies
 }
+
+fun killThenMove(moveTo: MoveTo) = CompleteIfMapChanges(
+    OrderedActionSequence(
+        listOf(
+            KillAll(), killAndMove(moveTo)          // this allows link to go back to attacking if needed
+        ), restartWhenDone = true
+    )
+)
 
 fun opportunityKillOrMove(next: MapCell, level: Int): Action =
     // if it is close kill all will go kill it
@@ -774,14 +782,14 @@ private fun halfInsidePassable(state: MapLocationState, pt: FramePoint, small: B
     return with(state.currentMapCell) {
         val midPassable = passable.get(pt.downHalf) && passable.get(pt.downHalf.justRightHalf)
         val topPassable = passable.get(pt) && passable.get(pt.justRightHalf)
-        d { " mid pass: $pt mid=$midPassable top=$topPassable small=${small}"}
+//        d { " mid pass: $pt mid=$midPassable top=$topPassable small=${small}"}
         if (small) {
             // whole thing needs to be showing
             topPassable && midPassable
         } else {
             // have of it needs to be showing
             val bottomPassable = passable.get(pt.downOneGrid) && passable.get(pt.downOneGrid.justRightHalf)
-            d { "         bottom=$bottomPassable"}
+//            d { "         bottom=$bottomPassable"}
             (topPassable && midPassable && bottomPassable) || bottomPassable && midPassable
         }
     }

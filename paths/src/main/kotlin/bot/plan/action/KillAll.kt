@@ -8,6 +8,7 @@ import bot.state.map.toGamePad
 import bot.state.oam.MonsterColor
 import bot.state.oam.Monsters
 import bot.state.oam.circleMonsterCenters
+import bot.state.oam.circleMonsterOutside
 import util.LogFile
 import util.d
 import kotlin.random.Random
@@ -189,26 +190,23 @@ class KillAll(
 
             var attackOnlySpecified = false
 
+            // specially handling for level 8 spinning center guy
+            val targetOnlyUse =
+                if (ignoreUntilOnly.isNotEmpty() && aliveEnemies.any { !ignoreUntilOnly.contains(it.tile) }) {
+                    d { " ignore only $ignoreUntilOnly" }
+                    circleMonsterOutside.toList()
+                } else {
+                    targetOnly
+                }
+
             // NEW
 //            aliveEnemies = aliveEnemies.filter { !it.damaged }
             // need special handling, cant route into center
-            if (targetOnly.isNotEmpty()) {
-                d { " target only $targetOnly" }
-                aliveEnemies = aliveEnemies.filter { targetOnly.contains(it.tile) }.toMutableList()
+            if (targetOnlyUse.isNotEmpty()) {
+                d { " target only $targetOnlyUse" }
+                aliveEnemies = aliveEnemies.filter { targetOnlyUse.contains(it.tile) }.toMutableList()
                 // test on the dragon i think
                 attackOnlySpecified = true
-            }
-
-            // specially handling for level 8 spinning center guy
-            if (ignoreUntilOnly.isNotEmpty()) {
-                d { " ignore only $ignoreUntilOnly"}
-                if (aliveEnemies.any { it.tile !in circleMonsterCenters }) {
-                    d { " ignore only have other monsters remove center"}
-                    // disable until this works
-///                    aliveEnemies.removeIf { it.tile in circleMonsterCenters }
-                } else {
-                    d { " ignore only its just the center"}
-                }
             }
 
             if (state.frameState.isOverworld &&
@@ -295,7 +293,7 @@ class KillAll(
                                 finishWithinStrikingRange = true
                             ),
                         ),
-                        attackableSpec = if (attackOnlySpecified) aliveEnemies.map { it.point } else emptyList()
+                        attackableSpec = if (attackOnlySpecified) aliveEnemies else emptyList()
                     ).let {
                         if (numPressB > 0) {
                             numPressB--

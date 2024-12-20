@@ -127,12 +127,13 @@ class RouteTo(val params: Param = Param()) {
         to: List<FramePoint>,
         param: RouteParam = RouteParam(),
         // pass in attack targets
-        attackableSpec: List<FramePoint> = emptyList()
+        attackableSpec: List<Agent> = emptyList()
     ): GamePad {
         val canAttack = param.allowAttack && (param.useB || state.frameState.canUseSword)
 
         // attack with wand as if it is a sword
-        val attackWithWand = param.allowAttack && !state.frameState.canUseSword && state.frameState.inventory.selectedItem == Inventory.Selected.wand
+        val attackWithWand =
+            param.allowAttack && !state.frameState.canUseSword && state.frameState.inventory.selectedItem == Inventory.Selected.wand
         val useB = if (attackWithWand) {
             true
         } else {
@@ -149,16 +150,22 @@ class RouteTo(val params: Param = Param()) {
 
         val attackableAgents: List<Agent> = AttackActionDecider.aliveEnemiesCanAttack(state)
         val attackable = attackableSpec.ifEmpty {
-            attackableAgents.map { it.point }
+            attackableAgents
         }
 
         val level = state.frameState.level
         // same with wand? not quite but close
-        val boomerangable: List<FramePoint> = attackableSpec.ifEmpty {
-            (attackableAgents.filter { it.affectedByBoomerang(level) } +
-                    state.loot.filter { it.lootNeeded(state) }  // won't boomerang for useless stuff like keys, compass, etc.
-            ).map { it.point }
+        val specOrAgents: List<Agent> = attackableSpec.ifEmpty {
+            attackableAgents
         }
+        val boomerangable: List<FramePoint> =
+            (specOrAgents.filter { it.affectedByBoomerang(level) } +
+                state.loot.filter { it.lootNeeded(state) }).map { it.point }  // won't boomerang for useless stuff like keys, compass, etc.
+//        val boomerangable: List<FramePoint> = attackableSpec.ifEmpty {
+//            (attackableAgents.filter { it.affectedByBoomerang(level) } +
+//                    state.loot.filter { it.lootNeeded(state) }  // won't boomerang for useless stuff like keys, compass, etc.
+//            ).map { it.point }
+//        }
         for (framePoint in attackableAgents) {
             d { " attackable agent: $framePoint" }
         }
@@ -184,8 +191,8 @@ class RouteTo(val params: Param = Param()) {
 //        val nearLink = Geom.Rectangle(leftCorner, state.link.downOneGrid.rightOneGrid)
         // should only do this for fireball projectiles
         val projectileNear = false // state.projectiles.filter { !state.frameState.isLevel || it.tile !in EnemyGroup.projectilesAttackIfNear }.any { it.point.toRect().intersect(nearLink) }
-        val inRangeOf by lazy { AttackActionDecider.inRangeOf(state, attackable, useB) }
-        val shouldLongAttack by lazy { param.allowRangedAttack && AttackLongActionDecider.shouldShootSword(state, attackable) }
+        val inRangeOf by lazy { AttackActionDecider.inRangeOf(state, attackable.map { it.point } , useB) }
+        val shouldLongAttack by lazy { param.allowRangedAttack && AttackLongActionDecider.shouldShootSword(state, attackable.map { it.point }) }
         val shouldLongBoomerang by lazy { param.allowRangedAttack && boomerangCt <= 0 && AttackLongActionDecider.shouldBoomerang(state, boomerangable) }
         boomerangCt--
 

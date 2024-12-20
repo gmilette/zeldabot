@@ -1,5 +1,6 @@
 package bot.plan
 
+import bot.plan.ZeldaPlan.raftLadderSetup
 import bot.plan.action.*
 import bot.plan.runner.Experiment
 import bot.plan.runner.MasterPlan
@@ -217,7 +218,7 @@ object ZeldaPlan {
         }
     }
 
-    private val raftLadderSetup: Experiment =
+    val raftLadderSetup: Experiment =
         Experiment(
             sword = ZeldaItem.WhiteSword,
             keys = 4,
@@ -529,20 +530,6 @@ object ZeldaPlan {
 //            routeTo(78-16)
 //            obj(Dest.Secrets.level2secret10)
         // grab level2 boomerang
-        startHereAt(raftLadderSetup.copy(
-            hearts = 15,
-            ring = ZeldaItem.BlueRing,
-            sword = ZeldaItem.MagicSword,
-            potion = true,
-            candle = true,
-            arrowAndBow = true,
-            magicKey = true,
-            whistle = true,
-            bait = true,
-            boomerang = ZeldaItem.MagicalBoomerang
-        )
-        )
-
         if (endLevel2BoomerangPickup) {
             2 using levelPlan2Boomerang
         } //7.5, 8
@@ -1409,10 +1396,24 @@ private fun PlanBuilder.levelPlan9PhaseGannon() {
             )
         )
         "doorstep of gannon".seg()
+        startHereAt(
+            raftLadderSetup.copy(
+                hearts = 16,
+                ring = ZeldaItem.BlueRing,
+                sword = ZeldaItem.MagicSword,
+                potion = true,
+                candle = true,
+                magicArrowAndBow = true,
+                magicKey = true,
+                whistle = true,
+                bait = true,
+                boomerang = ZeldaItem.MagicalBoomerang
+            )
+        )
         goInConsume(GamePad.MoveLeft, 10)
-        kill
-//        killCenterMonster
-        up
+//        kill
+        killCenterMonster
+        uptk
         "seg kill gannon".seg()
         goIn(GamePad.None, 100)
         switchToArrow()

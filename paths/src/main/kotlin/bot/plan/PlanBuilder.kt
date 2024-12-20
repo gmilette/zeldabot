@@ -502,6 +502,10 @@ class PlanBuilder(
         get() {
             addK(lastMapLoc.up)
         }
+    val uptk: Unit
+        get() {
+            addTk(lastMapLoc.up)
+        }
     val getTri: Unit
         get() {
 //            goTo(InLocations.Level3.triforce)
@@ -1057,7 +1061,11 @@ class PlanBuilder(
     }
 // kill and loot and move?
     private fun addK(nextLoc: MapLoc) {
-        add(nextLoc, killAndMove(moveTo(nextLoc)))
+        add(nextLoc, killThenMove(moveTo(nextLoc)))
+    }
+
+    private fun addTk(nextLoc: MapLoc) {
+        add(nextLoc, killThenMove(moveTo(nextLoc)))
     }
 
     private fun moveTo(next: Int, allowBlocking: Boolean = true, ignoreProjectiles: Boolean = false): MoveTo =

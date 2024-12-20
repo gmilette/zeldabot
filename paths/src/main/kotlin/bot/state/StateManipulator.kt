@@ -88,6 +88,13 @@ class StateManipulator(
         api.writeCPU(Addresses.hasArrow, 1)
     }
 
+    fun setMagicArrow() {
+        api.writeCPU(Addresses.hasBow, 1)
+        // silver arrow of course, let's be luxurious
+        // let's not
+        api.writeCPU(Addresses.hasArrow, 2) // silver
+    }
+
     fun setMagicKey() {
         api.writeCPU(Addresses.hasMagicKey, 1)
     }

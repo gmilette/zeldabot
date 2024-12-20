@@ -60,7 +60,7 @@ dependencies {
     implementation(files("libs/Nintaco.jar"))
     testImplementation(kotlin("test"))
     implementation("co.touchlab:kermit:2.0.4")
-    testImplementation("io.kotest:kotest-assertions-core-jvm:5.5.0")
+    testImplementation("io.kotest:kotest-assertions-core-jvm:5.6.2")
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
     implementation("com.google.code.gson:gson:2.10.1")
 }

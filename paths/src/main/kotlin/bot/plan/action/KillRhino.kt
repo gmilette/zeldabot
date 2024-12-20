@@ -324,7 +324,7 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
 //                    findNearestSafeIfCurrentlyNotSafe = false
                 ),
                 ),
-            targ?.let { listOf(targ) } ?: emptyList()
+            targ?.let { listOf(targ) }?.map { Agent(point = it,tile = rhinoHead2) } ?: emptyList()
          ).also {
             d {" Rhino action --> $it $waitCt $useB allow=$allowAttack"}
         }

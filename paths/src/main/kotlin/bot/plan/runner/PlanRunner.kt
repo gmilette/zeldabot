@@ -259,6 +259,9 @@ class PlanRunner(private val makePlan: PlanMaker,
         if (ex.arrowAndBow) {
             manipulator.setArrow()
         }
+        if (ex.magicArrowAndBow) {
+            manipulator.setMagicArrow()
+        }
         if (ex.magicKey) {
             manipulator.setMagicKey()
         }
@@ -314,7 +317,8 @@ class PlanRunner(private val makePlan: PlanMaker,
     }
 
     private fun completedAction(state: MapLocationState, action: Action?) {
-        val stateName = "${state.frameState.level}_${state.movedTo}"
+//        val stateName = "${state.frameState.level}_${state.movedTo}"
+        val stateName = "${state.frameState.level}_${state.frameState.mapLoc}"
         val root = DirectoryConstants.states
         val filePath = "mapstate/mapstate_${stateName}.save"
         // this path is for nintaco
@@ -324,7 +328,7 @@ class PlanRunner(private val makePlan: PlanMaker,
         if (File(stateFile).exists()) {
             d { "Already saved $stateFileName" }
         } else {
-            d { "Saved a state" }
+            d { "Saved a state to $stateFileName" }
             api.saveState(stateFileName)
             api.saveScreenshot()
         }

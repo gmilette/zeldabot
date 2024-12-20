@@ -17,6 +17,7 @@ data class Experiment(
     val boomerang: ZeldaItem = ZeldaItem.None,
     val rupees: Int = 0,
     val arrowAndBow: Boolean = false,
+    val magicArrowAndBow: Boolean = false,
     val candle: Boolean = false,
     val ladderAndRaft: Boolean = false,
     val whistle: Boolean = false,

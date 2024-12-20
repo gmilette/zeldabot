@@ -225,7 +225,7 @@ object Monsters {
         tile = setOf(0xbe, 0xb6, 0xBA, 0xb4, 0xac, 0xb0, 0xB8, 0xBC))
         .avoidFront()
         .immuneToB().inL()
-    val gel = Monster(name = "babysquixxshy").inL()
+    val gel = Monster(name = "babysqui  shy").inL()
     val gibdo = Monster(name = "mummy",
         tile = setOf(0xa6, 0xa4),
         color = blue
@@ -260,8 +260,9 @@ object Monsters {
     val moldorm = Monster(name = "cirleworm",
         tile = setOf(0x9E, 0xA0),
         color = blueAndRed).immuneToB().inL()
-    val patra = Monster(name = "eyecircleAndRhino",
-        tile = setOf(0xfe, 0xfc, 0xf8, 0xfa),
+    val patra = Monster(name = "circleEnemy",
+        tile = setOf(0xfe, 0xfc, //outside
+            0xf8, 0xfa), // inside
         color = blueAndRedAndGrey
     ).immuneToB().inL()
     val polsVoice = Monster(name = "bunny",
