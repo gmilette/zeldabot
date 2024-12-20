@@ -1328,7 +1328,7 @@ private fun PlanBuilder.levelPlan9PhaseSilverArrow() {
         "past bats".seg()
         leftm  //bats
         "circle monster kill".seg()
-        kill
+        killCenterMonster
         "to in stair".seg()
         addNext(
             32, makeCenterPush(
