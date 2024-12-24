@@ -3,8 +3,17 @@ package util
 import bot.state.FramePoint
 import io.kotest.matchers.shouldBe
 import org.junit.Test
+import kotlin.test.assertTrue
 
 class GeomTest {
+    @Test
+    fun equalsSame() {
+        // test the equals operator for two rectangles
+        assertTrue(Geom.Rectangle(FramePoint(1, 1), FramePoint(5, 5))
+                == Geom.Rectangle(FramePoint(1, 1), FramePoint(5, 5))
+        )
+    }
+
     @Test
     fun ptInside() {
         Geom.Rectangle(FramePoint(1, 1), FramePoint(5, 5)).apply {

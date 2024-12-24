@@ -194,10 +194,13 @@ object Monsters {
     val overworldLevel = setOf(0)
     val levelsWithNotSword = levelsWithWizzrobes + levelsWithBoomerang
 
-    fun damaged(tileAttribute: TileAttribute) =
-        lookup[tileAttribute.tile]?.let {
+    fun damaged(level: Int, tileAttribute: TileAttribute) =
+        lookup(level)[tileAttribute.tile]?.let {
             tileAttribute.color !in it.color
         } ?: false
+//        lookup[tileAttribute.tile]?.let {
+//            tileAttribute.color !in it.color
+//        } ?: false
 
     private fun MutableMap<Int, Monster>.addAll(monsters: List<Monster>): MutableMap<Int, Monster> {
         this.add(*(monsters.toTypedArray()))

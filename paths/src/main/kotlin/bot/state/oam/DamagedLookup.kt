@@ -181,11 +181,11 @@ object DamagedLookup {
 
     }
 
-    fun isDamaged(tileAttribute: TileAttribute, isOverworld: Boolean): Boolean {
+    fun isDamaged(tileAttribute: TileAttribute, isOverworld: Boolean, level: Int): Boolean {
         return if (isOverworld) {
             damagedPairs.contains(tileAttribute)
         } else {
-            Monsters.damaged(tileAttribute)
+            Monsters.damaged(level, tileAttribute)
         }
     }
 }

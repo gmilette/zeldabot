@@ -338,18 +338,27 @@ object AttackActionDecider {
         }
 
         val linkRect = link.toRectPlus(-2) // make bigger to make sure there is contact
+        val linkRectExact = link.toRectPlus(0) // make bigger to make sure there is contact
 
         // i donno, it seems like it isn't good for fighting sword guys
         val checkIntersectWithLink = true
         if (checkIntersectWithLink) {
+            d { " check intersect with link" }
+            val anySameAs = enemiesClose.any { it == linkRectExact || (it.topLeft == linkRectExact.topLeft && it.bottomRight == linkRectExact.bottomRight) }
+            if (anySameAs) {
+                d { " kill the pancake!" }
+                return GamePad.aOrB(useB)
+            }
             // need?
             val intersectWithLink = enemiesClose.firstOrNull { it.intersect(linkRect) }
             if (intersectWithLink != null) {
                 d { " intersects with link $linkRect" }
+                // if link is in a pancake then no swords will intersect
                 if (intersectWithLink.intersect(swords[from] ?: Geom.Rectangle())) {
                     d { " intersects with link's sword. Attack!" }
-                    GamePad.aOrB(useB)
+                    return GamePad.aOrB(useB)
                 } else {
+                    enemiesClose.forEach { d { " enemy close to not evade $it" } }
                     d { " doesnt intersect, evade" }
                     return GamePad.None
                 }

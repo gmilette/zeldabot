@@ -18,6 +18,7 @@ class OamStateReasoner(
     private val api: API,
     private val mapStatsTracker: MapStatsTracker = MapStatsTracker(),
     private val combine: Boolean = true,
+    private val level: Int = 1
 ) {
     private val sprites: List<SpriteData>
     private var spritesUncombined: List<SpriteData> = emptyList()
@@ -59,7 +60,7 @@ class OamStateReasoner(
     // calculate isDamaged here
     private fun SpriteData.toAgent(lookup: DirectionByMemoryLookup? = null): Agent {
         val tileAttribute = tile to attribute
-        val damaged = DamagedLookup.isDamaged(tileAttribute, isOverworld)
+        val damaged = DamagedLookup.isDamaged(tileAttribute, isOverworld, level)
 //        if (damaged) {
 //            d { "DDDD $tile to $attribute is damaged"}
 //            d { "info ${Monsters.lookup[tileAttribute.tile]} "}
@@ -255,12 +256,13 @@ data class SpriteData(
     val yFlip: Boolean = false,
     val color: Int = 0,
     val combine: Boolean = true,
-    val isOverworld: Boolean = false
+    val isOverworld: Boolean = false,
 ) {
     val tilePair = tile to attribute
 
     val hiddenOrLink: Boolean = point.y >= 248 || attribute == 32 ||
             EnemyGroup.ignorePairs.contains(tilePair)
+            || (tile == 32) //link sword
             //|| point.y < 60  dont need that because the y coordinate is adjusted
             //|| projectiles.contains(tile) //|| loot.contains(tile) // should be separate
             || ( (tile == 248 || tile == 250) && point.y == 187) // spinny guy
@@ -273,7 +275,9 @@ data class SpriteData(
 
     // keep
     // Debug: (Kermit) 49: SpriteData(index=49, point=(177, 128), tile=160, attribute=2) None
-    val hidden: Boolean = priority || point.y >= 248 || attribute == 32 ||
+    val hidden: Boolean = priority || point.y >= 248 ||
+            attribute == 32 ||
+            tile == 32 || // link's sword
             (!EnemyGroup.keepPairs.contains(tilePair) && EnemyGroup.ignoreFor(isOverworld).contains(tile)) ||
 //            ( (combine && tile != rhinoUpLeft.tile) && EnemyGroup.ignore.contains(tile)) ||
             EnemyGroup.ignorePairs.contains(tilePair)

@@ -309,13 +309,14 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
                 action
             }
 
-            state.link in state.aliveEnemies.map { it.point } -> {
-                whyEscape = "on enemy"
-                escapeActionCt = escapeActionTimes
-                d { " ESCAPE ACTION reset" }
-                same.reset()
-                wrapped.nextStep(state)
-            }
+            // what? dont escape when on enemy? makes no sense
+//            state.link in state.aliveEnemies.map { it.point } -> {
+//                whyEscape = "on enemy"
+//                escapeActionCt = escapeActionTimes
+//                d { " ESCAPE ACTION reset" }
+//                same.reset()
+//                wrapped.nextStep(state)
+//            }
 
             else -> {
                 val nextStep = wrapped.nextStep(state)

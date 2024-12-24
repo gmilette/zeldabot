@@ -64,7 +64,7 @@ object AttackLongActionDecider {
                     dist.record(pt)
                 }
                 val exDist = dist.distance()
-                exDist < 160 // the explosions are pretty far apart by this point, ok to start shooting
+                exDist < 180 // 160 // the explosions are pretty far apart by this point, ok to start shooting
             } else {
                 false
             }
