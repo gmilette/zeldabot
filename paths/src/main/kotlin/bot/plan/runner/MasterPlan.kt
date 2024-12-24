@@ -27,6 +27,12 @@ class MasterPlan(val segments: List<PlanSegment> = emptyList()) {
 //            throw RuntimeException("Ahh")
 //        }
         d { " created plan with $initialPlanSize actions" }
+//        for (planStep in it) {
+//            // level mapLoc action name
+//            planStep.action.apply {
+//                d { "$levelLoc $actionLoc $name" }
+//            }
+//        }
     }
 
     fun reset() {
@@ -109,7 +115,7 @@ class MasterPlan(val segments: List<PlanSegment> = emptyList()) {
             var action = pop()
             while (action !is StartHereByLocationAction) {
                 action = pop()
-                d { " skip ${action.name}" }
+//                d { " skip ${action.name}" }
                 ct++
             }
             d { " advanced $ct steps" }

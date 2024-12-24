@@ -4,14 +4,9 @@ import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapConstants
 import bot.state.map.pointModifier
-import bot.state.oam.EnemyGroup
-import bot.state.oam.Monsters
-import bot.state.oam.ProjectileDirectionLookup
-import bot.state.oam.toHex
+import bot.state.oam.*
 import org.jheaps.annotations.VisibleForTesting
-import util.Geom
-import util.Map2d
-import util.d
+import util.*
 
 object AttackLongActionDecider {
     fun isSwordLink() {
@@ -43,16 +38,39 @@ object AttackLongActionDecider {
                 } ?: false
         }
         val thereIsASword by lazy {
-            state.frameState.enemiesRaw.any { it.tileAttrib in EnemyGroup.swordProjectile }
+            state.frameState.enemiesRaw.any { it.y != 187 && it.tileAttrib in EnemyGroup.swordProjectile }
+        }
+        val thereIsAnExplosion by lazy {
+            state.frameState.enemiesRaw.any { it.tile == explosion }
         }
         if (swordIsFlying) {
             d { " SWORD IS FLYING -->-->-->-->"}
         } else if (thereIsASword) {
-            d { " SWORD IS THERE ------------"}
+            d { " SWORD IS THERE ------------" }
+        }
+        if (thereIsAnExplosion) {
+            d { " SWORD IS EXPLODING -x-x-x-x-x-x"}
         }
         val canShoot = full //state.frameState HeartCalculator.isFull()
         val isInEnoughToShoot = isInsideEnoughToShoot(state)
-        return (canShoot && !swordIsFlying && isInEnoughToShoot && targetInLongRange(state, targets))
+
+        val explosionDist by lazy {
+            if (thereIsAnExplosion) {
+                // could start shooting before explosion is done.
+                // there could be an algorithm to determine how far apart the explosions are
+                val dist = MinDistTotalFramesCount()
+                val explosions = state.frameState.enemiesRaw.filter { it.tile == explosion }.map { it.point }
+                for (pt in explosions) {
+                    dist.record(pt)
+                }
+                val exDist = dist.distance()
+                exDist < 160 // the explosions are pretty far apart by this point, ok to start shooting
+            } else {
+                false
+            }
+        }
+        d { "should shoot sword $canShoot $swordIsFlying $explosionDist ${isInEnoughToShoot.ifFalse("not in enough")} "}
+        return (canShoot && !swordIsFlying && !explosionDist &&isInEnoughToShoot && targetInLongRange(state, targets))
     }
 
     fun shouldBoomerang(state: MapLocationState, targets: List<FramePoint>): Boolean {

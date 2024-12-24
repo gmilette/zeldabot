@@ -1,11 +1,25 @@
 package bot.state
 
 import bot.state.FramePoint
+import bot.state.map.MapConstants
 import bot.state.map.MovingDirection
 import io.kotest.matchers.shouldBe
 import org.junit.Test
+import kotlin.test.assertTrue
 
 class FramePointKtTest {
+    // test inLevelMap
+    @Test
+    fun `test inLevelMap`() {
+        val point = FramePoint(51, 120)
+        val rangeY = MapConstants.twoGrid.. (MapConstants.MAX_Y - MapConstants.threeGrid + 1)
+        val rangeX = MapConstants.twoGrid..(MapConstants.MAX_X - MapConstants.threeGrid)
+
+
+        assertTrue(point.isInLevelMap)
+//        point.isInLevelMap shouldBe true
+    }
+
 
     @Test
     fun `test relative to`() {

@@ -938,6 +938,7 @@ private val level4: PlanBuilder.() -> Unit
         rightm
         kill
         right
+        switchToBoomerang
         // watch out for pancakes
         kill // there will be 2 suns still running around
         seg("push")
@@ -1285,6 +1286,7 @@ private fun PlanBuilder.levelPlan9PhaseRedRing() {
         )
 
         "spiral".seg()
+        startHereAtLoaded()
         right // kill the pancakes, getting quite stuck
         rightm
         "go down to ring".seg()
@@ -1396,20 +1398,6 @@ private fun PlanBuilder.levelPlan9PhaseGannon() {
             )
         )
         "doorstep of gannon".seg()
-        startHereAt(
-            raftLadderSetup.copy(
-                hearts = 16,
-                ring = ZeldaItem.BlueRing,
-                sword = ZeldaItem.MagicSword,
-                potion = true,
-                candle = true,
-                magicArrowAndBow = true,
-                magicKey = true,
-                whistle = true,
-                bait = true,
-                boomerang = ZeldaItem.MagicalBoomerang
-            )
-        )
         goInConsume(GamePad.MoveLeft, 10)
 //        kill
         killCenterMonster
@@ -1439,3 +1427,22 @@ private val level9: PlanBuilder.() -> Unit
         levelPlan9PhaseGannon()
         end
     }
+
+
+private fun PlanBuilder.startHereAtLoaded() {
+    startHereAt(
+        raftLadderSetup.copy(
+            hearts = 16,
+            ring = ZeldaItem.BlueRing,
+            sword = ZeldaItem.MagicSword,
+            potion = true,
+            candle = true,
+            magicArrowAndBow = true,
+            magicKey = true,
+            whistle = true,
+            bait = true,
+            boomerang = ZeldaItem.MagicalBoomerang
+        )
+    )
+
+}

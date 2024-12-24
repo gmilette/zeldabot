@@ -164,7 +164,8 @@ val FramePoint.toScreenY
 
 // three grid ensures that it is routing to where link can go i think
 val FramePoint.isInLevelMap
-    get() = y in MapConstants.twoGrid.. (MapConstants.MAX_Y - MapConstants.threeGrid) &&
+    // add the + 1 so it
+    get() = y in MapConstants.twoGrid.. (MapConstants.MAX_Y - MapConstants.threeGrid + 1) &&
             x in MapConstants.twoGrid..(MapConstants.MAX_X - MapConstants.threeGrid)
 
 val FramePoint.isOnMap

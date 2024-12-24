@@ -94,7 +94,7 @@ class FrameRoute(val path: List<FramePoint>) {
     }
 
     fun cornering(linkPt: FramePoint, linkDir: Direction?): FrameRoute {
-        d { "VERTEX: cornering $linkPt $linkDir" }
+//        d { "VERTEX: cornering $linkPt $linkDir" }
         if (pathStack.size < 4) return this
         val linkDir = linkDir ?: return this
 
@@ -104,7 +104,6 @@ class FrameRoute(val path: List<FramePoint>) {
         dirs.add(linkDir)
         pathStack.take(4).zipWithNext().forEach { (first, second) ->
             val dir = first.dirTo(second)
-            println("Pair: $first, $second ${dir.toArrow()}")
             dirs.add(dir)
         }
 //        pathStack.take(4).forEachIndexed { index, pt ->
