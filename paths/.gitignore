@@ -1,6 +1,10 @@
 # Compiled Lua sources
 luac.out
 
+aws.xml
+**/aws.xml
+*aws.xml
+
 build/kotlin/**
 
 skips/**
