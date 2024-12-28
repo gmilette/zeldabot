@@ -343,8 +343,8 @@ object AttackActionDecider {
         // i donno, it seems like it isn't good for fighting sword guys
         val checkIntersectWithLink = true
         if (checkIntersectWithLink) {
-            d { " check intersect with link" }
-            val anySameAs = enemiesClose.any { it == linkRectExact || (it.topLeft == linkRectExact.topLeft && it.bottomRight == linkRectExact.bottomRight) }
+            d { " check intersect with link short=$linkRect exact=$linkRectExact" }
+            val anySameAs = enemiesClose.any { it == linkRectExact || (it.topLeft == linkRectExact.topLeft) }
             if (anySameAs) {
                 d { " kill the pancake!" }
                 return GamePad.aOrB(useB)
@@ -352,7 +352,10 @@ object AttackActionDecider {
             // need?
             val intersectWithLink = enemiesClose.firstOrNull { it.intersect(linkRect) }
             if (intersectWithLink != null) {
-                d { " intersects with link $linkRect" }
+                d { " intersects with link $linkRect enemy that intersects: $intersectWithLink" }
+                val dirToAttack = intersectWithLink.distTo(swords[from] ?: Geom.Rectangle())
+
+                d { " sword is ${swords[from]} $dirToAttack"}
                 // if link is in a pancake then no swords will intersect
                 if (intersectWithLink.intersect(swords[from] ?: Geom.Rectangle())) {
                     d { " intersects with link's sword. Attack!" }
@@ -422,26 +425,6 @@ object AttackActionDecider {
             link.justRight6.justLeftDown,
             link.justRightLast6.justLeftDown.withY(link.y + farSize)
         )
-//        Direction.Left -> Geom.Rectangle(link.justDown6.withX(to.x), link.justDownLast6)
-//        Direction.Right -> Geom.Rectangle(link.justDown6, link.justDownLast6.withX(to.x))
-//        Direction.Down -> Geom.Rectangle(link.justRight6, link.justRightLast6.withY(to.y))
-//        Direction.Up -> Geom.Rectangle(link.justRight6.withY(to.y), link.justRightLast6)
-
-//        val leftAttack = Geom.Rectangle(
-//            link.justDownFourth.withX(link.x - nearSize), link.justDownThreeFourth
-//        )
-//        val rightAttack = Geom.Rectangle(
-//            link.justDownFourth.justRightEnd,
-//            link.justDownThreeFourth.justRightEnd.withX(link.x + farSize)
-//        )
-//        val upAttack = Geom.Rectangle(
-//            link.justRightFourth.withY(link.y - nearSize), link.justRightThreeFourth
-//        )
-//        val downAttack = Geom.Rectangle(
-//            link.justRightFourth.justLeftDown,
-//            link.justRightThreeFourth.justLeftDown.withY(link.y + farSize)
-//        )
-
         val swords = mapOf(
             Direction.Left to leftAttack,
             Direction.Right to rightAttack,
