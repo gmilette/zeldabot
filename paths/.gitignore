@@ -4,7 +4,7 @@ luac.out
 aws.xml
 **/aws.xml
 *aws.xml
-
+**/AugmentWebviewStateStore.xml
 build/kotlin/**
 
 skips/**
