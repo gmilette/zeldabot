@@ -1405,9 +1405,9 @@ private fun PlanBuilder.levelPlan9PhaseGannon() {
         killCenterMonster
         uptk
         "seg kill gannon".seg()
-//        startHereAtLoaded()
-//        goIn(GamePad.None, 100)
-//        goIn(GamePad.None, 100)
+        startHereAtLoaded()
+        goIn(GamePad.None, 100)
+        goIn(GamePad.None, 100)
         goIn(GamePad.None, 100)
         switchToArrow()
         goTo(InLocations.Level9.centerGannonAttack)

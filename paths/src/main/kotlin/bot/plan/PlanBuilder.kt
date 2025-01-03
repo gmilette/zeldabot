@@ -261,8 +261,8 @@ class PlanBuilder(
         }
     val killG: PlanBuilder
         get() {
-            add(lastMapLoc, gannonKill)
-//            add(lastMapLoc, KillGannon())
+//            add(lastMapLoc, gannonKill)
+            add(lastMapLoc, KillGannon())
             return this
         }
     fun killUntil(leftDead: Int): PlanBuilder {

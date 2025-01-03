@@ -18,33 +18,27 @@ class KillGannon : Action {
         GoIn(moveDistance, GamePad.MoveRight, reset = true),
         GoIn(MoveDelay, GamePad.None, reset = true),
         GoIn(MoveDelay, GamePad.None, reset = true),
-//        WaitUntilArrowGone(),
+        WaitUntilArrowGone(),
         GannonAttack(),
 
         GoIn(MoveDelay, GamePad.None, reset = true),
         GoIn(moveDistance, GamePad.MoveUp, reset = true),
         GoIn(MoveDelay, GamePad.None, reset = true),
-//        WaitUntilArrowGone(), // it really has to wait
+        WaitUntilArrowGone(), // it really has to wait
         GannonAttack(),
 
         GoIn(MoveDelay, GamePad.None, reset = true),
         GoIn(moveDistance, GamePad.MoveLeft, reset = true),
         GoIn(MoveDelay, GamePad.None, reset = true),
-//        WaitUntilArrowGone(),
+        WaitUntilArrowGone(),
         GannonAttack(),
 
         GoIn(MoveDelay, GamePad.None, reset = true),
         GoIn(moveDistance, GamePad.MoveDown, reset = true),
         GoIn(MoveDelay, GamePad.None, reset = true),
-//        WaitUntilArrowGone(),
+        WaitUntilArrowGone(),
         GannonAttack(),
         GoIn(MoveDelay, GamePad.None, reset = true),
-//        GoIn(MoveDelay, GamePad.None, reset = true),
-//        GoIn(moveDistance, GamePad.None, reset = true),
-//        WaitUntilArrowGone(),
-//        GoIn(MoveDelay, GamePad.None, reset = true),
-//        GannonAttack(),
-//        GoIn(MoveDelay, GamePad.None, reset = true),
         // it's better just to kill
 //        InsideNavAbout(InLocations.Level9.centerGannonAttack, about = 4)
     ), restartWhenDone = true)
@@ -70,7 +64,7 @@ class KillGannon : Action {
     private fun gannonDefeated(state: MapLocationState): Boolean =
         state.frameState.enemies.any { it.isGannonTriforce() }
 
-    private val triforceTiles = setOf(triforceTileLeft, triforceTile, triforceDirt, triforceDirt3)
+    private val triforceTiles = setOf(triforceTileLeft)
 
     private fun Agent.isGannonTriforce(): Boolean =
         tile in triforceTiles
@@ -148,6 +142,8 @@ private object GannonParts {
     val moreBody4 = 0xca
 }
 
+// link had trouble targetting the body, kill all is too cautious and looking for
+// safe spots. no need for this complicated thing, 
 val gannonKill = DecisionAction(KillGannon(), KillAll(
     targetOnly = gannonTargets,
     useBombs = true
@@ -162,14 +158,15 @@ private fun MapLocationState.gannonShowing(): Boolean = frameState.enemies.any {
 }
 
 class GannonAttack : Action {
-    private val freq = 10
+    private val freq = 5
     private var swordAction = AlwaysAttack(useB = false, freq = freq)
     private var arrowAction = AlwaysAttack(useB = true, freq = freq)
 
     private var frames = 0
 
     override fun complete(state: MapLocationState): Boolean {
-        val complete = frames >= freq
+        // never complete if gannon is showing, then maybe link will just keep shooting arrows
+        val complete = frames >= freq //&& !state.gannonShowing()
         if (complete) {
             frames = 0
             swordAction.reset()
