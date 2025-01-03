@@ -71,7 +71,9 @@ class FrameStateUpdater(
         val isRhino = mapLoc == 14 && level == 2
         val isSpiderLevel8 = mapLoc == 30 && level == 8
         val isSpiderLevel6 = mapLoc == 28 && level == 6
-        val combine = !isRhino && !isSpiderLevel8 && !isSpiderLevel6
+        val isGannon = mapLoc == 66 && level == 9
+        val combine = !isRhino && !isSpiderLevel8 && !isSpiderLevel6 && !isGannon
+        d { "combine is $combine" }
         val oam = OamStateReasoner(isOverworld, api, mapStats, combine = combine, level)
         val dirLookup = DirectionByMemoryLookup(api)
         val theEnemies = oam.agents(dirLookup)
@@ -110,8 +112,9 @@ class FrameStateUpdater(
         val seenBoomerang = mapStats.seenBoomerang
         val willSkip = SkipDetector.willSkip(api)
 
+        d { " num enemies ${theEnemies.size}"}
         for (enemy in theEnemies) {
-            d { "enemy: $enemy" }
+            d { "update enemy: $enemy" }
         }
 
         val frame = FrameState(api, theEnemies, theUncombined, theRaw, level, mapLoc, link, ladder, seenBoomerang)
@@ -125,14 +128,14 @@ class FrameStateUpdater(
         state.frameState = frame
 
         // game mode 8, is the dead screen
-        d { " GAME MODE ${state.frameState.gameMode} $willSkip"}
-        if (state.frameState.gameMode == 5) {
-            try {
-//                percentBlack()
-            } catch (e: Exception) {
-
-            }
-        }
+//        d { " GAME MODE ${state.frameState.gameMode} $willSkip"}
+//        if (state.frameState.gameMode == 5) {
+//            try {
+////                percentBlack()
+//            } catch (e: Exception) {
+//
+//            }
+//        }
     }
 
     fun updateDecision(gamePad: GamePad) {

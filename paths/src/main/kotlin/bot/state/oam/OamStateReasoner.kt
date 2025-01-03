@@ -207,7 +207,7 @@ class OamStateReasoner(
             }
         }
 
-        if (DEBUG) {
+        if (DEBUG || true) {
             d { " raw sprites " }
             spritesRaw.forEachIndexed { index, sprite ->
                 d { "$index: $sprite ${LinkDirectionFinder.dirFor(sprite)}" }
@@ -241,8 +241,6 @@ class OamStateReasoner(
         }
     }
 }
-fun Agent.isGannonTriforce(): Boolean =
-    tile to attribute == triforceTile2Pair
 
 data class SpriteData(
     val index: Int,

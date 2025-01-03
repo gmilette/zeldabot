@@ -329,7 +329,7 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
                     minDist.record(framePoint)
                 }
                 val dists = history.buffer.map { it.oneStr }.joinToString(" ")
-                d { "min dist for escape: $frames $minDist $dists"}
+//                d { "min dist for escape: $frames $minDist $dists"}
                 val notChanged = if (frames > framesPerEscape) { // stuck
                     val notChangedResult = (minDist.distance() < MapConstants.twoGrid)
 

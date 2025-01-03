@@ -260,14 +260,14 @@ object AttackActionDecider {
                 // for ghosts, it's ok to attack in front, as long as you are not DIRECTLY in front
                 // problem: ghosts and swords use the same tile, making them indistinguishable
                 val haveWizzRobe = (state.frameState.level in Monsters.levelsWithNotSword)
-                if (enemies.any { !it.canAttackFront }) {
+                if (enemies.any { !it.canAttackFront(state.frameState.level) }) {
                     for (dont in enemies.filter { !it.canAttackFront && it.dir == oppositeFrom }) {
                         d { "SWORD FRONT $haveWizzRobe DONT CHECK ${dont.point} can't attack from ${dont.dir} link facing ${state.frameState.link.dir}"}
                     }
                 }
                 // allow attacking as long as not directly in line with the wizzrobe!
                 enemies.filter {
-                    it.canAttackFront ||
+                    it.canAttackFront(state.frameState.level) ||
                             (!haveWizzRobe && it.dir != oppositeFrom) ||
                             (haveWizzRobe && (it.dir.vertical && state.frameState.link.y != it.y)) ||
                             (haveWizzRobe && (it.dir.horizontal && state.frameState.link.x != it.x))
@@ -386,7 +386,9 @@ object AttackActionDecider {
                 d { " enemy close to not evade $enemy" }
             }
             d { " doesnt intersect, evade" }
-            return GamePad.None
+            return null // try null, maybe link will move towards enemy then
+            // otherwise he just sits there, doesn't actually move
+//            return GamePad.None
         }
     }
 

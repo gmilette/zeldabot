@@ -1,8 +1,5 @@
 package bot.state.oam
 
-import bot.state.map.MapConstants
-import bot.state.map.isOverworld
-
 object EnemyGroup {
     const val oldWoman = (0x9a).toInt()
 
@@ -244,9 +241,6 @@ object EnemyGroup {
     ) + swordLink
 
     val lootPairs = setOf(
-        triforceTile2Pair,
-        triforceTile2PairAlt,
-        triforceTilePair,
         bigCoinPair,
         bigCoinPair2,
         bait
@@ -254,6 +248,8 @@ object EnemyGroup {
 
     val loot = setOf(
         compass,
+        triforceTileLeft,
+        triforceTile,
         // this just breaks things
 //        clockTile,
 //        silverArrow,

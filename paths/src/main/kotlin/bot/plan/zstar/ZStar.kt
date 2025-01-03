@@ -267,6 +267,8 @@ class ZStar(
         if (param.rParam.findNearestSafeIfCurrentlyNotSafe == true && !startIsSafe) {
             d { " dodge! "}
             return routeNearestSafe(param)
+        } else {
+            d { " make the route " }
         }
 
         // can result in NO_ROUTE, if already at target, or if already safe without routing anywhere
@@ -282,6 +284,8 @@ class ZStar(
         }.filter { costsF.safe(it) }
             // if all else fails just go with the original list
             .ifEmpty { targets.toList() }
+
+        d { " target before ${targets.size} now ${target.size}"}
 
         // stil getting NO ROUTE
 //        d { "From safe: $startIsSafe cost = ${costsF.get(param.start)} targets size = ${target.size} routeToSafe=${routeToSafe}"}

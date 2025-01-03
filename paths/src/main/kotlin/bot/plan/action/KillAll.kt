@@ -307,7 +307,7 @@ class KillAll(
                             }
                             GamePad.B
                         } else {
-                            d { "USE BOMB! Not yet" }
+                            d { "USE BOMB! Not yet $numPressB" }
                             it
                         }
                     }

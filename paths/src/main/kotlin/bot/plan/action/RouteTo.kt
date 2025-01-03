@@ -323,7 +323,6 @@ class RouteTo(val params: Param = Param()) {
         val linkPoints = linkPt.corners
         val enemiesNear =
             state.aliveOrProjectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid * 5 }
-
         // nothing to avoid if the clock is activated
         var avoid = if (!state.frameState.clockActivated) {
             // this seems to be ok, except link can get hit from the side

@@ -848,7 +848,9 @@ class GetLoot(
 
     override fun nextStep(state: MapLocationState): GamePad {
         d { " GET LOOT" }
-        val loot = state.neededLoot.sortedBy {
+        val lootList = if (adjustInSideLevelBecauseGannon) state.neededLoot.filter { it.tile == triforceTileLeft } else state.neededLoot
+
+        val loot = lootList.sortedBy {
             it.point.distTo(state.link)
         }
 

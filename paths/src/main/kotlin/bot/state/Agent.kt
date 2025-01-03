@@ -1,6 +1,7 @@
 package bot.state
 
 import bot.state.map.Direction
+import bot.state.map.MapConstants
 import bot.state.map.MovingDirection
 import bot.state.oam.EnemyGroup
 import bot.state.oam.MonstersOverworld
@@ -44,8 +45,15 @@ data class Agent(
     // tileAttribute.tile in Monsters.darknut.tile
     // look up monster, then check attribute
     val canAttackFront by lazy {
-        !swordDir.inAny(tile) && tile !in MonstersOverworld.lynel.tile
+        !swordDir.inAny(tile) // && tile !in MonstersOverworld.lynel.tile, overlaps with gannon
     }
+
+    fun canAttackFront(level: Int): Boolean =
+        if (level == MapConstants.overworld) {
+            tile !in MonstersOverworld.lynel.tile
+        } else {
+            !swordDir.inAny(tile)
+        }
 }
 
 enum class EnemyState {

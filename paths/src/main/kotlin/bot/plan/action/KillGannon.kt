@@ -1,13 +1,11 @@
 package bot.plan.action
 
+import bot.state.Agent
 import bot.state.FramePoint
 import bot.state.GamePad
 import bot.state.MapLocationState
 import bot.state.map.MapConstants
-import bot.state.oam.arrowHitExplosion
-import bot.state.oam.arrowTipShotByEnemy
-import bot.state.oam.arrowTipShotByEnemy2
-import bot.state.oam.isGannonTriforce
+import bot.state.oam.*
 import util.d
 
 class KillGannon : Action {
@@ -20,25 +18,25 @@ class KillGannon : Action {
         GoIn(moveDistance, GamePad.MoveRight, reset = true),
         GoIn(MoveDelay, GamePad.None, reset = true),
         GoIn(MoveDelay, GamePad.None, reset = true),
-        WaitUntilArrowGone(),
+//        WaitUntilArrowGone(),
         GannonAttack(),
 
         GoIn(MoveDelay, GamePad.None, reset = true),
         GoIn(moveDistance, GamePad.MoveUp, reset = true),
         GoIn(MoveDelay, GamePad.None, reset = true),
-        WaitUntilArrowGone(), // it really has to wait
+//        WaitUntilArrowGone(), // it really has to wait
         GannonAttack(),
 
         GoIn(MoveDelay, GamePad.None, reset = true),
         GoIn(moveDistance, GamePad.MoveLeft, reset = true),
         GoIn(MoveDelay, GamePad.None, reset = true),
-        WaitUntilArrowGone(),
+//        WaitUntilArrowGone(),
         GannonAttack(),
 
         GoIn(MoveDelay, GamePad.None, reset = true),
         GoIn(moveDistance, GamePad.MoveDown, reset = true),
         GoIn(MoveDelay, GamePad.None, reset = true),
-        WaitUntilArrowGone(),
+//        WaitUntilArrowGone(),
         GannonAttack(),
         GoIn(MoveDelay, GamePad.None, reset = true),
 //        GoIn(MoveDelay, GamePad.None, reset = true),
@@ -52,8 +50,7 @@ class KillGannon : Action {
     ), restartWhenDone = true)
 
     private fun isReadyForDeath(state: MapLocationState): Boolean {
-//        212, attribute=3 //dark
-        // attribute 43 is light
+        // doesn't work, no way to tell if gannon is ready for death
         return state.frameState.enemies.any {
             it.attribute == 3 && (it.tile > 200)
         }
@@ -64,18 +61,30 @@ class KillGannon : Action {
     }
 
     override fun complete(state: MapLocationState): Boolean {
-        return state.frameState.enemies.any { it.isGannonTriforce() }
+        return gannonDefeated(state)
                 // it's possible that link could defeat gannon at exact same spot
                 // that the triforce appeared and this isGannonTriforce will not trigger, assume victory then
                 || noEnemiesFrameCt > 5000
     }
+
+    private fun gannonDefeated(state: MapLocationState): Boolean =
+        state.frameState.enemies.any { it.isGannonTriforce() }
+
+    private val triforceTiles = setOf(triforceTileLeft, triforceTile, triforceDirt, triforceDirt3)
+
+    private fun Agent.isGannonTriforce(): Boolean =
+        tile in triforceTiles
 
     override fun target(): FramePoint {
         return FramePoint()
     }
 
     override fun nextStep(state: MapLocationState): GamePad {
-        d {"KillGannon num enemies ${state.numEnemies}"}
+        if (gannonDefeated(state)) {
+            d { "Gannon defeated"}
+        } else {
+            d {"KillGannon num enemies ${state.numEnemies}"}
+        }
         noEnemiesFrameCt++
 
         // why is this needed
@@ -88,7 +97,7 @@ class KillGannon : Action {
         if (isReadyForDeath(state)) {
             d {"KillGannon !! READY FOR DEATH !!"}
         } else {
-            d {"KillGannon"}
+            d {"KillGannon ${complete(state)}"}
         }
         criteria.nextStep(state)
 
@@ -115,8 +124,45 @@ class WaitUntilArrowGone : Action {
     }
 }
 
+private val gannonTargets = listOf(
+    GannonParts.body,
+    GannonParts.body2,
+    GannonParts.moreBody,
+    GannonParts.moreBody2,
+    GannonParts.moreBody3,
+    GannonParts.moreBody4,
+)
+
+// it's variable, maybe it depends on gannon's posture
+private object GannonParts {
+    val arm = 0xe0
+    val leg = 0xd4
+    val snout = 0xe2
+    val snout2 = 0xd2
+    val body = 0xe6
+    val body2 = 0xd6
+    val moreSnout = 0xda
+    val moreBody = 0xee
+    val moreBody2 = 0xde
+    val moreBody3 = 0xce
+    val moreBody4 = 0xca
+}
+
+val gannonKill = DecisionAction(KillGannon(), KillAll(
+    targetOnly = gannonTargets,
+    useBombs = true
+), completeIf = {
+    state -> state.frameState.enemies.any { it.tile == triforceTileLeft }
+}) {
+    state -> !state.gannonShowing()
+}
+
+private fun MapLocationState.gannonShowing(): Boolean = frameState.enemies.any {
+    it.tile > 200
+}
+
 class GannonAttack : Action {
-    private val freq = 5
+    private val freq = 10
     private var swordAction = AlwaysAttack(useB = false, freq = freq)
     private var arrowAction = AlwaysAttack(useB = true, freq = freq)
 
@@ -145,10 +191,8 @@ class GannonAttack : Action {
     }
 
     private fun isReadyForDeath(state: MapLocationState): Boolean {
-//        212, attribute=3 //dark
-        // attribute 43 is light
-        return state.frameState.enemies.any {
-            it.attribute == 3 && (it.tile > 200)
-        }
+        return state.gannonShowing()
     }
+
+    override val name: String = "GannonAttack"
 }

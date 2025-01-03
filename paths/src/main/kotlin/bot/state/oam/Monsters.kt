@@ -256,7 +256,13 @@ object Monsters {
     ).immuneToB().inL()
     val manhandla = Monster(name = "star").immuneToB().inL()
     val aquamentus = Monster(name = "dragon").immuneToB().inL().typeD()
-    val ganon = Monster(name = "ganon").immuneToB().inL().typeD()
+    val ganon = Monster(name = "ganon",
+        tile = setOf(
+            0xD0, 0xD2, 0xD4, 0xd6, 0xd8, 0xda, 0xde,
+            0xe0, 0xe2, 0xe4, 0xe6, 0xe8
+        ),
+        color = grey // always 3
+    ).immuneToB().inL().typeD()
     val gleeok = Monster(name = "hydradragon",
         tile = setOf(0xCA, 0xC2, 0xc8, 0xcc, 0xce, 0xc0, 0xdc, 0xda, 0xd4, 0xd2, 0xd8, 0xd0, 0xd6, 0xc6, 0xde),
         color = grey

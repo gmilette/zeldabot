@@ -69,9 +69,7 @@ val raft = (0x6C).toInt()
 val triforceNormal = (0x6E).toInt()
 // final triforce
 val triforceTile = (0xF4).toInt()
-val triforceTilePair = (0xF4).toInt() to (0x01).toInt()
-val triforceTile2Pair = (0xF2).toInt() to (0x01).toInt()
-val triforceTile2PairAlt = (0xF2).toInt() to (0x02).toInt()
+val triforceTileLeft = (0xF2).toInt()
 val triforceDirt = (0xEC).toInt() // attrib 03 //236 // also part of fourMonster
 val triforceDirt2 = (0xFA).toInt() // also circle enemy center, also rhino up
 val triforceDirt3 = (0xEA).toInt() // attrib 03
