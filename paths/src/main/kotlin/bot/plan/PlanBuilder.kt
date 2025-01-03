@@ -424,6 +424,12 @@ class PlanBuilder(
             add(nextLoc, moveTo(nextLoc))
             return this
         }
+    val downIgnoreProjectiles: PlanBuilder
+        get() {
+            val nextLoc = lastMapLoc.down
+            add(nextLoc, moveTo(nextLoc, ignoreProjectiles = true))
+            return this
+        }
     val inLevel: PlanBuilder
         get() {
             lev(1)

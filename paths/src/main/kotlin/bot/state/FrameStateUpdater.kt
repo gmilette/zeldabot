@@ -110,6 +110,10 @@ class FrameStateUpdater(
         val seenBoomerang = mapStats.seenBoomerang
         val willSkip = SkipDetector.willSkip(api)
 
+        for (enemy in theEnemies) {
+            d { "enemy: $enemy" }
+        }
+
         val frame = FrameState(api, theEnemies, theUncombined, theRaw, level, mapLoc, link, ladder, seenBoomerang)
 
         if (!frame.isScrolling) {

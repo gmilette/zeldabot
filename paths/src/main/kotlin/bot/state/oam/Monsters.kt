@@ -24,7 +24,7 @@ import nintaco.util.BitUtil
 data class Monster(
     val name: String = "",
     // valid monster colors
-    val color:Set<Int> = emptySet(),
+    val color:Set<Int> = setOf(MonsterColor.red, MonsterColor.blue, MonsterColor.grey, MonsterColor.other),
     /**
      * the tiles representing the monster
      */
@@ -126,7 +126,8 @@ object MonstersOverworld {
         tile = setOf(0xb2, 0xb4, 0xb6, 0xb8, 0xba, 0xb0),
         color = blueAndRed,
     ).typeA(MonsterColor.red).typeB(MonsterColor.blue)
-    val tektite = Monster(name = "spider")
+    val tektite = Monster(name = "spider",
+        color = blueAndRed) // confirm
     val ghini = Monster(name = "worldghost")
     val moblin = Monster(name = "arrowguy",
         tile = setOf(0xf0, 0xf2, 0xf4, 0xf6, 0xf8, 0xfa, 0xfe, ), // need to double check
@@ -236,14 +237,15 @@ object Monsters {
     val goriya = Monster(name = "boomerangguy",
         color = blueAndRed, // guess
         tile = setOf(0xbe, 0xb6, 0xBA, 0xb4, 0xac, 0xb0, 0xB8, 0xBC)).inL()
-    val keese = Monster(name = "bat", tile=setOf(0x9c, 0x9a)).inL()
-    val lanmoia = Monster(name = "eyeworm").inL()
+    val keese = Monster(name = "bat", tile=setOf(0x9c, 0x9a),
+        color = blue).inL() // 1 / 41
+    val lanmoia = Monster(name = "eyeworm",
+        color = blueAndRed).inL() // confirm
     val likelike = Monster(name = "pancake",
         tile = setOf(0xa6, 0xa4),
         color = red, // red for the pancake
     ).inL()
-    val digdogger = Monster(name = "whistleenemy",
-    ).inL()
+    val digdogger = Monster(name = "whistleenemy").inL()
     val dodongo = Monster("rhino",
         tile = setOf(0xf8, 0xf4, 0xf6,
             0xe0, 0xe2, 0xe8, 0xea,
@@ -363,6 +365,7 @@ private val red = setOf(MonsterColor.red)
 private val blue = setOf(MonsterColor.blue)
 private val blueAndRed = setOf(MonsterColor.blue, MonsterColor.red)
 private val blueAndRedAndGrey = setOf(MonsterColor.blue, MonsterColor.red, MonsterColor.grey)
+private val unknown = setOf(MonsterColor.red, MonsterColor.blue, MonsterColor.grey, MonsterColor.other)
 
 private val h67 = 0x43
 private val h66 = 0x42

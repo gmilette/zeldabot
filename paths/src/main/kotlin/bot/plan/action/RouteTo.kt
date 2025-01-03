@@ -19,8 +19,8 @@ class RouteTo(val params: Param = Param()) {
         /**
          * dont shoot the boomerang too much
          */
-        private val WAIT_BETWEEN_BOOMERANG = 20
-        private val WAIT_BETWEEN_NOT_BOOMERANG = 2
+        private const val WAIT_BETWEEN_BOOMERANG = 20
+        private const val WAIT_BETWEEN_NOT_BOOMERANG = 2
         var allowAttack = true
         fun hardlyReplan(dodgeEnemies: Boolean = true,
                          /** don't try to block or route around projectiles **/
@@ -214,12 +214,11 @@ class RouteTo(val params: Param = Param()) {
 
             considerAttacks && canAttack && shouldLongBoomerang -> {
                 d { " Route Action -> LongAttack Boomerang" }
-                boomerangCt = if (state.arrowActive) {
-                    // shoot the arrow alot when active
-                    WAIT_BETWEEN_NOT_BOOMERANG
-                } else {
+                boomerangCt = if (state.boomerangActive) {
                     // it's possible to get stuck doing the boomerang over and over never attacking
-                    typically(WAIT_BETWEEN_BOOMERANG, WAIT_BETWEEN_BOOMERANG * 2) // was 4
+                    typically(WAIT_BETWEEN_BOOMERANG, everySoOften = WAIT_BETWEEN_BOOMERANG * 2)
+                } else {
+                    WAIT_BETWEEN_NOT_BOOMERANG
                 }
                 attackB.nextStep(state)
             }
@@ -427,8 +426,8 @@ class RouteTo(val params: Param = Param()) {
         val inFrontOfGrids = getInFrontOfGrids(state)
 
         if (state.frameState.ladderDeployed) {
-            d { " make new route ladder deployed "}
             val dirToGo = state.bestDirection()
+            d { " make new route ladder deployed Go dir: $dirToGo"}
             val modifier = if (dirToGo == Direction.None) {
                 GamePad.randomDirection(state.link).toDirection().pointModifier()
             } else {

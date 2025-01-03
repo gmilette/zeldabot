@@ -8,16 +8,19 @@ import util.CalculateDirection
 import util.d
 
 object ProjectileDirectionCalculator {
+    private val DEBUG = false
     // agents must be the same type (projectile or not) maybe same tile
     fun calc(currentPoint: FramePoint, state: EnemyState, prev: List<Agent>, tile: Int): MovingDirection? {
-        d { " current point $currentPoint" }
-        d { " agents " }
-        for (agent in prev) {
-            d { " prev ${agent.point} ${agent.state}"}
-        }
-        for (prevPoint in prev.filter { it.state == state && !it.damaged && it.tile == tile} ) { // && it.tile == tile  don't check tile because it changes
-            val dir = CalculateDirection.calculateDirection(prevPoint.point, currentPoint)
-            d { "  to ${prevPoint.point} ${dir.toArrow()}" }
+        if (DEBUG) {
+            d { " current point $currentPoint" }
+            d { " agents " }
+            for (agent in prev) {
+                d { " prev ${agent.point} ${agent.state}" }
+            }
+            for (prevPoint in prev.filter { it.state == state && !it.damaged && it.tile == tile }) { // && it.tile == tile  don't check tile because it changes
+                val dir = CalculateDirection.calculateDirection(prevPoint.point, currentPoint)
+                d { "  to ${prevPoint.point} ${dir.toArrow()}" }
+            }
         }
         return prev.asSequence()
             .filter { it.state == state && !it.damaged && it.tile == tile}
@@ -25,11 +28,13 @@ object ProjectileDirectionCalculator {
             .map { prevPoint -> CalculateDirection.calculateDirection(prevPoint, currentPoint) }
             .firstOrNull { it != MovingDirection.UNKNOWN_OR_STATIONARY }
             .also {
-                if (state == EnemyState.Projectile) {
-                    if (it == null) {
-                        d { " no moving dir $it" }
-                    } else {
-                        d { "moving dir current: $currentPoint moving ${it.toArrow()}" }
+                if (DEBUG) {
+                    if (state == EnemyState.Projectile) {
+                        if (it == null) {
+                            d { " no moving dir $it" }
+                        } else {
+                            d { "moving dir current: $currentPoint moving ${it.toArrow()}" }
+                        }
                     }
                 }
             }

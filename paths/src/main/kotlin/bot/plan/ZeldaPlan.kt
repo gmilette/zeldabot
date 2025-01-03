@@ -1286,7 +1286,6 @@ private fun PlanBuilder.levelPlan9PhaseRedRing() {
         )
 
         "spiral".seg()
-        startHereAtLoaded()
         right // kill the pancakes, getting quite stuck
         rightm
         "go down to ring".seg()
@@ -1309,6 +1308,8 @@ private fun PlanBuilder.levelPlan9PhaseSilverArrow() {
         leftm
         upm
         "go in next room".seg()
+        // avoid battling the circle monster
+        goIn(GamePad.MoveUp, 8.grid, monitor = false)
         upm
         bombLeft
         GoIn(10, GamePad.MoveLeft)
@@ -1341,7 +1342,8 @@ private fun PlanBuilder.levelPlan9PhaseSilverArrow() {
         bombUp
         "acquire arrow".seg()
         switchToWand
-        wait(100)
+        // don't need this i think
+//        wait(100)
         kill
         "set the arrow".seg()
         // dont need it I think
@@ -1357,7 +1359,7 @@ private fun PlanBuilder.levelPlan9PhaseSilverArrow() {
 private fun PlanBuilder.levelPlan9PhaseGannon() {
     add {
         "return to center".seg()
-        down
+        downIgnoreProjectiles // there are only sun monsters
         kill
         "take stair back".seg()
         addNext(
@@ -1400,7 +1402,12 @@ private fun PlanBuilder.levelPlan9PhaseGannon() {
         "doorstep of gannon".seg()
         goInConsume(GamePad.MoveLeft, 10)
 //        kill
+        startHereAtLoaded()
         killCenterMonster
+        killCenterMonster
+        killCenterMonster
+        switchToArrow()
+        killG
         uptk
         "seg kill gannon".seg()
         goIn(GamePad.None, 100)

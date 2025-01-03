@@ -88,7 +88,7 @@ class OamStateReasoner(
             lookup?.lookupDirection(point) ?: DirectionLookup.getDir(tileAttribute)
         }
         if (state == EnemyState.Projectile) {
-            d { " Move dir for tile:${tileAttribute.toHex()} $point is ${movingDirection.toArrow()} and ${findDir.toArrow()}" }
+            d { " Move dir for tile:${tileAttribute.toHex()} $point is ${movingDirection.toArrow()} and ${findDir.toArrow()} damaged: $damaged pair: ${toStringIsProjLevel()}" }
         }
         return Agent(
             index = index, point = point,
@@ -296,7 +296,23 @@ data class SpriteData(
 
     val isProjectile = !hidden && (EnemyGroup.projectiles.contains(tile) || EnemyGroup.projectilePairs.contains(tilePair))
 
+    fun toStringIsProj(): String {
+        return if (isProjectile) {
+             " hidden $hidden enemyGroup: ${EnemyGroup.projectiles.contains(tile)}  pairs: ${EnemyGroup.projectilePairs.contains(tilePair)}"
+        } else {
+            " Not projectile"
+        }
+    }
+
     val isProjectileLevel = !hidden && (EnemyGroup.projectilesLevel.contains(tile) || EnemyGroup.projectilePairsLevel.contains(tilePair))
+
+    fun toStringIsProjLevel(): String {
+        return if (isProjectileLevel) {
+            " hidden $hidden enemyGroup: ${EnemyGroup.projectilesLevel.contains(tile)}  pairs: ${EnemyGroup.projectilePairsLevel.contains(tilePair)}"
+        } else {
+            " Not projectile"
+        }
+    }
 
     val projectileType = when {
         EnemyGroup.projectileMagicShieldBlockable.contains(tile) -> EnemyStates.Projectile.BlockableWithMagicShield

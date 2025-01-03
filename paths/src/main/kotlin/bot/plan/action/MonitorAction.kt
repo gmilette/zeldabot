@@ -474,26 +474,6 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
 
     var disabled = false
     override fun nextStep(state: MapLocationState): GamePad {
-//        if (initialLevel == -1) {
-//            initialLevel = state.frameState.level
-//        } else {
-//            if (initialLevel != state.frameState.level) {
-//                disabled = true
-//                failureCt = 0
-//            }
-//        }
-//        initialLevel = state.frameState.level
-//        if (disabled) {
-//            d {"disabled"}
-//            return wrapped.nextStep(state)
-//        }
-//        d { "StayInCurrentMapCell ${state.frameState.isDoneScrolling} ${initialMapCell != null}" }
-//        if (initialMapCell == null && !state.frameState.isScrolling && frameCt > FRAMES_BEFORE_SET_INITIAL) {
-//            initialMapCell = state.currentMapCell
-//            d { "StayInCurrentMapCell set to ${state.currentMapCell.mapLoc} level = $initialLevel" }
-//            initialLevel = state.frameState.level
-//        }
-
         // don't do any of this if the screen is scrolling
         // if it is scrolling just reset the framect after the scene
         if (state.frameState.isScrolling || state.movedTo == 0 || state.levelTo == -1) {
