@@ -246,7 +246,9 @@ class PlanRunner(private val makePlan: PlanMaker,
         if (ex.shield) {
             manipulator.setMagicShield()
         }
-        manipulator.setTriforceAll()
+        if (ex.setTriforce) {
+            manipulator.setTriforceAll()
+        }
         if (ex.wand) {
             manipulator.setWandNoBook()
         }

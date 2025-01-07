@@ -18,7 +18,8 @@ class OamStateReasoner(
     private val api: API,
     private val mapStatsTracker: MapStatsTracker = MapStatsTracker(),
     private val combine: Boolean = true,
-    private val level: Int = 1
+    private val level: Int = 1,
+    private val isGannon: Boolean = false
 ) {
     private val sprites: List<SpriteData>
     private var spritesUncombined: List<SpriteData> = emptyList()
@@ -67,7 +68,7 @@ class OamStateReasoner(
 //        }
 //        val damaged = mapStatsTracker.isDamaged(tile, attribute)
         val blockable = calcBlockable(tile, tileAttribute)
-        val state = toState(damaged, isOverworld)
+        val state = toState(damaged, isOverworld, isGannon)
         // could look up the direction based on tile and sprite
         // arrow
         // wizard
@@ -93,7 +94,7 @@ class OamStateReasoner(
         return Agent(
             index = index, point = point,
             dir = findDir,
-            state = toState(damaged, isOverworld), tile = tile, attribute = attribute,
+            state = toState(damaged, isOverworld, isGannon), tile = tile, attribute = attribute,
             tileByte = tile.toString(16), attributeByte = attribute.toString(16),
             damaged = damaged,
             blockable = blockable,
@@ -142,10 +143,12 @@ class OamStateReasoner(
         return mutable
     }
 
-    private fun SpriteData.toState(damaged: Boolean, isOverworld: Boolean): EnemyState =
+    private fun SpriteData.toState(damaged: Boolean, isOverworld: Boolean, isGannon: Boolean): EnemyState =
         when {
             this.hidden -> EnemyState.Dead
-            isLoot -> EnemyState.Loot
+            isOverworld && isLoot -> EnemyState.Loot
+            isGannon && this.tile in EnemyGroup.triforceTiles -> EnemyState.Loot
+            !isOverworld && isLoot -> EnemyState.Loot
             isOverworld && isProjectile -> EnemyState.Projectile
             !isOverworld && isProjectileLevel -> EnemyState.Projectile
             // treat as projectile for now

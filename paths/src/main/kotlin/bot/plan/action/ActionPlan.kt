@@ -826,17 +826,24 @@ object LootKnowledge {
 }
 
 class GetLoot(
-    private val adjustInSideLevelBecauseGannon: Boolean = false,
+    /**
+     * make various adjustments to get the loot after gannon is dead
+     */
+    private val getGannonLoot: Boolean = false,
     private val onlyIfYouNeedIt: Boolean = false
 ) : Action {
     // gannon triforce pieces are sometimes projectiles
     // yea but then we are going to route link into the projectiles
     // so now I parameterize this so that it only ignores projectiles when in gannon
     private val routeTo =
-        RouteTo(params = RouteTo.Param(whatToAvoid = RouteTo.Param.makeIgnoreProjectiles(adjustInSideLevelBecauseGannon)))
+        RouteTo(params = RouteTo.Param(whatToAvoid = RouteTo.Param.makeIgnoreProjectiles(getGannonLoot)))
 
     override fun complete(state: MapLocationState): Boolean =
         neededReachableLoot(state).isEmpty()
+//        if (getGannonLoot) hasTriforce(state).isEmpty() else neededReachableLoot(state).isEmpty()
+
+    private fun hasTriforce(state: MapLocationState): List<Agent> =
+        state.frameState.enemies.filter { it.tile == triforceTileLeft }
 
     // it cant be too close to the not passable spot
     // maybe just make sure all of it is passable
@@ -848,7 +855,7 @@ class GetLoot(
 
     override fun nextStep(state: MapLocationState): GamePad {
         d { " GET LOOT" }
-        val lootList = if (adjustInSideLevelBecauseGannon) state.neededLoot.filter { it.tile == triforceTileLeft } else state.neededLoot
+        val lootList = if (getGannonLoot) hasTriforce(state) else state.neededLoot
 
         val loot = lootList.sortedBy {
             it.point.distTo(state.link)
@@ -872,7 +879,7 @@ class GetLoot(
         // the target cannot actually be beyond the bottom two
         // lines that would be obsurd
         // need this only for gannon I think
-        if (adjustInSideLevelBecauseGannon && target.y > 8.grid) {
+        if (getGannonLoot && target.y > 8.grid) {
             target = FramePoint(target.x, 8.grid)
         }
 
@@ -883,15 +890,11 @@ class GetLoot(
             halfInsidePassable(state, it, false)
         }
 
-//        val targets = NearestSafestPoint.mapNearest(state, target.lootTargets)
-//        // i think this is ok, at least for vis
-//        target = NearestSafestPoint.mapNearest(state, listOf(loot.first().point)).first()
-
         // map nearest can cause zelda to get stuck sometimes
         d { " get loot for $target from targets $targets" }
         return routeTo.routeTo(
             state, targets,
-            RouteTo.RouteParam(forceNew = previousTarget != target) // mapNearest = false
+            RouteTo.RouteParam(forceNew = previousTarget != target),
         )
     }
 

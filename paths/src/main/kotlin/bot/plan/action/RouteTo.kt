@@ -469,6 +469,8 @@ class RouteTo(val params: Param = Param()) {
         nextPoint1 = route?.popOrEmpty() ?: FramePoint()
         if (nextPoint1.isZero) {
             d { "NO ROUTE" }
+        } else {
+            d { " router size: ${route?.numPoints ?: 0}" }
         }
         route?.next5()
         planCount = 0

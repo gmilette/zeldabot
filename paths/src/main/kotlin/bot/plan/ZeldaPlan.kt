@@ -1446,6 +1446,7 @@ private fun PlanBuilder.startHereAtLoaded() {
             magicKey = true,
             whistle = true,
             bait = true,
+            setTriforce = true,
             boomerang = ZeldaItem.MagicalBoomerang
         )
     )

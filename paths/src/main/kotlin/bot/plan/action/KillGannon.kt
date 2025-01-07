@@ -64,10 +64,8 @@ class KillGannon : Action {
     private fun gannonDefeated(state: MapLocationState): Boolean =
         state.frameState.enemies.any { it.isGannonTriforce() }
 
-    private val triforceTiles = setOf(triforceTileLeft)
-
     private fun Agent.isGannonTriforce(): Boolean =
-        tile in triforceTiles
+        tile in EnemyGroup.triforceTiles
 
     override fun target(): FramePoint {
         return FramePoint()
@@ -143,7 +141,7 @@ private object GannonParts {
 }
 
 // link had trouble targetting the body, kill all is too cautious and looking for
-// safe spots. no need for this complicated thing, 
+// safe spots. no need for this complicated thing,
 val gannonKill = DecisionAction(KillGannon(), KillAll(
     targetOnly = gannonTargets,
     useBombs = true
@@ -165,8 +163,10 @@ class GannonAttack : Action {
     private var frames = 0
 
     override fun complete(state: MapLocationState): Boolean {
-        // never complete if gannon is showing, then maybe link will just keep shooting arrows
-        val complete = frames >= freq //&& !state.gannonShowing()
+        // the idea is, if link is showing, the bot should try to shoot in that direction
+        // a few times in the hopes of hitting quickly, then it will start switching
+        val limit = if (state.gannonShowing()) freq * 2 else freq
+        val complete = frames >= limit
         if (complete) {
             frames = 0
             swordAction.reset()

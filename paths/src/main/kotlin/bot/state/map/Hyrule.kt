@@ -62,7 +62,8 @@ class Hyrule {
 class MapCellData(
     val name: String = "",
     val objective: Objective = Objective.empty,
-    // path parameters: if its a room with u shaped traps,
+    val attributes: Set<MapCellAttribute> = emptySet(),
+    // path parameters: if its a room with u shaped traps,,
     // path planning better do full plans, if there are
     // no traps, short plan depth. maybe level of danger
     // if the map is cut off top from bottom,
@@ -117,6 +118,11 @@ data class Objective(
         Center(FramePoint(120, 88-2)),
         Right(FramePoint(152, 96-2))
     }
+}
+
+enum class MapCellAttribute {
+    None,
+    NoAttack
 }
 
 class MapCell(

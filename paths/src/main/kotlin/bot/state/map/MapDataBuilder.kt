@@ -101,7 +101,8 @@ class MapBuilder {
                 2.grid,
                 1.grid,
                 DestType.Item(ZeldaItem.WhiteSword, EntryType.Walk())
-            )
+            ),
+            attributes = setOf(MapCellAttribute.NoAttack)
         )
         objectives[11] = MapCellData(
             "lev5",
@@ -534,7 +535,7 @@ private class CellBuilder {
     }
 
     private fun build(): MapCellData {
-        return MapCellData(name, destTypes.map { it.build() }.firstOrNull() ?: Objective.empty, exitSet)
+        return MapCellData(name, destTypes.map { it.build() }.firstOrNull() ?: Objective.empty, exits = exitSet)
     }
 
     fun aka(aka: String): CellBuilder {

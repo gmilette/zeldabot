@@ -79,7 +79,7 @@ class LevelCellBuilder {
 //        val typed = toTyped(level)
 
         // getItem true,
-        return MapCell(MapCellPoint(0, 0), spec.loc, MapCellData(spec.name, Objective.empty, ExitSet()), passable,
+        return MapCell(MapCellPoint(0, 0), spec.loc, MapCellData(spec.name, Objective.empty, exits = ExitSet()), passable,
             halfPassable = !spec.isGetItem && spec.isHalfPassable,
             isLevel = true)
     }

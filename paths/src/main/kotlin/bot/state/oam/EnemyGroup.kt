@@ -1,5 +1,7 @@
 package bot.state.oam
 
+import bot.state.Agent
+
 object EnemyGroup {
     const val oldWoman = (0x9a).toInt()
 
@@ -246,10 +248,12 @@ object EnemyGroup {
         bait
     )
 
+    val triforceTiles = setOf(triforceTileLeft, triforceTile)
+
     val loot = setOf(
         compass,
-        triforceTileLeft,
-        triforceTile,
+//        triforceTileLeft,
+//        triforceTile,
         // this just breaks things
 //        clockTile,
 //        silverArrow,

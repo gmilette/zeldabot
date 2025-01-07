@@ -2,10 +2,7 @@ package bot.plan.action
 
 import bot.state.*
 import bot.state.map.*
-import bot.state.oam.EnemyGroup
-import bot.state.oam.Monsters
-import bot.state.oam.circleMonsterCenters
-import bot.state.oam.swordDir
+import bot.state.oam.*
 import util.Geom
 import util.d
 
@@ -254,6 +251,11 @@ object AttackActionDecider {
                             d { " ignore only its just the center" }
                         }
                     }
+
+                    // it's not an enemy
+//                    if (state.frameState.mapLoc == 66) {
+//                        enemies.removeIf { it.tile in EnemyGroup.triforceTiles }
+//                    }
                 }
                 // nuance here
                 // for sword guys, absolutely don't attach
@@ -274,7 +276,12 @@ object AttackActionDecider {
                 }
             }
         } else {
-            enemies.filter { it.tile !in EnemyGroup.enemiesToNotAttackInOverworld }
+            if (state.currentMapCell.mapData.attributes.contains(MapCellAttribute.NoAttack)) {
+                // don't attack anything
+                emptyList()
+            } else {
+                enemies.filter { it.tile !in EnemyGroup.enemiesToNotAttackInOverworld }
+            }
 //        }.also {
 //            d { " attackable opposite from $oppositeFrom" }
 //            for (agent in it) {

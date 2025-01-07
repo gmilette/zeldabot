@@ -49,7 +49,7 @@ class FrameRoute(val path: List<FramePoint>) {
             return
         }
         for (framePoint in pathStack.subList(0, min(5, pathStack.size-1))) {
-            d { " : $framePoint ${framePoint.isTopRightCorner}"}
+            d { " : $framePoint dir=${framePoint.direction?.toArrow() ?: ""} corner=${framePoint.isTopRightCorner}"}
         }
     }
 
@@ -134,7 +134,7 @@ class FrameRoute(val path: List<FramePoint>) {
     }
 
     fun decideDirection(linkPt: FramePoint, linkDir: Direction?): Direction? {
-        d { "VERTEX: cornering $linkPt $linkDir" }
+        d { "VERTEX: cornering $linkPt $linkDir pathsize=${pathStack.size}" }
         if (pathStack.size < 4) return null
         val linkDir = linkDir ?: return null
 
@@ -143,7 +143,7 @@ class FrameRoute(val path: List<FramePoint>) {
         val dirs = PrevBuffer<Direction>(size = 4)
         dirs.add(linkDir)
         pathStack.take(4).zipWithNext().forEach { (first, second) ->
-            println("Pair: $first, $second")
+            d { "Pair: $first, $second" }
             dirs.add(first.dirTo(second))
         }
 
@@ -151,6 +151,13 @@ class FrameRoute(val path: List<FramePoint>) {
             d { "all same no change " }
             null
         } else {
+            // fold all dirs into a single string
+            d { "dirs: ${dirs.buffer.joinToString(" ") { it.toArrow() }}" }
+            for (direction in dirs.buffer) {
+                if (linkDir.perpendicularTo(direction)) {
+                    d { "perpendicular to $direction" }
+                }
+            }
             dirs.buffer.firstOrNull { linkDir.perpendicularTo(it) }.also {
                 d { "moving corner in direction $it" }
             }
