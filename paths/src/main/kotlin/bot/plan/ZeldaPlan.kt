@@ -186,6 +186,7 @@ object ZeldaPlan {
             2 using level2
             // need the cash to get the candle
             afterLevel2ItemsLetterEtcPhase(false)
+            startHereAt(raftLadderSetup)
             itemsNearLevel2CandleShieldPhase()
 
 

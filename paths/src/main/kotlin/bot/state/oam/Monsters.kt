@@ -131,11 +131,11 @@ object MonstersOverworld {
     val ghini = Monster(name = "worldghost")
     val moblin = Monster(name = "arrowguy",
         tile = setOf(0xf0, 0xf2, 0xf4, 0xf6, 0xf8, 0xfa, 0xfe, ), // need to double check
-        color = blueAndRed
+        color = redAndGrey // i dont think it can. be blue
     )
     val peahat = Monster(name = "spin",
         tile = setOf(0xc6),
-        color = red)
+        color = red).immuneToB()
     val zora = Monster(name = "waterguy",
         tile = setOf(0xbc, 0xbe, 0xEC, 0xEE)
     ).immuneToB()
@@ -370,6 +370,7 @@ private val grey = setOf(MonsterColor.grey)
 private val red = setOf(MonsterColor.red)
 private val blue = setOf(MonsterColor.blue)
 private val blueAndRed = setOf(MonsterColor.blue, MonsterColor.red)
+private val redAndGrey = setOf(MonsterColor.red, MonsterColor.grey)
 private val blueAndRedAndGrey = setOf(MonsterColor.blue, MonsterColor.red, MonsterColor.grey)
 private val unknown = setOf(MonsterColor.red, MonsterColor.blue, MonsterColor.grey, MonsterColor.other)
 

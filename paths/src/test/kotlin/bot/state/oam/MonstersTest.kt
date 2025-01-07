@@ -11,6 +11,11 @@ class MonstersTest {
     }
 
     @Test
+    fun `test moblin`() {
+        Monsters.damaged(level = 0, 0xf2 to 43) shouldBe false
+    }
+
+    @Test
     // these this
     fun `test mummy in level 1`() {
         val a = Monsters.lookup(9)[circleMonster]?.affectedByBoomerang
