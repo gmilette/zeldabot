@@ -78,14 +78,14 @@ class MapLocationState(
         if (lastPoints.allSameAndFull()) {
             return Direction.randomDirection()
         }
-        val lastDirections = lastPoints.buffer.zipWithNext { a, b -> a.dirTo(b) }
+        // don't keep the NONE
+        val lastDirections = lastPoints.buffer.zipWithNext { a, b -> a.dirTo(b) }.filter { it != Direction.None }
         val keyWithMostItems = lastDirections.groupBy { it.ordinal }.maxByOrNull { it.value.size }?.key ?: 0
         // idea: if there are two directions counts that are equal, link is oscillating, maybe do something different
         val direction = Direction.entries[keyWithMostItems]
-        d { " bestdirction sorted dirs $keyWithMostItems $direction moves $lastPoints"}
+        d { " best direction sorted dirs $keyWithMostItems $direction moves $lastPoints dirs: $lastDirections"}
         return direction
     }
-
     fun clearHistory() {
         framesOnScreen = 0
     }

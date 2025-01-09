@@ -41,7 +41,7 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
     private var directionCt = mutableMapOf<GamePad, DataCount>()
 
     init {
-        for (gamePad in GamePad.values()) {
+        for (gamePad in GamePad.entries) {
             directionCt[gamePad] = DataCount()
         }
     }

@@ -113,6 +113,12 @@ class MoveBuffer(val size: Int = 2) {
     val isFull: Boolean
         get() = buffer.size == size
 
+    fun addAll(pts: List<FramePoint>) {
+        for (pt in pts) {
+            add(pt)
+        }
+    }
+
     fun add(pt: FramePoint) {
         buffer.add(pt)
         if (buffer.size > size) {

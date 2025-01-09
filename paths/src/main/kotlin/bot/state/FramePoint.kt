@@ -138,6 +138,8 @@ fun FramePoint.directionTo(to: FramePoint): GamePad {
 
 fun FramePoint.dirTo(to: FramePoint): Direction {
     return when {
+        x == to.x && y == to.y -> Direction.None
+
         x == to.x -> {
             if (y < to.y) Direction.Down else Direction.Up
         }
