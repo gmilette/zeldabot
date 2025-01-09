@@ -596,8 +596,7 @@ class LadderAction: Action {
         get() = ""
 }
 
-class Timeout(action: Action) : WrappedAction(action) {
-    private val frameLimit = 400
+class Timeout(action: Action, private val frameLimit: Int = 400) : WrappedAction(action) {
     private var frames = 0
 
     override fun nextStep(state: MapLocationState): GamePad {

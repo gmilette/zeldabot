@@ -31,8 +31,12 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
     var stepHeal = 0.0
     var totalHeal = 0.0
     val bombsUsed = DataCount()
+    val keysUsed = DataCount()
+    val keysGot = DataCount(-1, -1)
+    val rupeesSpent = DataCount()
+    val rupeesGained = DataCount(-1, -1)
 
-    private val dataCounts = listOf(bombsUsed)
+    private val dataCounts = listOf(bombsUsed, keysGot, keysUsed, rupeesSpent, rupeesGained)
 
     private var directionCt = mutableMapOf<GamePad, DataCount>()
 
@@ -65,7 +69,9 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         val numFrames: Int = 0,
         val hits: Int = 0,
         val damage: Double = 0.0,
-        val heal: Double = 0.0
+        val heal: Double = 0.0,
+        val keys: Int = 0,
+        val rupees: Int
     )
 
     val completedStep = mutableListOf<StepCompleted>()
@@ -78,6 +84,8 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         
         setHearts(state)
         setBombs(state)
+        setKeys(state)
+        setRupees(state)
     }
 
     private fun setHearts(state: MapLocationState) {
@@ -125,6 +133,27 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         }
     }
 
+    private fun setKeys(state: MapLocationState) {
+        val num = state.frameState.inventory.numKeys
+        val previous = state.previousNumKeys
+        if (num < previous) {
+            keysUsed.inc()
+        } else if (num > previous) {
+            keysGot.inc()
+        }
+    }
+
+    private fun setRupees(state: MapLocationState) {
+        val num = state.frameState.inventory.numRupees
+        val previous = state.previousNumRupees
+        val diff = abs(num - previous)
+        if (num < previous) {
+            rupeesSpent.add(diff)
+        } else if (num > previous) {
+            rupeesGained.add(diff)
+        }
+    }
+
     private fun logCompletedStep() {
         completedStep.forEachIndexed { index, stepCompleted ->
             stepCompleted.apply {
@@ -134,10 +163,10 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         if (SAVE) {
             val csvWriter2 = CsvWriter()
             csvWriter2.open(outputFile, false) {
-                writeRow("index", "level", "mapLoc", "name", "time", "totalTime", "numFrames", "action", "hearts", "bombsUsed", "hits", "damage", "heal")
+                writeRow("index", "level", "mapLoc", "name", "time", "totalTime", "numFrames", "action", "hearts", "bombsUsed", "hits", "damage", "heal", "keys", "rupees")
                 completedStep.forEachIndexed { index, stepCompleted ->
                     stepCompleted.apply {
-                        writeRow(index, level, mapLoc, name, time, totalTime, numFrames, action, hearts, bombsUsed, hits, damage, heal)
+                        writeRow(index, level, mapLoc, name, time, totalTime, numFrames, action, hearts, bombsUsed, hits, damage, heal, keys, rupeesGained)
                     }
                 }
             }
@@ -248,7 +277,9 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
             frameCt,
             hits = hits,
             damage = damage,
-            heal = heal
+            heal = heal,
+            keysGot.perStep,
+            rupeesGained.perStep
         )
     }
 
@@ -267,6 +298,11 @@ data class DataCount(
     fun inc() {
         perStep++
         total++
+    }
+
+    fun add(amount: Int) {
+        perStep += amount
+        total += amount
     }
 
     fun actionDone() {

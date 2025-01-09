@@ -298,8 +298,9 @@ object EnemyGroup {
         waterMonsterPair.tile,
         waterMonsterPairUnder.tile, // also it is ghost
         waterMonsterPairUnder2.tile,
-        shopOwner.tile,
-        shopOwner2.tile,
+        // if I enable this link cannot attack the moblins
+//        shopOwner.tile,
+//        shopOwner2.tile,
         shopkeeperAndBat.tile
     )
 

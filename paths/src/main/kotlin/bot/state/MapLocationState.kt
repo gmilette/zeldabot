@@ -34,6 +34,8 @@ class MapLocationState(
     var previousHeart: Double = -1.0,
     var previousDamageNumber: Int = -1,
     var previousNumBombs: Int = 0,
+    var previousNumRupees: Int = 0,
+    var previousNumKeys: Int = 0,
     var previousGamePad: GamePad = GamePad.None,
 
     // null: not deployed

@@ -32,7 +32,7 @@ import util.d
 fun main(vararg args: String) = application {
     Window(
         onCloseRequest = ::exitApplication,
-        state = WindowState(width = 800.dp, height = 500.dp),
+        state = WindowState(width = 800.dp, height = 600.dp),
         title = "Zelda"
     ) {
         for (arg in args) {

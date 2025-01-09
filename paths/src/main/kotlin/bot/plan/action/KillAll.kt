@@ -213,6 +213,7 @@ class KillAll(
                 (lookForBombs && state.frameState.inventory.numBombs == 0)) {
 //                (lookForBombs || state.frameState.inventory.numBombs == 0)) {
                 if (ItemDropPrediction().bombsLikely()) {
+                    d { " bombs likely "}
                     // todo: also have to make all other enemies into projectiles somehow
                     val enemiesThatMightProduceBombs =
                         aliveEnemies.filter { it.color == MonsterColor.blue }
@@ -300,14 +301,14 @@ class KillAll(
                             GamePad.B
                         } else if (it == GamePad.B && (firstAttackBomb || useBombs)) {
                             numPressB = 3
-                            d { "USE BOMB!" }
+                            d { "USE BOMB! it=$it first $firstAttackBomb $useBombs" }
                             numPressB++
                             if (numPressB > 3) {
                                 firstAttackBomb = false
                             }
                             GamePad.B
                         } else {
-                            d { "USE BOMB! Not yet $numPressB" }
+                            d { "move numbB=$numPressB" }
                             it
                         }
                     }

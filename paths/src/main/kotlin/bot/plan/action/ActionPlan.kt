@@ -474,18 +474,58 @@ class WaitUntilCloudIsGone : Action {
 
     override fun complete(state: MapLocationState): Boolean {
         frames++
-        return frames > 1000 || (state.frameState.enemiesRaw.firstOrNull { it.tile == bombSmoke } == null &&
+        return frames > 500 || (state.frameState.enemiesRaw.firstOrNull { it.tile == bombSmoke } == null &&
                 state.frameState.enemiesRaw.firstOrNull { it.tile in EnemyGroup.shopOwners } != null)
     }
+
+    override val name: String
+        get() = "WaitUntilCloudIsGone $frames"
 }
 
 class WaitUntilFireIsGone : Action {
+    private var frames: Int = 0
+
+    override fun reset() {
+        frames = 0
+    }
+
     override val escapeActionEnabled: Boolean
         get() = false
 
     override fun complete(state: MapLocationState): Boolean {
-        return (state.frameState.enemiesRaw.none { it.tile == fire })
+        return frames > 500 || (state.frameState.enemiesRaw.none { it.tile == fire })
     }
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        frames++
+        return GamePad.None
+    }
+}
+
+// could try this
+class WaitUntilFireAppearsThenIsGone : Action {
+    private var sawFire = false
+
+    override fun reset() {
+        sawFire = false
+    }
+
+    override val escapeActionEnabled: Boolean
+        get() = false
+
+    override fun complete(state: MapLocationState): Boolean {
+        return sawFire && !hasFire(state)
+    }
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        if (hasFire(state)) {
+            d { "saw fire" }
+            sawFire = true
+        }
+        return GamePad.None
+    }
+
+    private fun hasFire(state: MapLocationState) = state.frameState.enemiesRaw.any { it.tile == fire }
 }
 
 class GoInConsume(private val moves: Int = 5, private val dir: GamePad = GamePad.MoveUp) :

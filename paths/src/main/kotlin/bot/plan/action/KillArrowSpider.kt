@@ -1,8 +1,6 @@
 package bot.plan.action
 
-import bot.state.FramePoint
-import bot.state.GamePad
-import bot.state.MapLocationState
+import bot.state.*
 import bot.state.map.MapConstants
 import bot.state.map.andAHalf
 import bot.state.map.grid
@@ -19,6 +17,7 @@ class KillArrowSpider : Action {
         val attackAreaLeftSideMiddleVertical = FramePoint(8.grid, 7.grid)
         val attackAreaLeftSideMiddleVerticalBottom = FramePoint(8.grid, 8.grid)
         val safeArea = FramePoint(7.grid.andAHalf, 9.grid)
+        val emergeArea = safeArea.upOneGrid
     }
 
     private val positionShootActions = mutableListOf<Action>(
@@ -68,12 +67,20 @@ class KillArrowSpider : Action {
 
 // start 8_62_m_b
 fun killSpider(): Action {
+    return DecisionAction(emergeAndKill(), Optional(HideFromSpider())) {
+        it.vulnerable() || it.aliveEnemies.isEmpty()
+    }
+}
+
+private fun emergeAndKill(): Action {
+    val emerge = InsideNav(KillArrowSpider.KillArrowSpiderData.emergeArea, tag = "emerge from spider")
     val kill = KillAll(useBombs = true,
         allowBlock = true, // but if spider head isn't open, do block
         targetOnly = listOf(spiderHeadOpen, spiderHeadOpening))
 //        targetOnly = listOf(spiderHeadOpen, spiderHeadOpening, spiderClaw2, spiderClaw))
-    return DecisionAction(kill, Optional(HideFromSpider())) {
-        it.vulnerable() || it.aliveEnemies.isEmpty()
+    // can't attack from hiding
+    return DecisionAction(Optional(emerge), kill) { state ->
+        state.frameState.link.point.toRect().intersect(KillArrowSpider.KillArrowSpiderData.safeArea.toRect())
     }
 }
 

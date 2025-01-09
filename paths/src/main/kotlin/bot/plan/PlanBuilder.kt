@@ -103,7 +103,7 @@ class PlanBuilder(
             // have to wait for the triforce animation
             // useless
 //        goIn(GamePad.None, 500)
-            if (consume && level != 7) {
+            if (consume && (level != 7 && level != 8)) {
                 goInConsume(exitDirection.toGamePad(), 20)
             }
             recall
@@ -730,10 +730,10 @@ class PlanBuilder(
         return this
     }
 
-    fun goTo(to: FramePoint, makePassable: FramePoint? = null, ignoreProjectiles: Boolean = false): PlanBuilder {
+    fun goTo(to: FramePoint, makePassable: FramePoint? = null, ignoreProjectiles: Boolean = false, monitorEnabled: Boolean = true): PlanBuilder {
         // need to add this elsewhere probably
         add(lastMapLoc, StartAtAction(0, -1))
-        goAbout(to, 2, 1, false, makePassable = makePassable, ignoreProjectiles = ignoreProjectiles)
+        goAbout(to, 2, 1, false, makePassable = makePassable, ignoreProjectiles = ignoreProjectiles, monitorEnabled = monitorEnabled)
         return this
     }
 
@@ -779,7 +779,9 @@ class PlanBuilder(
     }
 
     private fun goInGetCenterItem(to: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, showLetter: Boolean = false): PlanBuilder {
-        goTo(to, makePassable = to)
+        // it's possible the shop will be printing something and that
+        // can take some time, either wait for it to be done
+        goTo(to, makePassable = to, monitorEnabled = false)
         // move in the door
         goInConsume(GamePad.MoveUp, 5)
         if (showLetter) {
@@ -910,7 +912,7 @@ class PlanBuilder(
             GoIn(MapConstants.fourthGrid, direction, desiredDirection = direction.toDirection(), reset = true),
             GoIn(2, GamePad.B, reset = true),
             GoIn(75, GamePad.None, reset = true),
-            WaitUntilFireIsGone(),
+            CompleteIfMapChanges(WaitUntilFireIsGone()),
             if (retry) {
                 TimeoutThen(
                     action = CompleteIfMapChanges(InsideNav(to, makePassable = to, ignoreProjectiles = false, tag = "go in")),
@@ -920,6 +922,8 @@ class PlanBuilder(
                 CompleteIfMapChanges(
                     Timeout(
                         action = InsideNav(to, makePassable = to, ignoreProjectiles = false, tag = "go in"),
+                        // brown 100 secret didn't work, link just walked away
+                        frameLimit = 1000
                     )
                 )
             },
@@ -942,9 +946,9 @@ class PlanBuilder(
         return this
     }
 
-    fun goAbout(to: FramePoint, horizontal: Int, vertical: Int = 1, negVertical: Boolean = false, ignoreProjectiles: Boolean = false, makePassable: FramePoint? = null): PlanBuilder {
+    fun goAbout(to: FramePoint, horizontal: Int, vertical: Int = 1, negVertical: Boolean = false, ignoreProjectiles: Boolean = false, makePassable: FramePoint? = null, monitorEnabled: Boolean = true): PlanBuilder {
         add(lastMapLoc, InsideNavAbout(to, horizontal, vertical, negVertical = if (negVertical) 1 else 0,
-            ignoreProjectiles = ignoreProjectiles, makePassable = makePassable))
+            ignoreProjectiles = ignoreProjectiles, makePassable = makePassable, setMonitorEnabled = monitorEnabled))
         return this
     }
 

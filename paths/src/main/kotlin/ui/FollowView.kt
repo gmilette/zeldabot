@@ -66,13 +66,15 @@ fun FollowView(
         Progress(state)
 
         Row {
-            val hits = state.planRunner.runLog.totalHits
-            val bombs = state.planRunner.runLog.bombsUsed.total
-            FollowCard(title = "Hits", text = "$hits")
-            FollowCard(title = "Bombs", text = "$bombs")
-//            FollowCard(width = 100.dp, title = "Potions Refills", text = "1")
-//            FollowCard(width = 100.dp, title = "Bomb Refills", text = "1")
-//            FollowCard(width = 100.dp, title = "Rupee Refills", text = "1")
+            FollowCard(title = "Hits", text = "${state.planRunner.runLog.totalHits}")
+            FollowCard(title = "Bombs", text = state.planRunner.runLog.bombsUsed.total.toString())
+            FollowCard(title = "Keys      Total", text = state.planRunner.runLog.keysGot.total.toString())
+        }
+
+        Row {
+            FollowCard(title = "Keys Used", text = state.planRunner.runLog.keysUsed.total.toString())
+            FollowCard(title = "Rupees Spent", text = state.planRunner.runLog.rupeesSpent.total.toString())
+            FollowCard(title = "Rupees Total", text = state.planRunner.runLog.rupeesGained.total.toString())
         }
 
         Row {

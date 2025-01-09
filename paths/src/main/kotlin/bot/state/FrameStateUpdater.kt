@@ -41,6 +41,8 @@ class FrameStateUpdater(
             this.state.previousHeart = previous.life
             this.state.previousDamageNumber = previous.damageNumber
             this.state.previousNumBombs = previous.numBombs
+            this.state.previousNumKeys = previous.numKeys
+            this.state.previousNumRupees = previous.numRupees
         }
 
         state.lastGamePad = currentGamePad

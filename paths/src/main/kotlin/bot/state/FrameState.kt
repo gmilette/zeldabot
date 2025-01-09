@@ -22,6 +22,8 @@ data class FrameState(
     val seenBoomerang: Boolean,
     val inventory: Inventory = Inventory(api)
 ) {
+    val numRupees: Int = inventory.numRupees
+    val numKeys: Int = inventory.numKeys
     val numBombs: Int = inventory.numBombs
     val life: Double = inventory.heartCalc.lifeInHearts()
     val damageNumber: Int = inventory.heartCalc.damageNumber()

@@ -210,7 +210,7 @@ class OamStateReasoner(
             }
         }
 
-        if (DEBUG || true) {
+        if (DEBUG) {
             d { " raw sprites " }
             spritesRaw.forEachIndexed { index, sprite ->
                 d { "$index: $sprite ${LinkDirectionFinder.dirFor(sprite)}" }

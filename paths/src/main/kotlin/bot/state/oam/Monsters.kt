@@ -112,12 +112,15 @@ val swordDir = DirectionMap(
 )
 
 object MonstersOverworld {
-    val armos = Monster(name = "statue")
+    val armos = Monster(name = "statue",
+        tile = setOf(0xa0, 0xa4, 0xa6),
+        // red
+        )
     val leever = Monster(name = "undergroundguy",
-        tile = setOf(0xc4),
+        tile = setOf(0xc2, 0xc4), //0xc0 is underground, but it's not boomerangable yet
         color = blueAndRed)
     val lynel = Monster(name = "swordshooter",
-        tile = setOf(0xD0, 0xD2, 0xD4, 0xD6, 0xD8, 0xCE), //, 0xCE),
+        tile = setOf(0xD0, 0xD2, 0xD4, 0xD6, 0xD8, 0xCE), //, 0xCE), // not sure CE is there
         color = blueAndRed)
         .avoidFront()
         .typeD(MonsterColor.red)
@@ -127,6 +130,7 @@ object MonstersOverworld {
         color = blueAndRed,
     ).typeA(MonsterColor.red).typeB(MonsterColor.blue)
     val tektite = Monster(name = "spider",
+        tile = setOf(0xcc, 0xca),
         color = blueAndRed) // confirm
     val ghini = Monster(name = "worldghost")
     val moblin = Monster(name = "arrowguy",
@@ -238,7 +242,7 @@ object Monsters {
         color = blueAndRed, // guess
         tile = setOf(0xbe, 0xb6, 0xBA, 0xb4, 0xac, 0xb0, 0xB8, 0xBC)).inL()
     val keese = Monster(name = "bat", tile=setOf(0x9c, 0x9a),
-        color = blue).inL() // 1 / 41
+        color = blueAndRed).inL() // 1 / 41
     val lanmoia = Monster(name = "eyeworm",
         color = blueAndRed).inL() // confirm
     val likelike = Monster(name = "pancake",

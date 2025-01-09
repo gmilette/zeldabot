@@ -186,7 +186,6 @@ object ZeldaPlan {
             2 using level2
             // need the cash to get the candle
             afterLevel2ItemsLetterEtcPhase(false)
-            startHereAt(raftLadderSetup)
             itemsNearLevel2CandleShieldPhase()
 
 
@@ -208,6 +207,7 @@ object ZeldaPlan {
             // probably don't need this, but the margin is about 15 so yea get it
             obj(Dest.Secrets.bomb30Start) // 253
             greenPotion()
+            startHereAt(raftLadderSetup)
             ringLevels()
             greenPotion()
 //            startHereAt(raftLadderSetup)
@@ -248,6 +248,7 @@ object ZeldaPlan {
     private fun PlanBuilder.afterLevel2ItemsLetterEtcPhase(withBombHeart: Boolean = true) {
         add {
             phase(Phases.forest30)
+            startHereAt(raftLadderSetup)
             obj(Dest.Secrets.secretForest30NorthEast)
             phase(Phases.forest30 + "_end")
             obj(Dest.Secrets.bombSecret30North)
@@ -1169,9 +1170,10 @@ private val level7: PlanBuilder.() -> Unit
         wait(300)
         kill
         upk
+        cheatBombs
         bombRight
         seg("Kill hands")
-        switchToWand
+//        switchToWand
         killHandsInLevel7
         goTo(FramePoint(2.grid, 8.grid))
         addNext(

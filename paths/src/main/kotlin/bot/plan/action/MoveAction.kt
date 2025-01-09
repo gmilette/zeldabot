@@ -81,7 +81,7 @@ class CompleteIfMapChanges(private val wrapped: Action) : Action {
     }
 
     override val name: String
-        get() = "Until Change ${wrapped.name}"
+        get() = "Until Change Map from $initialMapLoc ${wrapped.name}"
 }
 
 class CompleteIfHaveBombs(wrapped: Action) : WrappedAction(wrapped) {
@@ -174,6 +174,7 @@ class InsideNavAbout(
                     makePassable?.let { listOf(makePassable) } ?: emptyList(),
                     forceHighCost = highCost
                 ),
+                allowAttack = !shop
             )
         )
 
