@@ -13,6 +13,7 @@ import bot.state.map.destination.EntryType
 import bot.state.map.destination.ZeldaItem
 import bot.state.map.level.LevelMapCellsLookup
 import bot.state.oam.*
+import org.apache.commons.math3.analysis.function.Add
 
 class PlanBuilder(
     private val mapData: MapCells,
@@ -407,6 +408,16 @@ class PlanBuilder(
     val enoughForPotion: PlanBuilder
         get() {
             add(lastMapLoc, EnoughForPotion)
+            return this
+        }
+    val cheatAddKey: PlanBuilder
+        get() {
+            add(lastMapLoc, AddKey)
+            return this
+        }
+    val enoughForArchery: PlanBuilder
+        get() {
+            add(lastMapLoc, EnoughForArchery)
             return this
         }
     val enoughForBait: PlanBuilder

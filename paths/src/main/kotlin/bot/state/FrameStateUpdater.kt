@@ -119,7 +119,7 @@ class FrameStateUpdater(
             d { "update enemy: $enemy" }
         }
 
-        val frame = FrameState(api, theEnemies, theUncombined, theRaw, level, mapLoc, link, ladder, seenBoomerang)
+        val frame = FrameState(api, theEnemies, theUncombined, theRaw, level, mapLoc, link, ladder, seenBoomerang, Inventory(api))
 
         if (!frame.isScrolling) {
             // don't track if the screen is scrolling

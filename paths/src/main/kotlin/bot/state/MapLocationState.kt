@@ -51,7 +51,8 @@ class MapLocationState(
         0,
         emptyAgent,
         emptyAgent,
-        false
+        false,
+        Inventory(ApiSource.getAPI())
     ),
 
     var framesOnScreen: Int = 0,

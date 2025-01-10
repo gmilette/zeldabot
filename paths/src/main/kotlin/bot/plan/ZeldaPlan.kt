@@ -1228,6 +1228,8 @@ private val level8: PlanBuilder.() -> Unit
         // clear out a little before moving on
         killUntil(4)
         bombUp
+        enoughForArchery
+        cheatAddKey
         upm
         killArrowSpider // kill arrow guy
         loot // spider tends to generate loot sometimes

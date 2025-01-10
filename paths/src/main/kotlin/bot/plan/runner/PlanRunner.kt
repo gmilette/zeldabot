@@ -174,7 +174,7 @@ class PlanRunner(private val makePlan: PlanMaker,
         levelExperiment = start.experiment
         val root = "mapstate/mapstate_${level}_${mapLoc}.save"
 
-        d { " run runHere $mapLoc lev $level for map $root"}
+        d { " run runHere $mapLoc lev $level for map $root" }
         startPath = root
         action = masterPlan.skipToStartAt()
         runLog = RunActionLog("mapstate_${level}_${mapLoc}", target)

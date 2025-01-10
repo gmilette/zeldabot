@@ -20,7 +20,7 @@ data class FrameState(
     val link: Agent,
     val ladder: Agent?,
     val seenBoomerang: Boolean,
-    val inventory: Inventory = Inventory(api)
+    val inventory: Inventory
 ) {
     val numRupees: Int = inventory.numRupees
     val numKeys: Int = inventory.numKeys
@@ -149,28 +149,22 @@ data class Inventory(
         }
     }
 
-    fun addRupeeEnough(state: FrameState, cost: Int) {
-        val current = state.inventory.numRupees
-        if (current < cost) {
-            addRupee(state, cost)
-        }
-    }
+//    fun addRupee(add: Int) {
+//        val current = numRupees
+//        val plus100 = max(252, current + add)
+//        api.writeCPU(Addresses.numRupees, plus100)
+//    }
 
-    fun addRupee(state: FrameState) {
-        addRupee(state, 100)
-    }
-
-    fun addRupee(state: FrameState, add: Int) {
-        val current = state.inventory.numRupees
-        val plus100 = max(252, current + add)
-        api.writeCPU(Addresses.numRupees, plus100)
-    }
-
-    fun addRupeeIfNeed(state: FrameState, upTo: Int) {
-        val current = state.inventory.numRupees
+    fun addRupeeIfNeed(upTo: Int) {
+        val current = numRupees
         if (current < upTo) {
             api.writeCPU(Addresses.numRupees, upTo)
         }
+    }
+
+    fun addKey() {
+        val current = numKeys
+        api.writeCPU(Addresses.numKeys, current + 1)
     }
 
     object Selected {
