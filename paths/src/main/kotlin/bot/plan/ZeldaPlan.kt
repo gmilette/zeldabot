@@ -958,8 +958,9 @@ private val level4: PlanBuilder.() -> Unit
         bombRightExactly
         //skip key that is up
         bombRight
-        // give space or boomerang?
-        goIn(GamePad.MoveRight, 10)
+        // move even more because I saw
+        // link go backwards accidently
+        goIn(GamePad.MoveRight, 20)
         switchToBoomerang
         kill
         seg("push near")

@@ -692,13 +692,14 @@ class PlanBuilder(
     }
 
     fun pushActionThenGoRight(push: InLocations.Push): PlanBuilder {
-        add(lastMapLoc.right, makePushActionThen(push, moveTo(lastMapLoc.right)))
+        val right = lastMapLoc.right
+        add(right, makePushActionThen(push, right, moveTo(right)))
         return this
     }
 
     fun pushActionThenGoUp(push: InLocations.Push): PlanBuilder {
         val up = lastMapLoc.up
-        add(up, makePushActionThen(push, moveTo(up)))
+        add(up, makePushActionThen(push, up, moveTo(up)))
         return this
     }
 

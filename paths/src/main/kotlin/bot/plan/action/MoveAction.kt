@@ -84,6 +84,27 @@ class CompleteIfMapChanges(private val wrapped: Action) : Action {
         get() = "Until Change Map from $initialMapLoc ${wrapped.name}"
 }
 
+class CompleteIfMapChangesTo(private val wrapped: Action, val to: MapLoc) : Action {
+    private var initialMapLoc: MapLoc = -1;
+
+    private fun changedMapLoc(state: MapLocationState): Boolean =
+        initialMapLoc > 0 && state.frameState.mapLoc == to
+
+    override fun complete(state: MapLocationState): Boolean =
+        changedMapLoc(state) || wrapped.complete(state)
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        d { " CompleteIfMapChanges initial $initialMapLoc current ${state.frameState.mapLoc}" }
+        if (initialMapLoc == -1) {
+            initialMapLoc = state.frameState.mapLoc
+        }
+        return wrapped.nextStep(state)
+    }
+
+    override val name: String
+        get() = "Until Change Map from $initialMapLoc to $to ${wrapped.name}"
+}
+
 class CompleteIfHaveBombs(wrapped: Action) : WrappedAction(wrapped) {
     override fun complete(state: MapLocationState): Boolean =
         state.frameState.inventory.numBombs != 0 || super.complete(state)

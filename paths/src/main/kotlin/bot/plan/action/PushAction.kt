@@ -6,8 +6,8 @@ import bot.state.map.*
 import util.d
 
 // timeout
-fun makePushActionThen(push: InLocations.Push, then: Action): Action =
-    CompleteIfMapChanges(PushAction(push, then))
+fun makePushActionThen(push: InLocations.Push, to: MapLoc, then: Action): Action =
+    CompleteIfMapChangesTo(PushAction(push, then), to = to)
 
 fun makeStatuePushGo(statue: FramePoint): Action =
     OrderedActionSequence(listOf(
