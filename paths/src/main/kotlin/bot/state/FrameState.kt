@@ -111,6 +111,7 @@ data class Inventory(
     val hasWand by lazy { api.readCpuB(Addresses.hasRod) }
     val numBombs by lazy { api.readCPU(Addresses.numBombs) }
     val numRupees by lazy { api.readCPU(Addresses.numRupees) }
+    val numPotions by lazy { api.readCPU(Addresses.hasPotion) }
     val numKeys by lazy { api.readCPU(Addresses.numKeys) }
     val hearts by lazy { api.readCPU(Addresses.heartContainers) }
     val damage by lazy { api.readCPU(Addresses.heartContainersHalf) }

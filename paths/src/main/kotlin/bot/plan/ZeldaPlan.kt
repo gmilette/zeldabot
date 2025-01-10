@@ -505,17 +505,12 @@ object ZeldaPlan {
     }
 
     private fun PlanBuilder.level5sequence(endLevel2BoomerangPickup: Boolean = true) {
-        phase("go to level 5")
-        5 using level5
-
         phase("gear for level 6")
         // i think this is not needed,  maybe it's after level5?
 //            routeTo(83) // position so we don't go through the 100 secret forest and get stuck
 //
         obj(ZeldaItem.PowerBracelet, itemLoc = Objective.ItemLoc.None)
 
-        // level6 potion
-        potionLevel6()
 ////            routeTo(32)
         goToAtPoint(33, FramePoint(11.grid, 3.grid))
 //            // hard to get into position when its passable, maybe position it
@@ -524,6 +519,12 @@ object ZeldaPlan {
         6 using level6
         // maybe switch to boomerang here
         potionLevel6NoBomb()
+
+        phase("go to level 5")
+        5 using level5
+
+        // get a potion
+        greenPotion() // for now, but there is a closer one for sure
 
         phase("Gear for level 8")
 //            obj(Dest.Shop.potionShopWest, itemLoc = Dest.Shop.ItemLocs.redPotion)
