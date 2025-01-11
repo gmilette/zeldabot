@@ -207,7 +207,6 @@ object ZeldaPlan {
             // probably don't need this, but the margin is about 15 so yea get it
             obj(Dest.Secrets.bomb30Start) // 253
             greenPotion()
-            startHereAt(raftLadderSetup)
             ringLevels()
             greenPotion()
 //            startHereAt(raftLadderSetup)
@@ -248,7 +247,7 @@ object ZeldaPlan {
     private fun PlanBuilder.afterLevel2ItemsLetterEtcPhase(withBombHeart: Boolean = true) {
         add {
             phase(Phases.forest30)
-            startHereAt(raftLadderSetup)
+//            startHereAt(raftLadderSetup)
             obj(Dest.Secrets.secretForest30NorthEast)
             phase(Phases.forest30 + "_end")
             obj(Dest.Secrets.bombSecret30North)
@@ -510,6 +509,7 @@ object ZeldaPlan {
 //            routeTo(83) // position so we don't go through the 100 secret forest and get stuck
 //
         obj(ZeldaItem.PowerBracelet, itemLoc = Objective.ItemLoc.None)
+        startHereAtAfterLevel4AndGather()
 
 ////            routeTo(32)
         goToAtPoint(33, FramePoint(11.grid, 3.grid))
@@ -1412,7 +1412,7 @@ private fun PlanBuilder.levelPlan9PhaseGannon() {
         killCenterMonster
         uptk
         "seg kill gannon".seg()
-        startHereAtLoaded()
+//        startHereAtLoaded()
         goIn(GamePad.None, 100)
         goIn(GamePad.None, 100)
         goIn(GamePad.None, 100)
@@ -1440,6 +1440,26 @@ private val level9: PlanBuilder.() -> Unit
         end
     }
 
+private fun PlanBuilder.startHereAtAfterLevel4AndGather() {
+    startHereAt(
+        raftLadderSetup.copy(
+            hearts = 12,
+            ring = ZeldaItem.BlueRing,
+            sword = ZeldaItem.WhiteSword,
+            rupees = 16,
+            keys = 5,
+            bombs = 8,
+            potion = true,
+            candle = true,
+            arrowAndBow = true,
+            magicKey = false,
+            whistle = false,
+            bait = false,
+            setTriforce = true,
+            boomerang = ZeldaItem.Boomerang
+        )
+    )
+}
 
 private fun PlanBuilder.startHereAtLoaded() {
     startHereAt(

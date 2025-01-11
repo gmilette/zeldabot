@@ -272,7 +272,7 @@ private class CycleDetector(val cyclesLimit: Int = 20) {
 // unstick
 
 class MoveHistoryAction(private val wrapped: Action, private val escapeAction: Action) : Action {
-    private val histSize = 250
+    private val histSize = 300 // 250 wasn't enough for master sword
     private val same = SameCount()
     private val changed = MinDistTotalFramesCount()
     private var escapeActionCt = 0
@@ -353,7 +353,7 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
                     escapeActionCt = escapeActionTimes
                     // if not changed to the reset screen
                     whyEscape = "histsize=$histSize ct: ${ct >= histSize} notChanged=$notChanged"
-                    d { " ESCAPE ACTION RESET" }
+                    d { " ESCAPE ACTION RESET for action ${wrapped.name} why: $whyEscape" }
                     frames = 0
                     same.reset()
                     changed.reset()

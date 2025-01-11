@@ -281,6 +281,9 @@ class DecisionAction(
     private val completeIf: (state: MapLocationState) -> Boolean = { false },
     private val chooseAction1: (state: MapLocationState) -> Boolean,
 ) : Action {
+    override val escapeActionEnabled: Boolean
+        get() = action1.escapeActionEnabled && action2.escapeActionEnabled
+
     override val actionLoc: MapLoc
         get() = if (action1 is MoveTo) action1.to else if (action2 is MoveTo) action2.to else -2
 

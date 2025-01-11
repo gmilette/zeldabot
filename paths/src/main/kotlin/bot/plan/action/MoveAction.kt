@@ -4,10 +4,7 @@ import bot.plan.action.NavUtil.directionToDir
 import bot.plan.zstar.FrameRoute
 import bot.state.*
 import bot.state.map.*
-import bot.state.oam.EnemyGroup
-import bot.state.oam.flame1
-import bot.state.oam.shopOwner
-import bot.state.oam.shopkeeperAndBat
+import bot.state.oam.*
 import util.d
 
 class CompleteIfAction(
@@ -25,16 +22,23 @@ class CompleteIfAction(
         get() = action.name
 }
 
+class CompleteWhenExitShop(wrapped: Action) : WrappedAction(wrapped) {
+    override fun complete(state: MapLocationState): Boolean {
+        d { " state game mode ${state.frameState.gameMode}"}
+        return wrapped.complete(state) || state.frameState.gameMode != 11
+    }
+}
+
 class CompleteIfChangeShopOwner(private val changeTo: Boolean, private val wrapped: Action) : Action {
     private var initial: Boolean? = null
     private var completeCt: Int = 0
 
     private fun changedOwnerAppearance(state: MapLocationState): Boolean =
-        state.frameState.enemies.isNotEmpty() && initial != null && (inShop(state) == changeTo)
+        initial != null && (inShop(state) == changeTo)
+//        state.frameState.enemies.isNotEmpty() && initial != null && (inShop(state) == changeTo)
 
-    private fun inShop(state: MapLocationState): Boolean = state.frameState.enemies.any {
-        (it.tile == shopOwner.first && it.attribute == shopOwner.second) ||
-                (it.tile == shopkeeperAndBat.first && it.attribute == shopkeeperAndBat.second)
+    private fun inShop(state: MapLocationState): Boolean = state.frameState.enemiesRaw.any {
+        (it.tile == shopOwner.first) || (it.tile == shopkeeperAndBat.first) || (it.tile == wizard)
     }
 
     override fun reset() {

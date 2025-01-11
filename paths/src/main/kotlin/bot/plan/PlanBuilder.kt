@@ -807,9 +807,11 @@ class PlanBuilder(
         if (itemLoc != Objective.ItemLoc.None.point && itemLoc != Objective.ItemLoc.Enter.point) {
             // walking down stairs, plus a few steps in
             // too much for bait
-            goInConsume(GamePad.MoveUp, 15)
+            // triggers escape
+            goInConsume(GamePad.MoveUp, 17)
 
             waitUntilCloudIsGone()
+            // wait until all words are done being displayed...
 
             // avoid accidently picking the center item
             if (itemLoc != InLocations.Overworld.centerItem) {
