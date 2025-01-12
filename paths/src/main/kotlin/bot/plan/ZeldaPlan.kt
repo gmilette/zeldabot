@@ -209,7 +209,6 @@ object ZeldaPlan {
             greenPotion()
             ringLevels()
             greenPotion()
-//            startHereAt(raftLadderSetup)
             arrowAndHearts()
 
             // then potion?
@@ -247,7 +246,6 @@ object ZeldaPlan {
     private fun PlanBuilder.afterLevel2ItemsLetterEtcPhase(withBombHeart: Boolean = true) {
         add {
             phase(Phases.forest30)
-//            startHereAt(raftLadderSetup)
             obj(Dest.Secrets.secretForest30NorthEast)
             phase(Phases.forest30 + "_end")
             obj(Dest.Secrets.bombSecret30North)
@@ -270,7 +268,6 @@ object ZeldaPlan {
     private fun PlanBuilder.whiteSword() {
         add {
             routeTo(10)
-//            startHereAt(raftLadderSetup)
             down
             up
             whiteSwordDodgeRoutine()
@@ -331,7 +328,6 @@ object ZeldaPlan {
             // todo: put back in
             fireBurn100()
             enoughForRing
-//            startHereAt(raftLadderSetup)
 //            routeTo(98 - 16) // go up so it routes ok
             obj(Dest.Shop.blueRing, position = true)
             // avoid accidentally going back in
@@ -359,7 +355,6 @@ object ZeldaPlan {
             // getPotionConditionally()
             // for now just always buy the big potion
             greenPotion()
-//            startHereAt(raftLadderSetup)
 
             // get the potion here if have enough cash
             // possibly only need to refill
@@ -509,7 +504,7 @@ object ZeldaPlan {
 //            routeTo(83) // position so we don't go through the 100 secret forest and get stuck
 //
         obj(ZeldaItem.PowerBracelet, itemLoc = Objective.ItemLoc.None)
-        startHereAtAfterLevel4AndGather()
+//        startHereAtAfterLevel4AndGather()
 
 ////            routeTo(32)
         goToAtPoint(33, FramePoint(11.grid, 3.grid))
@@ -517,8 +512,9 @@ object ZeldaPlan {
         obj(ZeldaItem.MagicSword)
 //
         6 using level6
+        startHereAtAfterLevel6()
         // maybe switch to boomerang here
-        potionLevel6NoBomb()
+        potionLevel6()
 
         phase("go to level 5")
         5 using level5
@@ -1449,6 +1445,28 @@ private fun PlanBuilder.startHereAtAfterLevel4AndGather() {
             rupees = 16,
             keys = 5,
             bombs = 8,
+            potion = true,
+            candle = true,
+            arrowAndBow = true,
+            magicKey = false,
+            whistle = false,
+            bait = false,
+            setTriforce = true,
+            boomerang = ZeldaItem.Boomerang
+        )
+    )
+}
+
+private fun PlanBuilder.startHereAtAfterLevel6() {
+    startHereAt(
+        raftLadderSetup.copy(
+            hearts = 13,
+            ring = ZeldaItem.BlueRing,
+            sword = ZeldaItem.WhiteSword,
+            rupees = 200,
+            keys = 4,
+            bombs = 8,
+            wand = true,
             potion = true,
             candle = true,
             arrowAndBow = true,
