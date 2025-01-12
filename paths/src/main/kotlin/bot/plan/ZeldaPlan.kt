@@ -306,6 +306,13 @@ object ZeldaPlan {
         }
     }
 
+    private fun PlanBuilder.forestPotion() {
+        add {
+            enoughForPotion
+            obj(Dest.Shop.potionShopForest, Objective.ItemLoc.Right)
+        }
+    }
+
     private fun PlanBuilder.potionLevel6() {
         add {
             enoughForPotion
@@ -512,15 +519,15 @@ object ZeldaPlan {
         obj(ZeldaItem.MagicSword)
 //
         6 using level6
-        startHereAtAfterLevel6()
         // maybe switch to boomerang here
         potionLevel6()
 
         phase("go to level 5")
         5 using level5
+        startHereAtAfterLevel5()
 
-        // get a potion
-        greenPotion() // for now, but there is a closer one for sure
+        forestPotion()
+//        greenPotion() // for now, but there is a closer one for sure
 
         phase("Gear for level 8")
 //            obj(Dest.Shop.potionShopWest, itemLoc = Dest.Shop.ItemLocs.redPotion)
@@ -1457,10 +1464,10 @@ private fun PlanBuilder.startHereAtAfterLevel4AndGather() {
     )
 }
 
-private fun PlanBuilder.startHereAtAfterLevel6() {
+private fun PlanBuilder.startHereAtAfterLevel5() {
     startHereAt(
         raftLadderSetup.copy(
-            hearts = 13,
+            hearts = 14,
             ring = ZeldaItem.BlueRing,
             sword = ZeldaItem.WhiteSword,
             rupees = 200,
@@ -1471,7 +1478,7 @@ private fun PlanBuilder.startHereAtAfterLevel6() {
             candle = true,
             arrowAndBow = true,
             magicKey = false,
-            whistle = false,
+            whistle = true,
             bait = false,
             setTriforce = true,
             boomerang = ZeldaItem.Boomerang

@@ -108,6 +108,8 @@ class OverworldRouter(private val hyrule: Hyrule) {
         // going up into a place where you are in an elbow of trees
         removeJust(107, 92, graph)
 
+        removeJust(27, 28, graph) // maze near level 5
+
         remove(98, 114, graph) // cant go down from secret place
 
         // go through green forest spot
