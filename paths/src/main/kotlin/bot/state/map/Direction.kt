@@ -18,10 +18,10 @@ enum class Direction {
             get() = listOf(Up, Right, Down, Left)
         fun randomDirection(): Direction =
             when (Random.nextInt(4)) {
-                1 -> Direction.Up
-                2 -> Direction.Down
-                3 -> Direction.Left
-                4 -> Direction.Right
+                0 -> Direction.Up
+                1 -> Direction.Down
+                2 -> Direction.Left
+                3 -> Right
                 else -> Direction.Down
             }
     }

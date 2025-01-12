@@ -39,6 +39,16 @@ enum class GamePad {
     companion object {
         fun aOrB(useB: Boolean) = if (useB) B else A
 
+        fun cycleDirection(from: GamePad): GamePad {
+            return when (from) {
+                MoveUp -> MoveRight
+                MoveRight -> MoveDown
+                MoveDown -> MoveLeft
+                MoveLeft -> MoveUp
+                else -> MoveDown
+            }
+        }
+
         fun randomDirection(from: FramePoint): GamePad {
             val possible = mutableListOf<GamePad>()
             if (from.x > MapConstants.oneGrid + 2) {
@@ -59,10 +69,10 @@ enum class GamePad {
 
         fun randomDirection() =
             when (Random.nextInt(4)) {
-                1 -> MoveUp
-                2 -> MoveDown
-                3 -> MoveLeft
-                4 -> MoveRight
+                0 -> MoveUp
+                1 -> MoveDown
+                2 -> MoveLeft
+                3 -> MoveRight
                 else -> MoveDown
             }
 

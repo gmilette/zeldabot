@@ -77,6 +77,7 @@ class MapLocationState(
         // this is required, otherwise link will get stuck
         // why is it commented out??
         if (lastPoints.allSameAndFull()) {
+            d { " all same and full " }
             return Direction.randomDirection()
         }
         // don't keep the NONE
@@ -84,7 +85,7 @@ class MapLocationState(
         val keyWithMostItems = lastDirections.groupBy { it.ordinal }.maxByOrNull { it.value.size }?.key ?: 0
         // idea: if there are two directions counts that are equal, link is oscillating, maybe do something different
         val direction = Direction.entries[keyWithMostItems]
-        d { " best direction sorted dirs $keyWithMostItems $direction moves $lastPoints dirs: $lastDirections"}
+        d { " bestdirction sorted dirs $keyWithMostItems $direction moves $lastPoints dirs: $lastDirections"}
         return direction
     }
     fun clearHistory() {
