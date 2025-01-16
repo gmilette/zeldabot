@@ -372,9 +372,8 @@ class PlanBuilder(
     }
     val upm: PlanBuilder
         get() {
-            // don't try to fight
-            val nextLoc = lastMapLoc.up
-            add(nextLoc, moveTo(nextLoc))
+            // don't try to fight, but get loot if there
+            addm(lastMapLoc.up)
             return this
         }
 
@@ -432,8 +431,7 @@ class PlanBuilder(
         }
     val downm: PlanBuilder
         get() {
-            val nextLoc = lastMapLoc.down
-            add(nextLoc, moveTo(nextLoc))
+            addm(lastMapLoc.down)
             return this
         }
     val downIgnoreProjectiles: PlanBuilder
@@ -486,8 +484,7 @@ class PlanBuilder(
         }
     val leftm: PlanBuilder
         get() {
-            val nextLoc = lastMapLoc.left
-            add(nextLoc, moveTo(nextLoc))
+            addm(lastMapLoc.left)
             return this
         }
     val right: Unit
@@ -536,8 +533,9 @@ class PlanBuilder(
         }
     val rightm: PlanBuilder
         get() {
-            val nextLoc = lastMapLoc.right
-            add(nextLoc, moveTo(nextLoc))
+            addm(lastMapLoc.right)
+//            val nextLoc = lastMapLoc.right
+//            add(nextLoc, moveTo(nextLoc))
             return this
         }
     val rightNoP: PlanBuilder
@@ -1084,7 +1082,12 @@ class PlanBuilder(
     private fun add(nextLoc: MapLoc) {
         add(nextLoc, lootAndMove(moveTo(nextLoc)))
     }
-// kill and loot and move?
+
+    private fun addm(nextLoc: MapLoc) {
+        add(nextLoc, lootAndMove(moveTo(nextLoc)))
+    }
+
+    // kill and loot and move?
     private fun addK(nextLoc: MapLoc) {
         add(nextLoc, killThenMove(moveTo(nextLoc)))
     }
