@@ -94,7 +94,7 @@ class SwitchToItemConditionally(private val inventoryPosition: () -> Int = { Inv
         GoIn(20, GamePad.None), // was 10
         OnceAction(WaitUntilItemMenuClosed()),
         // sometimes is just skip the killall
-        GoIn(25, GamePad.None),
+        GoIn(10, GamePad.None),
     )
 
     private val positionShoot = OrderedActionSequence(switchSequence, restartWhenDone = false)

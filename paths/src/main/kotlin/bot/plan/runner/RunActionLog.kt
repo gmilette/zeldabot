@@ -3,7 +3,6 @@ package bot.plan.runner
 import bot.DirectoryConstants
 import bot.plan.action.Action
 import bot.plan.action.UsePotion
-import bot.plan.action.UsePotionAction
 import bot.state.GamePad
 import bot.state.MapLoc
 import bot.state.MapLocationState
@@ -14,11 +13,11 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.abs
-import kotlin.math.exp
 
-class RunActionLog(private val fileNameRoot: String, private val experiment: Experiment) {
-
-    private val SAVE = true
+class RunActionLog(private val fileNameRoot: String,
+                   private val experiment: Experiment,
+                   private val save: Boolean = true
+) {
     val started = System.currentTimeMillis()
     var startedStep = System.currentTimeMillis()
     var framesForStep = 0
@@ -100,7 +99,7 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         val damage = previousHeart - currentHeart
         if (damage != 0.0) {
             val WRITE_HEART = false
-            if (WRITE_HEART) {
+            if (WRITE_HEART && save) {
                 val csvWriter2 = CsvWriter()
                 // damage, hearts, damageIn, life, life2, damage number
                 csvWriter2.open(heartLog, true) {
@@ -161,7 +160,7 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
                 d { "$index, $time, $totalTime, $action, $bombsUsed, $hits, $damage" }
             }
         }
-        if (SAVE) {
+        if (save) {
             val csvWriter2 = CsvWriter()
             csvWriter2.open(outputFile, false) {
                 writeRow("index", "level", "mapLoc", "name", "time", "totalTime", "numFrames", "action", "hearts", "bombsUsed", "hits", "damage", "heal", "keys", "rupees", "potion")
@@ -183,32 +182,34 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
         }
         val percentDone = masterPlan.percentDoneInt
         val finalMapLoc = state.currentMapCell.mapLoc
-        writeFinalHeader()
-        val stepCompleted = calculateStep(fileNameRoot, masterPlan.toStringCurrentSeg(), state, totalFrames, totalHits, totalDamage, totalHeal)
-        val csvWriter2 = CsvWriter()
-        csvWriter2.open(outputFileAll, true) {
-            writeRow(
-                now(),
-                stepCompleted.action,
-                outputFileName,
-                stepCompleted.totalTime,
-                totalFrames,
-                totalHits,
-                totalDamage,
-                totalHeal,
-                bombsUsed.total,
-                state.frameState.inventory.numRupees,
-                state.frameState.gameMode,
-                percentDone,
-                finalMapLoc,
-                result,
-                experiment.sword,
-                experiment.ring,
-                experiment.hearts,
-                experiment.bombs,
-                experiment.boomerang,
-                experiment.shield,
-            )
+        if (save) {
+            writeFinalHeader()
+            val stepCompleted = calculateStep(fileNameRoot, masterPlan.toStringCurrentSeg(), state, totalFrames, totalHits, totalDamage, totalHeal)
+            val csvWriter2 = CsvWriter()
+            csvWriter2.open(outputFileAll, true) {
+                writeRow(
+                    now(),
+                    stepCompleted.action,
+                    outputFileName,
+                    stepCompleted.totalTime,
+                    totalFrames,
+                    totalHits,
+                    totalDamage,
+                    totalHeal,
+                    bombsUsed.total,
+                    state.frameState.inventory.numRupees,
+                    state.frameState.gameMode,
+                    percentDone,
+                    finalMapLoc,
+                    result,
+                    experiment.sword,
+                    experiment.ring,
+                    experiment.hearts,
+                    experiment.bombs,
+                    experiment.boomerang,
+                    experiment.shield,
+                )
+            }
         }
     }
 
@@ -221,7 +222,7 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
 
     private fun writeFinalHeader() {
         val csvWriter2 = CsvWriter()
-        if (!File(outputFileAll).exists()) {
+        if (!File(outputFileAll).exists() && save) {
             csvWriter2.open(outputFileAll, true) {
                 writeRow("date", "action", "file", "totalTime", "totalFrames",
                     "totalHits", "totalDamage", "totalHeal", "bombsUsed", "rupees",
@@ -279,8 +280,8 @@ class RunActionLog(private val fileNameRoot: String, private val experiment: Exp
             hits = hits,
             damage = damage,
             heal = heal,
-            keysGot.perStep,
-            rupeesGained.perStep,
+            state.frameState.numKeys,
+            state.frameState.numRupees,
             state.frameState.inventory.numPotions
         )
     }

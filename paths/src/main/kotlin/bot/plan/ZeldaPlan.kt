@@ -1411,6 +1411,7 @@ private fun PlanBuilder.levelPlan9PhaseGannon() {
         )
         "doorstep of gannon".seg()
         goInConsume(GamePad.MoveLeft, 10)
+        enoughForArchery
         killCenterMonster
         killCenterMonster
         uptk

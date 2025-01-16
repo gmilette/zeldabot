@@ -122,7 +122,7 @@ class OamStateReasoner(
                 toCombine.filter { it.point.x == maybeKeep.point.x - 8 }.any { matched ->
                     matched.point.y == maybeKeep.point.y
                 }
-        }
+            }
 
         val mutable = toCombine.toMutableList()
         for (spriteData in toDelete) {
@@ -143,9 +143,12 @@ class OamStateReasoner(
         return mutable
     }
 
-    private fun SpriteData.toState(damaged: Boolean, isOverworld: Boolean, isGannon: Boolean): EnemyState =
-        when {
+    private fun SpriteData.toState(damaged: Boolean, isOverworld: Boolean, isGannon: Boolean): EnemyState {
+        val isSword = this.tile in Monsters.darknut.tile
+        val facingLink = false
+        return when {
             this.hidden -> EnemyState.Dead
+            !isOverworld && isSword && facingLink -> EnemyState.Projectile
             isOverworld && isLoot -> EnemyState.Loot
             isGannon && this.tile in EnemyGroup.triforceTiles -> EnemyState.Loot
             !isOverworld && isLoot -> EnemyState.Loot
@@ -155,6 +158,7 @@ class OamStateReasoner(
             damaged -> EnemyState.Projectile
             else -> EnemyState.Alive
         }
+    }
 
     // this isn't real
     // 21: SpriteData(index=21, point=(74, 23), tile=62, attribute=0, hidden=false)

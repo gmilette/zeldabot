@@ -65,16 +65,19 @@ fun FollowView(
 
         Progress(state)
 
-        Row {
-            FollowCard(title = "Hits", text = "${state.planRunner.runLog.totalHits}")
-            FollowCard(title = "Bombs", text = state.planRunner.runLog.bombsUsed.total.toString())
-            FollowCard(title = "Keys      Total", text = state.planRunner.runLog.keysGot.total.toString())
-        }
+        state.planRunner.runLog.let { runLog ->
+            Row {
+                FollowCard(title = "Hits", text = "${runLog.totalHits}")
+                FollowCard(title = "Bombs", text = runLog.bombsUsed.total.toString())
+                FollowCard(title = "Keys      Total", text = runLog.keysGot.total.toString())
+            }
 
-        Row {
-            FollowCard(title = "Keys Used", text = state.planRunner.runLog.keysUsed.total.toString())
-            FollowCard(title = "Rupees Spent", text = state.planRunner.runLog.rupeesSpent.total.toString())
-            FollowCard(title = "Rupees Total", text = state.planRunner.runLog.rupeesGained.total.toString())
+            Row {
+                FollowCard(title = "Keys Used", text = runLog.keysUsed.total.toString())
+                FollowCard(title = "Rupees Spent", text = runLog.rupeesSpent.total.toString())
+                FollowCard(title = "Rupees Total", text = runLog.rupeesGained.total.toString())
+            }
+
         }
 
         Row {

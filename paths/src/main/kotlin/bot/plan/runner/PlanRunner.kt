@@ -177,7 +177,7 @@ class PlanRunner(private val makePlan: PlanMaker,
         d { " run runHere $mapLoc lev $level for map $root" }
         startPath = root
         action = masterPlan.skipToStartAt()
-        runLog = RunActionLog("mapstate_${level}_${mapLoc}", target)
+        runLog = RunActionLog("here_mapstate_${level}_${mapLoc}", target, save = false)
     }
 
 
@@ -194,7 +194,7 @@ class PlanRunner(private val makePlan: PlanMaker,
         d { " run loc $mapLoc lev $level for map $root"}
         startPath = root
         action = withDefaultAction(masterPlan.skipToLocation(mapLoc, level))
-        runLog = RunActionLog("mapstate_${level}_${mapLoc}", target)
+        runLog = RunActionLog("mapstate_${level}_${mapLoc}", target, save = false)
     }
 
     private fun runIt(ex: String) {
@@ -288,10 +288,10 @@ class PlanRunner(private val makePlan: PlanMaker,
 
     fun next(state: MapLocationState): GamePad {
         val action = action ?: return GamePad.None
-        runLog.frameCompleted(state)
+        runLog?.frameCompleted(state)
 
         if (action.complete(state) || state.frameState.isDead) {
-            runLog.advance(action, state, masterPlan)
+            runLog?.advance(action, state, masterPlan)
             advance(state)
         }
 
@@ -308,7 +308,7 @@ class PlanRunner(private val makePlan: PlanMaker,
     private fun advance(state: MapLocationState) {
         if (masterPlan.complete || state.frameState.isDead) {
             d { " complete "}
-            runLog.logFinalComplete(state, masterPlan)
+            runLog?.logFinalComplete(state, masterPlan)
             rerun()
         } else {
             d { " complete action ${action?.javaClass?.name ?: ""}"}

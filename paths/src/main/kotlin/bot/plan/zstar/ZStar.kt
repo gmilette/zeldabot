@@ -8,6 +8,7 @@ import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapConstants
 import bot.state.map.pointModifier
+import util.JsonFile
 import util.Map2d
 import util.d
 import java.util.*
@@ -26,7 +27,7 @@ class ZStar(
     private val allPassable = passable.copy().mapXy { i, i2 -> true }
     companion object {
         var DEBUG = false
-        var DEBUG_B = false
+        var DEBUG_B = true
         private val DEBUG_DIR = false
         val DEBUG_ONE = false
 
@@ -42,7 +43,7 @@ class ZStar(
         val onEnemyCost = 100000
         val MaxCostAvoidEnemy = onEnemyCost
         val MaxCostAvoidEnemyNear = nearEnemyCost
-        const val ENEMY_COST = 10000
+        val HIGH_COST = nearEnemyCost - 1000 // less than near enemy so app can tell
     }
 
     val maximumCost: Int = MaxCostAvoidEnemyNear
@@ -132,9 +133,18 @@ class ZStar(
     private fun Map2d<Int>.safe(point: FramePoint): Boolean =
         get(point) < 1000
 
+    private fun Map2d<Int>.safeFromIntersect(point: FramePoint): Boolean =
+        get(point) < nearEnemyCost // note: if a cell is "high cost" it will be less than this too
+
+    private val file = JsonFile("routeInput", "safe")
+
     fun routeNearestSafe(
         param: ZRouteParam
     ): List<FramePoint> {
+        if (DEBUG_B) {
+            // keeps overwriting it
+            file.write(param)
+        }
         customizer.customize(param)
         return breadthSearch(param, param.start, targets = param.targets,
             pointBeforeStart = param.pointBeforeStart)
@@ -182,17 +192,16 @@ class ZStar(
             if (DEBUG_B) {
                 d { "$i: open nodes: ${toExplore.size} : $toExplore" }
             }
-            customizer.setAllEnemyCosts(param, i)
+            // needs way more testing
+//            customizer.setAllEnemyCosts(param, i)
             for (nearPoint in toExplore.toMutableList()) {
                 if (DEBUG_B) {
-                    d { "$i: -->explore $nearPoint" }
+                    d { "$i: -->explore $nearPoint cost=${costsF.get(nearPoint)} safe=${costsF.safe(nearPoint)} safeIntersect=${costsF.safeFromIntersect(nearPoint)}" }
                 }
                 // check if it intersects any enemies
+///                if (costsF.safeFromIntersect(nearPoint)) {
                 if (costsF.safe(nearPoint)) {
 //                if (nearPoint in targets) {
-                    if (DEBUG_B) {
-                        d { " Found end!!" }
-                    }
                     finalPoint = nearPoint
                     toExplore.clear()
                     break;
@@ -689,7 +698,7 @@ class ZStar(
 //        setForcePassable(enemies, setTo = false)
         }
 
-        fun setAllEnemyCosts(param: ZRouteParam, progress: Int = 0) {
+        private fun setAllEnemyCosts(param: ZRouteParam, progress: Int = 0) {
             setEnemyCostsByIntersect(param.enemies, param.projectiles, progress)
             setForceHighCost(param.rParam.forceHighCost)
         }
@@ -745,7 +754,7 @@ class ZStar(
                 if (DEBUG) {
                     d { " set highcost $grid" }
                 }
-                costsF.modifyTo(grid, MapConstants.oneGrid, ENEMY_COST)
+                costsF.modifyTo(grid, MapConstants.oneGrid, HIGH_COST)
             }
         }
 
