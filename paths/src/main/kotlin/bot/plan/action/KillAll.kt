@@ -263,10 +263,9 @@ class KillAll(
                     val previousTarget = target
                     target = firstEnemy.point
                     val link = state.frameState.link
-                    val dist = firstEnemy.point.distTo(link.point)
                     // force a new route if this has changed targets
                     val forceNew = previousTarget.oneStr != target.oneStr
-                    d { "Plan: target changed was $previousTarget now $target forceNew = $forceNew" }
+                    d { "Plan: attack: ${firstEnemy.point} target changed was $previousTarget now $target forceNew = $forceNew" }
 
                     // possibly remove some attack points in front of the enemy
                     val targetsToAttack = when {

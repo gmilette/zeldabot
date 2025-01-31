@@ -1,9 +1,10 @@
 package util
 
+import bot.ZeldaBot
 import co.touchlab.kermit.Logger
 
 object LoggerOverride {
-    var log = true
+    var log = ZeldaBot.log
 }
 
 inline fun v(message: () -> String) = log { Logger.v(message()) }

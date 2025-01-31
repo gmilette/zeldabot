@@ -1124,8 +1124,8 @@ private val level6: PlanBuilder.() -> Unit
         )
         down
         left
-        level6TriggerDoorThenUp
         enoughForArrow
+        level6TriggerDoorThenUp
         killArrowSpider
         goTo(InLocations.Level6.triforceHeart)
         // need

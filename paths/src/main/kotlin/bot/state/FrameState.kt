@@ -45,6 +45,10 @@ data class FrameState(
     val isDead: Boolean
         get() = gameMode == 8
 
+    val isLevelItemRoom = gameMode == 9 || gameMode == 10 //10 is the transition
+
+    val isInCave = gameMode == 11 || gameMode == 16
+
     val canUseSword: Boolean = swordUseCountdown == 0
     val isScrolling: Boolean
         get() = gameMode == 7 || gameMode == 6 || gameMode == 4

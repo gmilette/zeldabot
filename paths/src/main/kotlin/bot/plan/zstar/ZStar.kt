@@ -440,6 +440,8 @@ class ZStar(
             }
         }
 
+        d { " route iterations $iterCount"}
+
         if (DEBUG) {
             d { " ****** DONE $iterCount ****** " }
         }

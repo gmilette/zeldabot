@@ -426,6 +426,10 @@ fun lootAndMove(moveTo: Action) = DecisionAction(GetLoot(), moveTo) { state ->
     neededReachableLoot(state).isNotEmpty()
 }
 
+fun escapeCaveAndLootAndMove(moveTo: Action) = DecisionAction(moveTo, lootAndMove(moveTo)) { state ->
+    state.frameState.isInCave
+}
+
 //fun lootAndMove(moveTo: Action) = DecisionAction(GetLoot(), moveTo) { state ->
 //    neededReachableLoot(state).isNotEmpty()
 //}

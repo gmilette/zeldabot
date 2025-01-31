@@ -225,10 +225,15 @@ object NavUtil {
 
     fun MapLoc.directionToDir(to: MapLoc): Direction {
         return when {
+            // added these multiple just in case
+            to - this == 2 -> Direction.Right
             to - this == 1 -> Direction.Right
             to - this == -1 -> Direction.Left
+            to - this == -2 -> Direction.Left
             to - this == 16 -> Direction.Down
+            to - this == 32 -> Direction.Down
             to - this == -16 -> Direction.Up
+            to - this == -32 -> Direction.Up
             else -> {
                 d { " warped far from original location distance: ${this - to}" }
                 Direction.None

@@ -130,7 +130,8 @@ class FrameStateUpdater(
         state.frameState = frame
 
         // game mode 8, is the dead screen
-//        d { " GAME MODE ${state.frameState.gameMode} $willSkip"}
+        // 11 is cave
+        d { " GAME MODE ${state.frameState.gameMode}"}
 //        if (state.frameState.gameMode == 5) {
 //            try {
 ////                percentBlack()

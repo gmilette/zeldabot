@@ -221,6 +221,7 @@ class PlanBuilder(
     val killArrowSpider: PlanBuilder
         get() {
             switchToArrow()
+            wait(20) // it looked like in level 6 link just skipped to moving
             add(lastMapLoc, killSpider())
             return this
         }
@@ -1080,7 +1081,7 @@ class PlanBuilder(
         }
 
     private fun add(nextLoc: MapLoc) {
-        add(nextLoc, lootAndMove(moveTo(nextLoc)))
+        add(nextLoc, escapeCaveAndLootAndMove(moveTo(nextLoc)))
     }
 
     private fun addm(nextLoc: MapLoc) {

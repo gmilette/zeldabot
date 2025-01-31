@@ -24,6 +24,20 @@ class GeomTest {
     }
 
     @Test
+    fun `test inter`() {
+        val link = Geom.Rectangle(FramePoint(182, 105), FramePoint(186, 168))
+        val enemy = Geom.Rectangle(FramePoint(166, 128), FramePoint(182, 128))
+
+        // intersect sword rect Rectangle(topLeft=(182, 105)  , bottomRight=(186, 168)  )
+
+        //        / enemy: (166, 128) -> 182, 128 .. it does intersect along side
+        //        // link (176, 105) DOWN
+       val a = Geom.intersect(link, enemy)
+        println(a)
+        val b = a
+    }
+
+    @Test
     fun `test it`() {
 
         // Test cases

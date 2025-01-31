@@ -473,6 +473,8 @@ class RouteTo(val params: Param = Param()) {
             d { " router size: ${route?.numPoints ?: 0}" }
         }
         route?.next5()
+        d { " next 100 "}
+        route?.next100()
         planCount = 0
         val pointDir = nextPoint1.direction ?:
             route?.decideDirection(linkPt, state.frameState.link.dir)

@@ -63,6 +63,16 @@ class FrameRoute(val path: List<FramePoint>) {
         d { " :: ${pathStack.last()}"}
     }
 
+    fun next100() {
+        if (pathStack.isEmpty() || pathStack.size < 100) {
+            return
+        }
+        for (framePoint in pathStack.subList(0, min(100, pathStack.size-1))) {
+            d { " : $framePoint ${framePoint.isTopRightCorner}"}
+        }
+        d { " :: ${pathStack.last()}"}
+    }
+
     fun duplicateCornerFirst(linkPt: String, linkDir: Direction?): FrameRoute {
         d { "VERTEX: duplicateCornerFirst $linkPt $linkDir" }
         if (pathStack.size <= 1) return this

@@ -322,7 +322,9 @@ class MoveTo(
         if (state.currentMapCell.exitsFor(dir) == null) {
             d { " default move " }
         }
-        val exits = secretRoomExit(state) ?: state.currentMapCell.exitsFor(dir) ?: return NavUtil.randomDir()
+        val secretRoomExit = secretRoomExit(state)
+        val exits = secretRoomExit ?: state.currentMapCell.exitsFor(dir) ?: return NavUtil.randomDir()
+        val overrideMapCell = if (secretRoomExit != null) state.hyrule.shopMapCell else null
 
         targets = exits
 
@@ -335,7 +337,9 @@ class MoveTo(
         d { " arrived! is $arrived"}
 
         return if (!arrived) {
-            routeTo.routeTo(state, exits, RouteTo.RouteParam(allowBlock = allowBlocking))
+            routeTo.routeTo(state, exits, RouteTo.RouteParam(allowBlock = allowBlocking,
+                overrideMapCell = overrideMapCell)
+            )
         } else {
             movedIn++
             arrivedDir.toGamePad()
@@ -345,12 +349,19 @@ class MoveTo(
     override val name: String
         get() = "Move from ${this.fromLoc} to ${this.next.mapLoc}"
 
-    // untested
     private fun secretRoomExit(state: MapLocationState): List<FramePoint>? =
         when {
+            (state.frameState.isLevel && toLevel == MapConstants.overworld) -> {
+                d { " in level but shouldnt be "}
+                state.hyrule.shopMapCell.exitsFor(Direction.Down)
+            }
             (state.frameState.isLevel) -> null
             (state.frameState.enemiesRaw.count { it.tile in EnemyGroup.flame} >= 2) -> {
-                d { " in secret room "}
+                d { " in secret room cave=${state.frameState.isInCave}"}
+                state.hyrule.shopMapCell.exitsFor(Direction.Down)
+            }
+            (state.frameState.isInCave) -> {
+                d { " in cave, get out "}
                 state.hyrule.shopMapCell.exitsFor(Direction.Down)
             }
             else -> null
