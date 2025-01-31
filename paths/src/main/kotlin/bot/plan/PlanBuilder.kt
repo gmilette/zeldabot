@@ -524,13 +524,10 @@ class PlanBuilder(
         }
     val getTri: Unit
         get() {
-//            goTo(InLocations.Level3.triforce)
+            // need to change this to a complete when map changes
             goTo(InLocations.Level2.triforce)
             startAt(0)
             goIn(GamePad.MoveUp, MapConstants.oneGridPoint5)
-            // in case link goes to the left of it
-//            goIn(GamePad.MoveRight, 4)
-//            goIn(GamePad.MoveLeft, 4)
         }
     val rightm: PlanBuilder
         get() {

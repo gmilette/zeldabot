@@ -324,7 +324,15 @@ class MoveTo(
         }
         val secretRoomExit = secretRoomExit(state)
         val exits = secretRoomExit ?: state.currentMapCell.exitsFor(dir) ?: return NavUtil.randomDir()
-        val overrideMapCell = if (secretRoomExit != null) state.hyrule.shopMapCell else null
+        val overrideMapCell = if (secretRoomExit != null) {
+            if (levelLoc == MapConstants.overworld) {
+                state.hyrule.shopMapCell
+            } else {
+                state.hyrule.level1EntranceCell
+            }
+        } else {
+            null
+        }
 
         targets = exits
 
@@ -353,7 +361,7 @@ class MoveTo(
         when {
             (state.frameState.isLevel && toLevel == MapConstants.overworld) -> {
                 d { " in level but shouldnt be "}
-                state.hyrule.shopMapCell.exitsFor(Direction.Down)
+                state.hyrule.level1EntranceCell.exitsFor(Direction.Down)
             }
             (state.frameState.isLevel) -> null
             (state.frameState.enemiesRaw.count { it.tile in EnemyGroup.flame} >= 2) -> {

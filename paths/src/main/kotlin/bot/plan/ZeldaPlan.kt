@@ -1266,6 +1266,7 @@ private val level8: PlanBuilder.() -> Unit
         bombUp
         "kill dragon".seg()
         killLev4Dragon // dragon
+        "grab tri".seg()
         goTo(InLocations.Level8.triforceHeartAbove)
         goTo(InLocations.Level8.triforceHeart)
         upm

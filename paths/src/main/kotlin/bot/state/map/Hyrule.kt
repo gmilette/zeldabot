@@ -1,9 +1,11 @@
 package bot.state.map
 
+import bot.plan.InLocations
 import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.destination.DestType
 import bot.state.map.level.LevelMapCellsLookup
+import bot.state.map.level.LevelStartMapLoc
 import util.Map2d
 import util.d
 import java.io.File
@@ -16,6 +18,9 @@ class Hyrule {
     val map: Map<MapLoc, MapCell>
 
     val levelMap = LevelMapCellsLookup()
+
+    val level1EntranceCell: MapCell
+        get() = levelMap.cell(1, LevelStartMapLoc.lev(1))
 
     val shopMapCell: MapCell
         get() = getMapCell(58)
