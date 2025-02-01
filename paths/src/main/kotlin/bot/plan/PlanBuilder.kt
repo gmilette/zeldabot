@@ -525,8 +525,10 @@ class PlanBuilder(
     val getTri: Unit
         get() {
             // need to change this to a complete when map changes
+            // sometimes yes the user just exits
             goTo(InLocations.Level2.triforce)
             startAt(0)
+            // doesn't make sense if the user has already got the triforce
             goIn(GamePad.MoveUp, MapConstants.oneGridPoint5)
         }
     val rightm: PlanBuilder
