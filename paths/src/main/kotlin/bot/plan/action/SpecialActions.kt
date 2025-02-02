@@ -4,6 +4,7 @@ import bot.plan.InLocations
 import bot.state.FramePoint
 import bot.state.GamePad
 import bot.state.MapLocationState
+import bot.state.map.MapConstants
 import bot.state.map.grid
 import util.d
 
@@ -106,3 +107,13 @@ class Level3SequenceThenDo(private val sequence: OrderedActionSequence, action: 
     override val name: String
         get() = "Level3SequenceThenDo ${super.name}"
 }
+
+fun getTriforce() = CompleteIfMapChanges(
+    OrderedActionSequence(
+        listOf(
+            InsideNav(InLocations.Level2.triforce),
+            StartAtAction(0),
+            GoIn(MapConstants.oneGridPoint5, GamePad.MoveUp)
+        ), restartWhenDone = false, shouldComplete = true
+    )
+)

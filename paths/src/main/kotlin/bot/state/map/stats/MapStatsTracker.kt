@@ -97,7 +97,6 @@ class MapStatsTracker {
     }
 
     private fun saveLink(state: FrameState) {
-        d { " saveq link state ${state.link.point}"}
         visits.set(state.link.point, true)
     }
 

@@ -84,8 +84,8 @@ class FrameStateUpdater(
         val theRaw = oam.agentsRaw(dirLookup)
         val ladderMem = api.readCPU(Addresses.ladderDeployed) != 0
         // check ladder memory first
-        val ladderSprite = oam.ladderSprite?.let { "ladder sprite "} ?: "no sprite"
-        d { "ladder mem $ladderMem ${api.readCPU(Addresses.ladderDeployed)} $ladderSprite" }
+//        val ladderSprite = oam.ladderSprite?.let { "ladder sprite "} ?: "no sprite"
+//        d { "ladder mem $ladderMem ${api.readCPU(Addresses.ladderDeployed)} $ladderSprite" }
         val ladder = if (ladderMem) oam.ladderSprite else null
 
         val linkDir2 = oam.direction
@@ -93,9 +93,8 @@ class FrameStateUpdater(
 //        val damagedTile = if (oam.damaged) LinkDirectionFinder.damagedAttribute.last() else 0
         // lags behind one frame
         val linkDir = dirLookup.readLinkPointDir()
-        d { " LINKDIR: $linkDir $linkDir2"}
         // never changes
-        d { " link projectile sword >>>> ${api.readCPU(Addresses.linkSwordProjectile)}"}
+//        d { " link projectile sword >>>> ${api.readCPU(Addresses.linkSwordProjectile)}"}
         val link = Agent(0, linkPoint, linkDir, tile = 0)
 
         val previousNow = state.previousMove

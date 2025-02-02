@@ -633,16 +633,20 @@ object ZeldaPlan {
                 seg("steal key from hand grabby", ZeldaItem.Triforce)
                 go(InLocations.Level1.key114Position)
                 go(InLocations.Level1.key114)
+                startHereAtAfterLevel5()
                 // should do but too risky for now
 //                .go(InLocations.Level1.key114)
                 up
-                seg("destroy dragon")
+                seg("dragon position")
                 // avoid first round of fireballs
                 // no go up near the edge
 //                go(FramePoint(6.grid, 3.grid))
                 go(FramePoint(11 .grid, 6.grid))
+                seg("destroy dragon")
                 killLev1Dragon // aim for the head
-                rightm // triforce
+                seg("dragon destroyed")
+                rightonlym // triforce
+                seg("go in")
                 goIn(GamePad.MoveRight, 20)
                 seg("get the triforce")
                 getTri
@@ -711,7 +715,7 @@ object ZeldaPlan {
                 wait(200) // there might be a bomb appearing that I want
                 goTo(InLocations.Level2.heartMid)
                 loot // in case there is a bomb
-                leftm
+                leftonlym
                 goIn(GamePad.MoveLeft, 20)
                 getTri
             }
@@ -830,7 +834,7 @@ object ZeldaPlan {
             goTo(InLocations.Level2.heartMid)
             wait(200) // wait for a bomb to appear?
             loot // in case there is a bomb
-            leftm
+            leftonlym
             goIn(GamePad.MoveLeft, 20)
             getTri
         }
@@ -920,7 +924,7 @@ object ZeldaPlan {
             seg("kill boss")
             starKill
             go(InLocations.Level3.heartMid)
-            upm
+            uponlym
             getTri
         }
 
@@ -973,7 +977,7 @@ private val level4: PlanBuilder.() -> Unit
         killLev4Dragon // dragon
         //get heart
         goTo(InLocations.Level4.triforceHeart)
-        upm
+        uponlym
         getTri
     }
 
@@ -1054,7 +1058,7 @@ private val level5: PlanBuilder.() -> Unit
         kill // problem the projectiles are considered enemies
         seg("Get 5 triforce")
         goTo(InLocations.Level5.triforceHeart)
-        upm
+        uponlym
         getTri
     }
 
@@ -1129,7 +1133,7 @@ private val level6: PlanBuilder.() -> Unit
         killArrowSpider
         goTo(InLocations.Level6.triforceHeart)
         // need
-        upm
+        uponlym
         getTri
     }
 
@@ -1197,7 +1201,7 @@ private val level7: PlanBuilder.() -> Unit
         bombRight
         killLev1Dragon // aim for the head
         goTo(InLocations.Level7.triforceHeart)
-        rightm
+        rightonlym
         getTri
     }
 
@@ -1269,7 +1273,7 @@ private val level8: PlanBuilder.() -> Unit
         "grab tri".seg()
         goTo(InLocations.Level8.triforceHeartAbove)
         goTo(InLocations.Level8.triforceHeart)
-        upm
+        uponlym
         getTri
     }
 
@@ -1425,7 +1429,7 @@ private fun PlanBuilder.levelPlan9PhaseGannon() {
         goTo(InLocations.Level9.centerGannonAttack)
         killG
         lootInside
-        upm
+        uponlym
         "seg get princess".seg()
         rescuePrincess()
         peaceReturnsToHyrule()

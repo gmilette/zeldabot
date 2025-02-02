@@ -222,7 +222,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         var invincible: Boolean = false
         var maxLife: Boolean = false
         var fixLocationToZapper: Boolean = false
-        var log: Boolean = true
+        var log: Boolean = false
         var experiment: String? = null
 
         @JvmStatic

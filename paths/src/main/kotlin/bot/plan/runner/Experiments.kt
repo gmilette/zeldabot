@@ -141,7 +141,7 @@ class Experiments(private val masterPlan: PlanMaker) {
             twoBomb.copy(name = "level2Bomb6wws", hearts = 5, bombs = 0, sword = ZeldaItem.WoodenSword, shield = true),
             twoBomb.copy(name = "level2Bomb5", hearts = 5, bombs = 0, sword = ZeldaItem.WoodenSword),
             twoBomb.copy(name = "level2Bomb", hearts = 3, bombs = 0, sword = ZeldaItem.WoodenSword),
-            one.copy(name = "level1plan", hearts = 3, bombs = 1),
+            one.copy(name = "level1plan", hearts = 3, bombs = 4, sword = ZeldaItem.WhiteSword),
             one.copy(name = "level1", hearts = 3, bombs = 1),
             // get two bomb hearts and white sword
             one.copy(name = "lev1white5", hearts = 5, bombs = 4, sword = ZeldaItem.WhiteSword),
