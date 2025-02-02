@@ -78,6 +78,11 @@ object Addresses {
    const val linkY = 0x0084
    const val linkSwordProjectile = 0x007E
 
+   // 17: sword or boomerang is firing
+   // 49: one frame to indicate its complete
+   // 0: otherwise. does it mean link can shoot?
+   const val linkDoingAnAttack = 0x00AC
+
    // $08=North, $04=South, $01=East, $02=West
 //   const val linkDir = 0x0089 //it's 98
    const val moveDir = 0x0F // 01 or FF // Link's Move Direction

@@ -7,8 +7,6 @@ import bot.state.map.destination.zeldaItemsRequired
 import nintaco.api.API
 import nintaco.api.ApiSource
 import util.d
-import kotlin.math.max
-import kotlin.math.min
 
 data class FrameState(
     val api: API = ApiSource.getAPI(),
@@ -22,6 +20,8 @@ data class FrameState(
     val seenBoomerang: Boolean,
     val inventory: Inventory
 ) {
+    private val linkDoingAnAttack: Int by lazy { api.readCPU(Addresses.linkDoingAnAttack) }
+
     val numRupees: Int = inventory.numRupees
     val numKeys: Int = inventory.numKeys
     val numBombs: Int = inventory.numBombs
@@ -96,6 +96,10 @@ data class FrameState(
         return this.copy(enemies = enemies.toMutableList() + Agent(
             0, pt
         ))
+    }
+
+    fun linkDoingAnAttack(): Boolean {
+        return linkDoingAnAttack != 0
     }
 }
 

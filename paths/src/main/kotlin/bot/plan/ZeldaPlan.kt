@@ -524,7 +524,7 @@ object ZeldaPlan {
 
         phase("go to level 5")
         5 using level5
-        startHereAtAfterLevel5()
+//        startHereAtAfterLevel5()
 
         forestPotion()
 //        greenPotion() // for now, but there is a closer one for sure
@@ -633,7 +633,6 @@ object ZeldaPlan {
                 seg("steal key from hand grabby", ZeldaItem.Triforce)
                 go(InLocations.Level1.key114Position)
                 go(InLocations.Level1.key114)
-                startHereAtAfterLevel5()
                 // should do but too risky for now
 //                .go(InLocations.Level1.key114)
                 up
