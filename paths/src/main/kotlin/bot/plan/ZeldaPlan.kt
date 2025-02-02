@@ -167,6 +167,7 @@ object ZeldaPlan {
 
         return builder {
             woodenSwordPhase()
+            1 using level1
 
             "gather bombs".seg()
             gatherBombsFirstPhase()
@@ -296,6 +297,14 @@ object ZeldaPlan {
 //            val forest: MapLoc = 98
 //            routeTo(forest.up)
 //            routeTo(forest.up.right)
+        }
+    }
+
+    private fun PlanBuilder.exitReenter() {
+        add {
+            seg("reenter to not use key")
+            goInConsume(GamePad.MoveDown, 30)
+            goInConsume(GamePad.MoveUp, 30)
         }
     }
 
@@ -570,6 +579,7 @@ object ZeldaPlan {
                 lev(1)
                 inLevel
                 startAt(LevelStartMapLoc.lev(1))
+                exitReenter()
                 objective(ZeldaItem.Bow)
                 seg("grab key")
                 left
@@ -1066,6 +1076,9 @@ private val level6: PlanBuilder.() -> Unit
         phase(Phases.lev(6))
         lev(6)
         startAt(LevelStartMapLoc.lev(6))
+        seg("reenter to not use key")
+        goInConsume(GamePad.MoveDown, 30)
+        goInConsume(GamePad.MoveUp, 30)
         seg("move to level 6")
         left
         seg("first ghost")
