@@ -4,7 +4,8 @@ data class LevelData(
     val level: Int,
     val numKeysIn: Int,
     val numKeysNeeded: Int,
-    val numKeysPlanned: Int = 0
+    val numKeysPlanned: Int = 0,
+    val firstCellRequiresKey: Boolean = false
 )
 
 object LevelsData {
@@ -31,7 +32,8 @@ object LevelsData {
             // 1: left start
             // 2: right start
             numKeysIn = 6,
-            numKeysNeeded = 5 // only if use a bomb
+            numKeysNeeded = 5, // only if use a bomb
+            firstCellRequiresKey = true
         ),
         LevelData(
             // only got two
@@ -76,7 +78,8 @@ object LevelsData {
             // 3: (mid, hard) ghosts
             // 4: (mid, off path) ghosts
             numKeysIn = 4,
-            numKeysNeeded = 4 //visual YES
+            numKeysNeeded = 4, //visual YES
+            firstCellRequiresKey = true
         ),
         LevelData(
             level = 7,
