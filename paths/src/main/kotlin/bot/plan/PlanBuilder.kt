@@ -1102,7 +1102,7 @@ class PlanBuilder(
 
     // kill and loot and move?
     private fun addK(nextLoc: MapLoc) {
-        add(nextLoc, killThenMove(moveTo(nextLoc)))
+        add(nextLoc, killThenLootThenMove(moveTo(nextLoc)))
     }
 
     private fun addTk(nextLoc: MapLoc) {

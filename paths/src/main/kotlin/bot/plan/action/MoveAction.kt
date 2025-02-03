@@ -146,6 +146,10 @@ class InsideNav(
         get() = "Nav to inside $point $tag"
 }
 
+fun EitherPoint(point1: InsideNavAbout, point2: InsideNavAbout, chooseAction1: (state: MapLocationState) -> Boolean) = DecisionAction(
+    point1, point2, chooseAction1 = chooseAction1
+)
+
 class InsideNavAbout(
     private val point: FramePoint, about: Int, vertical: Int = 1, negVertical: Int = 0,
     val shop: Boolean = false, ignoreProjectiles: Boolean = false,

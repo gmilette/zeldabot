@@ -167,7 +167,6 @@ object ZeldaPlan {
 
         return builder {
             woodenSwordPhase()
-            1 using level1
 
             "gather bombs".seg()
             gatherBombsFirstPhase()
@@ -263,6 +262,17 @@ object ZeldaPlan {
             startAt(InLocations.Overworld.start)
             phase("Opening sequence")
             obj(Dest.item(ZeldaItem.WoodenSword))
+        }
+    }
+
+    private fun PlanBuilder.harvest() {
+        add {
+            // should result in about 200+
+            2 using levelPlan2Harvest
+            2 using levelPlan2Harvest
+            2 using levelPlan2Harvest
+            2 using levelPlan2Harvest
+            2 using levelPlan2Harvest
         }
     }
 
@@ -879,6 +889,38 @@ object ZeldaPlan {
 //            goInConsume(GamePad.MoveDown,90)
             startAt(60)
         }
+    }
+
+private val levelPlan2Harvest: PlanBuilder.() -> Unit
+    get() = {
+        phase(Phases.level2Harvest)
+        lev(2)
+        startAt(LevelStartMapLoc.lev(2))
+        seg("gather 3 keys")
+        startHereAtLoaded()
+        rightk
+        upk
+        seg("gather key 2")
+        leftk
+        leftk
+        rightk
+        rightk
+        upk
+        upk
+        seg("up to snake")
+        upk
+        upk
+        seg("escape")
+        downk
+        downk
+        downk
+        downk
+        seg("depart")
+        leftk
+        seg("move out")
+        goTo(FramePoint(7.grid + MapConstants.halfGrid, 8.grid))
+        goInConsume(GamePad.MoveDown,MapConstants.threeGrid)
+        startAt(60)
     }
 
     private val level3: PlanBuilder.() -> Unit
@@ -1508,6 +1550,7 @@ private fun PlanBuilder.startHereAtLoaded() {
     startHereAt(
         raftLadderSetup.copy(
             hearts = 16,
+            rupees = 0,
             ring = ZeldaItem.BlueRing,
             sword = ZeldaItem.MagicSword,
             potion = true,

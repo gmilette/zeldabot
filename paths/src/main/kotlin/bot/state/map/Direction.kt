@@ -108,6 +108,10 @@ fun Direction.perpendicularTo(other: Direction) =
     this != Direction.None && other != Direction.None &&
             this.vertical == other.horizontal
 
+fun Direction.paralellTo(other: Direction) =
+    this != Direction.None && other != Direction.None &&
+            (this.vertical == other.vertical || this.horizontal == other.horizontal)
+
 val Direction.vertical: Boolean
     get() = this == Direction.Up || this == Direction.Down
 

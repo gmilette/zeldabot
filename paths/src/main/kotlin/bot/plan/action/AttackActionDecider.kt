@@ -356,15 +356,22 @@ object AttackActionDecider {
             return GamePad.aOrB(useB)
         }
 
-        // check other directions
-        val otherDirs = swords.filter { it.key != from }
-        val attackMove = enemiesClose.firstNotNullOfOrNull { enemy ->
-            val attackDir = otherDirs.firstNotNullOfOrNull {
-                val dir = it.key
-                if (enemy.intersect(it.value)) dir else null
-            }
-            attackDir
-        }?.toGamePad() ?: GamePad.None
+        // it's problematic when there is a corner
+        // because it faces up, but can't go up, it has to persist in the cornering
+        val FACE_ENEMY = true
+        val attackMove = if (FACE_ENEMY) {
+            // check other directions
+            val otherDirs = swords.filter { it.key != from}
+            enemiesClose.firstNotNullOfOrNull { enemy ->
+                val attackDir = otherDirs.firstNotNullOfOrNull {
+                    val dir = it.key
+                    if (enemy.intersect(it.value)) dir else null
+                }
+                attackDir
+            }?.toGamePad() ?: GamePad.None
+        } else {
+            GamePad.None
+        }
 
         d {"Attack move $attackMove" }
         return attackMove

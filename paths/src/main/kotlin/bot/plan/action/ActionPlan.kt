@@ -446,10 +446,25 @@ fun killAndMove(moveTo: MoveTo) = DecisionAction(Optional(KillAll()), moveTo) { 
     state.hasEnemies
 }
 
+fun killAndLootAndMove(moveTo: MoveTo) = DecisionAction(Optional(KillAll()), lootAndMove(moveTo)) { state ->
+    state.hasEnemies
+}
+
 fun killThenMove(moveTo: MoveTo) = CompleteIfMapChanges(
     OrderedActionSequence(
         listOf(
-            KillAll(), killAndMove(moveTo)          // this allows link to go back to attacking if needed
+            KillAll(),
+            killAndMove(moveTo)          // this allows link to go back to attacking if needed
+        ), restartWhenDone = true
+    )
+)
+
+fun killThenLootThenMove(moveTo: MoveTo) = CompleteIfMapChanges(
+    OrderedActionSequence(
+        listOf(
+            KillAll(),
+            GetLoot(),
+            killAndLootAndMove(moveTo)          // this allows link to go back to attacking if needed
         ), restartWhenDone = true
     )
 )

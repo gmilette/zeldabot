@@ -129,7 +129,11 @@ class RouteTo(val params: Param = Param()) {
         // pass in attack targets
         attackableSpec: List<Agent> = emptyList()
     ): GamePad {
+//        val canAttack = param.allowAttack && !state.frameState.linkDoingAnAttack() && (param.useB || state.frameState.canUseSword)
         val canAttack = param.allowAttack && (param.useB || state.frameState.canUseSword)
+        if (state.frameState.linkDoingAnAttack()) {
+            d { " xxLink is attackingxx "}
+        }
 
         // attack with wand as if it is a sword
         val attackWithWand =
@@ -240,6 +244,11 @@ class RouteTo(val params: Param = Param()) {
 
             else -> {
                 d { " Route Action -> RangeAction $inRangeOf use ${theAttack.gameAction} is=${inRangeOf.isAttack}" }
+                // Problem --> if link is at a crossroads and especially if he is trying to move perpendicular
+                // it will probably not work
+                // solutions -> Include this in the cornering logic
+                // don't allow perpendicular facing of the enemy,
+                //  but then again, link can't turn around, so really this is just to turn off facing the enemy
                 if (inRangeOf.isAttack) {
                     theAttack.nextStep(state)
                 } else {
