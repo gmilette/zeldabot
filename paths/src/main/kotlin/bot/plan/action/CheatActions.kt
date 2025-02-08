@@ -29,14 +29,14 @@ fun cheatGetKey(): Action = ActionOnce { state ->
 
 fun cheatBombs() : Action  = ActionOnce { state ->
     if (state.frameState.inventory.numBombs < 4) {
-        file.write(state.frameState.mapLoc, "set to 4", state.frameState.inventory.numBombs)
+        file.write(state.frameState.mapLoc, "set bomb to 4", state.frameState.inventory.numBombs)
     }
     state.frameState.inventory.setBombs()
 }
 
 fun cheatRupee(enoughFor: Int = 100) : Action  = ActionOnce { state ->
     if (state.frameState.inventory.numRupees < enoughFor) {
-        file.write(state.frameState.mapLoc, "add $enoughFor rupee", state.frameState.inventory.numRupees)
+        file.write(state.frameState.mapLoc, "set rupee to $enoughFor", state.frameState.inventory.numRupees)
     }
     state.frameState.inventory.addRupeeIfNeed(enoughFor)
 }
