@@ -397,7 +397,7 @@ class PlanBuilder(
     }
     val cheatBombs: PlanBuilder
         get() {
-            add(lastMapLoc, CheatGetBombs())
+            add(lastMapLoc, CheatBombs)
             return this
         }
     val enoughForRing: PlanBuilder

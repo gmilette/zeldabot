@@ -32,7 +32,7 @@ object LevelsData {
             // 1: left start
             // 2: right start
             numKeysIn = 6,
-            numKeysNeeded = 5, // only if use a bomb
+            numKeysNeeded = 4, // first cell and used bomb
             firstCellRequiresKey = true
         ),
         LevelData(
@@ -78,7 +78,7 @@ object LevelsData {
             // 3: (mid, hard) ghosts
             // 4: (mid, off path) ghosts
             numKeysIn = 4,
-            numKeysNeeded = 4, //visual YES
+            numKeysNeeded = 3, //visual YES, use first cell
             firstCellRequiresKey = true
         ),
         LevelData(

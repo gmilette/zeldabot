@@ -1140,8 +1140,6 @@ private val level6: PlanBuilder.() -> Unit
         switchToBoomerang
         killLongWait
         pushActionThenGoUp(InLocations.Push.moveLeftOfTwo)
-        // don't need thisP
-//            killUntil(5) // leave some alive, just do some damage so bomb is successful
         bombRightExactly
         seg("go up to get wand")
         switchToBoomerang // so i can get the pancakes
@@ -1165,10 +1163,8 @@ private val level6: PlanBuilder.() -> Unit
         // pick up key in center
         goTo(InLocations.Level6.keyCenter)
         down //57
-//        startAt(57)
         kill
         rightk
-//        startAt(58)//save6
         seg("center move stair")
         kill
         addNext(
@@ -1291,7 +1287,7 @@ private val level8: PlanBuilder.() -> Unit
         killUntil(4)
         bombUp
         enoughForArchery
-        cheatAddKey
+//        cheatAddKey
         upm
         killArrowSpider // kill arrow guy
         loot // spider tends to generate loot sometimes

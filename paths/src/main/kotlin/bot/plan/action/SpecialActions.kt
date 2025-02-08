@@ -113,7 +113,9 @@ fun getTriforce() = CompleteIfMapChanges(
         listOf(
             InsideNav(InLocations.Level2.triforce),
             StartAtAction(0),
-            GoIn(MapConstants.oneGridPoint5, GamePad.MoveUp)
+            GoIn(MapConstants.oneGridPoint5, GamePad.MoveUp),
+            GoIn(MapConstants.halfGrid, GamePad.MoveLeft),
+            GoIn(MapConstants.halfGrid, GamePad.MoveRight)
         ), restartWhenDone = false, shouldComplete = true
     )
 )
