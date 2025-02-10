@@ -421,7 +421,11 @@ object ZeldaPlan {
     private fun PlanBuilder.gatherBombsFirstPhase() {
         this.add {
             val bombLoc: MapLoc = 107
-            routeTo(bombLoc)
+            // before there are bombs
+            routeTo(bombLoc.down)
+            // make it so your first attack could yield a bomb
+            killUntilBombsLikely
+            up
             killUntilGetBomb
             up
             killUntilGetBomb
@@ -948,6 +952,7 @@ private val levelPlan2Harvest: PlanBuilder.() -> Unit
             down  // downk, i think it as causing no completing
             seg("get raft")
             goIn(GamePad.MoveDown, 10)
+            switchToBomb
             // drop clearing bomb
             goIn(GamePad.B, 6)
             goTo(InLocations.rightStair)

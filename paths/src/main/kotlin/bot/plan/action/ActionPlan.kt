@@ -419,6 +419,8 @@ val lootOrKill = DecisionAction(Optional(GetLoot()), Optional(KillAll())) { stat
     neededReachableLoot(state).isNotEmpty()
 }
 
+fun killUntilBombsLikely() = CompleteIfBombsLikely(KillAll())
+
 //fun lootAndMove(moveTo: Action) = DecisionAction(Optional(GetLoot()), moveTo) { state ->
 //    neededReachableLoot(state).isNotEmpty()
 //}

@@ -50,7 +50,7 @@ val EnoughForRing
 val EnoughForPotion
     get() = cheatRupee(68)
 val EnoughForArchery
-    get() = cheatRupee(100)
+    get() = cheatRupee(75)
 val EnoughForArrow
     get() = cheatRupee(88)
 val EnoughForBait

@@ -303,6 +303,11 @@ class PlanBuilder(
             add(lastMapLoc, KillAll(needLongWait = false, ignoreUntilOnly = circleMonsterCenters))
             return this
         }
+    val killUntilBombsLikely: PlanBuilder
+        get() {
+            add(lastMapLoc, killUntilBombsLikely())
+            return this
+        }
     val killUntilGetBomb: PlanBuilder
         get() {
             killUntilGetBomb(0)
@@ -666,7 +671,7 @@ class PlanBuilder(
                 }
                 EntryType.WalkInLadder -> goToNotMonitored(point)
                 EntryType.WalkIn -> goTo(point)
-                EntryType.Bomb -> if (action) bombThenGoIn(point, itemLocPoint) else goInGetCenterItem(point, itemLocPoint)
+                is EntryType.Bomb -> if (action) bombThenGoIn(point, itemLocPoint, this.type.entry.requireLetter) else goInGetCenterItem(point, itemLocPoint)
                 is EntryType.Fire -> burnFromGo(point, this.type.entry.from, itemLocPoint)
                 is EntryType.Push -> pushDownGetItem(point, itemLocPoint)
                 is EntryType.Statue -> pushDownGetItem(point, itemLocPoint, position)
@@ -771,14 +776,14 @@ class PlanBuilder(
         return this
     }
 
-    private fun bombThenGoIn(entrance: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem): PlanBuilder {
+    private fun bombThenGoIn(entrance: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, showLetter: Boolean = false): PlanBuilder {
         bomb(entrance.copy(y = entrance.y + 8))
 
         add(lastMapLoc, CompleteIfMapChanges(ReBombIfNecessary(InsideNav(entrance, makePassable = entrance))))
 
         goIn(GamePad.MoveUp, 5)
 
-        goGetItem(itemLoc)
+        goGetItem(itemLoc, letterRequired = showLetter)
 
         return this
     }
@@ -810,11 +815,11 @@ class PlanBuilder(
         if (showLetter) {
             showLetterIfRequired()
         }
-        goGetItem(itemLoc)
+        goGetItem(itemLoc, showLetter)
         return this
     }
 
-    private fun goGetItem(itemLoc: FramePoint = InLocations.Overworld.centerItem) {
+    private fun goGetItem(itemLoc: FramePoint = InLocations.Overworld.centerItem, letterRequired: Boolean = false) {
         if (itemLoc != Objective.ItemLoc.None.point && itemLoc != Objective.ItemLoc.Enter.point) {
             // walking down stairs, plus a few steps in
             // too much for bait
@@ -826,9 +831,13 @@ class PlanBuilder(
 
             // avoid accidently picking the center item
             if (itemLoc != InLocations.Overworld.centerItem) {
-                goShop(itemLoc.downTwoGrid)
+                goShop(itemLoc.downThreeGrid)
             }
-            goShop(itemLoc)
+            if (letterRequired) {
+                goPotionDecision()
+            } else {
+                goShop(itemLoc)
+            }
             if (itemLoc != Objective.ItemLoc.Enter.point) {
                 exitShop()
                 // help exit after exiting
@@ -980,6 +989,11 @@ class PlanBuilder(
     private fun goShop(to: FramePoint): PlanBuilder {
         add(lastMapLoc, InsideNavAbout(to, 4, 2, 1,
             shop = true))
+        return this
+    }
+
+    private fun goPotionDecision(): PlanBuilder {
+        add(lastMapLoc, eitherPotion())
         return this
     }
 

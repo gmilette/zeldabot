@@ -259,6 +259,8 @@ val FramePoint.upTwoGrid
     get() = FramePoint(x, y - 32)
 val FramePoint.downTwoGrid
     get() = FramePoint(x, y + 32)
+val FramePoint.downThreeGrid
+    get() = FramePoint(x, y + 48)
 val FramePoint.rightTwoGrid
     get() = FramePoint(x + 32, y )
 val FramePoint.leftTwoGrid

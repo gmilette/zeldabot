@@ -274,7 +274,7 @@ class PlanRunner(private val makePlan: PlanMaker,
         if (ex.whistle) {
             manipulator.setHaveWhistle()
         }
-//        manipulator.setLetter()
+        manipulator.setLetter()
 //        manipulator.setLadderAndRaft(true)
         manipulator.setBoomerang(ex.boomerang)
         manipulator.setKeys(ex.keys)

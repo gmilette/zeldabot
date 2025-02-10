@@ -14,7 +14,7 @@ object Dest {
         DestType.Level(6),
         DestType.Level(7, entry = EntryType.WhistleWalk),
         DestType.Level(8, entry = EntryType.Fire(from = Direction.Left)),
-        DestType.Level(9, EntryType.Bomb)
+        DestType.Level(9, EntryType.Bomb())
     )
 
     fun level(number: Int) = levels[number - 1]
@@ -41,16 +41,16 @@ object Dest {
     }
 
     object Secrets {
-        val bomb30Start = DestType.SecretToEverybody(30, entry = EntryType.Bomb)
-        val bomb20 = DestType.SecretToEverybody(20, entry = EntryType.Bomb)
+        val bomb30Start = DestType.SecretToEverybody(30, entry = EntryType.Bomb())
+        val bomb20 = DestType.SecretToEverybody(20, entry = EntryType.Bomb())
         // forest
         val walk100 = DestType.SecretToEverybody(100)
         val forest30NearDesertForest = DestType.SecretToEverybody(30, EntryType.Fire(Direction.Left))
         val forest10Mid = DestType.SecretToEverybody(10, EntryType.Fire(Direction.Left))
         val forest100South = DestType.SecretToEverybody(100, EntryType.Fire(from = Direction.Down))
         val secretForest30NorthEast = DestType.SecretToEverybody(30, EntryType.Statue)
-        val bombSecret30North = DestType.SecretToEverybody(30, EntryType.Bomb)
-        val bombSecret30SouthWest = DestType.SecretToEverybody(30, EntryType.Bomb)
+        val bombSecret30North = DestType.SecretToEverybody(30, EntryType.Bomb())
+        val bombSecret30SouthWest = DestType.SecretToEverybody(30, EntryType.Bomb())
         val forest10BurnBrown = DestType.SecretToEverybody(10, EntryType.Fire(from = Direction.Down))
         val fire100SouthBrown = DestType.SecretToEverybody(100, EntryType.Fire(from = Direction.Right)) // or right
         val fire30GreenSouth = DestType.SecretToEverybody(30, EntryType.Fire(from = Direction.Left))
@@ -61,8 +61,8 @@ object Dest {
         val fireHeart = DestType.Heart(entry = EntryType.Fire(from = Direction.Up))
         val raftHeart = DestType.Heart(entry = EntryType.Walk())
         val ladderHeart = DestType.Heart(entry = EntryType.WalkInLadder)
-        val bombHeartNorth = DestType.Heart(entry = EntryType.Bomb)
-        val bombHeartSouth = DestType.Heart(entry = EntryType.Bomb)
+        val bombHeartNorth = DestType.Heart(entry = EntryType.Bomb())
+        val bombHeartSouth = DestType.Heart(entry = EntryType.Bomb())
     }
 
     object Shop {
@@ -74,10 +74,10 @@ object Dest {
         val westTreeShopNearWater = DestType.Shop(ShopType.C, EntryType.Fire(from = Direction.Up))
         val potionShopForest = DestType.Shop(ShopType.Potion, EntryType.Fire(from = Direction.Right))
         val potionShopWest = DestType.Shop(ShopType.Potion, EntryType.Walk(requireLetter = true))
-        val potionShopCornerNear1 = DestType.Shop(ShopType.Potion, EntryType.Bomb)
-        val potionShopTop = DestType.Shop(ShopType.Potion, EntryType.Bomb)
-        val potionShopLevel6 = DestType.Shop(ShopType.Potion, EntryType.Bomb)
-        val potionShopLevel9 = DestType.Shop(ShopType.Potion, EntryType.Bomb)
+        val potionShopCornerNear1 = DestType.Shop(ShopType.Potion, EntryType.Bomb(requireLetter = true))
+        val potionShopTop = DestType.Shop(ShopType.Potion, EntryType.Bomb(requireLetter = true))
+        val potionShopLevel6 = DestType.Shop(ShopType.Potion, EntryType.Bomb(requireLetter = true))
+        val potionShopLevel9 = DestType.Shop(ShopType.Potion, EntryType.Bomb(requireLetter = true))
         val potionShopNearStart = DestType.Shop(ShopType.Potion, EntryType.Fire(from = Direction.Down))
 
         object ItemLocs {
@@ -132,7 +132,7 @@ sealed class EntryType(val name: String) {
     object WalkIn : EntryType("walkIn")
     // requires special handling because of the laddder
     object WalkInLadder : EntryType("walkInLadder")
-    object Bomb : EntryType("bomb")
+    data class Bomb(val requireLetter: Boolean = false) : EntryType("bomb")
     data class Fire(val from: Direction = Direction.Down) : EntryType("fire from $from")
     data class Push(val from: Direction = Direction.Up) : EntryType("push from $from")
     object Statue : EntryType("statue")

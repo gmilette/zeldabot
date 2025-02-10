@@ -114,6 +114,14 @@ class CompleteIfHaveBombs(wrapped: Action) : WrappedAction(wrapped) {
         state.frameState.inventory.numBombs != 0 || super.complete(state)
 }
 
+class CompleteIfBombsLikely(wrapped: Action) : WrappedAction(wrapped) {
+    override fun complete(state: MapLocationState): Boolean =
+        ItemDropPrediction().bombsLikely()
+
+    override val name: String
+        get() = "CompleteIfBombsLikely ${wrapped.name}"
+}
+
 // move to this location then complete
 class InsideNav(
     private val point: FramePoint,
@@ -146,9 +154,18 @@ class InsideNav(
         get() = "Nav to inside $point $tag"
 }
 
-fun EitherPoint(point1: InsideNavAbout, point2: InsideNavAbout, chooseAction1: (state: MapLocationState) -> Boolean) = DecisionAction(
-    point1, point2, chooseAction1 = chooseAction1
-)
+fun eitherPoint(point1: FramePoint, point2: FramePoint, chooseAction1: (state: MapLocationState) -> Boolean) =
+    DecisionAction(
+        InsideNavAbout(
+            point1, 4, 2, 1,
+            shop = true
+        ),
+        InsideNavAbout(
+            point2, 4, 2, 1,
+            shop = true
+        ),
+        chooseAction1 = chooseAction1
+    )
 
 class InsideNavAbout(
     private val point: FramePoint, about: Int, vertical: Int = 1, negVertical: Int = 0,

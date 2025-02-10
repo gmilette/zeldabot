@@ -144,7 +144,7 @@ fun setTriforceAll() {
             setLetterShownToWoman()
         }
         // set to both potions
-        api.writeCPU(Addresses.hasPotion, if (add) 2 else 0)
+        api.writeCPU(Addresses.hasPotion, if (add) 1 else 0)
     }
 
     fun setBoomerang(item: ZeldaItem) {

@@ -67,7 +67,7 @@ class MapBuilder {
             "topleftrock",
             Objective(
                 FramePoint(100, 100), DestType.SecretToEverybody
-                    (20, EntryType.Bomb)
+                    (20, EntryType.Bomb())
             )
         )
         objectives[4] = CellBuilder().invoke {
@@ -86,7 +86,7 @@ class MapBuilder {
             Objective(
                 100,
                 100,
-                DestType.SecretToEverybody(20, EntryType.Bomb)
+                DestType.SecretToEverybody(20, EntryType.Bomb())
             )
         )
         objectives[8] = MapCellData(
@@ -153,13 +153,13 @@ class MapBuilder {
         objectives[19] = MapCellData(
             "placeshopsecret",
             Objective(
-                100, 100, DestType.SecretToEverybody(30, EntryType.Bomb)
+                100, 100, DestType.SecretToEverybody(30, EntryType.Bomb())
             )
         )
         objectives[20] = MapCellData(
             "mttopsecret",
             Objective(
-                100, 100, DestType.SecretToEverybody(20, EntryType.Bomb)
+                100, 100, DestType.SecretToEverybody(20, EntryType.Bomb())
             )
         )
         objectives[21] = MapCellData(

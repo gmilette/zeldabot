@@ -2,6 +2,7 @@ package bot.plan.action
 
 import androidx.compose.ui.res.useResource
 import bot.state.*
+import bot.state.map.Objective
 import util.d
 
 enum class DiversionState {
@@ -27,6 +28,19 @@ class SaveItemAction: Action {
         d{ " potion save item $currentItem"}
         return true
     }
+}
+
+fun eitherPotion(): Action = CompleteIfPotionFull(eitherPoint(
+    Objective.ItemLoc.Left.point,
+    Objective.ItemLoc.Right.point
+) { state ->
+    state.frameState.inventory.hasHalfPotion
+}
+)
+
+class CompleteIfPotionFull(wrapped: Action) : WrappedAction(wrapped) {
+    override fun complete(state: MapLocationState): Boolean =
+        state.frameState.inventory.hasFullPotion || super.complete(state)
 }
 
 class CompleteIfGameModeNormal : Action {
