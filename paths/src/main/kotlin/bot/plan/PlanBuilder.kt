@@ -831,7 +831,7 @@ class PlanBuilder(
 
             // avoid accidently picking the center item
             if (itemLoc != InLocations.Overworld.centerItem) {
-                goShop(itemLoc.downThreeGrid)
+                goShop(itemLoc.downTwoGrid)
             }
             if (letterRequired) {
                 goPotionDecision()

@@ -1183,7 +1183,6 @@ private val level6: PlanBuilder.() -> Unit
         )
         down
         left
-        enoughForArrow
         level6TriggerDoorThenUp
         killArrowSpider
         goTo(InLocations.Level6.triforceHeart)
@@ -1291,7 +1290,6 @@ private val level8: PlanBuilder.() -> Unit
         // clear out a little before moving on
         killUntil(4)
         bombUp
-        enoughForArchery
 //        cheatAddKey
         upm
         killArrowSpider // kill arrow guy

@@ -22,23 +22,27 @@ class ActionOnce(private val action: (MapLocationState) -> Unit) : Action {
 
 fun cheatGetKey(): Action = ActionOnce { state ->
     if (state.frameState.inventory.numKeys == 0) {
-        file.write(state.frameState.mapLoc, "add key", state.frameState.inventory.numKeys)
+        file.write(state.frameState.mapLoc, "key", "add key", state.frameState.inventory.numKeys)
         state.frameState.inventory.addKey()
     }
 }
 
 fun cheatBombs() : Action  = ActionOnce { state ->
     if (state.frameState.inventory.numBombs < 4) {
-        file.write(state.frameState.mapLoc, "set bomb to 4", state.frameState.inventory.numBombs)
+        file.write(state.frameState.level, state.frameState.mapLoc, "bomb", "set bomb to 4", state.frameState.inventory.numBombs)
     }
     state.frameState.inventory.setBombs()
 }
 
-fun cheatRupee(enoughFor: Int = 100) : Action  = ActionOnce { state ->
+fun cheatRupee(need: String, enoughFor: Int = 100) : Action  = ActionOnce { state ->
+    executeRupeeCheat(state, enoughFor, need)
+}
+
+fun executeRupeeCheat(state: MapLocationState, enoughFor: Int = 100, need: String) {
     if (state.frameState.inventory.numRupees < enoughFor) {
-        file.write(state.frameState.mapLoc, "set rupee to $enoughFor", state.frameState.inventory.numRupees)
+        file.write(state.frameState.level, state.frameState.mapLoc, need, "set rupee to $enoughFor", state.frameState.inventory.numRupees)
+        state.frameState.inventory.addRupeeIfNeed(enoughFor)
     }
-    state.frameState.inventory.addRupeeIfNeed(enoughFor)
 }
 
 val AddKey
@@ -46,12 +50,12 @@ val AddKey
 val CheatBombs
     get() = cheatBombs()
 val EnoughForRing
-    get() = cheatRupee(250)
+    get() = cheatRupee("ring", 250)
 val EnoughForPotion
-    get() = cheatRupee(68)
+    get() = cheatRupee("potion", 68)
 val EnoughForArchery
-    get() = cheatRupee(75)
+    get() = cheatRupee("archery", 75)
 val EnoughForArrow
-    get() = cheatRupee(88)
+    get() = cheatRupee("arrow", 88)
 val EnoughForBait
-    get() = cheatRupee(80)
+    get() = cheatRupee("bait", 80)

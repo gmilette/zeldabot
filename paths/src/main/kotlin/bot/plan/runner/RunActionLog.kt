@@ -166,7 +166,7 @@ class RunActionLog(private val fileNameRoot: String,
                 writeRow("index", "level", "mapLoc", "name", "time", "totalTime", "numFrames", "action", "hearts", "bombsUsed", "hits", "damage", "heal", "keys", "rupees", "potion")
                 completedStep.forEachIndexed { index, stepCompleted ->
                     stepCompleted.apply {
-                        writeRow(index, level, mapLoc, name, time, totalTime, numFrames, action, hearts, bombsUsed, hits, damage, heal, keys, rupeesGained, potionFills)
+                        writeRow(index, level, mapLoc, name, time, totalTime, numFrames, action, hearts, bombsUsed, hits, damage, heal, keys, rupees, potionFills)
                     }
                 }
             }

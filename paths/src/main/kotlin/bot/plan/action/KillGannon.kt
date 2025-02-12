@@ -15,6 +15,7 @@ class KillGannon : Action {
     }
     private var noEnemiesFrameCt = 0
     private val positionShoot = OrderedActionSequence(listOf(
+        EnoughForArchery,
         GoIn(moveDistance, GamePad.MoveRight, reset = true),
         GoIn(MoveDelay, GamePad.None, reset = true),
         GoIn(MoveDelay, GamePad.None, reset = true),

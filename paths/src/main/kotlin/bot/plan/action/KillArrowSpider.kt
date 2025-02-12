@@ -67,8 +67,10 @@ class KillArrowSpider : Action {
 
 // start 8_62_m_b
 fun killSpider(): Action {
-    return DecisionAction(emergeAndKill(), Optional(HideFromSpider())) {
-        it.vulnerable() || it.aliveEnemies.isEmpty()
+    return DecisionAction(emergeAndKill(), Optional(HideFromSpider())) { state ->
+        (state.vulnerable() || state.aliveEnemies.isEmpty()).also {
+            executeRupeeCheat(state, 20, "archery")
+        }
     }
 }
 
