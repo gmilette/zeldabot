@@ -38,6 +38,17 @@ fun cheatRupee(need: String, enoughFor: Int = 100) : Action  = ActionOnce { stat
     executeRupeeCheat(state, enoughFor, need)
 }
 
+fun cheatPotion() : Action  = ActionOnce { state ->
+    val (need, what) = when {
+        !state.frameState.inventory.hasPotion -> 68 to "red"
+        state.frameState.inventory.hasHalfPotion -> 40 to "blue"
+        else -> 0 to "none"
+    }
+    if (need > 0) {
+        executeRupeeCheat(state, need, what)
+    }
+}
+
 fun executeRupeeCheat(state: MapLocationState, enoughFor: Int = 100, need: String) {
     if (state.frameState.inventory.numRupees < enoughFor) {
         file.write(state.frameState.level, state.frameState.mapLoc, need, "set rupee to $enoughFor", state.frameState.inventory.numRupees)
@@ -52,7 +63,7 @@ val CheatBombs
 val EnoughForRing
     get() = cheatRupee("ring", 250)
 val EnoughForPotion
-    get() = cheatRupee("potion", 68)
+    get() = cheatPotion()
 val EnoughForArchery
     get() = cheatRupee("archery", 75)
 val EnoughForArrow
