@@ -15,7 +15,10 @@ import bot.state.map.level.LevelStartMapLoc
 object ZeldaPlan {
     enum class PlanOption {
         MAGIC_SHIELD_EARLY,
+        DO_HARVEST
     }
+
+    val DO_HARVEST: Boolean = true
 
     val option = PlanOption.MAGIC_SHIELD_EARLY
 
@@ -211,6 +214,11 @@ object ZeldaPlan {
             greenPotion()
             arrowAndHearts()
 
+            if (DO_HARVEST) {
+                seg("harvest")
+                harvest()
+            }
+
             // then potion?
             phase("level 5 sequence")
             level5sequence()
@@ -265,14 +273,14 @@ object ZeldaPlan {
         }
     }
 
-    private fun PlanBuilder.harvest() {
+    /**
+     * 5 should result in 200 ish
+     */
+    private fun PlanBuilder.harvest(n: Int = 5) {
         add {
-            // should result in about 200+
-            2 using levelPlan2Harvest
-            2 using levelPlan2Harvest
-            2 using levelPlan2Harvest
-            2 using levelPlan2Harvest
-            2 using levelPlan2Harvest
+            repeat(n) {
+                2 using levelPlan2Harvest
+            }
         }
     }
 
@@ -354,6 +362,7 @@ object ZeldaPlan {
             // todo: put back in
             fireBurn100()
             enoughForRing
+            obj(Dest.Fairy.brownForest)
 //            routeTo(98 - 16) // go up so it routes ok
             obj(Dest.Shop.blueRing, position = true)
             // avoid accidentally going back in
@@ -381,10 +390,11 @@ object ZeldaPlan {
             // getPotionConditionally()
             // for now just always buy the big potion
             greenPotion()
-
+            killUntilGetBomb
             // get the potion here if have enough cash
             // possibly only need to refill
             routeTo(102)
+            cheatBombs
             4 using level4
         }
     }
@@ -562,6 +572,9 @@ object ZeldaPlan {
         if (endLevel2BoomerangPickup) {
             2 using levelPlan2Boomerang
         } //7.5, 8
+        if (DO_HARVEST) {
+            harvest()
+        }
         seg("and now level 8")
         // make sure approach from left
         // rather than right

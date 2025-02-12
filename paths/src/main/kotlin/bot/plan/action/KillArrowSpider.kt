@@ -67,10 +67,15 @@ class KillArrowSpider : Action {
 
 // start 8_62_m_b
 fun killSpider(): Action {
-    return DecisionAction(emergeAndKill(), Optional(HideFromSpider())) { state ->
-        (state.vulnerable() || state.aliveEnemies.isEmpty()).also {
-            executeRupeeCheat(state, 20, "archery")
-        }
+    return DecisionAction(EnsureHaveArrows(emergeAndKill()), Optional(HideFromSpider())) { state ->
+        (state.vulnerable() || state.aliveEnemies.isEmpty())
+    }
+}
+
+class EnsureHaveArrows(val action: Action) : WrappedAction(action) {
+    override fun nextStep(state: MapLocationState): GamePad {
+        executeRupeeCheat(state, 20, "archery")
+        return super.nextStep(state)
     }
 }
 
