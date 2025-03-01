@@ -10,6 +10,7 @@ import util.d
 
 data class FrameState(
     val api: API = ApiSource.getAPI(),
+    val currentFrame: Int,
     val enemies: List<Agent>,
     val enemiesUncombined: List<Agent>,
     val enemiesRaw: List<Agent>,

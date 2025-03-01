@@ -65,6 +65,7 @@ class RunActionLog(private val fileNameRoot: String,
         val time: Long,
         val totalTime: Long,
         val bombsUsed: Int,
+        val frames: Int,
         val numFrames: Int = 0,
         val hits: Int = 0,
         val damage: Double = 0.0,
@@ -163,10 +164,10 @@ class RunActionLog(private val fileNameRoot: String,
         if (save) {
             val csvWriter2 = CsvWriter()
             csvWriter2.open(outputFile, false) {
-                writeRow("index", "level", "mapLoc", "name", "time", "totalTime", "numFrames", "action", "hearts", "bombsUsed", "hits", "damage", "heal", "keys", "rupees", "potion")
+                writeRow("index", "level", "mapLoc", "name", "time", "totalTime", "totalFrames", "numFrames", "action", "hearts", "bombsUsed", "hits", "damage", "heal", "keys", "rupees", "potion")
                 completedStep.forEachIndexed { index, stepCompleted ->
                     stepCompleted.apply {
-                        writeRow(index, level, mapLoc, name, time, totalTime, numFrames, action, hearts, bombsUsed, hits, damage, heal, keys, rupees, potionFills)
+                        writeRow(index, level, mapLoc, name, time, totalTime, frames, numFrames, action, hearts, bombsUsed, hits, damage, heal, keys, rupees, potionFills)
                     }
                 }
             }
@@ -266,23 +267,23 @@ class RunActionLog(private val fileNameRoot: String,
         val totalTime = (System.currentTimeMillis() - started) / 1000
         val cellName = state.getCell().mapData.name
         return StepCompleted(
-            state.frameState.level,
-            state.frameState.mapLoc,
-            seg.take(8),
-            cellName.take(8),
-            //.replace(potionOrReplace, "").
-            name.replace("\"", "").replace(potionReplace, "").trim(),
-            state.frameState.inventory.heartCalc.lifeInHearts(),
-            time,
-            totalTime,
-            bombsUsed.perStep,
-            frameCt,
+            level = state.frameState.level,
+            mapLoc = state.frameState.mapLoc,
+            seg = seg.take(8),
+            name = cellName.take(8),
+            action = name.replace("\"", "").replace(potionReplace, "").trim(),
+            hearts = state.frameState.inventory.heartCalc.lifeInHearts(),
+            time = time,
+            totalTime = totalTime,
+            bombsUsed = bombsUsed.perStep,
+            frames = state.frameState.currentFrame,
+            numFrames = frameCt,
             hits = hits,
             damage = damage,
             heal = heal,
-            state.frameState.numKeys,
-            state.frameState.numRupees,
-            state.frameState.inventory.numPotions
+            keys = state.frameState.numKeys,
+            rupees = state.frameState.numRupees,
+            potionFills = state.frameState.inventory.numPotions
         )
     }
 

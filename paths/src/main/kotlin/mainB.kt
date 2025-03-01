@@ -159,21 +159,21 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
             modifier = Modifier.align(Alignment.Start)
         ) {
 
-            Button(
-                modifier = Modifier.padding(8.dp),
-                onClick = {
+            Image(
+                painter = painterResource("icon_key.png"),
+                modifier = Modifier.size(40.dp).background(Color.LightGray).clickable {
                     model.addKey()
-                }) {
-                Text("+K")
-            }
+                },
+                contentDescription = ""
+            )
 
-            Button(
-                modifier = Modifier.padding(8.dp),
-                onClick = {
+            Image(
+                painter = painterResource("icon_bomb.png"),
+                modifier = Modifier.size(40.dp).background(Color.LightGray).clickable {
                     model.addBomb()
-                }) {
-                Text("+B")
-            }
+                },
+                contentDescription = ""
+            )
 
             Image(
                 painter = painterResource("icon_coin.png"),

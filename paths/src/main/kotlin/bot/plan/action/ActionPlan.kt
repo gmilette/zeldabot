@@ -465,6 +465,7 @@ fun killThenLootThenMove(moveTo: MoveTo) = CompleteIfMapChanges(
     OrderedActionSequence(
         listOf(
             KillAll(),
+            Wait(50),
             GetLoot(),
             killAndLootAndMove(moveTo)          // this allows link to go back to attacking if needed
         ), restartWhenDone = true

@@ -275,11 +275,26 @@ object ZeldaPlan {
 
     /**
      * 5 should result in 200 ish
+     * 4 = 119
      */
-    private fun PlanBuilder.harvest(n: Int = 5) {
+    private fun PlanBuilder.harvest(n: Int = 4) {
+        if (DO_HARVEST) {
+            add {
+                repeat(n) {
+                    2 using levelPlan2Harvest2
+//                    2 using levelPlan2Harvest
+                }
+            }
+        }
+    }
+
+    /**
+     * 5 should result in 200 ish
+     */
+    private fun PlanBuilder.harvestBombsNearLevel2(n: Int = 5) {
         add {
             repeat(n) {
-                2 using levelPlan2Harvest
+//                2 using levelPlan2Harvest
             }
         }
     }
@@ -401,6 +416,7 @@ object ZeldaPlan {
 
     private fun PlanBuilder.arrowAndHearts() {
         add {
+            harvest(5)
             enoughForArrow
             obj(Dest.Shop.arrowShop)
             phase(Phases.ladderHeart)
@@ -572,6 +588,7 @@ object ZeldaPlan {
         if (endLevel2BoomerangPickup) {
             2 using levelPlan2Boomerang
         } //7.5, 8
+
         if (DO_HARVEST) {
             harvest()
         }
@@ -581,9 +598,19 @@ object ZeldaPlan {
         val aboveLevel8: MapLoc = 93
         routeTo(aboveLevel8)
         left
+        startHereAtLoaded()
+        if (DO_HARVEST) {
+            harvest()
+        }
         down
         right
         8 using level8
+
+        // or harvest on the way to level 2
+        // or always harvest bombs if they are likely
+//        if (DO_HARVEST) {
+//            harvestBombsNearLevel2()
+//        }
 
         enoughForBait
         obj(Dest.Shop.blueRing, itemLoc = Dest.Shop.ItemLocs.bait, position = true)
@@ -910,12 +937,25 @@ object ZeldaPlan {
 
 private val levelPlan2Harvest: PlanBuilder.() -> Unit
     get() = {
+        phase(Phases.reenterLevel2)
+        lev(2)
+        startAt(LevelStartMapLoc.lev(2))
+        seg("go to boomerang")
+        up
+        right
+        up
+        goTo(FramePoint(7.grid + MapConstants.halfGrid, 8.grid))
+        goInConsume(GamePad.MoveDown,MapConstants.threeGrid)
+        startAt(60)
+    }
+
+private val levelPlan2Harvest2: PlanBuilder.() -> Unit
+    get() = {
         phase(Phases.level2Harvest)
         lev(2)
         startAt(LevelStartMapLoc.lev(2))
         seg("gather 3 keys")
-        startHereAtLoaded()
-        rightk
+        right
         upk
         seg("gather key 2")
         leftk

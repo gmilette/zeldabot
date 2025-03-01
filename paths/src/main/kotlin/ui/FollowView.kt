@@ -61,6 +61,7 @@ fun FollowView(
         Row {
             FollowCard(title = "Location", text = "${state.state.frameState.level} : ${state.state.frameState.mapLoc}")
             TimeElapsed(state)
+            FramesElapsed(state)
         }
 
         Progress(state)
@@ -163,6 +164,11 @@ private fun TimeElapsed(state: ZeldaModel.ShowState) {
     val minutes = (time / 60)
     val seconds = time - (minutes * 60)
     FollowCard(title = "Time", text = "${minutes.pad()}:${seconds.pad()}")
+}
+
+@Composable
+private fun FramesElapsed(state: ZeldaModel.ShowState) {
+    FollowCard(title = "Frames", text = "${state.state.frameState.currentFrame}")
 }
 
 @Composable

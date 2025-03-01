@@ -152,6 +152,10 @@ class RouteTo(val params: Param = Param()) {
             attack
         }
 
+        for (agent in attackableSpec) {
+            d { " attackableSpec: $agent" }
+        }
+
         val attackableAgents: List<Agent> = AttackActionDecider.aliveEnemiesCanAttack(state)
         val attackable = attackableSpec.ifEmpty {
             attackableAgents
