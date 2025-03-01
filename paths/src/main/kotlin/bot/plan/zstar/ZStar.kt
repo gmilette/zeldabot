@@ -233,6 +233,9 @@ class ZStar(
             path.add(0, lastPoint)
         }
 
+        // add the current point because the route code assumes the current
+        // point to be the first one in the path
+        path.add(0, current)
         d { " the final path is $path"}
         return path
     }

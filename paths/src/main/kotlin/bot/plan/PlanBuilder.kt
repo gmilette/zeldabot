@@ -105,7 +105,9 @@ class PlanBuilder(
             // useless
 //        goIn(GamePad.None, 500)
             if (consume && (level != 7 && level != 8)) {
-                goInConsume(exitDirection.toGamePad(), 20)
+                // i found link going back and forth
+                goInConsumeCompleteIfMapChanges(
+                    exitDirection.toGamePad(), 20)
             }
             recall
         }
@@ -1022,6 +1024,11 @@ class PlanBuilder(
 
     fun goInConsume(dir: GamePad = GamePad.MoveUp, num: Int): PlanBuilder {
         add(lastMapLoc, GoInConsume(num, dir))
+        return this
+    }
+
+    fun goInConsumeCompleteIfMapChanges(dir: GamePad = GamePad.MoveUp, num: Int): PlanBuilder {
+        add(lastMapLoc, CompleteIfMapChanges((GoInConsume(num, dir))))
         return this
     }
 

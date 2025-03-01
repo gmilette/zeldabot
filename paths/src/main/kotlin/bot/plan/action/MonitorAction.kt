@@ -529,7 +529,7 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
     }
 
     override val name: String
-        get() = "${if (failureCt>70) "! " else "" } ${wrapped.name}"
+        get() = "${if (failureCt>70) "!stayfailed " else "" } ${wrapped.name}"
 }
 
 class LadderAction: Action {
