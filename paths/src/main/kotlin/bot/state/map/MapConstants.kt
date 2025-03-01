@@ -11,6 +11,7 @@ object MapConstants {
     // each grid is 16 pixels. One tile occupies one grid usually. For example link is 1 grid big
     const val oneGrid = 16
     const val fourthGrid = 4
+    const val threeFourthGrid = fourthGrid * 3
     const val halfGrid = 8
     const val oneGridF = 16.0f
     const val oneGridPoint5 = 24

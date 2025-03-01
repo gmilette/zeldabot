@@ -2,6 +2,7 @@ package bot.plan
 
 import bot.plan.action.PushDirection
 import bot.state.*
+import bot.state.map.MapConstants
 import bot.state.map.grid
 
 
@@ -105,7 +106,7 @@ object InLocations {
         val bombItemRight = FramePoint(208, 43)
         //        val triforce = FramePoint(120, 88) // get the middle of the triangle at the top
 //        val triforce = FramePoint(128, 88) // get the middle of the triangle at the top
-        val triforce = FramePoint(128, 88).down.down.down.down // get the middle of the triangle at the top
+        val triforce = FramePoint(8.grid - MapConstants.halfGrid, 5.grid + MapConstants.threeFourthGrid) // get the middle of the triangle at the top
     }
 
     object Level3 {
