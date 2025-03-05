@@ -556,14 +556,20 @@ class WaitUntilFireAppearsThenIsGone : Action {
 class GoInConsume(private val moves: Int = 5, private val dir: GamePad = GamePad.MoveUp) :
     Action {
     private var movements = 0
+    // add this so that it doesnt get stuck and moves on
+    private var totalFrames = 0
 
     override val escapeActionEnabled: Boolean
         get() = false
 
+    override val monitorEnabled: Boolean
+        get() = false
+
     override fun complete(state: MapLocationState): Boolean =
-        movements >= moves
+        movements >= moves || totalFrames > 360
 
     override fun nextStep(state: MapLocationState): GamePad {
+        totalFrames++
         if (state.previousLocation != state.link) {
             d { " --> Moved" }
             movements++
