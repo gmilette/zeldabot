@@ -18,7 +18,7 @@ object ZeldaPlan {
         DO_HARVEST
     }
 
-    val DO_HARVEST: Boolean = true
+    val DO_HARVEST: Boolean = false
 
     val option = PlanOption.MAGIC_SHIELD_EARLY
 
@@ -90,10 +90,10 @@ object ZeldaPlan {
             greenPotion()
             arrowAndHearts()
 
-            if (DO_HARVEST) {
-                seg("harvest")
-                harvest()
-            }
+            seg("harvest")
+            harvest()
+            // should have enough coin for rest of game after
+            // 10 harvests
 
             // then potion?
             phase("level 5 sequence")
@@ -465,19 +465,15 @@ object ZeldaPlan {
             2 using levelPlan2Boomerang
         } //7.5, 8
 
-        if (DO_HARVEST) {
-            harvest()
-        }
+        harvest(2)
+
         seg("and now level 8")
         // make sure approach from left
         // rather than right
         val aboveLevel8: MapLoc = 93
         routeTo(aboveLevel8)
         left
-        startHereAtLoaded()
-        if (DO_HARVEST) {
-            harvest()
-        }
+//        harvest()
         down
         right
         8 using level8
@@ -873,6 +869,7 @@ private val levelPlan2Harvest2: PlanBuilder.() -> Unit
             // get past trap
             goIn(GamePad.MoveLeft, 30)
             seg("past the compass")
+            startHereAtAfterLevel5()
             killUntil2
             level3TriggerDoorThen // it's not great but ok
             goIn(GamePad.MoveLeft, 10)
@@ -1301,6 +1298,7 @@ private fun PlanBuilder.levelPlan9PhaseRedRing() {
 private fun PlanBuilder.levelPlan9PhaseSilverArrow() {
     add {
         down // kill pancake
+        cheatBombs // for now
         downm
         leftm
         upm
@@ -1338,7 +1336,7 @@ private fun PlanBuilder.levelPlan9PhaseSilverArrow() {
         )
         bombUp
         "acquire arrow".seg()
-        switchToWand
+//        switchToWand
         // don't need this i think
 //        wait(100)
         kill

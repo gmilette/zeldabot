@@ -158,7 +158,7 @@ data class Inventory(
 
     fun setBombs() {
         if (numBombs < 4) {
-            api.writeCPU(Addresses.numBombs, 4)
+            api.writeCPU(Addresses.numBombs, 8)
         }
     }
 

@@ -77,6 +77,8 @@ class NeighborFinder(
         } else {
             Direction.None
         }
+        d { " neighbors point: $point dir: $direction from $from dirMovingIn $dirMovingIn" }
+
         val validDirections = (ladderSpec?.directions(point) ?: Direction.all) - dirMovingIn
 
 //        var validDirections = okDirections(point, direction, dist)

@@ -1027,12 +1027,12 @@ class PlanBuilder(
         return this
     }
 
-    fun goInConsumeCompleteIfMapChanges(dir: GamePad = GamePad.MoveUp, num: Int): PlanBuilder {
+    private fun goInConsumeCompleteIfMapChanges(dir: GamePad = GamePad.MoveUp, num: Int): PlanBuilder {
         add(lastMapLoc, CompleteIfMapChanges((GoInConsume(num, dir))))
         return this
     }
 
-    fun waitUntilCloudIsGone(): PlanBuilder {
+    private fun waitUntilCloudIsGone(): PlanBuilder {
         add(lastMapLoc, WaitUntilCloudIsGone())
         return this
     }
