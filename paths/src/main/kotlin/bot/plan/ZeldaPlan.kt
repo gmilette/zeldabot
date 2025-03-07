@@ -869,7 +869,6 @@ private val levelPlan2Harvest2: PlanBuilder.() -> Unit
             // get past trap
             goIn(GamePad.MoveLeft, 30)
             seg("past the compass")
-            startHereAtAfterLevel5()
             killUntil2
             level3TriggerDoorThen // it's not great but ok
             goIn(GamePad.MoveLeft, 10)
@@ -1396,17 +1395,20 @@ private fun PlanBuilder.levelPlan9PhaseGannon() {
         )
         "doorstep of gannon".seg()
         goInConsume(GamePad.MoveLeft, 10)
+        startHereAtLoaded()
         enoughForArchery
         killCenterMonster
         killCenterMonster
         uptk
         "seg kill gannon".seg()
-//        startHereAtLoaded()
-        goIn(GamePad.None, 100)
-        goIn(GamePad.None, 100)
-        goIn(GamePad.None, 100)
+//        goIn(GamePad.None, 20)
+//        goIn(GamePad.None, 20)
+        goIn(GamePad.None, 20)
         switchToArrow()
-        goTo(InLocations.Level9.centerGannonAttack)
+        // cheap attack maneuver
+        goTo(InLocations.Level9.centerGannonAttackLeft)
+        goIn(GamePad.MoveUp, MapConstants.fourthGrid)
+        goIn(GamePad.A, 5)
         killG
         lootInside
         uponlym

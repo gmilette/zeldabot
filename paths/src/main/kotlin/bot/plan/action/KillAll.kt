@@ -400,16 +400,16 @@ class AlwaysAttack(useB: Boolean = false, private val freq: Int = 5, private val
     override fun nextStep(state: MapLocationState): GamePad {
         // just always do it
         val move = if (frames < 0) {
-            d { "** wait for frames $attackLength frames = $frames" }
+            d { "*x* wait for frames $attackLength frames = $frames" }
             GamePad.None
         } else {
             when {
                 frames % attackLength < freq -> {
-                    d { "** do attack now mod ${frames % attackLength} $attackLength frames = $frames" }
+                    d { "*x* do attack now mod ${frames % attackLength} $attackLength frames = $frames" }
                     gameAction
                 }
                 else -> {
-                    d { "** do attack now wait $attackLength $otherwiseRandom frames = $frames" }
+                    d { "*x* do attack now wait $attackLength $otherwiseRandom frames = $frames" }
                     if (otherwiseRandom) {
                         val dir = state.bestDirection()
                         if (dir == Direction.None) {

@@ -3,6 +3,7 @@ package bot.plan
 import bot.plan.action.PushDirection
 import bot.state.*
 import bot.state.map.MapConstants
+import bot.state.map.andAHalf
 import bot.state.map.grid
 
 
@@ -150,6 +151,7 @@ object InLocations {
     object Level9 {
         val moveUpBlock = FramePoint(6.grid, 5.grid)
         val centerGannonAttack = FramePoint(7.grid, 5.grid)
+        val centerGannonAttackLeft = FramePoint(5.grid, 4.grid.andAHalf)
     }
 
     object BombDirection {
