@@ -152,6 +152,7 @@ object InLocations {
         val moveUpBlock = FramePoint(6.grid, 5.grid)
         val centerGannonAttack = FramePoint(7.grid, 5.grid)
         val centerGannonAttackLeft = FramePoint(5.grid, 4.grid.andAHalf)
+        val center = FramePoint(7.grid.andAHalf, 7.grid)
     }
 
     object BombDirection {

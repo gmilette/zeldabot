@@ -222,7 +222,9 @@ class GannonAttack : Action {
 }
 
 private fun isReadyForDeath(state: MapLocationState): Boolean {
-    return state.gannonShowing() // todo: check the color to make sure death is coming
+    // doesn't work, no way to tell if gannon is ready for death
+    // both are color 3
+    return state.gannonShowing()
 }
 
 private fun gannonDefeated(state: MapLocationState): Boolean =
@@ -294,7 +296,7 @@ class SwordOrArrowAttack : Action {
 }
 
 class GannonCornerAttack : Action {
-    private val goTo = InsideNav(GannonLocations.cornerAttack, tag = "go to corner")
+    private val goTo = InsideNavAbout(GannonLocations.cornerAttack, 2)
     override fun complete(state: MapLocationState): Boolean {
         // should just be when link instersects the corner
 //        return state.link.toRect().intersect(GannonLocations.cornerAttack.toRect())

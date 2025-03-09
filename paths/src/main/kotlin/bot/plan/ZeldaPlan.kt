@@ -1394,21 +1394,23 @@ private fun PlanBuilder.levelPlan9PhaseGannon() {
             )
         )
         "doorstep of gannon".seg()
-        goInConsume(GamePad.MoveLeft, 10)
         startHereAtLoaded()
+        goInConsume(GamePad.MoveLeft, 10)
         enoughForArchery
         killCenterMonster
         killCenterMonster
         uptk
         "seg kill gannon".seg()
-//        goIn(GamePad.None, 20)
-//        goIn(GamePad.None, 20)
         goIn(GamePad.None, 20)
         switchToArrow()
-        // cheap attack maneuver
-        goTo(InLocations.Level9.centerGannonAttackLeft)
-        goIn(GamePad.MoveUp, MapConstants.fourthGrid)
-        goIn(GamePad.A, 5)
+        // cheap attack maneuver doesnt work well
+        // fireball interrupts it
+        goTo(InLocations.Level9.center)
+//        goTo(InLocations.Level9.centerGannonAttackLeft)
+//        goIn(GamePad.MoveUp, 2)
+//        goIn(GamePad.A, 2)
+//        goIn(GamePad.None, 2)
+//        goIn(GamePad.A, 2)
         killG
         lootInside
         uponlym
