@@ -883,7 +883,14 @@ object LootKnowledge {
             bigCoin -> (state.frameState.inventory.numRupees < 254)
             fairy,
             fairy2,
-            heart -> !state.frameState.inventory.heartCalc.noDamage()
+//            heart -> !state.frameState.inventory.heartCalc.noDamage()
+            heart -> {
+                val full = state.frameState.inventory.heartCalc.full(state)
+                if (full) {
+                    d { " ignore heart because full " }
+                }
+                !full
+            }
             else -> takeOther
         }
 

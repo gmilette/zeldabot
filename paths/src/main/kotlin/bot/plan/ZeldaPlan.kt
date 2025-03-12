@@ -1026,6 +1026,7 @@ private val level5: PlanBuilder.() -> Unit
         left
         seg("get past bunnies")
         switchToArrow() // is it in right spot?
+        startHereAtAfterLevel5()
         leftm
         seg("Use Whistle")
         goIn(GamePad.MoveLeft, 10) // more in a bit before whistlin'
@@ -1394,7 +1395,7 @@ private fun PlanBuilder.levelPlan9PhaseGannon() {
             )
         )
         "doorstep of gannon".seg()
-        startHereAtLoaded()
+//        startHereAtLoaded()
         goInConsume(GamePad.MoveLeft, 10)
         enoughForArchery
         killCenterMonster
