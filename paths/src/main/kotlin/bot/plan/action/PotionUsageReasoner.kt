@@ -34,7 +34,10 @@ fun eitherPotion(): Action = CompleteIfPotionFull(eitherPoint(
     Objective.ItemLoc.Left.point,
     Objective.ItemLoc.Right.point
 ) { state ->
-    state.frameState.inventory.hasHalfPotion
+    state.frameState.inventory.hasHalfPotion.also {
+        // just make sure you have enough rupees
+        cheatPotion().nextStep(state)
+    }
 }
 )
 

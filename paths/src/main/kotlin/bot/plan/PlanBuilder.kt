@@ -418,6 +418,11 @@ class PlanBuilder(
             add(lastMapLoc, EnoughForPotion)
             return this
         }
+    val haveLetter: PlanBuilder
+        get() {
+            add(lastMapLoc, HaveLetter)
+            return this
+        }
     val cheatAddKey: PlanBuilder
         get() {
             add(lastMapLoc, AddKey)

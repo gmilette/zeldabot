@@ -436,7 +436,7 @@ object ZeldaPlan {
 //            routeTo(83) // position so we don't go through the 100 secret forest and get stuck
 //
         obj(ZeldaItem.PowerBracelet, itemLoc = Objective.ItemLoc.None)
-//        startHereAtAfterLevel4AndGather()
+        startHereAtAfterLevel4AndGather()
 
 ////            routeTo(32)
         goToAtPoint(33, FramePoint(11.grid, 3.grid))

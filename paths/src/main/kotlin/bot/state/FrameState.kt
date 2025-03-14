@@ -175,6 +175,10 @@ data class Inventory(
         }
     }
 
+    fun setLetter() {
+        api.writeCPU(Addresses.hasLetter, 1)
+    }
+
     fun addKey() {
         val current = numKeys
         api.writeCPU(Addresses.numKeys, current + 1)

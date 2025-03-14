@@ -1,5 +1,6 @@
 package bot.plan.action
 
+import bot.state.Addresses
 import bot.state.GamePad
 import bot.state.MapLocationState
 import util.LogFile
@@ -38,6 +39,13 @@ fun cheatRupee(need: String, enoughFor: Int = 100) : Action  = ActionOnce { stat
     executeRupeeCheat(state, enoughFor, need)
 }
 
+fun cheatLetter() : Action  = ActionOnce { state ->
+    if (!state.frameState.inventory.hasLetter) {
+        file.write(state.frameState.level, state.frameState.mapLoc, "letter", "set letter", state.frameState.inventory.hasLetter)
+        state.frameState.inventory.setLetter()
+    }
+}
+
 fun cheatPotion() : Action  = ActionOnce { state ->
     val (need, what) = when {
         !state.frameState.inventory.hasPotion -> 68 to "red"
@@ -64,6 +72,8 @@ val EnoughForRing
     get() = cheatRupee("ring", 250)
 val EnoughForPotion
     get() = cheatPotion()
+val HaveLetter
+    get() = cheatLetter()
 val EnoughForArchery
     get() = cheatRupee("archery", 75)
 val EnoughForArrow

@@ -79,7 +79,7 @@ object LevelsData {
             // 4: (mid, off path) ghosts
             numKeysIn = 4,
             numKeysNeeded = 3, //visual YES, use first cell
-            firstCellRequiresKey = true
+            firstCellRequiresKey = false // doesn't work
         ),
         LevelData(
             level = 7,
