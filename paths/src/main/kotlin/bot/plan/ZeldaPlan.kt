@@ -18,7 +18,7 @@ object ZeldaPlan {
         DO_HARVEST
     }
 
-    val DO_HARVEST: Boolean = false
+    val DO_HARVEST: Boolean = true
 
     val option = PlanOption.MAGIC_SHIELD_EARLY
 
@@ -436,7 +436,7 @@ object ZeldaPlan {
 //            routeTo(83) // position so we don't go through the 100 secret forest and get stuck
 //
         obj(ZeldaItem.PowerBracelet, itemLoc = Objective.ItemLoc.None)
-        startHereAtAfterLevel4AndGather()
+//        startHereAtAfterLevel4AndGather()
 
 ////            routeTo(32)
         goToAtPoint(33, FramePoint(11.grid, 3.grid))
@@ -449,7 +449,7 @@ object ZeldaPlan {
 
         phase("go to level 5")
         5 using level5
-//        startHereAtAfterLevel5()
+        startHereAtAfterLevel5()
 
         forestPotion()
 //        greenPotion() // for now, but there is a closer one for sure
@@ -467,7 +467,7 @@ object ZeldaPlan {
 
         harvest(2)
 
-        seg("and now level 8")
+        phase("and now level 8")
         // make sure approach from left
         // rather than right
         val aboveLevel8: MapLoc = 93
@@ -1458,9 +1458,9 @@ private fun PlanBuilder.startHereAtAfterLevel4AndGather() {
 private fun PlanBuilder.startHereAtAfterLevel5() {
     startHereAt(
         raftLadderSetup.copy(
-            hearts = 14,
+            hearts = 15,
             ring = ZeldaItem.BlueRing,
-            sword = ZeldaItem.WhiteSword,
+            sword = ZeldaItem.MagicSword,
             rupees = 200,
             keys = 4,
             bombs = 8,

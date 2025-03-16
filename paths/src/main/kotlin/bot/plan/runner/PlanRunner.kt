@@ -253,7 +253,7 @@ class PlanRunner(private val makePlan: PlanMaker,
             manipulator.setWandNoBook()
         }
         if (ex.rupees > 0) {
-            manipulator.addRupee()
+            manipulator.setRupees(ex.rupees)
         }
         if (ex.candle) {
             manipulator.setRedCandle()

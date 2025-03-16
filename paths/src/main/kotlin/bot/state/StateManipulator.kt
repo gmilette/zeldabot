@@ -185,4 +185,8 @@ fun setTriforceAll() {
             }
         }
     }
+
+    fun setRupees(rupees: Int) {
+        api.writeCPU(Addresses.numRupees, rupees)
+    }
 }
