@@ -107,7 +107,7 @@ object InLocations {
         val bombItemRight = FramePoint(208, 43)
         //        val triforce = FramePoint(120, 88) // get the middle of the triangle at the top
 //        val triforce = FramePoint(128, 88) // get the middle of the triangle at the top
-        val triforce = FramePoint(8.grid - MapConstants.halfGrid, 5.grid + MapConstants.threeFourthGrid) // get the middle of the triangle at the top
+        val triforce = FramePoint(8.grid - MapConstants.halfGrid, 5.grid) // could add 1/4 here // get the middle of the triangle at the top
     }
 
     object Level3 {

@@ -90,8 +90,10 @@ object ZeldaPlan {
             greenPotion()
             arrowAndHearts()
 
-            seg("harvest")
+            // doesn't seem necessary
+            phase("harvest after arrow")
             harvest()
+            // has 223 coin now
             // should have enough coin for rest of game after
             // 10 harvests
 
@@ -130,6 +132,7 @@ object ZeldaPlan {
     private fun PlanBuilder.afterLevel2ItemsLetterEtcPhase(withBombHeart: Boolean = true) {
         add {
             phase(Phases.forest30)
+            // skipped?
             obj(Dest.Secrets.secretForest30NorthEast)
             phase(Phases.forest30 + "_end")
             obj(Dest.Secrets.bombSecret30North)
@@ -158,7 +161,6 @@ object ZeldaPlan {
             add {
                 repeat(n) {
                     2 using levelPlan2Harvest2
-//                    2 using levelPlan2Harvest
                 }
             }
         }
@@ -292,6 +294,7 @@ object ZeldaPlan {
 
     private fun PlanBuilder.arrowAndHearts() {
         add {
+            phase("harvest before arrow")
             harvest(5)
             enoughForArrow
             obj(Dest.Shop.arrowShop)
@@ -438,6 +441,7 @@ object ZeldaPlan {
         obj(ZeldaItem.PowerBracelet, itemLoc = Objective.ItemLoc.None)
 //        startHereAtAfterLevel4AndGather()
 
+        seg("position for magic sword")
 ////            routeTo(32)
         goToAtPoint(33, FramePoint(11.grid, 3.grid))
 //            // hard to get into position when its passable, maybe position it
@@ -451,6 +455,7 @@ object ZeldaPlan {
         5 using level5
         startHereAtAfterLevel5()
 
+        seg("pre 8 potion")
         forestPotion()
 //        greenPotion() // for now, but there is a closer one for sure
 
@@ -465,6 +470,7 @@ object ZeldaPlan {
             2 using levelPlan2Boomerang
         } //7.5, 8
 
+        phase("pre 8 harvest")
         harvest(2)
 
         phase("and now level 8")
@@ -484,6 +490,7 @@ object ZeldaPlan {
 //            harvestBombsNearLevel2()
 //        }
 
+        phase("items for level 7")
         enoughForBait
         obj(Dest.Shop.blueRing, itemLoc = Dest.Shop.ItemLocs.bait, position = true)
         greenPotion()
@@ -823,7 +830,7 @@ private val levelPlan2Harvest: PlanBuilder.() -> Unit
 
 private val levelPlan2Harvest2: PlanBuilder.() -> Unit
     get() = {
-        phase(Phases.level2Harvest)
+//        phase(Phases.level2Harvest)
         lev(2)
         startAt(LevelStartMapLoc.lev(2))
         seg("gather 3 keys")
