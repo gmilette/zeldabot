@@ -35,10 +35,10 @@ class CompleteIfChangeShopOwner(private val changeTo: Boolean, private val wrapp
 
     private fun changedOwnerAppearance(state: MapLocationState): Boolean =
         initial != null && (inShop(state) == changeTo)
-//        state.frameState.enemies.isNotEmpty() && initial != null && (inShop(state) == changeTo)
 
-    private fun inShop(state: MapLocationState): Boolean = state.frameState.enemiesRaw.any {
-        (it.tile == shopOwner.first) || (it.tile == shopkeeperAndBat.first) || (it.tile == wizard)
+    // incave is all we need I think
+    private fun inShop(state: MapLocationState): Boolean = state.frameState.isInCave || state.frameState.enemiesRaw.any {
+            (it.tile == shopkeeperAndBat.first) || (it.tile == wizard)
     }
 
     override fun reset() {
@@ -64,7 +64,7 @@ class CompleteIfChangeShopOwner(private val changeTo: Boolean, private val wrapp
     }
 
     override val name: String
-        get() = "Until Change Shop ${wrapped.name}"
+        get() = "Until Change Shop ${wrapped.name} count=$completeCt"
 }
 
 class CompleteIfMapChanges(private val wrapped: Action) : Action {
@@ -109,9 +109,9 @@ class CompleteIfMapChangesTo(private val wrapped: Action, val to: MapLoc) : Acti
         get() = "Until Change Map from $initialMapLoc to $to ${wrapped.name}"
 }
 
-class CompleteIfHaveBombs(wrapped: Action) : WrappedAction(wrapped) {
+class CompleteIfHaveBombs(wrapped: Action, private val minBombs: Int = 0) : WrappedAction(wrapped) {
     override fun complete(state: MapLocationState): Boolean =
-        state.frameState.inventory.numBombs != 0 || super.complete(state)
+        state.frameState.inventory.numBombs > minBombs || super.complete(state)
 }
 
 class CompleteIfBombsLikely(wrapped: Action) : WrappedAction(wrapped) {

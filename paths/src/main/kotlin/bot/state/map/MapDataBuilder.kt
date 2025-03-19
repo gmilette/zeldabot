@@ -293,7 +293,7 @@ class MapBuilder {
         objectives[61] = MapCellData(
             "woodstwoguys",
             Objective(
-                FramePoint(144, 64), Dest.Secrets.secretForest30NorthEast
+                FramePoint(9.grid, 4.grid), Dest.Secrets.secretForest30NorthEast
             )
         )
         objectives[60] = MapCellData(

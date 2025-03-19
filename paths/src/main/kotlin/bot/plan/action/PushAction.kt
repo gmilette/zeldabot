@@ -15,7 +15,7 @@ fun makeStatuePushGo(statue: FramePoint): Action =
             GoIn(20, GamePad.MoveDown, reset = true),
             GoIn(75, GamePad.None, reset = true),
             Timeout(InsideNav(statue, makePassable = statue, ignoreProjectiles = false, tag = "go in"))
-        ), restartWhenDone = false, shouldComplete = true, tag = "push") // fine if this restarts, it will end once user exits
+        ), restartWhenDone = false, shouldComplete = true, tag = "pushGo") // fine if this restarts, it will end once user exits
 
 fun makeStatuePush(statue: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem): Action =
     OrderedActionSequence(listOf(
