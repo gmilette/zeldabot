@@ -13,7 +13,7 @@ import bot.state.map.destination.EntryType
 import bot.state.map.destination.ZeldaItem
 import bot.state.map.level.LevelMapCellsLookup
 import bot.state.oam.*
-import org.apache.commons.math3.analysis.function.Add
+import util.d
 
 class PlanBuilder(
     private val mapData: MapCells,
@@ -56,9 +56,35 @@ class PlanBuilder(
     fun routeTo(loc: MapLoc, name: String = ""): PlanBuilder {
         //d { " path from $lastMapLoc to $loc"}
         val path = optimizer.findPath(lastMapLoc, loc) ?: return this
+        var previousCell: MapCell? = null // = MapCell(MapCellPoint(0, 0), 0, MapCellData("none"))
         for (mapCell in optimizer.correct(path.vertexList)) {
             if (mapCell.mapLoc != lastMapLoc) {
-                add(mapCell.mapLoc, lootAndMove(MoveTo(lastMapLoc, mapCell, level)))
+                previousCell?.let { currentCell ->
+                    if (currentCell.mapData.attributes.contains(MapCellAttribute.HasBombEnemies)) {
+                    // active only on map locations to harvest bombs
+                    // still should filter quick on locations that
+                    // have enemies to consider
+                    if (currentCell.mapData.attributes.contains(MapCellAttribute.SlowForEnemiesToAppear)) {
+                        add(currentCell.mapLoc, completeIfHaveEnemies(completeIfHaveEnoughBombs(Wait(200))))
+                    } else {
+                        add(currentCell.mapLoc, completeIfHaveEnemies(completeIfHaveEnoughBombs(Wait(20))))
+                    }
+                    val b = completeIfHaveEnoughBombs(
+                        KillAll(
+                            numberLeftToBeDead = 0,
+                            lookForBombs = true,
+                            needLongWait = false,
+                        )
+                    )
+                    add(currentCell.mapLoc, b)
+                }
+            }
+                previousCell = mapCell
+
+//                add(mapCell.mapLoc, overworldBombOrMove(move))
+                val move = MoveTo(lastMapLoc, mapCell, level)
+                add(mapCell.mapLoc, lootAndMove(move))
+//                add(mapCell.mapLoc, overworldLootAndMoveAndHarvest(MoveTo(lastMapLoc, mapCell, level)))
             }
         }
         return this
@@ -277,7 +303,7 @@ class PlanBuilder(
         return this
     }
     fun killUntilGetBomb(leftDead: Int): PlanBuilder {
-        add(lastMapLoc, lootAndKill(CompleteIfHaveBombs(KillAll(
+        add(lastMapLoc, lootAndKill(completeIfHaveBombs(KillAll(
             numberLeftToBeDead = leftDead,
             lookForBombs = true
 //            targetOnly = EnemyGroup.enemiesWhoMightHaveBombs
@@ -508,12 +534,12 @@ class PlanBuilder(
     val rightIfNeedBombs: Unit
         get() {
             val nextLoc = lastMapLoc.right
-            add(nextLoc, lootAndMove(CompleteIfHaveBombs(moveTo(nextLoc))))
+            add(nextLoc, lootAndMove(completeIfHaveBombs(moveTo(nextLoc))))
         }
     val leftIfNeedBombs: Unit
         get() {
             val nextLoc = lastMapLoc.left
-            add(nextLoc, lootAndMove(CompleteIfHaveBombs(moveTo(nextLoc))))
+            add(nextLoc, lootAndMove(completeIfHaveBombs(moveTo(nextLoc))))
         }
     val rightk: Unit
         get() {

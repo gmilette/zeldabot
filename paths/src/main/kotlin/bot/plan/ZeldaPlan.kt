@@ -123,8 +123,11 @@ object ZeldaPlan {
             "candle".seg()
             // more money
             obj(Dest.Shop.candleShopEast) // 199
-            "get shield".seg()
+            "money for shield".seg()
+            obj(Dest.Secrets.forest10Mid91)
             obj(Dest.Secrets.forest100South) // 239
+            startHereAtAfterLevel5()
+            "get shield".seg()
             obj(Dest.Shop.eastTreeShop) // 149
         }
     }
@@ -132,7 +135,6 @@ object ZeldaPlan {
     private fun PlanBuilder.afterLevel2ItemsLetterEtcPhase(withBombHeart: Boolean = true) {
         add {
             phase(Phases.forest30)
-            // skipped?
             obj(Dest.Secrets.secretForest30NorthEast)
             phase(Phases.forest30 + "_end")
             obj(Dest.Secrets.bombSecret30North)
@@ -453,7 +455,6 @@ object ZeldaPlan {
 
         phase("go to level 5")
         5 using level5
-        startHereAtAfterLevel5()
 
         seg("pre 8 potion")
         forestPotion()
@@ -1033,7 +1034,6 @@ private val level5: PlanBuilder.() -> Unit
         left
         seg("get past bunnies")
         switchToArrow() // is it in right spot?
-        startHereAtAfterLevel5()
         leftm
         seg("Use Whistle")
         goIn(GamePad.MoveLeft, 10) // more in a bit before whistlin'
@@ -1470,7 +1470,7 @@ private fun PlanBuilder.startHereAtAfterLevel5() {
             sword = ZeldaItem.MagicSword,
             rupees = 200,
             keys = 4,
-            bombs = 8,
+            bombs = 1,
             wand = true,
             potion = true,
             candle = true,

@@ -63,6 +63,9 @@ dependencies {
     testImplementation("io.kotest:kotest-assertions-core-jvm:5.6.2")
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
     implementation("com.google.code.gson:gson:2.10.1")
+
+    testImplementation("org.mockito:mockito-core:5.2.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.0.0")
 }
 
 tasks.test {

@@ -109,17 +109,24 @@ class CompleteIfMapChangesTo(private val wrapped: Action, val to: MapLoc) : Acti
         get() = "Until Change Map from $initialMapLoc to $to ${wrapped.name}"
 }
 
-class CompleteIfHaveBombs(wrapped: Action, private val minBombs: Int = 0) : WrappedAction(wrapped) {
-    override fun complete(state: MapLocationState): Boolean =
-        state.frameState.inventory.numBombs > minBombs || super.complete(state)
+fun completeIfHaveEnoughBombs(wrapped: Action) = completeIfHaveBombs(wrapped, 4)
+
+fun completeIfHaveBombs(wrapped: Action, minBombs: Int = 0): Action = CompleteIf(wrapped) {
+    frameState.inventory.numBombs > minBombs
 }
 
-class CompleteIfBombsLikely(wrapped: Action) : WrappedAction(wrapped) {
+fun completeIfHaveEnemies(wrapped: Action): Action = CompleteIf(wrapped, "have enemies") { hasEnemies }
+
+fun completeIfBombsLikely(wrapped: Action): Action = CompleteIf(wrapped, "Bombs likely") {
+    ItemDropPrediction().bombsLikely()
+}
+
+class CompleteIf(wrapped: Action, private val conditionName: String = "", private val condition: MapLocationState.() -> Boolean) : WrappedAction(wrapped) {
     override fun complete(state: MapLocationState): Boolean =
-        ItemDropPrediction().bombsLikely()
+        state.condition() || super.complete(state)
 
     override val name: String
-        get() = "CompleteIfBombsLikely ${wrapped.name}"
+        get() = if (conditionName.isEmpty()) wrapped.name else "CompleteIf $conditionName: ${wrapped.name}"
 }
 
 // move to this location then complete

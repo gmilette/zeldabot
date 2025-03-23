@@ -21,6 +21,7 @@ class MapBuilder {
     val upRight = e(u, r)
     val upDown = e(u, d)
     val eall = e(u, d, l, r)
+    val bombEnemies = setOf(MapCellAttribute.HasBombEnemies)
 
     fun e(vararg dir: Direction): ExitSet {
         return ExitSet(*dir)
@@ -265,10 +266,11 @@ class MapBuilder {
         objectives[45] = CellBuilder().invoke {
             aka("forestsecret")
             this has Dest.Secrets.bombSecret30North at 80 a 16
+            hasBombEnemies
         }
         objectives[46] = CellBuilder().invoke {
             aka("elbownearwater")
-            e(l, d)
+            hasBombEnemies
         }
         objectives[47] = MapCellData(
             "raftHeartEntry",
@@ -286,15 +288,18 @@ class MapBuilder {
     private fun addRow3(objectives: MutableMap<MapLoc, MapCellData>) {
         objectives[63] = MapCellData(
             "shorerafttoheart",
+            attributes = bombEnemies
         )
         objectives[62] = MapCellData(
-            "elbowshorenearheart"
+            "elbowshorenearheart",
+            attributes = bombEnemies
         )
         objectives[61] = MapCellData(
             "woodstwoguys",
             Objective(
                 FramePoint(9.grid, 4.grid), Dest.Secrets.secretForest30NorthEast
-            )
+            ),
+            attributes = bombEnemies
         )
         objectives[60] = MapCellData(
             "lev2",
@@ -311,7 +316,8 @@ class MapBuilder {
             Objective(type = Dest.Fairy.greenForest)
         )
         objectives[56] = MapCellData(
-            "lev1Entrybefore"
+            "lev1Entrybefore",
+            attributes = bombEnemies
         )
         objectives[55] = MapCellData(
             "lev1Entry",
@@ -364,22 +370,44 @@ class MapBuilder {
             aka("tree with fairy")
             this has Dest.Shop.potionShopForest at 11.grid a 2.grid
         }
+        objectives[76] = MapCellData(
+            "before lev2",
+            attributes = bombEnemies
+        )
         val shopCShieldLoc = Objective.ItemLoc.Left
         objectives[77] = MapCellData(
             "forest before 2",
-            Objective(FramePoint(13.grid, 6.grid), Dest.Shop.eastTreeShop, itemLoc = shopCShieldLoc)
+            Objective(FramePoint(13.grid, 6.grid), Dest.Shop.eastTreeShop, itemLoc = shopCShieldLoc),
+            attributes = bombEnemies
         )
         objectives[78] = MapCellData(
             "forest before 2 10 secret",
-            Objective(FramePoint(10.grid, 4.grid), Dest.Secrets.level2secret10)
+            Objective(FramePoint(10.grid, 4.grid), Dest.Secrets.level2secret10),
+            attributes = bombEnemies
         )
-        objectives[81] = MapCellData(
-            "forest burn secret",
-            Objective(FramePoint(9.grid, 6.grid), Dest.Secrets.forest10BurnBrown)
+        objectives[79] = MapCellData(
+            "mid coast",
         )
     }
 
     private fun addRow5(objectives: MutableMap<MapLoc, MapCellData>) {
+        objectives[81] = MapCellData(
+            "forest burn secret",
+            Objective(FramePoint(9.grid, 6.grid), Dest.Secrets.forest10BurnBrown),
+            attributes = bombEnemies
+        )
+        objectives[82] = MapCellData(
+            "forest before lev7",
+            attributes = bombEnemies
+        )
+        objectives[83] = MapCellData(
+            "forest before fairy",
+            attributes = bombEnemies
+        )
+        objectives[84] = MapCellData(
+            "to ring shop",
+            attributes = bombEnemies
+        )
         objectives[86] = MapCellData(
             "squareforest",
             Objective(FramePoint(10.grid, 6.grid), Dest.Secrets.forest10Mid)
@@ -387,10 +415,23 @@ class MapBuilder {
         objectives[88] = MapCellData(
             "boringForest",
         )
+        objectives[91] = MapCellData(
+            "forest mid",
+            Objective(FramePoint(2.grid, 6.grid), Dest.Secrets.forest10Mid91),
+            attributes = bombEnemies
+        )
+        objectives[92] = MapCellData(
+            "forest more",
+        )
+        objectives[93] = MapCellData(
+            "forest here",
+            attributes = setOf(MapCellAttribute.HasBombEnemies, MapCellAttribute.SlowForEnemiesToAppear)
+        )
         objectives[94] = MapCellData(
             "candelshop",
             // candle
-            Objective(FramePoint(7.grid, 1.grid), Dest.Shop.candleShopEast, Objective.ItemLoc.Right)
+            Objective(FramePoint(7.grid, 1.grid), Dest.Shop.candleShopEast, Objective.ItemLoc.Right),
+            attributes = bombEnemies
         )
         objectives[95] = MapCellData(
             "ladderHeart",
@@ -410,9 +451,14 @@ class MapBuilder {
             "woods with secret",
             Objective(FramePoint(8.grid, 2.grid), Dest.Secrets.fire100SouthBrown)
         )
+        objectives[99] = MapCellData(
+            "forest with neg",
+            attributes = bombEnemies
+        )
         objectives[100] = MapCellData(
             "potion shop",
-            Objective(FramePoint(7.grid, 1.grid), Dest.Shop.potionShopWest)
+            Objective(FramePoint(7.grid, 1.grid), Dest.Shop.potionShopWest),
+            attributes = bombEnemies
         )
         objectives[102] = MapCellData(
             "candle shop",
@@ -430,11 +476,16 @@ class MapBuilder {
         objectives[107] = MapCellData(
             "forest burn 100",
             // need to check this
-            Objective(FramePoint(8.grid, 6.grid), Dest.Secrets.forest100South)
+            Objective(FramePoint(8.grid, 6.grid), Dest.Secrets.forest100South),
+            attributes = bombEnemies
         )
         objectives[109] = MapCellData(
-            "lev 9",
+            "lev 8",
             Objective(10.grid, 2.grid, Dest.level(8))
+        )
+        objectives[110] = MapCellData(
+            "left of arrow",
+            attributes = bombEnemies
         )
     }
 
@@ -461,7 +512,8 @@ class MapBuilder {
             )
         objectives[115] =
             MapCellData(
-                "forest near lev3"
+                "forest near lev3",
+                attributes = bombEnemies
             )
         objectives[116] =
             MapCellData(
@@ -500,6 +552,22 @@ class MapBuilder {
             "bombHeartSouth",
             Objective(FramePoint(9.grid, 1.grid), Dest.Heart.bombHeartSouth, itemLoc = Objective.ItemLoc.Right),
         )
+        objectives[124] = MapCellData(
+            "south path 1",
+            attributes = bombEnemies
+        )
+        objectives[125] = MapCellData(
+            "south path 2",
+            attributes = bombEnemies
+        )
+        objectives[126] = MapCellData(
+            "south path 3",
+            attributes = bombEnemies
+        )
+        objectives[127] = MapCellData(
+            "south path 4",
+            attributes = bombEnemies
+        )
     }
 }
 
@@ -512,6 +580,13 @@ private class CellBuilder {
     private var name: String = ""
     private var destTypes: MutableList<DestTypeBuilder> = mutableListOf()
     private var exitSet: ExitSet = ExitSetAll
+
+    private var attributes: Set<MapCellAttribute> = mutableSetOf()
+    val hasBombEnemies: Unit
+        get() {
+            attributes = setOf(MapCellAttribute.HasBombEnemies)
+            return Unit
+        }
 
     class DestTypeBuilder(
         private var destType: DestType = DestType.Princess, private val builder: CellBuilder
@@ -535,7 +610,9 @@ private class CellBuilder {
     }
 
     private fun build(): MapCellData {
-        return MapCellData(name, destTypes.map { it.build() }.firstOrNull() ?: Objective.empty, exits = exitSet)
+        return MapCellData(name, destTypes.map { it.build() }.firstOrNull() ?: Objective.empty,
+            attributes = attributes,
+            exits = exitSet)
     }
 
     fun aka(aka: String): CellBuilder {

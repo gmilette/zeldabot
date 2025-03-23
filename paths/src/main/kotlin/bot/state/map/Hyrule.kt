@@ -1,6 +1,5 @@
 package bot.state.map
 
-import bot.plan.InLocations
 import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.destination.DestType
@@ -127,7 +126,9 @@ data class Objective(
 
 enum class MapCellAttribute {
     None,
-    NoAttack
+    NoAttack,
+    HasBombEnemies,
+    SlowForEnemiesToAppear
 }
 
 class MapCell(

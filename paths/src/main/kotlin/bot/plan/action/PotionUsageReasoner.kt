@@ -30,7 +30,7 @@ class SaveItemAction: Action {
     }
 }
 
-fun eitherPotion(): Action = CompleteIfPotionFull(eitherPoint(
+fun eitherPotion(): Action = completeIfPotionFull(eitherPoint(
     Objective.ItemLoc.Left.point,
     Objective.ItemLoc.Right.point
 ) { state ->
@@ -41,9 +41,8 @@ fun eitherPotion(): Action = CompleteIfPotionFull(eitherPoint(
 }
 )
 
-class CompleteIfPotionFull(wrapped: Action) : WrappedAction(wrapped) {
-    override fun complete(state: MapLocationState): Boolean =
-        state.frameState.inventory.hasFullPotion || super.complete(state)
+fun completeIfPotionFull(wrapped: Action): Action = CompleteIf(wrapped) {
+    frameState.inventory.hasFullPotion
 }
 
 class CompleteIfGameModeNormal : Action {

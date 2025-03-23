@@ -419,11 +419,8 @@ val lootOrKill = DecisionAction(Optional(GetLoot()), Optional(KillAll())) { stat
     neededReachableLoot(state).isNotEmpty()
 }
 
-fun killUntilBombsLikely() = CompleteIfBombsLikely(KillAll())
+fun killUntilBombsLikely() = completeIfBombsLikely(KillAll())
 
-//fun lootAndMove(moveTo: Action) = DecisionAction(Optional(GetLoot()), moveTo) { state ->
-//    neededReachableLoot(state).isNotEmpty()
-//}
 fun lootAndMove(moveTo: Action) = DecisionAction(GetLoot(), moveTo) { state ->
     neededReachableLoot(state).isNotEmpty()
 }
@@ -432,18 +429,10 @@ fun escapeCaveAndLootAndMove(moveTo: Action) = DecisionAction(moveTo, lootAndMov
     state.frameState.isInCave
 }
 
-//fun lootAndMove(moveTo: Action) = DecisionAction(GetLoot(), moveTo) { state ->
-//    neededReachableLoot(state).isNotEmpty()
-//}
-
 // do this for all move tasks that are after kill tasks
 // in case the kill all didnt work and there are enemies
 // around, in that case go back to kill mode
 
-// Why is it optional? because otherwise it doesnt complete and user has moved on
-//fun killAndMove(moveTo: MoveTo) = DecisionAction(Optional(KillAll()), moveTo) { state ->
-//    neededReachableLoot(state).isNotEmpty()
-//}
 fun killAndMove(moveTo: MoveTo) = DecisionAction(Optional(KillAll()), moveTo) { state ->
     state.hasEnemies
 }

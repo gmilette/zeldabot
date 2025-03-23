@@ -11,6 +11,7 @@ import bot.state.oam.circleMonsterCenters
 import bot.state.oam.circleMonsterOutside
 import util.LogFile
 import util.d
+import util.ifTrue
 import kotlin.random.Random
 
 class KillAll(
@@ -81,7 +82,7 @@ class KillAll(
     }
 
     override val name: String
-        get() = "KILL ALL $waitAfterAllKilled ${if (numberLeftToBeDead > 0) "until $numberLeftToBeDead" else ""} ${ignoreUntilOnly.size}"
+        get() = "KILL ALL $waitAfterAllKilled ${if (numberLeftToBeDead > 0) "until $numberLeftToBeDead" else ""} ${ignoreUntilOnly.size} ${this.lookForBombs.ifTrue("*Bombs")} "
 
     private fun killedAllEnemies(state: MapLocationState): Boolean {
         return state.clearedWithMinIgnoreLoot(numberLeftToBeDead + centerEnemies(state))
@@ -210,7 +211,7 @@ class KillAll(
             }
 
             if (state.frameState.isOverworld &&
-                (lookForBombs && state.frameState.inventory.numBombs == 0)) {
+                (lookForBombs && state.frameState.inventory.numBombs < 4)) {
 //                (lookForBombs || state.frameState.inventory.numBombs == 0)) {
                 if (ItemDropPrediction().bombsLikely()) {
                     d { " bombs likely "}
