@@ -44,30 +44,6 @@ fun makeStatuePush(statue: FramePoint, itemLoc: FramePoint = InLocations.Overwor
         ))
     ), restartWhenDone = false, shouldComplete = true)
 
-
-fun killUntilGetBombs(startAt: MapLoc) {
-//    CompleteIfHaveBombs(
-//    OrderedActionSequence(listOf(
-//    ))
-}
-//    // complete only when get the item
-
-//    if (position) {
-//        goTo(to.upOneGrid.justRightEnd)
-//    }
-//    val pushSpot = to.upOneGrid
-//    // doesn't work, need to use push spot
-//    goTo(pushSpot)
-//    // maybe just keep trying to get to a location in center of the push
-//    // needed to make this much lower for the pushing of magic sword
-//    goIn(GamePad.MoveDown, 20)
-//    // wait for it to move
-//    goIn(GamePad.None, 75)
-//
-//    goToOrMapChanges(to)
-//}
-
-
 fun makeCenterPush(startAt: MapLoc,
                    upTo: Action,
                    out: InLocations.OutLocation = InLocations.OutLocation.item): Action =

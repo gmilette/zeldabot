@@ -217,7 +217,7 @@ class KillAll(
                     d { " bombs likely "}
                     // todo: also have to make all other enemies into projectiles somehow
                     val enemiesThatMightProduceBombs =
-                        aliveEnemies.filter { it.color == MonsterColor.blue }
+                        aliveEnemies.filter { it.color == MonsterColor.blue || it.color == MonsterColor.grey }
                     if (enemiesThatMightProduceBombs.isNotEmpty()) {
                         d { " !! only target enemies that might produce bombs" }
                         aliveEnemies = enemiesThatMightProduceBombs.toMutableList()

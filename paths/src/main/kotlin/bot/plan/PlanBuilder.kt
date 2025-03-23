@@ -62,10 +62,10 @@ class PlanBuilder(
                 previousCell?.let { currentCell ->
                     if (currentCell.mapData.attributes.contains(MapCellAttribute.HasBombEnemies)) {
                         if (currentCell.mapData.attributes.contains(MapCellAttribute.SlowForEnemiesToAppear)) {
-                            add(currentCell.mapLoc, completeIfHaveEnemies(completeIfHaveEnoughBombs(Wait(200))))
+                            add(currentCell.mapLoc, completeIfHaveEnoughBombs(completeIfHaveEnemies(Wait(200))))
                         } else {
                             // give level a chance to start
-                            add(currentCell.mapLoc, completeIfHaveEnemies(completeIfHaveEnoughBombs(Wait(20))))
+                            add(currentCell.mapLoc, completeIfHaveEnoughBombs(completeIfHaveEnemies(Wait(20))))
                         }
                         val killAction = completeIfHaveEnoughBombs(
                             lootAndKill(
