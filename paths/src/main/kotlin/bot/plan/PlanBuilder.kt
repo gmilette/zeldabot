@@ -53,38 +53,35 @@ class PlanBuilder(
         add(lastMapLoc, whiteSwordManeuverSneakManeuver(moveDown, moveUp))
     }
 
-    fun routeTo(loc: MapLoc, name: String = ""): PlanBuilder {
+    fun routeTo(loc: MapLoc): PlanBuilder {
         //d { " path from $lastMapLoc to $loc"}
         val path = optimizer.findPath(lastMapLoc, loc) ?: return this
-        var previousCell: MapCell? = null // = MapCell(MapCellPoint(0, 0), 0, MapCellData("none"))
+        var previousCell: MapCell? = null
         for (mapCell in optimizer.correct(path.vertexList)) {
             if (mapCell.mapLoc != lastMapLoc) {
                 previousCell?.let { currentCell ->
                     if (currentCell.mapData.attributes.contains(MapCellAttribute.HasBombEnemies)) {
-                    // active only on map locations to harvest bombs
-                    // still should filter quick on locations that
-                    // have enemies to consider
-                    if (currentCell.mapData.attributes.contains(MapCellAttribute.SlowForEnemiesToAppear)) {
-                        add(currentCell.mapLoc, completeIfHaveEnemies(completeIfHaveEnoughBombs(Wait(200))))
-                    } else {
-                        add(currentCell.mapLoc, completeIfHaveEnemies(completeIfHaveEnoughBombs(Wait(20))))
-                    }
-                    val b = completeIfHaveEnoughBombs(
-                        KillAll(
-                            numberLeftToBeDead = 0,
-                            lookForBombs = true,
-                            needLongWait = false,
+                        if (currentCell.mapData.attributes.contains(MapCellAttribute.SlowForEnemiesToAppear)) {
+                            add(currentCell.mapLoc, completeIfHaveEnemies(completeIfHaveEnoughBombs(Wait(200))))
+                        } else {
+                            // give level a chance to start
+                            add(currentCell.mapLoc, completeIfHaveEnemies(completeIfHaveEnoughBombs(Wait(20))))
+                        }
+                        val killAction = completeIfHaveEnoughBombs(
+                            lootAndKill(
+                                KillAll(
+                                    numberLeftToBeDead = 0,
+                                    lookForBombs = true,
+                                    needLongWait = false,
+                                )
+                            )
                         )
-                    )
-                    add(currentCell.mapLoc, b)
+                        add(currentCell.mapLoc, killAction)
+                    }
                 }
-            }
                 previousCell = mapCell
-
-//                add(mapCell.mapLoc, overworldBombOrMove(move))
                 val move = MoveTo(lastMapLoc, mapCell, level)
                 add(mapCell.mapLoc, lootAndMove(move))
-//                add(mapCell.mapLoc, overworldLootAndMoveAndHarvest(MoveTo(lastMapLoc, mapCell, level)))
             }
         }
         return this
