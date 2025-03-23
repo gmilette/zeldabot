@@ -317,7 +317,8 @@ class MapBuilder {
         )
         objectives[56] = MapCellData(
             "lev1Entrybefore",
-            attributes = bombEnemies
+            // causes trouble getting out of level1
+//            attributes = bombEnemies
         )
         objectives[55] = MapCellData(
             "lev1Entry",
@@ -418,7 +419,8 @@ class MapBuilder {
         objectives[91] = MapCellData(
             "forest mid",
             Objective(FramePoint(2.grid, 6.grid), Dest.Secrets.forest10Mid91),
-            attributes = bombEnemies
+            // avoid getting distracted here and going up the wrong way
+//            attributes = bombEnemies
         )
         objectives[92] = MapCellData(
             "forest more",

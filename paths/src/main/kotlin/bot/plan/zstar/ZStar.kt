@@ -27,7 +27,7 @@ class ZStar(
     private val allPassable = passable.copy().mapXy { i, i2 -> true }
     companion object {
         var DEBUG = false
-        var DEBUG_B = true
+        var DEBUG_B = false
         private val DEBUG_DIR = false
         val DEBUG_ONE = false
 
