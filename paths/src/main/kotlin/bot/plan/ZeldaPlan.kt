@@ -46,7 +46,6 @@ object ZeldaPlan {
 
         return builder {
             woodenSwordPhase()
-            1 using level1
 
             "gather bombs".seg()
             gatherBombsFirstPhase()
@@ -169,9 +168,22 @@ object ZeldaPlan {
         }
     }
 
-    /**
-     * 5 should result in 200 ish
-     */
+    private fun PlanBuilder.routeNearLevel8ToGetBombs() {
+        add {
+            routeTo(78) // up near lev2
+            routeTo(127) // near sea corner
+            routeTo(123) // bomb heart
+        }
+    }
+
+    private fun PlanBuilder.routeNearLevel3ToGetBombs() {
+        add {
+            routeTo(115) // near lev3
+            routeTo(83) // near fairy
+            routeTo(81) // burn heart
+        }
+    }
+
     private fun PlanBuilder.harvestBombsNearLevel2(n: Int = 5) {
         add {
             repeat(n) {
@@ -463,23 +475,24 @@ object ZeldaPlan {
         phase("go to level 5")
         5 using level5
 
+        phase("Gear for level 8")
         seg("pre 8 potion")
         forestPotion()
 //        greenPotion() // for now, but there is a closer one for sure
 
-        phase("Gear for level 8")
 //            obj(Dest.Shop.potionShopWest, itemLoc = Dest.Shop.ItemLocs.redPotion)
 
         // is the 10 secret necessary, eh
 //            routeTo(78-16)
 //            obj(Dest.Secrets.level2secret10)
         // grab level2 boomerang
+        phase("get magic boomerang")
         if (endLevel2BoomerangPickup) {
             2 using levelPlan2Boomerang
         } //7.5, 8
 
         phase("pre 8 harvest")
-        harvest(2)
+        harvest(2) // didn't need this at all
 
         phase("and now level 8")
         // make sure approach from left
@@ -492,18 +505,23 @@ object ZeldaPlan {
         right
         8 using level8
 
-        // or harvest on the way to level 2
-        // or always harvest bombs if they are likely
-//        if (DO_HARVEST) {
-//            harvestBombsNearLevel2()
-//        }
+        // was missing bombs
+        if (DO_HARVEST) {
+            routeNearLevel8ToGetBombs()
+        }
 
         phase("items for level 7")
         enoughForBait
         obj(Dest.Shop.blueRing, itemLoc = Dest.Shop.ItemLocs.bait, position = true)
         greenPotion()
+        if (DO_HARVEST) {
+            routeNearLevel3ToGetBombs()
+        }
         obj(Dest.Fairy.brownForest)
         7 using level7
+        if (DO_HARVEST) {
+            routeNearLevel3ToGetBombs()
+        }
         greenPotion()
         right
         right
