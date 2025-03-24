@@ -111,11 +111,12 @@ class Level3SequenceThenDo(private val sequence: OrderedActionSequence, action: 
 fun getTriforce() = CompleteIfMapChanges(
     OrderedActionSequence(
         listOf(
-            InsideNav(InLocations.Level2.triforce),
             StartAtAction(0),
-            GoIn(MapConstants.oneGridPoint5, GamePad.MoveUp),
-            GoIn(MapConstants.halfGrid, GamePad.MoveLeft),
-            GoIn(MapConstants.halfGrid, GamePad.MoveRight)
+            InsideNav(InLocations.Level2.triforce),
+            StartAtAction(0)
+//            GoIn(MapConstants.oneGridPoint5, GamePad.MoveUp),
+//            GoIn(MapConstants.halfGrid, GamePad.MoveLeft),
+//            GoIn(MapConstants.halfGrid, GamePad.MoveRight)
         ), restartWhenDone = false, shouldComplete = true
     )
 )

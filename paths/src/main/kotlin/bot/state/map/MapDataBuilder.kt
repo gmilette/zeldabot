@@ -18,6 +18,7 @@ class MapBuilder {
     val r = Direction.Right
     val d = Direction.Down
     val l = Direction.Left
+    val right = e(r)
     val upRight = e(u, r)
     val upDown = e(u, d)
     val eall = e(u, d, l, r)
@@ -228,35 +229,35 @@ class MapBuilder {
         )
         objectives[37] = CellBuilder().invoke {
             aka("powerbraceletRight")
-            e(l)
+//            e(l)
             this has DestType.Shop(ShopType.B) at 100 a 100
         }
         objectives[38] = CellBuilder().invoke {
             aka("mountainWalk")
-            e(r, d)
+//            e(r, d)
             this has DestType.Shop(ShopType.C) at 100 a 100
         }
         objectives[39] = CellBuilder().invoke {
             aka("downfromboulder")
-            e(u, r)
+ //           e(u, r)
             this has Dest.Shop.potionShopCornerNear1 at 14.grid a 1.grid
         }
         objectives[40] = CellBuilder().invoke {
             aka("forestneardesert")
-            e(l, r, d)
+//            e(l, r, d)
             this has Dest.Secrets.forest30NearDesertForest at 13.grid a 6.grid
         }
         objectives[41] = CellBuilder().invoke {
             aka("grounddesert")
-            e(l, r)
+//            e(l, r)
         }
         objectives[42] = CellBuilder().invoke {
             aka("grounddesert2")
-            e(l, r, d)
+//            e(l, r, d)
         }
         objectives[43] = CellBuilder().invoke {
             aka("grounddesert3")
-            e(l, r, d)
+//            e(l, r, d)
         }
         objectives[44] = MapCellData(
             "Bomb heart north",
@@ -317,12 +318,13 @@ class MapBuilder {
         )
         objectives[56] = MapCellData(
             "lev1Entrybefore",
-            // causes trouble getting out of level1
 //            attributes = bombEnemies
+//            exits = ExitSetAll
         )
         objectives[55] = MapCellData(
             "lev1Entry",
-            Objective(InDest.centerLevel, Dest.level(1))
+            Objective(InDest.centerLevel, Dest.level(1)),
+//            exits = ExitSetAll
         )
         objectives[54] = MapCellData(
             "nowheremountain1"
@@ -419,7 +421,6 @@ class MapBuilder {
         objectives[91] = MapCellData(
             "forest mid",
             Objective(FramePoint(2.grid, 6.grid), Dest.Secrets.forest10Mid91),
-            // avoid getting distracted here and going up the wrong way
 //            attributes = bombEnemies
         )
         objectives[92] = MapCellData(
@@ -581,7 +582,7 @@ private class CellBuilder {
 
     private var name: String = ""
     private var destTypes: MutableList<DestTypeBuilder> = mutableListOf()
-    private var exitSet: ExitSet = ExitSetAll
+    private var exitSet: ExitSet = ExitSet()  // ExitSetAll
 
     private var attributes: Set<MapCellAttribute> = mutableSetOf()
     val hasBombEnemies: Unit

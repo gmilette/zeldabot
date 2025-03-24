@@ -86,8 +86,10 @@ class OverworldRouter(private val hyrule: Hyrule) {
         add(63, 47, graph) // raft heart
         add(31, 15, graph) // 100 secret
 
-        // ahh he wont go through the water, need to make it accessible
-//            add(23, 24, graph)
+        // only one way in to the level 1 area
+        removeJust(55, 54, graph)
+        removeJust(55, 55+16, graph)
+        removeJust(55, 55-16, graph)
 
         // dont go up or down in lost woods
         // only across it

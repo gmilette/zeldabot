@@ -46,6 +46,7 @@ object ZeldaPlan {
 
         return builder {
             woodenSwordPhase()
+            1 using level1
 
             "gather bombs".seg()
             gatherBombsFirstPhase()
@@ -126,7 +127,7 @@ object ZeldaPlan {
             "money for shield".seg()
             obj(Dest.Secrets.forest10Mid91)
             obj(Dest.Secrets.forest100South) // 239
-            startHereAtAfterLevel5()
+//            startHereAtAfterLevel5()
             "get shield".seg()
             obj(Dest.Shop.eastTreeShop) // 149
         }
@@ -338,6 +339,12 @@ object ZeldaPlan {
             killUntilGetBomb
             down
             down
+            right
+            right
+            right
+            left
+            left
+            left
             cheatBombs
 //            rightIfNeedBombs
 //            rightIfNeedBombs

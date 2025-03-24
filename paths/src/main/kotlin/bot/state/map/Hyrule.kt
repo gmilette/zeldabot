@@ -85,6 +85,9 @@ class ExitSet(vararg direction: Direction) {
         directions = direction.toList()
     }
 
+    val empty: Boolean
+        get() = directions.isEmpty()
+
     val hasHorizontal: Boolean
         get() = has(Direction.Right) && has(Direction.Left)
 
@@ -148,7 +151,7 @@ class MapCell(
         val end = MapCell(MapCellPoint(-1, -1), 0, MapCellData.empty)
     }
 
-    val exits = mutableMapOf<Direction, MutableList<FramePoint>>()
+    var exits = mutableMapOf<Direction, MutableList<FramePoint>>()
     val zstar: ZStar = ZStar(passable, halfPassable, isLevel)
 
     val exitNames: String
@@ -194,6 +197,14 @@ class MapCell(
 
     init {
         findExits()
+        filterExits()
+    }
+
+    private fun filterExits() {
+        if (mapData.exits.empty) return
+
+        exits = exits.filter { mapData.exits.has(it.key) }.toMutableMap()
+        d { " filtered exits $mapLoc ${exits.keys}"}
     }
 
     private fun findExits() {
@@ -229,8 +240,8 @@ class MapCell(
             } catch (e: Exception) {
 //                d { " IGNORE "}
             }
-
         }
+
     }
 
     fun write(dir: String = "") {

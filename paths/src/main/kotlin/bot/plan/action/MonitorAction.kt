@@ -500,6 +500,7 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
         } else {
             d { " should be at ${state.movedTo} but am at ${state.currentMapCell.mapLoc}"}
             val dir = state.currentMapCell.mapLoc.directionToDir(state.movedTo)
+            d { " move to $dir"}
 //
 //            // this should handle the case where link accidentally moves into
 //            // stair
@@ -507,6 +508,10 @@ class StayInCurrentMapCell(private val wrapped: Action) : Action {
                 dir == Direction.None -> state.currentMapCell.allExits()
                 else -> state.currentMapCell.exitsFor(dir) ?: state.currentMapCell.allExits()
             }
+            if (state.currentMapCell.mapLoc == 55 || state.currentMapCell.mapLoc == 56) {
+                d { " current is ${state.currentMapCell.mapLoc}"}
+            }
+            d { " exits $exits"}
 //            if (dir == Direction.None) {
 ////                // the only way to go is up and out I think, there isn't a way to warp
 ////                // somewhere else

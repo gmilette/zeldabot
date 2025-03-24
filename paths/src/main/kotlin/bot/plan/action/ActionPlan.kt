@@ -840,6 +840,7 @@ fun neededReachableLoot(state: MapLocationState): List<Agent> {
 // should take into account half passable
 private fun halfInsidePassable(state: MapLocationState, pt: FramePoint, small: Boolean): Boolean {
     return with(state.currentMapCell) {
+        if (passable.empty) return false
         val midPassable = passable.get(pt.downHalf) && passable.get(pt.downHalf.justRightHalf)
         val topPassable = passable.get(pt) && passable.get(pt.justRightHalf)
 //        d { " mid pass: $pt mid=$midPassable top=$topPassable small=${small}"}
