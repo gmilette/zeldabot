@@ -46,7 +46,6 @@ object ZeldaPlan {
 
         return builder {
             woodenSwordPhase()
-            1 using level1
 
             "gather bombs".seg()
             gatherBombsFirstPhase()
