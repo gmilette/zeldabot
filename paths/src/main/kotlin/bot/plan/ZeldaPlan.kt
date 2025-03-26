@@ -505,6 +505,7 @@ object ZeldaPlan {
         right
         8 using level8
 
+        startHereAtLoaded(false)
         // was missing bombs
         if (DO_HARVEST) {
             routeNearLevel8ToGetBombs()
@@ -514,9 +515,6 @@ object ZeldaPlan {
         enoughForBait
         obj(Dest.Shop.blueRing, itemLoc = Dest.Shop.ItemLocs.bait, position = true)
         greenPotion()
-        if (DO_HARVEST) {
-            routeNearLevel3ToGetBombs()
-        }
         obj(Dest.Fairy.brownForest)
         7 using level7
         if (DO_HARVEST) {
@@ -1509,11 +1507,12 @@ private fun PlanBuilder.startHereAtAfterLevel5() {
     )
 }
 
-private fun PlanBuilder.startHereAtLoaded() {
+private fun PlanBuilder.startHereAtLoaded(bomb: Boolean = true) {
     startHereAt(
         raftLadderSetup.copy(
             hearts = 16,
             rupees = 0,
+            bombs = if (bomb) 8 else 0,
             ring = ZeldaItem.BlueRing,
             sword = ZeldaItem.MagicSword,
             potion = true,

@@ -1,11 +1,10 @@
 package bot.plan.action
 
-import bot.state.Addresses
 import bot.state.GamePad
 import bot.state.MapLocationState
 import util.LogFile
 
-private val file = LogFile("cheatLog")
+private val file = LogFile("cheatLog", addDate = true)
 
 class ActionOnce(private val action: (MapLocationState) -> Unit) : Action {
     private var done = false
@@ -23,14 +22,14 @@ class ActionOnce(private val action: (MapLocationState) -> Unit) : Action {
 
 fun cheatGetKey(): Action = ActionOnce { state ->
     if (state.frameState.inventory.numKeys == 0) {
-        file.write(state.frameState.mapLoc, "key", "add key", state.frameState.inventory.numKeys)
+        file.write(state.frameState.level, state.frameState.mapLoc, state.frameState.currentFrame, "key", "add key", state.frameState.inventory.numKeys)
         state.frameState.inventory.addKey()
     }
 }
 
 fun cheatBombs() : Action  = ActionOnce { state ->
     if (state.frameState.inventory.numBombs < 4) {
-        file.write(state.frameState.level, state.frameState.mapLoc, "bomb", "set bomb to 4", state.frameState.inventory.numBombs)
+        file.write(state.frameState.level, state.frameState.mapLoc, state.frameState.currentFrame, "bomb", "set bomb to 4", state.frameState.inventory.numBombs)
     }
     state.frameState.inventory.setBombs()
 }
@@ -41,7 +40,7 @@ fun cheatRupee(need: String, enoughFor: Int = 100) : Action  = ActionOnce { stat
 
 fun cheatLetter() : Action  = ActionOnce { state ->
     if (!state.frameState.inventory.hasLetter) {
-        file.write(state.frameState.level, state.frameState.mapLoc, "letter", "set letter", state.frameState.inventory.hasLetter)
+        file.write(state.frameState.level, state.frameState.mapLoc, state.frameState.currentFrame, "letter", "set letter", state.frameState.inventory.hasLetter)
         state.frameState.inventory.setLetter()
     }
 }
@@ -59,7 +58,7 @@ fun cheatPotion() : Action  = ActionOnce { state ->
 
 fun executeRupeeCheat(state: MapLocationState, enoughFor: Int = 100, need: String) {
     if (state.frameState.inventory.numRupees < enoughFor) {
-        file.write(state.frameState.level, state.frameState.mapLoc, need, "set rupee to $enoughFor", state.frameState.inventory.numRupees)
+        file.write(state.frameState.level, state.frameState.mapLoc, state.frameState.currentFrame, need, "set rupee to $enoughFor", state.frameState.inventory.numRupees)
         state.frameState.inventory.addRupeeIfNeed(enoughFor)
     }
 }

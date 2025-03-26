@@ -214,13 +214,6 @@ class RunActionLog(private val fileNameRoot: String,
         }
     }
 
-    private fun now(): String {
-        val time = Calendar.getInstance().time
-        val formatter = SimpleDateFormat("yyyy_MM_dd_HH_mm")
-        val date = formatter.format(time)
-        return date
-    }
-
     private fun writeFinalHeader() {
         val csvWriter2 = CsvWriter()
         if (!File(outputFileAll).exists() && save) {
@@ -313,3 +306,11 @@ data class DataCount(
         perStep = 0
     }
 }
+
+fun now(): String {
+    val time = Calendar.getInstance().time
+    val formatter = SimpleDateFormat("yyyy_MM_dd_HH_mm")
+    val date = formatter.format(time)
+    return date
+}
+
