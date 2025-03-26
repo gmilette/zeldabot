@@ -3,6 +3,8 @@ package bot.state
 import bot.plan.action.NavUtil
 import bot.state.map.Direction
 import bot.state.map.MapConstants
+import bot.state.map.andAHalf
+import bot.state.map.grid
 import util.Geom
 import kotlin.math.abs
 import kotlin.math.sqrt
@@ -10,6 +12,9 @@ import kotlin.math.sqrt
 data class FramePoint(val x: Int = 0, val y: Int = 0, val direction: Direction? = null) {
     constructor(x: Int = 0, y: Int = 0) : this(x, y, null)
 
+    companion object {
+        val center: FramePoint = FramePoint(7.grid.andAHalf, 5.grid)
+    }
     val isZero: Boolean
         get() = x == 0 && y == 0
 

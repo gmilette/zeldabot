@@ -60,6 +60,8 @@ fun makeUsePotionAction(): OneTimeActionSequence {
     return OneTimeActionSequence(
         listOf(
             save,
+            // move inside level because you cannot use a potion in the entrance
+            CompleteIf(goInward()) { frameState.link.point.isInLevelMap },
             SwitchToItemConditionally(Inventory.Selected.potion),
             // wait until the screen scrolls down, but not too long
 //            CompleteIfGameModeNormal(),
@@ -71,25 +73,6 @@ fun makeUsePotionAction(): OneTimeActionSequence {
             //SwitchToItemConditionally(inventoryPosition = { 0 }),
             GoIn(20, GamePad.None)
         ), tag = "use potion")
-}
-
-class UsePotionW(wrapped: Action) : WrappedAction(wrapped) {
-    private val usePotion = makeUsePotionAction()
-
-    override fun complete(state: MapLocationState): Boolean =
-        !PotionUsageReasoner.shouldUsePotion(state.frameState) || wrapped.complete(state)
-
-    // go
-    override fun nextStep(state: MapLocationState): GamePad {
-        val should = PotionUsageReasoner.shouldUsePotion(state.frameState)
-        return if (should) {
-            d { "!!need potion!! should use ${should}"}
-            usePotion.nextStep(state)
-        } else {
-            d { "!!need potion!! no need"}
-            wrapped.nextStep(state)
-        }
-    }
 }
 
 class UsePotion : Action {

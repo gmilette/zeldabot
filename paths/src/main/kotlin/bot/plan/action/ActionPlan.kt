@@ -660,6 +660,8 @@ class GoDirection(private val dir: GamePad, private val moves: Int = 10) : Actio
         get() = "Go Up $movements of $moves"
 }
 
+fun goInward() = GoToward(FramePoint.center, moves = MapConstants.fourGrid)
+
 class GoToward(private val target: FramePoint, private val moves: Int = 10) : Action {
     private var movements = 0
 
