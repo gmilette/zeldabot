@@ -255,6 +255,7 @@ object Monsters {
             0xe0, 0xe2, 0xe8, 0xea,
             0xf2, 0xf8, 0xfe, 0xfa, 0xfc, ))
     val dragon = Monster(name = "dragon",
+        ////de is flying head ee is flying head.. color is 02 for these
         tile = setOf(0xCA, 0xC2, 0xc8, 0xcc, 0xce, 0xc0, 0xdc, 0xda, 0xd4, 0xd2, 0xd8, 0xd0, 0xd6, 0xc6, 0xde),
         color = grey
     ).immuneToB().inL()
@@ -338,7 +339,7 @@ object Monsters {
         .add(goriya, keese, moldorm, rope, stalfos, wallmaster, digdogger, dodongo, aquamentus)
 
     private val lookupLevel8: Map<Int, Monster> = mutableMapOf<Int, Monster>()
-        .add(darknut, gibdo, keese, polsVoice, zol, gohma, manhandla)
+        .add(darknut, gibdo, keese, polsVoice, zol, gohma, manhandla, dragon)
 
     private val lookupLevel9: Map<Int, Monster> = mutableMapOf<Int, Monster>()
         .add(gel, keese, lanmoia, likelike, vire, wizzrobe, zol, patra, ganon)

@@ -495,7 +495,8 @@ class MapBuilder {
     fun addRow7(objectives: MutableMap<MapLoc, MapCellData>) {
         objectives[111] = MapCellData(
             "arrow shop",
-            Objective(FramePoint(48, 16), Dest.Shop.arrowShop, itemLoc = Objective.ItemLoc.Right)
+            Objective(FramePoint(48, 16), Dest.Shop.arrowShop, itemLoc = Objective.ItemLoc.Right),
+            attributes = bombEnemies
         )
         objectives[112] = MapCellData(
             "useless end has shop",
@@ -555,9 +556,9 @@ class MapBuilder {
             "bombHeartSouth",
             Objective(FramePoint(9.grid, 1.grid), Dest.Heart.bombHeartSouth, itemLoc = Objective.ItemLoc.Right),
         )
+        //124 no 126 no 127 yes, 111 yes
         objectives[124] = MapCellData(
             "south path 1",
-            attributes = bombEnemies
         )
         objectives[125] = MapCellData(
             "south path 2",
@@ -565,7 +566,6 @@ class MapBuilder {
         )
         objectives[126] = MapCellData(
             "south path 3",
-            attributes = bombEnemies
         )
         objectives[127] = MapCellData(
             "south path 4",

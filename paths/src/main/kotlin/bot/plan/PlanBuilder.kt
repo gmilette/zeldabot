@@ -53,7 +53,7 @@ class PlanBuilder(
         add(lastMapLoc, whiteSwordManeuverSneakManeuver(moveDown, moveUp))
     }
 
-    fun routeTo(loc: MapLoc): PlanBuilder {
+    fun  routeTo(loc: MapLoc): PlanBuilder {
         //d { " path from $lastMapLoc to $loc"}
         val path = optimizer.findPath(lastMapLoc, loc) ?: return this
         var previousCell: MapCell? = null
@@ -62,12 +62,12 @@ class PlanBuilder(
                 previousCell?.let { currentCell ->
                     if (currentCell.mapData.attributes.contains(MapCellAttribute.HasBombEnemies)) {
                         if (currentCell.mapData.attributes.contains(MapCellAttribute.SlowForEnemiesToAppear)) {
-                            add(currentCell.mapLoc, completeIfHaveEnoughBombs(completeIfHaveEnemies(Wait(200))))
+                            add(currentCell.mapLoc, completeIfHaveFullBombs(completeIfHaveEnemies(Wait(200))))
                         } else {
                             // give level a chance to start
-                            add(currentCell.mapLoc, completeIfHaveEnoughBombs(completeIfHaveEnemies(Wait(20))))
+                            add(currentCell.mapLoc, completeIfHaveFullBombs(completeIfHaveEnemies(Wait(20))))
                         }
-                        val killAction = completeIfHaveEnoughBombs(
+                        val killAction = completeIfHaveFullBombs(
                             lootAndKill(
                                 KillAll(
                                     numberLeftToBeDead = 0,

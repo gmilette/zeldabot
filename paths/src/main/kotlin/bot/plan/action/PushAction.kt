@@ -117,6 +117,7 @@ class PushAction(push: InLocations.Push, then: Action): Action {
         // avoid horizontal spot
         Timeout(then),
         KillAll(),
+        // try to go exit
         InsideNav(push.position) // if we are going to retry reposition link
         ), restartWhenDone = true, tag = "push sequence")
 

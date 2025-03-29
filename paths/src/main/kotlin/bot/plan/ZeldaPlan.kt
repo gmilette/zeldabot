@@ -170,9 +170,14 @@ object ZeldaPlan {
 
     private fun PlanBuilder.routeNearLevel8ToGetBombs() {
         add {
-            routeTo(78) // up near lev2
+            // link routes up and around
             routeTo(127) // near sea corner
-            routeTo(123) // bomb heart
+            routeTo(111) // near sea corner
+
+//            // good but it makes link walk into the shop it doesn't need to go in
+//            routeTo(78) // up near lev2
+//            routeTo(127) // near sea corner
+//            routeTo(123) // bomb heart
         }
     }
 
@@ -504,8 +509,7 @@ object ZeldaPlan {
         down
         right
         8 using level8
-
-        startHereAtLoaded(false)
+        seg("done with 8 get bombs")
         // was missing bombs
         if (DO_HARVEST) {
             routeNearLevel8ToGetBombs()
@@ -516,6 +520,10 @@ object ZeldaPlan {
         obj(Dest.Shop.blueRing, itemLoc = Dest.Shop.ItemLocs.bait, position = true)
         greenPotion()
         obj(Dest.Fairy.brownForest)
+        // prob do before level 7 too
+        if (DO_HARVEST) {
+            routeNearLevel3ToGetBombs()
+        }
         7 using level7
         if (DO_HARVEST) {
             routeNearLevel3ToGetBombs()
@@ -1282,6 +1290,8 @@ private val level8: PlanBuilder.() -> Unit
         "grab tri".seg()
         goTo(InLocations.Level8.triforceHeartAbove)
         goTo(InLocations.Level8.triforceHeart)
+        startHereAtLoaded(false)
+
         uponlym
         getTri
     }

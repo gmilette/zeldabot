@@ -109,6 +109,8 @@ class CompleteIfMapChangesTo(private val wrapped: Action, val to: MapLoc) : Acti
         get() = "Until Change Map from $initialMapLoc to $to ${wrapped.name}"
 }
 
+fun completeIfHaveFullBombs(wrapped: Action) = completeIfHaveBombs(wrapped, 8)
+
 fun completeIfHaveEnoughBombs(wrapped: Action) = completeIfHaveBombs(wrapped, 4)
 
 fun completeIfHaveBombs(wrapped: Action, minBombs: Int = 0): Action = CompleteIf(wrapped) {
