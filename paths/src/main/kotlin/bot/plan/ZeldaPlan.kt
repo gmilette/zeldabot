@@ -172,7 +172,9 @@ object ZeldaPlan {
         add {
             // link routes up and around
             routeTo(127) // near sea corner
-            routeTo(111) // near sea corner
+            routeTo(111) // one up
+            routeTo(63) // corner
+            routeTo(46) // corner
 
 //            // good but it makes link walk into the shop it doesn't need to go in
 //            routeTo(78) // up near lev2
@@ -1201,6 +1203,7 @@ private val level7: PlanBuilder.() -> Unit
         bombRight
         seg("Kill hands")
 //        switchToWand
+        goIn(GamePad.MoveRight, 10)
         killHandsInLevel7
         goTo(FramePoint(2.grid, 8.grid))
         addNext(

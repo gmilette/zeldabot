@@ -72,7 +72,8 @@ class RunActionLog(private val fileNameRoot: String,
         val heal: Double = 0.0,
         val keys: Int = 0,
         val rupees: Int,
-        val potionFills: Int = 0
+        val potionFills: Int = 0,
+        val numBombs: Int = 0
     )
 
     val completedStep = mutableListOf<StepCompleted>()
@@ -164,10 +165,10 @@ class RunActionLog(private val fileNameRoot: String,
         if (save) {
             val csvWriter2 = CsvWriter()
             csvWriter2.open(outputFile, false) {
-                writeRow("index", "level", "mapLoc", "name", "time", "totalTime", "totalFrames", "numFrames", "action", "hearts", "bombsUsed", "hits", "damage", "heal", "keys", "rupees", "potion")
+                writeRow("index", "level", "mapLoc", "name", "time", "totalTime", "totalFrames", "numFrames", "action", "hearts", "bombsUsed", "hits", "damage", "heal", "keys", "rupees", "potion", "bombs")
                 completedStep.forEachIndexed { index, stepCompleted ->
                     stepCompleted.apply {
-                        writeRow(index, level, mapLoc, name, time, totalTime, frames, numFrames, action, hearts, bombsUsed, hits, damage, heal, keys, rupees, potionFills)
+                        writeRow(index, level, mapLoc, name, time, totalTime, frames, numFrames, action, hearts, bombsUsed, hits, damage, heal, keys, rupees, potionFills, numBombs)
                     }
                 }
             }
@@ -276,7 +277,8 @@ class RunActionLog(private val fileNameRoot: String,
             heal = heal,
             keys = state.frameState.numKeys,
             rupees = state.frameState.numRupees,
-            potionFills = state.frameState.inventory.numPotions
+            potionFills = state.frameState.inventory.numPotions,
+            numBombs = state.frameState.inventory.numBombs
         )
     }
 

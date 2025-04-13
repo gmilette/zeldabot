@@ -104,6 +104,7 @@ object EnemyGroup {
         clockTile,
 //            triforceDirt,
         triforceDirt2,
+        map,
 //            oldWoman
 //            dragonFeet,
 //            dragonFeet2,
@@ -260,7 +261,7 @@ object EnemyGroup {
         redring,
 //            brownBoomerang,
         bow,
-        map,
+//        map, // never try to get it
         masterKey,
         raft,
         fairy,

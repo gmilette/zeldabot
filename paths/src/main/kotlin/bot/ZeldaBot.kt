@@ -277,6 +277,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             }
             if (addCandle) {
                 stateManipulator.setRedCandle()
+                stateManipulator.setClock()
                 addCandle = false
             }
             if (addBoomerang) {

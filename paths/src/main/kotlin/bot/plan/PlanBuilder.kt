@@ -943,21 +943,6 @@ class PlanBuilder(
         switchToCandle()
         val burnFrom = from.pointModifier(MapConstants.twoGrid)(to)
         val opposite = from.opposite()
-//        goTo(burnFrom)
-//        // turn in proper direction
-////        d { " burn from $burnFrom to $to op $opposite"}
-//        // go until facing the correct direction
-////        goIn(opposite.toGamePad(), 4)
-//        // need test, idea is that link should stop when facing correct direction
-//        // but he might get distracted by attacking something else
-//        goInTowards(opposite.toGamePad(), MapConstants.fourthGrid)
-//
-//        // execute burn
-//        plan.add(UseItem())
-//        // do not walk into the fire
-//        goIn(GamePad.None, 75)
-//        // if link gets pushed through the stair, then it triggers complete
-//        goToOrMapChanges(to, to) // that should be passable now
 
         val directionExit: Direction = mapCell(lastMapLoc).exits.keys.firstNotNullOf {
             if (mapCell(lastMapLoc).exits[it]?.isNotEmpty() == true) it else null

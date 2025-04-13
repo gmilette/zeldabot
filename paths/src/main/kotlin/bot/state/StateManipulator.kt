@@ -109,6 +109,10 @@ class StateManipulator(
         api.writeCPU(Addresses.hasCandle, 2)
     }
 
+    fun setClock() {
+        api.writeCPU(Addresses.clockActivated, 1)
+    }
+
     fun setMagicShield() {
         api.writeCPU(Addresses.hasShield, 1)
     }

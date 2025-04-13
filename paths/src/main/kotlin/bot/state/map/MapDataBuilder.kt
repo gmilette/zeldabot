@@ -23,6 +23,7 @@ class MapBuilder {
     val upDown = e(u, d)
     val eall = e(u, d, l, r)
     val bombEnemies = setOf(MapCellAttribute.HasBombEnemies)
+    val bombEnemiesSlowToAppear = setOf(MapCellAttribute.HasBombEnemies, MapCellAttribute.SlowForEnemiesToAppear)
 
     fun e(vararg dir: Direction): ExitSet {
         return ExitSet(*dir)
@@ -397,7 +398,7 @@ class MapBuilder {
         objectives[81] = MapCellData(
             "forest burn secret",
             Objective(FramePoint(9.grid, 6.grid), Dest.Secrets.forest10BurnBrown),
-            attributes = bombEnemies
+            attributes = bombEnemiesSlowToAppear
         )
         objectives[82] = MapCellData(
             "forest before lev7",
@@ -517,7 +518,7 @@ class MapBuilder {
         objectives[115] =
             MapCellData(
                 "forest near lev3",
-                attributes = bombEnemies
+                attributes = bombEnemiesSlowToAppear
             )
         objectives[116] =
             MapCellData(
