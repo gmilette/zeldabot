@@ -13,20 +13,12 @@ import bot.state.map.level.LevelSpecBuilder
 import bot.state.map.level.LevelStartMapLoc
 
 object ZeldaPlan {
-    enum class PlanOption {
-        MAGIC_SHIELD_EARLY,
-        DO_HARVEST
-    }
-
-    val DO_HARVEST: Boolean = true
-
-    val option = PlanOption.MAGIC_SHIELD_EARLY
+    private val DO_HARVEST: Boolean = false
 
     fun makeMasterPlan(hyrule: Hyrule, mapData: MapCells, levelData: LevelMapCellsLookup): MasterPlan {
         val router = OverworldRouter(hyrule)
         val factory = PlanInputs(mapData, levelData, router)
         return safety(factory)
-//        return realLev1(factory)
     }
 
     private fun levelTour(factory: PlanInputs): MasterPlan {
@@ -191,14 +183,6 @@ object ZeldaPlan {
         }
     }
 
-    private fun PlanBuilder.harvestBombsNearLevel2(n: Int = 5) {
-        add {
-            repeat(n) {
-//                2 using levelPlan2Harvest
-            }
-        }
-    }
-
     private fun PlanBuilder.whiteSword() {
         add {
             routeTo(10)
@@ -328,12 +312,6 @@ object ZeldaPlan {
         }
     }
 
-    private fun PlanBuilder.remaining() {
-        add {
-
-        }
-    }
-
     private fun PlanBuilder.end() {
         add {
             // junk
@@ -382,82 +360,6 @@ object ZeldaPlan {
 //            routeTo(107 - 16 + 1)
             routeTo(bombLoc.up)
             routeTo(bombLoc.up.right)
-        }
-    }
-
-    private fun gatherBombsFirst(factory: PlanInputs): MasterPlan {
-        val start: PlanBuilder.() -> Unit = {
-            this.gatherBombsFirstPhase()
-        }
-
-        return masterPlan(factory, start)
-    }
-
-    // get a candle, and magic shield
-
-    private fun real(factory: PlanInputs): MasterPlan {
-        val start: PlanBuilder.() -> Unit = {
-            obj(Dest.level(2))
-            includeLevelPlan(levelPlan2(factory))
-        }
-
-        return masterPlan(
-            factory, start,
-            endLevel2BoomerangPickup = true
-        )
-    }
-
-    private fun masterPlan(
-        factory: PlanInputs, start: PlanBuilder.() -> Unit,
-        level2Later: Boolean = true,
-        endLevel2BoomerangPickup: Boolean = false
-    ): MasterPlan {
-        val builder = factory.make("begin!")
-        return builder {
-            woodenSwordPhase()
-
-            start()
-
-            // position by routing
-//            val sec:MapLoc = 61
-//            routeTo(sec.up)
-            afterLevel2ItemsLetterEtcPhase(true)
-
-            if (level2Later) {
-                obj(Dest.level(2))
-                includeLevelPlan(levelPlan2(factory))
-            }
-
-            // need a special plan for white sword guy to get killed less
-            // need to move around the sword guy
-            whiteSword()
-
-            obj(Dest.level(1))
-            includeLevelPlan(levelPlan1(factory))
-            obj(Dest.Secrets.bomb30Start) // could move later if we can guarantee level 2 provides
-            obj(Dest.Shop.candleShopMid)
-
-            if (option == PlanOption.MAGIC_SHIELD_EARLY) {
-                phase("get magic shield")
-                obj(Dest.Shop.westTreeShopNearWater)
-                phase("get heart and cash")
-                obj(Dest.Heart.fireHeart)
-                obj(Dest.Secrets.fire30GreenSouth)
-            }
-
-            ringLevels()
-
-            phase("grab hearts")
-            if (option != PlanOption.MAGIC_SHIELD_EARLY) {
-                obj(Dest.Secrets.fire30GreenSouth)
-                obj(Dest.Heart.fireHeart)
-            }
-            obj(Dest.Heart.bombHeartSouth)
-            obj(Dest.Secrets.forest100South)
-            arrowAndHearts()
-            // go down and make sure to walk off.
-            // something like this
-//            goToAtPoint(33, FramePoint(11.grid, 3.grid))
         }
     }
 
@@ -630,13 +532,6 @@ object ZeldaPlan {
         }
 
 
-    private fun levelPlan1(factory: PlanInputs): MasterPlan {
-        val builder = factory.make("Destroy level 1")
-        return builder {
-            level1()
-        }
-    }
-
     private val level2: PlanBuilder.() -> Unit
         get() = {
             add {
@@ -697,125 +592,6 @@ object ZeldaPlan {
             }
         }
 
-//    private fun PlanBuilder.level2() {
-//        add {
-//            lev(2)
-//            startAt(LevelStartMapLoc.lev(2))
-//            seg("gather 3 keys")
-//            right
-//            kill
-//            goTo(InLocations.Level2.keyMid)
-//            loot // maybe try to get loot
-//            up // nothing here
-//            seg("gather key 2")
-//            left
-//            kill
-//            left
-//            goTo(InLocations.Level2.keyMid)
-//            loot
-//            right
-//            right // grid room
-//            seg("sprint up from grid")
-//            up
-//            seg("go get blue boomerang")
-//            upm
-//            seg("gather key 3")
-//            kill
-//            loot // key 2
-//            seg("turn right to get boomerang")
-////            right
-////            kill
-////            // the boomerang is a projectile! do not avoid it
-////            goAbout(InLocations.Level2.keyMid, 1, 1, true, ignoreProjectiles = true)
-////            left
-//            seg("resume sprint")
-//            up
-//            // skip getting key from squishy guy
-////            .kill
-////            .goTo(InLocations.Level2.keyMid)
-//            upNoBlock // the squishy guy appears like a projectile so do not block
-//            kill
-//            seg("bomb room")
-//            // no key I think
-////            goTo(InLocations.Level2.keyMid)
-//            up
-//            kill // blocked before going // allow bombs
-//            goTo(InLocations.Level2.bombItemRight)
-//            up
-//            seg(Phases.Segment.lev2Boss)
-//            switchToBomb
-//            killLevel2Rhino
-//            seg("get the triforce")
-////            wait // why?
-//            goTo(InLocations.Level2.heartMid)
-//            loot // in case there is a bomb
-//            leftm
-//            goIn(GamePad.MoveLeft, 20)
-//            getTri
-//        }
-//    }
-
-    private fun levelPlan2(factory: PlanInputs): MasterPlan {
-        val builder = factory.make("Destroy level 2")
-
-        return builder {
-            lev(2)
-            startAt(LevelStartMapLoc.lev(2))
-            seg("gather 3 keys")
-            right
-            kill
-            goTo(InLocations.Level2.keyMid)
-            loot // maybe try to get loot
-            up // nothing here
-            seg("gather key 2")
-            left
-            kill
-            left
-            goTo(InLocations.Level2.keyMid)
-            loot
-            right
-            right // grid room
-            seg("sprint up from grid")
-            up
-            seg("go get blue boomerang")
-            upm
-            seg("gather key 3")
-            kill
-            loot // key 2
-            seg("turn right to get boomerang")
-//            right
-//            kill
-//            // the boomerang is a projectile! do not avoid it
-//            goAbout(InLocations.Level2.keyMid, 1, 1, true, ignoreProjectiles = true)
-//            left
-            seg("resume sprint")
-            up
-            // skip getting key from squishy guy
-//            .kill
-//            .goTo(InLocations.Level2.keyMid)
-            upNoBlock // the squishy guy appears like a projectile so do not block
-            kill
-            seg("bomb room")
-            // no key I think
-//            goTo(InLocations.Level2.keyMid)
-            up
-            kill // blocked before going // allow bombs
-            goTo(InLocations.Level2.bombItemRight)
-            up
-            seg(Phases.Segment.lev2Boss)
-            switchToBomb
-            killLevel2Rhino
-            seg("get the triforce")
-//            wait // why?
-            goTo(InLocations.Level2.heartMid)
-            wait(200) // wait for a bomb to appear?
-            loot // in case there is a bomb
-            leftonlym
-            goIn(GamePad.MoveLeft, 20)
-            getTri
-        }
-    }
-
     private val levelPlan2Boomerang: PlanBuilder.() -> Unit
         get() = {
             phase(Phases.reenterLevel2)
@@ -846,20 +622,6 @@ object ZeldaPlan {
 //            goInConsume(GamePad.MoveDown,90)
             startAt(60)
         }
-    }
-
-private val levelPlan2Harvest: PlanBuilder.() -> Unit
-    get() = {
-        phase(Phases.reenterLevel2)
-        lev(2)
-        startAt(LevelStartMapLoc.lev(2))
-        seg("go to boomerang")
-        up
-        right
-        up
-        goTo(FramePoint(7.grid + MapConstants.halfGrid, 8.grid))
-        goInConsume(GamePad.MoveDown,MapConstants.threeGrid)
-        startAt(60)
     }
 
 private val levelPlan2Harvest2: PlanBuilder.() -> Unit
@@ -1538,5 +1300,4 @@ private fun PlanBuilder.startHereAtLoaded(bomb: Boolean = true) {
             boomerang = ZeldaItem.MagicalBoomerang
         )
     )
-
 }
