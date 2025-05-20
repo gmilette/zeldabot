@@ -79,6 +79,13 @@ class MasterPlan(val segments: List<PlanSegment> = emptyList()) {
         }
     }
 
+    private fun dynamicSegment(action: Action) = PlanSegment("any", "any", listOf(action))
+
+    fun push(action: Action): Action {
+        i { "--> push to ${action.name}" }
+        giant.add(0, PlanStep(dynamicSegment(action), action))
+    }
+
     fun findStartHere(): StartHereByLocationAction? =
         giant.map { it.action }.firstOrNull { it is StartHereByLocationAction } as? StartHereByLocationAction
 
