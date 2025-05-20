@@ -81,7 +81,7 @@ class MasterPlan(val segments: List<PlanSegment> = emptyList()) {
 
     private fun dynamicSegment(action: Action) = PlanSegment("any", "any", listOf(action))
 
-    fun push(action: Action): Action {
+    fun push(action: Action) {
         i { "--> push to ${action.name}" }
         giant.add(0, PlanStep(dynamicSegment(action), action))
     }

@@ -146,7 +146,7 @@ object AttackActionDecider {
     }
 
     private fun validDir(dir: Direction, from: FramePoint): List<Direction> {
-        val all = Direction.values().toList()
+        val all = Direction.entries
 
         return when (dir) {
             Direction.Left,
@@ -205,16 +205,6 @@ object AttackActionDecider {
         return swords[dir]?.intersect(enemy) ?: false
     }
 
-    // need to filter enemies here too
-//    fun inRangeOf(state: MapLocationState): GamePad {
-//        return inRangeOf(
-//            state.frameState.link.dir,
-//            state.link,
-//            aliveEnemiesCanAttack(state),
-//            false
-//        )
-//    }
-
     fun inRangeOf(state: MapLocationState, targets: List<FramePoint>, useB: Boolean = false): GamePad {
         return inRangeOf(
             state.frameState.link.dir,
@@ -237,10 +227,6 @@ object AttackActionDecider {
             } else {
                 // doesnt really work
                 if (state.frameState.level == 9) {
-                    // unless you actually have to kill it
-//                    if (state.frameState.mapLoc != 97 && state.frameState.mapLoc != 82) {
-//                        enemies = enemies.filter { it.tile !in circleMonsterCenters }
-//                    }
                     if (state.frameState.mapLoc != 97 && state.frameState.mapLoc != 82) {
 //                        enemies = enemies.filter { it.tile !in circleMonsterCenters }
                         if (enemies.any { it.tile !in circleMonsterCenters }) {

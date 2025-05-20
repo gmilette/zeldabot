@@ -9,11 +9,6 @@ import org.jheaps.annotations.VisibleForTesting
 import util.*
 
 object AttackLongActionDecider {
-    fun isSwordLink() {
-        // if it is moving in same direction as link
-        // if it is within 1 grid of link
-    }
-
     fun isInsideEnoughToShoot(state: MapLocationState) =
         if (state.frameState.isLevel) {
             state.link.isInLevelMap
@@ -89,24 +84,14 @@ object AttackLongActionDecider {
             }
             (state.arrowActive) -> {
                 canShoot = true
-                false
-//                state.frameState.enemies.any { it.tile in ProjectileDirectionLookup.ghostProjectiles }
+                // need testing
+                state.frameState.enemies.any { it.tile in ProjectileDirectionLookup.arrowProjectiles }
             }
             else -> false
         }
         val inRange by lazy { targetInLongRange(state, targets) }
         d { "Shoot boomerang $shouldShoot can=$canShoot flying=$boomerangIsFlying range=$inRange"} // range=$inRange" }
         return (shouldShoot && canShoot && !boomerangIsFlying && inRange)
-        // when start a level, if enemies can be boomeranged, switch to it, but not if about
-        // to switch to bomb
-        // should be able to alternate, shooting sword and boomerang
-        // there are enemies or loot (allow shooting at loot)
-        // if boomerang is active
-        // if there are enemies that can be affected by boomerang
-        // ex. sword guy, ghost cannot be
-        // if enemy can be kill by it, always shoot
-        // if it is an enemy that can be stunned, observe cooldown shot
-        // if I want to shoot but the boomerang is not active
     }
 
     fun shouldWand(state: MapLocationState, targets: List<FramePoint>): Boolean {
@@ -119,13 +104,6 @@ object AttackLongActionDecider {
         d { "Shoot want $shouldShoot can=$canShoot"} // range=$inRange" }
         return (shouldShoot && canShoot && inRange)
     }
-
-    // boomerang algorithm
-    // since enemies are fro
-
-//    private fun targetInLongRange(state: MapLocationState): Boolean {
-//        return firstEnemyIntersect(state, longRectangle(state), state.aliveEnemies.map { it.point }) != null
-//    }
 
     private fun targetInLongRange(state: MapLocationState, targets: List<FramePoint>): Boolean {
         return firstEnemyIntersect(longRectangle(state), targets) != null
@@ -159,9 +137,6 @@ object AttackLongActionDecider {
             d { "long intersect $aliveEnemy $inter" }
         }
 
-//        return state.aliveEnemies.firstOrNull {
-//            swordRectangle.intersect(it.point.toRect())
-//        }
         return targets.firstOrNull {
             swordRectangle.intersect(it.toRect())
         }
@@ -179,8 +154,6 @@ object AttackLongActionDecider {
         Direction.Up -> Geom.Rectangle(link.justRight6.withY(to.y), link.justRightLast6)
         else -> link.toRect()
     }
-
-    // enemy group for immunie to boomerang
 
     private fun rayFrom(map: Map2d<Boolean>, point: FramePoint, dir: Direction): FramePoint {
         if (dir == Direction.None) return FramePoint()

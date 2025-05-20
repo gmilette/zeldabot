@@ -17,6 +17,7 @@ object ProjectileDirectionLookup {
 //        }
 
     val ghostProjectiles = setOf(ghostProjectileUpDown, ghostProjectileLeft1, ghostProjectileLeft2)
+    val arrowProjectiles = setOf(arrowTipShotByEnemy, arrowTipShotByEnemy2, arrowTipShotByEnemyPairDown.tile)
 
     private fun findDirWiz(projectile: TileAttribute): Direction =
         if (projectile.tile in ghostProjectiles) {
