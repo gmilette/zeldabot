@@ -7,11 +7,9 @@ buildscript {
         mavenCentral()
     }
 
-//    val composeVersion: String = "1.5.0"
-//    val kotlinVersion: String = "1.9.0"
-    val composeVersion: String = "1.4.3"
-//    val kotlinVersion: String = "1.9.24" //"1.8.22"
-    val kotlinVersion = "2.0.20" //
+    val composeVersion: String = "1.6.10"
+
+    val kotlinVersion = "2.0.20"
 
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
@@ -21,22 +19,9 @@ buildscript {
 }
 
 plugins {
-    val kotlinVersion = "2.0.20" //
-
-//    id("org.jetbrains.compose:compose-plugin") version kotlinVersion
+    val kotlinVersion = "2.0.20"
     id("org.jetbrains.kotlin.plugin.compose") version kotlinVersion
-
-///    id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
-//    id("org.jetbrains.kotlinx.dataframe")
-    //    kotlin("jvm") version "1.6.10"
-//    id("org.jetbrains.kotlinx.dataframe") version "0.10.0"
-//    val kotlinVersion = "1.8.22" // 1.9.24 i
-//    val kotlinVersion = "1.9.24" // 1.9.24
     kotlin("jvm") version kotlinVersion
-    kotlin("kapt") version kotlinVersion
-//    id("org.jetbrains.compose") version "1.1.1"
-//    id("org.jetbrains.compose") version "1.5.0"
-//    id("org.jetbrains.compose") version "1.4.3"
     id("org.jetbrains.compose") version "1.6.10"
 }
 
@@ -49,7 +34,6 @@ repositories {
     google()
 }
 
-//kotlin.sourceSets.getByName("main").kotlin.srcDir("build/generated/ksp/main/kotlin/")
 
 dependencies {
     implementation("org.jetbrains.kotlinx:dataframe:0.13.1")
@@ -62,7 +46,7 @@ dependencies {
     testImplementation(kotlin("test"))
     implementation("co.touchlab:kermit:2.0.4")
     testImplementation("io.kotest:kotest-assertions-core-jvm:5.6.2")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
     implementation("com.google.code.gson:gson:2.10.1")
 
     testImplementation("org.mockito:mockito-core:5.2.0")
@@ -73,11 +57,6 @@ tasks.test {
     useJUnit()
 }
 
-compose.desktop {
-    application {
-        mainClass = "MainKt"
-    }
-}
 
 tasks.withType<KotlinCompile> {
 //    kotlinOptions.jvmTarget = "1.8"
@@ -89,7 +68,7 @@ tasks.withType<Jar> {
 
     // required so that this app will run inside of nintaco
     val include = setOf("kotlin-runtime-1.9.0.jar",
-        "kotlin-stdlib-1.9.0.jar")
+        "kotlin-stdlib-1.9.0.jar") // Consider updating these if needed
 
     println("run jar")
 
@@ -98,10 +77,6 @@ tasks.withType<Jar> {
         .map { zipTree(it) }
         .also { from(it) }
 }
-
-//application {
-//    mainClass.set("HelloWorld")
-//}
 
 compose.desktop {
     application {
