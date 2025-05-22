@@ -10,7 +10,8 @@ buildscript {
 //    val composeVersion: String = "1.5.0"
 //    val kotlinVersion: String = "1.9.0"
     val composeVersion: String = "1.4.3"
-    val kotlinVersion: String = "1.9.24" //"1.8.22"
+//    val kotlinVersion: String = "1.9.24" //"1.8.22"
+    val kotlinVersion = "2.0.20" //
 
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")

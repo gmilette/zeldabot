@@ -144,7 +144,7 @@ class MasterPlan(val segments: List<PlanSegment> = emptyList()) {
                 d { " skip ${action.name}" }
                 ct++
             }
-            (action as? StartHereAction)?.restoreSaveSlot()
+            action.restoreSaveSlot()
             d { " advanced $ct steps" }
             action
         } else {
