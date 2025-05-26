@@ -1,5 +1,6 @@
 package bot.plan
 
+import bot.plan.ZeldaPlan.exitReenter
 import bot.plan.ZeldaPlan.raftLadderSetup
 import bot.plan.action.*
 import bot.plan.runner.Experiment
@@ -851,9 +852,7 @@ private val level6: PlanBuilder.() -> Unit
         phase(Phases.lev(6))
         lev(6)
         startAt(LevelStartMapLoc.lev(6))
-        seg("reenter to not use key")
-        goInConsume(GamePad.MoveDown, 30)
-        goInConsume(GamePad.MoveUp, 30)
+        objective(ZeldaItem.Wand)
         seg("move to level 6")
         left
         seg("first ghost")

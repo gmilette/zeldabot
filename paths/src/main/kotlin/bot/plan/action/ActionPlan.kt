@@ -257,7 +257,7 @@ class CompleteIfGetItem(
     private var frameCt = 0
     private var startingQuantity = -1
     override fun complete(state: MapLocationState): Boolean {
-        return ((startingQuantity >= 0) && (quantity(state) != startingQuantity)) ||
+        return (frameCt > 10 && (startingQuantity >= 0) && (quantity(state) > startingQuantity)) ||
                 super.complete(state)
     }
 
@@ -268,6 +268,7 @@ class CompleteIfGetItem(
         d { " CompleteIfGetItem " }
         if (startingQuantity < 0) {
             startingQuantity = quantity(state)
+            d { " CompleteIfGetItem starting with $startingQuantity" }
         }
         frameCt++
         return super.nextStep(state)
@@ -411,7 +412,10 @@ val moveToKillAllInCenterSpot = DecisionAction(
     state.numEnemies <= state.numEnemiesAliveInCenter()
 }
 
-fun lootAndKill(kill: Action) = DecisionAction(Optional(GetLoot()), kill) { state ->
+//fun lootAndKill(kill: Action) = DecisionAction(Optional(GetLoot()), kill) { state ->
+//    neededReachableLoot(state).isNotEmpty()
+//}
+fun lootAndKill(kill: Action) = DecisionAction(GetLoot(), kill) { state ->
     neededReachableLoot(state).isNotEmpty()
 }
 
@@ -869,10 +873,11 @@ object LootKnowledge {
     fun keep(tile: Int): Boolean =
         tile in keepSet
 
-    fun needed(state: MapLocationState, agent: Agent, takeOther: Boolean = true) =
+    fun needed(state: MapLocationState, agent: Agent, takeOther: Boolean = true): Boolean =
         when (agent.tile) {
             bomb -> (state.frameState.inventory.numBombs < 8)
             bigCoin -> (state.frameState.inventory.numRupees < 254)
+            key -> true // always need it
             fairy,
             fairy2,
 //            heart -> !state.frameState.inventory.heartCalc.noDamage()

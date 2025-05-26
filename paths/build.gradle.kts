@@ -1,28 +1,32 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-buildscript {
-    repositories {
-        gradlePluginPortal()
-        google()
-        mavenCentral()
-    }
-
-    val composeVersion: String = "1.6.10"
-
-    val kotlinVersion = "2.0.20"
-
-    dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-        classpath("org.jetbrains.compose:compose-gradle-plugin:$composeVersion")
-        classpath("com.android.tools.build:gradle:8.1.2")
-    }
-}
+//buildscript {
+//    repositories {
+//        gradlePluginPortal()
+//        google()
+//        mavenCentral()
+//    }
+//
+//    val composeVersion: String = "1.6.10"
+//
+//    val kotlinVersion = "2.0.20"
+//
+//    dependencies {
+//        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+//        classpath("org.jetbrains.compose:compose-gradle-plugin:$composeVersion")
+//        classpath("com.android.tools.build:gradle:8.1.2")
+//    }
+//}
 
 plugins {
-    val kotlinVersion = "2.0.20"
-    id("org.jetbrains.kotlin.plugin.compose") version kotlinVersion
-    kotlin("jvm") version kotlinVersion
-    id("org.jetbrains.compose") version "1.6.10"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.pluginCompose)
+    alias(libs.plugins.jetbrains.compose)
+
+//    val kotlinVersion = "2.0.20"
+//    id("org.jetbrains.kotlin.plugin.compose") version kotlinVersion
+//    kotlin("jvm") version kotlinVersion
+//    id("org.jetbrains.compose") version "1.6.10"
 }
 
 group = "me.greg"
@@ -36,22 +40,24 @@ repositories {
 
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:dataframe:0.13.1")
-//    implementation(compose.desktop.currentOs)
-    implementation(compose.desktop.macos_arm64)
-    implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.6.0")
-    implementation("org.locationtech.jts:jts-core:1.19.0")
-    implementation("org.jgrapht:jgrapht-core:1.5.1")
-    implementation(files("libs/Nintaco.jar"))
-    testImplementation(kotlin("test"))
-    implementation("co.touchlab:kermit:2.0.4")
-    testImplementation("io.kotest:kotest-assertions-core-jvm:5.6.2")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation(libs.kotlinx.dataframe)
+    implementation(compose.desktop.macos_arm64) // Accessor from the JetBrains Compose plugin
+    implementation(libs.kotlin.csv.jvm)
+    implementation(libs.jts.core)
+    implementation(libs.jgrapht.core)
+    implementation(files("libs/Nintaco.jar")) // Local file dependency remains the same
+    testImplementation(libs.kotlin.test) // Replaces kotlin("test")
+    implementation(libs.kermit)
+    testImplementation(libs.kotest.assertions.core)
+    testImplementation(libs.mockito.kotlin)
+    // You had mockito-core explicitly. mockito-kotlin usually brings a compatible version.
+    // If you need a specific version or for clarity:
+    testImplementation(libs.mockito.core)
+    implementation(libs.gson)
 
-    testImplementation("org.mockito:mockito-core:5.2.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.0.0")
+    // Removed duplicate/older mockito-kotlin:5.0.0 as 5.2.1 is used.
 }
+
 
 tasks.test {
     useJUnit()

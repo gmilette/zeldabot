@@ -77,7 +77,9 @@ class NeighborFinder(
         } else {
             Direction.None
         }
-        d { " neighbors point: $point dir: $direction from $from dirMovingIn $dirMovingIn" }
+        if (ZStar.DEBUG) {
+            d { " neighbors point: $point dir: $direction from $from dirMovingIn $dirMovingIn" }
+        }
 
         val validDirections = (ladderSpec?.directions(point) ?: Direction.all) - dirMovingIn
 
