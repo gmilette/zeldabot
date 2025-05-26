@@ -996,7 +996,8 @@ class PlanBuilder(
         return this
     }
 
-    fun goAbout(to: FramePoint, horizontal: Int, vertical: Int = 1, negVertical: Boolean = false, ignoreProjectiles: Boolean = false, makePassable: FramePoint? = null, monitorEnabled: Boolean = true): PlanBuilder {
+    fun goAbout(to: FramePoint, horizontal: Int, vertical: Int = 1, negVertical: Boolean = false, ignoreProjectiles: Boolean = false,
+                makePassable: FramePoint? = null, monitorEnabled: Boolean = true): PlanBuilder {
         add(lastMapLoc, InsideNavAbout(to, horizontal, vertical, negVertical = if (negVertical) 1 else 0,
             ignoreProjectiles = ignoreProjectiles, makePassable = makePassable, setMonitorEnabled = monitorEnabled))
         return this

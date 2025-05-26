@@ -475,7 +475,7 @@ object ZeldaPlan {
                 seg("grab key from zig")
                 killUntilGetKey
                 seg("get key from boomerang guys")
-                upm
+                up
                 goIn(GamePad.MoveUp, 30)
                 kill
                 goTo(InLocations.Level1.key83)
