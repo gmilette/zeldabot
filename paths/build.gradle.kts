@@ -15,26 +15,20 @@ repositories {
     google()
 }
 
-
 dependencies {
     implementation(libs.kotlinx.dataframe)
-    implementation(compose.desktop.macos_arm64) // Accessor from the JetBrains Compose plugin
+    implementation(compose.desktop.macos_arm64)
     implementation(libs.kotlin.csv.jvm)
     implementation(libs.jts.core)
     implementation(libs.jgrapht.core)
-    implementation(files("libs/Nintaco.jar")) // Local file dependency remains the same
-    testImplementation(libs.kotlin.test) // Replaces kotlin("test")
+    implementation(files("libs/Nintaco.jar"))
+    testImplementation(libs.kotlin.test)
     implementation(libs.kermit)
     testImplementation(libs.kotest.assertions.core)
     testImplementation(libs.mockito.kotlin)
-    // You had mockito-core explicitly. mockito-kotlin usually brings a compatible version.
-    // If you need a specific version or for clarity:
     testImplementation(libs.mockito.core)
     implementation(libs.gson)
-
-    // Removed duplicate/older mockito-kotlin:5.0.0 as 5.2.1 is used.
 }
-
 
 tasks.test {
     useJUnit()

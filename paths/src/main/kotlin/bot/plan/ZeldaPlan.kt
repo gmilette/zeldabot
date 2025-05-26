@@ -459,10 +459,8 @@ object ZeldaPlan {
                 right
                 seg("go to key skeleton")
                 rightm
-                // need kill until loot
                 seg("grab from skeleton")
                 killUntilGetKey
-//            pickupDeadItem
                 seg("move to arrow")
                 left // first rooms
                 up //99
@@ -477,7 +475,7 @@ object ZeldaPlan {
                 seg("grab key from zig")
                 killUntilGetKey
                 seg("get key from boomerang guys")
-                up
+                upm
                 goIn(GamePad.MoveUp, 30)
                 kill
                 goTo(InLocations.Level1.key83)
