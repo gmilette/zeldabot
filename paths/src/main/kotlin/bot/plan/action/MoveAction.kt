@@ -5,7 +5,7 @@ import bot.plan.zstar.FrameRoute
 import bot.state.*
 import bot.state.map.*
 import bot.state.oam.*
-import util.d
+mport util.d
 
 class CompleteIfAction(
     private val action: Action,
@@ -178,7 +178,8 @@ fun eitherPoint(point1: FramePoint, point2: FramePoint, chooseAction1: (state: M
 
 class InsideNavAbout(
     private val point: FramePoint, about: Int, vertical: Int = 1, negVertical: Int = 0,
-    val shop: Boolean = false, ignoreProjectiles: Boolean = false,
+    val shop: Boolean = false,
+    private val ignoreProjectiles: Boolean = false,
     private val makePassable: FramePoint? = null,
     orPoints: List<FramePoint> = emptyList(),
     private val setMonitorEnabled: Boolean = true,
@@ -224,7 +225,7 @@ class InsideNavAbout(
             to = points,
             RouteTo.RouteParam(
                 overrideMapCell = if (shop) state.hyrule.shopMapCell else null,
-                allowBlock = !shop,
+                allowBlock = !shop && !ignoreProjectiles,
                 rParam = RouteTo.RoutingParamCommon(
                     makePassable?.let { listOf(makePassable) } ?: emptyList(),
                     forceHighCost = highCost
