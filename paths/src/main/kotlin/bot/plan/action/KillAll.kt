@@ -286,6 +286,7 @@ class KillAll(
                         state, targetsToAttack,
                         RouteTo.RouteParam(
                             useB = firstAttackBomb || useBombs,
+                            allowRangedAttack = !firstAttackBomb,
                             forceNew = forceNew,
                             allowBlock = allowBlock,
                             rParam = RouteTo.RoutingParamCommon(
