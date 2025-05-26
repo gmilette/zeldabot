@@ -1,32 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-//buildscript {
-//    repositories {
-//        gradlePluginPortal()
-//        google()
-//        mavenCentral()
-//    }
-//
-//    val composeVersion: String = "1.6.10"
-//
-//    val kotlinVersion = "2.0.20"
-//
-//    dependencies {
-//        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-//        classpath("org.jetbrains.compose:compose-gradle-plugin:$composeVersion")
-//        classpath("com.android.tools.build:gradle:8.1.2")
-//    }
-//}
-
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.pluginCompose)
     alias(libs.plugins.jetbrains.compose)
-
-//    val kotlinVersion = "2.0.20"
-//    id("org.jetbrains.kotlin.plugin.compose") version kotlinVersion
-//    kotlin("jvm") version kotlinVersion
-//    id("org.jetbrains.compose") version "1.6.10"
 }
 
 group = "me.greg"
