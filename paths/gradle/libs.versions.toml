@@ -1,0 +1,47 @@
+# gradle/libs.versions.toml
+
+[versions]
+kotlin = "2.0.20"
+compose = "1.6.10"  # For JetBrains Compose Multiplatform plugin and related artifacts
+agp = "8.1.2"       # Android Gradle Plugin (if your project or subprojects use it)
+
+kotlinxDataframe = "0.13.1"
+kotlinCsv = "1.6.0"
+jtsCore = "1.19.0"
+jgraphtCore = "1.5.1"
+kermit = "2.0.4"
+kotestAssertions = "5.6.2"
+mockitoKotlin = "5.2.1" # Using the latest version you had
+mockitoCore = "5.2.0"   # Explicitly listed, ensure compatibility with mockitoKotlin
+gson = "2.10.1"
+
+[libraries]
+# Dependencies
+kotlinx-dataframe = { module = "org.jetbrains.kotlinx:dataframe", version.ref = "kotlinxDataframe" }
+kotlin-csv-jvm = { module = "com.github.doyaaaaaken:kotlin-csv-jvm", version.ref = "kotlinCsv" }
+jts-core = { module = "org.locationtech.jts:jts-core", version.ref = "jtsCore" }
+jgrapht-core = { module = "org.jgrapht:jgrapht-core", version.ref = "jgraphtCore" }
+kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+kotest-assertions-core = { module = "io.kotest:kotest-assertions-core-jvm", version.ref = "kotestAssertions" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+
+# For kotlin("test") helper
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+
+# Note: `compose.desktop.macos_arm64` is an accessor provided by the `org.jetbrains.compose` plugin.
+# No explicit library entry is needed here if the plugin is applied via the catalog.
+# The `files("libs/Nintaco.jar")` dependency remains a local file dependency in build.gradle.kts.
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-pluginCompose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "compose" }
+# Example if you have Android modules and want to manage the plugin from the catalog:
+# android-application = { id = "com.android.application", version.ref = "agp" }
+# android-library = { id = "com.android.library", version.ref = "agp" }
+
+# [bundles]
+# Example: If you often use mockito-core and mockito-kotlin together
+# mockito = ["mockito-core", "mockito-kotlin"]
