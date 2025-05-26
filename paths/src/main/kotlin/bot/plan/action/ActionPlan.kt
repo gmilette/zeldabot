@@ -265,7 +265,7 @@ class CompleteIfGetItem(
         state.frameState.inventory.select()
 
     override fun nextStep(state: MapLocationState): GamePad {
-        d { " CompleteIfGetItem " }
+        d { " CompleteIfGetItem starting=$startingQuantity now: ${quantity(state)}" }
         if (startingQuantity < 0) {
             startingQuantity = quantity(state)
             d { " CompleteIfGetItem starting with $startingQuantity" }
@@ -274,6 +274,8 @@ class CompleteIfGetItem(
         return super.nextStep(state)
     }
 
+    override val name: String
+        get() = "CompleteIfGetItem ${wrapped.name}"
 }
 
 class DecisionAction(
@@ -426,7 +428,16 @@ val lootOrKill = DecisionAction(Optional(GetLoot()), Optional(KillAll())) { stat
 fun killUntilBombsLikely() = completeIfBombsLikely(KillAll())
 
 fun lootAndMove(moveTo: Action) = DecisionAction(GetLoot(), moveTo) { state ->
-    neededReachableLoot(state).isNotEmpty()
+    neededReachableLoot(state).isNotEmpty().also {
+        d { " do I need loot? $it"}
+        for (agent in state.loot) {
+            d { " all loot $agent"}
+        }
+        for (agent in state.neededLoot) {
+            d { " needed loot $agent reach ${agent.reachableLoot(state)}"}
+        }
+    }
+
 }
 
 fun escapeCaveAndLootAndMove(moveTo: Action) = DecisionAction(moveTo, lootAndMove(moveTo)) { state ->
@@ -838,9 +849,13 @@ val MapLocationState.neededLoot: List<Agent>
 fun neededReachableLoot(state: MapLocationState): List<Agent> {
     return state.neededLoot.filter {
         // always get the fairy, it will move into accessible area
-        it.tile == fairy || halfInsidePassable(state, it.point, it.tile in LootKnowledge.halfSize)
+        // there isn't a case where the key can appear unreachable
+        // sometimes in level 1 in appears over water, but link can always retrieve it
+        it.tile == key || it.tile == fairy || halfInsidePassable(state, it.point, it.tile in LootKnowledge.halfSize)
     }
 }
+
+fun Agent.reachableLoot(state: MapLocationState): Boolean = tile == fairy || halfInsidePassable(state, point, tile in LootKnowledge.halfSize)
 
 // some items are half sized, like hearts
 // should take into account half passable

@@ -458,7 +458,7 @@ object ZeldaPlan {
                 goTo(InLocations.Level1.key114)
                 right
                 seg("go to key skeleton")
-                rightm
+                rightNoLoot
                 seg("grab from skeleton")
                 killUntilGetKey
                 seg("move to arrow")
@@ -471,7 +471,7 @@ object ZeldaPlan {
                 goTo(InLocations.Level1.key83)
                 seg("Bomb and move")
                 bombUp
-                upm // 51
+                upNoLoot // 51
                 seg("grab key from zig")
                 killUntilGetKey
                 seg("get key from boomerang guys")
@@ -505,7 +505,7 @@ object ZeldaPlan {
                 down.down // at 67 now
                 right // boomerang
                 goIn(GamePad.MoveRight, 30)
-                kill
+                kill // could prevent look at the boomerang position from being considered loot
                 goAbout(InLocations.Level1.boomerang68, 1, 1, true, ignoreProjectiles = true)
                 rightm //69 hand grabby, dont get loot
                 seg("steal key from hand grabby", ZeldaItem.Triforce)

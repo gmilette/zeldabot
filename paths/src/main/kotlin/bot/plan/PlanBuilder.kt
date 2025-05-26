@@ -310,6 +310,7 @@ class PlanBuilder(
     val killUntilGetKey: PlanBuilder
         get() {
             add(lastMapLoc, CompleteIfGetItem(KillAll()))
+            add(lastMapLoc, Wait(20)) // try to prevent leaving the key there
             add(lastMapLoc, GetLoot())
             return this
         }
@@ -408,7 +409,11 @@ class PlanBuilder(
             addm(lastMapLoc.up)
             return this
         }
-
+    val upNoLoot: Unit
+        get() {
+            val nextLoc = lastMapLoc.up
+            add(nextLoc, moveTo(nextLoc))
+        }
     val upNoBlock: PlanBuilder
         get() {
             // don't try to fight
@@ -527,6 +532,11 @@ class PlanBuilder(
     val right: Unit
         get() {
             add(lastMapLoc.right)
+        }
+    val rightNoLoot: Unit
+        get() {
+            val nextLoc = lastMapLoc.right
+            add(nextLoc, moveTo(nextLoc))
         }
     val rightIfNeedBombs: Unit
         get() {
