@@ -425,7 +425,8 @@ object AttackActionDecider {
         // sword length would be 16 - 6 = 10, I just tried 8 to see if that is better
         // based on visuals, 8 is too small, go 6
         // could go 1 or 2 more, but let's try 6 for now
-        val swordSizeLessThanGrid = 6 // // sword length
+        // 5-25, i think we want less
+        val swordSizeLessThanGrid = 7 // // sword length
         val nearSize = MapConstants.oneGrid - swordSizeLessThanGrid
         val farSize = MapConstants.twoGrid - swordSizeLessThanGrid
         val leftAttack = Geom.Rectangle(
