@@ -458,7 +458,7 @@ object ZeldaPlan {
                 goTo(InLocations.Level1.key114)
                 right
                 seg("go to key skeleton")
-                rightNoLoot
+                right
                 seg("grab from skeleton")
                 killUntilGetKey
                 seg("move to arrow")
@@ -471,7 +471,7 @@ object ZeldaPlan {
                 goTo(InLocations.Level1.key83)
                 seg("Bomb and move")
                 bombUp
-                upNoLoot // 51
+                up // 51
                 seg("grab key from zig")
                 killUntilGetKey
                 seg("get key from boomerang guys")

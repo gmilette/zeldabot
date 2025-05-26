@@ -414,9 +414,6 @@ val moveToKillAllInCenterSpot = DecisionAction(
     state.numEnemies <= state.numEnemiesAliveInCenter()
 }
 
-//fun lootAndKill(kill: Action) = DecisionAction(Optional(GetLoot()), kill) { state ->
-//    neededReachableLoot(state).isNotEmpty()
-//}
 fun lootAndKill(kill: Action) = DecisionAction(GetLoot(), kill) { state ->
     neededReachableLoot(state).isNotEmpty()
 }
@@ -427,18 +424,26 @@ val lootOrKill = DecisionAction(Optional(GetLoot()), Optional(KillAll())) { stat
 
 fun killUntilBombsLikely() = completeIfBombsLikely(KillAll())
 
-fun lootAndMove(moveTo: Action) = DecisionAction(GetLoot(), moveTo) { state ->
-    neededReachableLoot(state).isNotEmpty().also {
-        d { " do I need loot? $it"}
-        for (agent in state.loot) {
-            d { " all loot $agent"}
-        }
-        for (agent in state.neededLoot) {
-            d { " needed loot $agent reach ${agent.reachableLoot(state)}"}
+/**
+ * for decision actions where you do not want to continue selecting an action after
+ * the map has changed, this caused some actions to carry on into the next mapLoc
+ */
+private fun inCorrectMap(state: MapLocationState, action: Action): Boolean =
+    (state.frameState.mapLoc != action.actionLoc)
+
+fun lootAndMove(moveTo: Action) =
+    DecisionAction(Optional(GetLoot()), moveTo) { state ->
+        inCorrectMap(state, moveTo) &&
+        neededReachableLoot(state).isNotEmpty().also {
+            d { " do I need loot? $it loc=${state.frameState.mapLoc} moveLoc=${moveTo.actionLoc}" }
+            for (agent in state.loot) {
+                d { " all loot $agent" }
+            }
+            for (agent in state.neededLoot) {
+                d { " needed loot $agent reach ${agent.reachableLoot(state)}" }
+            }
         }
     }
-
-}
 
 fun escapeCaveAndLootAndMove(moveTo: Action) = DecisionAction(moveTo, lootAndMove(moveTo)) { state ->
     state.frameState.isInCave
@@ -449,11 +454,11 @@ fun escapeCaveAndLootAndMove(moveTo: Action) = DecisionAction(moveTo, lootAndMov
 // around, in that case go back to kill mode
 
 fun killAndMove(moveTo: MoveTo) = DecisionAction(Optional(KillAll()), moveTo) { state ->
-    state.hasEnemies
+    inCorrectMap(state, moveTo) && state.hasEnemies
 }
 
 fun killAndLootAndMove(moveTo: MoveTo) = DecisionAction(Optional(KillAll()), lootAndMove(moveTo)) { state ->
-    state.hasEnemies
+    inCorrectMap(state, moveTo) && state.hasEnemies
 }
 
 fun killThenMove(moveTo: MoveTo) = CompleteIfMapChanges(

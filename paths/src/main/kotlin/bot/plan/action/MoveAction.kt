@@ -67,8 +67,8 @@ class CompleteIfChangeShopOwner(private val changeTo: Boolean, private val wrapp
         get() = "Until Change Shop ${wrapped.name} count=$completeCt"
 }
 
-class CompleteIfMapChanges(private val wrapped: Action) : Action {
-    private var initialMapLoc: MapLoc = -1;
+class CompleteIfMapChanges(private val wrapped: Action, initial: MapLoc = -1) : Action {
+    private var initialMapLoc: MapLoc = initial
 
     private fun changedMapLoc(state: MapLocationState): Boolean =
         initialMapLoc > 0 && state.frameState.mapLoc != initialMapLoc
