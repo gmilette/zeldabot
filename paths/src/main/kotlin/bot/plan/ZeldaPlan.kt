@@ -1,6 +1,5 @@
 package bot.plan
 
-import bot.plan.ZeldaPlan.exitReenter
 import bot.plan.ZeldaPlan.raftLadderSetup
 import bot.plan.action.*
 import bot.plan.runner.Experiment
@@ -1008,6 +1007,7 @@ private val level8: PlanBuilder.() -> Unit
         seg("get to crossroads")
         up
         "bomb".seg()
+        startHereAtLoaded()
         bombUp
         kill
         goTo(InLocations.Level8.keySpot)

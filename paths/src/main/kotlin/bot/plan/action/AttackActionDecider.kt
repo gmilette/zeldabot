@@ -306,6 +306,7 @@ object AttackActionDecider {
         enemies: List<FramePoint>,
         useB: Boolean
     ): GamePad {
+        d { " ** in range of start ** "}
         val swords = swordRectangles(link)
         val smallTarget = useB // for bombing
 
@@ -327,6 +328,7 @@ object AttackActionDecider {
 
         val intersectResult = handleIntersectWithLink(enemiesClose, linkRect, swords, from, useB)
         if (intersectResult != null) {
+            d { " ** intersect result ** "}
             return intersectResult
         }
 
@@ -339,6 +341,7 @@ object AttackActionDecider {
                 )
             }) {
             // attack it
+            d { " ** attack it "}
             return GamePad.aOrB(useB)
         }
 
@@ -346,16 +349,25 @@ object AttackActionDecider {
         // because it faces up, but can't go up, it has to persist in the cornering
         val FACE_ENEMY = true
         val attackMove = if (FACE_ENEMY) {
+            d { " ** face"}
             // check other directions
             val otherDirs = swords.filter { it.key != from}
+            d { " ** face other $otherDirs $from num close ${enemiesClose.size}"}
+            for (rectangle in enemiesClose) {
+                d { " enemy close $rectangle" }
+            }
             enemiesClose.firstNotNullOfOrNull { enemy ->
                 val attackDir = otherDirs.firstNotNullOfOrNull {
                     val dir = it.key
-                    if (enemy.intersect(it.value)) dir else null
+                    val intersect = enemy.intersect(it.value)
+                    d { " ** face: try $dir intersect $intersect "}
+                    if (intersect) dir else null
                 }
+                d { " ** face: ${enemy} attack dir: $attackDir "}
                 attackDir
             }?.toGamePad() ?: GamePad.None
         } else {
+            d { " ** face: DONT "}
             GamePad.None
         }
 
@@ -394,7 +406,7 @@ object AttackActionDecider {
 
     private fun logDebugInfo(enemiesClose: List<Geom.Rectangle>, swords: Map<Direction, Geom.Rectangle>,
                              enemies: List<FramePoint>, link: FramePoint, from: Direction, smallTarget: Boolean) {
-        if (DEBUG) {
+        if (DEBUG || true) {
             d { " link $link from direction $from" }
             for (enemy in enemies) {
                 d { " enemy $enemy dist=${enemy.distTo(link)}" }

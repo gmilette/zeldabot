@@ -184,6 +184,9 @@ val MapLocationState.wandActive: Boolean
 val MapLocationState.arrowActive: Boolean
     get() = this.frameState.inventory.selectedItem == Inventory.Selected.arrow
 
+fun Agent.arrowKillable(level: Int) =
+    Monsters.lookup(level)[tile]?.arrowKillable ?: true
+
 fun Agent.affectedByBoomerang(level: Int) =
     Monsters.lookup(level)[tile]?.affectedByBoomerang ?: true // most monsters can be boomeranged AND loot
 

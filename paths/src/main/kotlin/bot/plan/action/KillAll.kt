@@ -96,14 +96,13 @@ class KillAll(
     }
 
     override fun complete(state: MapLocationState): Boolean =
-//        criteria.complete(state)
         (waitAfterAllKilled <= 0 && frameCount > 33 && killedAllEnemies(state)).also {
             val killedAll = killedAllEnemies(state)
             d { " kill all complete $it ${state.numEnemies} or ${numberLeftToBeDead} killedAll=$killedAll $frameCount $waitAfterAllKilled" }
 //            d { "result $it ${state.clearedWithMin(numberLeftToBeDead)} ct $frameCount wait $waitAfterAllKilled" }
-            state.frameState.enemies.filter { it.state == EnemyState.Alive }.forEach {
-                d { "enemy $it dist ${it.point.distTo(state.link)}" }
-            }
+//            state.frameState.enemies.filter { it.state == EnemyState.Alive }.forEach {
+//                d { "enemy $it dist ${it.point.distTo(state.link)}" }
+//            }
         }
 
     override fun nextStep(state: MapLocationState): GamePad {

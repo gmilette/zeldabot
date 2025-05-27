@@ -281,7 +281,7 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
     private var history: MoveBuffer = MoveBuffer(MapConstants.twoGrid)
     private var whyEscape = ""
     private var frames = 0
-    private val framesPerEscape = 2000
+    private val framesPerEscape = 1000 // 2000
 
     override fun target(): FramePoint {
         return wrapped.target()
@@ -327,17 +327,16 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
             else -> {
                 val nextStep = wrapped.nextStep(state)
                 val ct = same.record(nextStep)
-                //val notChanged = changed.record(state.link)
                 history.add(state.link)
 
                 val minDist = MinDistTotalFramesCount()
                 for (framePoint in history.buffer) {
                     minDist.record(framePoint)
                 }
-                val dists = history.buffer.map { it.oneStr }.joinToString(" ")
+//                val dists = history.buffer.map { it.oneStr }.joinToString(" ")
 //                d { "min dist for escape: $frames $minDist $dists"}
                 val notChanged = if (frames > framesPerEscape) { // stuck
-                    val notChangedResult = (minDist.distance() < MapConstants.twoGrid)
+                    val notChangedResult = (minDist.distance() < MapConstants.oneGrid)
 
                     if (notChangedResult) {
                         d { " ESCAPE ACTION NOT CHANGED $frames dist=${minDist.distance()}" }
@@ -346,8 +345,6 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
                 } else {
                     false
                 }
-                // keep saving link's location
-//                cycleDetector.save(state.link)
 //                d { " ESCAPE ACTION not same $nextStep + $ct last ${same.last}" }
                 if (ct >= histSize || notChanged) { // || notChanged
                     escapeActionCt = escapeActionTimes

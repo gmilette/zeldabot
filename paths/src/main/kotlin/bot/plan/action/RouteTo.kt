@@ -166,14 +166,17 @@ class RouteTo(val params: Param = Param()) {
         val specOrAgents: List<Agent> = attackableSpec.ifEmpty {
             attackableAgents
         }
+
+        // it's dumb to shoot arrows at
+        val affectedByProjectileAgents: List<Agent> = if (state.boomerangActive) {
+            specOrAgents.filter { it.affectedByBoomerang(level) }
+        } else {
+            specOrAgents.filter { it.arrowKillable(level) }
+        }
+        val affectedByProjectileLoot = state.loot.filter { it.lootNeeded(state) }
         val boomerangable: List<FramePoint> =
-            (specOrAgents.filter { it.affectedByBoomerang(level) } +
-                state.loot.filter { it.lootNeeded(state) }).map { it.point }  // won't boomerang for useless stuff like keys, compass, etc.
-//        val boomerangable: List<FramePoint> = attackableSpec.ifEmpty {
-//            (attackableAgents.filter { it.affectedByBoomerang(level) } +
-//                    state.loot.filter { it.lootNeeded(state) }  // won't boomerang for useless stuff like keys, compass, etc.
-//            ).map { it.point }
-//        }
+            (affectedByProjectileAgents + affectedByProjectileLoot)
+                .map { it.point }  // won't boomerang for useless stuff like keys, compass, etc.
         for (framePoint in attackableAgents) {
             d { " attackable agent: $framePoint" }
         }
@@ -436,6 +439,9 @@ class RouteTo(val params: Param = Param()) {
         val mapCell = param.overrideMapCell ?: state.currentMapCell
 
         val inFrontOfGrids = getInFrontOfGrids(state)
+        for (point in inFrontOfGrids) {
+            d { "in front grid $point"}
+        }
 
         if (state.frameState.ladderDeployed) {
             val dirToGo = state.bestDirection()
@@ -485,8 +491,8 @@ class RouteTo(val params: Param = Param()) {
         } else {
             d { " router size: ${route?.numPoints ?: 0}" }
             route?.next5()
-            d { " next 100 "}
-            route?.next100()
+//            d { " next 100 "}
+//            route?.next100()
         }
         planCount = 0
         val pointDir = nextPoint1.direction ?:
@@ -545,7 +551,7 @@ class RouteTo(val params: Param = Param()) {
     private fun getInFrontOfGridsSword(state: MapLocationState): List<FramePoint> =
         state.frameState.enemies.flatMap { agent: Agent ->
             // sames as just agent.dir
-//            d { " sword agent dir ${agent.dir} calc ${swordDir.dirFront(agent)}"}
+            d { " sword agent at ${agent.point} dir ${agent.dir} calc ${swordDir.dirFront(agent)}"}
             swordDir.dirFront(agent)?.let { dir ->
                 val pt = dir.pointModifier(MapConstants.oneGrid)(agent.point)
                 listOf(

@@ -41,12 +41,12 @@ class ZStar(
 
         val nearEnemyCost = 10000
         val onEnemyCost = 100000
-        val MaxCostAvoidEnemy = onEnemyCost
-        val MaxCostAvoidEnemyNear = nearEnemyCost
-        val HIGH_COST = nearEnemyCost - 1000 // less than near enemy so app can tell
+        // this would make it safe
+//        val HIGH_COST = nearEnemyCost - 1000 // less than near enemy so app can tell
+        // a little worse than just plain near enemy
+        val HIGH_COST = nearEnemyCost + 1000
+//        val HIGH_COST = onEnemyCost - 1000// this makes link avoid the swords even more, but also attack less
     }
-
-    val maximumCost: Int = MaxCostAvoidEnemyNear
 
     data class LadderSpec(val horizontal: Boolean, val point: FramePoint) {
         private fun isIn(other: FramePoint) = point.isInGrid(other)
@@ -301,10 +301,10 @@ class ZStar(
 
         // stil getting NO ROUTE
 //        d { "From safe: $startIsSafe cost = ${costsF.get(param.start)} targets size = ${target.size} routeToSafe=${routeToSafe}"}
-//        d { " targets zstar: "}
-//        for (framePoint in target) {
-//            d { "$framePoint"}
-//        }
+        d { " targets zstar: "}
+        for (framePoint in target) {
+            d { "$framePoint"}
+        }
 
         val openList: PriorityQueue<FramePoint> = PriorityQueue<FramePoint> { cell1, cell2 ->
             val cell1Val = (totalCosts[cell1] ?: 0) + (distanceToGoal[cell1] ?: 0)
@@ -345,10 +345,14 @@ class ZStar(
             // enemy target is always null currently, this is going to route to nearest
             // which is what we want anyway I think
             var doneBecause = "strike"
-            val done = if (param.rParam.finishWithinStrikingRange) {
+            // iterCount > 0 check is here so that this doesn't return an empty route
+            // if the current point really was in range of striking it wouldn't have entered
+            // this routine
+            val done = if (iterCount > 0 && param.rParam.finishWithinStrikingRange) {
                 val inLongRange = param.rParam.finishWithinLongStrikingRange &&
                         // hard to do without direction..
                         AttackLongActionDecider.inStrikingRange(point, enemies = param.enemies)
+                // this does match how inRangeOf determines attacking
                 AttackActionDecider.inStrikingRange(point, enemies = param.enemies)
             } else if (routeToSafe && costsF.safe(point)) {
                 doneBecause = "safe"
@@ -543,7 +547,7 @@ class ZStar(
                 d { "no target use $lastExplored looked for $target" }
 
                 cameFrom.forEach { t, u ->
-                    d { " $t -> $u" }
+                    d { "came from $t -> $u" }
                 }
                 d { " targets " }
                 for (target in targets) {
@@ -756,9 +760,9 @@ class ZStar(
         private fun setForceHighCost(grids: List<FramePoint> = emptyList()) {
             // was some repeats
             for (grid in grids.toSet()) {
-                if (DEBUG) {
-                    d { " set highcost $grid" }
-                }
+                d { " set highcost $grid" }
+//                if (DEBUG) {
+//                }
                 costsF.modifyTo(grid, MapConstants.oneGrid, HIGH_COST)
             }
         }

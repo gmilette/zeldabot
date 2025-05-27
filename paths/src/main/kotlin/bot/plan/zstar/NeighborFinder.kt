@@ -108,7 +108,7 @@ class NeighborFinder(
 //                    d { "skip loc" }
 //                }
             //test passable (112, 129) Down false
-            if (ZStar.DEBUG) {
+            if (ZStar.DEBUG && false) {
                 d { " test passable $next $direction onhway=${next.onHighway}" }
                 d { "rb ${passable.get(next.justRightEndBottom)}"}
                 d { "re ${passable.get(next.justRightEnd)}"}
