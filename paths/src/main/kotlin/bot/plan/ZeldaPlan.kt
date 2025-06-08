@@ -1008,7 +1008,7 @@ private val level8: PlanBuilder.() -> Unit
         up
         "bomb".seg()
         startHereAtLoaded()
-        bombUp
+        bombUpNoBlock
         kill
         goTo(InLocations.Level8.keySpot)
         upm
@@ -1017,7 +1017,7 @@ private val level8: PlanBuilder.() -> Unit
         killUntil(4)
         bombUp
 //        cheatAddKey
-        upm
+        upNoBlock
         killArrowSpider // kill arrow guy
         loot // spider tends to generate loot sometimes
         rightm
@@ -1043,6 +1043,7 @@ private val level8: PlanBuilder.() -> Unit
         )
 
         switchToArrowConditionally()
+        killWithBombsUntil4
         // give time to enter so that switching to bomb works
         goTo(FramePoint(11.grid, 2.grid))
         "bomb to get dragon".seg()
@@ -1289,7 +1290,8 @@ private fun PlanBuilder.startHereAtLoaded(bomb: Boolean = true) {
             sword = ZeldaItem.MagicSword,
             potion = true,
             candle = true,
-            magicArrowAndBow = true,
+            arrowAndBow = true,
+//            magicArrowAndBow = true,
             magicKey = true,
             whistle = true,
             bait = true,

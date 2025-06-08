@@ -350,6 +350,11 @@ class PlanBuilder(
             add(lastMapLoc, KillAll(needLongWait = false, firstAttackBomb = true))
             return this
         }
+    val killWithBombs: PlanBuilder
+        get() {
+            add(lastMapLoc, KillAll(needLongWait = false, useBombs = true))
+            return this
+        }
     val starKill: PlanBuilder
         get() {
             add(
@@ -366,6 +371,12 @@ class PlanBuilder(
                     )
                 )
             )
+            return this
+        }
+
+    val killWithBombsUntil4: PlanBuilder
+        get() {
+            add(lastMapLoc, lootAndKill(KillAll(needLongWait = false, useBombs = true, numberLeftToBeDead = 4)))
             return this
         }
 
@@ -1093,6 +1104,11 @@ class PlanBuilder(
         return this
     }
 
+    val bombUpNoBlock: PlanBuilder
+        get() {
+            doBomb(lastMapLoc.up, InLocations.topMiddleBombSpot, allowBlocking = false)
+            return this
+        }
     val bombUp: PlanBuilder
         get() {
             doBomb(lastMapLoc.up, InLocations.topMiddleBombSpot)
@@ -1115,11 +1131,11 @@ class PlanBuilder(
             return this
         }
 
-    private fun doBomb(nextLoc: MapLoc, bombLoc: FramePoint): PlanBuilder {
+    private fun doBomb(nextLoc: MapLoc, bombLoc: FramePoint, allowBlocking: Boolean = true): PlanBuilder {
         switchToBomb()
         // wait a little longer
         goIn(GamePad.None, 10)
-        add(nextLoc, BombThenMove(bombLoc = bombLoc, moveTo = moveTo(nextLoc)))
+        add(nextLoc, BombThenMove(bombLoc = bombLoc, moveTo = moveTo(nextLoc, allowBlocking = allowBlocking)))
 
         return this
     }
