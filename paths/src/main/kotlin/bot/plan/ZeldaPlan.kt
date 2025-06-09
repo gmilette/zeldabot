@@ -978,6 +978,7 @@ private val level7: PlanBuilder.() -> Unit
         goIn(GamePad.None, 100)
         seg("dragon")
         bombRight
+        startHereAtLoaded()
         killLev1Dragon // aim for the head
         goTo(InLocations.Level7.triforceHeart)
         rightonlym
@@ -1007,7 +1008,6 @@ private val level8: PlanBuilder.() -> Unit
         seg("get to crossroads")
         up
         "bomb".seg()
-        startHereAtLoaded()
         bombUpNoBlock
         kill
         goTo(InLocations.Level8.keySpot)
@@ -1053,7 +1053,6 @@ private val level8: PlanBuilder.() -> Unit
         "grab tri".seg()
         goTo(InLocations.Level8.triforceHeartAbove)
         goTo(InLocations.Level8.triforceHeart)
-        startHereAtLoaded(false)
 
         uponlym
         getTri
