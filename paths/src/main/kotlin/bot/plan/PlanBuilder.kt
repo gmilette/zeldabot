@@ -724,7 +724,7 @@ class PlanBuilder(
                 EntryType.WalkInLadder -> goToNotMonitored(point)
                 EntryType.WalkIn -> goTo(point)
                 is EntryType.Bomb -> if (action) bombThenGoIn(point, itemLocPoint, this.type.entry.requireLetter) else goInGetCenterItem(point, itemLocPoint)
-                is EntryType.Fire -> burnFromGo(point, this.type.entry.from, itemLocPoint)
+                is EntryType.Fire -> burnFromGo(point, this.type.entry.from, itemLocPoint, this.type.entry.requireLetter)
                 is EntryType.Push -> pushDownGetItem(point, itemLocPoint)
                 is EntryType.Statue -> pushDownGetItem(point, itemLocPoint, position)
                 is EntryType.WhistleWalk -> whistleThenGo(point)
@@ -959,7 +959,7 @@ class PlanBuilder(
     // L ... X
     // burn from left
     // turn opposite
-    private fun burnFromGo(to: FramePoint, from: Direction, itemLoc: FramePoint = InLocations.Overworld.centerItem): PlanBuilder {
+    private fun burnFromGo(to: FramePoint, from: Direction, itemLoc: FramePoint = InLocations.Overworld.centerItem, requireLetter: Boolean = false): PlanBuilder {
         // switch to candle
         switchToCandle()
         val burnFrom = from.pointModifier(MapConstants.twoGrid)(to)
@@ -973,7 +973,7 @@ class PlanBuilder(
         plan.add(makePositionBurn(burnFrom, opposite.toGamePad(), to, exitLoc))
 
 //        goIn(opposite.toGamePad(), 16)
-        goGetItem(itemLoc)
+        goGetItem(itemLoc, requireLetter)
         return this
     }
 

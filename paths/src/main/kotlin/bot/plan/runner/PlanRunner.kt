@@ -278,7 +278,9 @@ class PlanRunner(private val makePlan: PlanMaker,
 //        manipulator.setLadderAndRaft(true)
         manipulator.setBoomerang(ex.boomerang)
         manipulator.setKeys(ex.keys)
-        manipulator.setPotion(ex.potion)
+        if (ex.potion) {
+            manipulator.setMaxPotion()
+        }
         if (ex.bait) {
             manipulator.setBait()
         }

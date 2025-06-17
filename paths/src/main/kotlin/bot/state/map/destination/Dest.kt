@@ -73,13 +73,13 @@ object Dest {
         val arrowShop = DestType.Shop(ShopType.B, EntryType.Walk())
         val eastTreeShop = DestType.Shop(ShopType.C, EntryType.Fire(from = Direction.Left))
         val westTreeShopNearWater = DestType.Shop(ShopType.C, EntryType.Fire(from = Direction.Up))
-        val potionShopForest = DestType.Shop(ShopType.Potion, EntryType.Fire(from = Direction.Right))
+        val potionShopForest = DestType.Shop(ShopType.Potion, EntryType.Fire(from = Direction.Right, requireLetter = true))
         val potionShopWest = DestType.Shop(ShopType.Potion, EntryType.Walk(requireLetter = true))
         val potionShopCornerNear1 = DestType.Shop(ShopType.Potion, EntryType.Bomb(requireLetter = true))
         val potionShopTop = DestType.Shop(ShopType.Potion, EntryType.Bomb(requireLetter = true))
         val potionShopLevel6 = DestType.Shop(ShopType.Potion, EntryType.Bomb(requireLetter = true))
         val potionShopLevel9 = DestType.Shop(ShopType.Potion, EntryType.Bomb(requireLetter = true))
-        val potionShopNearStart = DestType.Shop(ShopType.Potion, EntryType.Fire(from = Direction.Down))
+        val potionShopNearStart = DestType.Shop(ShopType.Potion, EntryType.Fire(from = Direction.Down, requireLetter = true))
 
         object ItemLocs {
             val redPotion = Objective.ItemLoc.Right
@@ -134,7 +134,7 @@ sealed class EntryType(val name: String) {
     // requires special handling because of the laddder
     object WalkInLadder : EntryType("walkInLadder")
     data class Bomb(val requireLetter: Boolean = false) : EntryType("bomb")
-    data class Fire(val from: Direction = Direction.Down) : EntryType("fire from $from")
+    data class Fire(val from: Direction = Direction.Down, val requireLetter: Boolean = false) : EntryType("fire from $from")
     data class Push(val from: Direction = Direction.Up) : EntryType("push from $from")
     object Statue : EntryType("statue")
     object WhistleWalk : EntryType("whistlewalk")

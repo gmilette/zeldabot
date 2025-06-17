@@ -1279,11 +1279,11 @@ private fun PlanBuilder.startHereAtAfterLevel5() {
     )
 }
 
-private fun PlanBuilder.startHereAtLoaded(bomb: Boolean = true) {
+private fun PlanBuilder.startHereAtLoaded(bomb: Boolean = true, rupee: Int = 0) {
     startHereAt(
         raftLadderSetup.copy(
             hearts = 16,
-            rupees = 0,
+            rupees = rupee,
             bombs = if (bomb) 8 else 0,
             ring = ZeldaItem.BlueRing,
             sword = ZeldaItem.MagicSword,

@@ -151,6 +151,14 @@ fun setTriforceAll() {
         api.writeCPU(Addresses.hasPotion, if (add) 1 else 0)
     }
 
+    fun setMaxPotion() {
+        setLetterShownToWoman()
+        // set to both potions
+        // 3
+        // sets the potion to grey, but it means there are 3 potions!
+        api.writeCPU(Addresses.hasPotion, 7)
+    }
+
     fun setBoomerang(item: ZeldaItem) {
         d { " set boomerang $item"}
         when (item) {
