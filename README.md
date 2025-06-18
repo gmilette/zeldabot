@@ -11,7 +11,4 @@ https://www.youtube.com/channel/UCtvEKYJSAOfg0fxzjpT6OZw
 https://www.threads.net/@gregazor
 
 # How to run
-Click here for instructions about how to run
-[Jump to the Introduction](howtorun.md)
-how[howtorun.md]
-[howtorun.md]
+[Click here](howtorun.md) for instructions about how to run

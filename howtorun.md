@@ -14,7 +14,3 @@
 * Open Tools -> Start Program Server
 * Click start server
 * Then close the window
-
-## Troubleshooting and options
-* If you are on windows you need to run the .bat file, which disables the UI
-* This release will only run it's UI on mac
