@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter
 object DirectoryConstants {
     const val enableDebug = false
     var enableInfo: Boolean = false
+    val enableEmulatorSavedState = false
 
     private val botOutputDir = "botoutput"
 

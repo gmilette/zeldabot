@@ -330,12 +330,14 @@ class PlanRunner(private val makePlan: PlanMaker,
         val stateFileName = "${root}$filePath"
         // this path is for checking file existence
         val stateFile = "${DirectoryConstants.statesFromExecuting}$filePath"
-        if (File(stateFile).exists()) {
-            d { "Already saved $stateFileName" }
-        } else {
-            d { "Saved a state to $stateFileName" }
-            api.saveState(stateFileName)
-            api.saveScreenshot()
+        if (DirectoryConstants.enableEmulatorSavedState) {
+            if (File(stateFile).exists()) {
+                d { "Already saved $stateFileName" }
+            } else {
+                d { "Saved a state to $stateFileName" }
+                api.saveState(stateFileName)
+                api.saveScreenshot()
+            }
         }
     }
 
