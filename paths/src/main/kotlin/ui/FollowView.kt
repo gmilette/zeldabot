@@ -98,6 +98,7 @@ private fun ImageActionObjective(state: ZeldaModel.ShowState) {
         is DestType.SecretToEverybody -> "icon_coin.png"
         is DestType.Item -> {
             when (type.item) {
+                ZeldaItem.Bomb -> "icon_bomb.png"
                 ZeldaItem.Raft -> "icon_raft.png"
                 ZeldaItem.Bow -> "icon_bow.png"
                 ZeldaItem.Boomerang -> "icon_boomerang.png"

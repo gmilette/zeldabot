@@ -185,6 +185,7 @@ object ZeldaPlan {
 
     private fun PlanBuilder.whiteSword() {
         add {
+            objective(ZeldaItem.WhiteSword)
             routeTo(10)
             down
             up
@@ -325,6 +326,7 @@ object ZeldaPlan {
 
     private fun PlanBuilder.gatherBombsFirstPhase() {
         this.add {
+            objective(ZeldaItem.Bomb)
             val bombLoc: MapLoc = 107
             // before there are bombs
             routeTo(bombLoc.down)

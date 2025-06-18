@@ -60,7 +60,7 @@ val killRhinoCollectSeeHeart: Action
 
 // assume switched to arrow
 class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParameters()) : Action {
-    private val rhinoLog: LogFile = LogFile("Rhino")
+    private val rhinoLog: LogFile = LogFile("Rhino", devType = true)
 
     // 40 two bomb death
     private val ATTACK_DEATH_TIMING = 20

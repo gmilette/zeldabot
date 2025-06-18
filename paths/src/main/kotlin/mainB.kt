@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
+import bot.DirectoryConstants
 import bot.ZeldaBot
 import bot.plan.action.RouteTo
 import bot.plan.runner.PlanRunner
@@ -30,22 +31,31 @@ import ui.FollowView
 import util.d
 
 fun main(vararg args: String) = application {
+    for (arg in args) {
+        d { " ARG: $arg"}
+    }
+    ZeldaBot.experiment = args.getOrNull(0)
+    val isDev = args.contains("dev")
+    DirectoryConstants.enableInfo = isDev
+    val noUi = args.contains("noui")
     Window(
+        visible = !noUi,
         onCloseRequest = ::exitApplication,
         state = WindowState(width = 800.dp, height = 600.dp),
-        title = "Zelda"
+        title = "ZeldaBot"
     ) {
-        for (arg in args) {
-            d { " ARG: $arg"}
-        }
-        ZeldaBot.experiment = args.getOrNull(0)
         val model = remember { ZeldaModel() }
+        if (!isDev) {
+            model.changeDraw(false)
+        }
         val debugView = remember { mutableStateOf(true) }
-        if (debugView.value) {
+        if (isDev && debugView.value) {
             Debugview(model, debugView)
         } else {
             FollowView(model) {
-                SwitchViewButton(debugView)
+                if (isDev) {
+                    SwitchViewButton(debugView)
+                }
             }
         }
     }

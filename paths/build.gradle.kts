@@ -1,13 +1,12 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.pluginCompose)
     alias(libs.plugins.jetbrains.compose)
+    id("com.gradleup.shadow") version "8.3.6"
 }
 
-group = "me.greg"
-version = "1.0-SNAPSHOT"
+group = "com.zeldabot"
+version = "1.1.1"
 
 repositories {
     mavenCentral()
@@ -17,7 +16,7 @@ repositories {
 
 dependencies {
     implementation(libs.kotlinx.dataframe)
-    implementation(compose.desktop.macos_arm64)
+    implementation(compose.desktop.currentOs)
     implementation(libs.kotlin.csv.jvm)
     implementation(libs.jts.core)
     implementation(libs.jgrapht.core)
@@ -34,29 +33,15 @@ tasks.test {
     useJUnit()
 }
 
-
-tasks.withType<KotlinCompile> {
-//    kotlinOptions.jvmTarget = "1.8"
-//    kotlinOptions.jvmTarget = "11"
-//    kotlinOptions.jvmTarget = "17"
-}
-
-tasks.withType<Jar> {
-
-    // required so that this app will run inside of nintaco
-    val include = setOf("kotlin-runtime-1.9.0.jar",
-        "kotlin-stdlib-1.9.0.jar") // Consider updating these if needed
-
-    println("run jar")
-
-    configurations.runtimeClasspath.get()
-        .filter { it.name in include }
-        .map { zipTree(it) }
-        .also { from(it) }
-}
-
 compose.desktop {
     application {
         mainClass = "MainBKt"
     }
 }
+
+tasks.jar {
+    manifest {
+        attributes["Main-Class"] = "MainBKt"
+    }
+}
+

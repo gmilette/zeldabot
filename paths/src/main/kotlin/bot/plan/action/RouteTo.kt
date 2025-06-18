@@ -113,7 +113,7 @@ class RouteTo(val params: Param = Param()) {
         val findNearestSafeIfCurrentlyNotSafe: Boolean = true
     )
 
-    private val routeToFile: LogFile = LogFile("RouteTo")
+    private val routeToFile: LogFile = LogFile("RouteTo", devType = true)
 
     var route: FrameRoute? = null
         private set

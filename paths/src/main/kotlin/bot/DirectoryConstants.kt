@@ -5,17 +5,22 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 object DirectoryConstants {
-    const val enable = false
+    const val enableDebug = false
+    var enableInfo: Boolean = false
 
     private val botOutputDir = "botoutput"
 
     private val outDir = "..${File.separator}..${File.separator}$botOutputDir${File.separator}".also {
-        File(it).mkdirs()
+        if (enableDebug || enableInfo) {
+            File(it).mkdirs()
+        }
     }
 
     // run output vs. global output
     fun outDir(dir: String) = "$outDir$dir${File.separator}".also {
-        File(it).mkdirs()
+        if (enableDebug || enableInfo) {
+            File(it).mkdirs()
+        }
     }
 
     fun file(dir: String, filename: String) = "${outDir(dir)}$filename"

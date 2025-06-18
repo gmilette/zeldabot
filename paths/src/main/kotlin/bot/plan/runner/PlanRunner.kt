@@ -1,6 +1,7 @@
 package bot.plan.runner
 
 import bot.DirectoryConstants
+import bot.ZeldaBot
 import bot.plan.action.Action
 import bot.plan.action.DoNothing
 import bot.plan.action.moveHistoryAttackAction
@@ -211,7 +212,7 @@ class PlanRunner(private val makePlan: PlanMaker,
         masterPlan.reset()
         action = withDefaultAction(masterPlan.skipToStart())
         d { " START AT ${action?.name}"}
-        runLog = RunActionLog(ex.name, ex)
+        runLog = RunActionLog(ex.name, ex, save = DirectoryConstants.enableInfo)
         if (load) {
             d { "reset" }
             Thread( {

@@ -52,7 +52,7 @@ class KillAll(
         fun make() = KillAll()
     }
 
-    private val killAll: LogFile = LogFile("KillAll")
+    private val killAll: LogFile = LogFile("KillAll", devType = true)
 
     private val routeTo = RouteTo(RouteTo.Param(
         whatToAvoid = whatToAvoid)
