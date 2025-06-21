@@ -31,7 +31,7 @@ class RunActionLog(private val fileNameRoot: String,
     var totalHeal = 0.0
     val bombsUsed = DataCount()
     val keysUsed = DataCount()
-    val keysGot = DataCount(-1, -1)
+    val keysGot = DataCount(0, 0)
     val rupeesSpent = DataCount()
     val rupeesGained = DataCount(-1, -1)
 

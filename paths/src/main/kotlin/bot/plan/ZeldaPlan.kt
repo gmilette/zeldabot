@@ -488,6 +488,7 @@ object ZeldaPlan {
                 seg("push action")
                 goIn(GamePad.MoveLeft, MapConstants.oneGridPoint5) // dodge the traps by moving in
                 +makeCenterPush(127, makeUp(34))
+                seg("snag boomerang", ZeldaItem.Boomerang)
                 // because of bad routing link still goes back and forth ad just the wrong time
                 // try going up?
                 // maybe i have to fake out the traps
@@ -502,7 +503,6 @@ object ZeldaPlan {
                 goTo(beforeExit, ignoreProjectiles = true)
                 goIn(GamePad.MoveRight, MapConstants.twoGrid)
                 rightNoP // don't attack
-                seg("snag boomerang", ZeldaItem.Boomerang)
                 down.down // at 67 now
                 right // boomerang
                 goIn(GamePad.MoveRight, 30)
@@ -538,7 +538,7 @@ object ZeldaPlan {
                 phase(Phases.lev(2))
                 lev(2)
                 startAt(LevelStartMapLoc.lev(2))
-                seg("gather 3 keys")
+                seg("gather 3 keys", ZeldaItem.Key)
                 right
                 kill
                 goTo(InLocations.Level2.keyMid)
@@ -554,18 +554,12 @@ object ZeldaPlan {
                 right // grid room
                 seg("sprint up from grid")
                 up
-                seg("go get blue boomerang")
+//                seg("go get blue boomerang")
                 upm
-                seg("gather key 3")
+                seg("gather key 3", ZeldaItem.Key)
                 kill
                 loot // key 2
-                seg("turn right to get boomerang")
-//            right
-//            kill
-//            // the boomerang is a projectile! do not avoid it
-//            goAbout(InLocations.Level2.keyMid, 1, 1, true, ignoreProjectiles = true)
-//            left
-                seg("resume sprint")
+                seg("Get to Dodongo", ZeldaItem.Triforce)
                 up
                 // skip getting key from squishy guy
 //            .kill
@@ -597,7 +591,7 @@ object ZeldaPlan {
             phase(Phases.reenterLevel2)
             lev(2)
             startAt(LevelStartMapLoc.lev(2))
-            seg("go to boomerang")
+            seg("go to boomerang", ZeldaItem.Boomerang)
             up
             right
             up
@@ -606,7 +600,7 @@ object ZeldaPlan {
             seg("get boomerang")
             kill
             goAbout(InLocations.Level2.keyMid, 1, 1, true, ignoreProjectiles = true)
-            seg("depart")
+            seg("depart", ZeldaItem.None)
             left
             kill // door is locked until all killed
             down
@@ -629,20 +623,18 @@ private val levelPlan2Harvest2: PlanBuilder.() -> Unit
 //        phase(Phases.level2Harvest)
         lev(2)
         startAt(LevelStartMapLoc.lev(2))
-        seg("gather 3 keys")
+        seg("Wander level 2", ZeldaItem.Rupee)
         right
         upk
-        seg("gather key 2")
         leftk
         leftk
         rightk
         rightk
         upk
         upk
-        seg("up to snake")
         upk
         upk
-        seg("escape")
+        seg("escape", ZeldaItem.None)
         downk
         downk
         downk
@@ -660,10 +652,10 @@ private val levelPlan2Harvest2: PlanBuilder.() -> Unit
             phase(Phases.lev(3))
             lev(3)
             startAt(LevelStartMapLoc.lev(3))
-            seg("grab key")
+            seg("grab key", ZeldaItem.Key)
             left
             goTo(InLocations.Level2.keyMid)
-            seg("walk round corner")
+            seg("walk round corner", ZeldaItem.Raft)
             up // grab key it's easy
             kill
             loot
@@ -687,7 +679,7 @@ private val levelPlan2Harvest2: PlanBuilder.() -> Unit
             startAt(15)
             go(InLocations.getItem)
             upTo(105)
-            seg("get to back to center")
+            seg("get to back to center", ZeldaItem.Triforce)
             upm
             rightNoP
             seg("right no p")
@@ -717,7 +709,7 @@ private val level4: PlanBuilder.() -> Unit
         phase(Phases.lev(4))
         lev(4)
         startAt(113)
-        seg("go go go")
+        seg("go go go", ZeldaItem.Key)
         //key to left but dont bother
         up
         switchToBoomerang
@@ -728,7 +720,7 @@ private val level4: PlanBuilder.() -> Unit
         seg("get key from squishies")
         goTo(InLocations.Level4.squishyKey)
         up
-        seg("go get ladder")
+        seg("go get ladder", ZeldaItem.Ladder)
         rightm
         kill
         right
@@ -741,6 +733,7 @@ private val level4: PlanBuilder.() -> Unit
             96, InLocations.StairsLocation.corner
         )
         leftm
+        seg("across ladder", ZeldaItem.Triforce)
         goIn(GamePad.MoveLeft, 11.grid, monitor = false) // custom action to walk across using the ladder
         leftm
         seg("get past 4 monster")
@@ -771,7 +764,7 @@ private val level5: PlanBuilder.() -> Unit
         lev(5)
         cheatBombs
         startAt(LevelStartMapLoc.lev(5))
-        seg("move to level 5")
+        seg("move to level 5", ZeldaItem.Whistle)
         upm
         seg("left past key")
         bombLeft
@@ -795,7 +788,7 @@ private val level5: PlanBuilder.() -> Unit
             InLocations.Level5.mapLocGetItem,
             stairs = InLocations.StairsLocation.corner
         )
-        seg("backtrack out")
+        seg("backtrack out", ZeldaItem.Key)
         right
         addNext(
             100, makeCenterPush(
@@ -811,7 +804,7 @@ private val level5: PlanBuilder.() -> Unit
         right // possibly kill until get bomb IF need bombs
         seg("kill all zombie to open get key")
         killUntilGetKey
-        seg("rhino bypass")
+        seg("rhino bypass", ZeldaItem.Triforce)
         kill // have to kill all to move up
         up
         seg("kill all zombie up move right")
@@ -879,7 +872,7 @@ private val level6: PlanBuilder.() -> Unit
 //            loot // another key,  this is hard though because of ladder
         up
         up
-        seg("get want")
+        seg("get wand")
         kill
         +makePush(
             InLocations.Push.moveLeftOfTwo,
@@ -888,7 +881,7 @@ private val level6: PlanBuilder.() -> Unit
             stairs = InLocations.StairsLocation.corner
         )
 
-        seg("go down to other stair")
+        seg("go down to other stair", ZeldaItem.Triforce)
         down //25
         down //41
         // pick up key in center
@@ -923,6 +916,7 @@ private val level7: PlanBuilder.() -> Unit
         phase(Phases.lev(7))
         lev(7)
         startAt(LevelStartMapLoc.lev(7))
+        seg("Enter", ZeldaItem.RedCandle)
         upm
         bombUp
         switchToBoomerang
@@ -948,6 +942,7 @@ private val level7: PlanBuilder.() -> Unit
         // so skip
         killAllInCenter
         +makeCenterPush(88, makeUp(26))
+        seg("move right", ZeldaItem.Triforce)
         bombRight
         rightm
         seg("kill whistle")
@@ -958,6 +953,7 @@ private val level7: PlanBuilder.() -> Unit
         useItem()
         wait(300)
         kill
+        seg("move on")
         upk
         cheatBombs
         bombRight
@@ -992,7 +988,7 @@ private val level8: PlanBuilder.() -> Unit
         phase(Phases.lev(8))
         lev(8)
         startAt(LevelStartMapLoc.lev(8))
-        seg("run past")
+        seg("run past", ZeldaItem.BookOfMagic)
         goIn(GamePad.MoveUp, 10)
         switchToBomb
         left
@@ -1004,7 +1000,7 @@ private val level8: PlanBuilder.() -> Unit
         seg("go get book")
         kill
         +makeCenterPush(LevelSpecBuilder.getItemLoc8, makeUp(124))
-        seg("get back to start")
+        seg("get back to start", ZeldaItem.MagicKey)
         rightm
         rightm // at start
         seg("get to crossroads")
@@ -1026,7 +1022,7 @@ private val level8: PlanBuilder.() -> Unit
         seg("get key")
         killAllInCenter
         +makeCenterPush(LevelSpecBuilder.getItemLoc8Key, makeUp(31))
-        seg("get back to master battle")
+        seg("get back to master battle", ZeldaItem.Triforce)
         left
         down
         down
@@ -1066,6 +1062,7 @@ private fun PlanBuilder.levelPlan9PhaseRedRing() {
         startAt(LevelStartMapLoc.lev(9))
         // really dont want to accidently exit because link can't find way back to the entrance
         goInConsume(GamePad.MoveUp, 30)
+        seg("get red ring", ZeldaItem.RedRing)
         cheatBombs // for now
         upm
         leftm
@@ -1101,6 +1098,7 @@ private fun PlanBuilder.levelPlan9PhaseRedRing() {
 
 private fun PlanBuilder.levelPlan9PhaseSilverArrow() {
     add {
+        seg("get silver arrow", ZeldaItem.SilverArrow)
         down // kill pancake
         cheatBombs // for now
         downm
@@ -1157,7 +1155,8 @@ private fun PlanBuilder.levelPlan9PhaseSilverArrow() {
 
 private fun PlanBuilder.levelPlan9PhaseGannon() {
     add {
-        "return to center".seg()
+        seg("return to center")
+        objectivePrincess()
         downIgnoreProjectiles // there are only sun monsters
         kill
         "take stair back".seg()

@@ -91,6 +91,10 @@ class PlanBuilder(
         setObjective(Objective(type = DestType.Item(item)))
     }
 
+    fun objectivePrincess() {
+        setObjective(Objective(type = DestType.Princess))
+    }
+
     fun startAt(loc: MapLoc): PlanBuilder {
         // could add level too
         add(loc, StartAtAction())

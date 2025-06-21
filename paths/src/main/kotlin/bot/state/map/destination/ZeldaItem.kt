@@ -2,6 +2,9 @@ package bot.state.map.destination
 
 enum class ZeldaItem {
     None,
+    // items
+    Key,
+    Rupee,
     // named
     BombHeart,
     RaftHeartEntry,

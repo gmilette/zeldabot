@@ -193,7 +193,7 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
                 contentDescription = ""
             )
             Image(
-                painter = painterResource("icon_candle.png"),
+                painter = painterResource("icon_bluecandle.gif"),
                 modifier = Modifier.padding(horizontal = 8.dp).size(40.dp).background(Color.LightGray).clickable {
                     model.addCandle()
                 },

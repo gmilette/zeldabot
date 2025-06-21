@@ -61,7 +61,7 @@ fun FollowView(
         Row {
             FollowCard(title = "Location", text = "${state.state.frameState.level} : ${state.state.frameState.mapLoc}")
             TimeElapsed(state)
-            FramesElapsed(state)
+//            FramesElapsed(state)
         }
 
         Progress(state)
@@ -96,21 +96,40 @@ private fun ImageActionObjective(state: ZeldaModel.ShowState) {
         is DestType.Level -> "icon_tri.png"
         is DestType.Heart -> "icon_heart.png"
         is DestType.SecretToEverybody -> "icon_coin.png"
+        is DestType.Princess -> "icon_princess.png"
         is DestType.Item -> {
             when (type.item) {
+                ZeldaItem.Rupee -> "icon_coin.png"
+                ZeldaItem.Key -> "icon_key.png"
                 ZeldaItem.Bomb -> "icon_bomb.png"
                 ZeldaItem.Raft -> "icon_raft.png"
                 ZeldaItem.Bow -> "icon_bow.png"
-                ZeldaItem.Boomerang -> "icon_boomerang.png"
+                ZeldaItem.MagicShield -> "icon_magicshield.gif"
+                ZeldaItem.Ladder -> "icon_ladder.gif"
+                ZeldaItem.BlueCandle -> "icon_bluecandle.gif"
+                ZeldaItem.RedCandle -> "icon_redcandle.gif"
+                ZeldaItem.Boomerang -> "icon_boomerangbrown.gif"
+                ZeldaItem.MagicalBoomerang -> "icon_boomerang.png"
                 ZeldaItem.WoodenSword -> "icon_woodensword.png"
                 ZeldaItem.WhiteSword -> "icon_whitesword.png"
                 ZeldaItem.MagicSword -> "icon_sword.png"
                 ZeldaItem.Triforce -> "icon_linktri.png"
+                ZeldaItem.Arrow -> "icon_arrow.gif"
+                ZeldaItem.SilverArrow -> "icon_silverarrow.gif"
+                ZeldaItem.MagicKey -> "icon_magickey.gif"
+                ZeldaItem.BookOfMagic -> "icon_book.gif"
+                ZeldaItem.RedRing -> "icon_redring.gif"
+                ZeldaItem.BlueRing -> "icon_bluering.gif"
+                ZeldaItem.Wand -> "icon_wand.gif"
+                ZeldaItem.Whistle -> "icon_whistle.gif"
+                ZeldaItem.PowerBracelet -> "icon_bracelet.gif"
+                ZeldaItem.Potion -> "icon_potionhalf.gif"
+                ZeldaItem.SecondPotion -> "icon_potion.gif"
+                ZeldaItem.Food -> "icon_bait.gif"
                 else -> "icon_empty.png"
             }
         }
         is DestType.Triforce -> "icon_linktri.png"
-        is DestType.Princess -> "icon_linktri.png"
         is DestType.Woman -> "icon_empty.png"
         is DestType.Shop -> "icon_empty.png"
         else -> "icon_empty.png"
