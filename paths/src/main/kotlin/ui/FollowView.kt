@@ -139,7 +139,7 @@ private fun ImageActionObjective(state: ZeldaModel.ShowState) {
         FollowCard(title = "objective", background = Color.Green) {
             Box {
                 Image(
-                    painter = painterResource(image),
+                    painter = painterResource(resourcePath = image),
                     modifier = Modifier.size(40.dp).align(Alignment.Center).background(Color.LightGray),
                     contentDescription = ""
                 )

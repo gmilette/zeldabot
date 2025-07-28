@@ -37,6 +37,9 @@ fun main(vararg args: String) = application {
     ZeldaBot.experiment = args.getOrNull(0)
     val isDev = args.contains("dev")
     DirectoryConstants.enableInfo = isDev
+    // Note: If you want to run the shadowJar directly
+    // in Nintaco, addd noUi because the ui doesn't currently work
+    // it is unable to find resources for some reason
     val noUi = args.contains("noui")
     Window(
         visible = !noUi,

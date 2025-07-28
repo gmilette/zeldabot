@@ -55,6 +55,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             apiEnabled()
             setSpeed
         }
+
+        println("Start Zeldabot!")
     }
 
     private fun apiEnabled() {
@@ -63,7 +65,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     }
 
     private fun apiDisabled() {
-        println("API disabled")
+//        println("API disabled")
     }
 
     private fun dispose() {
