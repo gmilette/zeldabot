@@ -29,6 +29,12 @@ dependencies {
     implementation(libs.gson)
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
 tasks.test {
     useJUnit()
 }

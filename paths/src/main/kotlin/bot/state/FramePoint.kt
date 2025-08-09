@@ -9,7 +9,27 @@ import util.Geom
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-data class FramePoint(val x: Int = 0, val y: Int = 0, val direction: Direction? = null) {
+data class RoutePoint(val x: Int = 0, val y: Int = 0, val direction: Direction? = null, val gamePad: GamePad = GamePad.None) {
+    constructor(x: Int = 0, y: Int = 0) : this(x, y, null)
+
+    companion object {
+        val center: FramePoint = FramePoint(7.grid.andAHalf, 5.grid)
+    }
+    override fun equals(other: Any?): Boolean {
+        return if (other is RoutePoint) {
+            other.x == x && other.y == y && other.direction == direction && other.gamePad == gamePad
+        } else false
+    }
+
+    val oneStr: String
+        get() = "${x}_$y"
+
+    override fun toString(): String {
+        return "($x, $y) ${direction?.toArrow() ?: ""} $gamePad"
+    }
+}
+
+data class FramePoint(val x: Int = 0, val y: Int = 0, val direction: Direction? = null, val action: GamePad? = null) {
     constructor(x: Int = 0, y: Int = 0) : this(x, y, null)
 
     companion object {

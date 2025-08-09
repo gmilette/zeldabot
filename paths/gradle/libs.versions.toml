@@ -1,7 +1,7 @@
 # gradle/libs.versions.toml
 
 [versions]
-kotlin = "2.0.20"
+kotlin = "2.1.20"
 compose = "1.6.10"  # For JetBrains Compose Multiplatform plugin and related artifacts
 agp = "8.1.2"       # Android Gradle Plugin (if your project or subprojects use it)
 

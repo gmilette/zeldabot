@@ -122,6 +122,16 @@ class RouteTo(val params: Param = Param()) {
     private val attack = AlwaysAttack()
     private val attackB = AlwaysAttack(useB = true)
 
+    fun needsRoute(
+        state: MapLocationState,
+        to: List<FramePoint>,
+        param: RouteParam = RouteParam(),
+        // pass in attack targets
+        attackableSpec: List<Agent> = emptyList()
+    ): GamePad {
+        return GamePad.None
+    }
+
     fun routeTo(
         state: MapLocationState,
         to: List<FramePoint>,

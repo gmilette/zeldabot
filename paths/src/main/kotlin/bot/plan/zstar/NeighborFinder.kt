@@ -6,12 +6,6 @@ import util.Map2d
 import util.d
 import kotlin.random.Random
 
-// list of passible nodes
-//    private val FramePoint.neighbors
-//        get() = listOf(this.up, this.down, this.left, this.right).filter {
-//            it.x > 0 && it.x < passible.maxX && it.y > 0 && it.y <
-//                    passible.maxY && passible.get(it) }
-
 class NeighborFinder(
     var passable: Map2d<Boolean>,
     private val halfPassable: Boolean = true,
