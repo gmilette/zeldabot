@@ -52,6 +52,8 @@ data class FramePoint(val x: Int = 0, val y: Int = 0, val direction: Direction? 
     }
 }
 
+fun FramePoint.noDir() = FramePoint(x, y)
+
 data class FloatPoint(val x: Float, val y: Float) {
     fun nearest(): FramePoint =
         FramePoint(x.toInt(), y.toInt())
@@ -395,6 +397,7 @@ val FramePoint.justRightLast6
     get() = FramePoint(x + 10, y)
 
 
+fun FramePoint.withDir(dir: Direction): FramePoint = FramePoint(x, y, dir)
 fun FramePoint.withX(changeX: Int): FramePoint = FramePoint(changeX, y)
 fun FramePoint.withY(changeY: Int): FramePoint = FramePoint(x, changeY)
 
@@ -409,6 +412,9 @@ val FramePoint.justOutside
 
 fun FramePoint.distTo(other: FramePoint) =
     abs(x - other.x) + abs(y - other.y)
+
+fun FramePoint.minDistToRect(other: FramePoint) =
+    corners.minOf { other.distTo(it) }
 
 fun FramePoint.minDistToAny(other: List<FramePoint>) =
     other.minOf { this.distTo(it) }

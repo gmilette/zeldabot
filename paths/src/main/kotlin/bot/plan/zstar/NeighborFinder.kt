@@ -12,7 +12,7 @@ class NeighborFinder(
     /**
      * inside the level, link cannot move halfway into any part of the top two grids
      */
-    private val isLevel: Boolean = false
+    private val isLevel: Boolean = false,
 ) {
     var costF: Map2d<Int> = Map2d(mutableListOf())
 
@@ -96,8 +96,14 @@ class NeighborFinder(
 //        }
 
         for (direction in validDirections) {
-            //val next = SkipLocations.getNext(point, direction)
-            val next = direction.pointModifier()(point)
+
+            // I wanted to do this for bfs but it causes link to get stuck all the time
+            val nextNoDir = direction.pointModifier()(point)
+            val next = nextNoDir.withDir(direction)
+
+            // NEED THIS FOR REGULAR
+//            val next = direction.pointModifier()(point)
+
 //                if (next.distTo(this) > 1) {
 //                    d { "skip loc" }
 //                }
@@ -352,6 +358,11 @@ class NeighborFinder(
         return costF.safe(point) && costF.safe(point.justRightEndBottom)
                 && costF.safe(point.justRightEnd)
                 && costF.safe(point.justLeftBottom)
+    }
+
+
+    fun isSafe(point: FramePoint): Boolean {
+        return costF.safe(point)
     }
 
     fun Map2d<Int>.safe(point: FramePoint): Boolean =

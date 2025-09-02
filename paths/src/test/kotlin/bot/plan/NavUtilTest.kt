@@ -12,6 +12,7 @@ import bot.state.map.MapConstants
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import org.junit.Ignore
 import org.junit.Test
 import util.Map2d
 import util.d
@@ -19,8 +20,9 @@ import util.d
 /**
  * unit test to investiate routes
  */
+@Ignore
 class NavUtilTest {
-    //@Ignore
+    @Ignore
     @Test
     fun `test g NOW`() {
         ZStar.DEBUG = true

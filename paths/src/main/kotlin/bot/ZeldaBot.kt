@@ -477,7 +477,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                                 api.drawRect(topLeft.x, topLeft.y + MapConstants.yAdjust, width, height)
                             }
                         }
-                        val longAttack = AttackLongActionDecider.longRectangle(this)
+                        val longAttack = AttackLongActionDecider.longRectangle(frameStateUpdater.state.currentMapCell.passable, link, frameState.link.dir)
                         longAttack.apply {
                             api.color = Colors.GRAY
                             api.drawRect(topLeft.x, topLeft.y + MapConstants.yAdjust, width, height)
@@ -492,7 +492,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                             api.drawRect(topLeft.x, topLeft.y + MapConstants.yAdjust, width, height)
                         }
 
-//                        val longAttack = AttackLongActionDecider.longRectangle(this)
+//                        val longAttack = AttackLongActionDecider.longRectangle(frameStateUpdater.state.currentMapCell.passable, link, frameState.link.dir)
 //                        longAttack.apply {
 //                            api.color = Colors.GRAY
 //                            api.drawRect(topLeft.x, topLeft.y + MapConstants.yAdjust, width, height)

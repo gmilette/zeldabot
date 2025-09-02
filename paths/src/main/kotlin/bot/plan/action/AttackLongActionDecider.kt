@@ -1,6 +1,7 @@
 package bot.plan.action
 
 import bot.state.*
+import bot.state.dir
 import bot.state.map.Direction
 import bot.state.map.MapConstants
 import bot.state.map.pointModifier
@@ -9,6 +10,8 @@ import org.jheaps.annotations.VisibleForTesting
 import util.*
 
 object AttackLongActionDecider {
+    val DEBUG = true
+
     fun isInsideEnoughToShoot(state: MapLocationState) =
         if (state.frameState.isLevel) {
             state.link.isInLevelMap
@@ -157,22 +160,26 @@ object AttackLongActionDecider {
         return (shouldShoot && canShoot && inRange)
     }
 
-    fun targetInLongRange(from: FramePoint, state: MapLocationState, targets: List<FramePoint>): Boolean {
-        return firstEnemyIntersect(longRectangle(state, from, from.direction ?: Direction.None), targets) != null
+    fun targetInLongRange(passable: Map2d<Boolean>, from: FramePoint, targets: List<FramePoint>): Boolean {
+        return firstEnemyIntersect(longRectangle(passable, from, from.direction ?: Direction.None), targets) != null
     }
 
     fun targetInLongRange(state: MapLocationState, targets: List<FramePoint>): Boolean {
-        return firstEnemyIntersect(longRectangle(state), targets) != null
+        return firstEnemyIntersect(longRectangle(state.currentMapCell.passable,  state.link, state.frameState.link.dir), targets) != null
     }
 
-    fun longRectangle(state: MapLocationState, link: FramePoint = state.link, dir: Direction = state.frameState.link.dir): Geom.Rectangle {
+    fun longRectangle(passable: Map2d<Boolean>, link: FramePoint, dir: Direction): Geom.Rectangle {
         // assume go right
         val midLink = link.justDownFourth
         val bottomLink = link.justDownThreeFourth
-        val endReach = rayFrom(state.currentMapCell.passable, bottomLink, dir)
-        d { " end reach is $endReach $dir" }
+        val endReach = rayFrom(passable, bottomLink, dir)
+        if (DEBUG) {
+            d { " end reach is $endReach $dir" }
+        }
         val swordRectangle = swordRectangle(link, endReach, dir)
-        d { " $link intersect sword rect $swordRectangle" }
+        if (DEBUG) {
+            d { " $link intersect sword rect $swordRectangle" }
+        }
         return swordRectangle
     }
 
@@ -186,9 +193,11 @@ object AttackLongActionDecider {
         //     +12 bottom sword (account for size of sword or boomerang)
 
         // depends on direction
-        for (aliveEnemy in targets) {
-            val inter = swordRectangle.intersect(aliveEnemy.toRect())
-            d { "long intersect $aliveEnemy $inter" }
+        if (DEBUG) {
+            for (aliveEnemy in targets) {
+                val inter = swordRectangle.intersect(aliveEnemy.toRect())
+                d { "long intersect $aliveEnemy $inter" }
+            }
         }
 
         return targets.firstOrNull {

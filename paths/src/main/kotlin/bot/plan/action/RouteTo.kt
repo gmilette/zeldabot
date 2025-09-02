@@ -1,5 +1,7 @@
 package bot.plan.action
 
+import bot.plan.zstar.BreadthFirstSearch
+import bot.plan.zstar.BreadthFirstSearch.ActionRoute
 import bot.plan.zstar.FrameRoute
 import bot.plan.zstar.ZStar
 import bot.state.*
@@ -130,6 +132,57 @@ class RouteTo(val params: Param = Param()) {
         attackableSpec: List<Agent> = emptyList()
     ): GamePad {
         return GamePad.None
+    }
+
+    fun routeToBest(
+        state: MapLocationState,
+        to: List<FramePoint>,
+        param: RouteParam = RouteParam(),
+        // pass in attack targets
+        attackableSpec: List<Agent> = emptyList()
+    ): GamePad {
+        d { " BFS START"}
+        val linkPt = state.link
+        val paramZ = ZStar.ZRouteParam(
+            start = linkPt,
+            targets = to,
+            pointBeforeStart = state.previousMove.from,
+            enemies = emptyList(),
+            projectiles = emptyList(),
+            rParam = param.rParam
+        )
+        state.currentMapCell.zstar.setNeighborFinder(paramZ)
+        val ableToShoot = AttackLongActionDecider.ableToShoot(state)
+        val search = BreadthFirstSearch(ableToShoot, true,
+            state.currentMapCell.zstar.neighborFinder)
+        val attackableAgents: List<Agent> = AttackActionDecider.aliveEnemiesCanAttack(state)
+        val attackable = attackableSpec.ifEmpty {
+            attackableAgents
+        }
+        val linkDir = state.frameState.link.dir
+        val result = search.bestRoute(linkPt.withDir(linkDir), attackable.map { it.point })
+        d { " BFS result action ${result}"}
+        // refactor to one function
+        return when (result) {
+            is ActionRoute.Attack -> GamePad.aOrB(result.useB)
+            is ActionRoute.Route -> {
+                route = FrameRoute(result.route)
+                var nextPoint = route?.path?.getOrNull(1) ?: FramePoint()
+                val pointDir = route?.decideDirection(linkPt, state.frameState.link.dir)
+                d { " next is $nextPoint of ${route?.numPoints ?: 0} chose direction $pointDir" }
+                nextPoint = nextPoint.copy(direction = pointDir)
+                return when {
+                    nextPoint.isZero && linkPt.x == 0 -> GamePad.MoveLeft
+                    nextPoint.isZero && linkPt.y == 0 -> GamePad.MoveUp
+                    // already in a good spot
+                    nextPoint.isZero -> GamePad.None
+                    else -> nextPoint.direction?.toGamePad() ?: linkPt.directionTo(nextPoint)
+                }.also {
+                    //        writeFile(to, state, it)
+                    d { " link point $linkPt next point $nextPoint dir: $it ${if (nextPoint.direction != null) "HAS DIR ${nextPoint.direction}" else ""}" }
+                }
+            }
+        }
     }
 
     fun routeTo(
@@ -464,27 +517,28 @@ class RouteTo(val params: Param = Param()) {
             return modifier(linkPt)
         }
 
-        route = FrameRoute(
-            mapCell.zstar.route(
-                ZStar.ZRouteParam(
-                    start = linkPt,
-                    targets = to,
-                    pointBeforeStart = state.previousMove.from,
-                    enemies = avoid.points,
-                    projectiles = avoidProjectiles.map { it.point }, // don't add if there is no dodging
-                    rParam = param.rParam.copy(
-                        forcePassable = passable,
-                        forceHighCost = param.rParam.forceHighCost + inFrontOfGrids
-                    )
-//                    forcePassable = passable,
-//                    attackTarget = param.attackTarget,
-//                    mapNearest = param.mapNearest,
-//                    forceHighCost = param.forceHighCost + inFrontOfGrids,
-//                    // could just use this if enemyTarget isn't null
-//                    finishWithinStrikingRange = param.finishWithinStrikingRange
-                )
+        val paramZ = ZStar.ZRouteParam(
+            start = linkPt,
+            targets = to,
+            pointBeforeStart = state.previousMove.from,
+            enemies = avoid.points,
+            projectiles = avoidProjectiles.map { it.point }, // don't add if there is no dodging
+            rParam = param.rParam.copy(
+                forcePassable = passable,
+                forceHighCost = param.rParam.forceHighCost + inFrontOfGrids
             )
-        ) //.cornering(state.link, state.frameState.link.dir) //.cornerSoon(state.link.oneStr, state.frameState.link.dir)
+        )
+//        if (state.currentMapCell.mapLoc == 114) {
+//            d { " BFS!! ${state.currentMapCell.mapLoc}"}
+//            val route = FrameRoute(mapCell.zstar.routeWithBfs(paramZ))
+//        } else {
+//            d { " NO BFS!! ${state.currentMapCell.mapLoc}"}
+//            route = FrameRoute(
+//                mapCell.zstar.route(paramZ)
+//            ) //.cornering(state.link, state.frameState.link.dir) //.cornerSoon(state.link.oneStr, state.frameState.link.dir)
+//        }
+        route = FrameRoute(
+            mapCell.zstar.route(paramZ)) //.cornering(state.link, state.frameState.link.dir)
 
 
 //        route?.path?.lastOrNull()?.let { lastPt ->

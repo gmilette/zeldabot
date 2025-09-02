@@ -1283,6 +1283,7 @@ private fun PlanBuilder.startHereAtAfterLevel5() {
 private fun PlanBuilder.startHereAtLoaded(bomb: Boolean = true, rupee: Int = 0) {
     startHereAt(
         raftLadderSetup.copy(
+            ladderAndRaft = false,
             hearts = 16,
             rupees = rupee,
             bombs = if (bomb) 8 else 0,

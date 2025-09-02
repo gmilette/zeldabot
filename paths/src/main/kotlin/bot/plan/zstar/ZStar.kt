@@ -27,7 +27,7 @@ class ZStar(
     private val allPassable = passable.copy().mapXy { i, i2 -> true }
     companion object {
         var DEBUG = false
-        var DEBUG_B = false
+        var DEBUG_B = true
         private val DEBUG_DIR = false
         val DEBUG_ONE = false
 
@@ -79,7 +79,7 @@ class ZStar(
     private val initialPassable = passable
     var costsF: Map2d<Int> = initialMap.copy()
 
-    private val neighborFinder = NeighborFinder(passable, halfPassable, isLevel)
+    val neighborFinder = NeighborFinder(passable, halfPassable, isLevel)
 
     private val totalCosts = mutableMapOf<FramePoint, Int>()
     private val distanceToGoal = mutableMapOf<FramePoint, Int>()
@@ -106,21 +106,21 @@ class ZStar(
         val rParam: RouteTo.RoutingParamCommon = RouteTo.RoutingParamCommon(),
     )
 
-    fun route(
-        start: FramePoint,
-        beforeStart: FramePoint? = null,
-        target: FramePoint,
-        makePassable: List<FramePoint> = emptyList()
-    ): List<FramePoint> {
-        return route(
-            ZRouteParam(
-                start = start, targets = listOf(target), pointBeforeStart = beforeStart, enemies = emptyList(),
-                rParam = RouteTo.RoutingParamCommon(
-                    forcePassable = makePassable
-                ),
-            )
-        )
-    }
+//    fun route(
+//        start: FramePoint,
+//        beforeStart: FramePoint? = null,
+//        target: FramePoint,
+//        makePassable: List<FramePoint> = emptyList()
+//    ): List<FramePoint> {
+//        return route(
+//            ZRouteParam(
+//                start = start, targets = listOf(target), pointBeforeStart = beforeStart, enemies = emptyList(),
+//                rParam = RouteTo.RoutingParamCommon(
+//                    forcePassable = makePassable
+//                ),
+//            )
+//        )
+//    }
 
     private fun sum(): Int {
         var sum = 0
@@ -254,10 +254,32 @@ class ZStar(
 //        return routeNearestSafe(param)
 //    }
 
+    fun setNeighborFinder(
+        param: ZRouteParam
+    ) {
+        customizer.customize(param)
+        neighborFinder.costF = costsF
+        neighborFinder.passable = passable
+    }
+
+    fun routeWithBfs(
+        param: ZRouteParam
+    ): List<FramePoint>? {
+        setNeighborFinder(param)
+        val search = BreadthFirstSearch(true, true, neighborFinder)
+        if (search.isGoal(param.start, param.targets)) {
+            return null
+        }
+        val route = search.breadthFirstSearch(param.start, param.targets).firstOrNull() ?: emptyList()
+        d { " Route with bfs is ${route}"}
+        return route
+    }
+
     fun route(
         param: ZRouteParam
     ): List<FramePoint> {
-        customizer.customize(param)
+        setNeighborFinder(param)
+
         val maxIter = MAX_ITER
         val targets = if (false && param.rParam.mapNearest) {
             param.targets.flatMap { NearestSafestPoint.nearestSafePoints(it, costsF, passable) }
@@ -560,7 +582,8 @@ class ZStar(
             }
             d { " end " }
         }
-        val pathAdjusted = path.toMutableList()
+        // !!! need to remove the DIR or it just doesnt work
+        val pathAdjusted = path.toMutableList().map { it.noDir() }
 
         return pathAdjusted.also {
             // this doesn't work well

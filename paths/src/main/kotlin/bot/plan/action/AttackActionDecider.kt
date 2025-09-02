@@ -317,8 +317,8 @@ object AttackActionDecider {
 
         logDebugInfo(enemiesClose, swords, enemies, link, from, smallTarget)
 
-        val linkRect = link.toRectPlus(-2) // make bigger to make sure there is contact
-        val linkRectExact = link.toRectPlus(0) // make bigger to make sure there is contact
+        val linkRect = link.toRectPlus(-2)
+        val linkRectExact = link.toRectPlus(0)
 
         // i donno, it seems like it isn't good for fighting sword guys
         if (enemiesClose.any { it == linkRectExact || (it.topLeft == linkRectExact.topLeft) }) {
@@ -349,21 +349,29 @@ object AttackActionDecider {
         // because it faces up, but can't go up, it has to persist in the cornering
         val FACE_ENEMY = true
         val attackMove = if (FACE_ENEMY) {
-            d { " ** face"}
+            if (DEBUG) {
+                d { " ** face" }
+            }
             // check other directions
             val otherDirs = swords.filter { it.key != from}
-            d { " ** face other $otherDirs $from num close ${enemiesClose.size}"}
-            for (rectangle in enemiesClose) {
-                d { " enemy close $rectangle" }
+            if (DEBUG) {
+                d { " ** face other $otherDirs $from num close ${enemiesClose.size}" }
+                for (rectangle in enemiesClose) {
+                    d { " enemy close $rectangle" }
+                }
             }
             enemiesClose.firstNotNullOfOrNull { enemy ->
                 val attackDir = otherDirs.firstNotNullOfOrNull {
                     val dir = it.key
                     val intersect = enemy.intersect(it.value)
-                    d { " ** face: try $dir intersect $intersect "}
+                    if (DEBUG) {
+                        d { " ** face: try $dir intersect $intersect " }
+                    }
                     if (intersect) dir else null
                 }
-                d { " ** face: ${enemy} attack dir: $attackDir "}
+                if (DEBUG) {
+                    d { " ** face: ${enemy} attack dir: $attackDir " }
+                }
                 attackDir
             }?.toGamePad() ?: GamePad.None
         } else {
