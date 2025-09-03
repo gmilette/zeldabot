@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import bot.plan.zstar.NeighborFinder
-import bot.plan.zstar.BreadthFirstSearch
+import bot.plan.zstar.route.BreadthFirstSearch
 import bot.state.*
 import bot.state.map.Direction
 import util.Map2d

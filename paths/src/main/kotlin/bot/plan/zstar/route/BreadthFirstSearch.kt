@@ -1,19 +1,13 @@
-package bot.plan.zstar
+package bot.plan.zstar.route
 
-import bot.plan.action.Action
-import bot.plan.action.AttackActionBlockDecider
 import bot.plan.action.AttackActionDecider
 import bot.plan.action.AttackLongActionDecider
-import bot.plan.action.RouteTo.WhatToAvoid
+import bot.plan.zstar.NeighborFinder
 import bot.plan.zstar.ZStar.Companion.DEBUG_B
 import bot.plan.zstar.ZStar.Companion.MAX_ITER
-import bot.plan.zstar.ZStar.ZRouteParam
 import bot.state.FramePoint
-import bot.state.GamePad
 import bot.state.dirTo
 import bot.state.map.Direction
-import bot.state.map.MapConstants
-import bot.state.minDistToRect
 import util.d
 import java.util.*
 
@@ -67,7 +61,6 @@ class BreadthFirstSearch(
      * and find all goals
      * then we have
      */
-
     fun isGoal(point: FramePoint, targets: List<FramePoint>): Boolean {
         d { " goal from $point}"}
         val longAttack = ableToLongAttack && longDecider.targetInLongRange(neighborFinder.passable, point, targets)

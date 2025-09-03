@@ -1,14 +1,12 @@
 package bot.plan.action
 
-import bot.plan.zstar.BreadthFirstSearch
-import bot.plan.zstar.BreadthFirstSearch.ActionRoute
+import bot.plan.zstar.route.BreadthFirstSearch
+import bot.plan.zstar.route.BreadthFirstSearch.ActionRoute
 import bot.plan.zstar.FrameRoute
 import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.*
-import bot.state.oam.EnemyGroup
 import bot.state.oam.swordDir
-import util.Geom
 import util.LogFile
 import util.d
 import util.w
@@ -528,15 +526,6 @@ class RouteTo(val params: Param = Param()) {
                 forceHighCost = param.rParam.forceHighCost + inFrontOfGrids
             )
         )
-//        if (state.currentMapCell.mapLoc == 114) {
-//            d { " BFS!! ${state.currentMapCell.mapLoc}"}
-//            val route = FrameRoute(mapCell.zstar.routeWithBfs(paramZ))
-//        } else {
-//            d { " NO BFS!! ${state.currentMapCell.mapLoc}"}
-//            route = FrameRoute(
-//                mapCell.zstar.route(paramZ)
-//            ) //.cornering(state.link, state.frameState.link.dir) //.cornerSoon(state.link.oneStr, state.frameState.link.dir)
-//        }
         route = FrameRoute(
             mapCell.zstar.route(paramZ)) //.cornering(state.link, state.frameState.link.dir)
 

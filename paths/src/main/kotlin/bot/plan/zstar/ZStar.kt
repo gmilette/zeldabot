@@ -4,6 +4,7 @@ import bot.plan.action.AttackActionDecider
 import bot.plan.action.AttackLongActionDecider
 import bot.plan.action.RouteTo
 import bot.plan.action.isInGrid
+import bot.plan.zstar.route.BreadthFirstSearch
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapConstants
