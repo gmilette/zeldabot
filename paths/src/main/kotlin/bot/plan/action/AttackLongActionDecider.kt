@@ -66,8 +66,8 @@ object AttackLongActionDecider {
                 false
             }
         }
-        d { "should shoot sword $canShoot $swordIsFlying $explosionDist ${isInEnoughToShoot.ifFalse("not in enough")} "}
-        return canShoot
+        d { "should shoot sword can=$canShoot fly=$swordIsFlying exploded=$explosionDist ${isInEnoughToShoot.ifFalse("not in enough")} "}
+        return (canShoot && !swordIsFlying && !explosionDist && isInEnoughToShoot)
     }
 
     fun shouldShootSword(state: MapLocationState, targets: List<FramePoint>): Boolean {

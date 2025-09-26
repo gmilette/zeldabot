@@ -5,6 +5,9 @@ import bot.state.MapLocationState
 import bot.state.map.Direction
 import util.d
 
+/**
+ * if ladder is deployed perform the ladder action to get off of it
+ */
 class LadderActionDecider {
     fun doLadderAction(state: MapLocationState): Direction {
         return if (state.frameState.ladderDeployed) {

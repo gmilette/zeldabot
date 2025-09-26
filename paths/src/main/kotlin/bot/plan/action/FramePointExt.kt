@@ -4,6 +4,8 @@ import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.vertical
 
+fun FramePoint.distTo(other: List<FramePoint>) = other.sumOf { it.distTo(this) }
+
 fun FramePoint.distToSquare(other: FramePoint) = squarePts().minOf { it.distTo(other) }
 
 fun FramePoint.squarePts() = listOf(this, this.justRightEnd, this.justLeftBottom, this.justLeftDown)

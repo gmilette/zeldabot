@@ -2,11 +2,13 @@ package bot.plan.zstar.route
 
 import bot.plan.action.AttackActionDecider
 import bot.plan.action.AttackLongActionDecider
+import bot.plan.action.distTo
 import bot.plan.zstar.NeighborFinder
 import bot.plan.zstar.ZStar.Companion.DEBUG_B
 import bot.plan.zstar.ZStar.Companion.MAX_ITER
 import bot.state.FramePoint
 import bot.state.dirTo
+import bot.state.distTo
 import bot.state.map.Direction
 import util.d
 import java.util.*
@@ -30,6 +32,14 @@ class BreadthFirstSearch(
 ) {
     companion object {
         val MAX_PATHS = 3
+        // problems
+        // link goes to a corner
+        // link walks off map
+        // let's enemies get close, can't plan out routes that eventually
+        // get link farther away
+        // todo: need to have a constraint to not allow the route to leave an area ever
+        // maybe prioritize longer routes?
+        val SAFE_GOAL = false
     }
 
     init {
@@ -41,6 +51,18 @@ class BreadthFirstSearch(
             compareBy<List<FramePoint>> { countUnsafe(it) }
                 .thenBy { it.size }
         )
+    }
+
+    private fun sortPathsByBestFirstDist(foundPaths: List<List<FramePoint>>, enemies: List<FramePoint>): List<List<FramePoint>> {
+        return foundPaths.sortedWith(
+            compareBy<List<FramePoint>> { countUnsafe(it) }
+                .thenByDescending { it.countDistance(enemies) }
+        )
+    }
+
+    private fun List<FramePoint>.countDistance(enemies: List<FramePoint>): Int {
+        val sum: Int = sumOf { it.distTo(enemies) }
+        return sum
     }
 
     private fun countSafe(path: List<FramePoint>): Double {
@@ -61,7 +83,7 @@ class BreadthFirstSearch(
      * and find all goals
      * then we have
      */
-    fun isGoal(point: FramePoint, targets: List<FramePoint>): Boolean {
+    fun isGoal(point: FramePoint, targets: List<FramePoint>, initial: Boolean = false): Boolean {
         d { " goal from $point}"}
         val longAttack = ableToLongAttack && longDecider.targetInLongRange(neighborFinder.passable, point, targets)
         val attackAction by lazy { shortDecider.inRangeOf(point.direction ?: Direction.None, point, targets, false) }
@@ -98,6 +120,7 @@ class BreadthFirstSearch(
         // should return a goal type of LONG_ATTACK, vs SHORT_ATTACK
         // and the algorithm should prefer LONG_ATTACK range goals
         return when {
+            !initial && SAFE_GOAL && safe -> true // dont want this actually, i want to move not just sit
             longAttack && !tooClose && safe -> true // could be B or A
             attack && !tooCloseForAttack && safe -> true
             // need some better logic for getting loot than exact target
@@ -160,7 +183,7 @@ class BreadthFirstSearch(
         targets: List<FramePoint>,
         maxDepth: Int = 255
     ): ActionRoute {
-        return if (isGoal(start, targets)) {
+        return if (isGoal(start, targets, initial = true)) {
             d { " BFS: Started at goal: $start"}
             ActionRoute.Attack(false)
         } else {
@@ -191,7 +214,7 @@ class BreadthFirstSearch(
             
             if (current.depth > maxDepth) continue
             
-            if (isGoal(current.point, targets)) {
+            if (isGoal(current.point, targets, current.depth == 0)) {
                 // Ensure the final path includes the current point (last visited point)
                 val completePath = if (current.path.last() == current.point) {
                     current.path
@@ -243,15 +266,31 @@ class BreadthFirstSearch(
             }
         }
         
-        if (DEBUG_B) {
-            d { "BFS completed: found ${foundPaths.size} paths in $iterations iterations" }
-            for (path in foundPaths) {
-                d { "BFS path: ${path.size} $path"}
+//        if (DEBUG_B) {
+//            d { "BFS completed: found ${foundPaths.size} paths in $iterations iterations" }
+//            for (path in foundPaths) {
+//                val dist = path.countDistance(targets)
+//                d { "BFS path: ${path.size} $path $dist"}
+//            }
+//        }
+
+        return if (SAFE_GOAL) {
+            d { "BFS sort by dist" }
+            sortPathsByBestFirstDist(foundPaths, enemies = targets)
+        } else {
+            d { "BFS sort by size" }
+            sortPathsByBestFirst(foundPaths)
+        }.also {
+            if (DEBUG_B) {
+                d { "BFS sorted" }
+                for (path in it) {
+                    val dist = path.countDistance(targets)
+                    d { "BFS sorted path: ${path.size} $path $dist"}
+                }
             }
         }
-        
 //        return foundPaths.sortedBy { it.size }
-        return sortPathsByBestFirst(foundPaths)
+//        return sortPathsByBestFirst(foundPaths)
     }
 
 //    private fun breadthSearch(

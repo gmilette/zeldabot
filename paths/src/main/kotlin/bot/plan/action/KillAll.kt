@@ -233,9 +233,6 @@ class KillAll(
                 }
             }
 
-            // for rhino, adjust target location
-            // action
-
             aliveEnemies.forEach {
                 d { "alive enemy $it dist ${it.point.distTo(state.frameState.link.point)}" }
             }

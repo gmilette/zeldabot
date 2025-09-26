@@ -69,16 +69,6 @@ class SwitchToItem(private val inventoryPosition: () -> Int = { Inventory.Select
         get() = "SwitchToItem to ${inventoryPosition()}"
 }
 
-//private class DoneWhenNotSelecting : Action {
-//    override fun complete(state: MapLocationState): Boolean =
-//        !state.frameState.isSelecting
-//}
-//
-//private class DoneWhenSelecting : Action {
-//    override fun complete(state: MapLocationState): Boolean =
-//        state.frameState.isSelecting
-//}
-
 class SwitchToItemConditionally(private val inventoryPosition: () -> Int = { Inventory.Selected.candle }) : Action {
     constructor(inventory: Int) : this({ inventory })
 

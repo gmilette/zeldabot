@@ -9,7 +9,7 @@ import util.d
 object AttackActionDecider {
     // how close to get to enemies before engaging the dodge
     private const val dodgeBuffer = 3
-    var DEBUG = false
+    var DEBUG = true
 
     private val longExtra = MapConstants.swordGridPlusOne
     // if link is half way into a grid, can he swing and hit the target
@@ -205,12 +205,13 @@ object AttackActionDecider {
         return swords[dir]?.intersect(enemy) ?: false
     }
 
-    fun inRangeOf(state: MapLocationState, targets: List<FramePoint>, useB: Boolean = false): GamePad {
+    fun inRangeOf(state: MapLocationState, targets: List<FramePoint>, useB: Boolean = false, faceEnemy: Boolean = true): GamePad {
         return inRangeOf(
             state.frameState.link.dir,
             state.link,
             targets,
-            useB
+            useB,
+            faceEnemy
         )
     }
 
@@ -304,7 +305,8 @@ object AttackActionDecider {
         from: Direction,
         link: FramePoint,
         enemies: List<FramePoint>,
-        useB: Boolean
+        useB: Boolean,
+        faceEnemy: Boolean = true
     ): GamePad {
         d { " ** in range of start ** "}
         val swords = swordRectangles(link)
@@ -347,8 +349,7 @@ object AttackActionDecider {
 
         // it's problematic when there is a corner
         // because it faces up, but can't go up, it has to persist in the cornering
-        val FACE_ENEMY = true
-        val attackMove = if (FACE_ENEMY) {
+        val attackMove = if (faceEnemy) {
             if (DEBUG) {
                 d { " ** face" }
             }

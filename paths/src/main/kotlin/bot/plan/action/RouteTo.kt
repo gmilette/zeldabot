@@ -1,19 +1,21 @@
 package bot.plan.action
 
+import bot.plan.action.routeto.RouteExecution
+import bot.plan.action.routeto.RouteToGetInFrontOf
 import bot.plan.zstar.route.BreadthFirstSearch
 import bot.plan.zstar.route.BreadthFirstSearch.ActionRoute
 import bot.plan.zstar.FrameRoute
 import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.*
-import bot.state.oam.swordDir
 import util.LogFile
 import util.d
 import util.w
-import kotlin.random.Random
+import kotlin.collections.ifEmpty
 
 class RouteTo(val params: Param = Param()) {
     private var boomerangCt = 0
+    private var routeAction = RouteExecution(params)
 
     companion object {
         /**
@@ -33,7 +35,7 @@ class RouteTo(val params: Param = Param()) {
                 } else if (ignoreProjectiles) {
                     WhatToAvoid.JustEnemies
                 } else {
-                    WhatToAvoid.All
+                     WhatToAvoid.All
                 }
             )
         )
@@ -90,6 +92,10 @@ class RouteTo(val params: Param = Param()) {
         val forcePassable: List<FramePoint> = emptyList(),
         // could be used to avoid spots in front of sword guys too
         val forceHighCost: List<FramePoint> = emptyList(),
+        /**
+         * ignored
+         */
+        @Deprecated("Ignored")
         val attackTarget: FramePoint? = null,
         val ladderSpec: ZStar.LadderSpec? = null,
         /**
@@ -139,7 +145,7 @@ class RouteTo(val params: Param = Param()) {
         // pass in attack targets
         attackableSpec: List<Agent> = emptyList()
     ): GamePad {
-        d { " BFS START"}
+        d { "BFS START"}
         val linkPt = state.link
         val paramZ = ZStar.ZRouteParam(
             start = linkPt,
@@ -159,7 +165,7 @@ class RouteTo(val params: Param = Param()) {
         }
         val linkDir = state.frameState.link.dir
         val result = search.bestRoute(linkPt.withDir(linkDir), attackable.map { it.point })
-        d { " BFS result action ${result}"}
+        d { " BFS result action $result"}
         // refactor to one function
         return when (result) {
             is ActionRoute.Attack -> GamePad.aOrB(result.useB)
@@ -169,20 +175,25 @@ class RouteTo(val params: Param = Param()) {
                 val pointDir = route?.decideDirection(linkPt, state.frameState.link.dir)
                 d { " next is $nextPoint of ${route?.numPoints ?: 0} chose direction $pointDir" }
                 nextPoint = nextPoint.copy(direction = pointDir)
-                return when {
-                    nextPoint.isZero && linkPt.x == 0 -> GamePad.MoveLeft
-                    nextPoint.isZero && linkPt.y == 0 -> GamePad.MoveUp
-                    // already in a good spot
-                    nextPoint.isZero -> GamePad.None
-                    else -> nextPoint.direction?.toGamePad() ?: linkPt.directionTo(nextPoint)
-                }.also {
-                    //        writeFile(to, state, it)
-                    d { " link point $linkPt next point $nextPoint dir: $it ${if (nextPoint.direction != null) "HAS DIR ${nextPoint.direction}" else ""}" }
-                }
+                getActionFromRoute(nextPoint, linkPt)
             }
         }
     }
 
+    fun getActionFromRoute(nextPoint: FramePoint, linkPt: FramePoint): GamePad {
+        return when {
+            nextPoint.isZero && linkPt.x == 0 -> GamePad.MoveLeft
+            nextPoint.isZero && linkPt.y == 0 -> GamePad.MoveUp
+            // already in a good spot
+            nextPoint.isZero -> GamePad.None
+            else -> nextPoint.direction?.toGamePad() ?: linkPt.directionTo(nextPoint)
+        }.also {
+            //        writeFile(to, state, it)
+            d { " link point $linkPt next point $nextPoint dir: $it ${if (nextPoint.direction != null) "HAS DIR ${nextPoint.direction}" else ""}" }
+        }
+    }
+
+    //routeAction
     fun routeTo(
         state: MapLocationState,
         to: List<FramePoint>,
@@ -190,148 +201,91 @@ class RouteTo(val params: Param = Param()) {
         // pass in attack targets
         attackableSpec: List<Agent> = emptyList()
     ): GamePad {
-//        val canAttack = param.allowAttack && !state.frameState.linkDoingAnAttack() && (param.useB || state.frameState.canUseSword)
-        val canAttack = param.allowAttack && (param.useB || state.frameState.canUseSword)
-        if (state.frameState.linkDoingAnAttack()) {
-            d { " xxLink is attackingxx "}
-        }
-
-        // attack with wand as if it is a sword
-        val attackWithWand =
-            param.allowAttack && !state.frameState.canUseSword && state.frameState.inventory.selectedItem == Inventory.Selected.wand
-        val useB = if (attackWithWand) {
-            true
-        } else {
-            param.useB
-        }
-
-        val attackPossible by lazy { params.whatToAvoid != WhatToAvoid.None && canAttack }
-        d { " route To attackOrRoute attack=$attackPossible can=$canAttack allowBlock=${param.allowBlock} avoid=${params.whatToAvoid} waitBoom=$boomerangCt useB=${useB} canUseSword=${state.frameState.canUseSword} spec`${attackableSpec}" }
-        val theAttack = if (useB) {
-            attackB
-        } else {
-            attack
-        }
-
-        for (agent in attackableSpec) {
-            d { " attackableSpec: $agent" }
-        }
-
-        val attackableAgents: List<Agent> = AttackActionDecider.aliveEnemiesCanAttack(state)
-        val attackable = attackableSpec.ifEmpty {
-            attackableAgents
-        }
-
-        val level = state.frameState.level
-        // same with wand? not quite but close
-        val specOrAgents: List<Agent> = attackableSpec.ifEmpty {
-            attackableAgents
-        }
-
-        // it's dumb to shoot arrows at
-        val affectedByProjectileAgents: List<Agent> = if (state.boomerangActive) {
-            specOrAgents.filter { it.affectedByBoomerang(level) }
-        } else {
-            specOrAgents.filter { it.arrowKillable(level) }
-        }
-        val affectedByProjectileLoot = state.loot.filter { it.lootNeeded(state) }
-        val boomerangable: List<FramePoint> =
-            (affectedByProjectileAgents + affectedByProjectileLoot)
-                .map { it.point }  // won't boomerang for useless stuff like keys, compass, etc.
-        for (framePoint in attackableAgents) {
-            d { " attackable agent: $framePoint" }
-        }
-        for (framePoint in attackable) {
-            d { " attackable: $framePoint" }
-        }
-        for (framePoint in boomerangable) {
-            d { " boomerangable: $framePoint" }
-        }
-        val onlyBoomerangagle = (boomerangable - attackable)
-        for (framePoint in onlyBoomerangagle) {
-            d { " boomerangable: $framePoint" }
-        }
-
-        if (attackable.isEmpty()) {
-            d { "No attackable" }
-        }
-
-        val dodgeReflex: GamePad = GamePad.None //idea
-        val blockReflex: GamePad? = if (param.allowBlock && this.params.whatToAvoid != WhatToAvoid.JustEnemies) AttackActionBlockDecider.blockReflex(state) else null
-        val leftCorner = state.link.upLeftOneGridALittleLess
-//        val nearLink = Geom.Rectangle(leftCorner, state.link.downTwoGrid.rightTwoGrid)
-//        val nearLink = Geom.Rectangle(leftCorner, state.link.downOneGrid.rightOneGrid)
-        // should only do this for fireball projectiles
-        val projectileNear = false // state.projectiles.filter { !state.frameState.isLevel || it.tile !in EnemyGroup.projectilesAttackIfNear }.any { it.point.toRect().intersect(nearLink) }
-        val inRangeOf by lazy { AttackActionDecider.inRangeOf(state, attackable.map { it.point } , useB) }
-        val shouldLongAttack by lazy { param.allowRangedAttack && AttackLongActionDecider.shouldShootSword(state, attackable.map { it.point }) }
-        val shouldLongBoomerang by lazy { param.allowRangedAttack && boomerangCt <= 0 && AttackLongActionDecider.shouldBoomerang(state, boomerangable) }
-        boomerangCt--
-
-        val considerAttacks = allowAttack && !projectileNear && attackPossible
-        return when {
-            blockReflex != null -> {
-                d { " Route Action -> Block Reflex! $blockReflex" }
-                blockReflex
-            }
-            considerAttacks && (attack.isAttacking()) -> {
-                d { " Route Action -> Keep Attacking" }
-                theAttack.nextStep(state)
-            }
-
-            considerAttacks && canAttack && shouldLongAttack -> {
-                d { " Route Action -> LongAttack" }
-                theAttack.nextStep(state)
-            }
-
-            considerAttacks && canAttack && shouldLongBoomerang -> {
-                d { " Route Action -> LongAttack Boomerang" }
-                boomerangCt = if (state.boomerangActive) {
-                    // it's possible to get stuck doing the boomerang over and over never attacking
-                    typically(WAIT_BETWEEN_BOOMERANG, everySoOften = WAIT_BETWEEN_BOOMERANG * 2)
-                } else {
-                    WAIT_BETWEEN_NOT_BOOMERANG
-                }
-                attackB.nextStep(state)
-            }
-
-            !allowAttack ||
-                    !attackPossible ||
-                    projectileNear || // ignore sun
-                    (inRangeOf.isAttack && theAttack.attackWaiting()) || //rhino
-//                    !canAttack || // redundant
-                    (state.frameState.clockActivated && Random.nextInt(10) == 1) ||
-                    // this is weird, no need to do this yet
-//                    AttackActionDecider.getInFrontOfGrids(state) ||
-                    inRangeOf == GamePad.None -> {
-                attack.reset()
-                attackB.reset()
-                d { " Route Action -> No Attack allow=${allowAttack} possible=${attackPossible} projNear=$projectileNear clock=${state.frameState.clockActivated} inRangeOf=${inRangeOf == GamePad.None} rh=${(inRangeOf.isAttack && theAttack.attackWaiting())}" }
-                doRouteTo(state, to, param)
-            }
-
-            else -> {
-                d { " Route Action -> RangeAction $inRangeOf use ${theAttack.gameAction} is=${inRangeOf.isAttack}" }
-                // Problem --> if link is at a crossroads and especially if he is trying to move perpendicular
-                // it will probably not work
-                // solutions -> Include this in the cornering logic
-                // don't allow perpendicular facing of the enemy,
-                //  but then again, link can't turn around, so really this is just to turn off facing the enemy
-                if (inRangeOf.isAttack) {
-                    theAttack.nextStep(state)
-                } else {
-                    inRangeOf
-                }
-            }
-        }
+        // extract more of the code before actually calling makeRoute and use the route preparation instead
+        return routeAction.route(state, to, param, attackableSpec, this)
     }
 
-    private fun typically(typical: Int, everySoOften: Int): Int =
-        if (Random.nextInt(6) == 1) {
-            everySoOften
-        } else {
-            typical
-        }
+//    fun routeToOld(
+//        state: MapLocationState,
+//        to: List<FramePoint>,
+//        param: RouteParam = RouteParam(),
+//        // pass in attack targets
+//        attackableSpec: List<Agent> = emptyList()
+//    ): GamePad {
+////        val canAttack = param.allowAttack && !state.frameState.linkDoingAnAttack() && (param.useB || state.frameState.canUseSword)
+//        val preparation = RoutePreparation()
+//        preparation.prepare(state, to, param, attackableSpec)
+//        val decide = RouteToDetermineAction(preparation)
+//        decide.needsImmediateAction()
+//
+//        val blockReflex: GamePad? = if (param.allowBlock && this.params.whatToAvoid != WhatToAvoid.JustEnemies) AttackActionBlockDecider.blockReflex(state) else null
+//        val inRangeOf by lazy { AttackActionDecider.inRangeOf(state, attackable.map { it.point } , useB) }
+//        val shouldLongAttack by lazy { param.allowRangedAttack && AttackLongActionDecider.shouldShootSword(state, attackable.map { it.point }) }
+//        val shouldLongBoomerang by lazy { param.allowRangedAttack && boomerangCt <= 0 && AttackLongActionDecider.shouldBoomerang(state, boomerangable) }
+//        boomerangCt--
+//
+//        val considerAttacks = allowAttack && attackPossible
+//        return when {
+//            blockReflex != null -> {
+//                d { " Route Action -> Block Reflex! $blockReflex" }
+//                blockReflex
+//            }
+//            considerAttacks && (attack.isAttacking()) -> {
+//                d { " Route Action -> Keep Attacking" }
+//                theAttack.nextStep(state)
+//            }
+//
+//            considerAttacks && canAttack && shouldLongAttack -> {
+//                d { " Route Action -> LongAttack" }
+//                theAttack.nextStep(state)
+//            }
+//
+//            considerAttacks && canAttack && shouldLongBoomerang -> {
+//                d { " Route Action -> LongAttack Boomerang" }
+//                boomerangCt = if (state.boomerangActive) {
+//                    // it's possible to get stuck doing the boomerang over and over never attacking
+//                    typically(WAIT_BETWEEN_BOOMERANG, everySoOften = WAIT_BETWEEN_BOOMERANG * 2)
+//                } else {
+//                    WAIT_BETWEEN_NOT_BOOMERANG
+//                }
+//                attackB.nextStep(state)
+//            }
+//
+//            !allowAttack ||
+//                    !attackPossible ||
+//                    (inRangeOf.isAttack && theAttack.attackWaiting()) || //rhino
+//                    (state.frameState.clockActivated && Random.nextInt(10) == 1) ||
+//                    // this is weird, no need to do this yet
+////                    AttackActionDecider.getInFrontOfGrids(state) ||
+//                    inRangeOf == GamePad.None -> {
+//                attack.reset()
+//                attackB.reset()
+//                d { " Route Action -> No Attack allow=${allowAttack} possible=${attackPossible} clock=${state.frameState.clockActivated} inRangeOf=${inRangeOf == GamePad.None} rh=${(inRangeOf.isAttack && theAttack.attackWaiting())}" }
+//                doRouteTo(state, to, param)
+//            }
+//
+//            else -> {
+//                d { " Route Action -> RangeAction $inRangeOf use ${theAttack.gameAction} is=${inRangeOf.isAttack}" }
+//                // Problem --> if link is at a crossroads and especially if he is trying to move perpendicular
+//                // it will probably not work
+//                // solutions -> Include this in the cornering logic
+//                // don't allow perpendicular facing of the enemy,
+//                //  but then again, link can't turn around, so really this is just to turn off facing the enemy
+//                if (inRangeOf.isAttack) {
+//                    theAttack.nextStep(state)
+//                } else {
+//                    inRangeOf
+//                }
+//            }
+//        }
+//    }
+
+//    private fun typically(typical: Int, everySoOften: Int): Int =
+//        if (Random.nextInt(6) == 1) {
+//            everySoOften
+//        } else {
+//            typical
+//        }
 
     private fun writeFile(
         to: List<FramePoint>,
@@ -350,7 +304,7 @@ class RouteTo(val params: Param = Param()) {
         )
     }
 
-    private fun doRouteTo(
+    fun doRouteTo(
         state: MapLocationState,
         to: List<FramePoint>,
         paramIn: RouteParam
@@ -480,7 +434,7 @@ class RouteTo(val params: Param = Param()) {
         }
     }
 
-    private fun makeNewRoute(
+    fun makeNewRoute(
         param: RouteParam,
         state: MapLocationState,
         to: List<FramePoint>,
@@ -499,7 +453,7 @@ class RouteTo(val params: Param = Param()) {
 
         val mapCell = param.overrideMapCell ?: state.currentMapCell
 
-        val inFrontOfGrids = getInFrontOfGrids(state)
+        val inFrontOfGrids = RouteToGetInFrontOf.getInFrontOfGrids(state)
         for (point in inFrontOfGrids) {
             d { "in front grid $point"}
         }
@@ -580,51 +534,4 @@ class RouteTo(val params: Param = Param()) {
             GamePad.None
         }
     }
-    private fun getInFrontOfGridsForProjectiles(state: MapLocationState): List<FramePoint> =
-        state.frameState.enemies.filter { it.state == EnemyState.Projectile }.flatMap { agent ->
-            when (agent.moving) {
-                MovingDirection.LEFT -> listOf(agent.point.leftTwoGrid.right2,
-                    agent.point.leftTwoGrid.right2.upOneGrid)
-                MovingDirection.RIGHT -> listOf(agent.point.rightOneGrid.left2)
-                MovingDirection.DOWN -> listOf(agent.point.downOneGrid.up2)
-                MovingDirection.UP -> listOf(agent.point.upTwoGrid.down2)
-                // incorrect most likely
-                is MovingDirection.DIAGONAL -> listOf(agent.point.relativeTo(agent.moving.slope))
-                else -> emptyList()
-            }.also {
-                if (it.isNotEmpty()) {
-                    d { "${agent.point} is moving ${agent.moving.javaClass.simpleName} in front --> $it" }
-                }
-            }
-        }
-
-    private fun getInFrontOfGrids(state: MapLocationState): List<FramePoint> =
-        getInFrontOfGridsSword(state) + getInFrontOfGridsForProjectiles(state)
-
-    private fun getInFrontOfGridsSword(state: MapLocationState): List<FramePoint> =
-        state.frameState.enemies.flatMap { agent: Agent ->
-            // sames as just agent.dir
-            d { " sword agent at ${agent.point} dir ${agent.dir} calc ${swordDir.dirFront(agent)}"}
-            swordDir.dirFront(agent)?.let { dir ->
-                val pt = dir.pointModifier(MapConstants.oneGrid)(agent.point)
-                listOf(
-                    pt,
-                    // ok to be next to the enemy, just not half on top of the enemy
-                    if (dir.horizontal) pt.upHalfGrid else pt.leftHalfGrid
-                )
-            } ?: emptyList()
-        }
-
-    private fun getInFrontOfGridsGhosts(state: MapLocationState): List<FramePoint> =
-        // all the frames in front of the ghost are dangerous
-        state.frameState.enemies.flatMap { agent: Agent ->
-            swordDir.dirFront(agent)?.let { dir ->
-                val pt = dir.pointModifier(MapConstants.oneGrid)(agent.point)
-                listOf(
-                    pt,
-                    if (dir.horizontal) pt.upOneGrid else pt.leftOneGrid
-                )
-            } ?: emptyList()
-        }
-
 }
