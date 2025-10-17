@@ -5,7 +5,7 @@ import co.touchlab.kermit.Logger
 
 object LoggerOverride {
     val log: Boolean
-        get() = true // ZeldaBot.log
+        get() = ZeldaBot.log
 }
 
 inline fun v(message: () -> String) = log { Logger.v(message()) }
