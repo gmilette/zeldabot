@@ -67,6 +67,16 @@ class ZStar(
 
     private var iterCount = 0
 
+    // Metrics tracking - exposed publicly for comparison
+    var lastIterationsUsed: Int = 0
+        private set
+    var lastNodesExplored: Int = 0
+        private set
+    var lastMaxOpenListSize: Int = 0
+        private set
+    var lastClosedListSize: Int = 0
+        private set
+
     // this really helps keep zelda on track, it's a little strict though walking half way
     // is also acceptable
     // the game is constantly trying to make link travel on one of these paths
@@ -293,6 +303,12 @@ class ZStar(
         val closedList = mutableSetOf<FramePoint>()
         val cameFrom = mutableMapOf<FramePoint, FramePoint>()
 
+        // Reset metrics for this search
+        lastIterationsUsed = 0
+        lastNodesExplored = 0
+        lastMaxOpenListSize = 0
+        lastClosedListSize = 0
+
         // really what I want is it to just seek ANY safe point
         var routeToSafe = false
 
@@ -345,6 +361,10 @@ class ZStar(
 //        while (true && iterCount < MAX_ITER) {
         while (iterCount < maxIter) {
             iterCount++
+
+            // Track metrics
+            lastMaxOpenListSize = maxOf(lastMaxOpenListSize, openList.size)
+
             if (DEBUG) {
                 d { " ****** ITERATION $iterCount open ${openList.size} ****** " }
             }
@@ -389,10 +409,12 @@ class ZStar(
                     d { " explore found: $point done because $doneBecause" }
                 }
                 closedList.add(point)
+                lastNodesExplored++
                 break
             }
 
             closedList.add(point)
+            lastNodesExplored++
 
             // I think this is it
             val previousPoint =
@@ -469,6 +491,10 @@ class ZStar(
                 break
             }
         }
+
+        // Store final metrics
+        lastIterationsUsed = iterCount
+        lastClosedListSize = closedList.size
 
         d { " route iterations $iterCount"}
 

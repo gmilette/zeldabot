@@ -45,6 +45,11 @@ compose.desktop {
     }
 }
 
+tasks.register<JavaExec>("runComparison") {
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass.set("bot.plan.zstar.route.PathfindingComparisonExample")
+}
+
 tasks.jar {
     manifest {
         attributes["Main-Class"] = "MainBKt"

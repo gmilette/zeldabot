@@ -30,6 +30,15 @@ class BreadthFirstSearch(
     private val longDecider: AttackLongActionDecider = AttackLongActionDecider,
     private val shortDecider: AttackActionDecider = AttackActionDecider
 ) {
+    // Metrics tracking
+    var lastNodesExplored: Int = 0
+        private set
+    var lastIterationsUsed: Int = 0
+        private set
+    var lastMaxQueueSize: Int = 0
+        private set
+    var lastNodesConsidered: Int = 0
+        private set
     companion object {
         val MAX_PATHS = 3
         // problems
@@ -197,16 +206,36 @@ class BreadthFirstSearch(
         targets: List<FramePoint>,
         maxDepth: Int = 5000
     ): List<List<FramePoint>> {
+        // Validate input bounds
+        if (!neighborFinder.passableAndWithin(start)) {
+            d { "BFS: Start point $start is out of bounds or not passable" }
+            return emptyList()
+        }
+
+        if (targets.any { !neighborFinder.passableAndWithin(it) }) {
+            d { "BFS: One or more target points are out of bounds: $targets" }
+            return emptyList()
+        }
         val queue = LinkedList<SearchNode>()
         val visited = mutableSetOf<FramePoint>()
         val foundPaths = mutableListOf<List<FramePoint>>()
 
         queue.offer(SearchNode(start, listOf(start), 0))
-        
+
         var iterations = 0
+        // Reset all metrics at start of search
+        lastNodesExplored = 0
+        lastNodesConsidered = 0
+        lastMaxQueueSize = 0
+
         while (queue.isNotEmpty() && iterations < MAX_ITER && foundPaths.size < MAX_PATHS) {
             iterations++
+
+            // Track maximum queue size
+            lastMaxQueueSize = maxOf(lastMaxQueueSize, queue.size)
+
             val current = queue.poll()
+            lastNodesConsidered++ // Count every node we pull from queue
             
             if (DEBUG_B) {
                 d { "$iterations: exploring ${current.point} at depth ${current.depth}" }
@@ -231,6 +260,7 @@ class BreadthFirstSearch(
             
             if (current.point in visited) continue
             visited.add(current.point)
+            lastNodesExplored++
 
             val from = current.path.getOrNull(current.path.size - 2)
             
@@ -265,7 +295,9 @@ class BreadthFirstSearch(
                 }
             }
         }
-        
+
+        lastIterationsUsed = iterations
+
 //        if (DEBUG_B) {
 //            d { "BFS completed: found ${foundPaths.size} paths in $iterations iterations" }
 //            for (path in foundPaths) {

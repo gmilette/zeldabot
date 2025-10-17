@@ -18,7 +18,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import bot.plan.zstar.NeighborFinder
+import bot.plan.zstar.ZStar
 import bot.plan.zstar.route.BreadthFirstSearch
+import bot.plan.zstar.route.BreadthFirstSearchWrapper
+import bot.plan.zstar.route.ZStarWrapper
+import bot.plan.zstar.route.PathfindingComparator
+import bot.plan.zstar.route.PathfindingResult
 import bot.state.*
 import bot.state.map.Direction
 import util.Map2d
@@ -46,6 +51,8 @@ class BreadthFirstSearchTestUIState {
     var ableToLongAttack by mutableStateOf(false)
     var showInstructions by mutableStateOf(false)
     var selectedPathIndex by mutableStateOf(0)  // -1 means show all paths, 0+ means show specific path
+    var comparisonResults = mutableStateListOf<PathfindingResult>()
+    var showComparison by mutableStateOf(false)
     
     private val settingsFile = File("breadthfirstsearch_settings.json")
     
@@ -155,20 +162,20 @@ class BreadthFirstSearchTestUIState {
     fun runBreadthFirstSearch() {
         val start = startPoint ?: return
         if (enemies.isEmpty()) return
-        
+
         foundPaths.clear()
-        
+
         try {
             val neighborFinder = NeighborFinder(passableGrid).apply {
                 costF = costGrid
             }
-            
+
             // Create a real BreadthFirstSearch instance - now much simpler!
             val breadthFirstSearch = BreadthFirstSearch(
                 ableToLongAttack = ableToLongAttack,
                 neighborFinder = neighborFinder
             )
-            
+
             // Use the real algorithm with actual isGoal logic
             val paths = breadthFirstSearch.breadthFirstSearch(
                 start = start,
@@ -177,9 +184,72 @@ class BreadthFirstSearchTestUIState {
             )
             foundPaths.addAll(paths)
             selectedPathIndex = if (paths.isNotEmpty()) 0 else -1
-            
+
         } catch (e: Exception) {
             println("Error running BreadthFirstSearch: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+
+    fun runComparison() {
+        val start = startPoint ?: return
+        if (enemies.isEmpty()) return
+
+        comparisonResults.clear()
+
+        try {
+            val neighborFinder = NeighborFinder(passableGrid).apply {
+                costF = costGrid
+            }
+
+            val zstar = ZStar(passableGrid, halfPassable = true, isLevel = false).apply {
+                // Set up the cost grid for enemies
+                customizer.setEnemyCosts(start, enemies.toList())
+            }
+
+            // Create algorithm wrappers
+            val bfsWrapper = BreadthFirstSearchWrapper(
+                ableToLongAttack = ableToLongAttack,
+                ableToAttack = true,
+                neighborFinder = neighborFinder
+            )
+
+            val zstarWrapper = ZStarWrapper(zstar)
+
+            val algorithms = listOf(bfsWrapper, zstarWrapper)
+            val comparator = PathfindingComparator()
+
+            // Create test scenario
+            val scenario = PathfindingComparator.TestScenario(
+                name = "UI Test Scenario",
+                start = start,
+                targets = enemies.toList(),
+                maxDepth = 300,
+                description = "User-defined scenario from UI"
+            )
+
+            // Run comparison
+            val result = comparator.compareAlgorithms(scenario, algorithms)
+
+            // Store results for display
+            comparisonResults.addAll(result.results.values)
+
+            // Also update foundPaths with the BFS result for visualization
+            foundPaths.clear()
+            result.results["BreadthFirstSearch"]?.let { bfsResult ->
+                if (bfsResult.success) {
+                    foundPaths.add(bfsResult.path)
+                }
+            }
+
+            // Print comparison to console
+            println("=== PATHFINDING COMPARISON RESULTS ===")
+            println(result.summary)
+
+            selectedPathIndex = if (foundPaths.isNotEmpty()) 0 else -1
+
+        } catch (e: Exception) {
+            println("Error running comparison: ${e.message}")
             e.printStackTrace()
         }
     }
@@ -348,17 +418,26 @@ fun BreadthFirstSearchTestUI() {
                     onClick = { uiState.runBreadthFirstSearch() },
                     enabled = uiState.startPoint != null && uiState.enemies.isNotEmpty()
                 ) {
-                    Text("Run BreadthFirst Search")
+                    Text("Run BFS")
+                }
+
+                Button(
+                    onClick = { uiState.runComparison() },
+                    enabled = uiState.startPoint != null && uiState.enemies.isNotEmpty()
+                ) {
+                    Text("Compare BFS vs Z*")
                 }
                 
                 Button(
-                    onClick = { 
+                    onClick = {
                         uiState.foundPaths.clear()
                         uiState.enemies.clear()
                         uiState.startPoint = null
                         uiState.selectedPathIndex = 0
                         uiState.ableToLongAttack = false
                         uiState.startDirection = Direction.None
+                        uiState.comparisonResults.clear()
+                        uiState.showComparison = false
                         uiState.deleteSavedSettings()
                     }
                 ) {
@@ -452,6 +531,14 @@ fun BreadthFirstSearchTestUI() {
                 ) {
                     Text("Info")
                 }
+
+                if (uiState.comparisonResults.isNotEmpty()) {
+                    Button(
+                        onClick = { uiState.showComparison = !uiState.showComparison }
+                    ) {
+                        Text("Results")
+                    }
+                }
                 
                 Spacer(Modifier.weight(1f))
             }
@@ -499,7 +586,46 @@ fun BreadthFirstSearchTestUI() {
                     }
                 }
             }
-            
+
+            // Comparison Results (conditionally visible)
+            if (uiState.showComparison && uiState.comparisonResults.isNotEmpty()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = 2.dp
+                ) {
+                    Column(Modifier.padding(8.dp)) {
+                        Text("Algorithm Comparison Results:", fontWeight = FontWeight.Bold)
+
+                        uiState.comparisonResults.forEach { result ->
+                            val status = if (result.success) "✓" else "✗"
+                            Text("$status ${result.metrics.algorithmName}:")
+                            if (result.success) {
+                                Text("  • Path length: ${result.metrics.pathLength} steps")
+                                Text("  • Time: ${result.metrics.executionTimeMs}ms")
+                                Text("  • Safety: ${String.format("%.1f%%", result.metrics.safetyScore * 100)}")
+                                Text("  • Nodes explored: ${result.metrics.nodesExplored}")
+                                Text("  • Iterations: ${result.metrics.iterationsUsed}")
+                            } else {
+                                Text("  • Failed to find path")
+                            }
+                            Spacer(Modifier.height(4.dp))
+                        }
+
+                        // Determine winner
+                        val successfulResults = uiState.comparisonResults.filter { it.success }
+                        if (successfulResults.size > 1) {
+                            val winner = successfulResults.minByOrNull {
+                                // Simple scoring: prefer faster + safer
+                                it.metrics.executionTimeMs * (1.0 - it.metrics.safetyScore)
+                            }
+                            winner?.let {
+                                Text("🏆 Winner: ${it.metrics.algorithmName}", fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+            }
+
             Spacer(Modifier.height(8.dp))
             
             // Grid
