@@ -1,6 +1,6 @@
 package bot
 
-import bot.plan.ZeldaPlan
+import bot.plan.levels.ZeldaPlan
 import bot.plan.action.*
 import bot.plan.runner.MasterPlan
 import bot.plan.runner.PlanRunner
@@ -16,7 +16,6 @@ import nintaco.api.GamepadButtons
 import util.Map2d
 import util.RunOnceLambda
 import util.d
-import util.ifTrue
 
 class ZeldaBot(private val monitor: ZeldaMonitor) {
     private val api: API = ApiSource.getAPI()
