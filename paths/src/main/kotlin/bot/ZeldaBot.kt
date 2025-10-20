@@ -1,6 +1,6 @@
 package bot
 
-import bot.plan.levels.ZeldaPlan
+import bot.plan.ZeldaPlan
 import bot.plan.action.*
 import bot.plan.runner.MasterPlan
 import bot.plan.runner.PlanRunner

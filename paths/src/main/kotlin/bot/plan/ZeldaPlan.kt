@@ -1,9 +1,20 @@
-package bot.plan.levels
+package bot.plan
 
-import bot.plan.OverworldRouter
-import bot.plan.PlanInputs
+import bot.plan.levels.afterLevel2ItemsLetterEtcPhase
+import bot.plan.levels.arrowAndHearts
+import bot.plan.levels.gatherBombsFirstPhase
+import bot.plan.levels.greenPotion
+import bot.plan.levels.harvest
+import bot.plan.levels.itemsNearLevel2CandleShieldPhase
+import bot.plan.levels.level1
+import bot.plan.levels.level2
+import bot.plan.levels.level5sequence
+import bot.plan.levels.ringLevels
+import bot.plan.levels.whiteSword
+import bot.plan.levels.woodenSwordPhase
 import bot.plan.runner.MasterPlan
-import bot.state.map.*
+import bot.state.map.Hyrule
+import bot.state.map.MapCells
 import bot.state.map.destination.Dest
 import bot.state.map.level.LevelMapCellsLookup
 
