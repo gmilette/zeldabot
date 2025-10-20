@@ -61,6 +61,13 @@ class RouteExecution(val params: Param = Param()) {
         preparation.prepare(state, to, param, attackableSpec)
         val determine = RouteToDetermineAction(preparation)
 
+        theAttack = if (determine.preparation.useB) {
+            attackB
+        } else {
+            attack
+        }
+        boomerangCt = (boomerangCt - 1).coerceAtLeast(0)
+
         val action = determine.nextAction(
             state,
             to,
@@ -68,12 +75,6 @@ class RouteExecution(val params: Param = Param()) {
             boomerangCt,
              theAttack.isAttacking(),
         )
-
-        theAttack = if (determine.preparation.useB) {
-            attackB
-        } else {
-            attack
-        }
 
         d { " Route Action -> Type is $action attacking=${theAttack.isAttacking()}" }
         // keeps turning around while attacking

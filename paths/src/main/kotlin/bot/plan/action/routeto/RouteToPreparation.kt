@@ -51,11 +51,6 @@ class RoutePreparation(val params: Param = Param()) {
         } else {
             param.useB
         }
-//        val theAttack = if (useB) {
-//            attackB
-//        } else {
-//            attack
-//        }
 
         val attackableAgents: List<Agent> = AttackActionDecider.aliveEnemiesCanAttack(state)
         attackable = attackableSpec.ifEmpty {
@@ -77,7 +72,7 @@ class RoutePreparation(val params: Param = Param()) {
         boomerangable =
             (affectedByProjectileAgents + affectedByProjectileLoot)
                 .map { it.point }  // won't boomerang for useless stuff like keys, compass, etc.
-        val onlyBoomerangagle = (boomerangable - attackable)
+        val onlyBoomerangagle = (boomerangable - attackable.map { it.point })
 
         prepareAvoid(state, param)
 

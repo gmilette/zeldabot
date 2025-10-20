@@ -1109,7 +1109,6 @@ private fun PlanBuilder.levelPlan9PhaseSilverArrow() {
         goIn(GamePad.MoveUp, 8.grid, monitor = false)
         upm
         bombLeft
-        GoIn(10, GamePad.MoveLeft)
         "kill travel 1".seg()
         kill
         // trigger trap first

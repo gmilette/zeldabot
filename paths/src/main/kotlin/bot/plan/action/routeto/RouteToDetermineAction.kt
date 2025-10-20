@@ -39,7 +39,6 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
         }
         val shouldLongAttack by lazy { param.allowRangedAttack && AttackLongActionDecider.shouldShootSword(state, attackablePoints) }
         val shouldLongBoomerang by lazy { param.allowRangedAttack && boomerangCt <= 0 && AttackLongActionDecider.shouldBoomerang(state, preparation.boomerangable) }
-//            boomerangCt--
         val inRangeOf by lazy { AttackActionDecider.inRangeOf(linkDir, link, attackablePoints, param.useB, faceEnemy = true) }
         val shouldShortAttack by lazy { inRangeOf.isAttack }
         val shouldFace by lazy { inRangeOf.isDirection }
