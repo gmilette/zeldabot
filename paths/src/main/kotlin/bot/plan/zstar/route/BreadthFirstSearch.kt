@@ -23,39 +23,6 @@ data class SearchNode(
     val foundSafe: Boolean = false
 )
 
-/**
- * Enhanced path scoring metrics for better path comparison
- */
-data class PathScore(
-    val unsafeCount: Double,
-    val maxConsecutiveUnsafe: Int,
-    val pathLength: Int,
-    val averageEnemyDistance: Double,
-    val stepsToFirstSafe: Int,
-    val directionChanges: Int
-) : Comparable<PathScore> {
-    override fun compareTo(other: PathScore): Int {
-        // Priority order:
-        // 1. Minimize unsafe tiles
-        unsafeCount.compareTo(other.unsafeCount).takeIf { it != 0 }?.let { return it }
-
-        // 2. Minimize consecutive unsafe tiles (clustered danger is worse)
-        maxConsecutiveUnsafe.compareTo(other.maxConsecutiveUnsafe).takeIf { it != 0 }?.let { return it }
-
-        // 3. Prefer paths that reach safety quickly
-        stepsToFirstSafe.compareTo(other.stepsToFirstSafe).takeIf { it != 0 }?.let { return it }
-
-        // 4. Maximize distance from enemies (negative because we want larger distances first)
-        (-averageEnemyDistance).compareTo(-other.averageEnemyDistance).takeIf { it != 0 }?.let { return it }
-
-        // 5. Prefer shorter paths
-        pathLength.compareTo(other.pathLength).takeIf { it != 0 }?.let { return it }
-
-        // 6. Prefer smoother paths (fewer direction changes)
-        return directionChanges.compareTo(other.directionChanges)
-    }
-}
-
 class BreadthFirstSearch(
     private var ableToLongAttack: Boolean = false,
     private var ableToAttack: Boolean = true,
@@ -63,6 +30,7 @@ class BreadthFirstSearch(
     private val longDecider: AttackLongActionDecider = AttackLongActionDecider,
     private val shortDecider: AttackActionDecider = AttackActionDecider
 ) {
+    private val pathScoring = PathScoring(neighborFinder)
     companion object {
         val MAX_PATHS = 3
         // problems
@@ -87,102 +55,11 @@ class BreadthFirstSearch(
      * - Path smoothness
      */
     private fun sortPathsByBestFirst(foundPaths: List<List<FramePoint>>, enemies: List<FramePoint> = emptyList()): List<List<FramePoint>> {
-        return foundPaths.sortedBy { path -> calculatePathScore(path, enemies) }
+        return pathScoring.sortPathsByScore(foundPaths, enemies)
     }
 
     private fun sortPathsByBestFirstDist(foundPaths: List<List<FramePoint>>, enemies: List<FramePoint>): List<List<FramePoint>> {
         return sortPathsByBestFirst(foundPaths, enemies)
-    }
-
-    private fun List<FramePoint>.countDistance(enemies: List<FramePoint>): Int {
-        val sum: Int = sumOf { it.distTo(enemies) }
-        return sum
-    }
-
-    private fun countSafe(path: List<FramePoint>): Double {
-        val sum: Double = path.sumOf { if (neighborFinder.isSafe(it)) 1.0 else 0.0 }
-        return sum
-    }
-
-    private fun countUnsafe(path: List<FramePoint>): Double {
-        val sum: Double = path.sumOf { if (neighborFinder.isSafe(it)) 0.0 else 1.0 }
-        return sum
-    }
-
-    /**
-     * Calculate maximum consecutive unsafe tiles in a path.
-     * Consecutive unsafe sections are more dangerous than scattered ones.
-     */
-    private fun maxConsecutiveUnsafe(path: List<FramePoint>): Int {
-        var maxConsecutive = 0
-        var currentConsecutive = 0
-
-        for (point in path) {
-            if (!neighborFinder.isSafe(point)) {
-                currentConsecutive++
-                maxConsecutive = maxOf(maxConsecutive, currentConsecutive)
-            } else {
-                currentConsecutive = 0
-            }
-        }
-
-        return maxConsecutive
-    }
-
-    /**
-     * Calculate average distance from enemies throughout the path.
-     * Paths that keep Link farther from enemies are safer.
-     */
-    private fun averageEnemyDistance(path: List<FramePoint>, enemies: List<FramePoint>): Double {
-        if (path.isEmpty() || enemies.isEmpty()) return 0.0
-        val totalDistance = path.sumOf { it.distTo(enemies) }
-        return totalDistance.toDouble() / path.size
-    }
-
-    /**
-     * Calculate number of steps until reaching first safe tile.
-     * Paths that reach safety quickly are preferred.
-     */
-    private fun stepsToFirstSafe(path: List<FramePoint>): Int {
-        val firstSafeIndex = path.indexOfFirst { neighborFinder.isSafe(it) }
-        return if (firstSafeIndex == -1) path.size else firstSafeIndex
-    }
-
-    /**
-     * Count direction changes in the path.
-     * Fewer direction changes means smoother, more efficient movement.
-     */
-    private fun countDirectionChanges(path: List<FramePoint>): Int {
-        if (path.size < 2) return 0
-
-        var changes = 0
-        var lastDirection: Direction? = null
-
-        for (i in 1 until path.size) {
-            val currentDirection = path[i - 1].dirTo(path[i])
-            if (lastDirection != null && currentDirection != lastDirection && currentDirection != Direction.None) {
-                changes++
-            }
-            if (currentDirection != Direction.None) {
-                lastDirection = currentDirection
-            }
-        }
-
-        return changes
-    }
-
-    /**
-     * Calculate comprehensive path score for enhanced comparison
-     */
-    private fun calculatePathScore(path: List<FramePoint>, enemies: List<FramePoint>): PathScore {
-        return PathScore(
-            unsafeCount = countUnsafe(path),
-            maxConsecutiveUnsafe = maxConsecutiveUnsafe(path),
-            pathLength = path.size,
-            averageEnemyDistance = averageEnemyDistance(path, enemies),
-            stepsToFirstSafe = stepsToFirstSafe(path),
-            directionChanges = countDirectionChanges(path)
-        )
     }
 
     private fun initialCalculations() {
@@ -394,7 +271,7 @@ class BreadthFirstSearch(
             if (DEBUG_B) {
                 d { "BFS sorted with enhanced scoring" }
                 for (path in it) {
-                    val score = calculatePathScore(path, targets)
+                    val score = pathScoring.calculatePathScore(path, targets)
                     d { "BFS path score: unsafe=${score.unsafeCount}, maxConsec=${score.maxConsecutiveUnsafe}, " +
                         "len=${score.pathLength}, avgDist=${"%.1f".format(score.averageEnemyDistance)}, " +
                         "safeSteps=${score.stepsToFirstSafe}, dirChanges=${score.directionChanges}" }
