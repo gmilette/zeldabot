@@ -451,23 +451,24 @@ class PathScoringTest {
     @Test
     fun `calculatePathScore should compute all metrics correctly`() {
         val path = listOf(
-            FramePoint(0, 0, Direction.Right),   // safe
-            FramePoint(1, 0, Direction.Right),   // unsafe
-            FramePoint(2, 0, Direction.Down),    // unsafe
-            FramePoint(2, 1, Direction.Down)     // safe
+            FramePoint(0, 0),   // safe
+            FramePoint(8, 0),   // unsafe
+            FramePoint(16, 0),  // unsafe
+            FramePoint(24, 0)   // safe
         )
 
-        neighborFinder.costF.set(FramePoint(1, 0), 150)
-        neighborFinder.costF.set(FramePoint(2, 0), 150)
+        neighborFinder.costF.set(FramePoint(8, 0), 150)
+        neighborFinder.costF.set(FramePoint(16, 0), 150)
 
-        val enemies = listOf(FramePoint(10, 0))
+        val enemies = listOf(FramePoint(50, 0))
         val score = pathScoring.calculatePathScore(path, enemies)
 
         score.unsafeCount shouldBeExactly 2.0
         score.maxConsecutiveUnsafe shouldBeExactly 2
         score.pathLength shouldBeExactly 4
         score.stepsToFirstSafe shouldBeExactly 0
-        score.directionChanges shouldBeExactly 1
+        // All points are on a horizontal line, so 0 direction changes
+        score.directionChanges shouldBeExactly 0
     }
 
     // ========================================
