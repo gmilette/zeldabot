@@ -1,5 +1,6 @@
 package bot.plan.zstar.route
 
+import bot.plan.action.distTo
 import bot.plan.zstar.NeighborFinder
 import bot.state.FramePoint
 import bot.state.dirTo
