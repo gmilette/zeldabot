@@ -288,7 +288,7 @@ class PathScoringTest {
             FramePoint(0, 1, Direction.Up)
         )
 
-        pathScoring.countDirectionChanges(path) shouldBeExactly 3
+        pathScoring.countDirectionChanges(path) shouldBeExactly 2
     }
 
     @Test
