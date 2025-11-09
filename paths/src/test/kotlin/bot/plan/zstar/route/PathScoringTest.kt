@@ -183,15 +183,15 @@ class PathScoringTest {
     }
 
     @Test
-    fun `averageEnemyDistance should use closest enemy for each point`() {
+    fun `averageEnemyDistance should sum distances to all enemies for each point`() {
         val path = listOf(
-            FramePoint(0, 0),   // closest to (5,0) = 5
-            FramePoint(50, 0)   // closest to (45,0) = 5
+            FramePoint(0, 0),   // distance to (5,0)=5 + distance to (45,0)=45 = 50
+            FramePoint(50, 0)   // distance to (5,0)=45 + distance to (45,0)=5 = 50
         )
         val enemies = listOf(FramePoint(5, 0), FramePoint(45, 0))
 
-        // Average = (5 + 5) / 2 = 5.0
-        pathScoring.averageEnemyDistance(path, enemies) shouldBeExactly 5.0
+        // Average = (50 + 50) / 2 = 50.0
+        pathScoring.averageEnemyDistance(path, enemies) shouldBeExactly 50.0
     }
 
     // ========================================
