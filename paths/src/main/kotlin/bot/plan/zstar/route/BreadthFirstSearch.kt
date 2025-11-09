@@ -30,6 +30,7 @@ class BreadthFirstSearch(
     private val longDecider: AttackLongActionDecider = AttackLongActionDecider,
     private val shortDecider: AttackActionDecider = AttackActionDecider
 ) {
+    private val pathScoring = PathScoring(neighborFinder)
     companion object {
         val MAX_PATHS = 3
         // problems
@@ -46,33 +47,19 @@ class BreadthFirstSearch(
         initialCalculations()
     }
 
-    private fun sortPathsByBestFirst(foundPaths: List<List<FramePoint>>): List<List<FramePoint>> {
-        return foundPaths.sortedWith(
-            compareBy<List<FramePoint>> { countUnsafe(it) }
-                .thenBy { it.size }
-        )
+    /**
+     * Sort paths using enhanced scoring that considers multiple factors:
+     * - Unsafe tile count and distribution
+     * - Distance from enemies
+     * - Speed to reach safety
+     * - Path smoothness
+     */
+    private fun sortPathsByBestFirst(foundPaths: List<List<FramePoint>>, enemies: List<FramePoint> = emptyList()): List<List<FramePoint>> {
+        return pathScoring.sortPathsByScore(foundPaths, enemies)
     }
 
     private fun sortPathsByBestFirstDist(foundPaths: List<List<FramePoint>>, enemies: List<FramePoint>): List<List<FramePoint>> {
-        return foundPaths.sortedWith(
-            compareBy<List<FramePoint>> { countUnsafe(it) }
-                .thenByDescending { it.countDistance(enemies) }
-        )
-    }
-
-    private fun List<FramePoint>.countDistance(enemies: List<FramePoint>): Int {
-        val sum: Int = sumOf { it.distTo(enemies) }
-        return sum
-    }
-
-    private fun countSafe(path: List<FramePoint>): Double {
-        val sum: Double = path.sumOf { if (neighborFinder.isSafe(it)) 1.0 else 0.0 }
-        return sum
-    }
-
-    private fun countUnsafe(path: List<FramePoint>): Double {
-        val sum: Double = path.sumOf { if (neighborFinder.isSafe(it)) 0.0 else 1.0 }
-        return sum
+        return sortPathsByBestFirst(foundPaths, enemies)
     }
 
     private fun initialCalculations() {
@@ -278,14 +265,16 @@ class BreadthFirstSearch(
             d { "BFS sort by dist" }
             sortPathsByBestFirstDist(foundPaths, enemies = targets)
         } else {
-            d { "BFS sort by size" }
-            sortPathsByBestFirst(foundPaths)
+            d { "BFS sort by enhanced scoring" }
+            sortPathsByBestFirst(foundPaths, enemies = targets)
         }.also {
             if (DEBUG_B) {
-                d { "BFS sorted" }
+                d { "BFS sorted with enhanced scoring" }
                 for (path in it) {
-                    val dist = path.countDistance(targets)
-                    d { "BFS sorted path: ${path.size} $path $dist"}
+                    val score = pathScoring.calculatePathScore(path, targets)
+                    d { "BFS path score: unsafe=${score.unsafeCount}, maxConsec=${score.maxConsecutiveUnsafe}, " +
+                        "len=${score.pathLength}, avgDist=${"%.1f".format(score.averageEnemyDistance)}, " +
+                        "safeSteps=${score.stepsToFirstSafe}, dirChanges=${score.directionChanges}" }
                 }
             }
         }
