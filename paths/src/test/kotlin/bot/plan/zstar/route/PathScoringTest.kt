@@ -57,8 +57,8 @@ class PathScoringTest {
         )
 
         // Mark points as unsafe (cost >= 100)
-        neighborFinder.costF.set(1, 1, 150)
-        neighborFinder.costF.set(2, 2, 200)
+        neighborFinder.costF.set(FramePoint(1, 1), 150)
+        neighborFinder.costF.set(FramePoint(2, 2), 200)
 
         pathScoring.countUnsafe(path) shouldBeExactly 2.0
     }
@@ -71,7 +71,7 @@ class PathScoringTest {
             FramePoint(2, 2)
         )
 
-        neighborFinder.costF.set(1, 1, 150) // unsafe
+        neighborFinder.costF.set(FramePoint(1, 1), 150) // unsafe
 
         pathScoring.countSafe(path) shouldBeExactly 2.0
     }
@@ -107,9 +107,9 @@ class PathScoringTest {
             FramePoint(4, 4)   // safe
         )
 
-        neighborFinder.costF.set(1, 1, 150)
-        neighborFinder.costF.set(2, 2, 150)
-        neighborFinder.costF.set(3, 3, 150)
+        neighborFinder.costF.set(FramePoint(1, 1), 150)
+        neighborFinder.costF.set(FramePoint(2, 2), 150)
+        neighborFinder.costF.set(FramePoint(3, 3), 150)
 
         pathScoring.maxConsecutiveUnsafe(path) shouldBeExactly 3
     }
@@ -128,13 +128,13 @@ class PathScoringTest {
         )
 
         // First section: 2 consecutive
-        neighborFinder.costF.set(1, 1, 150)
-        neighborFinder.costF.set(2, 2, 150)
+        neighborFinder.costF.set(FramePoint(1, 1), 150)
+        neighborFinder.costF.set(FramePoint(2, 2), 150)
 
         // Second section: 3 consecutive (max)
-        neighborFinder.costF.set(4, 4, 150)
-        neighborFinder.costF.set(5, 5, 150)
-        neighborFinder.costF.set(6, 6, 150)
+        neighborFinder.costF.set(FramePoint(4, 4), 150)
+        neighborFinder.costF.set(FramePoint(5, 5), 150)
+        neighborFinder.costF.set(FramePoint(6, 6), 150)
 
         pathScoring.maxConsecutiveUnsafe(path) shouldBeExactly 3
     }
@@ -147,9 +147,9 @@ class PathScoringTest {
             FramePoint(3, 3)
         )
 
-        neighborFinder.costF.set(1, 1, 150)
-        neighborFinder.costF.set(2, 2, 150)
-        neighborFinder.costF.set(3, 3, 150)
+        neighborFinder.costF.set(FramePoint(1, 1), 150)
+        neighborFinder.costF.set(FramePoint(2, 2), 150)
+        neighborFinder.costF.set(FramePoint(3, 3), 150)
 
         pathScoring.maxConsecutiveUnsafe(path) shouldBeExactly 3
     }
@@ -232,8 +232,8 @@ class PathScoringTest {
             FramePoint(4, 4)
         )
 
-        neighborFinder.costF.set(1, 1, 150)
-        neighborFinder.costF.set(2, 2, 150)
+        neighborFinder.costF.set(FramePoint(1, 1), 150)
+        neighborFinder.costF.set(FramePoint(2, 2), 150)
 
         pathScoring.stepsToFirstSafe(path) shouldBeExactly 2
     }
@@ -246,9 +246,9 @@ class PathScoringTest {
             FramePoint(3, 3)
         )
 
-        neighborFinder.costF.set(1, 1, 150)
-        neighborFinder.costF.set(2, 2, 150)
-        neighborFinder.costF.set(3, 3, 150)
+        neighborFinder.costF.set(FramePoint(1, 1), 150)
+        neighborFinder.costF.set(FramePoint(2, 2), 150)
+        neighborFinder.costF.set(FramePoint(3, 3), 150)
 
         pathScoring.stepsToFirstSafe(path) shouldBeExactly 3
     }
@@ -457,8 +457,8 @@ class PathScoringTest {
             FramePoint(2, 1, Direction.Down)     // safe
         )
 
-        neighborFinder.costF.set(1, 0, 150)
-        neighborFinder.costF.set(2, 0, 150)
+        neighborFinder.costF.set(FramePoint(1, 0), 150)
+        neighborFinder.costF.set(FramePoint(2, 0), 150)
 
         val enemies = listOf(FramePoint(10, 0))
         val score = pathScoring.calculatePathScore(path, enemies)
@@ -497,9 +497,9 @@ class PathScoringTest {
         )
 
         // Mark points as unsafe
-        neighborFinder.costF.set(1, 1, 150)
-        neighborFinder.costF.set(2, 2, 150)
-        neighborFinder.costF.set(3, 3, 150)
+        neighborFinder.costF.set(FramePoint(1, 1), 150)
+        neighborFinder.costF.set(FramePoint(2, 2), 150)
+        neighborFinder.costF.set(FramePoint(3, 3), 150)
 
         val paths = listOf(worstPath, mediumPath, bestPath)
         val enemies = listOf(FramePoint(50, 50))
@@ -538,10 +538,10 @@ class PathScoringTest {
         )
 
         // Mark points as unsafe
-        neighborFinder.costF.set(1, 1, 150)
-        neighborFinder.costF.set(9, 1, 150)
-        neighborFinder.costF.set(2, 2, 150)
-        neighborFinder.costF.set(3, 3, 150)
+        neighborFinder.costF.set(FramePoint(1, 1), 150)
+        neighborFinder.costF.set(FramePoint(9, 1), 150)
+        neighborFinder.costF.set(FramePoint(2, 2), 150)
+        neighborFinder.costF.set(FramePoint(3, 3), 150)
 
         val paths = listOf(consecutivePath, scatteredPath)
         val enemies = listOf(FramePoint(50, 50))
