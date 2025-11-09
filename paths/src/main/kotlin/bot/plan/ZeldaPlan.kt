@@ -655,6 +655,7 @@ private val levelPlan2Harvest2: PlanBuilder.() -> Unit
             seg("grab key", ZeldaItem.Key)
             left
             goTo(InLocations.Level2.keyMid)
+            loot
             seg("walk round corner", ZeldaItem.Raft)
             up // grab key it's easy
             kill

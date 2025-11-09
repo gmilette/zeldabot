@@ -33,8 +33,8 @@ class ZStar(
         val DEBUG_ONE = false
 
         // at 1000, link cant go into the squares
-        // at 10000, it is slow
-        var MAX_ITER = 1000 // not sure if need more than this
+        // at 10000, it is slow, cant find way out of level3 angle room
+        var MAX_ITER = 10000 // not sure if need more than this
         var SHORT_ITER = MAX_ITER // 5000 // not sure if i should use
         val LIMIT_ITERATIONS = false
         val DO_CORNERS = true
