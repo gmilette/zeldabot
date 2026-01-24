@@ -21,6 +21,15 @@ class OamStateReasoner(
     private val level: Int = 1,
     private val isGannon: Boolean = false
 ) {
+    companion object {
+        // Reusable buffer to avoid allocation every frame
+        // OAM is 256 bytes: 64 sprites × 4 bytes each
+        private val oamBuffer = IntArray(256)
+
+        // Track whether bulk OAM read is available (disabled on first failure)
+        private var bulkOamAvailable = true
+    }
+
     private val sprites: List<SpriteData>
     private var spritesUncombined: List<SpriteData> = emptyList()
     private var spritesRaw: List<SpriteData> = emptyList()
@@ -172,19 +181,34 @@ class OamStateReasoner(
         return BitUtil.getBit(x, bit) == 1
     }
 
-    private fun readOam(at: Int): SpriteData {
-        val x = api.readOAM(at + 0x0003)
-        val y = api.readOAM(at)
-        val tile = api.readOAM(at + 0x0001)
-        val attrib = api.readOAM(at + 0x0002)
-//        val tileAddress = if (ppu.isSpriteSize8x16()) (((tile and 1) shl 12)
-//                or ((tile and 0xFE) shl 4)) else (ppu.getSpritePatternTableAddress()
-//                or (tile shl 4))
-        // if priority is false, then maybe ignore it
-        // OAM data frame
+    /**
+     * Parse sprite data from the pre-loaded OAM buffer.
+     * OAM format per sprite (4 bytes): Y, Tile, Attribute, X
+     */
+    private fun parseSpriteFromBuffer(spriteIndex: Int): SpriteData {
+        val at = spriteIndex * 4
+        val y = oamBuffer[at]
+        val tile = oamBuffer[at + 1]
+        val attrib = oamBuffer[at + 2]
+        val x = oamBuffer[at + 3]
 
-        // damaged ghost is only pallette 28.. the palette 24 could be, but it is also the live ghost, depending
-//        val paletteIndex = 0x10 or ((attrib and 0x03) shl 2)
+        val color = attrib.monsterColor()
+        val priority = getBitBool(attrib, 5)
+        val xFlip = BitUtil.getBitBool(attrib, 6)
+        val yFlip = BitUtil.getBitBool(attrib, 7)
+        return SpriteData(spriteIndex, FramePoint(x, y - MapConstants.yAdjust), tile, attrib,
+            priority = priority, xFlip = xFlip, yFlip = yFlip, color = color, combine = combine, isOverworld = isOverworld)
+    }
+
+    /**
+     * Original method: read OAM one byte at a time (fallback for old Nintaco versions)
+     */
+    private fun readOamLegacy(at: Int): SpriteData {
+        val y = api.readOAM(at)
+        val tile = api.readOAM(at + 1)
+        val attrib = api.readOAM(at + 2)
+        val x = api.readOAM(at + 3)
+
         val color = attrib.monsterColor()
         val priority = getBitBool(attrib, 5)
         val xFlip = BitUtil.getBitBool(attrib, 6)
@@ -193,9 +217,32 @@ class OamStateReasoner(
             priority = priority, xFlip = xFlip, yFlip = yFlip, color = color, combine = combine, isOverworld = isOverworld)
     }
 
+    private fun tryBulkOamRead(): Boolean {
+        return try {
+            api.readAllOAM(oamBuffer)
+//            val method = api.javaClass.getMethod("readAllOAM", IntArray::class.java)
+//            method.invoke(api, oamBuffer)
+            true
+        } catch (e: Throwable) {
+            false
+        }
+    }
+
     private fun readOam(): List<SpriteData> {
-        spritesRaw = (0..63).map {
-            readOam(0x0001 * (it * 4))
+        // Try bulk read first (much faster), fall back to individual reads if unavailable
+        if (bulkOamAvailable) {
+            if (tryBulkOamRead()) {
+                spritesRaw = (0..63).map { parseSpriteFromBuffer(it) }
+                d { "Bulk OAM complete" }
+            } else {
+                // Bulk read not available, disable and use legacy method
+                bulkOamAvailable = false
+                d { "Bulk OAM read not available, falling back to legacy method" }
+                spritesRaw = (0..63).map { readOamLegacy(it * 4) }
+            }
+        } else {
+            d { "Bulk OAM not available" }
+            spritesRaw = (0..63).map { readOamLegacy(it * 4) }
         }
 
         val dirDamage = LinkDirectionFinder.direction(spritesRaw)
