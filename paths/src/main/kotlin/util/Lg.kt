@@ -10,13 +10,13 @@ object LoggerOverride {
 
 inline fun v(message: () -> String) = log { Logger.v(message()) }
 
-inline fun d(t: Throwable? = null, message: () -> String) = log { Logger.d( message()) }
+inline fun d(t: Throwable? = null, message: () -> String) = log { Logger.d( message(), t) }
 
-inline fun i(t: Throwable? = null, message: () -> String) = log { Logger.i(message()) }
+inline fun i(t: Throwable? = null, message: () -> String) = log { Logger.i(message(), t) }
 
-inline fun w(t: Throwable? = null, message: () -> String) = log { Logger.w(message()) }
+inline fun w(t: Throwable? = null, message: () -> String) = log { Logger.w(message(), t) }
 
-inline fun e(t: Throwable? = null, message: () -> String) = log { Logger.e( message()) }
+inline fun e(t: Throwable? = null, message: () -> String) = log { Logger.e( message(), t) }
 
 /** @suppress */
 @PublishedApi
