@@ -757,7 +757,6 @@ class ZStar(
 
 //            d { " set enemy cost for intersecting" }
             costsF.mapXyCurrent { x, y, current ->
-//                val pt = FramePoint(x,y).toRectPlus(MapConstants.halfGrid)
                 val pt = FramePoint(x,y).toRect() //Plus(MapConstants.oneGrid)
 
 //                val cost = enemyRect.sumOf { 1 / it.distTo(pt) } * nearEnemyCost
