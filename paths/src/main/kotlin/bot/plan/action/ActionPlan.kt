@@ -86,10 +86,6 @@ class OrderActionBuilder() {
 
     }
 
-    // plan builder?
-//    fun untilMapChange() {
-//
-//    }
     fun untilMapChange(vararg actions: Action) {
 
     }
@@ -629,8 +625,8 @@ class GoIn(
         val linkInDesiredDirectionEnoughTimes = numInDesiredDirection >= 2
         val complete = movements >= moves || linkInDesiredDirectionEnoughTimes
         if (complete && reset) {
-//            d { " --> RESET $name $movements"}
-            if (randomlyMoveHalf && Random.nextInt(4) > 3) {
+            // 25% chance
+            if (randomlyMoveHalf && Random.nextInt(3) > 3) {
                 d { " do less"}
                 movements = moves / 2
             } else {

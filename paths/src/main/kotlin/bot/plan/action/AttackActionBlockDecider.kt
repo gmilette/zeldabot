@@ -45,15 +45,7 @@ object AttackActionBlockDecider {
             return null
         }
 
-        // it's going to hit us!
-        d { "Block reflex: about to get hit by ${projectile.point}"}
-        return if (link.dir == facingProjectileDirection) {
-            d { "Block reflex: wait and block"}
-            GamePad.None
-        } else {
-            d { "Block reflex: face $facingProjectileDirection"}
-            facingProjectileDirection.toGamePad()
-        }
+        return itsGoingToHitUsAction(projectile, link, facingProjectileDirection)
     }
 
     private fun checkAllDirections(link: Agent, projectile: Agent): GamePad? {
@@ -65,23 +57,31 @@ object AttackActionBlockDecider {
             val facingProjectileDirection = dir.opposite()
 
             // todo
+
             // if it is inside two more directions pick the closest one
             if (projectileTarget.intersect(link.point.toRect())) {
-                // it's going to hit us!
-                d { "Block reflex: about to get hit by ${projectile.point}" }
-                return if (link.dir == facingProjectileDirection) {
-                    d { "Block reflex: wait and block" }
-                    GamePad.None
-                } else {
-                    d { "Block reflex: face $facingProjectileDirection" }
-                    facingProjectileDirection.toGamePad()
-                }
+                return itsGoingToHitUsAction(projectile, link, facingProjectileDirection)
             } else {
                 d { "Block reflex: not in direction $dir"}
             }
         }
 
         return null
+    }
+
+    private fun itsGoingToHitUsAction(
+        projectile: Agent,
+        link: Agent,
+        facingProjectileDirection: Direction
+    ): GamePad? {
+        d { "Block reflex: about to get hit by ${projectile.point}" }
+        return if (link.dir == facingProjectileDirection) {
+            d { "Block reflex: wait and block" }
+            GamePad.None
+        } else {
+            d { "Block reflex: face $facingProjectileDirection" }
+            facingProjectileDirection.toGamePad()
+        }
     }
 
 }
