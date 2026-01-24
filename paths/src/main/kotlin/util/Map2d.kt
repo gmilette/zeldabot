@@ -17,7 +17,11 @@ class Map2d<T>(
         get() = map.size
 
     fun copy(): Map2d<T> {
-        return this.map { it }
+        val newMap = ArrayList<MutableList<T>>(maxY)
+        for (row in map) {
+            newMap.add(ArrayList(row))
+        }
+        return Map2d(newMap)
     }
 
     class Builder<T>(
