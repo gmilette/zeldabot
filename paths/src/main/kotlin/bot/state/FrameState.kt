@@ -21,7 +21,7 @@ data class FrameState(
     val seenBoomerang: Boolean,
     val inventory: Inventory
 ) {
-    private val linkDoingAnAttack: Int by lazy { api.readCPU(Addresses.linkDoingAnAttack) }
+    private val linkDoingAnAttack: Boolean by lazy { LinkSwingingDetection.attacking(api) }
 
     val numRupees: Int = inventory.numRupees
     val numKeys: Int = inventory.numKeys
@@ -100,7 +100,7 @@ data class FrameState(
     }
 
     fun linkDoingAnAttack(): Boolean {
-        return linkDoingAnAttack != 0
+        return linkDoingAnAttack
     }
 }
 
