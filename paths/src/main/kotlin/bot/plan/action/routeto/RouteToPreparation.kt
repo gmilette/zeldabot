@@ -40,6 +40,8 @@ class RoutePreparation(val params: Param = Param()) {
         // pass in attack targets
         attackableSpec: List<Agent> = emptyList()
     ) {
+        // Just changed linkDoingAnAttack to be more specific
+        // NEED TO TEST THIS
         canAttack = param.allowAttack && !state.frameState.linkDoingAnAttack() && (param.useB || state.frameState.canUseSword)
         attackPossible = params.whatToAvoid != WhatToAvoid.None && canAttack
 
@@ -79,6 +81,7 @@ class RoutePreparation(val params: Param = Param()) {
         //// LOG
         d { " route To attackOrRoute attack=$attackPossible can=$canAttack allowBlock=${param.allowBlock} avoid=${params.whatToAvoid} useB=${useB} canUseSword=${state.frameState.canUseSword} spec`${attackableSpec}"}
         if (state.frameState.linkDoingAnAttack()) {
+            // observation: This always lasts 15 frames
             d { " xxLink is attackingxx " }
         }
 

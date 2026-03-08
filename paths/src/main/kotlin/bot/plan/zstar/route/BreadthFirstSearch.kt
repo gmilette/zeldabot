@@ -206,6 +206,7 @@ class BreadthFirstSearch(
         var iterations = 0
         while (queue.isNotEmpty() && iterations < MAX_ITER && foundPaths.size < MAX_PATHS) {
             iterations++
+
             val current = queue.poll()
             
             if (DEBUG_B) {

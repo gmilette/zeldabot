@@ -81,6 +81,7 @@ object Addresses {
    // 17: sword or boomerang is firing
    // 49: one frame to indicate its complete
    // 0: otherwise. does it mean link can shoot?
+   // Correction NO, also sword state needs to be zero too
    const val linkDoingAnAttack = 0x00AC
 
    // $08=North, $04=South, $01=East, $02=West
@@ -88,7 +89,7 @@ object Addresses {
    const val moveDir = 0x0F // 01 or FF // Link's Move Direction
    // enemy location is still set when the enemy is dead
    // or if link goes to another screen and there are no enemies
-   // todo: precomipled knowledge is number of enemies on each
+   // todo: precompiled knowledge is number of enemies on each0x12
    // hack: just wait for the enemy to move x or y to really know if it exists
    const val enemyX1 = 0x0071
    const val tenthEnemyCount = 0x0050
@@ -237,22 +238,19 @@ object Addresses {
       0x0395,
    )
 
-   // 128 seems to be dead
-   // but it isn't always updated
-   // looks like
    val enemyHp = listOf(
-      0x0485,
-      0x4856,
-      0x4857,
-      0x4858,
-      0x4859,
-      0x485A,
-      0x485B,
-      0x485C,
-      0x485D,
-      0x485E,
-      0x486F,
-      0x4860,
+      0x0485,  // slot 0: Link
+      0x0486,  // slot 1: enemy
+      0x0487,
+      0x0488,
+      0x0489,
+      0x048A,
+      0x048B,
+      0x048C,
+      0x048D,
+      0x048E,
+      0x048F,
+      0x0490,  // slot 11: last enemy
    )
 
    val enemyCountdowns = listOf(
@@ -307,8 +305,9 @@ object Addresses {
    // 23 map
    // 29 boomerang
    // 3 nothing?
-   const val dungeonTypeOfItem = 0x0AB
-   const val dungeonFloorItem = 0x097
+   const val dungeonTypeOfItem = 0x00AB
+   // y coordinate of dropped item?
+   const val dungeonFloorItem = 0x0097
 
    const val clockActivated = 0x066C
 
@@ -347,6 +346,69 @@ object Addresses {
    // https://www.zeldaspeedruns.com/loz/generalknowledge/item-drops-chart
    const val enemiesKilledCount = 0x052A
    const val enemiesKilledWithoutTakingDamage = 0x0627
+
+   object More {
+      // Stun timer countdown before an object can act again after being hit
+      val objStunTimer = listOf(
+         0x003D, 0x003E, 0x003F, 0x0040, 0x0041, 0x0042,
+         0x0043, 0x0044, 0x0045, 0x0046, 0x0047, 0x0048,
+      )
+
+      // Object type ID — identifies what kind of enemy/object is in each slot
+      // Note: slot 0 (0x034F) overlaps with the room kill counter
+      val objType = listOf(
+         0x034F, 0x0350, 0x0351, 0x0352, 0x0353, 0x0354,
+         0x0355, 0x0356, 0x0357, 0x0358, 0x0359, 0x035A,
+      )
+
+      // Object spawn/death state machine — alive, spawning, dying transitions
+      val objMetastate = listOf(
+         0x0405, 0x0406, 0x0407, 0x0408, 0x0409, 0x040A,
+         0x040B, 0x040C, 0x040D, 0x040E, 0x040F, 0x0410,
+      )
+
+      // Weapon slot ObjState addresses (OBJ_STATE = 0x00AC + slot number)
+      const val swordState     = 0x00B9 // Sword / Magic Rod projectile state
+      const val beamState      = 0x00BA // Sword beam / Magic Rod shot state
+      const val boomerangState = 0x00BB // Boomerang / Food state
+      const val bomb1State     = 0x00BC // Bomb 1 / Fire 1 state
+      const val bomb2State     = 0x00BD // Bomb 2 / Fire 2 state
+
+      // can use to detect if arrow is in the Air
+      //   ANIMATION_ARROW_ACTIVE = 10
+      //  ANIMATION_ARROW_HIT = 20
+      //  ANIMATION_ARROW_END = 21
+      //  And the check:
+      //  if ANIMATION_ARROW_ACTIVE <= arrows <= ANIMATION_ARROW_END:
+      //      state = AnimationState.ACTIVE
+      // So while in flight the value is somewhere in the range 10–21.
+      // It enters at 10, hits something at 20, and ends at 21, then drops back to 0 when gone.
+      const val arrowState     = 0x00BE // Arrow / Rod shot state
+
+      // Treasure / floor item
+      const val treasureX    = 0x0083 // X position of a dropped or floor item
+      // Note: 0x0097 is used as treasure Y in Python; Addresses.kt calls it dungeonFloorItem
+      const val treasureY    = 0x0097 // Y position of a dropped or floor item
+      const val treasureFlag = 0x00BF // Whether a treasure item is currently present
+
+      // Tile layout — full 32x22 play-area tile grid for the current room (704 bytes)
+      const val tileLayout = 0x0D30
+
+      // Sound
+      const val tune0 = 0x0605 // Sound pulse 1 channel — detect audio events (e.g. enemy hit, item pickup)
+
+      // RNG state — 12 consecutive bytes at 0x0018-0x0023
+      const val rngBase = 0x0018
+
+      // Inventory items missing from Addresses.kt
+      const val hasCompass  = 0x0667 // Compass for the current dungeon
+      const val hasMap      = 0x0668 // Map for the current dungeon
+      const val hasCompass9 = 0x0669 // Compass for level 9
+      const val hasMap9     = 0x066A // Map for level 9
+      const val hasTriforceOfPower = 0x0672 // Triforce of Power / last boss defeated flag
+      const val maxBombs    = 0x067C // Maximum bomb carrying capacity
+      const val rupeesAdd   = 0x067D // Pending rupee addition (being counted up on screen)
+   }
 
    object Ram {
       const val killedEnemyCount = 0x0627

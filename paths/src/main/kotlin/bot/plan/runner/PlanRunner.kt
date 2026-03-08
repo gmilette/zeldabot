@@ -73,7 +73,7 @@ class PlanRunner(private val makePlan: PlanMaker,
                 rupees = 250,
                 potion = true,
                 boomerang = ZeldaItem.MagicalBoomerang,
-                arrowAndBow = true
+                magicArrowAndBow = true
             )
             runLoc(mapLoc, level)
         } else {

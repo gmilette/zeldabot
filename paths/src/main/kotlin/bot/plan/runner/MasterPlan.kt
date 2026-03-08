@@ -27,12 +27,12 @@ class MasterPlan(val segments: List<PlanSegment> = emptyList()) {
 //            throw RuntimeException("Ahh")
 //        }
         d { " created plan with $initialPlanSize actions" }
-//        for (planStep in it) {
-//            // level mapLoc action name
-//            planStep.action.apply {
-//                d { "$levelLoc $actionLoc $name" }
-//            }
-//        }
+        for (planStep in it) {
+            // level mapLoc action name
+            planStep.action.apply {
+                d { "$levelLoc $actionLoc $name" }
+            }
+        }
     }
 
     fun reset() {
@@ -75,7 +75,7 @@ class MasterPlan(val segments: List<PlanSegment> = emptyList()) {
     fun pop(): Action {
         justRemoved = giant.removeFirst()
         return justRemoved.action.also {
-            i { "--> switch to ${it.name}" }
+            i { "--> switch to ${it.name} ${it.actionLoc}, ${it.levelLoc}" }
         }
     }
 
@@ -102,9 +102,9 @@ class MasterPlan(val segments: List<PlanSegment> = emptyList()) {
         var current = pop()
         while(keepGoing && giant.isNotEmpty()) {
             val first = giant.first().action
-//            d { " SEARCH one ${first.actionLoc}"}
+//            d { " SEARCH one ${first.actionLoc} at lev ${first.levelLoc} for $mapLoc at level ${level}"}
              if (first.actionLoc == mapLoc && first.levelLoc == level) {
-//                d { " search plan move ${first.actionLoc} " } // lev ${first.toLevel}"}
+                d { " search plan move ${first.actionLoc} " }
                 // stop
                 keepGoing = false
                  current = pop()
@@ -112,7 +112,6 @@ class MasterPlan(val segments: List<PlanSegment> = emptyList()) {
                 current = pop()
             }
         }
-//        d { " done search plan "}
         return current
     }
 

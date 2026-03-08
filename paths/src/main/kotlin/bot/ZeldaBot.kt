@@ -17,6 +17,7 @@ import util.Map2d
 import util.RunOnceLambda
 import util.d
 import util.ifTrue
+import java.io.File
 
 class ZeldaBot(private val monitor: ZeldaMonitor) {
     private val api: API = ApiSource.getAPI()
@@ -37,7 +38,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         val root = DirectoryConstants.states
         d { " master plan ${plan.masterPlan.toStringAll()}" }
         val loadZelda by RunOnceLambda {
-            d { " load zelda ${plan.startPath}" }
+            val f = File("$root/${plan.startPath}")
+            d { " load zelda $root/${plan.startPath} full ${f.absolutePath}" }
 //            api.quickLoadState(1)
             api.loadState("$root/${plan.startPath}")
         }
@@ -87,6 +89,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     val plan = PlanRunner(::makePlan, api, ZeldaBot.experiment ?: "default")
 
     private fun makePlan(): MasterPlan {
+        d { " make a plan "}
         // make sure to reset any state here
         frameStateUpdater.reset()
         return ZeldaPlan.makeMasterPlan(hyrule, hyrule.mapCellsObject, hyrule.levelMap)
