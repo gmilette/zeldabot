@@ -54,6 +54,12 @@ interface Action {
 }
 
 abstract class WrappedAction(val wrapped: Action) : Action {
+    override val actionLoc: MapLoc
+        get() = wrapped.actionLoc
+
+    override val levelLoc: MapLoc
+        get() = wrapped.levelLoc
+
     override fun reset() {
         wrapped.reset()
     }
@@ -114,6 +120,12 @@ class OrderedActionSequence(
 ) : Action {
     private var lastComplete = -1
     var stepName: String = ""
+
+    override val actionLoc: MapLoc
+        get() = actions.firstOrNull { it is MoveTo || it is DecisionAction }?.actionLoc ?: -3
+
+    override val levelLoc: MapLoc
+        get() = actions.firstOrNull { it is MoveTo || it is DecisionAction }?.levelLoc ?: -3
 
     // keep popping the stack
 //    private var stack = action

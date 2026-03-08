@@ -70,6 +70,12 @@ class CompleteIfChangeShopOwner(private val changeTo: Boolean, private val wrapp
 class CompleteIfMapChanges(private val wrapped: Action, initial: MapLoc = -1) : Action {
     private var initialMapLoc: MapLoc = initial
 
+    override val actionLoc: MapLoc
+        get() = wrapped.actionLoc
+
+    override val levelLoc: MapLoc
+        get() = wrapped.levelLoc
+
     private fun changedMapLoc(state: MapLocationState): Boolean =
         initialMapLoc > 0 && state.frameState.mapLoc != initialMapLoc
 

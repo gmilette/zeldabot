@@ -3,7 +3,7 @@
     <output_file path="$PROJECT_DIR$/../../botoutput/zeldaconsole.txt" />
     <option name="MAIN_CLASS_NAME" value="MainBKt" />
     <module name="paths.main" />
-    <option name="PROGRAM_PARAMETERS" value="9_28_m_b" />
+    <option name="PROGRAM_PARAMETERS" value="9_3_m_b dev" />
     <shortenClasspath name="NONE" />
     <method v="2">
       <option name="Make" enabled="true" />

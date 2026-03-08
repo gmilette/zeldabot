@@ -157,10 +157,10 @@ private fun MapLocationState.gannonShowing(): Boolean = frameState.enemies.any {
 
 class GannonAttack : Action {
     private val freq = 5
-    private var swordAction = AlwaysAttack(useB = false, freq = freq)
-    private var arrowAction = AlwaysAttack(useB = true, freq = freq)
-//    private var swordAction = AlwaysAttackWhenCan(useB = false)
-//    private var arrowAction = AlwaysAttackWhenCan(useB = true)
+//    private var swordAction = AlwaysAttack(useB = false, freq = freq)
+//    private var arrowAction = AlwaysAttack(useB = true, freq = freq)
+    private var swordAction = AlwaysAttackWhenCan(useB = false)
+    private var arrowAction = AlwaysAttackWhenCan(useB = true)
 
     private var frames = 0
 
