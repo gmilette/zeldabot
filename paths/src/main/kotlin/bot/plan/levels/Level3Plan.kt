@@ -11,7 +11,7 @@ import bot.state.map.grid
 import bot.state.map.level.LevelStartMapLoc
 
 object Level3Plan {
-    private object Level3Locations {
+    private object Loc {
         val keyMid = FramePoint(128, 88)
         val keyElbowSquishy = FramePoint(8.grid, 5.grid)
         val heartMid = FramePoint(128, 88)
@@ -27,7 +27,7 @@ object Level3Plan {
             startAt(LevelStartMapLoc.lev(3))
             seg("grab key", ZeldaItem.Key)
             left
-            goTo(Level3Locations.keyMid)
+            goTo(Loc.keyMid)
             loot
             seg("walk round corner", ZeldaItem.Raft)
             up // grab key it's easy
@@ -64,7 +64,7 @@ object Level3Plan {
             upm // option to get key up, but skip
             seg("Keys from squishy")
             kill
-            goTo(Level3Locations.keyElbowSquishy)
+            goTo(Loc.keyElbowSquishy)
             // walk past trap ??
             rightm
             goIn(GamePad.MoveRight, MapConstants.threeGrid)
@@ -73,7 +73,7 @@ object Level3Plan {
             level3BombThenRight
             seg("kill boss")
             starKill
-            go(Level3Locations.heartMid)
+            go(Loc.heartMid)
             uponlym
             getTri
         }

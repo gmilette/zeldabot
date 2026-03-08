@@ -1,6 +1,5 @@
 package bot.plan.levels
 
-import bot.plan.InLocations
 import bot.plan.Phases
 import bot.plan.PlanBuilder
 import bot.plan.action.makeCenterPush
@@ -12,6 +11,16 @@ import bot.state.map.grid
 import bot.state.map.level.LevelStartMapLoc
 
 object Level1Plan {
+    private object Loc {
+        val key114Position = FramePoint(9.grid, 6.grid)
+        val key114 = FramePoint(10.grid, 8.grid)
+        val key83 = FramePoint(8.grid, 3.grid)
+
+        // hands level1, prob same as key114
+        val key69 = FramePoint(164, 128)
+        val boomerang68 = FramePoint(8.grid, 3.grid) //try grid // 3.5?? //56
+    }
+
     val level1: PlanBuilder.() -> Unit
         get() = {
             add {
@@ -25,7 +34,7 @@ object Level1Plan {
                 left
                 goIn(GamePad.MoveLeft, 30)
                 kill //164, 192
-                goTo(InLocations.Level1.key114)
+                goTo(Loc.key114)
                 right
                 seg("go to key skeleton")
                 right
@@ -38,7 +47,7 @@ object Level1Plan {
                 goIn(GamePad.MoveUp, 5)
                 seg("get key from skeletons")
                 kill // these skeletons provide a key
-                goTo(InLocations.Level1.key83)
+                goTo(Loc.key83)
                 seg("Bomb and move")
                 bombUp
                 up // 51
@@ -48,7 +57,7 @@ object Level1Plan {
                 up
                 goIn(GamePad.MoveUp, 30)
                 kill
-                goTo(InLocations.Level1.key83)
+                goTo(Loc.key83)
                 // get around a hard corner
                 goTo(FramePoint(7.grid, 2.grid))
                 goTo(FramePoint(3.grid, 2.grid))
@@ -76,13 +85,13 @@ object Level1Plan {
                 right // boomerang
                 goIn(GamePad.MoveRight, 30)
                 kill // could prevent look at the boomerang position from being considered loot
-                goAbout(InLocations.Level1.boomerang68, 1, 1, true, ignoreProjectiles = true)
+                goAbout(Loc.boomerang68, 1, 1, true, ignoreProjectiles = true)
                 rightm //69 hand grabby, dont get loot
                 seg("steal key from hand grabby", ZeldaItem.Triforce)
-                go(InLocations.Level1.key114Position)
-                go(InLocations.Level1.key114)
+                go(Loc.key114Position)
+                go(Loc.key114)
                 // should do but too risky for now
-//                .go(InLocations.Level1.key114)
+//                .go(Loc.key114)
                 up
                 seg("dragon position")
                 // avoid first round of fireballs
