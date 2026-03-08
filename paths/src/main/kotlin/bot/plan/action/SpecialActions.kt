@@ -1,6 +1,7 @@
 package bot.plan.action
 
 import bot.plan.InLocations
+import bot.plan.levels.Level2Plan
 import bot.state.FramePoint
 import bot.state.GamePad
 import bot.state.MapLocationState
@@ -112,7 +113,7 @@ fun getTriforce() = CompleteIfMapChanges(
     OrderedActionSequence(
         listOf(
             StartAtAction(0),
-            InsideNav(InLocations.Level2.triforce),
+            InsideNav(Level2Plan.Loc.triforce),
             StartAtAction(0)
 //            GoIn(MapConstants.oneGridPoint5, GamePad.MoveUp),
 //            GoIn(MapConstants.halfGrid, GamePad.MoveLeft),

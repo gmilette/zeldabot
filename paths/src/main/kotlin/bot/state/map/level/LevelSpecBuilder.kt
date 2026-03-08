@@ -1,6 +1,6 @@
 package bot.state.map.level
 
-import bot.plan.InLocations
+import bot.plan.levels.Level5Plan
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.ExitSet
@@ -37,7 +37,7 @@ class LevelSpecBuilder {
             const val redRing: MapLoc = 0
             const val silverArrow: MapLoc = 79
         }
-        val getItemLoc5Item: MapLoc = InLocations.Level5.mapLocGetItem
+        val getItemLoc5Item: MapLoc = Level5Plan.Loc.mapLocGetItem
     }
 
     fun e(vararg dir: Direction): ExitSet {

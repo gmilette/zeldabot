@@ -11,7 +11,7 @@ import bot.state.map.grid
 import bot.state.map.level.LevelStartMapLoc
 
 object Level2Plan {
-    private object Loc {
+    object Loc {
         val heartMid = FramePoint(128, 88) //boss heart
         val keyMid = FramePoint(128, 88)
         val keyMidDown = FramePoint(128, 81)

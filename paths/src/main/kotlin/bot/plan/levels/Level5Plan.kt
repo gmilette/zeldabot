@@ -13,7 +13,7 @@ import bot.state.map.grid
 import bot.state.map.level.LevelStartMapLoc
 
 object Level5Plan {
-    private object Loc {
+    object Loc {
         val mapLocGetItem: MapLoc = 4
         val moveLeft = FramePoint(7.grid, 5.grid)
         val cornerStairs = FramePoint(13.grid, 2.grid)
