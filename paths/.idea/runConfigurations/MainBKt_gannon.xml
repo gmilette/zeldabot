@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="MainBKt gannon" type="JetRunConfigurationType" activateToolWindowBeforeRun="false">
+    <output_file path="$PROJECT_DIR$/../../botoutput/zeldaconsole.txt" />
+    <option name="MAIN_CLASS_NAME" value="MainBKt" />
+    <module name="paths.main" />
+    <option name="PROGRAM_PARAMETERS" value="9_28_m_b" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

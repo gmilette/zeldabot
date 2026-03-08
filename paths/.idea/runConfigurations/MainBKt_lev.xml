@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="MainBKt_lev" type="JetRunConfigurationType">
+    <output_file path="$PROJECT_DIR$/../../botoutput/zeldaconsole.txt" is_save="true" />
+    <log_file checked="false" alias="zeldalog" path="$PROJECT_DIR$/../../botoutput" show_all="true" />
+    <option name="MAIN_CLASS_NAME" value="MainBKt" />
+    <module name="paths.main" />
+    <option name="PROGRAM_PARAMETERS" value="level1plan" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
