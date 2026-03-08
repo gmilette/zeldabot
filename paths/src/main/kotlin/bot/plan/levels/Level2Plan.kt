@@ -1,16 +1,26 @@
 package bot.plan.levels
 
-import bot.plan.InLocations
 import bot.plan.Phases
 import bot.plan.PlanBuilder
 import bot.state.FramePoint
 import bot.state.GamePad
 import bot.state.map.MapConstants
+import bot.state.map.andAHalf
 import bot.state.map.destination.ZeldaItem
 import bot.state.map.grid
 import bot.state.map.level.LevelStartMapLoc
 
 object Level2Plan {
+    private object Loc {
+        val heartMid = FramePoint(128, 88) //boss heart
+        val keyMid = FramePoint(128, 88)
+        val keyMidDown = FramePoint(128, 81)
+        val bombItemRight = FramePoint(208, 43)
+        //        val triforce = FramePoint(120, 88) // get the middle of the triangle at the top
+//        val triforce = FramePoint(128, 88) // get the middle of the triangle at the top
+        val triforce = FramePoint(8.grid - MapConstants.halfGrid, 5.grid.andAHalf) // could add 1/4 here // get the middle of the triangle at the top
+    }
+
     val level2: PlanBuilder.() -> Unit
         get() = {
             phase(Phases.lev(2))
@@ -19,14 +29,14 @@ object Level2Plan {
             seg("gather 3 keys", ZeldaItem.Key)
             right
             kill
-            goTo(InLocations.Level2.keyMid)
+            goTo(Loc.keyMid)
             loot // maybe try to get loot
             up // nothing here
             seg("gather key 2")
             left
             kill
             left
-            goTo(InLocations.Level2.keyMid)
+            goTo(Loc.keyMid)
             loot
             right
             right // grid room
@@ -41,22 +51,22 @@ object Level2Plan {
             up
             // skip getting key from squishy guy
 //            .kill
-//            .goTo(InLocations.Level2.keyMid)
+//            .goTo(Loc.keyMid)
             upNoBlock // the squishy guy appears like a projectile so do not block
             kill
             seg("bomb room")
             // no key I think
-//            goTo(InLocations.Level2.keyMid)
+//            goTo(Loc.keyMid)
             up
             kill // blocked before going // allow bombs
-            goTo(InLocations.Level2.bombItemRight)
+            goTo(Loc.bombItemRight)
             up
             seg(Phases.Segment.lev2Boss)
             switchToBomb
             killLevel2Rhino
             seg("get the triforce")
             wait(200) // there might be a bomb appearing that I want
-            goTo(InLocations.Level2.heartMid)
+            goTo(Loc.heartMid)
             loot // in case there is a bomb
             leftonlym
             goIn(GamePad.MoveLeft, 20)
@@ -76,7 +86,7 @@ object Level2Plan {
             right
             seg("get boomerang")
             kill
-            goAbout(InLocations.Level2.keyMid, 1, 1, true, ignoreProjectiles = true)
+            goAbout(Loc.keyMid, 1, 1, true, ignoreProjectiles = true)
             seg("depart", ZeldaItem.None)
             left
             kill // door is locked until all killed

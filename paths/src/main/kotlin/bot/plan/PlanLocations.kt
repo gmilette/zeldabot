@@ -77,7 +77,6 @@ object InLocations {
             PushDirection(horizontal = false, vertical = false),
             position = FramePoint()
         )
-
     }
 
     object Overworld {
@@ -89,63 +88,6 @@ object InLocations {
         val shopLeftItem = FramePoint(88, 88)
 
         val start: MapLoc = 119
-    }
-    object Level1 {
-        val key114Position = FramePoint(9.grid, 6.grid)
-        val key114 = FramePoint(10.grid, 8.grid)
-        val key83 = FramePoint(8.grid, 3.grid)
-
-        // hands level1, prob same as key114
-        val key69 = FramePoint(164, 128)
-        val boomerang68 = FramePoint(8.grid, 3.grid) //try grid // 3.5?? //56
-    }
-
-    object Level2 {
-        val heartMid = FramePoint(128, 88) //boss heart
-        val keyMid = FramePoint(128, 88)
-        val keyMidDown = FramePoint(128, 81)
-        val bombItemRight = FramePoint(208, 43)
-        //        val triforce = FramePoint(120, 88) // get the middle of the triangle at the top
-//        val triforce = FramePoint(128, 88) // get the middle of the triangle at the top
-        val triforce = FramePoint(8.grid - MapConstants.halfGrid, 5.grid.andAHalf) // could add 1/4 here // get the middle of the triangle at the top
-    }
-
-    object Level4 {
-        val batKey = FramePoint(144, 88)
-        val squishyKey = FramePoint(135, 64)
-        val triforceHeart = FramePoint(208, 123)
-    }
-
-    object Level5 {
-        val mapLocGetItem: MapLoc = 4
-        val moveLeft = FramePoint(7.grid, 5.grid)
-        val cornerStairs = FramePoint(13.grid, 2.grid)
-        val cornerStairsBefore = FramePoint(13.grid-5, 2.grid)
-        val triforceHeart = FramePoint(8.grid, 3.grid)
-    }
-
-    object Level6 {
-        val moveUpSingle = FramePoint(7.grid, 5.grid)
-        val triforceHeart = FramePoint(8.grid, 5.grid)
-        val keyCenter = FramePoint(8.grid, 5.grid)
-    }
-
-    object Level7 {
-        val pushRight = FramePoint(12.grid, 5.grid)
-        val triforceHeart = FramePoint(8.grid, 5.grid)
-    }
-
-    object Level8 {
-        val triforceHeartAbove = FramePoint(3.grid, 6.grid)
-        val triforceHeart = FramePoint(2.grid, 8.grid)
-        val keySpot = FramePoint(8.grid, 5.grid)
-    }
-
-    object Level9 {
-        val moveUpBlock = FramePoint(6.grid, 5.grid)
-        val centerGannonAttack = FramePoint(7.grid, 5.grid)
-        val centerGannonAttackLeft = FramePoint(5.grid, 4.grid.andAHalf)
-        val center = FramePoint(7.grid.andAHalf, 7.grid)
     }
 
     object BombDirection {
