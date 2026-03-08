@@ -48,7 +48,7 @@ class RouteExecution(val params: Param = Param()) {
     private val attackB = AlwaysAttackWhenCan(useB = true)
     private var boomerangCt = 0
 
-    var theAttack: AlwaysAttackWhenCan = attack
+    private var theAttack: AlwaysAttackWhenCan = attack
 
     fun route(
         state: MapLocationState,

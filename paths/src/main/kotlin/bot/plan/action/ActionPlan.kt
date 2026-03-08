@@ -122,10 +122,10 @@ class OrderedActionSequence(
     var stepName: String = ""
 
     override val actionLoc: MapLoc
-        get() = actions.firstOrNull { it is MoveTo || it is DecisionAction }?.actionLoc ?: -3
+        get() = actions.firstOrNull { it.actionLoc >= 0 }?.actionLoc ?: -3
 
     override val levelLoc: MapLoc
-        get() = actions.firstOrNull { it is MoveTo || it is DecisionAction }?.levelLoc ?: -3
+        get() = actions.firstOrNull { it.actionLoc >= 0 }?.levelLoc ?: -3
 
     // keep popping the stack
 //    private var stack = action

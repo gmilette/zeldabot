@@ -104,7 +104,7 @@ class MasterPlan(val segments: List<PlanSegment> = emptyList()) {
             val first = giant.first().action
 //            d { " SEARCH one ${first.actionLoc} at lev ${first.levelLoc} for $mapLoc at level ${level}"}
              if (first.actionLoc == mapLoc && first.levelLoc == level) {
-                d { " search plan move ${first.actionLoc} " } // lev ${first.toLevel}"}
+                d { " search plan move ${first.actionLoc} " }
                 // stop
                 keepGoing = false
                  current = pop()
@@ -112,7 +112,6 @@ class MasterPlan(val segments: List<PlanSegment> = emptyList()) {
                 current = pop()
             }
         }
-//        d { " done search plan "}
         return current
     }
 

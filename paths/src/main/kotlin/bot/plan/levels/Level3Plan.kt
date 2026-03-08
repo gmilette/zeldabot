@@ -11,6 +11,15 @@ import bot.state.map.grid
 import bot.state.map.level.LevelStartMapLoc
 
 object Level3Plan {
+    private object Level3Locations {
+        val keyMid = FramePoint(128, 88)
+        val keyElbowSquishy = FramePoint(8.grid, 5.grid)
+        val heartMid = FramePoint(128, 88)
+
+        // requires then moving up / needed?
+        val triforce = FramePoint(7.grid, 6.grid) // get the middle of the triangle at the top
+    }
+
     val level3: PlanBuilder.() -> Unit
         get() = {
             phase(Phases.lev(3))
@@ -18,7 +27,7 @@ object Level3Plan {
             startAt(LevelStartMapLoc.lev(3))
             seg("grab key", ZeldaItem.Key)
             left
-            goTo(InLocations.Level2.keyMid)
+            goTo(Level3Locations.keyMid)
             loot
             seg("walk round corner", ZeldaItem.Raft)
             up // grab key it's easy
@@ -55,7 +64,7 @@ object Level3Plan {
             upm // option to get key up, but skip
             seg("Keys from squishy")
             kill
-            goTo(InLocations.Level3.keyElbowSquishy)
+            goTo(Level3Locations.keyElbowSquishy)
             // walk past trap ??
             rightm
             goIn(GamePad.MoveRight, MapConstants.threeGrid)
@@ -64,9 +73,8 @@ object Level3Plan {
             level3BombThenRight
             seg("kill boss")
             starKill
-            go(InLocations.Level3.heartMid)
+            go(Level3Locations.heartMid)
             uponlym
             getTri
         }
-
 }

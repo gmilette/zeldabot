@@ -1,6 +1,5 @@
 package bot.plan.action
 
-import bot.plan.action.AlwaysAttack.Companion.attackLength
 import bot.state.GamePad
 import bot.state.MapLocationState
 import bot.state.map.Direction
@@ -97,7 +96,6 @@ class AlwaysAttackWhenCan(useB: Boolean = false, private val otherwiseRandom: Bo
             if (framesSinceAttacked > 0) {
                 d { " attacked with $framesSinceAttacked" }
             }
-            System.out.println("ATTACK!!")
             framesSinceAttacked = 1
             gameAction
         }
@@ -108,4 +106,8 @@ class AlwaysAttackWhenCan(useB: Boolean = false, private val otherwiseRandom: Bo
 
     override fun complete(state: MapLocationState): Boolean =
         false
+
+    override fun reset() {
+        framesSinceAttacked = 0
+    }
 }

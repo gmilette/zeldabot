@@ -13,56 +13,54 @@ import bot.state.map.level.LevelStartMapLoc
 object Level2Plan {
     val level2: PlanBuilder.() -> Unit
         get() = {
-            add {
-                phase(Phases.lev(2))
-                lev(2)
-                startAt(LevelStartMapLoc.lev(2))
-                seg("gather 3 keys", ZeldaItem.Key)
-                right
-                kill
-                goTo(InLocations.Level2.keyMid)
-                loot // maybe try to get loot
-                up // nothing here
-                seg("gather key 2")
-                left
-                kill
-                left
-                goTo(InLocations.Level2.keyMid)
-                loot
-                right
-                right // grid room
-                seg("sprint up from grid")
-                up
+            phase(Phases.lev(2))
+            lev(2)
+            startAt(LevelStartMapLoc.lev(2))
+            seg("gather 3 keys", ZeldaItem.Key)
+            right
+            kill
+            goTo(InLocations.Level2.keyMid)
+            loot // maybe try to get loot
+            up // nothing here
+            seg("gather key 2")
+            left
+            kill
+            left
+            goTo(InLocations.Level2.keyMid)
+            loot
+            right
+            right // grid room
+            seg("sprint up from grid")
+            up
 //                seg("go get blue boomerang")
-                upm
-                seg("gather key 3", ZeldaItem.Key)
-                kill
-                loot // key 2
-                seg("Get to Dodongo", ZeldaItem.Triforce)
-                up
-                // skip getting key from squishy guy
+            upm
+            seg("gather key 3", ZeldaItem.Key)
+            kill
+            loot // key 2
+            seg("Get to Dodongo", ZeldaItem.Triforce)
+            up
+            // skip getting key from squishy guy
 //            .kill
 //            .goTo(InLocations.Level2.keyMid)
-                upNoBlock // the squishy guy appears like a projectile so do not block
-                kill
-                seg("bomb room")
-                // no key I think
+            upNoBlock // the squishy guy appears like a projectile so do not block
+            kill
+            seg("bomb room")
+            // no key I think
 //            goTo(InLocations.Level2.keyMid)
-                up
-                kill // blocked before going // allow bombs
-                goTo(InLocations.Level2.bombItemRight)
-                up
-                seg(Phases.Segment.lev2Boss)
-                switchToBomb
-                killLevel2Rhino
-                seg("get the triforce")
-                wait(200) // there might be a bomb appearing that I want
-                goTo(InLocations.Level2.heartMid)
-                loot // in case there is a bomb
-                leftonlym
-                goIn(GamePad.MoveLeft, 20)
-                getTri
-            }
+            up
+            kill // blocked before going // allow bombs
+            goTo(InLocations.Level2.bombItemRight)
+            up
+            seg(Phases.Segment.lev2Boss)
+            switchToBomb
+            killLevel2Rhino
+            seg("get the triforce")
+            wait(200) // there might be a bomb appearing that I want
+            goTo(InLocations.Level2.heartMid)
+            loot // in case there is a bomb
+            leftonlym
+            goIn(GamePad.MoveLeft, 20)
+            getTri
         }
 
     val levelPlan2Boomerang: PlanBuilder.() -> Unit

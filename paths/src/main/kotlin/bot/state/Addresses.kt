@@ -89,7 +89,7 @@ object Addresses {
    const val moveDir = 0x0F // 01 or FF // Link's Move Direction
    // enemy location is still set when the enemy is dead
    // or if link goes to another screen and there are no enemies
-   // todo: precomipled knowledge is number of enemies on each0x12
+   // todo: precompiled knowledge is number of enemies on each0x12
    // hack: just wait for the enemy to move x or y to really know if it exists
    const val enemyX1 = 0x0071
    const val tenthEnemyCount = 0x0050
@@ -305,9 +305,9 @@ object Addresses {
    // 23 map
    // 29 boomerang
    // 3 nothing?
-   const val dungeonTypeOfItem = 0x0AB
+   const val dungeonTypeOfItem = 0x00AB
    // y coordinate of dropped item?
-   const val dungeonFloorItem = 0x097
+   const val dungeonFloorItem = 0x0097
 
    const val clockActivated = 0x066C
 
