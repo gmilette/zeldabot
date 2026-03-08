@@ -81,8 +81,7 @@ class RoutePreparation(val params: Param = Param()) {
         //// LOG
         d { " route To attackOrRoute attack=$attackPossible can=$canAttack allowBlock=${param.allowBlock} avoid=${params.whatToAvoid} useB=${useB} canUseSword=${state.frameState.canUseSword} spec`${attackableSpec}"}
         if (state.frameState.linkDoingAnAttack()) {
-            //15 frames of attacking
-            System.out.println("attackingxx")
+            // observation: This always lasts 15 frames
             d { " xxLink is attackingxx " }
         }
 

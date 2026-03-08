@@ -1050,6 +1050,20 @@ class PlanBuilder(
         return this
     }
 
+    fun always(): PlanBuilder {
+        add(lastMapLoc, AlwaysAttackWhenCan())
+//        add(lastMapLoc, AlwaysAttack())
+        return this
+    }
+
+    fun exitReenter() {
+        add {
+            seg("reenter to not use key")
+            goInConsume(GamePad.MoveDown, 30)
+            goInConsume(GamePad.MoveUp, 30)
+        }
+    }
+
     /**
      * end when achieved desired direction
      */

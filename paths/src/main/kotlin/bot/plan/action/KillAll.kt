@@ -166,7 +166,7 @@ class KillAll(
         return if (killedAllEnemies(state)) {
             d { " no enemies all killed ${numberLeftToBeDead}" }
             waitAfterAllKilled--
-            return GamePad.None // just wait
+            GamePad.None // just wait
         } else {
             // first kill the enemies not in center
             // but if there is a heart prefer that!

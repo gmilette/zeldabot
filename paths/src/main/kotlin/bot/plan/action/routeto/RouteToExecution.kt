@@ -2,6 +2,7 @@ package bot.plan.action.routeto
 
 import bot.plan.action.Action
 import bot.plan.action.AlwaysAttack
+import bot.plan.action.AlwaysAttackWhenCan
 import bot.plan.action.RouteTo
 import bot.plan.action.RouteTo.Param
 import bot.plan.action.RouteTo.RouteParam
@@ -43,11 +44,11 @@ class RouteExecution(val params: Param = Param()) {
         private const val WAIT_BETWEEN_NOT_BOOMERANG = 2
     }
 
-    private val attack = AlwaysAttack()
-    private val attackB = AlwaysAttack(useB = true)
+    private val attack = AlwaysAttackWhenCan()
+    private val attackB = AlwaysAttackWhenCan(useB = true)
     private var boomerangCt = 0
 
-    var theAttack: AlwaysAttack = attack
+    var theAttack: AlwaysAttackWhenCan = attack
 
     fun route(
         state: MapLocationState,
@@ -73,10 +74,10 @@ class RouteExecution(val params: Param = Param()) {
             to,
             param,
             boomerangCt,
-             theAttack.isAttacking(),
+             theAttack.isAttacking(state),
         )
 
-        d { " Route Action -> Type is $action attacking=${theAttack.isAttacking()}" }
+        d { " Route Action -> Type is $action attacking=${theAttack.isAttacking(state)}" }
         // keeps turning around while attacking
 
         return when (action) {
