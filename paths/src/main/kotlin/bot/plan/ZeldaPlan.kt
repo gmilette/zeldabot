@@ -3,6 +3,8 @@ package bot.plan
 import bot.plan.ZeldaPlan.raftLadderSetup
 import bot.plan.action.*
 import bot.plan.levels.Level1Plan
+import bot.plan.levels.Level2Plan
+import bot.plan.levels.Level3Plan
 import bot.plan.runner.Experiment
 import bot.plan.runner.MasterPlan
 import bot.state.*
@@ -39,6 +41,7 @@ object ZeldaPlan {
 
         return builder {
             woodenSwordPhase()
+            1 using level1
 
             "gather bombs".seg()
             gatherBombsFirstPhase()
@@ -440,177 +443,17 @@ object ZeldaPlan {
         get() = Level1Plan.level1
 
     private val level2: PlanBuilder.() -> Unit
-        get() = {
-            add {
-                phase(Phases.lev(2))
-                lev(2)
-                startAt(LevelStartMapLoc.lev(2))
-                seg("gather 3 keys", ZeldaItem.Key)
-                right
-                kill
-                goTo(InLocations.Level2.keyMid)
-                loot // maybe try to get loot
-                up // nothing here
-                seg("gather key 2")
-                left
-                kill
-                left
-                goTo(InLocations.Level2.keyMid)
-                loot
-                right
-                right // grid room
-                seg("sprint up from grid")
-                up
-//                seg("go get blue boomerang")
-                upm
-                seg("gather key 3", ZeldaItem.Key)
-                kill
-                loot // key 2
-                seg("Get to Dodongo", ZeldaItem.Triforce)
-                up
-                // skip getting key from squishy guy
-//            .kill
-//            .goTo(InLocations.Level2.keyMid)
-                upNoBlock // the squishy guy appears like a projectile so do not block
-                kill
-                seg("bomb room")
-                // no key I think
-//            goTo(InLocations.Level2.keyMid)
-                up
-                kill // blocked before going // allow bombs
-                goTo(InLocations.Level2.bombItemRight)
-                up
-                seg(Phases.Segment.lev2Boss)
-                switchToBomb
-                killLevel2Rhino
-                seg("get the triforce")
-                wait(200) // there might be a bomb appearing that I want
-                goTo(InLocations.Level2.heartMid)
-                loot // in case there is a bomb
-                leftonlym
-                goIn(GamePad.MoveLeft, 20)
-                getTri
-            }
-        }
+        get() = Level2Plan.level2
 
     private val levelPlan2Boomerang: PlanBuilder.() -> Unit
-        get() = {
-            phase(Phases.reenterLevel2)
-            lev(2)
-            startAt(LevelStartMapLoc.lev(2))
-            seg("go to boomerang", ZeldaItem.Boomerang)
-            up
-            right
-            up
-            up
-            right
-            seg("get boomerang")
-            kill
-            goAbout(InLocations.Level2.keyMid, 1, 1, true, ignoreProjectiles = true)
-            seg("depart", ZeldaItem.None)
-            left
-            kill // door is locked until all killed
-            down
-            down
-            left
-            seg("Go to exit")
-            down
-            seg("move out")
-            goTo(FramePoint(7.grid + MapConstants.halfGrid, 8.grid))
-            goInConsume(GamePad.MoveDown,MapConstants.threeGrid)
-            // try inside nav instead
-//            downTo(60)
-//            goInConsume(GamePad.MoveDown,90)
-            startAt(60)
-        }
+        get() = Level2Plan.levelPlan2Boomerang
     }
 
-private val levelPlan2Harvest2: PlanBuilder.() -> Unit
-    get() = {
-//        phase(Phases.level2Harvest)
-        lev(2)
-        startAt(LevelStartMapLoc.lev(2))
-        seg("Wander level 2", ZeldaItem.Rupee)
-        right
-        upk
-        leftk
-        leftk
-        rightk
-        rightk
-        upk
-        upk
-        upk
-        upk
-        seg("escape", ZeldaItem.None)
-        downk
-        downk
-        downk
-        downk
-        seg("depart")
-        leftk
-        seg("move out")
-        goTo(FramePoint(7.grid + MapConstants.halfGrid, 8.grid))
-        goInConsume(GamePad.MoveDown,MapConstants.threeGrid)
-        startAt(60)
-    }
+    private val levelPlan2Harvest2: PlanBuilder.() -> Unit
+        get() = Level2Plan.levelPlan2Harvest2
 
     private val level3: PlanBuilder.() -> Unit
-        get() = {
-            phase(Phases.lev(3))
-            lev(3)
-            startAt(LevelStartMapLoc.lev(3))
-            seg("grab key", ZeldaItem.Key)
-            left
-            goTo(InLocations.Level2.keyMid)
-            loot
-            seg("walk round corner", ZeldaItem.Raft)
-            up // grab key it's easy
-            kill
-            loot
-            up
-            leftm
-            // get past trap
-            goIn(GamePad.MoveLeft, 30)
-            seg("past the compass")
-            killUntil2
-            level3TriggerDoorThen // it's not great but ok
-            goIn(GamePad.MoveLeft, 10)
-            seg("fight swords")
-            kill // don't attack half
-            down  // downk, i think it as causing no completing
-            seg("get raft")
-            goIn(GamePad.MoveDown, 10)
-            switchToBomb
-            // drop clearing bomb
-            goIn(GamePad.B, 6)
-            goTo(InLocations.rightStair)
-            startAt(15)
-            go(InLocations.getItem)
-            upTo(105)
-            seg("get to back to center", ZeldaItem.Triforce)
-            upm
-            rightNoP
-            seg("right no p")
-            goTo(FramePoint(12.grid, 5.grid))
-            goIn(GamePad.MoveRight, MapConstants.twoGrid)
-            rightNoP
-            seg("get to boss")
-            upm // option to get key up, but skip
-            seg("Keys from squishy")
-            kill
-            goTo(InLocations.Level3.keyElbowSquishy)
-            // walk past trap ??
-            rightm
-            goIn(GamePad.MoveRight, MapConstants.threeGrid)
-            seg("BOMB RIGHT")
-            switchToBomb
-            level3BombThenRight
-            seg("kill boss")
-            starKill
-            go(InLocations.Level3.heartMid)
-            uponlym
-            getTri
-        }
+        get() = Level3Plan.level3
 
 private val level4: PlanBuilder.() -> Unit
     get() = {
