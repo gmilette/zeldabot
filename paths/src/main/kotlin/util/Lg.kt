@@ -13,8 +13,8 @@ object LoggerOverride {
     val log: Boolean
         get() = ZeldaBot.log
 
-    private val allowed = mutableListOf<String>("bot.plan")
-    private val denied = mutableListOf<String>("bot.plan.zstar")
+    private val allowed = mutableListOf<String>("")
+    private val denied = mutableListOf<String>("")
 
     /** Only show logs from these packages (prefix match). If empty, all packages are shown. */
     fun allow(vararg packages: String) = apply { allowed.addAll(packages) }
