@@ -278,8 +278,8 @@ class KillAll(
                     }
 
                     // could route to all targets
-                    routeTo.routeTo(
-//                    routeTo.routeToBest(
+//                    routeTo.routeTo(
+                    routeTo.routeToBest(
                         state, targetsToAttack,
                         RouteTo.RouteParam(
                             useB = firstAttackBomb || useBombs,
