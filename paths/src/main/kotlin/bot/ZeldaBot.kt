@@ -13,6 +13,7 @@ import nintaco.api.API
 import nintaco.api.ApiSource
 import nintaco.api.Colors
 import nintaco.api.GamepadButtons
+import util.LoggerOverride
 import util.Map2d
 import util.RunOnceLambda
 import util.d
@@ -34,6 +35,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         // this allows the code to programatically start the game at a certain state
         // but it has to happen after the API is ready, so execute on callback from
         // listeners
+        LoggerOverride.init()
 
         val root = DirectoryConstants.states
         d { " master plan ${plan.masterPlan.toStringAll()}" }

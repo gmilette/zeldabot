@@ -13,7 +13,6 @@ import bot.state.map.destination.EntryType
 import bot.state.map.destination.ZeldaItem
 import bot.state.map.level.LevelMapCellsLookup
 import bot.state.oam.*
-import util.d
 
 class PlanBuilder(
     private val mapData: MapCells,
@@ -53,7 +52,7 @@ class PlanBuilder(
         add(lastMapLoc, whiteSwordManeuverSneakManeuver(moveDown, moveUp))
     }
 
-    fun  routeTo(loc: MapLoc): PlanBuilder {
+    fun routeTo(loc: MapLoc): PlanBuilder {
         //d { " path from $lastMapLoc to $loc"}
         val path = optimizer.findPath(lastMapLoc, loc) ?: return this
         var previousCell: MapCell? = null
@@ -619,70 +618,6 @@ class PlanBuilder(
             return this
         }
 
-    fun pushInLevelMiddleStair(inMapLoc: MapLoc = 88, upTo: MapLoc = lastMapLoc, outLocation: FramePoint = InLocations.getItem) {
-//        seg("push and go in upTo $upTo loc $outLocation")
-        goTo(FramePoint(3.grid, 8.grid))
-        pushThenGoTo(InLocations.diamondLeftBottomPush, InLocations.middleStair)
-        startAt(inMapLoc)
-        go(outLocation) //TODO no have to exit
-//        add(lastMapLoc, GoDirection(GamePad.MoveUp, 100))
-        upTo(upTo)
-    }
-
-    fun pushInLevelAnyBlock(inMapLoc: MapLoc = 88,
-                            // target to push
-                            pushTarget: FramePoint? = null,
-                            // where the stairs are
-                            stairsTarget: FramePoint,
-                            // where to go back to
-                            upTo: MapLoc = lastMapLoc,
-                            // where to go inside
-                            outLocation: FramePoint = InLocations.getItem,
-                            directionFrom: Direction = Direction.Down,
-                            position: FramePoint = FramePoint(3.grid, 8.grid), // for down
-                            thenGo: GamePad = GamePad.None) {
-        // position
-        goTo(position)
-
-        // dynamic direction?
-
-        pushTarget?.let { pushTarget ->
-            when (directionFrom) {
-                Direction.Down -> {
-                    // push from below
-                    val belowPushTarget = pushTarget.downEnd
-                    goTo(belowPushTarget)
-                    // push
-                    add(lastMapLoc, GoDirection(GamePad.MoveUp, 70))
-                    add(lastMapLoc, GoDirection(GamePad.MoveDown, 10))
-                    add(lastMapLoc, GoDirection(GamePad.MoveRight, 20))
-                }
-
-                Direction.Left -> {
-                    val pushFrom = directionFrom.pointModifier(MapConstants.twoGrid)(pushTarget)
-                    goTo(pushFrom)
-                    // push
-                    add(lastMapLoc, GoDirection(GamePad.MoveRight, 70))
-                    add(lastMapLoc, GoDirection(GamePad.MoveLeft, 50))
-                    add(lastMapLoc, GoDirection(GamePad.MoveUp, 20))
-                }
-
-                else -> {
-                    throw IllegalArgumentException("can't do it")
-                }
-            }
-        }
-        // go to stairs, maybe not always ignore projectiles
-        add(lastMapLoc, InsideNav(stairsTarget, ignoreProjectiles = true))
-        if (thenGo != GamePad.None) {
-            goIn(thenGo, 15)
-        }
-
-        startAt(inMapLoc)
-        go(outLocation)
-        upTo(upTo)
-    }
-
     fun obj(item: ZeldaItem, itemLoc: Objective.ItemLoc? = null) {
         // set the segment
         seg("get ${item.name}")
@@ -736,44 +671,6 @@ class PlanBuilder(
         }
     }
 
-    /**
-     * for when the push block is part of a middle stair
-     *   *
-     *  * *
-     *   *
-     */
-    fun pushThenGoTo(toB: FramePoint, toT: FramePoint = InLocations.middleStair, ignoreProjectiles: Boolean = false): PlanBuilder {
-//        pushThenGoToDynamic(toB, toT, ignoreProjectiles)
-        add(lastMapLoc, InsideNavAbout(toB, 4, ignoreProjectiles = ignoreProjectiles))
-        add(lastMapLoc, GoDirection(GamePad.MoveUp, 70))
-        add(lastMapLoc, GoDirection(GamePad.MoveRight, 70))
-        add(lastMapLoc, InsideNav(toT, ignoreProjectiles = ignoreProjectiles))
-        return this
-    }
-
-    fun pushThenGoToDynamic(blockIn: FramePoint, toT: FramePoint = InLocations.middleStair, ignoreProjectiles: Boolean = false): PlanBuilder {
-//        // just for compat ability
-        val block = blockIn.upOneGrid
-        val pushFromUp = Direction.Up.pointModifier(MapConstants.oneGrid)(block)
-        val pushFromDown = Direction.Down.pointModifier(MapConstants.oneGrid)(block)
-        add(lastMapLoc, InsideNavAbout(pushFromUp, 4, ignoreProjectiles = ignoreProjectiles, orPoints = listOf(pushFromDown)))
-        // go there
-        add(lastMapLoc, GoToward(block, 70))
-        add(lastMapLoc, GoDirection(GamePad.MoveRight, 70))
-        add(lastMapLoc, InsideNav(toT, ignoreProjectiles = ignoreProjectiles))
-        add(lastMapLoc, GoDirection(GamePad.MoveRight, 4))
-        add(lastMapLoc, GoDirection(GamePad.MoveLeft, 4))
-        return this
-    }
-
-    fun pushJust(target: FramePoint) {
-        // position
-        goTo(FramePoint(3.grid, 8.grid))
-        add(lastMapLoc, InsideNavAbout(target.justLeftDown, 4))
-        add(lastMapLoc, GoDirection(GamePad.MoveUp, 70))
-        add(lastMapLoc, GoDirection(GamePad.MoveRight, 20))
-    }
-
     fun pushActionThenGoRight(push: InLocations.Push): PlanBuilder {
         val right = lastMapLoc.right
         add(right, makePushActionThen(push, right, moveTo(right)))
@@ -786,28 +683,10 @@ class PlanBuilder(
         return this
     }
 
-//    fun pushActionThenGoCorner(toB: FramePoint): PlanBuilder {
-//        add(lastMapLoc.right, makePushActionThen(toB, moveTo(lastMapLoc.right)))
-//        return this
-//    }
-
-    fun pushWait(toB: FramePoint): PlanBuilder {
-        // if it fails need to retry
-        // position
-        add(lastMapLoc, InsideNavAbout(FramePoint(toB.x - MapConstants.twoGrid, toB.y - MapConstants.twoGrid), 4))
-        add(lastMapLoc, InsideNavAbout(toB, 2))
-        add(lastMapLoc, GoDirection(GamePad.MoveDown, 100))
-        add(lastMapLoc, Wait(300))
-        // escape it
-        add(lastMapLoc, GoDirection(GamePad.MoveUp, 20))
-        return this
-    }
     fun go(to: FramePoint): PlanBuilder {
         add(lastMapLoc, InsideNav(to))
         return this
     }
-
-    fun makeGo(to: FramePoint) = InsideNav(to)
 
     private fun showLetterIfRequired(): PlanBuilder {
         add(lastMapLoc, ShowLetterConditionally())
@@ -824,11 +703,6 @@ class PlanBuilder(
     fun goToNotMonitored(to: FramePoint): PlanBuilder {
         add(lastMapLoc, StartAtAction(0, -1))
         add(lastMapLoc, InsideNavAbout(to, 4, 2, 1, setMonitorEnabled = false))
-        return this
-    }
-
-    private fun goToOrMapChanges(to: FramePoint, makePassable: FramePoint? = null): PlanBuilder {
-        add(lastMapLoc, CompleteIfMapChanges(InsideNavAbout(to, 2, 1, negVertical = 0, makePassable = makePassable)))
         return this
     }
 
@@ -944,7 +818,6 @@ class PlanBuilder(
 
     fun switchToLetter() {
         switchToItem(Inventory.Selected.letter)
-//        plan.add(SwitchToItemConditionally(Inventory.Selected.whistle))
     }
 
     fun switchToWhistle() {
@@ -1064,18 +937,6 @@ class PlanBuilder(
         }
     }
 
-    /**
-     * end when achieved desired direction
-     */
-    fun goInTowards(dir: GamePad = GamePad.MoveUp, num: Int): PlanBuilder {
-        add(lastMapLoc, GoIn(num, dir, desiredDirection = dir.toDirection()))
-        return this
-    }
-
-    fun usePotionIfNeed() {
-        add(lastMapLoc, UsePotion())
-    }
-
     fun goInConsume(dir: GamePad = GamePad.MoveUp, num: Int): PlanBuilder {
         add(lastMapLoc, GoInConsume(num, dir))
         return this
@@ -1157,8 +1018,6 @@ class PlanBuilder(
 
         return this
     }
-
-
 
     private fun build(): MasterPlan {
         makeSegment()
