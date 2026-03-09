@@ -1,6 +1,7 @@
 package bot.plan
 
 import KillHandsInLevel7
+import bot.ZeldaBot
 import bot.plan.action.*
 import bot.plan.runner.Experiment
 import bot.plan.runner.MasterPlan
@@ -33,6 +34,10 @@ class PlanBuilder(
     companion object {
         private const val OVERWORLD_LEVEL = 0
     }
+
+    private fun killAction(): Action =
+        if (ZeldaBot.useRLCombat) KillAllRL(ZeldaBot.rlModelPath)
+        else KillAll(needLongWait = false)
 
     operator fun invoke(block: PlanBuilder.() -> Unit): MasterPlan {
         this.block()
@@ -267,7 +272,7 @@ class PlanBuilder(
         }
     val killb: PlanBuilder
         get() {
-            add(lastMapLoc, KillAll(useBombs = true, waitAfterAttack = false))
+            add(lastMapLoc, if (ZeldaBot.useRLCombat) KillAllRL(ZeldaBot.rlModelPath) else KillAll(useBombs = true, waitAfterAttack = false))
             return this
         }
     val killLevel2Rhino: PlanBuilder
@@ -297,7 +302,7 @@ class PlanBuilder(
             return this
         }
     fun killUntil(leftDead: Int): PlanBuilder {
-        add(lastMapLoc, lootAndKill(KillAll(
+        add(lastMapLoc, lootAndKill(if (ZeldaBot.useRLCombat) KillAllRL(ZeldaBot.rlModelPath) else KillAll(
             numberLeftToBeDead = leftDead
         )))
         return this
@@ -319,13 +324,13 @@ class PlanBuilder(
         }
     val killAndLoot: PlanBuilder
         get() {
-            add(lastMapLoc, KillAll())
+            add(lastMapLoc, killAction())
             add(lastMapLoc, GetLoot())
             return this
         }
     val kill: PlanBuilder
         get() {
-            add(lastMapLoc, lootAndKill(KillAll(needLongWait = false)))
+            add(lastMapLoc, lootAndKill(killAction()))
             return this
         }
     val killCenterMonster: PlanBuilder
@@ -345,7 +350,7 @@ class PlanBuilder(
         }
     val killLongWait: PlanBuilder
         get() {
-            add(lastMapLoc, lootAndKill(KillAll(needLongWait = true)))
+            add(lastMapLoc, lootAndKill(killAction()))
             return this
         }
     val killFirstAttackBomb: PlanBuilder
@@ -355,7 +360,7 @@ class PlanBuilder(
         }
     val killWithBombs: PlanBuilder
         get() {
-            add(lastMapLoc, KillAll(needLongWait = false, useBombs = true))
+            add(lastMapLoc, if (ZeldaBot.useRLCombat) KillAllRL(ZeldaBot.rlModelPath) else KillAll(needLongWait = false, useBombs = true))
             return this
         }
     val starKill: PlanBuilder
