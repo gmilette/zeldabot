@@ -37,7 +37,7 @@ private fun callerPackage(): String =
             !cls.startsWith("sun.") &&
             !cls.startsWith("kotlin.")
         }
-        ?.substringBefore('$')  // strip lambda/inner class suffixes
+        ?.substringBefore('$')
         ?: ""
 
 private class FilteringLogWriter(
@@ -47,7 +47,7 @@ private class FilteringLogWriter(
 ) : LogWriter() {
     override fun isLoggable(tag: String, severity: Severity): Boolean {
         val pkg = callerPackage()
-        if (denied.any { pkg.startsWith(it) }) return false
+        if (denied.isNotEmpty() && denied.any { pkg.startsWith(it) }) return false
         if (allowed.isNotEmpty() && allowed.none { pkg.startsWith(it) }) return false
         return true
     }
