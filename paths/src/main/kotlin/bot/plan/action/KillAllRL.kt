@@ -16,7 +16,7 @@ import java.nio.FloatBuffer
  * The ONNX model is loaded lazily on first use.
  * Until a model is trained, this acts as a random policy fallback.
  */
-class KillAllRL(private val modelPath: String = "models/killall_policy.onnx") : Action {
+class KillAllRL(private val modelPath: String = "killall_policy.onnx") : Action {
 
     private var episodeFrameCount = 0
 
@@ -49,6 +49,7 @@ class KillAllRL(private val modelPath: String = "models/killall_policy.onnx") : 
     override fun complete(state: MapLocationState): Boolean = state.cleared
 
     override fun nextStep(state: MapLocationState): GamePad {
+        d { "KillAllRL nextStep" }
         episodeFrameCount++
         val obs = KillAllStateEncoder.encode(state, episodeFrameCount)
         val sess = session

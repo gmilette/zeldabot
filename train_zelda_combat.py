@@ -84,17 +84,21 @@ class ZeldaCombatEnv(gym.Env):
         print(f"[py] reset() sending RESET\\n ...", flush=True)
         t0 = time.time()
         self._sock.sendall(b"RESET\n")
-        # Read and discard 0x01 keepalive bytes until the first obs byte arrives.
-        # Server sends 0x01 every ~2s while waiting for the game to settle.
-        print(f"[py] reset() waiting for ACK/obs...", flush=True)
-        first = recvall(self._sock, 1)
-        while first[0] == 0x01:
-            t_ka = time.time() - t0
-            print(f"[py] reset() keepalive ACK ({t_ka:.1f}s elapsed), still waiting...", flush=True)
-            first = recvall(self._sock, 1)
-        # first is now the first byte of the obs payload
-        rest = recvall(self._sock, OBS_BYTES - 1)
-        raw = first + rest
+        # Read and discard 0x01 keepalive bytes until 0xFF "obs follows" marker.
+        # Server sends 0x01 every ~500ms while waiting for the game to settle,
+        # then sends 0xFF immediately before the 452-byte obs payload.
+        print(f"[py] reset() waiting for 0xFF obs marker...", flush=True)
+        b = recvall(self._sock, 1)
+        while b[0] != 0xFF:
+            if b[0] == 0x01:
+                t_ka = time.time() - t0
+                print(f"[py] reset() keepalive 0x01 ({t_ka:.1f}s elapsed), still waiting...", flush=True)
+            else:
+                print(f"[py] reset() unexpected byte {b[0]:#x}, discarding", flush=True)
+            b = recvall(self._sock, 1)
+        t_marker = time.time() - t0
+        print(f"[py] reset() 0xFF marker received in {t_marker:.2f}s — reading {OBS_BYTES} obs bytes...", flush=True)
+        raw = recvall(self._sock, OBS_BYTES)
         elapsed = time.time() - t0
         print(f"[py] reset() obs received {len(raw)} bytes in {elapsed:.2f}s", flush=True)
         assert len(raw) == OBS_BYTES, f"Expected {OBS_BYTES} bytes, got {len(raw)}"

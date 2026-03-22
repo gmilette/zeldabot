@@ -76,7 +76,11 @@ object KillAllTrainingServer {
             println("KillAllTrainingServer: Nintaco API activated — setting speed to 400%")
             api.setSpeed(400)
         }
-        api.addDeactivateListener { println("KillAllTrainingServer: Nintaco API deactivated") }
+        api.addDeactivateListener {
+            println("KillAllTrainingServer: Nintaco API deactivated")
+            api.run()
+            println("KillAllTrainingServer: Ran it again")
+        }
 
         Thread({ runSocketServer() }, "training-socket-server").apply {
             isDaemon = true
@@ -280,9 +284,9 @@ object KillAllTrainingServer {
             // and placed obs there. Clearing it would cause a deadlock.
             println("[handleReset] reload already in progress, resetResponseQueueSize=${resetResponseQueue.size}, waiting for settle...")
         }
-        println("[handleReset] polling resetResponseQueue (keepalive every 2s)...")
+        println("[handleReset] polling resetResponseQueue (keepalive every 500ms)...")
         while (true) {
-            val obs = resetResponseQueue.poll(2, TimeUnit.SECONDS)
+            val obs = resetResponseQueue.poll(500, TimeUnit.MILLISECONDS)
             if (obs != null) {
                 println("[handleReset] obs received (${obs.size} floats), returning to Python")
                 return obs
@@ -354,14 +358,18 @@ object KillAllTrainingServer {
                     // "RESET\n" — read remaining 5 bytes
                     val rest = ByteArray(5)
                     inp.readFully(rest)
-                    println("[socket] << RESET received — sending ACK immediately")
-                    out.write(byteArrayOf(0x01))  // phase-1 ACK: "got it, loading..."
+                    println("[socket] << RESET received — sending initial ACK")
+                    out.write(byteArrayOf(0x01))
                     out.flush()
-                    println("[socket] >> ACK sent, now blocking on handleReset()...")
+                    println("[socket] >> initial ACK sent, blocking on handleReset()...")
                     val obs = handleReset(out)
+                    // 0xFF = "obs follows" marker — safe because obs floats are in [0,1]
+                    // so their first byte is always 0x00–0x3F, never 0xFF.
+                    // Python discards 0x01 keepalives then reads until 0xFF, then reads 452 bytes.
+                    out.write(byteArrayOf(0xFF.toByte()))
                     out.write(floatsToBytes(obs))
                     out.flush()
-                    println("[socket] >> RESET obs sent (${OBS_BYTES} bytes)")
+                    println("[socket] >> 0xFF marker + obs sent (${OBS_BYTES} bytes)")
                 } else {
                     // 4-byte big-endian action int, first byte already read
                     val b2 = inp.readByte()
