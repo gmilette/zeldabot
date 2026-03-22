@@ -231,6 +231,8 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         var fixLocationToZapper: Boolean = false
         var log: Boolean = false
         var experiment: String? = null
+        var useRLCombat: Boolean = true
+        var rlModelPath: String = "killall_policy.onnx"
 
         @JvmStatic
         fun startIt(monitor: ZeldaMonitor): ZeldaBot {
