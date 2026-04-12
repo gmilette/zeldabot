@@ -1,15 +1,13 @@
 package bot.state
 
 import bot.plan.action.PreviousMove
-import bot.plan.action.ProjectileDirectionCalculator
 import bot.state.map.*
 import bot.state.map.stats.MapStatsTracker
-import bot.state.oam.LinkDirectionFinder
+import bot.state.movement.MovePredictor
+import bot.state.movement.SkipDetector
 import bot.state.oam.OamStateReasoner
 import nintaco.api.API
-import org.apache.commons.math3.analysis.function.Add
 import util.d
-import kotlin.math.abs
 
 class FrameStateUpdater(
     private val api: API,
@@ -111,7 +109,7 @@ class FrameStateUpdater(
         state.lastPoints.add(linkPoint)
 
         val seenBoomerang = mapStats.seenBoomerang
-        val willSkip = SkipDetector.willSkip(api)
+//        val willSkip = SkipDetector.willSkip(api)
 
         d { " num enemies ${theEnemies.size}"}
         for (enemy in theEnemies) {
@@ -123,7 +121,7 @@ class FrameStateUpdater(
         if (!frame.isScrolling) {
             // don't track if the screen is scrolling
             val mapCoordinates = MapCoordinates(level, mapLoc)
-            mapStats.track(mapCoordinates, theEnemies, frame)
+            mapStats.track(api, mapCoordinates, theEnemies, frame)
         }
         state.framesOnScreen++
         state.frameState = frame
@@ -145,10 +143,11 @@ class FrameStateUpdater(
             // don't track if the screen is scrolling
             val mapCoordinates = MapCoordinates(state.frameState.level, state.frameState.mapLoc)
             val subPixel = api.readCPU(Addresses.subPixel)
-            val subTile = api.readCPU(Addresses.subTile)
+            val subTile = api.readSigned(Addresses.subTile)
             val linkDir = api.readCPU(Addresses.linkDir)
             val skip = SkipDetector.getSkip(this.api)
-            mapStats.trackDecision(state.link, gamePad, skip)
+            val movementPrediction = MovePredictor(api).predict(gamePad)
+            mapStats.trackDecision(state.link, gamePad, skip, movementPrediction)
         }
     }
 

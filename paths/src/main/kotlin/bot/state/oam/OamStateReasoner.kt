@@ -61,7 +61,7 @@ class OamStateReasoner(
     // calculate isDamaged here
     private fun SpriteData.toAgent(lookup: DirectionByMemoryLookup? = null): Agent {
         val tileAttribute = tile to attribute
-        val damaged = DamagedLookup.isDamaged(tileAttribute, isOverworld, level)
+//        val damaged = DamagedLookup.isDamaged(tileAttribute, isOverworld, level)
 //        if (damaged) {
 //            d { "DDDD $tile to $attribute is damaged"}
 //            d { "info ${Monsters.lookup[tileAttribute.tile]} "}
@@ -88,6 +88,12 @@ class OamStateReasoner(
             // maybe calculate the dir here for alive enemies
             lookup?.lookupDirection(point) ?: DirectionLookup.getDir(tileAttribute)
         }
+        // currently testing this, possibly could use & or || to check that both agree
+        val damaged = lookup?.lookupDamaged(point) ?: DamagedLookup.isDamaged(tileAttribute, isOverworld, level)
+        if (damaged) {
+            d { "DDDD $tile tis damaged point $point"}
+        }
+
         if (state == EnemyState.Projectile) {
             d { " Move dir for tile:${tileAttribute.toHex()} $point is ${movingDirection.toArrow()} and ${findDir.toArrow()} damaged: $damaged pair: ${toStringIsProjLevel()}" }
         }

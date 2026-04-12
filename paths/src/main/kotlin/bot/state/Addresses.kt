@@ -1,7 +1,6 @@
 package bot.state
 
 object Addresses {
-   // game
    /**
     * 0=Title/transitory    1=Selection Screen
    5=Normal              6=Preparing Scroll
@@ -31,6 +30,18 @@ object Addresses {
 
    const val triforce = 0x0671
 
+//   non-zero means Link is currently being knocked back. The low nibble is the direction of the shove using the same bitmask as movement. This is the primary flag — Walker_Move checks this first before any other movement logic.
+   const val shoveDir = 0x00C0
+   //   how many pixels of knockback remain. Counts down toward zero each frame. When it hits zero, ObjShoveDir is reset to zero and normal movement resumes.
+   const val shoveDist = 0x00D3
+//   val objGridOffset: Int,   // $0394
+//   val objInputDir: Int,     // $03F8
+//   val objDir: Int,          // $0098
+//   val objPosFrac: Int,      // $03A8
+//   val objQSpeedFrac: Int    // $03BC
+
+   const val objInputDir = 0x03F8
+   const val objQSpeedFrac = 0x03BC
    // alternates between -128 and 0
    const val subPixel = 0x03A8
    // 0, 1, 3, 4, 6, 7
@@ -54,6 +65,8 @@ object Addresses {
    // how many moves to go 100
 
    const val subTile = 0x0394
+   // One-frame flag set by the NES to suppress diagonal turning mid-cell
+   const val linkGoStraight = 0x0057
    const val collidingTile = 0x049E
 
    //Low Nibble = how many hearts are filled. High Nybble = No. of heart containers - 1
@@ -127,6 +140,22 @@ object Addresses {
       0x03C5,
       0x03C6,
       0x03C7,
+   )
+
+//   slot 1 (first enemy) is 0x04F1, slot 2 is 0x04F2
+   val enemyDamaged = listOf(
+      0x04F0,
+      0x04F1,
+      0x04F2,
+      0x04F3,
+      0x04F4,
+      0x04F5,
+      0x04F6,
+      0x04F7,
+      0x04F8,
+      0x04F9,
+      0x04FA,
+      0x04FB,
    )
 
    val ememiesX = listOf(
@@ -238,6 +267,9 @@ object Addresses {
       0x0395,
    )
 
+   /**
+    * HexDecimal0x000 (dead/empty)0x10160x20320x30480x40640x60960x801280x901440xA01600xF0240
+    */
    val enemyHp = listOf(
       0x0485,  // slot 0: Link
       0x0486,  // slot 1: enemy
@@ -428,9 +460,4 @@ object Addresses {
       const val subX = 0x00FD // ?
       const val screenScrolling = 0x00e8 //$00=No, $08=Northbound, $04=Southbound, $01=Eastbound, $02=Westbound
    }
-
-   object Oam {
-      const val start = 0x0000
-   }
-
 }

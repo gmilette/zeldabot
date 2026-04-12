@@ -6,8 +6,11 @@ import bot.plan.action.ProjectileDirectionCalculator
 import bot.state.*
 import bot.state.map.MapConstants
 import bot.state.map.MovingDirection
+import bot.state.movement.MovePredictor
+import bot.state.movement.SkipCoordinates
 import bot.state.oam.EnemyGroup.boomerangs
 import com.google.gson.GsonBuilder
+import nintaco.api.API
 import util.Map2d
 import util.d
 import java.io.File
@@ -18,8 +21,25 @@ var gson = GsonBuilder().setPrettyPrinting().create()
 data class PointAction(
     val point: FramePoint,
     val action: GamePad,
-    val skipCoordinates: SkipCoordinates
-)
+//    val skipCoordinates: SkipCoordinates,
+    val movementPrediction: MovePredictor.MovementPrediction = MovePredictor.MovementPrediction(),
+    var actual: Actual = Actual()
+) {
+    fun predicted(): Boolean =
+        movementPrediction.pixels == actual.dist
+
+    fun differentPoints(): Boolean =
+        point != actual.point
+}
+
+data class Actual(
+    val state: MovePredictor.LinkState = MovePredictor.LinkState(),
+    val point: FramePoint = FramePoint(),
+    val dist: Int = -1
+) {
+    constructor(state: MovePredictor.LinkState, point: FramePoint, from: FramePoint):
+        this(state, point, point.distTo(from))
+}
 
 data class MapStatsData(
     val mapCoordinates: MapCoordinates,
@@ -100,11 +120,12 @@ class MapStatsTracker {
         visits.set(state.link.point, true)
     }
 
-    fun trackDecision(link: FramePoint, pad: GamePad, skipCoordinates: SkipCoordinates) {
-        movements.add(PointAction(link, pad, skipCoordinates))
+    fun trackDecision(link: FramePoint, pad: GamePad, skipCoordinates: SkipCoordinates, movementPrediction: MovePredictor.MovementPrediction) {
+        // skipCoordinates,
+        movements.add(PointAction(link, pad, movementPrediction))
     }
 
-    fun track(mapCoordinates: MapCoordinates, enemies: List<Agent>, state: FrameState) {
+    fun track(api: API, mapCoordinates: MapCoordinates, enemies: List<Agent>, state: FrameState) {
         if (mapCoordinates != this.mapCoordinates) {
             reset(this.mapCoordinates)
         }
@@ -118,6 +139,9 @@ class MapStatsTracker {
                 }
                 tileAttribCount[entry.key] = this
             }
+        }
+        movements.lastOrNull()?.let { last ->
+            last.actual = Actual(MovePredictor(api).makeState(last.action), state.link.point, last.point)
         }
         this.mapCoordinates = mapCoordinates
     }
@@ -157,6 +181,9 @@ class MapStatsTracker {
     }
 
     private fun writeVisits(mapCoordinates: MapCoordinates) {
+        val writeVisits = false
+        if (!writeVisits) { return } // this is currently useless
+
         if (!DirectoryConstants.enableDebug) return
 
         d { " write visits "}
@@ -200,12 +227,23 @@ class MapStatsTracker {
         d { " appendMovements "}
         val fileNameCsv = "${mapCoordinates.level}_${mapCoordinates.loc}_movements.csv"
         val fileNameCsvDir = DirectoryConstants.file("visits", fileNameCsv)
+        val fileNameJsonFilename = "${mapCoordinates.level}_${mapCoordinates.loc}_movements.json"
+        val fileNameJson = DirectoryConstants.file("visits", fileNameJsonFilename)
+//        val writer = FileWriter(fileNameCsvDir, true)
+//        writer.append("x,y,action,subp,subtitle,linkdir,willskip,pixels,direction,pxmoved,ptmoved\n")
+//        for (movement in movements) {
+//            writer.append("${movement.point.x},${movement.point.y},${movement.action.name},${movement.skipCoordinates.subPixel},${movement.skipCoordinates.subTile},${movement.skipCoordinates.linkDir},${SkipDetector.willSkip(movement.skipCoordinates)}, ${movement.movementPrediction.pixels},${movement.movementPrediction.direction},${movement.actualPixelsMoved},${movement.actualPointMovedTo.oneStr}\n")
+//        }
+//        writer.close()
 
-        val writer = FileWriter(fileNameCsvDir, true)
-        for (movement in movements) {
-            writer.append("${movement.point.x},${movement.point.y},${movement.action.name},${movement.skipCoordinates.subPixel},${movement.skipCoordinates.subTile},${movement.skipCoordinates.linkDir}\n")
+        File(fileNameJson).bufferedWriter().use { writer ->
+            for (movement in movements) {
+                if (!movement.predicted() && !movement.movementPrediction.input.shoved && movement.differentPoints() && movement.action.isDirection && movement.actual.dist < 5) {
+                    writer.write(gson.toJson(movement))
+                    writer.newLine()
+                }
+            }
         }
-        writer.close()
 
         movements = mutableListOf()
     }

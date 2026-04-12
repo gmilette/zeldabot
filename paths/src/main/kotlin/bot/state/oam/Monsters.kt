@@ -4,6 +4,8 @@ import bot.state.Agent
 import bot.state.map.Direction
 import bot.state.oam.Monsters.add
 import nintaco.util.BitUtil
+import kotlin.and
+import kotlin.collections.get
 
 //18, 16, // link shield shite
 //12, 14, // facing up link
@@ -23,6 +25,8 @@ import nintaco.util.BitUtil
 
 data class Monster(
     val name: String = "",
+    // unique identifier for this monster type
+    val objType: ObjectType = ObjectType(),
     // valid monster colors
     val color:Set<Int> = setOf(MonsterColor.red, MonsterColor.blue, MonsterColor.grey, MonsterColor.other),
     /**
@@ -33,7 +37,7 @@ data class Monster(
     val arrowKillable: Boolean = false,
     val overworld: Boolean = true,
     val avoidFront: Boolean = false,
-    val type: MutableMap<Int, MonsterItemsType> = mutableMapOf()
+    val type: MutableMap<Int, MonsterItemsType> = mutableMapOf(),
 ) {
     fun typeA(color: Int): Monster {
         this.type[color] = MonsterItemsType.A
@@ -72,6 +76,14 @@ data class Monster(
     }
 }
 
+data class ObjectType(
+    val red: Set<Int> = emptySet(),
+    val blue: Set<Int> = emptySet(),
+    val other: Set<Int> = emptySet(),
+    val all: Set<Int> = red + blue + other
+) {
+    fun match(type: Int): Boolean = all.contains(type)
+}
 
 val waterMonster = Monster(tile = setOf(0x0EE0, 0x0EC0))
 
@@ -113,34 +125,42 @@ val swordDir = DirectionMap(
 
 object MonstersOverworld {
     val armos = Monster(name = "statue",
+        objType = ObjectType(other = setOf(0x1F)),
         tile = setOf(0xa0, 0xa4, 0xa6),
         // red
         )
     val leever = Monster(name = "undergroundguy",
+        objType = ObjectType(red = setOf(0x10), blue = setOf(0x0F)),
         tile = setOf(0xc2, 0xc4), //0xc0 is underground, but it's not boomerangable yet
         color = blueAndRed)
     val lynel = Monster(name = "swordshooter",
+        objType = ObjectType(red = setOf(0x02), blue = setOf(0x01)),
         tile = setOf(0xD0, 0xD2, 0xD4, 0xD6, 0xD8, 0xCE), //, 0xCE), // not sure CE is there
         color = blueAndRed)
         .avoidFront()
         .typeD(MonsterColor.red)
         .typeD(MonsterColor.blue)
     val octorok = Monster(name = "overworldgrunt",
+        objType = ObjectType(red = setOf(0x08, 0x0A), blue = setOf(0x07, 0x09)),
         tile = setOf(0xb2, 0xb4, 0xb6, 0xb8, 0xba, 0xb0),
         color = blueAndRed,
     ).typeA(MonsterColor.red).typeB(MonsterColor.blue)
     val tektite = Monster(name = "spider",
+        objType = ObjectType(red = setOf(0x0E), blue = setOf(0x0D)),
         tile = setOf(0xcc, 0xca),
         color = blueAndRed) // confirm
-    val ghini = Monster(name = "worldghost")
+    val ghini = Monster(name = "worldghost", objType = ObjectType(other = setOf(0x22, 0x23)))
     val moblin = Monster(name = "arrowguy",
+        objType = ObjectType(red = setOf(0x04), blue = setOf(0x03)),
         tile = setOf(0xf0, 0xf2, 0xf4, 0xf6, 0xf8, 0xfa, 0xfe, ), // need to double check
         color = redAndGrey // i dont think it can. be blue
     )
     val peahat = Monster(name = "spin",
+        objType = ObjectType(other = setOf(0x1B)),
         tile = setOf(0xc6),
         color = red).immuneToB()
     val zora = Monster(name = "waterguy",
+        objType = ObjectType(other = setOf(0x11)),
         tile = setOf(0xbc, 0xbe, 0xEC, 0xEE)
     ).immuneToB()
 
@@ -223,34 +243,41 @@ object Monsters {
     //6_56
     // also same as sword guy
     val wizzrobe = Monster(name = "ghost",
+        objType = ObjectType(red = setOf(0x25), blue = setOf(0x24)),
         color = blueAndRed,
         // missing some tiles?
         tile = setOf(0xb4, 0xb6, 0xb8, 0xba)).immuneToB().inL()
     // 3_105 red
     // 5_100 blue
     val darknut = Monster("swordguy",
+        objType = ObjectType(red = setOf(0x0C), blue = setOf(0x0B)),
         color = blueAndRed,
         tile = setOf(0xbe, 0xb6, 0xBA, 0xb4, 0xac, 0xb0, 0xB8, 0xBC))
         .avoidFront()
         .immuneToB().inL()
-    val gel = Monster(name = "babysqui  shy").inL()
+    val gel = Monster(name = "babysqui  shy", objType = ObjectType(red = setOf(0x16), blue = setOf(0x15))).inL()
     val gibdo = Monster(name = "mummy",
+        objType = ObjectType(other = setOf(0x31)),
         tile = setOf(0xa6, 0xa4),
         color = blue
     ).inL()
     val goriya = Monster(name = "boomerangguy",
+        objType = ObjectType(red = setOf(0x06), blue = setOf(0x05)),
         color = blueAndRed, // guess
         tile = setOf(0xbe, 0xb6, 0xBA, 0xb4, 0xac, 0xb0, 0xB8, 0xBC)).inL()
-    val keese = Monster(name = "bat", tile=setOf(0x9c, 0x9a),
+    val keese = Monster(name = "bat", objType = ObjectType(red = setOf(0x1D), blue = setOf(0x1C), other = setOf(0x1E)), tile=setOf(0x9c, 0x9a),
         color = blueAndRed).inL() // 1 / 41
     val lanmoia = Monster(name = "eyeworm",
+        objType = ObjectType(other = setOf(0x3A, 0x3B)),
         color = blueAndRed).inL() // confirm
     val likelike = Monster(name = "pancake",
+        objType = ObjectType(other = setOf(0x18)),
         tile = setOf(0xa6, 0xa4),
         color = red, // red for the pancake
     ).inL()
-    val digdogger = Monster(name = "whistleenemy").inL()
+    val digdogger = Monster(name = "whistleenemy", objType = ObjectType(other = setOf(0x19, 0x38, 0x39))).inL()
     val dodongo = Monster("rhino",
+        objType = ObjectType(other = setOf(0x32, 0x33)),
         tile = setOf(0xf8, 0xf4, 0xf6,
             0xe0, 0xe2, 0xe8, 0xea,
             0xf2, 0xf8, 0xfe, 0xfa, 0xfc, ))
@@ -259,9 +286,10 @@ object Monsters {
         tile = setOf(0xCA, 0xC2, 0xc8, 0xcc, 0xce, 0xc0, 0xdc, 0xda, 0xd4, 0xd2, 0xd8, 0xd0, 0xd6, 0xc6, 0xde),
         color = grey
     ).immuneToB().inL()
-    val manhandla = Monster(name = "star").immuneToB().inL()
-    val aquamentus = Monster(name = "dragon").immuneToB().inL().typeD()
+    val manhandla = Monster(name = "star", objType = ObjectType(other = setOf(0x3C))).immuneToB().inL()
+    val aquamentus = Monster(name = "dragon", objType = ObjectType(other = setOf(0x3D))).immuneToB().inL().typeD()
     val ganon = Monster(name = "ganon",
+        objType = ObjectType(other = setOf(0x3E)),
         tile = setOf(
             0xD0, 0xD2, 0xD4, 0xd6, 0xd8, 0xda, 0xde,
             0xe0, 0xe2, 0xe4, 0xe6, 0xe8
@@ -269,32 +297,39 @@ object Monsters {
         color = grey // always 3
     ).immuneToB().inL().typeD()
     val gleeok = Monster(name = "hydradragon",
+        objType = ObjectType(other = setOf(0x42, 0x43, 0x44, 0x45, 0x46)),
         tile = setOf(0xCA, 0xC2, 0xc8, 0xcc, 0xce, 0xc0, 0xdc, 0xda, 0xd4, 0xd2, 0xd8, 0xd0, 0xd6, 0xc6, 0xde),
         color = grey
     ).immuneToB().inL().typeD()
-    val gohma = Monster(name = "spider").immuneToB().inL().typeD()
+    val gohma = Monster(name = "spider", objType = ObjectType(other = setOf(0x34, 0x35))).immuneToB().inL().typeD()
     val moldorm = Monster(name = "cirleworm",
+        objType = ObjectType(other = setOf(0x41)),
         tile = setOf(0x9E, 0xA0),
         color = blueAndRed).immuneToB().inL()
     val patra = Monster(name = "circleEnemy",
+        objType = ObjectType(other = setOf(0x47, 0x48)),
         tile = setOf(0xfe, 0xfc, //outside
             0xf8, 0xfa), // inside
         color = blueAndRedAndGrey
     ).immuneToB().inL()
     val polsVoice = Monster(name = "bunny",
+        objType = ObjectType(other = setOf(0x17)),
         tile = setOf(0xa2, 0xa0),
         color = setOf(MonsterColor.other)
     ).inL().arrowKillable() // .immuneToB(), let us shoot boomerang too
     val rope = Monster("fastWorm",
+        objType = ObjectType(other = setOf(0x29)),
         tile = setOf(0xa0, 0xa2, 0xa4, 0xa6),
         color = red).inL()
     val stalfos = Monster("skeleton",
+        objType = ObjectType(other = setOf(0x2B)),
         color = red,
         // 0,3,1 are damaged
     ).inL()
-    val vire = Monster("batparent").inL()
-    val wallmaster = Monster("grabby").inL()
+    val vire = Monster("batparent", objType = ObjectType(other = setOf(0x12, 0x13))).inL()
+    val wallmaster = Monster("grabby", objType = ObjectType(other = setOf(0x28))).inL()
     val zol = Monster("squishy",
+        objType = ObjectType(other = setOf(0x14)),
         color = setOf(MonsterColor.grey),
         tile = setOf(0xaa, 0xa8)).inL()
     val darknutGroup = darknut + wizzrobe + goriya
@@ -486,3 +521,4 @@ fun Monster.byShield(): Monster {
 fun Monster.byMagic(): Monster {
     return this
 }
+
