@@ -16,6 +16,7 @@ fun MovePredictor.LinkState.lookupPrediction(): MovePrediction =
         inputDir   = objInputDir,
         objDir     = objDir,
         posFrac    = objPosFrac,
+        speed      = objQSpeedFrac,
     )
 
 fun GamePad.toObjInputDir(): Int = when (this) {
@@ -43,19 +44,12 @@ class MovePredictor(private val api: API) {
     fun predict(gamePad: GamePad): MovementPrediction {
         val linkState = makeState(gamePad)
         val p = linkState.lookupPrediction()
-//        val p: MovePrediction = MovePredictorData.lookup(action = linkState.gamePad.toObjInputDir(),
-//            gridOffset = linkState.objGridOffset,
-//            inputDir  = gamePad.toObjInputDir(),
-//            objDir = linkState.objInputDir,
-//            posFrac = linkState.objQSpeedFrac
-//        )
         return MovementPrediction(
-            linkState,
-            pixels = p.dist,
-            newObjGridOffset = p.newObjGridOffset,
-            newObjPosFrac = p.newObjPosFrac,
-        )
-//        return predictLinkMovement(linkState)
+                linkState,
+                pixels = p.dist,
+                newObjGridOffset = p.newObjGridOffset,
+                newObjPosFrac = p.newObjPosFrac,
+            )
     }
 
     data class LinkState(
