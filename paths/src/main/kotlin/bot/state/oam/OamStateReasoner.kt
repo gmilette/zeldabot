@@ -27,7 +27,7 @@ class OamStateReasoner(
 
     var ladderSprite: Agent? = null
     var direction: Direction = Direction.None
-    var damaged: Boolean = false
+    var linkDamaged: Boolean = false
 
     init {
         sprites = readOam()
@@ -67,6 +67,13 @@ class OamStateReasoner(
 //            d { "info ${Monsters.lookup[tileAttribute.tile]} "}
 //        }
 //        val damaged = mapStatsTracker.isDamaged(tile, attribute)
+
+        // currently testing this, possibly could use & or || to check that both agree
+        val damaged = lookup?.lookupDamaged(point) ?: DamagedLookup.isDamaged(tileAttribute, isOverworld, level)
+        if (damaged) {
+            d { "DDDD $tile tis damaged point $point"}
+        }
+
         val blockable = calcBlockable(tile, tileAttribute)
         val state = toState(damaged, isOverworld, isGannon)
         // could look up the direction based on tile and sprite
@@ -87,11 +94,6 @@ class OamStateReasoner(
         } else {
             // maybe calculate the dir here for alive enemies
             lookup?.lookupDirection(point) ?: DirectionLookup.getDir(tileAttribute)
-        }
-        // currently testing this, possibly could use & or || to check that both agree
-        val damaged = lookup?.lookupDamaged(point) ?: DamagedLookup.isDamaged(tileAttribute, isOverworld, level)
-        if (damaged) {
-            d { "DDDD $tile tis damaged point $point"}
         }
 
         if (state == EnemyState.Projectile) {
@@ -206,7 +208,7 @@ class OamStateReasoner(
 
         val dirDamage = LinkDirectionFinder.direction(spritesRaw)
         direction = dirDamage.direction
-        damaged = dirDamage.damaged
+        linkDamaged = dirDamage.damaged
 
         setLadder(spritesRaw)
 
