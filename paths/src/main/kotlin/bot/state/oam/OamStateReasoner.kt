@@ -102,7 +102,7 @@ class OamStateReasoner(
         return Agent(
             index = index, point = point,
             dir = findDir,
-            state = toState(damaged, isOverworld, isGannon), tile = tile, attribute = attribute,
+            state = state, tile = tile, attribute = attribute,
             tileByte = tile.toString(16), attributeByte = attribute.toString(16),
             damaged = damaged,
             blockable = blockable,
