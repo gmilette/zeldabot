@@ -120,8 +120,7 @@ class MapStatsTracker {
         visits.set(state.link.point, true)
     }
 
-    fun trackDecision(link: FramePoint, pad: GamePad, skipCoordinates: SkipCoordinates, movementPrediction: MovePredictor.MovementPrediction) {
-        // skipCoordinates,
+    fun trackDecision(link: FramePoint, pad: GamePad, movementPrediction: MovePredictor.MovementPrediction) {
         movements.add(PointAction(link, pad, movementPrediction))
     }
 

@@ -141,13 +141,8 @@ class FrameStateUpdater(
     fun updateDecision(gamePad: GamePad) {
         if (!state.frameState.isScrolling) {
             // don't track if the screen is scrolling
-            val mapCoordinates = MapCoordinates(state.frameState.level, state.frameState.mapLoc)
-            val subPixel = api.readCPU(Addresses.subPixel)
-            val subTile = api.readSigned(Addresses.subTile)
-            val linkDir = api.readCPU(Addresses.linkDir)
-            val skip = SkipDetector.getSkip(this.api)
             val movementPrediction = MovePredictor(api).predict(gamePad)
-            mapStats.trackDecision(state.link, gamePad, skip, movementPrediction)
+            mapStats.trackDecision(state.link, gamePad, movementPrediction)
         }
     }
 

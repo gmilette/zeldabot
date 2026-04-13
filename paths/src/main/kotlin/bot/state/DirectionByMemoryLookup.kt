@@ -3,7 +3,6 @@ package bot.state
 import bot.state.map.Direction
 import bot.state.map.MapConstants
 import nintaco.api.API
-import org.apache.commons.math3.analysis.function.Add
 import util.d
 
 class DirectionByMemoryLookup(
