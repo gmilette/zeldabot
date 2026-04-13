@@ -1,20 +1,14 @@
 package bot.plan.action.routeto
 
-import bot.plan.action.Action
-import bot.plan.action.AlwaysAttack
-import bot.plan.action.AttackActionDecider
+import bot.plan.action.*
 import bot.plan.action.RouteTo.Param
 import bot.plan.action.RouteTo.RouteParam
 import bot.plan.action.RouteTo.WhatToAvoid
-import bot.plan.action.affectedByBoomerang
-import bot.plan.action.aliveEnemies
-import bot.plan.action.aliveOrProjectile
-import bot.plan.action.arrowKillable
-import bot.plan.action.boomerangActive
-import bot.plan.action.loot
-import bot.plan.action.lootNeeded
-import bot.plan.action.projectiles
-import bot.state.*
+import bot.plan.zstar.route.AttackableDecider
+import bot.state.Agent
+import bot.state.FramePoint
+import bot.state.Inventory
+import bot.state.MapLocationState
 import util.d
 
 /**
@@ -35,7 +29,6 @@ class RoutePreparation(val params: Param = Param()) {
 
     fun prepare(
         state: MapLocationState,
-        to: List<FramePoint>,
         param: RouteParam = RouteParam(),
         // pass in attack targets
         attackableSpec: List<Agent> = emptyList()
@@ -54,16 +47,13 @@ class RoutePreparation(val params: Param = Param()) {
             param.useB
         }
 
-        val attackableAgents: List<Agent> = AttackActionDecider.aliveEnemiesCanAttack(state)
-        attackable = attackableSpec.ifEmpty {
-            attackableAgents
-        }
-
-        val level = state.frameState.level
-        // same with wand? not quite but close
+        val attackableAgents: List<Agent> = AttackableDecider.aliveEnemiesCanAttack(state)
         val specOrAgents: List<Agent> = attackableSpec.ifEmpty {
             attackableAgents
         }
+        attackable = specOrAgents
+
+        val level = state.frameState.level
 
         val affectedByProjectileAgents: List<Agent> = if (state.boomerangActive) {
             specOrAgents.filter { it.affectedByBoomerang(level) }
@@ -74,12 +64,23 @@ class RoutePreparation(val params: Param = Param()) {
         boomerangable =
             (affectedByProjectileAgents + affectedByProjectileLoot)
                 .map { it.point }  // won't boomerang for useless stuff like keys, compass, etc.
-        val onlyBoomerangagle = (boomerangable - attackable.map { it.point })
+
+        // what is only boomerangable?
+//        onlyBoomerangable = (boomerangable - attackable.map { it.point }.toSet())
 
         prepareAvoid(state, param)
 
         //// LOG
-        d { " route To attackOrRoute attack=$attackPossible can=$canAttack allowBlock=${param.allowBlock} avoid=${params.whatToAvoid} useB=${useB} canUseSword=${state.frameState.canUseSword} spec`${attackableSpec}"}
+        log(param, state, attackableSpec, attackableAgents)
+    }
+
+    private fun log(
+        param: RouteParam,
+        state: MapLocationState,
+        attackableSpec: List<Agent>,
+        attackableAgents: List<Agent>
+    ) {
+        d { " route To attackOrRoute attack=$attackPossible can=$canAttack allowBlock=${param.allowBlock} avoid=${params.whatToAvoid} useB=${useB} canUseSword=${state.frameState.canUseSword} spec`${attackableSpec}" }
         if (state.frameState.linkDoingAnAttack()) {
             // observation: This always lasts 15 frames
             d { " xxLink is attackingxx " }
@@ -92,24 +93,22 @@ class RoutePreparation(val params: Param = Param()) {
         for (framePoint in attackableAgents) {
             d { " attackable agent: $framePoint" }
         }
-        for (framePoint in attackable) {
-            d { " attackable: $framePoint" }
+        if (attackable.isEmpty()) {
+            d { "No attackable" }
+        } else {
+            for (framePoint in attackable) {
+                d { " attackable: $framePoint" }
+            }
         }
         for (framePoint in boomerangable) {
             d { " boomerangable: $framePoint" }
         }
-        for (framePoint in onlyBoomerangagle) {
-            d { " boomerangable: $framePoint" }
-        }
-
-        if (attackable.isEmpty()) {
-            d { "No attackable" }
-        }
     }
 
     private fun prepareAvoid(state: MapLocationState, routeParam: RouteParam) {
-        // nothing to avoid if the clock is activated
-        avoid = if (!state.frameState.clockActivated) {
+        avoid = if (state.frameState.clockActivated) {
+            emptyList()
+        } else {
             // this seems to be ok, except link can get hit from the side
             // unless it avoids projectiles
             when (params.whatToAvoid) {
@@ -118,20 +117,16 @@ class RoutePreparation(val params: Param = Param()) {
                 WhatToAvoid.JustEnemies -> state.aliveEnemies
                 else -> state.aliveOrProjectile
             }
-        } else {
-            emptyList()
         }
 
-        avoidProjectiles = if (!state.frameState.clockActivated) {
-            // this seems to be ok, except link can get hit from the side
-            // unless it avoids projectiles
+        avoidProjectiles = if (state.frameState.clockActivated) {
+            emptyList()
+        } else {
             when (params.whatToAvoid) {
                 WhatToAvoid.None,
                 WhatToAvoid.JustEnemies -> emptyList()
                 else -> state.projectiles
             }
-        } else {
-            emptyList()
         }
 
         val inFrontOfGrids = RouteToGetInFrontOf.getInFrontOfGrids(state)

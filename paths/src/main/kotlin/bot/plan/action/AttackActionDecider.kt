@@ -215,68 +215,6 @@ object AttackActionDecider {
         )
     }
 
-    /**
-     * it's annoying to watch link attack the spin guys, ignore those
-     */
-    fun aliveEnemiesCanAttack(state: MapLocationState): List<Agent> {
-        val oppositeFrom by lazy { state.frameState.link.dir.opposite() }
-
-        var enemies = state.aliveEnemies.toMutableList()
-        return if (state.frameState.isLevel) {
-            if (state.frameState.level == 1 && state.frameState.mapLoc == 53) {
-                enemies.filter { it.tile in EnemyGroup.dragon1}
-            } else {
-                // doesnt really work
-                if (state.frameState.level == 9) {
-                    if (state.frameState.mapLoc != 97 && state.frameState.mapLoc != 82) {
-//                        enemies = enemies.filter { it.tile !in circleMonsterCenters }
-                        if (enemies.any { it.tile !in circleMonsterCenters }) {
-                            d { " ignore only have other monsters remove center" }
-                            // disable until this works
-                            enemies.removeIf { it.tile in circleMonsterCenters }
-                        } else {
-                            d { " ignore only its just the center" }
-                        }
-                    }
-
-                    // it's not an enemy
-//                    if (state.frameState.mapLoc == 66) {
-//                        enemies.removeIf { it.tile in EnemyGroup.triforceTiles }
-//                    }
-                }
-                // nuance here
-                // for sword guys, absolutely don't attach
-                // for ghosts, it's ok to attack in front, as long as you are not DIRECTLY in front
-                // problem: ghosts and swords use the same tile, making them indistinguishable
-                val haveWizzRobe = (state.frameState.level in Monsters.levelsWithNotSword)
-                if (enemies.any { !it.canAttackFront(state.frameState.level) }) {
-                    for (dont in enemies.filter { !it.canAttackFront && it.dir == oppositeFrom }) {
-                        d { "SWORD FRONT $haveWizzRobe DONT CHECK ${dont.point} can't attack from ${dont.dir} link facing ${state.frameState.link.dir}"}
-                    }
-                }
-                // allow attacking as long as not directly in line with the wizzrobe!
-                enemies.filter {
-                    it.canAttackFront(state.frameState.level) ||
-                            (!haveWizzRobe && it.dir != oppositeFrom) ||
-                            (haveWizzRobe && (it.dir.vertical && state.frameState.link.y != it.y)) ||
-                            (haveWizzRobe && (it.dir.horizontal && state.frameState.link.x != it.x))
-                }
-            }
-        } else {
-            if (state.currentMapCell.mapData.attributes.contains(MapCellAttribute.NoAttack)) {
-                // don't attack anything
-                emptyList()
-            } else {
-                enemies.filter { it.tile !in EnemyGroup.enemiesToNotAttackInOverworld }
-            }
-//        }.also {
-//            d { " attackable opposite from $oppositeFrom" }
-//            for (agent in it) {
-//                d { " attackable: $agent"}
-//            }
-        }
-    }
-
     fun inStrikingRange(from: FramePoint, enemies: List<FramePoint>): Boolean {
         val swords = swordRectangles(from)
 

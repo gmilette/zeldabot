@@ -6,6 +6,7 @@ import bot.plan.zstar.route.BreadthFirstSearch
 import bot.plan.zstar.route.BreadthFirstSearch.ActionRoute
 import bot.plan.zstar.FrameRoute
 import bot.plan.zstar.ZStar
+import bot.plan.zstar.route.AttackableDecider
 import bot.state.*
 import bot.state.map.*
 import util.LogFile
@@ -159,7 +160,7 @@ class RouteTo(val params: Param = Param()) {
         val ableToShoot = AttackLongActionDecider.ableToShoot(state)
         val search = BreadthFirstSearch(ableToShoot, true,
             state.currentMapCell.zstar.neighborFinder)
-        val attackableAgents: List<Agent> = AttackActionDecider.aliveEnemiesCanAttack(state)
+        val attackableAgents: List<Agent> = AttackableDecider.aliveEnemiesCanAttack(state)
         val attackable = attackableSpec.ifEmpty {
             attackableAgents
         }

@@ -8,6 +8,9 @@ import util.d
 class DirectionByMemoryLookup(
     private val api: API
 ){
+    companion object {
+        val DEBUG = false
+    }
     data class PointAndDamage(
         val point: FramePoint,
         val damaged: Int = 0
@@ -17,8 +20,10 @@ class DirectionByMemoryLookup(
 
     init {
         enemyPoints = readEnemyPointDir().associateBy { it.point.oneStr }
-        for (enemyPoint in enemyPoints.values) {
-            d { " enemyPoints: $enemyPoint" }
+        if (DEBUG) {
+            for (enemyPoint in enemyPoints.values) {
+                d { " enemyPoints: $enemyPoint" }
+            }
         }
     }
 
@@ -51,8 +56,10 @@ class DirectionByMemoryLookup(
             val pt = it .first.first
             val dir = it.first.second
             val damage = it.second
-            if (damage != 0) {
-                d { "the damage $damage at $pt" }
+            if (DEBUG) {
+                if (damage != 0) {
+                    d { "the damage $damage at $pt" }
+                }
             }
             val point = FramePoint(pt.first, pt.second - MapConstants.yAdjust, mapDir(dir))
             PointAndDamage(point, damage) }.expandX()

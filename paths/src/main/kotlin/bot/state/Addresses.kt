@@ -415,7 +415,7 @@ object Addresses {
       //      state = AnimationState.ACTIVE
       // So while in flight the value is somewhere in the range 10–21.
       // It enters at 10, hits something at 20, and ends at 21, then drops back to 0 when gone.
-      const val arrowState     = 0x00BE // Arrow / Rod shot state
+      const val weaponState = 0x00BE // Arrow / Rod shot state
 
       // Treasure / floor item
       const val treasureX    = 0x0083 // X position of a dropped or floor item

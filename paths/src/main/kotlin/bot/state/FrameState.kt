@@ -19,9 +19,11 @@ data class FrameState(
     val link: Agent,
     val ladder: Agent?,
     val seenBoomerang: Boolean,
-    val inventory: Inventory
+    val inventory: Inventory,
 ) {
     private val linkDoingAnAttack: Boolean by lazy { LinkSwingingDetection.attacking(api) }
+
+    val projectileStatus = LinkProjectileStatus(api)
 
     val numRupees: Int = inventory.numRupees
     val numKeys: Int = inventory.numKeys
@@ -120,6 +122,8 @@ data class Inventory(
     val hasWand by lazy { api.readCpuB(Addresses.hasRod) }
     val numBombs by lazy { api.readCPU(Addresses.numBombs) }
     val numRupees by lazy { api.readCPU(Addresses.numRupees) }
+    val hasRupees: Boolean
+        get() = numRupees > 0
     val numPotions by lazy { api.readCPU(Addresses.hasPotion) }
     val numKeys by lazy { api.readCPU(Addresses.numKeys) }
     val hearts by lazy { api.readCPU(Addresses.heartContainers) }

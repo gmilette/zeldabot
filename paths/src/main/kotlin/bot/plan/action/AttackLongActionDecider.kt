@@ -124,28 +124,30 @@ object AttackLongActionDecider {
     }
 
     fun shouldBoomerang(state: MapLocationState, targets: List<FramePoint>): Boolean {
-        d { "X-> should boomerang targets=$targets " }
+        d { "X-> should boomerang targets=$targets ${state.frameState.projectileStatus.status()}" }
         // includes loot
         val shouldShoot = targets.isNotEmpty()
         var canShoot = false // state.boomerangActive || state.wandActive || state.arrowActive
         val boomerangIsFlying = when {
             (state.boomerangActive) -> {
                 canShoot = true
-                state.frameState.enemies.any { it.tile in EnemyGroup.boomerangs }
+                state.frameState.projectileStatus.boomerangReady
+//                state.frameState.enemies.any { it.tile in EnemyGroup.boomerangs }
             }
             (state.wandActive) -> {
                 canShoot = true
-                state.frameState.enemies.any { it.tile in ProjectileDirectionLookup.ghostProjectiles }
+//                state.frameState.enemies.any { it.tile in ProjectileDirectionLookup.ghostProjectiles }
+                state.frameState.projectileStatus.weaponReady
             }
             (state.arrowActive) -> {
-                canShoot = true
-                // need testing
-                state.frameState.enemies.any { it.tile in ProjectileDirectionLookup.arrowProjectiles }
+                canShoot = state.frameState.inventory.hasRupees
+//                state.frameState.enemies.any { it.tile in ProjectileDirectionLookup.arrowProjectiles }
+                state.frameState.projectileStatus.weaponReady
             }
             else -> false
         }
         val inRange by lazy { targetInLongRange(state, targets) }
-        d { "Shoot boomerang $shouldShoot can=$canShoot flying=$boomerangIsFlying range=$inRange"} // range=$inRange" }
+        d { "Shoot boomerang $shouldShoot can=$canShoot flying=$boomerangIsFlying range=$inRange"}
         return (shouldShoot && canShoot && !boomerangIsFlying && inRange)
     }
 
