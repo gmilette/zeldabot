@@ -1,7 +1,5 @@
 package bot.plan.action.routeto
 
-import bot.plan.action.Action
-import bot.plan.action.AlwaysAttack
 import bot.plan.action.AlwaysAttackWhenCan
 import bot.plan.action.RouteTo
 import bot.plan.action.RouteTo.Param
@@ -15,7 +13,7 @@ import util.d
 import kotlin.random.Random
 
 
-sealed class PointMoveAction() {
+sealed class PointMoveAction {
     data class Block(val gamePad: GamePad): PointMoveAction()
     data object ContinueAttack: PointMoveAction()
     data object LongAttack: PointMoveAction()

@@ -20,6 +20,7 @@ import bot.state.map.destination.ZeldaItem
 import bot.state.map.level.LevelMapCellsLookup
 import bot.state.map.level.LevelSpecBuilder
 import bot.state.map.level.LevelStartMapLoc
+import sequence.findpaths.Plan
 
 object ZeldaPlan {
     private val DO_HARVEST: Boolean = false
@@ -46,6 +47,7 @@ object ZeldaPlan {
         val builder = factory.make("begin!")
 
         return builder {
+//            walkInCircle()
             woodenSwordPhase()
 
             "gather bombs".seg()
@@ -144,6 +146,20 @@ object ZeldaPlan {
             if (withBombHeart) {
                 obj(Dest.Heart.bombHeartNorth)
             }
+        }
+    }
+
+    private fun PlanBuilder.walkInCircle() {
+        val start = FramePoint(5.grid, 5.grid)
+        add {
+            goTo(start)
+            repeat(10) {
+                goTo(start)
+                goTo(start.rightTwoGrid)
+                goTo(start.rightTwoGrid.downTwoGrid)
+                goTo(start.downTwoGrid)
+            }
+            routeTo(127)
         }
     }
 

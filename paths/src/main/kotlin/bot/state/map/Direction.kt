@@ -24,6 +24,15 @@ enum class Direction {
                 3 -> Right
                 else -> Direction.Down
             }
+
+        /** Decode a NES direction bitmask: $01=East, $02=West, $04=South, $08=North. */
+        fun fromBitmask(bitmask: Int): Direction = when (bitmask) {
+            1 -> Right
+            2 -> Left
+            4 -> Down
+            8 -> Up
+            else -> None
+        }
     }
 
     fun vertical() = this in Companion.vertical

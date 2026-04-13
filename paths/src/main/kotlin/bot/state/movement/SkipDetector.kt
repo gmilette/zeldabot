@@ -1,7 +1,9 @@
-package bot.state
+package bot.state.movement
 
+import bot.state.Addresses
 import bot.state.map.Direction
 import bot.state.map.upOrLeft
+import bot.state.readSigned
 import nintaco.api.API
 import kotlin.math.abs
 
@@ -14,16 +16,20 @@ data class SkipCoordinates(
 object SkipDetector {
     fun getSkip(api: API): SkipCoordinates {
         val subPixel = api.readCPU(Addresses.subPixel)
-        val subTile = api.readCPU(Addresses.subTile)
+        val subTile = api.readSigned(Addresses.subTile)
         val linkDir = api.readCPU(Addresses.linkDir)
         return SkipCoordinates(subPixel, subTile, linkDir)
     }
 
     fun willSkip(api: API): Boolean {
         val subPixel = api.readCPU(Addresses.subPixel)
-        val subTile = api.readCPU(Addresses.subTile)
+        val subTile = api.readSigned(Addresses.subTile)
         val linkDir = api.readCPU(Addresses.linkDir)
         return willSkip(subPixel, subTile, linkDir)
+    }
+
+    fun willSkip(coordinates: SkipCoordinates): Boolean {
+        return willSkip(coordinates.subPixel, coordinates.subTile, coordinates.linkDir)
     }
 
     fun willSkip(subPixel: Int, subTile: Int, linkDir: Int): Boolean {
