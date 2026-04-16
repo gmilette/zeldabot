@@ -20,10 +20,27 @@ object AttackLongActionDecider {
         }
 
     fun ableToShoot(state: MapLocationState): Boolean {
+        val swordIsFlying by lazy {
+            state.frameState.projectileStatus.swordIsFlying
+        }
+        val canShoot = state.frameState.inventory.heartCalc.full(state)
+        val isInEnoughToShoot = isInsideEnoughToShoot(state)
+        if (swordIsFlying) {
+            d { " SWORD IS FLYING by sprite -->-->-->-->"}
+        }
+
+        d { "should shoot sword can=$canShoot fly=$swordIsFlying ${isInEnoughToShoot.ifFalse("not in enough")} "}
+        return (canShoot && !swordIsFlying && isInEnoughToShoot)
+    }
+
+    fun ableToShootOld(state: MapLocationState): Boolean {
         val full = state.frameState.inventory.heartCalc.full(state)
         // sword is more than 1 grid away from link
         // need more work
         val swordIsFlying by lazy {
+            state.frameState.projectileStatus.swordIsFlying
+        }
+        val swordIsFlyingBySprite by lazy {
             for (agent in state.frameState.enemiesRaw.filter {
                 it.tileAttrib in EnemyGroup.swordProjectile
             }) {
@@ -39,6 +56,9 @@ object AttackLongActionDecider {
         }
         val thereIsAnExplosion by lazy {
             state.frameState.enemiesRaw.any { it.tile == explosion }
+        }
+        if (swordIsFlyingBySprite) {
+            d { " SWORD IS FLYING by sprite -->-->-->-->"}
         }
         if (swordIsFlying) {
             d { " SWORD IS FLYING -->-->-->-->"}
@@ -131,18 +151,15 @@ object AttackLongActionDecider {
         val boomerangIsFlying = when {
             (state.boomerangActive) -> {
                 canShoot = true
-                state.frameState.projectileStatus.boomerangReady
-//                state.frameState.enemies.any { it.tile in EnemyGroup.boomerangs }
+                state.frameState.projectileStatus.boomerangInFlight
             }
             (state.wandActive) -> {
                 canShoot = true
-//                state.frameState.enemies.any { it.tile in ProjectileDirectionLookup.ghostProjectiles }
-                state.frameState.projectileStatus.weaponReady
+                state.frameState.projectileStatus.weaponInFlight
             }
             (state.arrowActive) -> {
                 canShoot = state.frameState.inventory.hasRupees
-//                state.frameState.enemies.any { it.tile in ProjectileDirectionLookup.arrowProjectiles }
-                state.frameState.projectileStatus.weaponReady
+                state.frameState.projectileStatus.weaponInFlight
             }
             else -> false
         }

@@ -17,5 +17,17 @@ data class LinkProjectileStatus(val api: API) {
     val weaponInFlight = weaponState != 0
     val weaponReady = !linkBusy && weaponState == 0
 
-    fun status(): String = "boomerang: $boomerangReady, weapon: $weaponReady arrow: $arrowInFlight, wand: $wandProjectileInFlight"
+    /**
+     * $00BA = 0x00  No projectile active
+     * $00BA = 0x10  Sword beam active and flying
+     * $00BA = 0x01  Sword beam spreading out on impact
+     * $00BA = 0x80  Magic rod shot active and flying
+     */
+    private val beamState by lazy { api.readCPU(Addresses.More.beamState) and 0xFF }
+    val swordBeamActive = beamState == 0x10 || beamState == 0x01
+    val magicShotActive = beamState and 0x80 != 0
+    val beamInUse = beamState != 0
+    val swordIsFlying = beamInUse
+
+    fun status(): String = "beam: $beamInUse boomerang: $boomerangReady, weapon: $weaponReady arrow: $arrowInFlight, wand: $wandProjectileInFlight"
 }
