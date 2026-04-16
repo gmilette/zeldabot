@@ -13,8 +13,9 @@ data class LinkProjectileStatus(val api: API) {
 
     private val weaponState by lazy { api.readCPU(Addresses.More.weaponState) and 0xFF }
     val arrowInFlight = weaponState and 0xF0 in setOf(0x10, 0x20)
-    val wandProjectileActive = weaponState and 0xF0 == 0x30
+    val wandProjectileInFlight = weaponState and 0xF0 == 0x30
+    val weaponInFlight = weaponState != 0
     val weaponReady = !linkBusy && weaponState == 0
 
-    fun status(): String = "boomerang: $boomerangReady, weapon: $weaponReady arrow: $arrowInFlight, wand: $wandProjectileActive"
+    fun status(): String = "boomerang: $boomerangReady, weapon: $weaponReady arrow: $arrowInFlight, wand: $wandProjectileInFlight"
 }
