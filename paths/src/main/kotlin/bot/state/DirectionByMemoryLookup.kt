@@ -13,7 +13,8 @@ class DirectionByMemoryLookup(
     }
     data class PointAndDamage(
         val point: FramePoint,
-        val damaged: Int = 0
+        val damaged: Int = 0,
+        val hp: Int = 0
     )
 
     private val enemyPoints: Map<String, PointAndDamage>
@@ -49,21 +50,32 @@ class DirectionByMemoryLookup(
     private fun readEnemyPointDir(): List<PointAndDamage> {
         val dirs = Addresses.ememyDir.map { api.readCPU(it) }
         val damaged = Addresses.enemyDamaged.map { api.readCPU(it) }
+        val hp = Addresses.enemyHp.map { api.readCPU(it) }
         val x = Addresses.ememiesX.map { api.readCPU(it) }
         val y = Addresses.ememiesY.map { api.readCPU(it) }
-//        val enemyDirs = x.zip(y).zip(dirs).map { FramePoint(it.first.first, it.first.second - MapConstants.yAdjust, mapDir(it.second)) }.expandX()
-        val enemyDirsD = x.zip(y).zip(dirs).zip(damaged).map {
-            val pt = it .first.first
-            val dir = it.first.second
-            val damage = it.second
-            if (DEBUG) {
-                if (damage != 0) {
-                    d { "the damage $damage at $pt" }
-                }
-            }
-            val point = FramePoint(pt.first, pt.second - MapConstants.yAdjust, mapDir(dir))
-            PointAndDamage(point, damage) }.expandX()
-        return enemyDirsD
+
+        val info = mutableListOf<PointAndDamage>()
+        for (i in x.indices) {
+            val pt = FramePoint(x[i], y[i] - MapConstants.yAdjust, mapDir(dirs[i]))
+            val damage = damaged[i]
+            val hpVal = hp[i]
+            val all = PointAndDamage(pt, damage, hpVal)
+            info.add(all)
+            d { "readEnemyPointDir info: $i: $pt $all" }
+        }
+        return info
+//        val enemyDirsD = x.zip(y).zip(dirs).zip(damaged).map {
+//            val pt = it .first.first
+//            val dir = it.first.second
+//            val damage = it.second
+//            if (DEBUG) {
+//                if (damage != 0) {
+//                    d { "the damage $damage at $pt" }
+//                }
+//            }
+//            val point = FramePoint(pt.first, pt.second - MapConstants.yAdjust, mapDir(dir))
+//            PointAndDamage(point, damage) }.expandX()
+//        return enemyDirsD
     }
 
     fun readLinkPointDir(): Direction {

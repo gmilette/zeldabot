@@ -34,8 +34,9 @@ class RunActionLog(private val fileNameRoot: String,
     val keysGot = DataCount(0, 0)
     val rupeesSpent = DataCount()
     val rupeesGained = DataCount(-1, -1)
+    val damaged = DataCount()
 
-    private val dataCounts = listOf(bombsUsed, keysGot, keysUsed, rupeesSpent, rupeesGained)
+    private val dataCounts = listOf(bombsUsed, keysGot, keysUsed, rupeesSpent, rupeesGained, damaged)
 
     private var directionCt = mutableMapOf<GamePad, DataCount>()
 
@@ -69,6 +70,7 @@ class RunActionLog(private val fileNameRoot: String,
         val numFrames: Int = 0,
         val hits: Int = 0,
         val damage: Double = 0.0,
+        val damaged: Int = 0,
         val heal: Double = 0.0,
         val keys: Int = 0,
         val rupees: Int,
@@ -83,11 +85,18 @@ class RunActionLog(private val fileNameRoot: String,
 
         framesForStep++
         totalFrames++
-        
+
+        setDamage(state)
         setHearts(state)
         setBombs(state)
         setKeys(state)
         setRupees(state)
+    }
+
+    private fun setDamage(state: MapLocationState) {
+        if (state.frameState.link.damaged) {
+            damaged.inc()
+        }
     }
 
     private fun setHearts(state: MapLocationState) {
@@ -165,10 +174,10 @@ class RunActionLog(private val fileNameRoot: String,
         if (save) {
             val csvWriter2 = CsvWriter()
             csvWriter2.open(outputFile, false) {
-                writeRow("index", "level", "mapLoc", "name", "time", "totalTime", "totalFrames", "numFrames", "action", "hearts", "bombsUsed", "hits", "damage", "heal", "keys", "rupees", "potion", "bombs")
+                writeRow("index", "level", "mapLoc", "name", "time", "totalTime", "totalFrames", "numFrames", "action", "hearts", "bombsUsed", "hits", "damage", "damaged", "heal", "keys", "rupees", "potion", "bombs")
                 completedStep.forEachIndexed { index, stepCompleted ->
                     stepCompleted.apply {
-                        writeRow(index, level, mapLoc, name, time, totalTime, frames, numFrames, action, hearts, bombsUsed, hits, damage, heal, keys, rupees, potionFills, numBombs)
+                        writeRow(index, level, mapLoc, name, time, totalTime, frames, numFrames, action, hearts, bombsUsed, hits, damage, damaged, heal, keys, rupees, potionFills, numBombs)
                     }
                 }
             }
@@ -274,6 +283,7 @@ class RunActionLog(private val fileNameRoot: String,
             numFrames = frameCt,
             hits = hits,
             damage = damage,
+            damaged = damaged.perStep,
             heal = heal,
             keys = state.frameState.numKeys,
             rupees = state.frameState.numRupees,

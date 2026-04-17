@@ -93,7 +93,8 @@ class FrameStateUpdater(
         val linkDir = dirLookup.readLinkPointDir()
         // never changes
 //        d { " link projectile sword >>>> ${api.readCPU(Addresses.linkSwordProjectile)}"}
-        val link = Agent(0, linkPoint, linkDir, tile = 0)
+        val linkDamaged = api.readCPU(Addresses.linkDamaged)
+        val link = Agent(0, linkPoint, linkDir, tile = 0, damaged = linkDamaged != 0)
 
         val previousNow = state.previousMove
         state.previousMove = PreviousMove(

@@ -118,8 +118,8 @@ object Addresses {
    const val linkDirReal = 0x00FA
    //  $08=North, $04=South, $01=East, $02=West
    const val linkDir = 0x0098
-
-
+   // if != 0 then link is currently damaged
+   const val linkDamaged = 0x04F0
 
    // i found
    // 5F if ladder deployed
@@ -144,8 +144,7 @@ object Addresses {
 
 //   slot 1 (first enemy) is 0x04F1, slot 2 is 0x04F2
    val enemyDamaged = listOf(
-      0x04F0,
-      0x04F1,
+      0x04F1, // link is 0x04F0,
       0x04F2,
       0x04F3,
       0x04F4,
@@ -159,7 +158,7 @@ object Addresses {
    )
 
    val ememiesX = listOf(
-      0x0071,
+      0x0071, // link is at 0070
       0x0072,
       0x0073,
       0x0074,
@@ -173,7 +172,7 @@ object Addresses {
       0x007C,
    )
    val ememiesY = listOf(
-      0x0085,
+      0x0085, // link is at 0084
       0x0086,
       0x0087,
       0x0088,
@@ -187,7 +186,7 @@ object Addresses {
       0x0090,
    )
    val ememyDir = listOf(
-      0x0099,
+      0x0099, //link starts at 0098
       0x009A,
       0x009B,
       0x009C,
