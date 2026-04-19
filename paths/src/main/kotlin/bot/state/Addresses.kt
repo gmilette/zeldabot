@@ -269,8 +269,8 @@ object Addresses {
    /**
     * HexDecimal0x000 (dead/empty)0x10160x20320x30480x40640x60960x801280x901440xA01600xF0240
     */
+//   0x0485,  // slot 0: Link
    val enemyHp = listOf(
-      0x0485,  // slot 0: Link
       0x0486,  // slot 1: enemy
       0x0487,
       0x0488,

@@ -91,55 +91,6 @@ object AttackLongActionDecider {
     }
 
     fun shouldShootSword(state: MapLocationState, targets: List<FramePoint>): Boolean {
-//        d { "X-> should shoot sword" }
-//        val full = state.frameState.inventory.heartCalc.full(state)
-//        // sword is more than 1 grid away from link
-//        // need more work
-//        val swordIsFlying by lazy {
-//            for (agent in state.frameState.enemiesRaw.filter {
-//                it.tileAttrib in EnemyGroup.swordProjectile
-//            }) {
-//                d { " raw sword $agent ${agent.point.distTo(state.link)}"}
-//            }
-//            state.frameState.enemiesRaw.filter { it.y != 187 && it.y != 248 && it.tileAttrib in EnemyGroup.swordProjectile}
-//                .minByOrNull { it.point.distTo(state.link) }?.let {
-//                    it.point.distTo(state.link) > MapConstants.oneGrid
-//                } ?: false
-//        }
-//        val thereIsASword by lazy {
-//            state.frameState.enemiesRaw.any { it.y != 187 && it.tileAttrib in EnemyGroup.swordProjectile }
-//        }
-//        val thereIsAnExplosion by lazy {
-//            state.frameState.enemiesRaw.any { it.tile == explosion }
-//        }
-//        if (swordIsFlying) {
-//            d { " SWORD IS FLYING -->-->-->-->"}
-//        } else if (thereIsASword) {
-//            d { " SWORD IS THERE ------------" }
-//        }
-//        if (thereIsAnExplosion) {
-//            d { " SWORD IS EXPLODING -x-x-x-x-x-x"}
-//        }
-//        val canShoot = full //state.frameState HeartCalculator.isFull()
-//        val isInEnoughToShoot = isInsideEnoughToShoot(state)
-//
-//        val explosionDist by lazy {
-//            if (thereIsAnExplosion) {
-//                // could start shooting before explosion is done.
-//                // there could be an algorithm to determine how far apart the explosions are
-//                val dist = MinDistTotalFramesCount()
-//                val explosions = state.frameState.enemiesRaw.filter { it.tile == explosion }.map { it.point }
-//                for (pt in explosions) {
-//                    dist.record(pt)
-//                }
-//                val exDist = dist.distance()
-//                exDist < 180 // 160 // the explosions are pretty far apart by this point, ok to start shooting
-//            } else {
-//                false
-//            }
-//        }
-//        d { "should shoot sword $canShoot $swordIsFlying $explosionDist ${isInEnoughToShoot.ifFalse("not in enough")} "}
-//        return (canShoot && !swordIsFlying && !explosionDist &&isInEnoughToShoot && targetInLongRange(state, targets))
         return ableToShoot(state) && targetInLongRange(state, targets)
     }
 
@@ -147,7 +98,7 @@ object AttackLongActionDecider {
         d { "X-> should boomerang targets=$targets ${state.frameState.projectileStatus.status()}" }
         // includes loot
         val shouldShoot = targets.isNotEmpty()
-        var canShoot = false // state.boomerangActive || state.wandActive || state.arrowActive
+        var canShoot = false
         val boomerangIsFlying = when {
             (state.boomerangActive) -> {
                 canShoot = true
