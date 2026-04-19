@@ -282,6 +282,7 @@ object Addresses {
       0x048E,
       0x048F,
       0x0490,  // slot 11: last enemy
+      0x0491, // make s
    )
 
    val enemyCountdowns = listOf(
