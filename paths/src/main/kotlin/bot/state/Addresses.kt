@@ -155,6 +155,7 @@ object Addresses {
       0x04F9,
       0x04FA,
       0x04FB,
+      0x04FC,
    )
 
    val ememiesX = listOf(
