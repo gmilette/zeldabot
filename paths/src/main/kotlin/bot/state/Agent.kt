@@ -59,7 +59,7 @@ data class Agent(
         }
 
     val hurt: Boolean
-        get() = state == EnemyState.Alive && type != 0 && maxHp > 0 && hp != 0 && hp < maxHp
+        get() = state == EnemyState.Alive && type > 0 && maxHp > 0 && hp > 0 && hp < maxHp
 }
 
 enum class EnemyState {

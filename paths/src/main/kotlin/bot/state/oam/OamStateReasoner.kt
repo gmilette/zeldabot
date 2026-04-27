@@ -21,6 +21,7 @@ class OamStateReasoner(
     private val level: Int = 1,
     private val isGannon: Boolean = false
 ) {
+    val lookup = DirectionByMemoryLookup(api)
     private val sprites: List<SpriteData>
     private var spritesUncombined: List<SpriteData> = emptyList()
     private var spritesRaw: List<SpriteData> = emptyList()
@@ -48,23 +49,23 @@ class OamStateReasoner(
     val allDead: Boolean
         get() = alive.isEmpty()
 
-    fun agents(lookup: DirectionByMemoryLookup): List<Agent> =
-        sprites.map { it.toAgent(lookup) }
+    fun agents(): List<Agent> =
+        sprites.map { it.toAgent() }
 
     fun agentsUncombined(): List<Agent> =
         spritesUncombined.map { it.toAgent() }
 
     // but also filter anything that isn'
-    fun agentsRaw(lookup: DirectionByMemoryLookup): List<Agent> =
-        spritesRaw.filter { it.point.y < 248 }.map { it.toAgent(lookup) }
+    fun agentsRaw(): List<Agent> =
+        spritesRaw.filter { it.point.y < 248 }.map { it.toAgent() }
 
     // calculate isDamaged here
-    private fun SpriteData.toAgent(lookup: DirectionByMemoryLookup? = null): Agent {
+    private fun SpriteData.toAgent(): Agent {
         val tileAttribute = tile to attribute
 //        val damaged = mapStatsTracker.isDamaged(tile, attribute)
 
         // currently testing this, possibly could use & or || to check that both agree
-        val damaged = lookup?.lookupDamaged(point) ?: DamagedLookup.isDamaged(tileAttribute, isOverworld, level)
+        val damaged = lookup.lookupDamaged(point) // ?: DamagedLookup.isDamaged(tileAttribute, isOverworld, level)
         if (damaged) {
             d { "DDDD $tile tis damaged point $point"}
         }
@@ -88,15 +89,15 @@ class OamStateReasoner(
             }
         } else {
             // maybe calculate the dir here for alive enemies
-            lookup?.lookupDirection(point) ?: DirectionLookup.getDir(tileAttribute)
+            lookup.lookupDirection(point) // ?: DirectionLookup.getDir(tileAttribute)
         }
 
         if (state == EnemyState.Projectile) {
             d { " Move dir for tile:${tileAttribute.toHex()} $point is ${movingDirection.toArrow()} and ${findDir.toArrow()} damaged: $damaged pair: ${toStringIsProjLevel()}" }
         }
-        val hp = lookup?.lookupHp(point) ?: -1
-        val type = lookup?.lookupType(point) ?: -1
-        val maxHp = if (type != -1) EnemyMaxHpTable.maxHp(type) else -1
+        val hp = lookup.lookupHp(point)
+        val type = lookup.lookupType(point)
+        val maxHp = EnemyMaxHpTable.maxHp(type)
 
         return Agent(
             index = index, point = point,
