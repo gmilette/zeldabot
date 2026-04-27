@@ -26,7 +26,10 @@ data class Agent(
     val damaged: Boolean = false,
     val blockable: Blockable = Blockable.No,
     val moving: MovingDirection = MovingDirection.UNKNOWN_OR_STATIONARY,
-    val color: Int = 0
+    val color: Int = 0,
+    val hp: Int = 0, // current hp
+    val maxHp: Int = 0,
+    val type: Int = 0
 ) {
     val tileAttrib = TileAttribute(tile, attribute)
 
@@ -54,6 +57,9 @@ data class Agent(
         } else {
             !swordDir.inAny(tile)
         }
+
+    val hurt: Boolean
+        get() = state == EnemyState.Alive && type != 0 && maxHp > 0 && hp != 0 && hp < maxHp
 }
 
 enum class EnemyState {
@@ -70,6 +76,7 @@ sealed class EnemyStates {
     object Dead : EnemyStates()
     object Loot : EnemyStates()
     sealed class Projectile(val blockable: Boolean, val magicShieldBlockable: Boolean) : EnemyStates() {
+        object DamagedEnemy: Projectile(blockable = false, magicShieldBlockable = false)
         object Unblockable : Projectile(blockable = false, magicShieldBlockable = false)
         object Blockable : Projectile(blockable = true, magicShieldBlockable = false)
         object BlockableWithMagicShield : Projectile(blockable = true, magicShieldBlockable = true)

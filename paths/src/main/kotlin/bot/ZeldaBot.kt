@@ -17,7 +17,6 @@ import util.LoggerOverride
 import util.Map2d
 import util.RunOnceLambda
 import util.d
-import util.ifTrue
 import java.io.File
 
 class ZeldaBot(private val monitor: ZeldaMonitor) {
@@ -358,7 +357,9 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     inner class ScreenDraw {
         private val drawAttackZone = false
         private val drawAttackPoints = false
-        private val drawEnemyCosts = true
+        private val drawDamaged = true
+        private val drawHasLessThanMaxHp = true
+        private val drawEnemyCosts = false
 
         private val rhinoHeadLeftUp = 0xFA // foot up
         private val rhinoHeadLeftUp2 = 0xFC // foot down
@@ -470,6 +471,22 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                             for (pt in pts) {
                                 api.drawOval(pt.x, pt.y + MapConstants.yAdjust, 2, 2)
                             }
+                        }
+                    }
+
+                    if (drawHasLessThanMaxHp) {
+                        for (enemy in frameState.enemies.filter { it.hurt }) {
+                            api.color = Colors.YELLOW
+                            api.drawOval(enemy.x, enemy.y + MapConstants.yAdjust, 4, 4)
+                            api.fillOval(enemy.x, enemy.y + MapConstants.yAdjust, 4, 4)
+                        }
+                    }
+
+                    if (drawDamaged) {
+                        for (enemy in frameState.enemies.filter { it.damaged }) {
+                            api.color = Colors.RED
+                            api.drawOval(enemy.x, enemy.y + MapConstants.yAdjust, 4, 4)
+                            api.fillOval(enemy.x, enemy.y + MapConstants.yAdjust, 4, 4)
                         }
                     }
 

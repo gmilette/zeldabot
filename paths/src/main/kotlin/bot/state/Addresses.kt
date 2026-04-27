@@ -389,9 +389,11 @@ object Addresses {
 
       // Object type ID — identifies what kind of enemy/object is in each slot
       // Note: slot 0 (0x034F) overlaps with the room kill counter
+      val objectTypeLink = 0x034F
       val objType = listOf(
-         0x034F, 0x0350, 0x0351, 0x0352, 0x0353, 0x0354,
+         0x0350, 0x0351, 0x0352, 0x0353, 0x0354,
          0x0355, 0x0356, 0x0357, 0x0358, 0x0359, 0x035A,
+         0x035B // added 1 more
       )
 
       // Object spawn/death state machine — alive, spawning, dying transitions

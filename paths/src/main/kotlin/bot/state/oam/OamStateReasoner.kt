@@ -94,6 +94,10 @@ class OamStateReasoner(
         if (state == EnemyState.Projectile) {
             d { " Move dir for tile:${tileAttribute.toHex()} $point is ${movingDirection.toArrow()} and ${findDir.toArrow()} damaged: $damaged pair: ${toStringIsProjLevel()}" }
         }
+        val hp = lookup?.lookupHp(point) ?: -1
+        val type = lookup?.lookupType(point) ?: -1
+        val maxHp = if (type != -1) EnemyMaxHpTable.maxHp(type) else -1
+
         return Agent(
             index = index, point = point,
             dir = findDir,
@@ -102,7 +106,10 @@ class OamStateReasoner(
             damaged = damaged,
             blockable = blockable,
             moving = movingDirection,
-            color = color
+            color = color,
+            hp = hp,
+            maxHp = maxHp,
+            type = type
         )
     }
 
