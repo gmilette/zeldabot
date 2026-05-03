@@ -345,6 +345,7 @@ object Addresses {
    const val clockActivated = 0x066C
 
    const val swordUseCountdown = 0x004C
+   const val swordBlocked = 0x052E
 
    // inventory
    const val selectedItem = 0x0656

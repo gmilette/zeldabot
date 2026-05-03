@@ -17,7 +17,10 @@ import util.d
 class RoutePreparation(val params: Param = Param()) {
     var attackable: List<Agent> = emptyList()
     var boomerangable: List<FramePoint> = emptyList()
+    // can be stopped by a bubble
     var canAttack = false
+    // link can still attack even if hit with bubble
+    var canLongAttack = false
     var attackPossible = false
 //        var attackWithWand
     var useB = false
@@ -36,7 +39,8 @@ class RoutePreparation(val params: Param = Param()) {
         // Just changed linkDoingAnAttack to be more specific
         // NEED TO TEST THIS
         canAttack = param.allowAttack && !state.frameState.linkDoingAnAttack() && (param.useB || state.frameState.canUseSword)
-        attackPossible = params.whatToAvoid != WhatToAvoid.None && canAttack
+        canLongAttack = param.allowAttack && !state.frameState.linkDoingAnAttack()
+        attackPossible = params.whatToAvoid != WhatToAvoid.None // && canAttack // Test this comment
 
         // attack with wand as if it is a sword
         val attackWithWand =

@@ -41,6 +41,7 @@ data class FrameState(
     val tenth: Int by lazy { api.readCPU(Addresses.tenthEnemyCount) }
     val clockActivated: Boolean by lazy { api.readCpuB(Addresses.clockActivated) }
     private val swordUseCountdown: Int by lazy { api.readCPU(Addresses.swordUseCountdown) }
+    private val swordBlocked: Int by lazy { api.readCPU(Addresses.swordBlocked) }
 
     val isLevel = level != MapConstants.overworld
     val isOverworld = !isLevel
@@ -52,7 +53,7 @@ data class FrameState(
 
     val isInCave = gameMode == 11 || gameMode == 16
 
-    val canUseSword: Boolean = swordUseCountdown == 0
+    val canUseSword: Boolean = swordUseCountdown == 0 && swordBlocked == 0
     val isScrolling: Boolean
         get() = gameMode == 7 || gameMode == 6 || gameMode == 4
 

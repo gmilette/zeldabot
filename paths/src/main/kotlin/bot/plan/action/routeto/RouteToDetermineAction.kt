@@ -76,7 +76,7 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
                 d { " Route Action -> LongAttack" }
                 PointMoveAction.LongAttack
             }
-            considerAttacks && canAttack && shouldLongBoomerang -> {
+            considerAttacks && preparation.canLongAttack && shouldLongBoomerang -> {
                 d { " Route Action -> LongAttack Boomerang" }
                 PointMoveAction.BoomerangAttack
             }
