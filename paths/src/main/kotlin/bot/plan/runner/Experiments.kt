@@ -4,7 +4,6 @@ import bot.plan.Phases
 import bot.plan.action.Action
 import bot.plan.action.KillAll
 import bot.plan.action.StartAtAction
-import bot.plan.action.dodge
 import bot.state.map.destination.ZeldaItem
 
 class Experiments(private val masterPlan: PlanMaker) {
@@ -16,8 +15,6 @@ class Experiments(private val masterPlan: PlanMaker) {
 //    var current: Experiment = default
 ////        get() = experiments["level2rhino"] ?: default
 //      get() = experiments["level3plan"] ?: evaluation["level3plan"] ?: default
-
-    var experimentIncrement = 0
 
     val experiments: Map<String, Experiment>
 

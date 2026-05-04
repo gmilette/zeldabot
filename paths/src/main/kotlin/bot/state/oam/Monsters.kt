@@ -255,7 +255,7 @@ object Monsters {
         tile = setOf(0xbe, 0xb6, 0xBA, 0xb4, 0xac, 0xb0, 0xB8, 0xBC))
         .avoidFront()
         .immuneToB().inL()
-    val gel = Monster(name = "babysqui  shy", objType = ObjectType(red = setOf(0x16), blue = setOf(0x15))).inL()
+    val gel = Monster(name = "babysquishy", objType = ObjectType(red = setOf(0x16), blue = setOf(0x15))).inL()
     val gibdo = Monster(name = "mummy",
         objType = ObjectType(other = setOf(0x31)),
         tile = setOf(0xa6, 0xa4),
@@ -264,7 +264,7 @@ object Monsters {
     val goriya = Monster(name = "boomerangguy",
         objType = ObjectType(red = setOf(0x06), blue = setOf(0x05)),
         color = blueAndRed, // guess
-        tile = setOf(0xbe, 0xb6, 0xBA, 0xb4, 0xac, 0xb0, 0xB8, 0xBC)).inL()
+        tile = setOf(0xbe, 0xb6, 0xBA, 0xb4, 0xac, 0xb0, 0xB8, 0xBC)).inL().arrowKillable()
     val keese = Monster(name = "bat", objType = ObjectType(red = setOf(0x1D), blue = setOf(0x1C), other = setOf(0x1E)), tile=setOf(0x9c, 0x9a),
         color = blueAndRed).inL() // 1 / 41
     val lanmoia = Monster(name = "eyeworm",

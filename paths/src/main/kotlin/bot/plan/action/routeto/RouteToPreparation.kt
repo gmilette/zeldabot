@@ -59,10 +59,12 @@ class RoutePreparation(val params: Param = Param()) {
 
         val level = state.frameState.level
 
-        val affectedByProjectileAgents: List<Agent> = if (state.boomerangActive) {
-            specOrAgents.filter { it.affectedByBoomerang(level) }
-        } else {
-            specOrAgents.filter { it.arrowKillable(level) }
+        val affectedByProjectileAgents: List<Agent> = when {
+            state.boomerangActive || state.wandActive -> specOrAgents.filter { it.affectedByBoomerang(level) }
+            // if you can hit it with a boomerang, you can hit it with an arrow
+            state.arrowActive -> specOrAgents.filter { it.arrowKillable(level) || it.affectedByBoomerang(level) }
+            // bomb? or candle?
+            else -> emptyList()
         }
         val affectedByProjectileLoot = state.loot.filter { it.lootNeeded(state) }
         boomerangable =
@@ -149,17 +151,5 @@ class RoutePreparation(val params: Param = Param()) {
         passable = state.frameState.ladder?.let {
             routeParam.rParam.forcePassable + listOf(it.point)
         } ?: routeParam.rParam.forcePassable
-
-//        val paramZ = ZStar.ZRouteParam(
-//            start = linkPt,
-//            targets = to,
-//            pointBeforeStart = state.previousMove.from,
-//            enemies = avoid.points,
-//            projectiles = avoidProjectiles.points, // don't add if there is no dodging
-//            rParam = param.rParam.copy(
-//                forcePassable = passable,
-//                forceHighCost = param.rParam.forceHighCost + inFrontOfGrids
-//            )
-//        )
     }
 }
