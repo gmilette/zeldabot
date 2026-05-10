@@ -319,21 +319,14 @@ data class SpriteData(
         }
     }
 
-    val isProjectileLevel = !hidden && (EnemyGroup.projectilesLevel.contains(tile) || EnemyGroup.projectilePairsLevel.contains(tile))
+    val isProjectileLevel = !hidden && (EnemyGroup.projectilesLevel.contains(tile))
 
     fun toStringIsProjLevel(): String {
         return if (isProjectileLevel) {
-            " hidden $hidden enemyGroup: ${EnemyGroup.projectilesLevel.contains(tile)}  pairs: ${EnemyGroup.projectilePairsLevel.contains(tile)}"
+            " hidden $hidden enemyGroup: ${EnemyGroup.projectilesLevel.contains(tile)}"
         } else {
             " Not projectile"
         }
-    }
-
-    val projectileType = when {
-        EnemyGroup.projectileMagicShieldBlockable.contains(tile) -> EnemyStates.Projectile.BlockableWithMagicShield
-        EnemyGroup.projectileUnblockable.contains(tile) -> EnemyStates.Projectile.Unblockable
-        EnemyGroup.projectileUnblockable.contains(tile) -> EnemyStates.Projectile.Unblockable
-        else -> EnemyStates.Projectile.Blockable
     }
 }
 

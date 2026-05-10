@@ -160,8 +160,6 @@ object EnemyGroup {
 
     val projectilesLevel = projectiles - rockProjectile
 
-    val projectilePairsLevel = projectiles - rockProjectile
-
     val projectileMagicShieldBlockable = setOf(
         ghostProjectileUpDown,
         ghostProjectileLeft1,
