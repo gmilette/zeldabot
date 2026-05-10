@@ -167,74 +167,8 @@ class KillAll(
             waitAfterAllKilled--
             GamePad.None // just wait
         } else {
-            // first kill the enemies not in center
-            // but if there is a heart prefer that!
-            var aliveEnemies = state.frameState.heartsClosestToLink().ifEmpty {
-                state.frameState.enemiesClosestToLink()
-            }.toMutableList()
-            // if you have clock enabled, the ghost can get stuck on a location that is not passable
-            // we should try to route to it still with the nearest
-            if (considerEnemiesInCenter) {
-                val numEnemiesInCenter = state.numEnemiesAliveInCenter()
-                // all enemies
-                if (numEnemiesInCenter != aliveEnemies.size) {
-                    val centers = state.enemiesAliveInCenter()
-                    for (agent in centers) {
-                        aliveEnemies.remove(agent)
-                    }
-                } else {
-                    d { "Attack center enemies" }
-                }
-            }
-
-            var attackOnlySpecified = false
-
-            // specially handling for level 8 spinning center guy
-            val targetOnlyUse =
-                if (ignoreUntilOnly.isNotEmpty() && aliveEnemies.any { !ignoreUntilOnly.contains(it.tile) }) {
-                    d { " ignore only $ignoreUntilOnly" }
-                    circleMonsterOutside.toList()
-                } else {
-                    targetOnly
-                }
-
-            // NEW
-//            aliveEnemies = aliveEnemies.filter { !it.damaged }
-            // need special handling, cant route into center
-            if (targetOnlyUse.isNotEmpty()) {
-                d { " target only $targetOnlyUse" }
-                aliveEnemies = aliveEnemies.filter { targetOnlyUse.contains(it.tile) }.toMutableList()
-                // test on the dragon i think
-                attackOnlySpecified = true
-            }
-
-            if (state.frameState.isOverworld &&
-                (lookForBombs && state.frameState.inventory.numBombs < 4)) {
-//                (lookForBombs || state.frameState.inventory.numBombs == 0)) {
-                if (ItemDropPrediction().bombsLikely()) {
-                    d { " bombs likely "}
-                    // todo: also have to make all other enemies into projectiles somehow
-                    val enemiesThatMightProduceBombs =
-                        aliveEnemies.filter { it.color == MonsterColor.blue || it.color == MonsterColor.grey }
-                    if (enemiesThatMightProduceBombs.isNotEmpty()) {
-                        d { " !! only target enemies that might produce bombs" }
-                        aliveEnemies = enemiesThatMightProduceBombs.toMutableList()
-                        attackOnlySpecified = true
-                    }
-                } else {
-                    val enemiesThatWillNotProduceBombs =
-                        aliveEnemies.filter { it.color == MonsterColor.red }
-                    if (enemiesThatWillNotProduceBombs.isNotEmpty()) {
-                        d { " !! only target enemies that will not produce bombs" }
-                        aliveEnemies = enemiesThatWillNotProduceBombs.toMutableList()
-                        attackOnlySpecified = true
-                    }
-                }
-            }
-
-            aliveEnemies.forEach {
-                d { "alive enemy $it dist ${it.point.distTo(state.frameState.link.point)}" }
-            }
+            val enemyFilter = KillAllTargetFilters(state, ignoreUntilOnly, targetOnly)
+            val aliveEnemies = enemyFilter.filter(lookForBombs)
 
             if (killedAllEnemies(state)) {
                 waitAfterAllKilled--
@@ -288,7 +222,7 @@ class KillAll(
                                 finishWithinStrikingRange = true
                             ),
                         ),
-                        attackableSpec = if (attackOnlySpecified) aliveEnemies else emptyList()
+                        attackableSpec = if (enemyFilter.attackOnlySpecified) aliveEnemies else emptyList()
                     ).let {
                         if (numPressB > 0) {
                             numPressB--
