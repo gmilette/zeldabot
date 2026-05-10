@@ -118,8 +118,8 @@ object Addresses {
    const val linkDirReal = 0x00FA
    //  $08=North, $04=South, $01=East, $02=West
    const val linkDir = 0x0098
-
-
+   // if != 0 then link is currently damaged
+   const val linkDamaged = 0x04F0
 
    // i found
    // 5F if ladder deployed
@@ -144,8 +144,7 @@ object Addresses {
 
 //   slot 1 (first enemy) is 0x04F1, slot 2 is 0x04F2
    val enemyDamaged = listOf(
-      0x04F0,
-      0x04F1,
+      0x04F1, // link is 0x04F0,
       0x04F2,
       0x04F3,
       0x04F4,
@@ -156,10 +155,11 @@ object Addresses {
       0x04F9,
       0x04FA,
       0x04FB,
+      0x04FC,
    )
 
    val ememiesX = listOf(
-      0x0071,
+      0x0071, // link is at 0070
       0x0072,
       0x0073,
       0x0074,
@@ -173,7 +173,7 @@ object Addresses {
       0x007C,
    )
    val ememiesY = listOf(
-      0x0085,
+      0x0085, // link is at 0084
       0x0086,
       0x0087,
       0x0088,
@@ -187,7 +187,7 @@ object Addresses {
       0x0090,
    )
    val ememyDir = listOf(
-      0x0099,
+      0x0099, //link starts at 0098
       0x009A,
       0x009B,
       0x009C,
@@ -270,8 +270,8 @@ object Addresses {
    /**
     * HexDecimal0x000 (dead/empty)0x10160x20320x30480x40640x60960x801280x901440xA01600xF0240
     */
+//   0x0485,  // slot 0: Link
    val enemyHp = listOf(
-      0x0485,  // slot 0: Link
       0x0486,  // slot 1: enemy
       0x0487,
       0x0488,
@@ -283,6 +283,7 @@ object Addresses {
       0x048E,
       0x048F,
       0x0490,  // slot 11: last enemy
+      0x0491, // make s
    )
 
    val enemyCountdowns = listOf(
@@ -344,6 +345,7 @@ object Addresses {
    const val clockActivated = 0x066C
 
    const val swordUseCountdown = 0x004C
+   const val swordBlocked = 0x052E
 
    // inventory
    const val selectedItem = 0x0656
@@ -388,9 +390,11 @@ object Addresses {
 
       // Object type ID — identifies what kind of enemy/object is in each slot
       // Note: slot 0 (0x034F) overlaps with the room kill counter
+      val objectTypeLink = 0x034F
       val objType = listOf(
-         0x034F, 0x0350, 0x0351, 0x0352, 0x0353, 0x0354,
+         0x0350, 0x0351, 0x0352, 0x0353, 0x0354,
          0x0355, 0x0356, 0x0357, 0x0358, 0x0359, 0x035A,
+         0x035B // added 1 more
       )
 
       // Object spawn/death state machine — alive, spawning, dying transitions
@@ -415,7 +419,7 @@ object Addresses {
       //      state = AnimationState.ACTIVE
       // So while in flight the value is somewhere in the range 10–21.
       // It enters at 10, hits something at 20, and ends at 21, then drops back to 0 when gone.
-      const val arrowState     = 0x00BE // Arrow / Rod shot state
+      const val weaponState = 0x00BE // Arrow / Rod shot state
 
       // Treasure / floor item
       const val treasureX    = 0x0083 // X position of a dropped or floor item

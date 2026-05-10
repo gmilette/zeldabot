@@ -122,6 +122,16 @@ object EnemyGroup {
         bombSmokeLess,
     )
 
+//    val projectilePairs = setOf(
+//        arrowPair,
+//        boulder4Pair,
+//        boulder3Pair,
+//        arrowTipShotByEnemyPair,
+//        arrowButtShotByEnemyPair,
+//        arrowButtShotByEnemy2,
+//        rockProjectile
+//    ) // + swordProjectile
+
     val projectiles = setOf(
         flame1,
         flame2,
@@ -139,25 +149,16 @@ object EnemyGroup {
         ghostProjectileUpDown,
         ghostProjectileLeft1,
         ghostProjectileLeft2,
-        rockProjectile.tile,
+        rockProjectile,
         // not in level though
         bombSmoke,
         bombSmokeLess,
+        arrow,
+        boulder4,
+        boulder3,
     )
 
-    val projectilesLevel = projectiles - rockProjectile.tile
-
-    val projectilePairs = setOf(
-        arrowPair,
-        boulder4Pair,
-        boulder3Pair,
-        arrowTipShotByEnemyPair,
-        arrowButtShotByEnemy,
-        arrowButtShotByEnemy2,
-        rockProjectile
-    ) // + swordProjectile
-
-    val projectilePairsLevel = projectilePairs - rockProjectile
+    val projectilesLevel = projectiles - rockProjectile
 
     val projectileMagicShieldBlockable = setOf(
         ghostProjectileUpDown,
@@ -174,30 +175,14 @@ object EnemyGroup {
         fire,
         dragon4FlamingHead,
         spinCircleEnemy,
-    )
-
-    val projectilePairsUnblockable = setOf(
-        boulder4Pair,
-        boulder3Pair,
-//        rockProjectile // it's shot by the overworld enemies
+        boulder4,
+        boulder3
     )
 
     // don't use the projectile pairs
     val projectileBlockable = projectiles -
             projectileUnblockable -
-            projectileMagicShieldBlockable -
-            projectilePairsUnblockable.map { it.first }.toSet()
-
-    // todo: need to add back these projectiles when I know attrib
-//        boulder, boulder2, boulder3, boulder4,
-
-//    // ghosts and sword guys
-//    val avoidFrontEnemies = setOf(
-//        ghost,
-//        swordDir.up.first()
-//    )
-//
-//    val projectilesAttackIfNear = setOf(sun, sun2)
+            projectileMagicShieldBlockable
 
     val largeProjectiles = setOf(
         sun, sun2, // sun
@@ -216,6 +201,10 @@ object EnemyGroup {
         rhinoUpLeft,
         rhinoHeadMouthClosed
     )
+    val keep = setOf(
+        rhinoUpLeft,
+        rhinoHeadMouthClosed
+    ).map { it.tile }
 
     val ignorePairs = setOf(
         movingBlock,
@@ -242,12 +231,6 @@ object EnemyGroup {
         waterMonsterPairAlt, // tile address = 0EE0
         waterMonsterPairAlt2
     ) + swordLink
-
-    val lootPairs = setOf(
-        bigCoinPair,
-        bigCoinPair2,
-        bait
-    )
 
     val triforceTiles = setOf(triforceTileLeft, triforceTile)
 
@@ -285,6 +268,8 @@ object EnemyGroup {
 //        triforceTile,
 //        triforceTile2,
         magicSword,
+        bigCoin,
+        bait
     )
 
     val dragon1 = setOf(

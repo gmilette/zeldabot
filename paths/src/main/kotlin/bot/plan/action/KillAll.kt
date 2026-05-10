@@ -106,7 +106,6 @@ class KillAll(
         }
 
     override fun nextStep(state: MapLocationState): GamePad {
-        val numEnemiesInCenter = state.numEnemiesAliveInCenter()
         // dont have to wait on any levels that have boomerangs
         // which gets confused with ghosts
         // if you are throwing boomerangs, this isnt going to work
@@ -125,7 +124,7 @@ class KillAll(
             }
         }
 //        needLongWait = false
-        d { " KILL ALL step ${state.currentMapCell.mapLoc} count $frameCount wait $waitAfterAllKilled center: $numEnemiesInCenter needLong $needLongWait" }
+        d { " KILL ALL step ${state.currentMapCell.mapLoc} count $frameCount wait $waitAfterAllKilled needLong $needLongWait" }
 
         for (enemy in state.frameState.enemies.filter { it.state != EnemyState.Dead }) {
             d { " enemy: $enemy" }
@@ -175,8 +174,8 @@ class KillAll(
             }.toMutableList()
             // if you have clock enabled, the ghost can get stuck on a location that is not passable
             // we should try to route to it still with the nearest
-//            aliveEnemies = aliveEnemies.filter { state.currentMapCell.passable.get(it.point) }.toMutableList()
             if (considerEnemiesInCenter) {
+                val numEnemiesInCenter = state.numEnemiesAliveInCenter()
                 // all enemies
                 if (numEnemiesInCenter != aliveEnemies.size) {
                     val centers = state.enemiesAliveInCenter()
@@ -239,10 +238,9 @@ class KillAll(
 
             if (killedAllEnemies(state)) {
                 waitAfterAllKilled--
-                return GamePad.None // just wait
+                GamePad.None // just wait
             } else {
                 // 110 too low for bats
-//                waitAfterAllKilled = if (needLongWait) 250 else 50
                 // need 250 for ghosts only
                 waitAfterAllKilled = if (needLongWait) 250 else 50
                 val firstEnemyOrNull = aliveEnemies.firstOrNull()
@@ -254,8 +252,6 @@ class KillAll(
                         RouteTo.RouteParam(forceNew = true)
                     )
                 }
-                // no enemies? do dodge
-                // handle the null?? need to test
                 firstEnemyOrNull.let { firstEnemy ->
                     val previousTarget = target
                     target = firstEnemy.point

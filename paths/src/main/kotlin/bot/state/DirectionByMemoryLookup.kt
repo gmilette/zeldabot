@@ -8,17 +8,22 @@ import util.d
 class DirectionByMemoryLookup(
     private val api: API
 ){
+    companion object {
+        val DEBUG = false
+    }
     data class PointAndDamage(
         val point: FramePoint,
-        val damaged: Int = 0
+        val damaged: Int = 0,
+        val hp: Int = 0,
+        val type: Int = 0
     )
 
     private val enemyPoints: Map<String, PointAndDamage>
 
     init {
         enemyPoints = readEnemyPointDir().associateBy { it.point.oneStr }
-        for (enemyPoint in enemyPoints.values) {
-            d { " enemyPoints: $enemyPoint" }
+        if (DEBUG) {
+            d { toString() }
         }
     }
 
@@ -27,16 +32,20 @@ class DirectionByMemoryLookup(
     // add type too
     fun lookupDamaged(point: FramePoint): Boolean = (enemyPoints[point.oneStr]?.damaged ?: 0) != 0
 
+    fun lookupHp(point: FramePoint): Int = (enemyPoints[point.oneStr]?.hp ?: 0)
+
+    fun lookupType(point: FramePoint): Int = (enemyPoints[point.oneStr]?.type ?: 0)
+
     /**
      * it seems the oam locations might be different than memory locations by 1 x value
      */
     private fun List<PointAndDamage>.expandX(): List<PointAndDamage> {
         return flatMap {
             listOf(it,
-                PointAndDamage(it.point.up.dir(it.point.direction), it.damaged),
-                PointAndDamage(it.point.down.dir(it.point.direction), it.damaged),
-                PointAndDamage(it.point.right.dir(it.point.direction), it.damaged),
-                PointAndDamage(it.point.left.dir(it.point.direction), it.damaged)
+                PointAndDamage(it.point.up.dir(it.point.direction), it.damaged, it.hp, it.type),
+                PointAndDamage(it.point.down.dir(it.point.direction), it.damaged, it.hp, it.type),
+                PointAndDamage(it.point.right.dir(it.point.direction), it.damaged, it.hp, it.type),
+                PointAndDamage(it.point.left.dir(it.point.direction), it.damaged, it.hp, it.type)
             )
         }
     }
@@ -44,19 +53,22 @@ class DirectionByMemoryLookup(
     private fun readEnemyPointDir(): List<PointAndDamage> {
         val dirs = Addresses.ememyDir.map { api.readCPU(it) }
         val damaged = Addresses.enemyDamaged.map { api.readCPU(it) }
+        val hp = Addresses.enemyHp.map { api.readCPU(it) }
+        val types = Addresses.More.objType.map { api.readCPU(it) }
         val x = Addresses.ememiesX.map { api.readCPU(it) }
         val y = Addresses.ememiesY.map { api.readCPU(it) }
-//        val enemyDirs = x.zip(y).zip(dirs).map { FramePoint(it.first.first, it.first.second - MapConstants.yAdjust, mapDir(it.second)) }.expandX()
-        val enemyDirsD = x.zip(y).zip(dirs).zip(damaged).map {
-            val pt = it .first.first
-            val dir = it.first.second
-            val damage = it.second
-            if (damage != 0) {
-                d { "the damage $damage at $pt" }
-            }
-            val point = FramePoint(pt.first, pt.second - MapConstants.yAdjust, mapDir(dir))
-            PointAndDamage(point, damage) }.expandX()
-        return enemyDirsD
+
+        val info = mutableListOf<PointAndDamage>()
+        for (i in x.indices) {
+            val pt = FramePoint(x[i], y[i] - MapConstants.yAdjust, mapDir(dirs[i]))
+            val damage = damaged[i]
+            val hpVal = hp[i]
+            val typeVal = types[i]
+            val all = PointAndDamage(pt, damage, hpVal, typeVal)
+            info.add(all)
+            d(DEBUG) { "readEnemyPointDir info: $i: $pt $all" }
+        }
+        return info.expandX()
     }
 
     fun readLinkPointDir(): Direction {
@@ -65,4 +77,12 @@ class DirectionByMemoryLookup(
     }
 
     private fun mapDir(dir: Int) = Direction.fromBitmask(dir)
+
+    override fun toString(): String {
+        val builder = StringBuilder()
+        for (enemyPoint in enemyPoints.values) {
+            builder.append(" enemyPoints: $enemyPoint\n")
+        }
+        return builder.toString()
+    }
 }

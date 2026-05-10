@@ -17,8 +17,6 @@ class Experiments(private val masterPlan: PlanMaker) {
 ////        get() = experiments["level2rhino"] ?: default
 //      get() = experiments["level3plan"] ?: evaluation["level3plan"] ?: default
 
-    var experimentIncrement = 0
-
     val experiments: Map<String, Experiment>
 
     val evaluation: Map<String, Experiment>

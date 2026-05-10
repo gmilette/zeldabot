@@ -57,7 +57,7 @@ class RouteExecution(val params: Param = Param()) {
         routeTo: RouteTo,
     ): GamePad {
         val preparation = RoutePreparation(params)
-        preparation.prepare(state, to, param, attackableSpec)
+        preparation.prepare(state, param, attackableSpec)
         val determine = RouteToDetermineAction(preparation)
 
         theAttack = if (determine.preparation.useB) {

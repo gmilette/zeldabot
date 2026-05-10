@@ -50,8 +50,8 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
         val attackPossible = preparation.attackPossible
 //        val canAttack = param.allowAttack && !state.frameState.linkDoingAnAttack() && (param.useB || state.frameState.canUseSword)
 
-        val considerAttacks = RouteTo.Companion.allowAttack && attackPossible
-        d { " Determing route action attacking=$isAttacking consider=$considerAttacks "}
+        val considerAttacks = RouteTo.allowAttack && attackPossible
+        d { " Determine route action attacking=$isAttacking consider=$considerAttacks "}
 
         return when {
             // don't get stuck attacking emptu space when the clock is activated
@@ -76,7 +76,7 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
                 d { " Route Action -> LongAttack" }
                 PointMoveAction.LongAttack
             }
-            considerAttacks && canAttack && shouldLongBoomerang -> {
+            considerAttacks && preparation.canLongAttack && shouldLongBoomerang -> {
                 d { " Route Action -> LongAttack Boomerang" }
                 PointMoveAction.BoomerangAttack
             }
@@ -126,6 +126,7 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
 //                }
 //            }
         }
+
     private fun exitOfScreen(linkPt: FramePoint, to: List<FramePoint>): GamePad {
         // why this? let's go without it and see if it's ok
         // it gets stuck almost about to exit some levels

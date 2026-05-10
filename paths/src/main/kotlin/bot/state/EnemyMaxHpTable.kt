@@ -33,5 +33,7 @@ object EnemyMaxHpTable {
         0x35 to 240,  // Grumble
     )
 
-    fun maxHp(objType: Int): Int = hpByType[objType] ?: 240
+    const val DEFAULT_HP = 240
+
+    fun maxHp(objType: Int): Int = hpByType[objType] ?: DEFAULT_HP
 }

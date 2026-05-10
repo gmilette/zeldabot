@@ -19,9 +19,11 @@ data class FrameState(
     val link: Agent,
     val ladder: Agent?,
     val seenBoomerang: Boolean,
-    val inventory: Inventory
+    val inventory: Inventory,
 ) {
     private val linkDoingAnAttack: Boolean by lazy { LinkSwingingDetection.attacking(api) }
+
+    val projectileStatus = LinkProjectileStatus(api)
 
     val numRupees: Int = inventory.numRupees
     val numKeys: Int = inventory.numKeys
@@ -39,6 +41,7 @@ data class FrameState(
     val tenth: Int by lazy { api.readCPU(Addresses.tenthEnemyCount) }
     val clockActivated: Boolean by lazy { api.readCpuB(Addresses.clockActivated) }
     private val swordUseCountdown: Int by lazy { api.readCPU(Addresses.swordUseCountdown) }
+    private val swordBlocked: Int by lazy { api.readCPU(Addresses.swordBlocked) }
 
     val isLevel = level != MapConstants.overworld
     val isOverworld = !isLevel
@@ -50,7 +53,7 @@ data class FrameState(
 
     val isInCave = gameMode == 11 || gameMode == 16
 
-    val canUseSword: Boolean = swordUseCountdown == 0
+    val canUseSword: Boolean = swordUseCountdown == 0 && swordBlocked == 0
     val isScrolling: Boolean
         get() = gameMode == 7 || gameMode == 6 || gameMode == 4
 
@@ -120,6 +123,8 @@ data class Inventory(
     val hasWand by lazy { api.readCpuB(Addresses.hasRod) }
     val numBombs by lazy { api.readCPU(Addresses.numBombs) }
     val numRupees by lazy { api.readCPU(Addresses.numRupees) }
+    val hasRupees: Boolean
+        get() = numRupees > 0
     val numPotions by lazy { api.readCPU(Addresses.hasPotion) }
     val numKeys by lazy { api.readCPU(Addresses.numKeys) }
     val hearts by lazy { api.readCPU(Addresses.heartContainers) }

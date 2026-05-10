@@ -285,6 +285,10 @@ class PlanBuilder(
         get() {
             switchToBoomerang()
         }
+    val switchToArrow: Unit
+        get() {
+            switchToArrow()
+        }
     val switchToWand: Unit
         get() {
             switchToWand()

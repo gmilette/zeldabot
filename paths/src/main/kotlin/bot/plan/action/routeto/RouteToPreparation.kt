@@ -1,20 +1,14 @@
 package bot.plan.action.routeto
 
-import bot.plan.action.Action
-import bot.plan.action.AlwaysAttack
-import bot.plan.action.AttackActionDecider
+import bot.plan.action.*
 import bot.plan.action.RouteTo.Param
 import bot.plan.action.RouteTo.RouteParam
 import bot.plan.action.RouteTo.WhatToAvoid
-import bot.plan.action.affectedByBoomerang
-import bot.plan.action.aliveEnemies
-import bot.plan.action.aliveOrProjectile
-import bot.plan.action.arrowKillable
-import bot.plan.action.boomerangActive
-import bot.plan.action.loot
-import bot.plan.action.lootNeeded
-import bot.plan.action.projectiles
-import bot.state.*
+import bot.plan.zstar.route.AttackableDecider
+import bot.state.Agent
+import bot.state.FramePoint
+import bot.state.Inventory
+import bot.state.MapLocationState
 import util.d
 
 /**
@@ -23,7 +17,10 @@ import util.d
 class RoutePreparation(val params: Param = Param()) {
     var attackable: List<Agent> = emptyList()
     var boomerangable: List<FramePoint> = emptyList()
+    // can be stopped by a bubble
     var canAttack = false
+    // link can still attack even if hit with bubble
+    var canLongAttack = false
     var attackPossible = false
 //        var attackWithWand
     var useB = false
@@ -35,7 +32,6 @@ class RoutePreparation(val params: Param = Param()) {
 
     fun prepare(
         state: MapLocationState,
-        to: List<FramePoint>,
         param: RouteParam = RouteParam(),
         // pass in attack targets
         attackableSpec: List<Agent> = emptyList()
@@ -43,7 +39,8 @@ class RoutePreparation(val params: Param = Param()) {
         // Just changed linkDoingAnAttack to be more specific
         // NEED TO TEST THIS
         canAttack = param.allowAttack && !state.frameState.linkDoingAnAttack() && (param.useB || state.frameState.canUseSword)
-        attackPossible = params.whatToAvoid != WhatToAvoid.None && canAttack
+        canLongAttack = param.allowAttack && !state.frameState.linkDoingAnAttack()
+        attackPossible = params.whatToAvoid != WhatToAvoid.None // && canAttack // Test this comment
 
         // attack with wand as if it is a sword
         val attackWithWand =
@@ -54,32 +51,42 @@ class RoutePreparation(val params: Param = Param()) {
             param.useB
         }
 
-        val attackableAgents: List<Agent> = AttackActionDecider.aliveEnemiesCanAttack(state)
-        attackable = attackableSpec.ifEmpty {
-            attackableAgents
-        }
-
-        val level = state.frameState.level
-        // same with wand? not quite but close
+        val attackableAgents: List<Agent> = AttackableDecider.aliveEnemiesCanAttack(state)
         val specOrAgents: List<Agent> = attackableSpec.ifEmpty {
             attackableAgents
         }
+        attackable = specOrAgents
 
-        val affectedByProjectileAgents: List<Agent> = if (state.boomerangActive) {
-            specOrAgents.filter { it.affectedByBoomerang(level) }
-        } else {
-            specOrAgents.filter { it.arrowKillable(level) }
+        val level = state.frameState.level
+
+        val affectedByProjectileAgents: List<Agent> = when {
+            state.boomerangActive || state.wandActive -> specOrAgents.filter { it.affectedByBoomerang(level) }
+            // if you can hit it with a boomerang, you can hit it with an arrow
+            state.arrowActive -> specOrAgents.filter { it.arrowKillable(level) || it.affectedByBoomerang(level) }
+            // bomb? or candle?
+            else -> emptyList()
         }
         val affectedByProjectileLoot = state.loot.filter { it.lootNeeded(state) }
         boomerangable =
             (affectedByProjectileAgents + affectedByProjectileLoot)
                 .map { it.point }  // won't boomerang for useless stuff like keys, compass, etc.
-        val onlyBoomerangagle = (boomerangable - attackable.map { it.point })
+
+        // what is only boomerangable?
+//        onlyBoomerangable = (boomerangable - attackable.map { it.point }.toSet())
 
         prepareAvoid(state, param)
 
         //// LOG
-        d { " route To attackOrRoute attack=$attackPossible can=$canAttack allowBlock=${param.allowBlock} avoid=${params.whatToAvoid} useB=${useB} canUseSword=${state.frameState.canUseSword} spec`${attackableSpec}"}
+        log(param, state, attackableSpec, attackableAgents)
+    }
+
+    private fun log(
+        param: RouteParam,
+        state: MapLocationState,
+        attackableSpec: List<Agent>,
+        attackableAgents: List<Agent>
+    ) {
+        d { " route To attackOrRoute attack=$attackPossible can=$canAttack allowBlock=${param.allowBlock} avoid=${params.whatToAvoid} useB=${useB} canUseSword=${state.frameState.canUseSword} spec`${attackableSpec}" }
         if (state.frameState.linkDoingAnAttack()) {
             // observation: This always lasts 15 frames
             d { " xxLink is attackingxx " }
@@ -92,24 +99,22 @@ class RoutePreparation(val params: Param = Param()) {
         for (framePoint in attackableAgents) {
             d { " attackable agent: $framePoint" }
         }
-        for (framePoint in attackable) {
-            d { " attackable: $framePoint" }
+        if (attackable.isEmpty()) {
+            d { "No attackable" }
+        } else {
+            for (framePoint in attackable) {
+                d { " attackable: $framePoint" }
+            }
         }
         for (framePoint in boomerangable) {
             d { " boomerangable: $framePoint" }
         }
-        for (framePoint in onlyBoomerangagle) {
-            d { " boomerangable: $framePoint" }
-        }
-
-        if (attackable.isEmpty()) {
-            d { "No attackable" }
-        }
     }
 
     private fun prepareAvoid(state: MapLocationState, routeParam: RouteParam) {
-        // nothing to avoid if the clock is activated
-        avoid = if (!state.frameState.clockActivated) {
+        avoid = if (state.frameState.clockActivated) {
+            emptyList()
+        } else {
             // this seems to be ok, except link can get hit from the side
             // unless it avoids projectiles
             when (params.whatToAvoid) {
@@ -118,26 +123,19 @@ class RoutePreparation(val params: Param = Param()) {
                 WhatToAvoid.JustEnemies -> state.aliveEnemies
                 else -> state.aliveOrProjectile
             }
-        } else {
-            emptyList()
         }
 
-        avoidProjectiles = if (!state.frameState.clockActivated) {
-            // this seems to be ok, except link can get hit from the side
-            // unless it avoids projectiles
+        avoidProjectiles = if (state.frameState.clockActivated) {
+            emptyList()
+        } else {
             when (params.whatToAvoid) {
                 WhatToAvoid.None,
                 WhatToAvoid.JustEnemies -> emptyList()
                 else -> state.projectiles
             }
-        } else {
-            emptyList()
         }
 
         val inFrontOfGrids = RouteToGetInFrontOf.getInFrontOfGrids(state)
-        for (point in inFrontOfGrids) {
-            d { "in front grid $point"}
-        }
 
         forceHighCost = routeParam.rParam.forceHighCost + inFrontOfGrids
 
@@ -150,17 +148,5 @@ class RoutePreparation(val params: Param = Param()) {
         passable = state.frameState.ladder?.let {
             routeParam.rParam.forcePassable + listOf(it.point)
         } ?: routeParam.rParam.forcePassable
-
-//        val paramZ = ZStar.ZRouteParam(
-//            start = linkPt,
-//            targets = to,
-//            pointBeforeStart = state.previousMove.from,
-//            enemies = avoid.points,
-//            projectiles = avoidProjectiles.points, // don't add if there is no dodging
-//            rParam = param.rParam.copy(
-//                forcePassable = passable,
-//                forceHighCost = param.rParam.forceHighCost + inFrontOfGrids
-//            )
-//        )
     }
 }

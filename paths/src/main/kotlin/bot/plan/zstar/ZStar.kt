@@ -28,7 +28,7 @@ class ZStar(
     private val allPassable = passable.copy().mapXy { i, i2 -> true }
     companion object {
         var DEBUG = false
-        var DEBUG_B = true
+        var DEBUG_B = false
         private val DEBUG_DIR = false
         val DEBUG_ONE = false
 
@@ -237,7 +237,9 @@ class ZStar(
         // add the current point because the route code assumes the current
         // point to be the first one in the path
         path.add(0, current)
-        d { " the final path is $path"}
+        if (DEBUG_B) {
+            d { " the final path is $path" }
+        }
         return path
     }
 

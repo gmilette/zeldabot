@@ -1,11 +1,13 @@
 package bot.plan.action
 
+import bot.plan.action.AttackActionBlockDecider.DEBUG
 import bot.state.*
 import bot.state.map.*
 import bot.state.oam.ProjectileDirectionLookup
 import util.d
 
 object AttackActionBlockDecider {
+    private val DEBUG = false
     /**
      * return null if no action should be taken
      */
@@ -17,7 +19,7 @@ object AttackActionBlockDecider {
                 check(state.frameState.link, projectile)
             } else {
                 // we don't know which direction this is traveling, check all the directions it could be
-                d { " check all dir ${state.frameState.link.point.distTo(projectile.point)}"}
+                d(DEBUG) { " check all dir ${state.frameState.link.point.distTo(projectile.point)}"}
                 checkAllDirections(state.frameState.link, projectile)
             }
             if (reflexAction != null) {
@@ -46,12 +48,12 @@ object AttackActionBlockDecider {
         }
 
         // it's going to hit us!
-        d { "Block reflex: about to get hit by ${projectile.point}"}
+        d(DEBUG) { "Block reflex: about to get hit by ${projectile.point}"}
         return if (link.dir == facingProjectileDirection) {
-            d { "Block reflex: wait and block"}
+            d(DEBUG) { "Block reflex: wait and block"}
             GamePad.None
         } else {
-            d { "Block reflex: face $facingProjectileDirection"}
+            d(DEBUG) { "Block reflex: face $facingProjectileDirection"}
             facingProjectileDirection.toGamePad()
         }
     }
@@ -68,16 +70,16 @@ object AttackActionBlockDecider {
             // if it is inside two more directions pick the closest one
             if (projectileTarget.intersect(link.point.toRect())) {
                 // it's going to hit us!
-                d { "Block reflex: about to get hit by ${projectile.point}" }
+                d(DEBUG) { "Block reflex: about to get hit by ${projectile.point}" }
                 return if (link.dir == facingProjectileDirection) {
-                    d { "Block reflex: wait and block" }
+                    d(DEBUG) { "Block reflex: wait and block" }
                     GamePad.None
                 } else {
-                    d { "Block reflex: face $facingProjectileDirection" }
+                    d(DEBUG) { "Block reflex: face $facingProjectileDirection" }
                     facingProjectileDirection.toGamePad()
                 }
             } else {
-                d { "Block reflex: not in direction $dir"}
+                d(DEBUG) { "Block reflex: not in direction $dir"}
             }
         }
 

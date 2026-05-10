@@ -75,11 +75,10 @@ class FrameStateUpdater(
         val combine = !isRhino && !isSpiderLevel8 && !isSpiderLevel6 && !isGannon
         d { "combine is $combine" }
         val oam = OamStateReasoner(isOverworld, api, mapStats, combine = combine, level, isGannon = isGannon)
-        val dirLookup = DirectionByMemoryLookup(api)
-        val theEnemies = oam.agents(dirLookup)
+        val theEnemies = oam.agents()
 
         val theUncombined = oam.agentsUncombined()
-        val theRaw = oam.agentsRaw(dirLookup)
+        val theRaw = oam.agentsRaw()
         val ladderMem = api.readCPU(Addresses.ladderDeployed) != 0
         // check ladder memory first
 //        val ladderSprite = oam.ladderSprite?.let { "ladder sprite "} ?: "no sprite"
@@ -90,10 +89,11 @@ class FrameStateUpdater(
 //        val linkTile = LinkDirectionFinder.damagedAttribute.last()
 //        val damagedTile = if (oam.damaged) LinkDirectionFinder.damagedAttribute.last() else 0
         // lags behind one frame
-        val linkDir = dirLookup.readLinkPointDir()
+        val linkDir = oam.lookup.readLinkPointDir()
         // never changes
 //        d { " link projectile sword >>>> ${api.readCPU(Addresses.linkSwordProjectile)}"}
-        val link = Agent(0, linkPoint, linkDir, tile = 0)
+        val linkDamaged = api.readCPU(Addresses.linkDamaged)
+        val link = Agent(0, linkPoint, linkDir, tile = 0, damaged = linkDamaged != 0)
 
         val previousNow = state.previousMove
         state.previousMove = PreviousMove(
@@ -111,9 +111,9 @@ class FrameStateUpdater(
         val seenBoomerang = mapStats.seenBoomerang
 //        val willSkip = SkipDetector.willSkip(api)
 
-        d { " num enemies ${theEnemies.size}"}
+        d { " frame update num enemies ${theEnemies.size}"}
         for (enemy in theEnemies) {
-            d { "update enemy: $enemy" }
+            d { "enemy: $enemy" }
         }
 
         val frame = FrameState(api, currentFrame, theEnemies, theUncombined, theRaw, level, mapLoc, link, ladder, seenBoomerang, Inventory(api))
