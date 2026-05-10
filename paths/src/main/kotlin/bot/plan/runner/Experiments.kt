@@ -4,6 +4,7 @@ import bot.plan.Phases
 import bot.plan.action.Action
 import bot.plan.action.KillAll
 import bot.plan.action.StartAtAction
+import bot.plan.action.dodge
 import bot.state.map.destination.ZeldaItem
 
 class Experiments(private val masterPlan: PlanMaker) {
