@@ -136,9 +136,6 @@ class RoutePreparation(val params: Param = Param()) {
         }
 
         val inFrontOfGrids = RouteToGetInFrontOf.getInFrontOfGrids(state)
-        for (point in inFrontOfGrids) {
-            d { "in front grid $point"}
-        }
 
         forceHighCost = routeParam.rParam.forceHighCost + inFrontOfGrids
 

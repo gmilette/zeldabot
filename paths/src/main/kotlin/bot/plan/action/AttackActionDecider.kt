@@ -9,7 +9,7 @@ import util.d
 object AttackActionDecider {
     // how close to get to enemies before engaging the dodge
     private const val dodgeBuffer = 3
-    var DEBUG = true
+    var DEBUG = false
 
     private val longExtra = MapConstants.swordGridPlusOne
     // if link is half way into a grid, can he swing and hit the target

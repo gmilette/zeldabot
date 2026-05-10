@@ -44,7 +44,11 @@ object RouteToGetInFrontOf {
         }
 
     fun getInFrontOfGrids(state: MapLocationState): List<FramePoint> =
-        getInFrontOfGridsSword(state) + getInFrontOfGridsForProjectiles(state)
+        (getInFrontOfGridsSword(state) + getInFrontOfGridsForProjectiles(state)).also {
+            for (point in it) {
+                d { "in front grid $point"}
+            }
+        }
 
     fun getInFrontOfGridsSword(state: MapLocationState): List<FramePoint> =
         state.frameState.enemies.flatMap { agent: Agent ->

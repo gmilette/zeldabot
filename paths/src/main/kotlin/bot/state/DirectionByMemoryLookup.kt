@@ -66,7 +66,7 @@ class DirectionByMemoryLookup(
             val typeVal = types[i]
             val all = PointAndDamage(pt, damage, hpVal, typeVal)
             info.add(all)
-            d { "readEnemyPointDir info: $i: $pt $all" }
+            d(DEBUG) { "readEnemyPointDir info: $i: $pt $all" }
         }
         return info.expandX()
     }
