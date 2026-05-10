@@ -39,7 +39,8 @@ val shopkeeperAndBat = (0x9C).toInt() to (0x00).toInt()
 val bat = (0x9A).toInt()
 
 // shot from the enemies
-val rockProjectile = (0x9e).toInt() to (0x00).toInt()
+val rockProjectilePair = (0x9e).toInt() to (0x00).toInt()
+val rockProjectile = (0x9e).toInt()
 
 val sun = 0x8e // 144
 val sun2 = 0x90 //
@@ -49,6 +50,8 @@ val boulder2 = (0x92).toInt()
 //val boulder4 = (0xE8).toInt() // also part of circle enemy // also rhino
 val boulder4Pair = (0xE8).toInt() to (0x02).toInt()
 val boulder3Pair = (0xEA).toInt() to (0x02).toInt()
+val boulder4 = (0xE8).toInt()
+val boulder3 = (0xEA).toInt()
 val arrowTipShotByEnemy = (0x88).toInt()
 val arrowTipShotByEnemy2 = (0x86).toInt()
 val arrowHitExplosion = (0x3c).toInt()
@@ -58,8 +61,9 @@ val arrowTipShotByEnemyPairRight = (0x88).toInt() to (0x02).toInt()
 val arrowButtShotByEnemyPairRight = (0x86).toInt() to (0x02).toInt()
 val arrowTipShotByEnemyPairDown = (0x28).toInt() to (0x82).toInt()
 val arrowTipShotByEnemyPairUp = (0x28).toInt() to (0x02).toInt()
-val arrowButtShotByEnemy = (0x86).toInt() to (0x42).toInt()
-val arrowButtShotByEnemy2 = (0x86).toInt() to (0x02).toInt()
+val arrowButtShotByEnemy = (0x86).toInt()
+val arrowButtShotByEnemy2Pair = (0x86).toInt() to (0x02).toInt()
+val arrowButtShotByEnemy2 = (0x86).toInt()
 
 val largeShield = (0x56).toInt()
 val candle = (0x26).toInt()
@@ -88,6 +92,7 @@ val rod = (0x4A).toInt()
 val letter = (0x4C).toInt()
 val powerBracelet = (0x4E).toInt()
 
+const val arrow = (0x28).toInt()
 val arrowPair = (0x28).toInt() to (0x82).toInt()
 val silverArrow = (0x28).toInt()
 val compass = (0x6A).toInt()
@@ -115,7 +120,7 @@ const val oldWoman = (0x9a).toInt()
 const val potion = (0x99).toInt() //?
 val whistle = (0x24).toInt()
 val masterKey = (0x2C).toInt()
-val bait = (0x22).toInt() to (0x02).toInt()
+val bait = (0x22).toInt()
 
 val secretEverybodyMonsterOrCircleEnemyLeft = 250 // fa
 val secretEverybodyMonsterOrCircleEnemyRight = 248 // f8

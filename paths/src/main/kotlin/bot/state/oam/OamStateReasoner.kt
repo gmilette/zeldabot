@@ -70,7 +70,7 @@ class OamStateReasoner(
             d { "DDDD $tile tis damaged point $point"}
         }
 
-        val blockable = calcBlockable(tile, tileAttribute)
+        val blockable = calcBlockable(tile)
         val state = toState(damaged, isOverworld, isGannon)
         // could look up the direction based on tile and sprite
         // arrow
@@ -114,9 +114,9 @@ class OamStateReasoner(
         )
     }
 
-    private fun calcBlockable(tile: Int, tilePair: Pair<Int, Int>): Blockable =
+    private fun calcBlockable(tile: Int): Blockable =
         when {
-            EnemyGroup.projectilePairsUnblockable.contains(tilePair) -> Blockable.No
+            EnemyGroup.projectileUnblockable.contains(tile) -> Blockable.No
             EnemyGroup.projectileBlockable.contains(tile) -> Blockable.WithSmallShield
             EnemyGroup.projectileMagicShieldBlockable.contains(tile) -> Blockable.WithMagicShield
             else -> Blockable.No
@@ -294,8 +294,7 @@ data class SpriteData(
     val hidden: Boolean = priority || point.y >= 248 ||
             attribute == 32 ||
             tile == 32 || // link's sword
-            (!EnemyGroup.keepPairs.contains(tilePair) && EnemyGroup.ignoreFor(isOverworld).contains(tile)) ||
-//            ( (combine && tile != rhinoUpLeft.tile) && EnemyGroup.ignore.contains(tile)) ||
+            (!EnemyGroup.keep.contains(tile) && EnemyGroup.ignoreFor(isOverworld).contains(tile)) ||
             EnemyGroup.ignorePairs.contains(tilePair)
             //|| point.y < 60  dont need that because the y coordinate is adjusted
             //|| projectiles.contains(tile) //|| loot.contains(tile) // should be separate
@@ -308,23 +307,23 @@ data class SpriteData(
             || point.y < 0
             || (!combine && (tile == rhinoTail || tile == rhinoMid))
 
-    val isLoot = !hidden && (EnemyGroup.loot.contains(tile) || EnemyGroup.lootPairs.contains(tilePair))
+    val isLoot = !hidden && (EnemyGroup.loot.contains(tile))
 
-    val isProjectile = !hidden && (EnemyGroup.projectiles.contains(tile) || EnemyGroup.projectilePairs.contains(tilePair))
+    val isProjectile = !hidden && (EnemyGroup.projectiles.contains(tile) || EnemyGroup.projectiles.contains(tile))
 
     fun toStringIsProj(): String {
         return if (isProjectile) {
-             " hidden $hidden enemyGroup: ${EnemyGroup.projectiles.contains(tile)}  pairs: ${EnemyGroup.projectilePairs.contains(tilePair)}"
+             " hidden $hidden enemyGroup: ${EnemyGroup.projectiles.contains(tile)}  pairs: ${EnemyGroup.projectiles.contains(tile)}"
         } else {
             " Not projectile"
         }
     }
 
-    val isProjectileLevel = !hidden && (EnemyGroup.projectilesLevel.contains(tile) || EnemyGroup.projectilePairsLevel.contains(tilePair))
+    val isProjectileLevel = !hidden && (EnemyGroup.projectilesLevel.contains(tile) || EnemyGroup.projectilePairsLevel.contains(tile))
 
     fun toStringIsProjLevel(): String {
         return if (isProjectileLevel) {
-            " hidden $hidden enemyGroup: ${EnemyGroup.projectilesLevel.contains(tile)}  pairs: ${EnemyGroup.projectilePairsLevel.contains(tilePair)}"
+            " hidden $hidden enemyGroup: ${EnemyGroup.projectilesLevel.contains(tile)}  pairs: ${EnemyGroup.projectilePairsLevel.contains(tile)}"
         } else {
             " Not projectile"
         }
@@ -333,7 +332,7 @@ data class SpriteData(
     val projectileType = when {
         EnemyGroup.projectileMagicShieldBlockable.contains(tile) -> EnemyStates.Projectile.BlockableWithMagicShield
         EnemyGroup.projectileUnblockable.contains(tile) -> EnemyStates.Projectile.Unblockable
-        EnemyGroup.projectilePairsUnblockable.contains(tilePair) -> EnemyStates.Projectile.Unblockable
+        EnemyGroup.projectileUnblockable.contains(tile) -> EnemyStates.Projectile.Unblockable
         else -> EnemyStates.Projectile.Blockable
     }
 }
