@@ -42,7 +42,7 @@ val bat = (0x9A).toInt()
 val rockProjectilePair = (0x9e).toInt() to (0x00).toInt()
 val rockProjectile = (0x9e).toInt()
 
-val sun = 0x8e // 144
+val sun1 = 0x8e // 144
 val sun2 = 0x90 //
 val boulder = (0x90).toInt()
 val boulder2 = (0x92).toInt()

@@ -1,18 +1,14 @@
 package bot.plan.action
 
 import bot.state.*
-import bot.state.map.Direction
 import bot.state.map.MapConstants
 import bot.state.map.grid
-import bot.state.map.toGamePad
-import bot.state.oam.MonsterColor
 import bot.state.oam.Monsters
-import bot.state.oam.circleMonsterCenters
-import bot.state.oam.circleMonsterOutside
+import bot.state.oam.sun1
+import bot.state.oam.sun2
 import util.LogFile
 import util.d
 import util.ifTrue
-import kotlin.random.Random
 
 class KillAll(
     /**
@@ -160,6 +156,12 @@ class KillAll(
                 waitAfterPressing--
                 return GamePad.None
             }
+        }
+
+        val numBubbles = state.frameState.enemies.filter { it.tile == sun2 || it.tile == sun1 }.size
+        val allDead = state.frameState.enemiesLeftCalculator.allEnemiesDead(numberLeftToBeDead + numBubbles)
+        if (allDead) {
+            d { " ALL DEAD! "}
         }
 
         return if (killedAllEnemies(state)) {

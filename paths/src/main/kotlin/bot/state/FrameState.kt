@@ -60,6 +60,8 @@ data class FrameState(
     val isDoneScrolling: Boolean
         get() = gameMode == 4
 
+    val enemiesLeftCalculator: EnemiesLeftCalculator by lazy { EnemiesLeftCalculator(api) }
+
     val ladderDeployed: Boolean
         get() = ladder != null && ladder.point.y >= 0 //on selection screen it is above normal items
 
