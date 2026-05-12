@@ -170,7 +170,7 @@ class KillAll(
             waitAfterAllKilled--
             GamePad.None // just wait
         } else {
-            val enemyFilter = KillAllTargetFilters(state, ignoreUntilOnly, targetOnly)
+            val enemyFilter = KillAllTargetFilters(state, ignoreUntilOnly, targetOnly, considerEnemiesInCenter)
             val aliveEnemies = enemyFilter.filter(lookForBombs)
 
             if (killedAllEnemies(state)) {

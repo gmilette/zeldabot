@@ -11,6 +11,7 @@ import util.d
 class KillAllTargetFilters(private val state: MapLocationState,
                            private val ignoreUntilOnly: Set<Int> = emptySet(),
                            private val targetOnly: List<Int>,
+                           private val considerEnemiesInCenter: Boolean = false,
 ) {
     private var aliveEnemies = state.frameState.heartsClosestToLink().ifEmpty {
         state.frameState.enemiesClosestToLink()
@@ -20,7 +21,9 @@ class KillAllTargetFilters(private val state: MapLocationState,
 
     fun filter(lookForBombs: Boolean): List<Agent> {
         removeDamaged()
-        considerEnemiesInCenter()
+        if (considerEnemiesInCenter) {
+            considerEnemiesInCenter()
+        }
         targetOnlyInUse()
         lookForBombs(lookForBombs)
 
