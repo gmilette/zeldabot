@@ -81,7 +81,14 @@ class KillAll(
         get() = "KILL ALL $waitAfterAllKilled ${if (numberLeftToBeDead > 0) "until $numberLeftToBeDead" else ""} ${ignoreUntilOnly.size} ${this.lookForBombs.ifTrue("*Bombs")} "
 
     private fun killedAllEnemies(state: MapLocationState): Boolean {
-        return state.clearedWithMinIgnoreLoot(numberLeftToBeDead + centerEnemies(state))
+        // unkillable should be zora and sun even though you can kill zora
+        val numBubbles = state.frameState.enemies.filter { it.tile == sun2 || it.tile == sun1 }.size
+        val allDead = state.frameState.enemiesLeftCalculator.allEnemiesDead(numberLeftToBeDead + numBubbles + centerEnemies(state))
+        if (allDead) {
+            d { " ALL DEAD! "}
+        }
+        return allDead
+//        return state.clearedWithMinIgnoreLoot(numberLeftToBeDead + centerEnemies(state))
     }
 
     private fun centerEnemies(state: MapLocationState): Int =
@@ -158,12 +165,6 @@ class KillAll(
             }
         }
 
-        val numBubbles = state.frameState.enemies.filter { it.tile == sun2 || it.tile == sun1 }.size
-        val allDead = state.frameState.enemiesLeftCalculator.allEnemiesDead(numberLeftToBeDead + numBubbles)
-        if (allDead) {
-            d { " ALL DEAD! "}
-        }
-
         return if (killedAllEnemies(state)) {
             d { " no enemies all killed ${numberLeftToBeDead}" }
             waitAfterAllKilled--
@@ -178,7 +179,9 @@ class KillAll(
             } else {
                 // 110 too low for bats
                 // need 250 for ghosts only
-                waitAfterAllKilled = if (needLongWait) 250 else 50
+                // should be instant now...
+//                waitAfterAllKilled = if (needLongWait) 250 else 50
+                waitAfterAllKilled = 5
                 val firstEnemyOrNull = aliveEnemies.firstOrNull()
                 if (firstEnemyOrNull == null) {
                     // added for the dragon, doesn't really work well
