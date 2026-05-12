@@ -2,6 +2,7 @@ package bot
 
 import bot.plan.ZeldaPlan
 import bot.plan.action.*
+import bot.plan.action.routeto.RoutePreparation.Companion.STUN_AGAIN
 import bot.plan.runner.MasterPlan
 import bot.plan.runner.PlanRunner
 import bot.state.*
@@ -358,7 +359,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         private val drawAttackZone = false
         private val drawAttackPoints = false
         private val drawDamaged = true
-        private val drawHasLessThanMaxHp = true
+        private val drawHasLessThanMaxHp = false
         private val drawEnemyCosts = false
 
         private val rhinoHeadLeftUp = 0xFA // foot up
@@ -485,6 +486,11 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                     if (drawDamaged) {
                         for (enemy in frameState.enemies.filter { it.damaged }) {
                             api.color = Colors.RED
+                            api.drawOval(enemy.x, enemy.y + MapConstants.yAdjust, 4, 4)
+                            api.fillOval(enemy.x, enemy.y + MapConstants.yAdjust, 4, 4)
+                        }
+                        for (enemy in frameState.enemies.filter { it.stunnedLeft > STUN_AGAIN }) {
+                            api.color = Colors.GRAY
                             api.drawOval(enemy.x, enemy.y + MapConstants.yAdjust, 4, 4)
                             api.fillOval(enemy.x, enemy.y + MapConstants.yAdjust, 4, 4)
                         }

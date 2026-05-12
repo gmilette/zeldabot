@@ -15,6 +15,12 @@ import util.d
  * unchanged data while trying different routes
  */
 class RoutePreparation(val params: Param = Param()) {
+    companion object {
+        // when less than this threshold, allow stunning again
+        // It should found down over 16 frames
+        const val STUN_AGAIN = 4
+    }
+
     var attackable: List<Agent> = emptyList()
     var boomerangable: List<FramePoint> = emptyList()
     // can be stopped by a bubble
@@ -66,9 +72,10 @@ class RoutePreparation(val params: Param = Param()) {
             // bomb? or candle?
             else -> emptyList()
         }
+        val stunnedAgents = specOrAgents.filter { it.stunnedLeft in 1..STUN_AGAIN }.toSet()
         val affectedByProjectileLoot = state.loot.filter { it.lootNeeded(state) }
         boomerangable =
-            (affectedByProjectileAgents + affectedByProjectileLoot)
+            (affectedByProjectileAgents + affectedByProjectileLoot - stunnedAgents)
                 .map { it.point }  // won't boomerang for useless stuff like keys, compass, etc.
 
         // what is only boomerangable?

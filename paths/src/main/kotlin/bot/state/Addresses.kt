@@ -383,9 +383,11 @@ object Addresses {
 
    object More {
       // Stun timer countdown before an object can act again after being hit
+      // link: 0x003D,
       val objStunTimer = listOf(
-         0x003D, 0x003E, 0x003F, 0x0040, 0x0041, 0x0042,
+         0x003E, 0x003F, 0x0040, 0x0041, 0x0042,
          0x0043, 0x0044, 0x0045, 0x0046, 0x0047, 0x0048,
+         0x0049 // extra
       )
 
       // Object type ID — identifies what kind of enemy/object is in each slot

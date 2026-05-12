@@ -98,12 +98,6 @@ data class FrameState(
     val enemiesSorted: List<Agent>
         get() = enemies.sortedBy { it.point.distTo(link.point) }
 
-    fun withEnemyAt(pt: FramePoint): FrameState {
-        return this.copy(enemies = enemies.toMutableList() + Agent(
-            0, pt
-        ))
-    }
-
     fun linkDoingAnAttack(): Boolean {
         return linkDoingAnAttack
     }
