@@ -177,10 +177,7 @@ class KillAll(
                 waitAfterAllKilled--
                 GamePad.None // just wait
             } else {
-                // 110 too low for bats
-                // need 250 for ghosts only
-                // should be instant now...
-//                waitAfterAllKilled = if (needLongWait) 250 else 50
+                // just wait a little
                 waitAfterAllKilled = 5
                 val firstEnemyOrNull = aliveEnemies.firstOrNull()
                 if (firstEnemyOrNull == null) {
