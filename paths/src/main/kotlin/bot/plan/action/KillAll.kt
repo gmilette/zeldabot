@@ -83,9 +83,10 @@ class KillAll(
     private fun killedAllEnemies(state: MapLocationState): Boolean {
         // unkillable should be zora and sun even though you can kill zora
         val numBubbles = state.frameState.enemies.filter { it.tile == sun2 || it.tile == sun1 }.size
-        val allDead = state.frameState.enemiesLeftCalculator.allEnemiesDead(numberLeftToBeDead + numBubbles + centerEnemies(state))
+        val allDeadByCount by lazy { state.frameState.enemiesLeftCalculator.allEnemiesDead(numberLeftToBeDead + numBubbles + centerEnemies(state)) }
+        val allDead = state.frameState.enemiesLeftCalculator.allDead || allDeadByCount
         if (allDead) {
-            d { " ALL DEAD! "}
+            d { " ALL DEAD!"}
         }
         return allDead
 //        return state.clearedWithMinIgnoreLoot(numberLeftToBeDead + centerEnemies(state))
@@ -101,7 +102,7 @@ class KillAll(
     override fun complete(state: MapLocationState): Boolean =
         (waitAfterAllKilled <= 0 && frameCount > 33 && killedAllEnemies(state)).also {
             val killedAll = killedAllEnemies(state)
-            d { " kill all complete $it ${state.numEnemies} or ${numberLeftToBeDead} killedAll=$killedAll $frameCount $waitAfterAllKilled" }
+            d { " kill all complete $it ${state.numEnemies} or ${numberLeftToBeDead} cen ${centerEnemies(state)} killedAll=$killedAll $frameCount $waitAfterAllKilled" }
 //            d { "result $it ${state.clearedWithMin(numberLeftToBeDead)} ct $frameCount wait $waitAfterAllKilled" }
 //            state.frameState.enemies.filter { it.state == EnemyState.Alive }.forEach {
 //                d { "enemy $it dist ${it.point.distTo(state.link)}" }

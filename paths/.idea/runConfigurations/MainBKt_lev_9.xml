@@ -4,7 +4,7 @@
     <log_file checked="false" alias="zeldalog" path="$PROJECT_DIR$/../../botoutput" show_all="true" />
     <option name="MAIN_CLASS_NAME" value="MainBKt" />
     <module name="paths.main" />
-    <option name="PROGRAM_PARAMETERS" value="level9plan" />
+    <option name="PROGRAM_PARAMETERS" value="level9plan dev" />
     <shortenClasspath name="NONE" />
     <method v="2">
       <option name="Make" enabled="true" />

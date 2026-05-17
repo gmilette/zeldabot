@@ -103,7 +103,7 @@ class RunActionLog(private val fileNameRoot: String,
         // always decreases, but isn't always exactly accurate for some reason
         val currentHeart = state.frameState.inventory.heartCalc.lifeInHearts()
         val previousHeart = state.previousHeart
-        d { " previous heart $previousHeart current heart $currentHeart" }
+//        d { " previous heart $previousHeart current heart $currentHeart" }
         // should just check if
         val currentDamage = state.frameState.damageNumber
         val previousDamage = state.previousDamageNumber
