@@ -399,6 +399,16 @@ class DoNothing : Action {
     }
 }
 
+class CompleteAction : Action {
+    override fun complete(state: MapLocationState): Boolean =
+        true
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        return GamePad.None
+    }
+}
+
+
 class Optional(val action: Action, private val must: Boolean = true) : Action {
     override fun reset() {
         action.reset()

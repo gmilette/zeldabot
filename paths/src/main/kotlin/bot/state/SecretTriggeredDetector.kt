@@ -14,7 +14,7 @@ class SecretTriggeredDetector(private val api: API) {
         FramePoint(api.readCPU(Addresses.pushBlockX), api.readCPU(Addresses.pushBlockY))
     }
     val pushBlockType by lazy { api.readCPU(Addresses.More.pushBlockType) and 0xFF }
-    fun checkHasPushBlock() = pushBlockType == pushBlockTypeValue
+    fun hasPushBlock() = pushBlockType == pushBlockTypeValue
 
     // !! this is probably the only one the code needs to check
     // Trigger 5: pushable block fully pushed — spawns staircase
@@ -28,15 +28,15 @@ class SecretTriggeredDetector(private val api: API) {
 //        return secretTrigger == SecretTrigger.BlockDoor && blockPushed != 0
 //    }
     fun pushedDoorAndRevealedStairs(): Boolean {
-        return checkHasPushBlock() && (blockPushed == 1 || blockPushed == 2)
+        return hasPushBlock() && (blockPushed == 1 || blockPushed == 2)
     }
     // Trigger 4: pushable block fully pushed — opens shutter doors
     fun pushedDoor(): Boolean {
-        return checkHasPushBlock() && blockPushed != 0
+        return hasPushBlock() && blockPushed != 0
     }
 
     fun hasBeenPushed(): Boolean = pushedDoor() || pushedDoorAndRevealedStairs()
-    fun log() = d { "secret trigger $secretTrigger checkBlockDoorOrStairs: ${hasBeenPushed()} has pushed ${checkHasPushBlock()} block pushed $blockPushed check door ${pushedDoor()} check stair ${pushedDoorAndRevealedStairs()} pt ${pushBlockPoint}" }
+    fun log() = d { "secret trigger $secretTrigger checkBlockDoorOrStairs: ${hasBeenPushed()} has pushed ${hasPushBlock()} block pushed $blockPushed check door ${pushedDoor()} check stair ${pushedDoorAndRevealedStairs()} pt ${pushBlockPoint}" }
 
     /**
      * tell you what kind of room trigger there is

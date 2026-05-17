@@ -66,6 +66,28 @@ fun makePush(push: InLocations.Push = InLocations.Push.diamondLeft,
              upTo: Action,
              startAt: MapLoc,
              /**
+              * point where the stairs is
+              */
+             stairs: InLocations.StairsLocation,
+             out: InLocations.OutLocation = InLocations.OutLocation.item): Action =
+    OrderedActionSequence(listOf(
+        completeIfPushed(PushAction(push)),
+        CompleteIfMapChanges(InsideNav(stairs.point,
+            push.ignoreProjectiles,
+            makePassable = push.point,
+            highCost = push.highCost,
+        )),
+        CompleteIfMapChanges(OrderedActionSequence(listOf(
+            StartAtAction(startAt),
+            InsideNav(out.point, ignoreProjectiles = true),
+            upTo,
+        ), restartWhenDone = false, shouldComplete = true)) // fine if this restarts, it will end once user exits
+    ), restartWhenDone = false, shouldComplete = true)
+
+fun makePushO(push: InLocations.Push = InLocations.Push.diamondLeft,
+             upTo: Action,
+             startAt: MapLoc,
+             /**
                      * point where the stairs is
                      */
              stairs: InLocations.StairsLocation,
@@ -100,13 +122,12 @@ fun goNoPush(upTo: Action,
 /**
  * robust push sequence
  */
-class PushAction(push: InLocations.Push, then: Action): Action {
+class PushAction(push: InLocations.Push, then: Action = CompleteAction()): Action {
 
     val sequence = OrderedActionSequence(
     listOfNotNull(
 //        InsideNav(push.position, makePassable = push.point), // fails in level 9
         if (push == InLocations.Push.diamondLeft) navToPush(push, center = true) else null,
-        // added the != diamond left
         if (push != InLocations.Push.none && (push != InLocations.Push.diamondLeft)) navToPush(push) else null,
         if (push != InLocations.Push.none) PushIt(push.point) else null,
         // optional some push

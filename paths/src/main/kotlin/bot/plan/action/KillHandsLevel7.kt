@@ -33,8 +33,9 @@ class KillHandsInLevel7 : Action {
     private var lastAction = ""
     private var lastTarget = FramePoint(0, 0)
 
-    private val criteria = DeadForAWhile {
-        lastAction != "SAFE" && it.clearedWithMinIgnoreLoot(0) // leave no enemies
+    private val criteria = DeadForAWhile(limit = 50) {
+//        lastAction != "SAFE" && it.clearedWithMinIgnoreLoot(0) // leave no enemies
+        lastAction != "SAFE" && it.frameState.enemiesLeftCalculator.allDead
     }
 
     // need to wait to make sure they are killed maybe
