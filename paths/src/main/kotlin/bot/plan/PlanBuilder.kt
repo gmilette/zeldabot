@@ -881,14 +881,14 @@ class PlanBuilder(
                     )
                 )
             },
-        ), restartWhenDone = true, shouldComplete = true, tag = "burn") // fine if this restarts, it will end once user exits
+        ), restartWhenDone = true, shouldComplete = true, tag = "burn")
 
     private fun exitReturnAction(burnFrom: FramePoint, direction: GamePad, to: FramePoint, exitLoc: MapLoc): Action =
         OrderedActionSequence(listOf(
             MoveTo(fromLoc = lastMapLoc, next = mapCell(exitLoc), toLevel = 0),
             MoveTo(fromLoc = exitLoc, next = mapCell(lastMapLoc), toLevel = 0),
             makePositionBurn(burnFrom, direction, to, exitLoc, false)
-        ), restartWhenDone = false, shouldComplete = true, tag = "exit then return") // fine if this restarts, it will end once user exits
+        ), restartWhenDone = false, shouldComplete = true, tag = "exit then return")
 
     private fun PlanBuilder.pushDownGetItem(to: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, position: Boolean = false):
             PlanBuilder {

@@ -5,9 +5,18 @@ import bot.state.*
 import bot.state.map.*
 import util.d
 
-// timeout
-fun makePushActionThen(push: InLocations.Push, to: MapLoc, then: Action): Action =
-    CompleteIfMapChangesTo(PushAction(push, then), to = to)
+/**
+ * used to move a block then exit a room
+ */
+fun makePushActionThen(push: InLocations.Push, to: MapLoc, then: Action): Action {
+    val actions = OrderedActionSequence(
+        listOf(
+            completeIfPushed(PushAction(push)), then
+        ), restartWhenDone = false, shouldComplete = true, tag = "push then"
+    )
+
+    return CompleteIfMapChangesTo(actions, to = to)
+}
 
 fun makeStatuePushGo(statue: FramePoint): Action =
     OrderedActionSequence(listOf(
@@ -15,7 +24,7 @@ fun makeStatuePushGo(statue: FramePoint): Action =
             GoIn(20, GamePad.MoveDown, reset = true),
             GoIn(75, GamePad.None, reset = true),
             Timeout(InsideNav(statue, makePassable = statue, ignoreProjectiles = false, tag = "go in"))
-        ), restartWhenDone = false, shouldComplete = true, tag = "pushGo") // fine if this restarts, it will end once user exits
+        ), restartWhenDone = false, shouldComplete = true, tag = "pushGo")
 
 fun makeStatuePush(statue: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem): Action =
     OrderedActionSequence(listOf(
@@ -24,7 +33,7 @@ fun makeStatuePush(statue: FramePoint, itemLoc: FramePoint = InLocations.Overwor
             GoIn(20, GamePad.MoveDown, reset = true),
             GoIn(75, GamePad.None, reset = true),
             Timeout(InsideNav(statue, makePassable = statue, ignoreProjectiles = false, tag = "go in"))
-        ), restartWhenDone = false, shouldComplete = true, tag = "push") // fine if this restarts, it will end once user exits
+        ), restartWhenDone = false, shouldComplete = true, tag = "push")
 //        ), CompleteWhenExitShop(OrderedActionSequence(
         ), CompleteIfChangeShopOwner(false, OrderedActionSequence(
             listOfNotNull(
@@ -71,39 +80,20 @@ fun makePush(push: InLocations.Push = InLocations.Push.diamondLeft,
              stairs: InLocations.StairsLocation,
              out: InLocations.OutLocation = InLocations.OutLocation.item): Action =
     OrderedActionSequence(listOf(
+        // push
         completeIfPushed(PushAction(push)),
+        // move to stairs
         CompleteIfMapChanges(InsideNav(stairs.point,
             push.ignoreProjectiles,
             makePassable = push.point,
             highCost = push.highCost,
         )),
+        // get items then move out of stairs
         CompleteIfMapChanges(OrderedActionSequence(listOf(
             StartAtAction(startAt),
             InsideNav(out.point, ignoreProjectiles = true),
             upTo,
-        ), restartWhenDone = false, shouldComplete = true)) // fine if this restarts, it will end once user exits
-    ), restartWhenDone = false, shouldComplete = true)
-
-fun makePushO(push: InLocations.Push = InLocations.Push.diamondLeft,
-             upTo: Action,
-             startAt: MapLoc,
-             /**
-                     * point where the stairs is
-                     */
-             stairs: InLocations.StairsLocation,
-             out: InLocations.OutLocation = InLocations.OutLocation.item): Action =
-    OrderedActionSequence(listOf(
-        CompleteIfMapChanges(
-            PushAction(push, InsideNav(stairs.point,
-                push.ignoreProjectiles,
-                makePassable = if (push == InLocations.Push.right) push.point else push.point, // was null if right..
-                highCost = push.highCost
-                ))),
-        CompleteIfMapChanges(OrderedActionSequence(listOf(
-            StartAtAction(startAt),
-            InsideNav(out.point, ignoreProjectiles = true),
-            upTo,
-        ), restartWhenDone = false, shouldComplete = true)) // fine if this restarts, it will end once user exits
+        ), restartWhenDone = false, shouldComplete = true))
     ), restartWhenDone = false, shouldComplete = true)
 
 fun goNoPush(upTo: Action,
@@ -116,30 +106,25 @@ fun goNoPush(upTo: Action,
             StartAtAction(startAt),
             InsideNav(out.point, tag = "go to no push point"),
             upTo,
-        ), restartWhenDone = false, shouldComplete = true)) // fine if this restarts, it will end once user exits
+        ), restartWhenDone = false, shouldComplete = true))
     ), restartWhenDone = false, shouldComplete = true)
 
 /**
- * robust push sequence
+ * use with [completeIfPushed]
  */
-class PushAction(push: InLocations.Push, then: Action = CompleteAction()): Action {
+class PushAction(push: InLocations.Push): Action {
 
     val sequence = OrderedActionSequence(
-    listOfNotNull(
-//        InsideNav(push.position, makePassable = push.point), // fails in level 9
-        if (push == InLocations.Push.diamondLeft) navToPush(push, center = true) else null,
-        if (push != InLocations.Push.none && (push != InLocations.Push.diamondLeft)) navToPush(push) else null,
-        if (push != InLocations.Push.none) PushIt(push.point) else null,
-        // optional some push
-        if (push.needAway) AwayFrom(push.point) else null,
-//        Wait(10),
-        // // move away from block otherwise link will be on unpassable
-        StartAtAction(0, -1),
-        // avoid horizontal spot
-        Timeout(then),
-        KillAll(),
-        // try to go exit
-        InsideNav(push.position) // if we are going to retry reposition link
+        listOfNotNull(
+            if (push == InLocations.Push.diamondLeft) navToPush(push, center = true) else null,
+            if (push != InLocations.Push.none && (push != InLocations.Push.diamondLeft)) navToPush(push) else null,
+            if (push != InLocations.Push.none) PushIt(push.point) else null,
+            // move away from block otherwise link will be on unpassable
+            if (push.needAway) AwayFrom(push.point) else null,
+            StartAtAction(0, -1),
+            // avoid horizontal spot
+            KillAll(),
+            InsideNav(push.position) // if we are going to retry reposition link
         ), restartWhenDone = true, tag = "push sequence")
 
     override fun reset() {
