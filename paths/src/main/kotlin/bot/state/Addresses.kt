@@ -383,6 +383,9 @@ object Addresses {
    const val enemiesKilledCount = 0x052A
    const val enemiesKilledWithoutTakingDamage = 0x0627
 
+   const val fluteTimer = 0x003C
+   const val usedFlute  = 0x051B
+
    object More {
       // the room data including the secret trigger
       val secretTrigger = 0x04CD

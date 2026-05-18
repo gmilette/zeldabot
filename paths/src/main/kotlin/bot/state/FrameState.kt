@@ -24,6 +24,7 @@ data class FrameState(
     private val linkDoingAnAttack: Boolean by lazy { LinkSwingingDetection.attacking(api) }
 
     val trigger by lazy { SecretTriggeredDetector(api) }
+    val whistle by lazy { WhistleCalculator(api) }
     val projectileStatus = LinkProjectileStatus(api)
 
     val numRupees: Int = inventory.numRupees

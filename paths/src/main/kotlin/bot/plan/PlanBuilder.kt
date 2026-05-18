@@ -611,8 +611,6 @@ class PlanBuilder(
     val rightm: PlanBuilder
         get() {
             addm(lastMapLoc.right)
-//            val nextLoc = lastMapLoc.right
-//            add(nextLoc, moveTo(nextLoc))
             return this
         }
     val rightNoP: PlanBuilder
@@ -725,7 +723,7 @@ class PlanBuilder(
     // do whistle then move
     private fun whistleThenGo(entrance: FramePoint): PlanBuilder {
         goIn(GamePad.MoveUp, 20)
-        useWhistle()
+        digdoggerWhistle()
         // wait until whistle sounds
         // no need to wait long
         goIn(GamePad.None, 100)
@@ -734,7 +732,7 @@ class PlanBuilder(
         return this
     }
 
-    private fun useWhistle() {
+    private fun digdoggerWhistle() {
         switchToWhistle()
         goIn(GamePad.None, 100)
         plan.add(UseItem())
@@ -834,6 +832,10 @@ class PlanBuilder(
 
     fun useItem() {
         plan.add(UseItem())
+    }
+
+    fun waitUntilWhistleDone() = WaitUntil("whistle done") {
+        it.frameState.whistle.fluteWasUsedAndDone()
     }
 
     //

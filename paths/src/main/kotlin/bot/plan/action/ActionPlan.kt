@@ -1036,6 +1036,19 @@ class Wait(val howLong: Int) : Action {
         get() = "Wait for $frames of $howLong"
 }
 
+class WaitUntil(private val tag: String, private val condition: (MapLocationState) -> Boolean) : Action {
+    override fun complete(state: MapLocationState): Boolean =
+        condition(state)
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        d { " waiting until $tag" }
+        return GamePad.None
+    }
+
+    override val name: String
+        get() = "Wait until $tag"
+}
+
 /**
  * just use to mark where the plan should start
  */
