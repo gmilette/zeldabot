@@ -23,6 +23,8 @@ data class FrameState(
 ) {
     private val linkDoingAnAttack: Boolean by lazy { LinkSwingingDetection.attacking(api) }
 
+    val trigger by lazy { SecretTriggeredDetector(api) }
+    val whistle by lazy { WhistleCalculator(api) }
     val projectileStatus = LinkProjectileStatus(api)
 
     val numRupees: Int = inventory.numRupees
@@ -60,6 +62,8 @@ data class FrameState(
     val isDoneScrolling: Boolean
         get() = gameMode == 4
 
+    val enemiesLeftCalculator: EnemiesLeftCalculator by lazy { EnemiesLeftCalculator(api) }
+
     val ladderDeployed: Boolean
         get() = ladder != null && ladder.point.y >= 0 //on selection screen it is above normal items
 
@@ -95,12 +99,6 @@ data class FrameState(
 
     val enemiesSorted: List<Agent>
         get() = enemies.sortedBy { it.point.distTo(link.point) }
-
-    fun withEnemyAt(pt: FramePoint): FrameState {
-        return this.copy(enemies = enemies.toMutableList() + Agent(
-            0, pt
-        ))
-    }
 
     fun linkDoingAnAttack(): Boolean {
         return linkDoingAnAttack

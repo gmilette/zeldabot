@@ -185,7 +185,7 @@ object EnemyGroup {
             projectileMagicShieldBlockable
 
     val largeProjectiles = setOf(
-        sun, sun2, // sun
+        sun1, sun2, // sun
         fire,
         trap, // trap,
         boulder, boulder2,

@@ -14,6 +14,7 @@ class DirectionByMemoryLookup(
     data class PointAndDamage(
         val point: FramePoint,
         val damaged: Int = 0,
+        val stunned: Int = 0,
         val hp: Int = 0,
         val type: Int = 0
     )
@@ -29,7 +30,8 @@ class DirectionByMemoryLookup(
 
     fun lookupDirection(point: FramePoint): Direction = enemyPoints[point.oneStr]?.point?.direction ?: Direction.None
 
-    // add type too
+    fun lookupStunned(point: FramePoint): Int = (enemyPoints[point.oneStr]?.stunned ?: 0)
+
     fun lookupDamaged(point: FramePoint): Boolean = (enemyPoints[point.oneStr]?.damaged ?: 0) != 0
 
     fun lookupHp(point: FramePoint): Int = (enemyPoints[point.oneStr]?.hp ?: 0)
@@ -42,10 +44,10 @@ class DirectionByMemoryLookup(
     private fun List<PointAndDamage>.expandX(): List<PointAndDamage> {
         return flatMap {
             listOf(it,
-                PointAndDamage(it.point.up.dir(it.point.direction), it.damaged, it.hp, it.type),
-                PointAndDamage(it.point.down.dir(it.point.direction), it.damaged, it.hp, it.type),
-                PointAndDamage(it.point.right.dir(it.point.direction), it.damaged, it.hp, it.type),
-                PointAndDamage(it.point.left.dir(it.point.direction), it.damaged, it.hp, it.type)
+                it.copy(point = it.point.up.dir(it.point.direction)),
+                it.copy(point = it.point.down.dir(it.point.direction)),
+                it.copy(point = it.point.right.dir(it.point.direction)),
+                it.copy(point = it.point.left.dir(it.point.direction)),
             )
         }
     }
@@ -57,6 +59,7 @@ class DirectionByMemoryLookup(
         val types = Addresses.More.objType.map { api.readCPU(it) }
         val x = Addresses.ememiesX.map { api.readCPU(it) }
         val y = Addresses.ememiesY.map { api.readCPU(it) }
+        val stunned = Addresses.More.objStunTimer.map { api.readCPU(it) }
 
         val info = mutableListOf<PointAndDamage>()
         for (i in x.indices) {
@@ -64,7 +67,8 @@ class DirectionByMemoryLookup(
             val damage = damaged[i]
             val hpVal = hp[i]
             val typeVal = types[i]
-            val all = PointAndDamage(pt, damage, hpVal, typeVal)
+            val stunned = stunned[i]
+            val all = PointAndDamage(pt, damage, stunned, hpVal, typeVal)
             info.add(all)
             d(DEBUG) { "readEnemyPointDir info: $i: $pt $all" }
         }

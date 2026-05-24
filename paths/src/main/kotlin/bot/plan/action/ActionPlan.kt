@@ -399,6 +399,16 @@ class DoNothing : Action {
     }
 }
 
+class CompleteAction : Action {
+    override fun complete(state: MapLocationState): Boolean =
+        true
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        return GamePad.None
+    }
+}
+
+
 class Optional(val action: Action, private val must: Boolean = true) : Action {
     override fun reset() {
         action.reset()
@@ -1024,6 +1034,19 @@ class Wait(val howLong: Int) : Action {
 
     override val name: String
         get() = "Wait for $frames of $howLong"
+}
+
+class WaitUntil(private val tag: String, private val condition: (MapLocationState) -> Boolean) : Action {
+    override fun complete(state: MapLocationState): Boolean =
+        condition(state)
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        d { " waiting until $tag" }
+        return GamePad.None
+    }
+
+    override val name: String
+        get() = "Wait until $tag"
 }
 
 /**

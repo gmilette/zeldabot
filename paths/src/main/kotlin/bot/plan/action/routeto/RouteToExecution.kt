@@ -36,9 +36,9 @@ sealed class PointMoveAction {
 class RouteExecution(val params: Param = Param()) {
     companion object {
         /**
-         * dont shoot the boomerang too much
+         * dont shoot the boomerang too much, but rely
          */
-        private const val WAIT_BETWEEN_BOOMERANG = 20
+        private const val WAIT_BETWEEN_BOOMERANG = 4
         private const val WAIT_BETWEEN_NOT_BOOMERANG = 2
     }
 
@@ -110,7 +110,7 @@ class RouteExecution(val params: Param = Param()) {
         }
     }
 
-    private fun typically(typical: Int = WAIT_BETWEEN_BOOMERANG, everySoOften: Int = typical * 2): Int =
+    private fun typically(typical: Int = WAIT_BETWEEN_BOOMERANG, everySoOften: Int = typical * 3): Int =
         if (Random.nextInt(6) == 1) {
             everySoOften
         } else {

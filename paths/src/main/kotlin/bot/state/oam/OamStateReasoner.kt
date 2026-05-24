@@ -97,6 +97,7 @@ class OamStateReasoner(
         }
         val hp = lookup.lookupHp(point)
         val type = lookup.lookupType(point)
+        val stunned = lookup.lookupStunned(point)
         val maxHp = EnemyMaxHpTable.maxHp(type)
 
         return Agent(
@@ -106,6 +107,7 @@ class OamStateReasoner(
             tileByte = tile.toString(16), attributeByte = attribute.toString(16),
             damaged = damaged,
             blockable = blockable,
+            stunnedLeft = stunned,
             moving = movingDirection,
             color = color,
             hp = hp,

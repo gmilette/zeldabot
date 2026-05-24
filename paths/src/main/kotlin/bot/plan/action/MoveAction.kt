@@ -129,6 +129,12 @@ fun completeIfBombsLikely(wrapped: Action): Action = CompleteIf(wrapped, "Bombs 
     ItemDropPrediction().bombsLikely()
 }
 
+fun completeIfPushed(wrapped: Action) = CompleteIf(wrapped, "completeIfPushed") {
+   frameState.trigger.hasBeenPushed().also {
+        frameState.trigger.log()
+    }
+}
+
 class CompleteIf(wrapped: Action, private val conditionName: String = "", private val condition: MapLocationState.() -> Boolean) : WrappedAction(wrapped) {
     override fun complete(state: MapLocationState): Boolean =
         state.condition() || super.complete(state)
@@ -143,18 +149,24 @@ class InsideNav(
     ignoreProjectiles: Boolean = false,
     private val makePassable: FramePoint? = null,
     private val tag: String = "",
-    private val highCost: List<FramePoint> = emptyList()
+    private val highCost: List<FramePoint> = emptyList(),
+    private val addPushed: Boolean = true // just always check for it
 ) : Action {
     private val routeTo = RouteTo.hardlyReplan(ignoreProjectiles = ignoreProjectiles)
     override fun complete(state: MapLocationState): Boolean =
         state.frameState.link.point == point
 
     override fun nextStep(state: MapLocationState): GamePad {
+        val highCostList = if (addPushed && state.frameState.trigger.hasBeenPushed() && state.frameState.trigger.hasPushBlock()) {
+            highCost + state.frameState.trigger.pushBlockPoint
+        } else {
+            highCost
+        }
         return routeTo.routeTo(state, listOf(point),
             RouteTo.RouteParam(
                 rParam = RouteTo.RoutingParamCommon(
                     forcePassable = makePassable?.let { listOf(makePassable) } ?: emptyList(),
-                    forceHighCost = highCost)
+                    forceHighCost = highCostList)
             )
         )
     }

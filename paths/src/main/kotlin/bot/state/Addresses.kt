@@ -158,6 +158,7 @@ object Addresses {
       0x04FC,
    )
 
+   val pushBlockX = 0x007B
    val ememiesX = listOf(
       0x0071, // link is at 0070
       0x0072,
@@ -169,9 +170,10 @@ object Addresses {
       0x0078,
       0x0079,
       0x007A,
-      0x007B,
+      0x007B, // also push block
       0x007C,
    )
+   val pushBlockY = 0x008F
    val ememiesY = listOf(
       0x0085, // link is at 0084
       0x0086,
@@ -183,7 +185,7 @@ object Addresses {
       0x008C,
       0x008D,
       0x008E,
-      0x008F,
+      0x008F, // also push block
       0x0090,
    )
    val ememyDir = listOf(
@@ -381,23 +383,37 @@ object Addresses {
    const val enemiesKilledCount = 0x052A
    const val enemiesKilledWithoutTakingDamage = 0x0627
 
+   const val fluteTimer = 0x003C
+   const val usedFlute  = 0x051B
+
    object More {
+      // the room data including the secret trigger
+      val secretTrigger = 0x04CD
+      val secretTriggered = 0x04CE
+      val blockPushed = 0x04CF
       // Stun timer countdown before an object can act again after being hit
+      // link: 0x003D,
       val objStunTimer = listOf(
-         0x003D, 0x003E, 0x003F, 0x0040, 0x0041, 0x0042,
+         0x003E, 0x003F, 0x0040, 0x0041, 0x0042,
          0x0043, 0x0044, 0x0045, 0x0046, 0x0047, 0x0048,
+         0x0049 // extra
       )
 
       // Object type ID — identifies what kind of enemy/object is in each slot
       // Note: slot 0 (0x034F) overlaps with the room kill counter
-      val objectTypeLink = 0x034F
+      val objectTypeLinkAndRoomKillCounter = 0x034F
+      val roomObjectCount = 0x034E
+      val allEnemiesDead = 0x034D
+      val pushBlockType = 0x035A
       val objType = listOf(
          0x0350, 0x0351, 0x0352, 0x0353, 0x0354,
-         0x0355, 0x0356, 0x0357, 0x0358, 0x0359, 0x035A,
+         0x0355, 0x0356, 0x0357, 0x0358, 0x0359,
+         0x035A, // push block type
          0x035B // added 1 more
       )
 
       // Object spawn/death state machine — alive, spawning, dying transitions
+      //
       val objMetastate = listOf(
          0x0405, 0x0406, 0x0407, 0x0408, 0x0409, 0x040A,
          0x040B, 0x040C, 0x040D, 0x040E, 0x040F, 0x0410,

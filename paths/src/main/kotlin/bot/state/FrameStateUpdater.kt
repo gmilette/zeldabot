@@ -1,10 +1,10 @@
 package bot.state
 
 import bot.plan.action.PreviousMove
-import bot.state.map.*
+import bot.state.map.Hyrule
+import bot.state.map.MapConstants
 import bot.state.map.stats.MapStatsTracker
 import bot.state.movement.MovePredictor
-import bot.state.movement.SkipDetector
 import bot.state.oam.OamStateReasoner
 import nintaco.api.API
 import util.d

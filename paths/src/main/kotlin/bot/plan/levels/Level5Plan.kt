@@ -17,7 +17,7 @@ object Level5Plan {
         val mapLocGetItem: MapLoc = 4
         val moveLeft = FramePoint(7.grid, 5.grid)
         val cornerStairs = FramePoint(13.grid, 2.grid)
-        val cornerStairsBefore = FramePoint(13.grid-5, 2.grid)
+        val cornerStairsBefore = FramePoint(13.grid - 5, 2.grid)
         val triforceHeart = FramePoint(8.grid, 3.grid)
     }
 
@@ -86,14 +86,7 @@ object Level5Plan {
             seg("get past bunnies")
             switchToArrow() // is it in right spot?
             leftm
-            seg("Use Whistle")
-            goIn(GamePad.MoveLeft, 10) // more in a bit before whistlin'
-            switchToWhistle()
-            goIn(GamePad.None, 50) // more in a bit before whistlin'
-            goIn(GamePad.MoveLeft, 20) // move more in
-            useItem()
-            wait(100) // wait for whistle to happen, otherwise bot will route uselessly
-//        switchToBoomerang // broke waiting
+            digdoggerWhistle()
             seg("Now destroy him")
             kill // problem the projectiles are considered enemies
             seg("Get 5 triforce")
@@ -101,5 +94,15 @@ object Level5Plan {
             uponlym
             getTri
         }
+}
 
+fun PlanBuilder.digdoggerWhistle(moveIn: GamePad = GamePad.MoveLeft) {
+    add {
+        seg("Digdogger Whistle")
+        goIn(moveIn, 10) // more in a bit before whistlin'
+        switchToWhistle()
+        useItem()
+        waitUntilWhistleDone()
+        switchToBoomerang
+    }
 }

@@ -611,8 +611,6 @@ class PlanBuilder(
     val rightm: PlanBuilder
         get() {
             addm(lastMapLoc.right)
-//            val nextLoc = lastMapLoc.right
-//            add(nextLoc, moveTo(nextLoc))
             return this
         }
     val rightNoP: PlanBuilder
@@ -725,7 +723,7 @@ class PlanBuilder(
     // do whistle then move
     private fun whistleThenGo(entrance: FramePoint): PlanBuilder {
         goIn(GamePad.MoveUp, 20)
-        useWhistle()
+        digdoggerWhistle()
         // wait until whistle sounds
         // no need to wait long
         goIn(GamePad.None, 100)
@@ -734,7 +732,7 @@ class PlanBuilder(
         return this
     }
 
-    private fun useWhistle() {
+    private fun digdoggerWhistle() {
         switchToWhistle()
         goIn(GamePad.None, 100)
         plan.add(UseItem())
@@ -836,6 +834,10 @@ class PlanBuilder(
         plan.add(UseItem())
     }
 
+    fun waitUntilWhistleDone() = WaitUntil("whistle done") {
+        it.frameState.whistle.fluteWasUsedAndDone()
+    }
+
     //
     // L ... X
     // burn from left
@@ -879,14 +881,14 @@ class PlanBuilder(
                     )
                 )
             },
-        ), restartWhenDone = true, shouldComplete = true, tag = "burn") // fine if this restarts, it will end once user exits
+        ), restartWhenDone = true, shouldComplete = true, tag = "burn")
 
     private fun exitReturnAction(burnFrom: FramePoint, direction: GamePad, to: FramePoint, exitLoc: MapLoc): Action =
         OrderedActionSequence(listOf(
             MoveTo(fromLoc = lastMapLoc, next = mapCell(exitLoc), toLevel = 0),
             MoveTo(fromLoc = exitLoc, next = mapCell(lastMapLoc), toLevel = 0),
             makePositionBurn(burnFrom, direction, to, exitLoc, false)
-        ), restartWhenDone = false, shouldComplete = true, tag = "exit then return") // fine if this restarts, it will end once user exits
+        ), restartWhenDone = false, shouldComplete = true, tag = "exit then return")
 
     private fun PlanBuilder.pushDownGetItem(to: FramePoint, itemLoc: FramePoint = InLocations.Overworld.centerItem, position: Boolean = false):
             PlanBuilder {

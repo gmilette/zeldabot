@@ -24,6 +24,8 @@ data class Agent(
     val tileByte: String = tile.toString(16),
     val attributeByte: String = attribute.toString(16),
     val damaged: Boolean = false,
+    // count down to being unstunned from max of 16
+    val stunnedLeft: Int = 0,
     val blockable: Blockable = Blockable.No,
     val moving: MovingDirection = MovingDirection.UNKNOWN_OR_STATIONARY,
     val color: Int = 0,

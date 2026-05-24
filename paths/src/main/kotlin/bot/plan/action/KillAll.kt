@@ -1,18 +1,14 @@
 package bot.plan.action
 
 import bot.state.*
-import bot.state.map.Direction
 import bot.state.map.MapConstants
 import bot.state.map.grid
-import bot.state.map.toGamePad
-import bot.state.oam.MonsterColor
 import bot.state.oam.Monsters
-import bot.state.oam.circleMonsterCenters
-import bot.state.oam.circleMonsterOutside
+import bot.state.oam.sun1
+import bot.state.oam.sun2
 import util.LogFile
 import util.d
 import util.ifTrue
-import kotlin.random.Random
 
 class KillAll(
     /**
@@ -85,7 +81,15 @@ class KillAll(
         get() = "KILL ALL $waitAfterAllKilled ${if (numberLeftToBeDead > 0) "until $numberLeftToBeDead" else ""} ${ignoreUntilOnly.size} ${this.lookForBombs.ifTrue("*Bombs")} "
 
     private fun killedAllEnemies(state: MapLocationState): Boolean {
-        return state.clearedWithMinIgnoreLoot(numberLeftToBeDead + centerEnemies(state))
+        // unkillable should be zora and sun even though you can kill zora
+        val numBubbles = state.frameState.enemies.filter { it.tile == sun2 || it.tile == sun1 }.size
+        val allDeadByCount by lazy { state.frameState.enemiesLeftCalculator.allEnemiesDead(numberLeftToBeDead + numBubbles + centerEnemies(state)) }
+        val allDead = state.frameState.enemiesLeftCalculator.allDead || allDeadByCount
+        if (allDead) {
+            d { " ALL DEAD!"}
+        }
+        return allDead
+//        return state.clearedWithMinIgnoreLoot(numberLeftToBeDead + centerEnemies(state))
     }
 
     private fun centerEnemies(state: MapLocationState): Int =
@@ -98,7 +102,7 @@ class KillAll(
     override fun complete(state: MapLocationState): Boolean =
         (waitAfterAllKilled <= 0 && frameCount > 33 && killedAllEnemies(state)).also {
             val killedAll = killedAllEnemies(state)
-            d { " kill all complete $it ${state.numEnemies} or ${numberLeftToBeDead} killedAll=$killedAll $frameCount $waitAfterAllKilled" }
+            d { " kill all complete $it ${state.numEnemies} or ${numberLeftToBeDead} cen ${centerEnemies(state)} killedAll=$killedAll $frameCount $waitAfterAllKilled" }
 //            d { "result $it ${state.clearedWithMin(numberLeftToBeDead)} ct $frameCount wait $waitAfterAllKilled" }
 //            state.frameState.enemies.filter { it.state == EnemyState.Alive }.forEach {
 //                d { "enemy $it dist ${it.point.distTo(state.link)}" }
@@ -167,82 +171,15 @@ class KillAll(
             waitAfterAllKilled--
             GamePad.None // just wait
         } else {
-            // first kill the enemies not in center
-            // but if there is a heart prefer that!
-            var aliveEnemies = state.frameState.heartsClosestToLink().ifEmpty {
-                state.frameState.enemiesClosestToLink()
-            }.toMutableList()
-            // if you have clock enabled, the ghost can get stuck on a location that is not passable
-            // we should try to route to it still with the nearest
-            if (considerEnemiesInCenter) {
-                val numEnemiesInCenter = state.numEnemiesAliveInCenter()
-                // all enemies
-                if (numEnemiesInCenter != aliveEnemies.size) {
-                    val centers = state.enemiesAliveInCenter()
-                    for (agent in centers) {
-                        aliveEnemies.remove(agent)
-                    }
-                } else {
-                    d { "Attack center enemies" }
-                }
-            }
-
-            var attackOnlySpecified = false
-
-            // specially handling for level 8 spinning center guy
-            val targetOnlyUse =
-                if (ignoreUntilOnly.isNotEmpty() && aliveEnemies.any { !ignoreUntilOnly.contains(it.tile) }) {
-                    d { " ignore only $ignoreUntilOnly" }
-                    circleMonsterOutside.toList()
-                } else {
-                    targetOnly
-                }
-
-            // NEW
-//            aliveEnemies = aliveEnemies.filter { !it.damaged }
-            // need special handling, cant route into center
-            if (targetOnlyUse.isNotEmpty()) {
-                d { " target only $targetOnlyUse" }
-                aliveEnemies = aliveEnemies.filter { targetOnlyUse.contains(it.tile) }.toMutableList()
-                // test on the dragon i think
-                attackOnlySpecified = true
-            }
-
-            if (state.frameState.isOverworld &&
-                (lookForBombs && state.frameState.inventory.numBombs < 4)) {
-//                (lookForBombs || state.frameState.inventory.numBombs == 0)) {
-                if (ItemDropPrediction().bombsLikely()) {
-                    d { " bombs likely "}
-                    // todo: also have to make all other enemies into projectiles somehow
-                    val enemiesThatMightProduceBombs =
-                        aliveEnemies.filter { it.color == MonsterColor.blue || it.color == MonsterColor.grey }
-                    if (enemiesThatMightProduceBombs.isNotEmpty()) {
-                        d { " !! only target enemies that might produce bombs" }
-                        aliveEnemies = enemiesThatMightProduceBombs.toMutableList()
-                        attackOnlySpecified = true
-                    }
-                } else {
-                    val enemiesThatWillNotProduceBombs =
-                        aliveEnemies.filter { it.color == MonsterColor.red }
-                    if (enemiesThatWillNotProduceBombs.isNotEmpty()) {
-                        d { " !! only target enemies that will not produce bombs" }
-                        aliveEnemies = enemiesThatWillNotProduceBombs.toMutableList()
-                        attackOnlySpecified = true
-                    }
-                }
-            }
-
-            aliveEnemies.forEach {
-                d { "alive enemy $it dist ${it.point.distTo(state.frameState.link.point)}" }
-            }
+            val enemyFilter = KillAllTargetFilters(state, ignoreUntilOnly, targetOnly, considerEnemiesInCenter)
+            val aliveEnemies = enemyFilter.filter(lookForBombs)
 
             if (killedAllEnemies(state)) {
                 waitAfterAllKilled--
                 GamePad.None // just wait
             } else {
-                // 110 too low for bats
-                // need 250 for ghosts only
-                waitAfterAllKilled = if (needLongWait) 250 else 50
+                // just wait a little
+                waitAfterAllKilled = 5
                 val firstEnemyOrNull = aliveEnemies.firstOrNull()
                 if (firstEnemyOrNull == null) {
                     // added for the dragon, doesn't really work well
@@ -288,7 +225,7 @@ class KillAll(
                                 finishWithinStrikingRange = true
                             ),
                         ),
-                        attackableSpec = if (attackOnlySpecified) aliveEnemies else emptyList()
+                        attackableSpec = if (enemyFilter.attackOnlySpecified) aliveEnemies else emptyList()
                     ).let {
                         if (numPressB > 0) {
                             numPressB--

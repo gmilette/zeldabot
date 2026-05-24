@@ -31,15 +31,9 @@ object Level7Plan {
             seg("past water")
             kill //2
             upk
-            leftm
+            leftm // dont attack dogo
             up
-            seg("bait spot")
-            goIn(GamePad.MoveUp, 20)
-            switchToBait()
-            goIn(GamePad.None, 100)
-            goIn(GamePad.MoveUp, 20) // move more in
-            goTo(FramePoint(8.grid, 7.grid))
-            useItem()
+            useBait()
             switchToBoomerang
             upm
             rightm
@@ -52,13 +46,7 @@ object Level7Plan {
             seg("move right", ZeldaItem.Triforce)
             bombRight
             rightm
-            seg("kill whistle")
-            goIn(GamePad.MoveRight, 20) // more in a bit before whistlin'
-            switchToWhistle()
-            goIn(GamePad.None, 50)
-            goIn(GamePad.MoveRight, 20) // move more in
-            useItem()
-            wait(300)
+            digdoggerWhistle(GamePad.MoveRight)
             kill
             seg("move on")
             upk
@@ -88,4 +76,16 @@ object Level7Plan {
             rightonlym
             getTri
         }
+
+    private fun PlanBuilder.useBait() {
+        add {
+            seg("bait spot")
+            goIn(GamePad.MoveUp, 20)
+            switchToBait()
+            goIn(GamePad.None, 100)
+            goIn(GamePad.MoveUp, 20) // move more in
+            goTo(FramePoint(8.grid, 7.grid))
+            useItem()
+        }
+    }
 }
