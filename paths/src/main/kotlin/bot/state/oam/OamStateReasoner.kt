@@ -34,7 +34,7 @@ class OamStateReasoner(
         sprites = readOam()
     }
 
-    val DEBUG = false
+    private val DEBUG = false
 
     val alive: List<SpriteData>
         get() {
@@ -69,8 +69,12 @@ class OamStateReasoner(
         if (damaged) {
             d { "DDDD $tile tis damaged point $point"}
         }
+        val hp = lookup.lookupHp(point)
+        val type = lookup.lookupType(point)
+        val stunned = lookup.lookupStunned(point)
+        val maxHp = EnemyMaxHpTable.maxHp(type)
 
-        val blockable = calcBlockable(tile)
+        val blockable = calcBlockable(tile, type)
         val state = toState(damaged, isOverworld, isGannon)
         // could look up the direction based on tile and sprite
         // arrow
@@ -95,10 +99,6 @@ class OamStateReasoner(
         if (state == EnemyState.Projectile) {
             d { " Move dir for tile:${tileAttribute.toHex()} $point is ${movingDirection.toArrow()} and ${findDir.toArrow()} damaged: $damaged pair: ${toStringIsProjLevel()}" }
         }
-        val hp = lookup.lookupHp(point)
-        val type = lookup.lookupType(point)
-        val stunned = lookup.lookupStunned(point)
-        val maxHp = EnemyMaxHpTable.maxHp(type)
 
         return Agent(
             index = index, point = point,
@@ -116,9 +116,9 @@ class OamStateReasoner(
         )
     }
 
-    private fun calcBlockable(tile: Int): Blockable =
+    private fun calcBlockable(tile: Int, type: Int): Blockable =
         when {
-            EnemyGroup.projectileUnblockable.contains(tile) -> Blockable.No
+            EnemyGroup.projectileUnblockable.contains(tile) || EnemyObjectTypes.projectileObjectTypeUnblockable.contains(type) -> Blockable.No
             EnemyGroup.projectileBlockable.contains(tile) -> Blockable.WithSmallShield
             EnemyGroup.projectileMagicShieldBlockable.contains(tile) -> Blockable.WithMagicShield
             else -> Blockable.No
@@ -145,7 +145,7 @@ class OamStateReasoner(
             mutable.remove(spriteData)
         }
 
-        if (DEBUG || true) {
+        if (DEBUG) {
             d { " alive sprites AFTER delete" }
             mutable.forEachIndexed { index, sprite ->
                 d { "$index: $sprite" }
@@ -159,6 +159,7 @@ class OamStateReasoner(
     private fun SpriteData.toState(damaged: Boolean, isOverworld: Boolean, isGannon: Boolean): EnemyState {
         val isSword = this.tile in Monsters.darknut.tile
         val facingLink = false
+
         return when {
             this.hidden -> EnemyState.Dead
             !isOverworld && isSword && facingLink -> EnemyState.Projectile
@@ -220,7 +221,7 @@ class OamStateReasoner(
         d { " sprites ** alive ** ${spritesRaw.filter { !it.hidden }.size}" }
         // ahh there are twice as many sprites because each sprite is two big
         val alive = spritesRaw.filter { !it.hidden }
-        if (DEBUG || true) {
+        if (DEBUG) {
             d { " alive sprites OAM" }
             alive.forEachIndexed { index, sprite ->
                 d { "$index: $sprite" }
