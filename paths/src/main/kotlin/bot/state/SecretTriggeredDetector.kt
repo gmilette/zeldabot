@@ -4,7 +4,7 @@ import bot.state.SecretTriggeredDetector.SecretTrigger.entries
 import nintaco.api.API
 import util.d
 
-class SecretTriggeredDetector(private val api: API) {
+class SecretTriggeredDetector(private val api: API, private val mapLoc: MapLoc) {
     val pushBlockTypeValue = 0x68
 
     /**
@@ -100,5 +100,18 @@ class SecretTriggeredDetector(private val api: API) {
         BlockStairs   (5),
         MoneyOrLife   (6),
         AllDeadForItem(7);
+    }
+
+    // candle burns, bombs, and push block staircases
+    private val isOverworldSecretFound: Boolean by lazy {
+        calculateIsOverworldSecretFound()
+    }
+
+    private fun calculateIsOverworldSecretFound(): Boolean {
+        val worldFlagsAddrLo = api.readCPU(Addresses.worldFlagsAddrLo) and 0xFF
+        val worldFlagsAddrHi = api.readCPU(Addresses.worldFlagsAddrHi) and 0xFF
+        val worldFlagsAddr   = worldFlagsAddrLo or (worldFlagsAddrHi shl 8)
+        val roomFlags        = api.readCPU(worldFlagsAddr + mapLoc) and 0xFF
+        return (roomFlags and 0x80) != 0
     }
 }

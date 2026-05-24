@@ -386,6 +386,9 @@ object Addresses {
    const val fluteTimer = 0x003C
    const val usedFlute  = 0x051B
 
+   const val worldFlagsAddrLo = 0x6BAF
+   const val worldFlagsAddrHi = 0x6BB0
+
    object More {
       // the room data including the secret trigger
       val secretTrigger = 0x04CD
