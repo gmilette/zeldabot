@@ -2,53 +2,46 @@ package bot.state.map
 
 import bot.state.FramePoint
 
-//enum class MovingDirection {
-//    UP_RIGHT,
-//    UP_LEFT,
-//    DOWN_RIGHT,
-//    DOWN_LEFT,
-//    LEFT,
-//    RIGHT,
-//    UP,
-//    DOWN,
-//    UNKNOWN_OR_STATIONARY,
-//}
-
 sealed class MovingDirection {
-    data class DIAGONAL(val slope: FramePoint): MovingDirection()
-    object LEFT: MovingDirection()
-    object RIGHT: MovingDirection()
-    object UP: MovingDirection()
-    object DOWN: MovingDirection()
-    object UNKNOWN_OR_STATIONARY: MovingDirection()
+    sealed class Diagonal(val slope: FramePoint): MovingDirection() {
+        object UpRight: Diagonal(FramePoint(1, 1))
+        object UpLeft: Diagonal(FramePoint(-1, 1))
+        object DownRight: Diagonal(FramePoint(1, -1))
+        object DownLeft: Diagonal(FramePoint(-1, -1))
+    }
+    object Left: MovingDirection()
+    object Right: MovingDirection()
+    object Up: MovingDirection()
+    object Down: MovingDirection()
+    object UnknownOrStationary: MovingDirection()
 
     companion object {
         fun from(dir: Direction): MovingDirection =
             when (dir) {
-                Direction.Left -> LEFT
-                Direction.Right -> RIGHT
-                Direction.Down -> DOWN
-                Direction.Up -> UP
-                else -> UNKNOWN_OR_STATIONARY
+                Direction.Left -> Left
+                Direction.Right -> Right
+                Direction.Down -> Down
+                Direction.Up -> Up
+                else -> UnknownOrStationary
             }
     }
 
     fun toArrow(): String =
         when (this) {
-            is DIAGONAL -> "/"
-            is LEFT -> "<--"
-            is RIGHT -> "-->"
-            is UP -> "^"
-            is DOWN -> "_"
+            is Diagonal -> "/"
+            is Left -> "<--"
+            is Right -> "-->"
+            is Up -> "^"
+            is Down -> "_"
             else -> "x"
         }
 
     fun toDirection(): Direction =
         when (this) {
-            is LEFT -> Direction.Left
-            is RIGHT ->Direction.Right
-            is UP -> Direction.Up
-            is DOWN -> Direction.Down
+            is Left -> Direction.Left
+            is Right ->Direction.Right
+            is Up -> Direction.Up
+            is Down -> Direction.Down
             else -> Direction.None
         }
 

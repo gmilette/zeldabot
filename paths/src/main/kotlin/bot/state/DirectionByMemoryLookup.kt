@@ -2,6 +2,7 @@ package bot.state
 
 import bot.state.map.Direction
 import bot.state.map.MapConstants
+import bot.state.map.MovingDirection
 import nintaco.api.API
 import util.d
 
@@ -14,6 +15,7 @@ class DirectionByMemoryLookup(
     data class PointAndDamage(
         val index: Int, // which array index in the various lists of addresses
         val point: FramePoint,
+        val move: MovingDirection = MovingDirection.UnknownOrStationary,
         val damaged: Int = 0,
         val stunned: Int = 0,
         val hp: Int = 0,
@@ -28,17 +30,13 @@ class DirectionByMemoryLookup(
             d { toString() }
         }
     }
-    fun lookup(point: FramePoint): PointAndDamage? = enemyPoints[point.oneStr]
 
-    fun lookupDirection(point: FramePoint): Direction = enemyPoints[point.oneStr]?.point?.direction ?: Direction.None
-
-    fun lookupStunned(point: FramePoint): Int = (enemyPoints[point.oneStr]?.stunned ?: 0)
-
-    fun lookupDamaged(point: FramePoint): Boolean = (enemyPoints[point.oneStr]?.damaged ?: 0) != 0
-
-    fun lookupHp(point: FramePoint): Int = (enemyPoints[point.oneStr]?.hp ?: 0)
-
-    fun lookupType(point: FramePoint): Int = (enemyPoints[point.oneStr]?.type ?: 0)
+    fun closest(point: FramePoint): PointAndDamage? {
+        return enemyPoints.minByOrNull { it.value.point.distTo(point) }?.let {
+            d(DEBUG) { "dist to closest to $point is ${it.value.point} dist: ${it.value.point.distTo(point)}"}
+            it.value
+        }
+    }
 
     /**
      * it seems the oam locations might be different than memory locations by 1 x value
@@ -66,15 +64,16 @@ class DirectionByMemoryLookup(
         val info = mutableListOf<PointAndDamage>()
         for (i in x.indices) {
             val pt = FramePoint(x[i], y[i] - MapConstants.yAdjust, mapDir(dirs[i]))
+            val moveDirection = Direction.fromBitmaskWithDiagonal(dirs[i])
             val damage = damaged[i]
             val hpVal = hp[i]
             val typeVal = types[i]
             val stunned = stunned[i]
-            val all = PointAndDamage(i, pt, damage, stunned, hpVal, typeVal)
+            val all = PointAndDamage(i, pt, moveDirection, damage, stunned, hpVal, typeVal)
             info.add(all)
             d(DEBUG) { "readEnemyPointDir info: $i: $pt $all" }
         }
-        return info.expandX()
+        return info
     }
 
     fun readLinkPointDir(): Direction {
@@ -87,7 +86,7 @@ class DirectionByMemoryLookup(
     override fun toString(): String {
         val builder = StringBuilder()
         for (enemyPoint in enemyPoints.values) {
-            builder.append(" enemyPoints: $enemyPoint\n")
+            builder.append(" enemyPoints: $enemyPoint \n")
         }
         return builder.toString()
     }

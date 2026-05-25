@@ -7,7 +7,6 @@ import bot.state.*
 import bot.state.map.MapConstants
 import bot.state.map.MovingDirection
 import bot.state.movement.MovePredictor
-import bot.state.movement.SkipCoordinates
 import bot.state.oam.EnemyGroup.boomerangs
 import com.google.gson.GsonBuilder
 import nintaco.api.API
@@ -287,7 +286,7 @@ class MapStatsTracker {
     fun calcDirection(currentPoint: FramePoint, state: EnemyState, tile: Int): MovingDirection =
         previousEnemyLocations.buffer.firstOrNull()?.let { previousPoint ->
             ProjectileDirectionCalculator.calc(currentPoint, state, previousPoint, tile)
-        } ?: MovingDirection.UNKNOWN_OR_STATIONARY
+        } ?: MovingDirection.UnknownOrStationary
 }
 
 class AttributeCount(tile: Int = 0, val hex: String = tile.toString(16)) {

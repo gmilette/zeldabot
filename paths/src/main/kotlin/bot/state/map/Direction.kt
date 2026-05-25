@@ -1,11 +1,8 @@
 package bot.state.map
 
 import bot.state.*
-import bot.state.GamePad.MoveDown
-import bot.state.GamePad.MoveLeft
-import bot.state.GamePad.MoveRight
-import bot.state.GamePad.MoveUp
 import util.Geom
+import util.d
 import kotlin.random.Random
 
 enum class Direction {
@@ -26,13 +23,40 @@ enum class Direction {
             }
 
         /** Decode a NES direction bitmask: $01=East, $02=West, $04=South, $08=North. */
+        /**
+         *     RIGHT_DOWN(0x05),
+         *     LEFT_DOWN (0x06),
+         *     RIGHT_UP  (0x09),
+         *     LEFT_UP   (0x0A),
+         */
         fun fromBitmask(bitmask: Int): Direction = when (bitmask) {
             1 -> Right
             2 -> Left
             4 -> Down
             8 -> Up
-            else -> None
+            // these are diagonal. TODO: fill in
+            5 -> Right // right-down
+            6 -> Left // left-down
+            9 -> Right // right-up
+            10 -> Left // left-up
+            else -> None.also { d { "unknown direction bitmask: $bitmask hex value: ${bitmask.toString(16)}" } }
+        }.also {
+            d { "fromBitmask: $bitmask -> $it" }
         }
+
+        fun fromBitmaskWithDiagonal(bitmask: Int): MovingDirection = when (bitmask) {
+            1 -> MovingDirection.Right
+            2 -> MovingDirection.Left
+            4 -> MovingDirection.Down
+            8 -> MovingDirection.Up
+            5 -> MovingDirection.Diagonal.DownRight
+            6 -> MovingDirection.Diagonal.DownLeft // left-down
+            9 -> MovingDirection.Diagonal.UpRight // right-up
+            10 -> MovingDirection.Diagonal.UpLeft // left-up
+            else -> MovingDirection.UnknownOrStationary.also { d { "unknown direction bitmask: $bitmask hex value: ${bitmask.toString(16)}" } }
+        }
+
+        fun isDiagonal(bitmask: Int) = bitmask in listOf(5, 6, 9, 10)
     }
 
     fun vertical() = this in Companion.vertical

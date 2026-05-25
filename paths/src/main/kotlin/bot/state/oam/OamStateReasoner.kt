@@ -64,16 +64,21 @@ class OamStateReasoner(
         val tileAttribute = tile to attribute
 //        val damaged = mapStatsTracker.isDamaged(tile, attribute)
 
-        // currently testing this, possibly could use & or || to check that both agree
-        val damaged = lookup.lookupDamaged(point) // ?: DamagedLookup.isDamaged(tileAttribute, isOverworld, level)
-        if (damaged) {
-            d { "DDDD $tile tis damaged point $point"}
+        val memory = lookup.closest(point)
+        if (memory == null) {
+            d(DEBUG) { "NO MEMORY FOR $point"}
         }
-        val hp = lookup.lookupHp(point)
-        val type = lookup.lookupType(point)
-        val stunned = lookup.lookupStunned(point)
+        d(DEBUG) { "memory: $memory"}
+        // currently testing this, possibly could use & or || to check that both agree
+        val damaged = (memory?.damaged ?: 0) != 0
+        if (damaged) {
+            d(DEBUG) { "$tile tis damaged point $point"}
+        }
+        val hp = memory?.hp ?: 0
+        val type = memory?.type ?: 0
+        val stunned = memory?.stunned ?: 0
         val maxHp = EnemyMaxHpTable.maxHp(type)
-        val memoryIndex = lookup.lookup(point)?.index ?: 0
+        val memoryIndex = memory?.index ?: 0
 
         val blockable = calcBlockable(tile, type)
         val state = toState(damaged, isOverworld, isGannon)
@@ -82,38 +87,30 @@ class OamStateReasoner(
         // wizard
         // diagonal
         // boulder -> down in block of 4 pattern
-        var movingDirection: MovingDirection = MovingDirection.UNKNOWN_OR_STATIONARY
-        val findDir = if (state == EnemyState.Projectile) {
-            // TODO:
-//            if (type in EnemyObjectTypes.fireball) {
-//                FireballDirectionCalculator(api).direction(memoryIndex)
+//        var movingDirection: MovingDirection = MovingDirection.UNKNOWN_OR_STATIONARY
+//        if (state == EnemyState.Projectile) {
+//            val found = ProjectileDirectionLookup.findDir(tileAttribute)
+//            if (found == Direction.None) {
+//                movingDirection = mapStatsTracker.calcDirection(point, state, tile)
+//                movingDirection.toDirection()
+//            } else {
+//                movingDirection = MovingDirection.from(found)
 //            }
-            val found = ProjectileDirectionLookup.findDir(tileAttribute)
-            if (found == Direction.None) {
-                movingDirection = mapStatsTracker.calcDirection(point, state, tile)
-                movingDirection.toDirection()
-            } else {
-                movingDirection = MovingDirection.from(found)
-                found
-            }
-        } else {
-            // maybe calculate the dir here for alive enemies
-            lookup.lookupDirection(point) // ?: DirectionLookup.getDir(tileAttribute)
-        }
+//        }
 
         if (state == EnemyState.Projectile) {
-            d { " Move dir for tile:${tileAttribute.toHex()} $point is ${movingDirection.toArrow()} and ${findDir.toArrow()} damaged: $damaged pair: ${toStringIsProjLevel()}" }
+            d(DEBUG) { " Move dir for tile:${tileAttribute.toHex()} $point is ${memory?.move ?: MovingDirection.UnknownOrStationary} damaged: $damaged pair: ${toStringIsProjLevel()}" }
         }
 
         return Agent(
             index = index, point = point,
-            dir = findDir,
+            dir = memory?.point?.direction ?: Direction.None,
             state = state, tile = tile, attribute = attribute,
             tileByte = tile.toString(16), attributeByte = attribute.toString(16),
             damaged = damaged,
             blockable = blockable,
             stunnedLeft = stunned,
-            moving = movingDirection,
+            moving = memory?.move ?: MovingDirection.UnknownOrStationary,
             color = color,
             hp = hp,
             maxHp = maxHp,

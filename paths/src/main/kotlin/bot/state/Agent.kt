@@ -3,11 +3,9 @@ package bot.state
 import bot.state.map.Direction
 import bot.state.map.MapConstants
 import bot.state.map.MovingDirection
-import bot.state.oam.EnemyGroup
 import bot.state.oam.MonstersOverworld
 import bot.state.oam.TileAttribute
 import bot.state.oam.swordDir
-import util.CalculateDirection
 
 val List<Agent>.points: List<FramePoint>
     get() = this.map { it.point }
@@ -27,7 +25,7 @@ data class Agent(
     // count down to being unstunned from max of 16
     val stunnedLeft: Int = 0,
     val blockable: Blockable = Blockable.No,
-    val moving: MovingDirection = MovingDirection.UNKNOWN_OR_STATIONARY,
+    val moving: MovingDirection = MovingDirection.UnknownOrStationary,
     val color: Int = 0,
     val hp: Int = 0, // current hp
     val maxHp: Int = 0,
