@@ -53,7 +53,6 @@ class KillAll(
     private val routeTo = RouteTo(RouteTo.Param(
         whatToAvoid = whatToAvoid)
     )
-    private val criteria = KillAllCompleteCriteria()
 
     private var previousAttack = false
     private var pressACount = 0
@@ -95,10 +94,6 @@ class KillAll(
     private fun centerEnemies(state: MapLocationState): Int =
         if (considerEnemiesInCenter) state.numEnemiesAliveInCenter() else 0
 
-    private fun killedAllEnemiesIgnoreLoot(state: MapLocationState): Boolean {
-        return state.clearedWithMinIgnoreLoot(numberLeftToBeDead)
-    }
-
     override fun complete(state: MapLocationState): Boolean =
         (waitAfterAllKilled <= 0 && frameCount > 33 && killedAllEnemies(state)).also {
             val killedAll = killedAllEnemies(state)
@@ -133,7 +128,6 @@ class KillAll(
         for (enemy in state.frameState.enemies.filter { it.state != EnemyState.Dead }) {
             d { " enemy: $enemy" }
         }
-        criteria.update(state)
 
         frameCount++
         when {
