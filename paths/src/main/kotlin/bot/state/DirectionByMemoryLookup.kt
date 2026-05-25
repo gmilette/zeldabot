@@ -31,13 +31,12 @@ class DirectionByMemoryLookup(
         }
     }
 
-    fun closest(point: FramePoint): PointAndDamage? {
-        return enemyPoints.minByOrNull { it.value.point.distTo(point) }?.let {
-            d(DEBUG) { "dist to closest to $point is ${it.value.point} dist: ${it.value.point.distTo(point)}"}
-            it.value
-        }
+    fun closest(point: FramePoint, maxDistance: Int = 5): PointAndDamage? {
+        val nearest = enemyPoints.values.minByOrNull { it.point.distTo(point) } ?: return null
+        val dist = nearest.point.distTo(point)
+        d(DEBUG) { "dist to closest to $point is ${nearest.point} dist: $dist" }
+        return nearest.takeIf { dist <= maxDistance }
     }
-
     /**
      * it seems the oam locations might be different than memory locations by 1 x value
      */
