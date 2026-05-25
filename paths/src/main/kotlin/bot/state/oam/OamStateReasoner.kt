@@ -86,7 +86,7 @@ class OamStateReasoner(
         val findDir = if (state == EnemyState.Projectile) {
             // TODO:
 //            if (type in EnemyObjectTypes.fireball) {
-//                DirectionReader(api).getDirection(memoryIndex)
+//                FireballDirectionCalculator(api).direction(memoryIndex)
 //            }
             val found = ProjectileDirectionLookup.findDir(tileAttribute)
             if (found == Direction.None) {
