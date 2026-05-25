@@ -15,7 +15,7 @@ val List<Agent>.points: List<FramePoint>
 val emptyAgent = Agent(0, FramePoint(0, 0), Direction.Down, EnemyState.Unknown, 0)
 
 data class Agent(
-    val index: Int = 0,
+    val index: Int = 0, // index into OAM
     val point: FramePoint,
     val dir: Direction = Direction.None,
     val state: EnemyState = EnemyState.Unknown,

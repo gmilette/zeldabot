@@ -73,6 +73,7 @@ class OamStateReasoner(
         val type = lookup.lookupType(point)
         val stunned = lookup.lookupStunned(point)
         val maxHp = EnemyMaxHpTable.maxHp(type)
+        val memoryIndex = lookup.lookup(point)?.index ?: 0
 
         val blockable = calcBlockable(tile, type)
         val state = toState(damaged, isOverworld, isGannon)
@@ -83,6 +84,10 @@ class OamStateReasoner(
         // boulder -> down in block of 4 pattern
         var movingDirection: MovingDirection = MovingDirection.UNKNOWN_OR_STATIONARY
         val findDir = if (state == EnemyState.Projectile) {
+            // TODO:
+//            if (type in EnemyObjectTypes.fireball) {
+//                DirectionReader(api).getDirection(memoryIndex)
+//            }
             val found = ProjectileDirectionLookup.findDir(tileAttribute)
             if (found == Direction.None) {
                 movingDirection = mapStatsTracker.calcDirection(point, state, tile)

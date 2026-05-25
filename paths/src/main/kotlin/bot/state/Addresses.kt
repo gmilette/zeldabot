@@ -389,6 +389,9 @@ object Addresses {
    const val worldFlagsAddrLo = 0x6BAF
    const val worldFlagsAddrHi = 0x6BB0
 
+   const val fireballDirX = 0x0412
+   const val fireballDirY = 0x0437
+
    object More {
       // the room data including the secret trigger
       val secretTrigger = 0x04CD

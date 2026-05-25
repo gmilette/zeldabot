@@ -12,6 +12,7 @@ class DirectionByMemoryLookup(
         val DEBUG = false
     }
     data class PointAndDamage(
+        val index: Int, // which array index in the various lists of addresses
         val point: FramePoint,
         val damaged: Int = 0,
         val stunned: Int = 0,
@@ -27,6 +28,7 @@ class DirectionByMemoryLookup(
             d { toString() }
         }
     }
+    fun lookup(point: FramePoint): PointAndDamage? = enemyPoints[point.oneStr]
 
     fun lookupDirection(point: FramePoint): Direction = enemyPoints[point.oneStr]?.point?.direction ?: Direction.None
 
@@ -68,7 +70,7 @@ class DirectionByMemoryLookup(
             val hpVal = hp[i]
             val typeVal = types[i]
             val stunned = stunned[i]
-            val all = PointAndDamage(pt, damage, stunned, hpVal, typeVal)
+            val all = PointAndDamage(i, pt, damage, stunned, hpVal, typeVal)
             info.add(all)
             d(DEBUG) { "readEnemyPointDir info: $i: $pt $all" }
         }

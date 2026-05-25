@@ -13,8 +13,16 @@ object LoggerOverride {
     val log: Boolean
         get() = ZeldaBot.log
 
-    private val allowed = mutableListOf<String>("")
-    private val denied = mutableListOf<String>("")
+//    private val allowed = mutableListOf("bot.state.SecretTriggeredDetector")
+    private val allowed = mutableListOf("")
+    private val denied = mutableListOf(
+        //"bot.state.oam.OamStateReasoner",
+        "bot.plan.zstar.ZStar",
+        "bot.plan.action.routeto.RouteToGetInFrontOf",
+        "bot.state.HeartsStateCalculator",
+        "bot.plan.runner.PlanRunner",
+        "bot.state.oam.LinkDirectionFinder",
+        "bot.plan.action.routeto.RouteToGetInFrontOf")
 
     /** Only show logs from these packages (prefix match). If empty, all packages are shown. */
     fun allow(vararg packages: String) = apply { allowed.addAll(packages) }
@@ -48,7 +56,14 @@ private class FilteringLogWriter(
     override fun isLoggable(tag: String, severity: Severity): Boolean {
         val pkg = callerPackage()
         if (denied.isNotEmpty() && denied.any { pkg.startsWith(it) }) return false
-        if (allowed.isNotEmpty() && allowed.none { pkg.startsWith(it) }) return false
+//        if (pkg.contains("OamState") || pkg.contains("DirectionByMemoryLookup")) return true else return false
+        if (allowed.isNotEmpty()) {
+            if (allowed.any { pkg.startsWith(it) }) {
+                return true
+            } else {
+                return false
+            }
+        }
         return true
     }
 
@@ -67,6 +82,8 @@ private class ZFormatter : MessageStringFormatter {
 }
 
 inline fun v(message: () -> String) = log { Logger.v(message()) }
+
+inline fun d(enabled: Boolean, message: () -> String) = log { if (enabled) Logger.d( message()) }
 
 inline fun d(t: Throwable? = null, message: () -> String) = log { Logger.d( message()) }
 
