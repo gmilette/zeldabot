@@ -47,6 +47,7 @@ class TimeoutThen(action: Action, private val contingency: Action) : WrappedActi
 
     override fun reset() {
         frames = 0
+        contingency.reset()
         super.reset()
     }
 
