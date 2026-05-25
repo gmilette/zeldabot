@@ -73,9 +73,10 @@ class FrameStateUpdater(
         val isSpiderLevel6 = mapLoc == 28 && level == 6
         val isGannon = mapLoc == 66 && level == 9
         val combine = !isRhino && !isSpiderLevel8 && !isSpiderLevel6 && !isGannon
-        d { "combine is $combine" }
         val oam = OamStateReasoner(isOverworld, api, mapStats, combine = combine, level, isGannon = isGannon)
+        d { "create enemies" }
         val theEnemies = oam.agents()
+        d { "create enemies done" }
 
         val theUncombined = oam.agentsUncombined()
         val theRaw = oam.agentsRaw()

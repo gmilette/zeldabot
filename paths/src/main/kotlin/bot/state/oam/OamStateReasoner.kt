@@ -59,7 +59,6 @@ class OamStateReasoner(
     fun agentsRaw(): List<Agent> =
         spritesRaw.filter { it.point.y < 248 }.map { it.toAgent() }
 
-    // calculate isDamaged here
     private fun SpriteData.toAgent(): Agent {
         val tileAttribute = tile to attribute
 //        val damaged = mapStatsTracker.isDamaged(tile, attribute)
