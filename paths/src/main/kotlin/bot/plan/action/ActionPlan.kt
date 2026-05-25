@@ -431,7 +431,7 @@ class Optional(val action: Action, private val must: Boolean = true) : Action {
 
 val moveToKillAllInCenterSpot = DecisionAction(
     InsideNavAbout(FramePoint(5.grid, 5.grid), 2),
-    KillInCenter()
+    KillAllInCenter()
 ) { state ->
     state.numEnemies <= state.numEnemiesAliveInCenter()
 }

@@ -10,7 +10,7 @@ import org.jheaps.annotations.VisibleForTesting
 import util.*
 
 object AttackLongActionDecider {
-    val DEBUG = false
+    const val DEBUG = false
 
     fun isInsideEnoughToShoot(state: MapLocationState) =
         if (state.frameState.isLevel) {

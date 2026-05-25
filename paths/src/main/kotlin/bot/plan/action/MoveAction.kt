@@ -424,3 +424,25 @@ class MoveTo(
             else -> null
         }
 }
+
+val CycleAction = OrderedActionSequence(
+    listOf(
+        GoIn(3, GamePad.A, reset = true),
+        GoIn(3, GamePad.None, reset = true),
+        GoIn(3, GamePad.A, reset = true),
+        GoIn(3, GamePad.None, reset = true),
+        GoIn(3, GamePad.A, reset = true),
+        GoIn(3, GamePad.None, reset = true),
+        GoIn(3, GamePad.A, reset = true),
+        GoIn(3, GamePad.None, reset = true),
+        GoIn(3, GamePad.A, reset = true),
+        GoIn(3, GamePad.None, reset = true),
+        GoIn(3, GamePad.A, reset = true),
+        GoIn(3, GamePad.None, reset = true),
+        GoIn(MapConstants.twoGrid, GamePad.MoveDown, reset = true, randomlyMoveHalf = true),
+        GoIn(MapConstants.twoGrid, GamePad.MoveRight, reset = true, randomlyMoveHalf = true),
+        GoIn(MapConstants.twoGrid, GamePad.MoveLeft, reset = true, randomlyMoveHalf = true),
+        GoIn(MapConstants.twoGrid,GamePad.MoveUp, reset = true, randomlyMoveHalf = true)
+    )
+)
+

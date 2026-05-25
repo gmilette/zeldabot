@@ -45,7 +45,6 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
         val ladderAction by lazy { ladderDecider.doLadderAction(state) }
         val exitOffScreenAction by lazy { exitOfScreen(state.frameState.link.point, to) }
 
-
         val canAttack = preparation.canAttack
         val attackPossible = preparation.attackPossible
 //        val canAttack = param.allowAttack && !state.frameState.linkDoingAnAttack() && (param.useB || state.frameState.canUseSword)

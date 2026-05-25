@@ -262,7 +262,7 @@ class PlanBuilder(
             goTo(FramePoint(8.grid, 8.grid)) // bottom center
             // shoot with arrows?
             switchToArrow()
-            add(lastMapLoc, KillInCenter())
+            add(lastMapLoc, KillAllInCenter())
             return this
         }
     val killb: PlanBuilder
