@@ -57,7 +57,8 @@ object AttackLongActionDecider {
             }
             else -> false
         }
-        val inRange by lazy { targetInLongRange(state, targets) }
+        val targetsSorted = targets.sortedBy { it.distTo(state.link) }
+        val inRange by lazy { targetInLongRange(state, targetsSorted) }
         d { "Shoot boomerang $shouldShoot can=$canShoot flying=$boomerangIsFlying range=$inRange"}
         return (shouldShoot && canShoot && !boomerangIsFlying && inRange)
     }
