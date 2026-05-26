@@ -109,6 +109,16 @@ class OamStateReasoner(
             else -> Blockable.No
         }
 
+    private fun calcBlockableFromType(objType: Int): Blockable {
+        return when {
+            (objType in EnemyObjectTypes.blockableWithoutShield) -> Blockable.WithSmallShield
+            // TODO: need to add boulder and other projectiles
+            (objType in EnemyObjectTypes.alwaysHarmful) -> Blockable.No
+            (objType < 0x53) -> Blockable.No
+            else -> Blockable.WithMagicShield
+        }
+    }
+
     @VisibleForTesting
     fun combine(toCombine: List<SpriteData>): List<SpriteData> {
         // can delete, because there is a sprite 8pxs to left that is the same
