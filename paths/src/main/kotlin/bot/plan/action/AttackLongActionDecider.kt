@@ -37,6 +37,7 @@ object AttackLongActionDecider {
         return ableToShoot(state) && targetInLongRange(state, targets)
     }
 
+    // problem: Need to pass in non-boomerangable enemies since they could potentially block projectiles
     fun shouldBoomerang(state: MapLocationState, targets: List<FramePoint>): Boolean {
         d { "X-> should boomerang targets=$targets ${state.frameState.projectileStatus.status()}" }
         // includes loot
@@ -57,8 +58,7 @@ object AttackLongActionDecider {
             }
             else -> false
         }
-        val targetsSorted = targets.sortedBy { it.distTo(state.link) }
-        val inRange by lazy { targetInLongRange(state, targetsSorted) }
+        val inRange by lazy { targetInLongRange(state, targets) }
         d { "Shoot boomerang $shouldShoot can=$canShoot flying=$boomerangIsFlying range=$inRange"}
         return (shouldShoot && canShoot && !boomerangIsFlying && inRange)
     }
