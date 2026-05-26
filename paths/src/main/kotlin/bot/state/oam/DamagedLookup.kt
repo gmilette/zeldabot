@@ -1,8 +1,5 @@
 package bot.state.oam
 
-import bot.state.oam.DamagedLookup.add128
-import util.d
-
 object DamagedLookup {
     private val h67 = 0x43
     private val h66 = 0x42

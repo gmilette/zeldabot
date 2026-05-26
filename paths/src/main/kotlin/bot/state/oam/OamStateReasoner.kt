@@ -3,7 +3,6 @@ package bot.state.oam
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapConstants
-import bot.state.map.MovingDirection
 import bot.state.map.stats.MapStatsTracker
 import nintaco.api.API
 import nintaco.util.BitUtil
@@ -61,55 +60,40 @@ class OamStateReasoner(
 
     private fun SpriteData.toAgent(): Agent {
         val tileAttribute = tile to attribute
-//        val damaged = mapStatsTracker.isDamaged(tile, attribute)
 
-        val memory = lookup.closest(point)
-        if (memory == null) {
-            d(DEBUG) { "NO MEMORY FOR $point"}
-        }
+        val memory = lookup.closest(point) ?: return emptyAgent //.also { e { "EMPTY AGENT DETECTED, not memory at point $point" }}
+
         d(DEBUG) { "memory: $memory"}
         // currently testing this, possibly could use & or || to check that both agree
-        val damaged = (memory?.damaged ?: 0) != 0
+        val damaged = memory.damaged != 0
         if (damaged) {
             d(DEBUG) { "$tile tis damaged point $point"}
         }
-        val hp = memory?.hp ?: 0
-        val type = memory?.type ?: 0
-        val stunned = memory?.stunned ?: 0
+        val hp = memory.hp
+        val type = memory.type
+        val stunned = memory.stunned
         val maxHp = EnemyMaxHpTable.maxHp(type)
-        val memoryIndex = memory?.index ?: 0
+        val memoryIndex = memory.index
 
         val blockable = calcBlockable(tile, type)
         val state = toState(damaged, isOverworld, isGannon)
-        // could look up the direction based on tile and sprite
-        // arrow
-        // wizard
-        // diagonal
-        // boulder -> down in block of 4 pattern
-//        var movingDirection: MovingDirection = MovingDirection.UNKNOWN_OR_STATIONARY
-//        if (state == EnemyState.Projectile) {
-//            val found = ProjectileDirectionLookup.findDir(tileAttribute)
-//            if (found == Direction.None) {
-//                movingDirection = mapStatsTracker.calcDirection(point, state, tile)
-//                movingDirection.toDirection()
-//            } else {
-//                movingDirection = MovingDirection.from(found)
-//            }
-//        }
 
+        // boulder has a different movement direction, down 4 block type
         if (state == EnemyState.Projectile) {
-            d(DEBUG) { " Move dir for tile:${tileAttribute.toHex()} $point is ${memory?.move ?: MovingDirection.UnknownOrStationary} damaged: $damaged pair: ${toStringIsProjLevel()}" }
+            d(DEBUG) { " Move dir for tile:${tileAttribute.toHex()} $point is ${memory.point} damaged: $damaged pair: ${toStringIsProjLevel()}" }
         }
 
         return Agent(
-            index = index, point = point,
-            dir = memory?.point?.direction ?: Direction.None,
-            state = state, tile = tile, attribute = attribute,
-            tileByte = tile.toString(16), attributeByte = attribute.toString(16),
+            index = index,
+            point = memory.point,
+            dir = memory.point.direction ?: Direction.None,
+            state = state,
+            tile = tile,
+            attribute = attribute,
             damaged = damaged,
             blockable = blockable,
             stunnedLeft = stunned,
-            moving = memory?.move ?: MovingDirection.UnknownOrStationary,
+            moving = memory.move,
             color = color,
             hp = hp,
             maxHp = maxHp,

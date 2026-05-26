@@ -29,7 +29,8 @@ data class Agent(
     val color: Int = 0,
     val hp: Int = 0, // current hp
     val maxHp: Int = 0,
-    val type: Int = 0
+    val type: Int = 0,
+    val typeByte: String = type.toString(16)
 ) {
     val tileAttrib = TileAttribute(tile, attribute)
 

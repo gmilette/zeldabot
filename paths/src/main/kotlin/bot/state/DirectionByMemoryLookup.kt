@@ -10,7 +10,7 @@ class DirectionByMemoryLookup(
     private val api: API
 ){
     companion object {
-        val DEBUG = false
+        private const val DEBUG = false
     }
     data class PointAndDamage(
         val index: Int, // which array index in the various lists of addresses
@@ -36,19 +36,6 @@ class DirectionByMemoryLookup(
         val dist = nearest.point.distTo(point)
         d(DEBUG) { "dist to closest to $point is ${nearest.point} x dist: ${point.x - nearest.point.x} y dist: ${point.y - nearest.point.y} dist: $dist" }
         return nearest.takeIf { dist <= maxDistance }
-    }
-    /**
-     * it seems the oam locations might be different than memory locations by 1 x value
-     */
-    private fun List<PointAndDamage>.expandX(): List<PointAndDamage> {
-        return flatMap {
-            listOf(it,
-                it.copy(point = it.point.up.dir(it.point.direction)),
-                it.copy(point = it.point.down.dir(it.point.direction)),
-                it.copy(point = it.point.right.dir(it.point.direction)),
-                it.copy(point = it.point.left.dir(it.point.direction)),
-            )
-        }
     }
 
     private fun readEnemyPointDir(): List<PointAndDamage> {
