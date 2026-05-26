@@ -383,7 +383,7 @@ class PlanBuilder(
 
     val killAFewWithB: PlanBuilder
         get() {
-            add(lastMapLoc, lootAndKill(KillAll(needLongWait = false, useBombs = true, numberLeftToBeDead = 4)))
+            add(lastMapLoc, lootAndKill(KillAll(needLongWait = false, useBombs = true, numberLeftToBeDead = 8)))
             return this
         }
 

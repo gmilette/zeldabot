@@ -75,8 +75,9 @@ object Level8Plan {
                 )
             )
 
+            "clear some rabbits".seg()
             switchToArrowConditionally()
-//            killAFewWithB
+            killAFewWithB // need this to force link to use B to kill a few
             goTo(FramePoint(11.grid, 2.grid))
             "bomb to get dragon".seg()
             bombUp
