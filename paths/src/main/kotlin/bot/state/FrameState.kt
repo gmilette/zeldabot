@@ -20,17 +20,23 @@ data class FrameState(
     val ladder: Agent?,
     val inventory: Inventory,
 ) {
-    private val linkDoingAnAttack: Boolean by lazy { LinkSwingingDetection.attacking(api) }
-
     val trigger by lazy { SecretTriggeredDetector(api, mapLoc) }
     val whistle by lazy { WhistleCalculator(api) }
     val projectileStatus = LinkProjectileStatus(api)
+    val enemiesLeftCalculator: EnemiesLeftCalculator by lazy { EnemiesLeftCalculator(api) }
 
-    val numRupees: Int = inventory.numRupees
-    val numKeys: Int = inventory.numKeys
-    val numBombs: Int = inventory.numBombs
-    val life: Double = inventory.heartCalc.lifeInHearts()
-    val damageNumber: Int = inventory.heartCalc.damageNumber()
+    private val linkDoingAnAttack: Boolean by lazy { LinkSwingingDetection.attacking(api) }
+
+    val numRupees: Int
+        get() = inventory.numRupees
+    val numKeys: Int
+        get() = inventory.numKeys
+    val numBombs: Int
+        get() = inventory.numBombs
+    val life: Double
+        get() = inventory.heartCalc.lifeInHearts()
+    val damageNumber: Int
+        get() = inventory.heartCalc.damageNumber()
 
     /**
      *  0=Title/transitory    1=Selection Screen
@@ -60,8 +66,6 @@ data class FrameState(
 
     val isDoneScrolling: Boolean
         get() = gameMode == 4
-
-    val enemiesLeftCalculator: EnemiesLeftCalculator by lazy { EnemiesLeftCalculator(api) }
 
     val ladderDeployed: Boolean
         get() = ladder != null && ladder.point.y >= 0 //on selection screen it is above normal items
@@ -99,9 +103,7 @@ data class FrameState(
     val enemiesSorted: List<Agent>
         get() = enemies.sortedBy { it.point.distTo(link.point) }
 
-    fun linkDoingAnAttack(): Boolean {
-        return linkDoingAnAttack
-    }
+    fun linkDoingAnAttack(): Boolean = linkDoingAnAttack
 }
 
 private fun API.readCpuB(address: Int): Boolean =
