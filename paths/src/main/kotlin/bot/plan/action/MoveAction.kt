@@ -38,7 +38,7 @@ class CompleteIfChangeShopOwner(private val changeTo: Boolean, private val wrapp
 
     // incave is all we need I think
     private fun inShop(state: MapLocationState): Boolean = state.frameState.isInCave || state.frameState.enemiesRaw.any {
-            (it.tile == shopkeeperAndBat.first) || (it.tile == wizard)
+            (it == shopkeeperAndBat.first) || (it == wizard)
     }
 
     override fun reset() {
@@ -413,7 +413,7 @@ class MoveTo(
                 state.hyrule.level1EntranceCell.exitsFor(Direction.Down)
             }
             (state.frameState.isLevel) -> null
-            (state.frameState.enemiesRaw.count { it.tile in EnemyGroup.flame} >= 2) -> {
+            (state.frameState.enemiesRaw.count { it in EnemyGroup.flame} >= 2) -> {
                 d { " in secret room cave=${state.frameState.isInCave}"}
                 state.hyrule.shopMapCell.exitsFor(Direction.Down)
             }

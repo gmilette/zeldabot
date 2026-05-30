@@ -17,7 +17,7 @@ data class Agent(
     val point: FramePoint,
     val dir: Direction = Direction.None,
     val state: EnemyState = EnemyState.Unknown,
-    val tile: Int = 0,
+    val tile: Tile = 0,
     val attribute: Int = 0,
     val tileByte: String = tile.toString(16),
     val attributeByte: String = attribute.toString(16),
@@ -62,6 +62,8 @@ data class Agent(
     val hurt: Boolean
         get() = state == EnemyState.Alive && type > 0 && maxHp > 0 && hp > 0 && hp < maxHp
 }
+
+typealias Tile = Int
 
 enum class EnemyState {
     Unknown,

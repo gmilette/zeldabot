@@ -26,27 +26,12 @@ class OamStateReasoner(
     private var spritesRaw: List<SpriteData> = emptyList()
 
     var ladderSprite: Agent? = null
-    var direction: Direction = Direction.None
-    var linkDamaged: Boolean = false
 
     init {
         sprites = readOam()
     }
 
     private val DEBUG = false
-
-    val alive: List<SpriteData>
-        get() {
-            return sprites.filter { !it.hidden }
-        }
-
-    val loot: List<SpriteData>
-        get() {
-            return sprites.filter { it.isLoot }
-        }
-
-    val allDead: Boolean
-        get() = alive.isEmpty()
 
     fun agents(): List<Agent> =
         sprites.map { it.toAgent() }
@@ -55,13 +40,25 @@ class OamStateReasoner(
         spritesUncombined.map { it.toAgent() }
 
     // but also filter anything that isn'
-    fun agentsRaw(): List<Agent> =
-        spritesRaw.filter { it.point.y < 248 }.map { it.toAgent() }
+    fun agentsRaw(): List<Tile> =
+        spritesRaw.filter { it.point.y < 248 }.map { it.tile }
+
+    /**
+     * contains only oam data
+      */
+    private fun SpriteData.fromSpriteData(): Agent =
+        Agent(
+            index = index,
+            point = point,
+            tile = tile,
+            attribute = attribute,
+            color = color,
+        )
 
     private fun SpriteData.toAgent(): Agent {
         val tileAttribute = tile to attribute
 
-        val memory = lookup.closest(point) ?: return emptyAgent //.also { e { "EMPTY AGENT DETECTED, not memory at point $point" }}
+        val memory = lookup.closest(point) ?: return fromSpriteData() //.also { e { "EMPTY AGENT DETECTED, not memory at point $point" }}
 
         d(DEBUG) { "memory: $memory"}
         // currently testing this, possibly could use & or || to check that both agree
@@ -147,7 +144,6 @@ class OamStateReasoner(
             }
         }
 
-
         return mutable
     }
 
@@ -206,10 +202,6 @@ class OamStateReasoner(
         spritesRaw = (0..63).map {
             readOam(0x0001 * (it * 4))
         }
-
-        val dirDamage = LinkDirectionFinder.direction(spritesRaw)
-        direction = dirDamage.direction
-        linkDamaged = dirDamage.damaged
 
         setLadder(spritesRaw)
 

@@ -530,8 +530,8 @@ class WaitUntilCloudIsGone : Action {
 
     override fun complete(state: MapLocationState): Boolean {
         frames++
-        return frames > 500 || (state.frameState.enemiesRaw.firstOrNull { it.tile == bombSmoke } == null &&
-                state.frameState.enemiesRaw.firstOrNull { it.tile in EnemyGroup.shopOwners } != null)
+        return frames > 500 || (state.frameState.enemiesRaw.firstOrNull { it == bombSmoke } == null &&
+                state.frameState.enemiesRaw.firstOrNull { it in EnemyGroup.shopOwners } != null)
     }
 
     override val name: String
@@ -549,7 +549,7 @@ class WaitUntilFireIsGone : Action {
         get() = false
 
     override fun complete(state: MapLocationState): Boolean {
-        return frames > 500 || (state.frameState.enemiesRaw.none { it.tile == fire })
+        return frames > 500 || (state.frameState.enemiesRaw.none { it == fire })
     }
 
     override fun nextStep(state: MapLocationState): GamePad {
@@ -581,7 +581,7 @@ class WaitUntilFireAppearsThenIsGone : Action {
         return GamePad.None
     }
 
-    private fun hasFire(state: MapLocationState) = state.frameState.enemiesRaw.any { it.tile == fire }
+    private fun hasFire(state: MapLocationState) = state.frameState.enemiesRaw.any { it == fire }
 }
 
 class GoInConsume(private val moves: Int = 5, private val dir: GamePad = GamePad.MoveUp) :

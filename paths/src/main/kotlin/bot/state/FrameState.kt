@@ -13,7 +13,7 @@ data class FrameState(
     val currentFrame: Int,
     val enemies: List<Agent>,
     val enemiesUncombined: List<Agent>,
-    val enemiesRaw: List<Agent>,
+    val enemiesRaw: List<Tile>,
     val level: Int,
     val mapLoc: MapLoc,
     val link: Agent,
