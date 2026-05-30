@@ -97,7 +97,7 @@ private fun emergeAndKill(): Action {
 // 3. shoot!
 
 private fun MapLocationState.vulnerable(): Boolean = frameState.enemiesUncombined
-    .any { it.tile == spiderHeadOpen || it.tile == spiderHeadOpening }
+    .any { it == spiderHeadOpen || it == spiderHeadOpening }
 
 class HideFromSpider : Action {
     private val goTo = InsideNav(KillArrowSpider.KillArrowSpiderData.safeArea, tag = "hide from spider")

@@ -78,7 +78,7 @@ class FrameStateUpdater(
         val theEnemies = oam.agents()
         d { "create enemies done" }
 
-        val theUncombined = oam.agentsUncombined()
+        val theUncombined = oam.tilesUncombined()
         val theRaw = oam.agentsRaw()
         val ladderMem = api.readCPU(Addresses.ladderDeployed) != 0
         // check ladder memory first

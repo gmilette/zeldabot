@@ -12,7 +12,7 @@ data class FrameState(
     val api: API = ApiSource.getAPI(),
     val currentFrame: Int,
     val enemies: List<Agent>,
-    val enemiesUncombined: List<Agent>,
+    val enemiesUncombined: List<Tile>,
     val enemiesRaw: List<Tile>,
     val level: Int,
     val mapLoc: MapLoc,

@@ -36,8 +36,8 @@ class OamStateReasoner(
     fun agents(): List<Agent> =
         sprites.map { it.toAgent() }
 
-    fun agentsUncombined(): List<Agent> =
-        spritesUncombined.map { it.toAgent() }
+    fun tilesUncombined(): List<Tile> =
+        spritesUncombined.map { it.tile }
 
     // but also filter anything that isn'
     fun agentsRaw(): List<Tile> =
