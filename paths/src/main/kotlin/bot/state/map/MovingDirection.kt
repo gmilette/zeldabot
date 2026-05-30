@@ -28,11 +28,14 @@ sealed class MovingDirection {
 
     fun toArrow(): String =
         when (this) {
-            is Diagonal -> "/"
-            is Left -> "<--"
-            is Right -> "-->"
-            is Up -> "^"
-            is Down -> "_"
+            is Diagonal.UpRight   -> "↗"
+            is Diagonal.UpLeft    -> "↖"
+            is Diagonal.DownRight -> "↘"
+            is Diagonal.DownLeft  -> "↙"
+            Left -> "←"
+            Right -> "→"
+            Up -> "↑"
+            Down -> "↓"
             else -> "x"
         }
 

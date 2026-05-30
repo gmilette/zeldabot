@@ -15,11 +15,11 @@ enum class Direction {
             get() = listOf(Up, Right, Down, Left)
         fun randomDirection(): Direction =
             when (Random.nextInt(4)) {
-                0 -> Direction.Up
-                1 -> Direction.Down
-                2 -> Direction.Left
+                0 -> Up
+                1 -> Down
+                2 -> Left
                 3 -> Right
-                else -> Direction.Down
+                else -> Down
             }
 
         /** Decode a NES direction bitmask: $01=East, $02=West, $04=South, $08=North. */
@@ -34,7 +34,7 @@ enum class Direction {
             2 -> Left
             4 -> Down
             8 -> Up
-            // these are diagonal. TODO: fill in
+            // these are diagonal
             5 -> Right // right-down
             6 -> Left // left-down
             9 -> Right // right-up
@@ -50,9 +50,9 @@ enum class Direction {
             4 -> MovingDirection.Down
             8 -> MovingDirection.Up
             5 -> MovingDirection.Diagonal.DownRight
-            6 -> MovingDirection.Diagonal.DownLeft // left-down
-            9 -> MovingDirection.Diagonal.UpRight // right-up
-            10 -> MovingDirection.Diagonal.UpLeft // left-up
+            6 -> MovingDirection.Diagonal.DownLeft
+            9 -> MovingDirection.Diagonal.UpRight
+            10 -> MovingDirection.Diagonal.UpLeft
             else -> MovingDirection.UnknownOrStationary.also { d { "unknown direction bitmask: $bitmask hex value: ${bitmask.toString(16)}" } }
         }
 
@@ -65,23 +65,16 @@ enum class Direction {
 
     fun toArrow(): String =
         when (this) {
-            Left -> "<--"
-            Right -> "-->"
-            Up -> "^"
-            Down -> "_"
+            Left -> "←"
+            Right -> "→"
+            Up -> "↑"
+            Down -> "↓"
             else -> "x"
         }
+
 }
 
 fun Direction.ifHave(message: String): String = if (this != Direction.None) message else ""
-
-//fun FramePoint.facing(rect: Geom.Rectangle): Boolean = when (this) {
-//    Direction.Left -> x
-//    Direction.Right -> x < rect.topLeft.x
-//    Direction.Up -> Direction.Down
-//    Direction.Down -> Direction.Up
-//    Direction.None -> Direction.None
-//}
 
 private fun FramePoint.isLeftOf(rect: Geom.Rectangle): Boolean =
     x < rect.topLeft.x
@@ -124,7 +117,6 @@ fun Direction.mapLocModifier(): (MapLoc) -> MapLoc {
         Direction.None -> { p: MapLoc -> p }
     }
 }
-
 
 val Direction.isLeftUp: Boolean
     get() = when (this) {

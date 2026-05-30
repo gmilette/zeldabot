@@ -31,34 +31,6 @@ object LinkDirectionFinder {
         val tileAttribute = linkMatch.tile to linkMatch.attribute
         val isDamaged = damagedAttribute.contains(linkMatch.attribute)
         d { "DIRDIR: $dir ${tileAttribute.toHex()} ${isDamaged.ifTrue("damaged")} ${tileAttribute.toFlagString()}"}
-
-        // damaged colors 0,1,2,3?
-        // RIGHT:
-        // DIRDIR: Right  x: false y: false color: 0
-        // DIRDIR: Left  x: true y: false color: 0
-        // DIRDIR: Up  x: true y: false color: 0
-        // DIRDIR: Down  x: false y: false color: 0
-
-        // DIRDIR: 0_0 Right  x: false y: false color: 0
-        // DIRDIR: 4_0 Right  x: false y: false color: 0
-        // DIRDIR: 2_64 Left  x: true y: false color: 0
-
-        // DIRDIR: 12_0 Up  x: false y: false color: 0
-        // DIRDIR: 90_0 Down  x: false y: false color: 0
-
-//        d { "link match $linkMatch $dir damaged $isDamaged"}
-//        for (sprite in sprites.filter { isLink(it.tile) }) {
-//            d { "sprite LINK was $sprite hidden=${sprite.hidden} hidden=${sprite.hiddenOrLink}" }
-//        }
-//        for (sprite in sprites) {
-//            d { "sprite was $sprite" }
-//        }
-//        if (linkMatch == null) {
-//            d { " sprites link!" }
-//            sprites.forEachIndexed { index, sprite ->
-//                d { "$index: $sprite ${LinkDirection.dirFor(sprite)}" }
-//            }
-//        }
         return DirectionDamage((dir ?: Direction.None), isDamaged)
     }
 

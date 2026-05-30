@@ -86,9 +86,6 @@ class FrameStateUpdater(
 //        d { "ladder mem $ladderMem ${api.readCPU(Addresses.ladderDeployed)} $ladderSprite" }
         val ladder = if (ladderMem) oam.ladderSprite else null
 
-        val linkDir2 = oam.direction
-//        val linkTile = LinkDirectionFinder.damagedAttribute.last()
-//        val damagedTile = if (oam.damaged) LinkDirectionFinder.damagedAttribute.last() else 0
         // lags behind one frame
         val linkDir = oam.lookup.readLinkPointDir()
         // never changes
