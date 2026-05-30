@@ -52,7 +52,6 @@ class MapLocationState(
         0,
         emptyAgent,
         emptyAgent,
-        false,
         Inventory(ApiSource.getAPI())
     ),
 

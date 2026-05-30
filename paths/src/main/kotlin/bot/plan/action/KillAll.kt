@@ -105,24 +105,17 @@ class KillAll(
         }
 
     override fun nextStep(state: MapLocationState): GamePad {
-        // dont have to wait on any levels that have boomerangs
-        // which gets confused with ghosts
-        // if you are throwing boomerangs, this isnt going to work
-        if (false && state.frameState.seenBoomerang) {
-            needLongWait = false
-        } else {
-            // once set to true, do not change it back
-            // only the wizzrobes
-            if (!needLongWait && !considerEnemiesInCenter && state.frameState.level in Monsters.levelsWithWizzrobes) {
-                needLongWait = state.longWait.isNotEmpty()
-                if (needLongWait) {
-                    d { " set long waited "}
-                } else {
-                    d { " no long wait "}
-                }
+        // once set to true, do not change it back
+        // only the wizzrobes
+        if (!needLongWait && !considerEnemiesInCenter && state.frameState.level in Monsters.levelsWithWizzrobes) {
+            needLongWait = state.longWait.isNotEmpty()
+            if (needLongWait) {
+                d { " set long waited "}
+            } else {
+                d { " no long wait "}
             }
         }
-//        needLongWait = false
+
         d { " KILL ALL step ${state.currentMapCell.mapLoc} count $frameCount wait $waitAfterAllKilled needLong $needLongWait" }
 
         for (enemy in state.frameState.enemies.filter { it.state != EnemyState.Dead }) {

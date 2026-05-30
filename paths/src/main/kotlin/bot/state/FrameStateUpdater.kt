@@ -106,15 +106,12 @@ class FrameStateUpdater(
         previousNow.previous = null
         state.lastPoints.add(linkPoint)
 
-        val seenBoomerang = mapStats.seenBoomerang
-//        val willSkip = SkipDetector.willSkip(api)
-
         d { " frame update num enemies ${theEnemies.size}"}
         for (enemy in theEnemies) {
             d { "enemy: $enemy" }
         }
 
-        val frame = FrameState(api, currentFrame, theEnemies, theUncombined, theRaw, level, mapLoc, link, ladder, seenBoomerang, Inventory(api))
+        val frame = FrameState(api, currentFrame, theEnemies, theUncombined, theRaw, level, mapLoc, link, ladder, Inventory(api))
 
         if (!frame.isScrolling) {
             // don't track if the screen is scrolling
