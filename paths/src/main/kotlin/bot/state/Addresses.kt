@@ -126,6 +126,10 @@ object Addresses {
    // 00 if not
    const val ladderDeployed = 0x035A
 
+   // 0. not active
+   // other. what enemy slot it is in
+   const val ladderSlot = 0x0064
+
    // is it link or enemies
    val velocity = listOf(
       0x03BC,
