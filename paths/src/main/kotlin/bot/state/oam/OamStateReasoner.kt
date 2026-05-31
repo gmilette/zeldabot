@@ -26,6 +26,7 @@ class OamStateReasoner(
     private var spritesRaw: List<SpriteData> = emptyList()
 
     var ladderSprite: Agent? = null
+        private set
 
     init {
         sprites = readOam()
