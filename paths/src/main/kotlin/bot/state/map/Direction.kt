@@ -11,8 +11,11 @@ enum class Direction {
     companion object {
         val horizontal: List<Direction> = listOf(Left, Right)
         val vertical: List<Direction> = listOf(Up, Down)
+        val horizontalSet: Set<Direction> = setOf(Left, Right)
+        val verticalSet: Set<Direction> = setOf(Up, Down)
         val all: List<Direction>
             get() = listOf(Up, Right, Down, Left)
+        val allSet: Set<Direction> = all.toSet()
         fun randomDirection(): Direction =
             when (Random.nextInt(4)) {
                 0 -> Up

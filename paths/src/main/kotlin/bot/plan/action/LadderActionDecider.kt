@@ -3,6 +3,7 @@ package bot.plan.action
 import bot.state.GamePad
 import bot.state.MapLocationState
 import bot.state.map.Direction
+import bot.state.map.horizontal
 import util.d
 
 /**
@@ -11,8 +12,9 @@ import util.d
 class LadderActionDecider {
     fun doLadderAction(state: MapLocationState): Direction {
         return if (state.frameState.ladderDeployed) {
-            val dirToGo = state.bestDirection()
-            d { " make new route ladder deployed Go dir: $dirToGo"}
+            val allowed = allowed(state)
+            val dirToGo = state.bestDirection(allowed)
+            d { " make new route ladder deployed Go dir: $dirToGo from $allowed ladder is ${state.frameState.ladder?.dir}"}
             val modifier = if (dirToGo == Direction.None) {
                 GamePad.randomDirection(state.link).toDirection()
             } else {
@@ -22,5 +24,10 @@ class LadderActionDecider {
         } else {
             Direction.None
         }
+    }
+
+    private fun allowed(state: MapLocationState): Set<Direction> {
+        val dir = state.frameState.ladder?.dir ?: return emptySet<Direction>()
+        return if (dir.horizontal) Direction.horizontalSet else Direction.verticalSet
     }
 }
