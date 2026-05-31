@@ -31,6 +31,9 @@ class DirectionByMemoryLookup(
         }
     }
 
+    fun get(index: Int): PointAndDamage? =
+        enemyPoints.values.firstOrNull { it.index == index }
+
     fun closest(point: FramePoint, maxDistance: Int = 5): PointAndDamage? {
         val nearest = enemyPoints.values.minByOrNull { it.point.distTo(point) } ?: return null
         val dist = nearest.point.distTo(point)

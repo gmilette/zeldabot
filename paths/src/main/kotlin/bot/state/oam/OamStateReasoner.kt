@@ -8,6 +8,7 @@ import nintaco.api.API
 import nintaco.util.BitUtil
 import org.jheaps.annotations.VisibleForTesting
 import util.d
+import util.e
 
 /**
  * reason about the sprites
@@ -59,7 +60,7 @@ class OamStateReasoner(
     private fun SpriteData.toAgent(): Agent {
         val tileAttribute = tile to attribute
 
-        val memory = lookup.closest(point) ?: return fromSpriteData() //.also { e { "EMPTY AGENT DETECTED, not memory at point $point" }}
+        val memory = lookup.closest(point) ?: return fromSpriteData().also { e { "EMPTY AGENT DETECTED, not memory at point $point" }}
 
         d(DEBUG) { "memory: $memory"}
         // currently testing this, possibly could use & or || to check that both agree
@@ -244,10 +245,28 @@ class OamStateReasoner(
                     ladders[1]
                 }
             }
-            sp.toAgent()
+            d { "set ladder sprite $sp"}
+            sp.toAgent().copy(dir = ladderDirection())
         } else {
             null
         }
+    }
+
+    fun ladderDirection(): Direction {
+        val ladderSlot = api.readCPU(Addresses.ladderSlot) and 0xFF
+        val ladderActive = ladderSlot != 0
+
+        d { "ladderSlot: $ladderSlot ladderActive: $ladderActive"}
+
+        val ladderDirection = if (ladderActive) {
+            // ladderSlot is indexed assuming link is the first
+            // but lookup assumes it's the first enemy
+            lookup.get(ladderSlot-1)?.point?.direction ?: Direction.None
+        } else {
+            Direction.None
+        }
+
+        return ladderDirection
     }
 }
 

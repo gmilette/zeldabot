@@ -102,30 +102,7 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
                 PointMoveAction.Route
             }
         }
-//
-//            !allowAttack ||
-//                    !attackPossible ||
-//                    (inRangeOf.isAttack && theAttack.attackWaiting()) || //rhino
-//                    (state.frameState.clockActivated && Random.nextInt(10) == 1) ||
-//                    // this is weird, no need to do this yet
-////                    AttackActionDecider.getInFrontOfGrids(state) ||
-//                    inRangeOf == GamePad.None -> {
-//                PointMoveAction.Route
-//            }
-//            else -> {
-//                d { " Route Action -> RangeAction $inRangeOf use ${theAttack.gameAction} is=${inRangeOf.isAttack}" }
-//                // Problem --> if link is at a crossroads and especially if he is trying to move perpendicular
-//                // it will probably not work
-//                // solutions -> Include this in the cornering logic
-//                // don't allow perpendicular facing of the enemy,
-//                //  but then again, link can't turn around, so really this is just to turn off facing the enemy
-//                if (inRangeOf.isAttack) {
-//                    PointMoveAction.ShortAttack
-//                } else {
-//                    PointMoveAction.FaceEnemyForAttack(inRangeOf)
-//                }
-//            }
-        }
+    }
 
     private fun exitOfScreen(linkPt: FramePoint, to: List<FramePoint>): GamePad {
         // why this? let's go without it and see if it's ok

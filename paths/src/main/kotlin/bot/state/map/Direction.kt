@@ -40,8 +40,6 @@ enum class Direction {
             9 -> Right // right-up
             10 -> Left // left-up
             else -> None.also { d { "unknown direction bitmask: $bitmask hex value: ${bitmask.toString(16)}" } }
-        }.also {
-            d { "fromBitmask: $bitmask -> $it" }
         }
 
         fun fromBitmaskWithDiagonal(bitmask: Int): MovingDirection = when (bitmask) {
