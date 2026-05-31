@@ -116,8 +116,8 @@ class PushAction(push: InLocations.Push): Action {
 
     val sequence = OrderedActionSequence(
         listOfNotNull(
-            if (push == InLocations.Push.diamondLeft) navToPush(push, center = true) else null,
-            if (push != InLocations.Push.none && (push != InLocations.Push.diamondLeft)) navToPush(push) else null,
+            if (push == InLocations.Push.diamondLeft) lootOrNavToPush(push, center = true) else null,
+            if (push != InLocations.Push.none && (push != InLocations.Push.diamondLeft)) lootOrNavToPush(push) else null,
             if (push != InLocations.Push.none) PushIt(push.point) else null,
             // move away from block otherwise link will be on unpassable
             if (push.needAway) AwayFrom(push.point) else null,
@@ -151,6 +151,17 @@ class PushAction(push: InLocations.Push): Action {
 data class PushDirection(
     val horizontal: Boolean = false, val vertical: Boolean = true
 )
+
+private fun lootOrNavToPush(
+    push: InLocations.Push,
+    center: Boolean = false,
+    ignoreProjectiles: Boolean = false
+): Action {
+    val navTo = navToPush(push, center, ignoreProjectiles)
+    return DecisionAction(GetLoot(), navTo, chooseAction1 = { state ->
+        neededReachableLoot(state).isNotEmpty()
+    })
+}
 
 private fun navToPush(push: InLocations.Push, center: Boolean = false, ignoreProjectiles: Boolean = false): Action {
     val dirs = mutableListOf<FramePoint>()
