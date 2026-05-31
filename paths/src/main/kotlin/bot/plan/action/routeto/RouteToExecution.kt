@@ -111,7 +111,7 @@ class RouteExecution(val params: Param = Param()) {
     }
 
     private fun typically(typical: Int = WAIT_BETWEEN_BOOMERANG, everySoOften: Int = typical * 2): Int =
-        if (Random.nextInt(6) == 1) {
+        if (Random.nextInt(3) == 1) {
             // get unstuck by waiting much longer sometimes
             everySoOften
         } else {
