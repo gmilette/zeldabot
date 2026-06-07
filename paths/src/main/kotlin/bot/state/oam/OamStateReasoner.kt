@@ -55,6 +55,7 @@ class OamStateReasoner(
             tile = tile,
             attribute = attribute,
             color = color,
+            state = toState()
         )
 
     private fun SpriteData.toAgent(): Agent {
@@ -149,7 +150,7 @@ class OamStateReasoner(
         return mutable
     }
 
-    private fun SpriteData.toState(damaged: Boolean, isOverworld: Boolean, isGannon: Boolean): EnemyState {
+    private fun SpriteData.toState(damaged: Boolean = false, isOverworld: Boolean = false, isGannon: Boolean = false): EnemyState {
         val isSword = this.tile in Monsters.darknut.tile
         val facingLink = false
 

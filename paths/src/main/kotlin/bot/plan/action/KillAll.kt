@@ -165,7 +165,7 @@ class KillAll(
                 waitAfterAllKilled--
                 GamePad.None // just wait
             } else {
-                // just wait a little
+                // just wait a little in case a loot is going to appear
                 waitAfterAllKilled = 5
                 val firstEnemyOrNull = aliveEnemies.firstOrNull()
                 if (firstEnemyOrNull == null) {
@@ -234,53 +234,6 @@ class KillAll(
             }
         }
     }
-}
-
-class KillAllCompleteCriteria {
-    private var count = 0
-    private var waitAfterAllKilled = 0
-
-    fun update(state: MapLocationState) {
-        count++
-        if (state.hasEnemies) {
-            waitAfterAllKilled = 110
-        } else {
-            waitAfterAllKilled--
-        }
-    }
-
-    fun complete(state: MapLocationState): Boolean =
-        (waitAfterAllKilled <= 0 && count > 33 && state.cleared).also {
-            d { " kill all complete $it" }
-            d { " kill all status ${state.frameState.enemies}" }
-            state.frameState.enemies.forEach {
-                d { "loot $it dist ${it.point.distTo(state.link)}" }
-            }
-        }
-}
-
-class AttackOnce(useB: Boolean = false, private val freq: Int = 5) :
-    Action {
-    private var frames = 0
-    private val gameAction = if (useB) GamePad.B else GamePad.A
-
-    override fun nextStep(state: MapLocationState): GamePad {
-        // just always do it
-        val move = if (frames < 0) {
-            GamePad.None
-        } else {
-            when {
-                frames % 10 < freq -> gameAction
-                else -> GamePad.None
-            }
-        }
-        frames++
-        return move
-    }
-
-    override fun complete(state: MapLocationState): Boolean =
-        frames >= 10
-
 }
 
 class DeadForAWhile(

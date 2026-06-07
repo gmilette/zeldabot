@@ -22,6 +22,7 @@ object LoggerOverride {
         "bot.state.HeartsStateCalculator",
         "bot.plan.runner.PlanRunner",
         "bot.state.oam.LinkDirectionFinder",
+        "bot.state.InventoryReader",
         "bot.plan.action.routeto.RouteToGetInFrontOf")
 
     /** Only show logs from these packages (prefix match). If empty, all packages are shown. */
