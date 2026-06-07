@@ -55,7 +55,7 @@ class OamStateReasoner(
             tile = tile,
             attribute = attribute,
             color = color,
-            state = toState()
+            state = toState(isOverworld = isOverworld, isGannon = isGannon)
         )
 
     private fun SpriteData.toAgent(): Agent {
