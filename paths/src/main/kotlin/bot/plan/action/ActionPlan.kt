@@ -1011,7 +1011,7 @@ class GetLoot(
         d { " get loot for $target from targets $targets" }
         return routeTo.routeTo(
             state, targets,
-            RouteTo.RouteParam(forceNew = previousTarget != target),
+            RouteTo.RouteParam(),
         )
     }
 

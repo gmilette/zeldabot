@@ -173,16 +173,12 @@ class KillAll(
                     d { "No enemies!!" }
                     return routeTo.routeTo(
                         state, listOf(FramePoint(8.grid, 6.grid)),
-                        RouteTo.RouteParam(forceNew = true)
+                        RouteTo.RouteParam()
                     )
                 }
                 firstEnemyOrNull.let { firstEnemy ->
-                    val previousTarget = target
                     target = firstEnemy.point
                     val link = state.frameState.link
-                    // force a new route if this has changed targets
-                    val forceNew = previousTarget.oneStr != target.oneStr
-                    d { "Plan: attack: ${firstEnemy.point} target changed was $previousTarget now $target forceNew = $forceNew" }
 
                     // possibly remove some attack points in front of the enemy
                     val targetsToAttack = when {
@@ -192,6 +188,8 @@ class KillAll(
 
                         else -> AttackActionDecider.attackPoints(target, not = firstEnemy.dir)
                     }
+
+                    d { "Plan: attack: ${firstEnemy.point} target is $target targets $targetsToAttack" }
 
                     if (link.point in targetsToAttack) {
                         d { " !On Target " }
@@ -204,7 +202,6 @@ class KillAll(
                         RouteTo.RouteParam(
                             useB = firstAttackBomb || useBombs,
                             allowRangedAttack = !firstAttackBomb,
-                            forceNew = forceNew,
                             allowBlock = allowBlock,
                             rParam = RouteTo.RoutingParamCommon(
                                 attackTarget = target,

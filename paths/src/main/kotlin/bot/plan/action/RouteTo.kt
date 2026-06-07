@@ -72,10 +72,6 @@ class RouteTo(val params: Param = Param()) {
 
     data class RouteParam(
         /**
-         * trigger a new plan
-         */
-        val forceNew: Boolean = false,
-        /**
          * if set, use this map cell, otherwise look up from the current state
          */
         val overrideMapCell: MapCell? = null,

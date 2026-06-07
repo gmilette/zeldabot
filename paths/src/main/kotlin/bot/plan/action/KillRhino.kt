@@ -312,7 +312,7 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
         val allowAttack = shouldAttack && (waitCt <= 0)
         val action = routeTo.routeTo(
             state, targets,
-            RouteTo.RouteParam(forceNew = true,
+            RouteTo.RouteParam(
                 useB = useB,
 //                allowAttack = attackRhinoWithSword,
                 allowAttack = shouldAttack && (waitCt <= 0),
