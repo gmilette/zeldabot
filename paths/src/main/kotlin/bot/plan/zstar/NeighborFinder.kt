@@ -60,10 +60,8 @@ class NeighborFinder(
     }
 
     // need to know the previous point
-    fun neighbors(point: FramePoint, direction: Direction? = null, dist: Int = 1, ladderSpec: ZStar.LadderSpec? = null, from: FramePoint? = null): List<FramePoint> {
+    fun neighbors(point: FramePoint, direction: Direction? = null, dist: Int = 1, from: FramePoint? = null): List<FramePoint> {
         val neigh = mutableListOf<FramePoint>()
-
-        //val validDirections = ladderSpec?.directions(point) ?: Direction.all
 
         val dontTurnAround = true
         val dirMovingIn: Direction = if (dontTurnAround) {
@@ -75,7 +73,7 @@ class NeighborFinder(
             d { " neighbors point: $point dir: $direction from $from dirMovingIn $dirMovingIn" }
         }
 
-        val validDirections = (ladderSpec?.directions(point) ?: Direction.all) - dirMovingIn
+        val validDirections = Direction.all - dirMovingIn
 
 //        var validDirections = okDirections(point, direction, dist)
 //        if (GStar.DEBUG) {

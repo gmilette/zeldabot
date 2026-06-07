@@ -83,7 +83,6 @@ class RouteExecution(val params: Param = Param()) {
             PointMoveAction.Route -> {
                 attack.reset()
                 attackB.reset()
-//                routeTo.doRouteTo(state, to, param)
                 val nextPoint = routeTo.makeNewRoute(
                     param,
                     state,

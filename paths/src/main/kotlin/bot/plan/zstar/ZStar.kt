@@ -49,22 +49,6 @@ class ZStar(
 //        val HIGH_COST = onEnemyCost - 1000// this makes link avoid the swords even more, but also attack less
     }
 
-    data class LadderSpec(val horizontal: Boolean, val point: FramePoint) {
-        private fun isIn(other: FramePoint) = point.isInGrid(other)
-
-        fun directions(other: FramePoint) = if (false && isIn(other)) {
-            if (DEBUG) {
-                d { "on ladder $other horiz=$horizontal" }
-            }
-            if (horizontal) Direction.horizontal else Direction.vertical
-        } else {
-            if (DEBUG) {
-                d { "on ladder no $other not in $point" }
-            }
-            Direction.all
-        }
-    }
-
     private var iterCount = 0
 
     // this really helps keep zelda on track, it's a little strict though walking half way
@@ -414,7 +398,7 @@ class ZStar(
             neighborFinder.costF = costsF
             val fromPoint = cameFrom[point]
             val neighbors =
-                (neighborFinder.neighbors(point, dir, dist ?: 0, param.rParam.ladderSpec, from = fromPoint) - closedList - avoid).shuffled()
+                (neighborFinder.neighbors(point, dir, dist ?: 0, from = fromPoint) - closedList - avoid).shuffled()
             for (toPoint in neighbors) {
                 // raw cost of this cell
                 val cost = costsF.get(toPoint)
