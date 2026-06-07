@@ -2,6 +2,7 @@ package bot.state
 
 import bot.state.map.Direction
 import bot.state.map.MapConstants
+import bot.state.map.MovingDirection
 import nintaco.api.API
 import util.d
 
@@ -9,10 +10,12 @@ class DirectionByMemoryLookup(
     private val api: API
 ){
     companion object {
-        val DEBUG = false
+        private const val DEBUG = false
     }
     data class PointAndDamage(
+        val index: Int, // which array index in the various lists of addresses
         val point: FramePoint,
+        val move: MovingDirection = MovingDirection.UnknownOrStationary,
         val damaged: Int = 0,
         val stunned: Int = 0,
         val hp: Int = 0,
@@ -28,28 +31,14 @@ class DirectionByMemoryLookup(
         }
     }
 
-    fun lookupDirection(point: FramePoint): Direction = enemyPoints[point.oneStr]?.point?.direction ?: Direction.None
+    fun get(index: Int): PointAndDamage? =
+        enemyPoints.values.firstOrNull { it.index == index }
 
-    fun lookupStunned(point: FramePoint): Int = (enemyPoints[point.oneStr]?.stunned ?: 0)
-
-    fun lookupDamaged(point: FramePoint): Boolean = (enemyPoints[point.oneStr]?.damaged ?: 0) != 0
-
-    fun lookupHp(point: FramePoint): Int = (enemyPoints[point.oneStr]?.hp ?: 0)
-
-    fun lookupType(point: FramePoint): Int = (enemyPoints[point.oneStr]?.type ?: 0)
-
-    /**
-     * it seems the oam locations might be different than memory locations by 1 x value
-     */
-    private fun List<PointAndDamage>.expandX(): List<PointAndDamage> {
-        return flatMap {
-            listOf(it,
-                it.copy(point = it.point.up.dir(it.point.direction)),
-                it.copy(point = it.point.down.dir(it.point.direction)),
-                it.copy(point = it.point.right.dir(it.point.direction)),
-                it.copy(point = it.point.left.dir(it.point.direction)),
-            )
-        }
+    fun closest(point: FramePoint, maxDistance: Int = 5): PointAndDamage? {
+        val nearest = enemyPoints.values.minByOrNull { it.point.distTo(point) } ?: return null
+        val dist = nearest.point.distTo(point)
+        d(DEBUG) { "dist to closest to $point is ${nearest.point} x dist: ${point.x - nearest.point.x} y dist: ${point.y - nearest.point.y} dist: $dist" }
+        return nearest.takeIf { dist <= maxDistance }
     }
 
     private fun readEnemyPointDir(): List<PointAndDamage> {
@@ -64,15 +53,16 @@ class DirectionByMemoryLookup(
         val info = mutableListOf<PointAndDamage>()
         for (i in x.indices) {
             val pt = FramePoint(x[i], y[i] - MapConstants.yAdjust, mapDir(dirs[i]))
+            val moveDirection = Direction.fromBitmaskWithDiagonal(dirs[i])
             val damage = damaged[i]
             val hpVal = hp[i]
             val typeVal = types[i]
             val stunned = stunned[i]
-            val all = PointAndDamage(pt, damage, stunned, hpVal, typeVal)
+            val all = PointAndDamage(i, pt, moveDirection, damage, stunned, hpVal, typeVal)
             info.add(all)
             d(DEBUG) { "readEnemyPointDir info: $i: $pt $all" }
         }
-        return info.expandX()
+        return info
     }
 
     fun readLinkPointDir(): Direction {
@@ -85,7 +75,7 @@ class DirectionByMemoryLookup(
     override fun toString(): String {
         val builder = StringBuilder()
         for (enemyPoint in enemyPoints.values) {
-            builder.append(" enemyPoints: $enemyPoint\n")
+            builder.append(" enemyPoints: $enemyPoint \n")
         }
         return builder.toString()
     }

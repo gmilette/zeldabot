@@ -68,7 +68,7 @@ class RoutePreparation(val params: Param = Param()) {
         val affectedByProjectileAgents: List<Agent> = when {
             state.boomerangActive || state.wandActive -> specOrAgents.filter { it.affectedByBoomerang(level) }
             // if you can hit it with a boomerang, you can hit it with an arrow
-            state.arrowActive -> specOrAgents.filter { it.arrowKillable(level) || it.affectedByBoomerang(level) }
+            state.arrowActive -> specOrAgents.filter { it.arrowKillable(level) || (level != 8 && it.affectedByBoomerang(level)) }
             // bomb? or candle?
             else -> emptyList()
         }

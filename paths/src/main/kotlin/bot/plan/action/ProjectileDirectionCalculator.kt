@@ -26,7 +26,7 @@ object ProjectileDirectionCalculator {
             .filter { it.state == state && !it.damaged && it.tile == tile}
             .map { it.point }
             .map { prevPoint -> CalculateDirection.calculateDirection(prevPoint, currentPoint) }
-            .firstOrNull { it != MovingDirection.UNKNOWN_OR_STATIONARY }
+            .firstOrNull { it != MovingDirection.UnknownOrStationary }
             .also {
                 if (DEBUG) {
                     if (state == EnemyState.Projectile) {

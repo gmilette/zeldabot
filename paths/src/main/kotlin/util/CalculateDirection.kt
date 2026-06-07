@@ -13,15 +13,15 @@ object CalculateDirection {
         val sameLine = sameLine(p1, p2)
 
         return when {
-//            sameLine -> MovingDirection.DIAGONAL(FramePoint(deltaX(p1, p2), deltaY(p1, p2)))
+//            sameLine -> MovingDirection.GenericDiagonal(FramePoint(deltaX(p1, p2), deltaY(p1, p2)))
 //            sameLine && deltaX > 0 && deltaY > 0 -> MovingDirection.UP_RIGHT
 //            sameLine && deltaX < 0 && deltaY > 0 -> MovingDirection.UP_LEFT
 //            sameLine && deltaX > 0 && deltaY < 0 -> MovingDirection.DOWN_RIGHT
 //            sameLine && deltaX < 0 && deltaY < 0 -> MovingDirection.DOWN_LEFT
-            deltaX == 0 && deltaY == 0 -> MovingDirection.UNKNOWN_OR_STATIONARY
-            deltaX == 0 -> if (deltaY < 0) MovingDirection.UP else MovingDirection.DOWN
-            deltaY == 0 -> if (deltaX > 0) MovingDirection.RIGHT else MovingDirection.LEFT
-            else -> MovingDirection.UNKNOWN_OR_STATIONARY
+            deltaX == 0 && deltaY == 0 -> MovingDirection.UnknownOrStationary
+            deltaX == 0 -> if (deltaY < 0) MovingDirection.Up else MovingDirection.Down
+            deltaY == 0 -> if (deltaX > 0) MovingDirection.Right else MovingDirection.Left
+            else -> MovingDirection.UnknownOrStationary
         }
     }
 

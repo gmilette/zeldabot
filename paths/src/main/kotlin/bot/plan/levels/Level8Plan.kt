@@ -75,9 +75,9 @@ object Level8Plan {
                 )
             )
 
+            "clear some rabbits".seg()
             switchToArrowConditionally()
-            killWithBombsUntil4
-            // give time to enter so that switching to bomb works
+            killAFewWithB // need this to force link to use B to kill a few
             goTo(FramePoint(11.grid, 2.grid))
             "bomb to get dragon".seg()
             bombUp

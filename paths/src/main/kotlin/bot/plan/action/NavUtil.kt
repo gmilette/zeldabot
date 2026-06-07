@@ -1,13 +1,12 @@
 package bot.plan.action
 
-import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapCell
 import util.d
 import kotlin.math.abs
 
-class MoveTowardsUtil() {
+class MoveTowardsUtil {
     private var directions: MutableList<GamePad> = mutableListOf()
 
     fun moveTowards(link: FramePoint, target: FramePoint, previousMove: PreviousMove): GamePad {

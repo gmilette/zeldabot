@@ -52,7 +52,6 @@ class MapLocationState(
         0,
         emptyAgent,
         emptyAgent,
-        false,
         Inventory(ApiSource.getAPI())
     ),
 
@@ -74,21 +73,21 @@ class MapLocationState(
      * get most frequent direction, it will be one that was successful
      * if link is not moving, then it will be forced to try something random
      */
-    fun bestDirection(): Direction {
+    fun bestDirection(only: Set<Direction> = Direction.allSet): Direction {
         // this is required, otherwise link will get stuck
-        // why is it commented out??
         if (lastPoints.allSameAndFull()) {
             d { " all same and full " }
             return Direction.randomDirection()
         }
         // don't keep the NONE
-        val lastDirections = lastPoints.buffer.zipWithNext { a, b -> a.dirTo(b) }.filter { it != Direction.None }
+        val lastDirections = lastPoints.buffer.zipWithNext { a, b -> a.dirTo(b) }.filter { it != Direction.None }.filter { it in only }
         val keyWithMostItems = lastDirections.groupBy { it.ordinal }.maxByOrNull { it.value.size }?.key ?: 0
         // idea: if there are two directions counts that are equal, link is oscillating, maybe do something different
         val direction = Direction.entries[keyWithMostItems]
-        d { " bestdirction sorted dirs $keyWithMostItems $direction moves $lastPoints dirs: $lastDirections"}
+        d { " bestdirection sorted dirs $keyWithMostItems $direction moves $lastPoints dirs: $lastDirections"}
         return direction
     }
+
     fun clearHistory() {
         framesOnScreen = 0
     }

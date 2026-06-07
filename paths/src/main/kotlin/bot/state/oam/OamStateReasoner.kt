@@ -3,12 +3,12 @@ package bot.state.oam
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapConstants
-import bot.state.map.MovingDirection
 import bot.state.map.stats.MapStatsTracker
 import nintaco.api.API
 import nintaco.util.BitUtil
 import org.jheaps.annotations.VisibleForTesting
 import util.d
+import util.e
 
 /**
  * reason about the sprites
@@ -27,88 +27,73 @@ class OamStateReasoner(
     private var spritesRaw: List<SpriteData> = emptyList()
 
     var ladderSprite: Agent? = null
-    var direction: Direction = Direction.None
-    var linkDamaged: Boolean = false
+        private set
 
     init {
         sprites = readOam()
     }
 
-    val DEBUG = false
-
-    val alive: List<SpriteData>
-        get() {
-            return sprites.filter { !it.hidden }
-        }
-
-    val loot: List<SpriteData>
-        get() {
-            return sprites.filter { it.isLoot }
-        }
-
-    val allDead: Boolean
-        get() = alive.isEmpty()
+    private val DEBUG = false
 
     fun agents(): List<Agent> =
         sprites.map { it.toAgent() }
 
-    fun agentsUncombined(): List<Agent> =
-        spritesUncombined.map { it.toAgent() }
+    fun tilesUncombined(): List<Tile> =
+        spritesUncombined.map { it.tile }
 
     // but also filter anything that isn'
-    fun agentsRaw(): List<Agent> =
-        spritesRaw.filter { it.point.y < 248 }.map { it.toAgent() }
+    fun agentsRaw(): List<Tile> =
+        spritesRaw.filter { it.point.y < 248 }.map { it.tile }
 
-    // calculate isDamaged here
+    /**
+     * contains only oam data
+      */
+    private fun SpriteData.fromSpriteData(): Agent =
+        Agent(
+            index = index,
+            point = point,
+            tile = tile,
+            attribute = attribute,
+            color = color,
+            state = toState()
+        )
+
     private fun SpriteData.toAgent(): Agent {
         val tileAttribute = tile to attribute
-//        val damaged = mapStatsTracker.isDamaged(tile, attribute)
 
+        val memory = lookup.closest(point) ?: return fromSpriteData().also { e { "EMPTY AGENT DETECTED, not memory at point $point" }}
+
+        d(DEBUG) { "memory: $memory"}
         // currently testing this, possibly could use & or || to check that both agree
-        val damaged = lookup.lookupDamaged(point) // ?: DamagedLookup.isDamaged(tileAttribute, isOverworld, level)
+        val damaged = memory.damaged != 0
         if (damaged) {
-            d { "DDDD $tile tis damaged point $point"}
+            d(DEBUG) { "$tile tis damaged point $point"}
         }
-
-        val blockable = calcBlockable(tile)
-        val state = toState(damaged, isOverworld, isGannon)
-        // could look up the direction based on tile and sprite
-        // arrow
-        // wizard
-        // diagonal
-        // boulder -> down in block of 4 pattern
-        var movingDirection: MovingDirection = MovingDirection.UNKNOWN_OR_STATIONARY
-        val findDir = if (state == EnemyState.Projectile) {
-            val found = ProjectileDirectionLookup.findDir(tileAttribute)
-            if (found == Direction.None) {
-                movingDirection = mapStatsTracker.calcDirection(point, state, tile)
-                movingDirection.toDirection()
-            } else {
-                movingDirection = MovingDirection.from(found)
-                found
-            }
-        } else {
-            // maybe calculate the dir here for alive enemies
-            lookup.lookupDirection(point) // ?: DirectionLookup.getDir(tileAttribute)
-        }
-
-        if (state == EnemyState.Projectile) {
-            d { " Move dir for tile:${tileAttribute.toHex()} $point is ${movingDirection.toArrow()} and ${findDir.toArrow()} damaged: $damaged pair: ${toStringIsProjLevel()}" }
-        }
-        val hp = lookup.lookupHp(point)
-        val type = lookup.lookupType(point)
-        val stunned = lookup.lookupStunned(point)
+        val hp = memory.hp
+        val type = memory.type
+        val stunned = memory.stunned
         val maxHp = EnemyMaxHpTable.maxHp(type)
+        val memoryIndex = memory.index
+
+        val blockable = calcBlockable(tile, type)
+        val state = toState(damaged, isOverworld, isGannon)
+
+        // boulder has a different movement direction, down 4 block type
+        if (state == EnemyState.Projectile) {
+            d(DEBUG) { " Move dir for tile:${tileAttribute.toHex()} $point is ${memory.point} damaged: $damaged pair: ${toStringIsProjLevel()}" }
+        }
 
         return Agent(
-            index = index, point = point,
-            dir = findDir,
-            state = state, tile = tile, attribute = attribute,
-            tileByte = tile.toString(16), attributeByte = attribute.toString(16),
+            index = index,
+            point = memory.point,
+            dir = memory.point.direction ?: Direction.None,
+            state = state,
+            tile = tile,
+            attribute = attribute,
             damaged = damaged,
             blockable = blockable,
             stunnedLeft = stunned,
-            moving = movingDirection,
+            moving = memory.move,
             color = color,
             hp = hp,
             maxHp = maxHp,
@@ -116,13 +101,23 @@ class OamStateReasoner(
         )
     }
 
-    private fun calcBlockable(tile: Int): Blockable =
+    private fun calcBlockable(tile: Int, type: Int): Blockable =
         when {
-            EnemyGroup.projectileUnblockable.contains(tile) -> Blockable.No
+            EnemyGroup.projectileUnblockable.contains(tile) || EnemyObjectTypes.projectileObjectTypeUnblockable.contains(type) -> Blockable.No
             EnemyGroup.projectileBlockable.contains(tile) -> Blockable.WithSmallShield
             EnemyGroup.projectileMagicShieldBlockable.contains(tile) -> Blockable.WithMagicShield
             else -> Blockable.No
         }
+
+    private fun calcBlockableFromType(objType: Int): Blockable {
+        return when {
+            (objType in EnemyObjectTypes.blockableWithoutShield) -> Blockable.WithSmallShield
+            // TODO: need to add boulder and other projectiles
+            (objType in EnemyObjectTypes.alwaysHarmful) -> Blockable.No
+            (objType < 0x53) -> Blockable.No
+            else -> Blockable.WithMagicShield
+        }
+    }
 
     @VisibleForTesting
     fun combine(toCombine: List<SpriteData>): List<SpriteData> {
@@ -145,20 +140,20 @@ class OamStateReasoner(
             mutable.remove(spriteData)
         }
 
-        if (DEBUG || true) {
+        if (DEBUG) {
             d { " alive sprites AFTER delete" }
             mutable.forEachIndexed { index, sprite ->
                 d { "$index: $sprite" }
             }
         }
 
-
         return mutable
     }
 
-    private fun SpriteData.toState(damaged: Boolean, isOverworld: Boolean, isGannon: Boolean): EnemyState {
+    private fun SpriteData.toState(damaged: Boolean = false, isOverworld: Boolean = false, isGannon: Boolean = false): EnemyState {
         val isSword = this.tile in Monsters.darknut.tile
         val facingLink = false
+
         return when {
             this.hidden -> EnemyState.Dead
             !isOverworld && isSword && facingLink -> EnemyState.Projectile
@@ -211,16 +206,12 @@ class OamStateReasoner(
             readOam(0x0001 * (it * 4))
         }
 
-        val dirDamage = LinkDirectionFinder.direction(spritesRaw)
-        direction = dirDamage.direction
-        linkDamaged = dirDamage.damaged
-
         setLadder(spritesRaw)
 
         d { " sprites ** alive ** ${spritesRaw.filter { !it.hidden }.size}" }
         // ahh there are twice as many sprites because each sprite is two big
         val alive = spritesRaw.filter { !it.hidden }
-        if (DEBUG || true) {
+        if (DEBUG) {
             d { " alive sprites OAM" }
             alive.forEachIndexed { index, sprite ->
                 d { "$index: $sprite" }
@@ -255,10 +246,28 @@ class OamStateReasoner(
                     ladders[1]
                 }
             }
-            sp.toAgent()
+            d { "set ladder sprite $sp"}
+            sp.toAgent().copy(dir = ladderDirection())
         } else {
             null
         }
+    }
+
+    fun ladderDirection(): Direction {
+        val ladderSlot = api.readCPU(Addresses.ladderSlot) and 0xFF
+        val ladderActive = ladderSlot != 0
+
+        d { "ladderSlot: $ladderSlot ladderActive: $ladderActive"}
+
+        val ladderDirection = if (ladderActive) {
+            // ladderSlot is indexed assuming link is the first
+            // but lookup assumes it's the first enemy
+            lookup.get(ladderSlot-1)?.point?.direction ?: Direction.None
+        } else {
+            Direction.None
+        }
+
+        return ladderDirection
     }
 }
 

@@ -3,11 +3,9 @@ package bot.state
 import bot.state.map.Direction
 import bot.state.map.MapConstants
 import bot.state.map.MovingDirection
-import bot.state.oam.EnemyGroup
 import bot.state.oam.MonstersOverworld
 import bot.state.oam.TileAttribute
 import bot.state.oam.swordDir
-import util.CalculateDirection
 
 val List<Agent>.points: List<FramePoint>
     get() = this.map { it.point }
@@ -15,11 +13,11 @@ val List<Agent>.points: List<FramePoint>
 val emptyAgent = Agent(0, FramePoint(0, 0), Direction.Down, EnemyState.Unknown, 0)
 
 data class Agent(
-    val index: Int = 0,
+    val index: Int = 0, // index into OAM
     val point: FramePoint,
     val dir: Direction = Direction.None,
     val state: EnemyState = EnemyState.Unknown,
-    val tile: Int = 0,
+    val tile: Tile = 0,
     val attribute: Int = 0,
     val tileByte: String = tile.toString(16),
     val attributeByte: String = attribute.toString(16),
@@ -27,11 +25,12 @@ data class Agent(
     // count down to being unstunned from max of 16
     val stunnedLeft: Int = 0,
     val blockable: Blockable = Blockable.No,
-    val moving: MovingDirection = MovingDirection.UNKNOWN_OR_STATIONARY,
+    val moving: MovingDirection = MovingDirection.UnknownOrStationary,
     val color: Int = 0,
     val hp: Int = 0, // current hp
     val maxHp: Int = 0,
-    val type: Int = 0
+    val type: Int = 0,
+    val typeByte: String = type.toString(16)
 ) {
     val tileAttrib = TileAttribute(tile, attribute)
 
@@ -63,6 +62,8 @@ data class Agent(
     val hurt: Boolean
         get() = state == EnemyState.Alive && type > 0 && maxHp > 0 && hp > 0 && hp < maxHp
 }
+
+typealias Tile = Int
 
 enum class EnemyState {
     Unknown,

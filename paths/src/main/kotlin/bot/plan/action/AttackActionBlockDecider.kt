@@ -48,7 +48,7 @@ object AttackActionBlockDecider {
         }
 
         // it's going to hit us!
-        d(DEBUG) { "Block reflex: about to get hit by ${projectile.point}"}
+        d(DEBUG) { "Block reflex: about to get hit by ${projectile.point} moving ${projectile.dir}"}
         return if (link.dir == facingProjectileDirection) {
             d(DEBUG) { "Block reflex: wait and block"}
             GamePad.None

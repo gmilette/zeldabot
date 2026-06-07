@@ -1,11 +1,8 @@
 package bot.state.map
 
 import bot.state.*
-import bot.state.GamePad.MoveDown
-import bot.state.GamePad.MoveLeft
-import bot.state.GamePad.MoveRight
-import bot.state.GamePad.MoveUp
 import util.Geom
+import util.d
 import kotlin.random.Random
 
 enum class Direction {
@@ -14,25 +11,53 @@ enum class Direction {
     companion object {
         val horizontal: List<Direction> = listOf(Left, Right)
         val vertical: List<Direction> = listOf(Up, Down)
+        val horizontalSet: Set<Direction> = setOf(Left, Right)
+        val verticalSet: Set<Direction> = setOf(Up, Down)
         val all: List<Direction>
             get() = listOf(Up, Right, Down, Left)
+        val allSet: Set<Direction> = all.toSet()
         fun randomDirection(): Direction =
             when (Random.nextInt(4)) {
-                0 -> Direction.Up
-                1 -> Direction.Down
-                2 -> Direction.Left
+                0 -> Up
+                1 -> Down
+                2 -> Left
                 3 -> Right
-                else -> Direction.Down
+                else -> Down
             }
 
         /** Decode a NES direction bitmask: $01=East, $02=West, $04=South, $08=North. */
+        /**
+         *     RIGHT_DOWN(0x05),
+         *     LEFT_DOWN (0x06),
+         *     RIGHT_UP  (0x09),
+         *     LEFT_UP   (0x0A),
+         */
         fun fromBitmask(bitmask: Int): Direction = when (bitmask) {
             1 -> Right
             2 -> Left
             4 -> Down
             8 -> Up
-            else -> None
+            // these are diagonal
+            5 -> Right // right-down
+            6 -> Left // left-down
+            9 -> Right // right-up
+            10 -> Left // left-up
+            else -> None.also { d { "unknown direction bitmask: $bitmask hex value: ${bitmask.toString(16)}" } }
         }
+
+        fun fromBitmaskWithDiagonal(bitmask: Int): MovingDirection = when (bitmask) {
+            1 -> MovingDirection.Right
+            2 -> MovingDirection.Left
+            4 -> MovingDirection.Down
+            8 -> MovingDirection.Up
+            5 -> MovingDirection.Diagonal.DownRight
+            6 -> MovingDirection.Diagonal.DownLeft
+            9 -> MovingDirection.Diagonal.UpRight
+            10 -> MovingDirection.Diagonal.UpLeft
+            else -> MovingDirection.UnknownOrStationary.also { d { "unknown direction bitmask: $bitmask hex value: ${bitmask.toString(16)}" } }
+        }
+
+        fun isDiagonal(bitmask: Int) = bitmask in listOf(5, 6, 9, 10)
     }
 
     fun vertical() = this in Companion.vertical
@@ -41,23 +66,16 @@ enum class Direction {
 
     fun toArrow(): String =
         when (this) {
-            Left -> "<--"
-            Right -> "-->"
-            Up -> "^"
-            Down -> "_"
+            Left -> "←"
+            Right -> "→"
+            Up -> "↑"
+            Down -> "↓"
             else -> "x"
         }
+
 }
 
 fun Direction.ifHave(message: String): String = if (this != Direction.None) message else ""
-
-//fun FramePoint.facing(rect: Geom.Rectangle): Boolean = when (this) {
-//    Direction.Left -> x
-//    Direction.Right -> x < rect.topLeft.x
-//    Direction.Up -> Direction.Down
-//    Direction.Down -> Direction.Up
-//    Direction.None -> Direction.None
-//}
 
 private fun FramePoint.isLeftOf(rect: Geom.Rectangle): Boolean =
     x < rect.topLeft.x
@@ -100,7 +118,6 @@ fun Direction.mapLocModifier(): (MapLoc) -> MapLoc {
         Direction.None -> { p: MapLoc -> p }
     }
 }
-
 
 val Direction.isLeftUp: Boolean
     get() = when (this) {

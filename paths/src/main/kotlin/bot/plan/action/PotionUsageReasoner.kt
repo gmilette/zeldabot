@@ -1,6 +1,5 @@
 package bot.plan.action
 
-import androidx.compose.ui.res.useResource
 import bot.state.*
 import bot.state.map.Objective
 import util.d
@@ -63,15 +62,10 @@ fun makeUsePotionAction(): OneTimeActionSequence {
             // move inside level because you cannot use a potion in the entrance
             CompleteIf(goInward()) { frameState.link.point.isInLevelMap },
             SwitchToItemConditionally(Inventory.Selected.potion),
-            // wait until the screen scrolls down, but not too long
-//            CompleteIfGameModeNormal(),
-            GoIn(80, GamePad.None),        // use it
+            GoIn(10, GamePad.None),
             UseItem(),
-            // i dont think we need this if inventory thing keeps pressing statr
-//            GoIn(800, GamePad.None), //500 ok for 8
             SwitchToItemConditionally(inventoryPosition = { save.currentItem }),
-            //SwitchToItemConditionally(inventoryPosition = { 0 }),
-            GoIn(20, GamePad.None)
+            GoIn(10, GamePad.None)
         ), tag = "use potion")
 }
 
@@ -101,8 +95,8 @@ class UsePotion : Action {
 }
 
 object PotionUsageReasoner {
-    val USE_POTION_HEART_LIMIT = 2.0
-    val USE_POTION_MINIMIM_LIMIT = 7.0
+    const val USE_POTION_HEART_LIMIT = 2.0
+    const val USE_POTION_MINIMUM_LIMIT = 7.0
 
     var diversionNeed: DiversionState = DiversionState.noNeed
 
@@ -114,7 +108,7 @@ object PotionUsageReasoner {
         //val almostDead by lazy { state.inventory.heartCalc.lifeInHearts() <= 8.25f }
         val full by lazy { state.inventory.heartCalc.full(state) }
 //        val full = false
-        val haveEnough by lazy { (state.inventory.heartCalc.heartContainers() - heart) > USE_POTION_MINIMIM_LIMIT }
+        val haveEnough by lazy { (state.inventory.heartCalc.heartContainers() - heart) > USE_POTION_MINIMUM_LIMIT }
         val havePotion by lazy { state.inventory.hasPotion }
         val isLevel = state.isLevel
         val message = when {

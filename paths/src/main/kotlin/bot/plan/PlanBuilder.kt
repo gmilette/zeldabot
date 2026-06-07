@@ -262,7 +262,7 @@ class PlanBuilder(
             goTo(FramePoint(8.grid, 8.grid)) // bottom center
             // shoot with arrows?
             switchToArrow()
-            add(lastMapLoc, KillInCenter())
+            add(lastMapLoc, KillAllInCenter())
             return this
         }
     val killb: PlanBuilder
@@ -381,9 +381,9 @@ class PlanBuilder(
             return this
         }
 
-    val killWithBombsUntil4: PlanBuilder
+    val killAFewWithB: PlanBuilder
         get() {
-            add(lastMapLoc, lootAndKill(KillAll(needLongWait = false, useBombs = true, numberLeftToBeDead = 4)))
+            add(lastMapLoc, lootAndKill(KillAll(needLongWait = false, useBombs = true, numberLeftToBeDead = 8)))
             return this
         }
 

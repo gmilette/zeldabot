@@ -73,21 +73,22 @@ class FrameStateUpdater(
         val isSpiderLevel6 = mapLoc == 28 && level == 6
         val isGannon = mapLoc == 66 && level == 9
         val combine = !isRhino && !isSpiderLevel8 && !isSpiderLevel6 && !isGannon
-        d { "combine is $combine" }
         val oam = OamStateReasoner(isOverworld, api, mapStats, combine = combine, level, isGannon = isGannon)
+        d { "create enemies" }
         val theEnemies = oam.agents()
+        d { "create enemies done" }
 
-        val theUncombined = oam.agentsUncombined()
+        val theUncombined = oam.tilesUncombined()
         val theRaw = oam.agentsRaw()
         val ladderMem = api.readCPU(Addresses.ladderDeployed) != 0
         // check ladder memory first
 //        val ladderSprite = oam.ladderSprite?.let { "ladder sprite "} ?: "no sprite"
 //        d { "ladder mem $ladderMem ${api.readCPU(Addresses.ladderDeployed)} $ladderSprite" }
         val ladder = if (ladderMem) oam.ladderSprite else null
+        if (ladder != null) {
+            d { "ladder direction ${ladder.dir}"}
+        }
 
-        val linkDir2 = oam.direction
-//        val linkTile = LinkDirectionFinder.damagedAttribute.last()
-//        val damagedTile = if (oam.damaged) LinkDirectionFinder.damagedAttribute.last() else 0
         // lags behind one frame
         val linkDir = oam.lookup.readLinkPointDir()
         // never changes
@@ -108,15 +109,12 @@ class FrameStateUpdater(
         previousNow.previous = null
         state.lastPoints.add(linkPoint)
 
-        val seenBoomerang = mapStats.seenBoomerang
-//        val willSkip = SkipDetector.willSkip(api)
-
         d { " frame update num enemies ${theEnemies.size}"}
         for (enemy in theEnemies) {
             d { "enemy: $enemy" }
         }
 
-        val frame = FrameState(api, currentFrame, theEnemies, theUncombined, theRaw, level, mapLoc, link, ladder, seenBoomerang, Inventory(api))
+        val frame = FrameState(api, currentFrame, theEnemies, theUncombined, theRaw, level, mapLoc, link, ladder, Inventory(api))
 
         if (!frame.isScrolling) {
             // don't track if the screen is scrolling

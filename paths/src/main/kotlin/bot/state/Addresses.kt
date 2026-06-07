@@ -126,6 +126,10 @@ object Addresses {
    // 00 if not
    const val ladderDeployed = 0x035A
 
+   // 0. not active
+   // other. what enemy slot it is in
+   const val ladderSlot = 0x0064
+
    // is it link or enemies
    val velocity = listOf(
       0x03BC,
@@ -385,6 +389,12 @@ object Addresses {
 
    const val fluteTimer = 0x003C
    const val usedFlute  = 0x051B
+
+   const val worldFlagsAddrLo = 0x6BAF
+   const val worldFlagsAddrHi = 0x6BB0
+
+   const val fireballDirX = 0x0412
+   const val fireballDirY = 0x0437
 
    object More {
       // the room data including the secret trigger

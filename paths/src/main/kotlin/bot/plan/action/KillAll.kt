@@ -53,7 +53,6 @@ class KillAll(
     private val routeTo = RouteTo(RouteTo.Param(
         whatToAvoid = whatToAvoid)
     )
-    private val criteria = KillAllCompleteCriteria()
 
     private var previousAttack = false
     private var pressACount = 0
@@ -95,10 +94,6 @@ class KillAll(
     private fun centerEnemies(state: MapLocationState): Int =
         if (considerEnemiesInCenter) state.numEnemiesAliveInCenter() else 0
 
-    private fun killedAllEnemiesIgnoreLoot(state: MapLocationState): Boolean {
-        return state.clearedWithMinIgnoreLoot(numberLeftToBeDead)
-    }
-
     override fun complete(state: MapLocationState): Boolean =
         (waitAfterAllKilled <= 0 && frameCount > 33 && killedAllEnemies(state)).also {
             val killedAll = killedAllEnemies(state)
@@ -110,30 +105,22 @@ class KillAll(
         }
 
     override fun nextStep(state: MapLocationState): GamePad {
-        // dont have to wait on any levels that have boomerangs
-        // which gets confused with ghosts
-        // if you are throwing boomerangs, this isnt going to work
-        if (false && state.frameState.seenBoomerang) {
-            needLongWait = false
-        } else {
-            // once set to true, do not change it back
-            // only the wizzrobes
-            if (!needLongWait && !considerEnemiesInCenter && state.frameState.level in Monsters.levelsWithWizzrobes) {
-                needLongWait = state.longWait.isNotEmpty()
-                if (needLongWait) {
-                    d { " set long waited "}
-                } else {
-                    d { " no long wait "}
-                }
+        // once set to true, do not change it back
+        // only the wizzrobes
+        if (!needLongWait && !considerEnemiesInCenter && state.frameState.level in Monsters.levelsWithWizzrobes) {
+            needLongWait = state.longWait.isNotEmpty()
+            if (needLongWait) {
+                d { " set long waited "}
+            } else {
+                d { " no long wait "}
             }
         }
-//        needLongWait = false
+
         d { " KILL ALL step ${state.currentMapCell.mapLoc} count $frameCount wait $waitAfterAllKilled needLong $needLongWait" }
 
         for (enemy in state.frameState.enemies.filter { it.state != EnemyState.Dead }) {
             d { " enemy: $enemy" }
         }
-        criteria.update(state)
 
         frameCount++
         when {
@@ -178,7 +165,7 @@ class KillAll(
                 waitAfterAllKilled--
                 GamePad.None // just wait
             } else {
-                // just wait a little
+                // just wait a little in case a loot is going to appear
                 waitAfterAllKilled = 5
                 val firstEnemyOrNull = aliveEnemies.firstOrNull()
                 if (firstEnemyOrNull == null) {
@@ -247,136 +234,6 @@ class KillAll(
             }
         }
     }
-}
-
-class KillAllCompleteCriteria {
-    private var count = 0
-    private var waitAfterAllKilled = 0
-
-    fun update(state: MapLocationState) {
-        count++
-        if (state.hasEnemies) {
-            waitAfterAllKilled = 110
-        } else {
-            waitAfterAllKilled--
-        }
-    }
-
-    fun complete(state: MapLocationState): Boolean =
-        (waitAfterAllKilled <= 0 && count > 33 && state.cleared).also {
-            d { " kill all complete $it" }
-            d { " kill all status ${state.frameState.enemies}" }
-            state.frameState.enemies.forEach {
-                d { "loot $it dist ${it.point.distTo(state.link)}" }
-            }
-        }
-}
-
-class AttackOnce(useB: Boolean = false, private val freq: Int = 5) :
-    Action {
-    private var frames = 0
-    private val gameAction = if (useB) GamePad.B else GamePad.A
-
-    override fun nextStep(state: MapLocationState): GamePad {
-        // just always do it
-        val move = if (frames < 0) {
-            GamePad.None
-        } else {
-            when {
-                frames % 10 < freq -> gameAction
-                else -> GamePad.None
-            }
-        }
-        frames++
-        return move
-    }
-
-    override fun complete(state: MapLocationState): Boolean =
-        frames >= 10
-
-}
-
-val CycleAction = OrderedActionSequence(
-    listOf(
-        GoIn(3, GamePad.A, reset = true),
-        GoIn(3, GamePad.None, reset = true),
-        GoIn(3, GamePad.A, reset = true),
-        GoIn(3, GamePad.None, reset = true),
-        GoIn(3, GamePad.A, reset = true),
-        GoIn(3, GamePad.None, reset = true),
-        GoIn(3, GamePad.A, reset = true),
-        GoIn(3, GamePad.None, reset = true),
-        GoIn(3, GamePad.A, reset = true),
-        GoIn(3, GamePad.None, reset = true),
-        GoIn(3, GamePad.A, reset = true),
-        GoIn(3, GamePad.None, reset = true),
-        GoIn(MapConstants.twoGrid, GamePad.MoveDown, reset = true, randomlyMoveHalf = true),
-        GoIn(MapConstants.twoGrid, GamePad.MoveRight, reset = true, randomlyMoveHalf = true),
-        GoIn(MapConstants.twoGrid, GamePad.MoveLeft, reset = true, randomlyMoveHalf = true),
-        GoIn(MapConstants.twoGrid,GamePad.MoveUp, reset = true, randomlyMoveHalf = true)
-    )
-)
-
-class KillInCenter : Action {
-    object KillInCenterLocations {
-        // should be the middle of the attack area
-        val position = FramePoint(3.grid, 8.grid)
-
-        //        val attackFrom = FramePoint(8.grid, 8.grid)
-        val attackFrom = FramePoint(8.grid, 8.grid)
-    }
-
-    // more debugging
-    private val positionShootActions = mutableListOf(
-        InsideNavAbout(
-            KillInCenterLocations.attackFrom,
-            1,
-            vertical = 2
-        ),
-        GoIn(10, GamePad.MoveUp, true)
-//        AlwaysAttack()
-    )
-
-    init {
-        repeat(times = 5) {
-            positionShootActions.add(GoIn(10, GamePad.MoveUp, true))
-            positionShootActions.add(GoIn(3, GamePad.A, true))
-            positionShootActions.add(GoIn(3, GamePad.None, true))
-            positionShootActions.add(GoIn(3, GamePad.A, true))
-            positionShootActions.add(GoIn(3, GamePad.None, true))
-            positionShootActions.add(GoIn(10, GamePad.MoveUp, true))
-            positionShootActions.add(GoIn(3, GamePad.A, true))
-            positionShootActions.add(GoIn(3, GamePad.None, true))
-            positionShootActions.add(GoIn(3, GamePad.A, true))
-            positionShootActions.add(GoIn(10, GamePad.MoveUp, true))
-            positionShootActions.add(GoIn(3, GamePad.None, true))
-            positionShootActions.add(GoIn(3, GamePad.B, true))
-            positionShootActions.add(GoIn(3, GamePad.None, true))
-            positionShootActions.add(GoIn(3, GamePad.A, true))
-            positionShootActions.add(GoIn(3, GamePad.None, true))
-        }
-    }
-
-
-    private val positionShoot = OrderedActionSequence(positionShootActions, restartWhenDone = true)
-
-    override fun complete(state: MapLocationState): Boolean =
-        state.numEnemiesAliveInCenter() == 0
-
-    override fun target(): FramePoint {
-        return positionShoot.target()
-    }
-
-    override fun nextStep(state: MapLocationState): GamePad {
-        d { "KillInCenter" }
-        // if I can detect the nose open then, I can dodge while that is happening
-        // otherwise, just relentlessly attack
-
-        return positionShoot.nextStep(state)
-    }
-
-    override val name: String
-        get() = "KillInCenter ${positionShoot.stepName} ${positionShoot.name}"
 }
 
 class DeadForAWhile(

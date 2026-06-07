@@ -312,7 +312,7 @@ private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {
                         enemies.sortedBy { it.point.y } .filter { it.state != EnemyState.Dead }.forEachIndexed { index, enemy ->
 //                            val tileLine = MapStatsTracker.attribFor(enemy.tile).tileStringLine()
 //                            + " " + tileLine
-                            val moving = if (enemy.moving == MovingDirection.UNKNOWN_OR_STATIONARY) "" else enemy.moving.toArrow()
+                            val moving = if (enemy.moving == MovingDirection.UnknownOrStationary) "" else enemy.moving.toArrow()
                             val hp = if (enemy.hurt) " ${enemy.type} ${enemy.hp} of ${enemy.maxHp}" else ""
                             Text(
                                 "$index: (${enemy.tile.toString(16)}_${enemy.attribute.toString(16)}) ${enemy.state.name} ${enemy.point} ${enemy.point.toG} ${enemy.color} ${enemy.dir.toArrow()}" +

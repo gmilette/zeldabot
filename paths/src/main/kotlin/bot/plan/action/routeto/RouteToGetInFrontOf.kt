@@ -28,13 +28,12 @@ object RouteToGetInFrontOf {
     fun getInFrontOfGridsForProjectiles(state: MapLocationState): List<FramePoint> =
         state.frameState.enemies.filter { it.state == EnemyState.Projectile }.flatMap { agent ->
             when (agent.moving) {
-                MovingDirection.LEFT -> listOf(agent.point.leftTwoGrid.right2,
+                MovingDirection.Left -> listOf(agent.point.leftTwoGrid.right2,
                     agent.point.leftTwoGrid.right2.upOneGrid)
-                MovingDirection.RIGHT -> listOf(agent.point.rightOneGrid.left2)
-                MovingDirection.DOWN -> listOf(agent.point.downOneGrid.up2)
-                MovingDirection.UP -> listOf(agent.point.upTwoGrid.down2)
-                // incorrect most likely
-                is MovingDirection.DIAGONAL -> listOf(agent.point.relativeTo(agent.moving.slope))
+                MovingDirection.Right -> listOf(agent.point.rightOneGrid.left2)
+                MovingDirection.Down -> listOf(agent.point.downOneGrid.up2)
+                MovingDirection.Up -> listOf(agent.point.upTwoGrid.down2)
+                is MovingDirection.Diagonal -> listOf(agent.point.relativeTo(agent.moving.slope))
                 else -> emptyList()
             }.also {
                 if (it.isNotEmpty()) {

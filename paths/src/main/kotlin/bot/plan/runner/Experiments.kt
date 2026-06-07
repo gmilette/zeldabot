@@ -131,7 +131,7 @@ class Experiments(private val masterPlan: PlanMaker) {
             // go straight to level1
             // should have 0 bombs though
             two.copy(name = "level2b", hearts = 3, bombs = 0, sword = ZeldaItem.WoodenSword, boomerang = ZeldaItem.Boomerang),
-            two.copy(name = "level2", hearts = 3, bombs = 0, sword = ZeldaItem.WoodenSword),
+            two.copy(name = "level2plan", hearts = 3, bombs = 0, sword = ZeldaItem.WoodenSword),
             two.copy(name = "level25h", hearts = 5, bombs = 0, sword = ZeldaItem.WoodenSword),
             twoBomb.copy(name = "level2Bomb4", hearts = 4, bombs = 0, sword = ZeldaItem.WoodenSword),
             twoBomb.copy(name = "level2Bomb5w", hearts = 5, bombs = 0, sword = ZeldaItem.WhiteSword),
