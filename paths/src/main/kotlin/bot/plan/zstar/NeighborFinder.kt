@@ -64,16 +64,16 @@ class NeighborFinder(
         val neigh = mutableListOf<FramePoint>()
 
         val dontTurnAround = true
-        val dirMovingIn: Direction = if (dontTurnAround) {
+        val avoidDirection: Direction = if (dontTurnAround) {
             from?.dirTo(point)?.opposite() ?: Direction.None
         } else {
             Direction.None
         }
         if (ZStar.DEBUG) {
-            d { " neighbors point: $point dir: $direction from $from dirMovingIn $dirMovingIn" }
+            d { " neighbors point: $point dir: $direction from $from avoidDirection $avoidDirection" }
         }
 
-        val validDirections = Direction.all - dirMovingIn
+        val validDirections = Direction.all - avoidDirection
 
 //        var validDirections = okDirections(point, direction, dist)
 //        if (GStar.DEBUG) {

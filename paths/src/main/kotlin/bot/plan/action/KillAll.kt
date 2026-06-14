@@ -21,10 +21,6 @@ class KillAll(
     // do not try to kill the enemies in the center
     private val considerEnemiesInCenter: Boolean = false,
     /**
-     * how long to wait after all enemies dead to assume all is dead
-     */
-    private var needLongWait: Boolean = false,
-    /**
      * only target these tiles
      */
     private val targetOnly: List<Int> = listOf(),
@@ -105,18 +101,7 @@ class KillAll(
         }
 
     override fun nextStep(state: MapLocationState): GamePad {
-        // once set to true, do not change it back
-        // only the wizzrobes
-        if (!needLongWait && !considerEnemiesInCenter && state.frameState.level in Monsters.levelsWithWizzrobes) {
-            needLongWait = state.longWait.isNotEmpty()
-            if (needLongWait) {
-                d { " set long waited "}
-            } else {
-                d { " no long wait "}
-            }
-        }
-
-        d { " KILL ALL step ${state.currentMapCell.mapLoc} count $frameCount wait $waitAfterAllKilled needLong $needLongWait" }
+        d { " KILL ALL step ${state.currentMapCell.mapLoc} count $frameCount wait $waitAfterAllKilled" }
 
         for (enemy in state.frameState.enemies.filter { it.state != EnemyState.Dead }) {
             d { " enemy: $enemy" }
@@ -204,7 +189,6 @@ class KillAll(
                             allowRangedAttack = !firstAttackBomb,
                             allowBlock = allowBlock,
                             rParam = RouteTo.RoutingParamCommon(
-                                attackTarget = target,
                                 mapNearest = true,
                                 finishWithinStrikingRange = true
                             ),

@@ -231,16 +231,6 @@ class ZStar(
         // determine
     }
 
-    private fun goalFunction() {
-
-    }
-
-//    fun route(
-//        param: ZRouteParam
-//    ): List<FramePoint> {
-//        return routeNearestSafe(param)
-//    }
-
     fun setNeighborFinder(
         param: ZRouteParam
     ) {
@@ -622,12 +612,8 @@ class ZStar(
 //            val startSum = sum()
             d { "Plan: iter = enemies ${param.enemies.size}" }
             resetPassable(param.start)
-            // only if inside a radius
-//            setEnemyCosts(param.start, param.enemies)
-            // fails, why?
             setAllEnemyCosts(param)
             setForcePassable(param.rParam.forcePassable)
-            setZeroCost(param.rParam.attackTarget)
         }
 
         fun reset() {
@@ -774,16 +760,6 @@ class ZStar(
 //                if (DEBUG) {
 //                }
                 costsF.modifyTo(grid, MapConstants.oneGrid, HIGH_COST)
-            }
-        }
-
-        private fun setZeroCost(target: FramePoint?) {
-            target?.let {
-                if (DEBUG) {
-                    d { "set zero cost $target" }
-                }
-                // actual enemy higher cost then around the enemy
-                costsF.modifyTo(target, MapConstants.oneGrid, 0)
             }
         }
     }
