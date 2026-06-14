@@ -17,7 +17,7 @@ class KillAllTargetFilters(private val state: MapLocationState,
         state.frameState.enemiesClosestToLink()
     }.toMutableList()
 
-    var attackOnlySpecified = false
+    private var attackOnlySpecified = false
 
     fun filter(lookForBombs: Boolean): List<Agent> {
         removeDamaged()
@@ -31,7 +31,7 @@ class KillAllTargetFilters(private val state: MapLocationState,
             d { "alive enemy $it dist ${it.point.distTo(state.frameState.link.point)}" }
         }
 
-        return aliveEnemies
+        return if (attackOnlySpecified) aliveEnemies else emptyList()
     }
 
     fun considerEnemiesInCenter() {

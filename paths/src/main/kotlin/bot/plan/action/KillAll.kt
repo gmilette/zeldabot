@@ -180,9 +180,24 @@ class KillAll(
                         d { " !On Target " }
                     }
 
+                    val killRouting = true
+                    if (killRouting) {
+                        val pad = routeToBest(state, aliveEnemies)
+                        // TODO: this probably doesn't work
+                        if (pad == GamePad.B && (firstAttackBomb || useBombs)) {
+                            numPressB = 3
+                            d { "USE BOMB! it=$pad first $firstAttackBomb $useBombs" }
+                            numPressB++
+                            if (numPressB > 3) {
+                                firstAttackBomb = false
+                            }
+                            GamePad.B
+                        }
+                        return pad
+                    }
+
                     // could route to all targets
                     routeTo.routeTo(
-//                    routeTo.routeToBest(
                         state, targetsToAttack,
                         RouteTo.RouteParam(
                             useB = firstAttackBomb || useBombs,
@@ -193,7 +208,7 @@ class KillAll(
                                 finishWithinStrikingRange = true
                             ),
                         ),
-                        attackableSpec = if (enemyFilter.attackOnlySpecified) aliveEnemies else emptyList()
+                        attackableSpec = aliveEnemies
                     ).let {
                         if (numPressB > 0) {
                             numPressB--
@@ -215,6 +230,23 @@ class KillAll(
             }
         }
     }
+
+    private fun routeToBest(state: MapLocationState, aliveEnemies: List<Agent>): GamePad {
+        return routeTo.routeToBest(
+            state,
+            RouteTo.RouteParam(
+                useB = firstAttackBomb || useBombs,
+                allowRangedAttack = !firstAttackBomb,
+                allowBlock = allowBlock,
+                rParam = RouteTo.RoutingParamCommon(
+                    mapNearest = true,
+                    finishWithinStrikingRange = true
+                ),
+            ),
+            attackableSpec = aliveEnemies
+        )
+    }
+
 }
 
 class DeadForAWhile(

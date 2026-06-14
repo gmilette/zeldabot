@@ -133,7 +133,6 @@ class RouteTo(val params: Param = Param()) {
 
     fun routeToBest(
         state: MapLocationState,
-        to: List<FramePoint>,
         param: RouteParam = RouteParam(),
         // pass in attack targets
         attackableSpec: List<Agent> = emptyList()
@@ -142,7 +141,7 @@ class RouteTo(val params: Param = Param()) {
         val linkPt = state.link
         val paramZ = ZStar.ZRouteParam(
             start = linkPt,
-            targets = to,
+            targets = emptyList(),
             pointBeforeStart = state.previousMove.from,
             enemies = emptyList(),
             projectiles = emptyList(),
