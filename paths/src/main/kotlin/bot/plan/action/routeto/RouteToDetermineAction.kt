@@ -105,6 +105,7 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
     }
 
     private fun exitOfScreen(linkPt: FramePoint, to: List<FramePoint>): GamePad {
+        if (to.isEmpty()) return GamePad.None
         // why this? let's go without it and see if it's ok
         // it gets stuck almost about to exit some levels
         // i'm not sure if this fixes it
