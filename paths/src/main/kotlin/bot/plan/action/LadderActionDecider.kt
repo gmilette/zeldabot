@@ -15,12 +15,11 @@ class LadderActionDecider {
             val allowed = allowed(state)
             val dirToGo = state.bestDirection(allowed)
             d { " make new route ladder deployed Go dir: $dirToGo from $allowed ladder is ${state.frameState.ladder?.dir}"}
-            val modifier = if (dirToGo == Direction.None) {
+            if (dirToGo == Direction.None) {
                 GamePad.randomDirection(state.link).toDirection()
             } else {
                 dirToGo
             }
-            modifier
         } else {
             Direction.None
         }
