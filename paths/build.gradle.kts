@@ -27,6 +27,7 @@ dependencies {
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.mockito.core)
     implementation(libs.gson)
+    implementation("com.microsoft.onnxruntime:onnxruntime:1.19.0")
 }
 
 java {
