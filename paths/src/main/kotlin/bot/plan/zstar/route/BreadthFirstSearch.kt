@@ -23,11 +23,7 @@ data class SearchNode(
 
 class BreadthFirstSearch(
     private val isGoal: (FramePoint) -> Boolean = { false },
-    private var ableToLongAttack: Boolean = false,
-    private var ableToAttack: Boolean = true,
     private val neighborFinder: NeighborFinder,
-    private val longDecider: AttackLongActionDecider = AttackLongActionDecider,
-    private val shortDecider: AttackActionDecider = AttackActionDecider
 ) {
     companion object {
         val MAX_PATHS = 3
@@ -82,7 +78,7 @@ class BreadthFirstSearch(
      * and find all goals
      * then we have
      */
-    fun isGoal(point: FramePoint, targets: List<FramePoint>, initial: Boolean = false): Boolean {
+    fun isTheGoal(point: FramePoint): Boolean {
         d { " goal from $point}"}
         return isGoal(point)
     }
@@ -115,7 +111,7 @@ class BreadthFirstSearch(
         targets: List<FramePoint>,
         maxDepth: Int = 255
     ): ActionRoute {
-        return if (isGoal(start, targets, initial = true)) {
+        return if (isGoal(start)) {
             d { " BFS: Started at goal: $start"}
             ActionRoute.Attack(false)
         } else {
@@ -126,7 +122,7 @@ class BreadthFirstSearch(
 
     fun breadthFirstSearch(
         start: FramePoint,
-        targets: List<FramePoint>,
+        targets: List<FramePoint> = emptyList(),
         maxDepth: Int = 5000
     ): List<List<FramePoint>> {
         val queue = LinkedList<SearchNode>()
@@ -146,8 +142,9 @@ class BreadthFirstSearch(
             }
             
             if (current.depth > maxDepth) continue
-            
-            if (isGoal(current.point, targets, current.depth == 0)) {
+
+            // current.depth == 0
+            if (isGoal(current.point)) {
                 // Ensure the final path includes the current point (last visited point)
                 val completePath = if (current.path.last() == current.point) {
                     current.path
@@ -209,7 +206,7 @@ class BreadthFirstSearch(
 
         return if (SAFE_GOAL) {
             d { "BFS sort by dist" }
-            sortPathsByBestFirstDist(foundPaths, enemies = targets)
+            sortPathsByBestFirstDist(foundPaths, enemies = targets) // TODO: Add back in the enemies
         } else {
             d { "BFS sort by size" }
             sortPathsByBestFirst(foundPaths)

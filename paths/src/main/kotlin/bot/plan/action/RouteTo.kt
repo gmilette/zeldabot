@@ -155,8 +155,7 @@ class RouteTo(val params: Param = Param()) {
             GoalFunction(ableToLongAttack = ableToShoot, ableToAttack = true, state.currentMapCell.zstar.neighborFinder)
                 .isGoal(point, emptyList(), false)
         }
-        val search = BreadthFirstSearch(isGoal, ableToShoot, true,
-            state.currentMapCell.zstar.neighborFinder)
+        val search = BreadthFirstSearch(isGoal, state.currentMapCell.zstar.neighborFinder)
         val attackableAgents: List<Agent> = AttackableDecider.aliveEnemiesCanAttack(state)
         val attackable = attackableSpec.ifEmpty {
             attackableAgents

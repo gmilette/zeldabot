@@ -165,7 +165,6 @@ class BreadthFirstSearchTestUIState {
             
             // Create a real BreadthFirstSearch instance - now much simpler!
             val breadthFirstSearch = BreadthFirstSearch(
-                ableToLongAttack = ableToLongAttack,
                 neighborFinder = neighborFinder
             )
             
