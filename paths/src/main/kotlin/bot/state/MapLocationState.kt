@@ -1,19 +1,17 @@
 package bot.state
 
 import bot.plan.action.MoveBuffer
-import bot.plan.action.PrevBuffer
 import bot.plan.action.PreviousMove
 import bot.state.map.Direction
 import bot.state.map.Hyrule
 import bot.state.map.MapCell
-import bot.state.map.pointModifier
 import nintaco.api.ApiSource
 import util.d
 
 /**
  * persists between frames
  */
-class MapLocationState(
+data class MapLocationState(
     var hyrule: Hyrule,
 
     var lastGamePad: GamePad = GamePad.MoveUp,

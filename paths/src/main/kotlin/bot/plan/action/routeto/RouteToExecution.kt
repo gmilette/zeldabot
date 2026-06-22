@@ -48,6 +48,10 @@ class RouteExecution(val params: Param = Param()) {
 
     private var theAttack: AlwaysAttackWhenCan = attack
 
+    fun getDetermine(): RouteToDetermineAction {
+        return RouteToDetermineAction(RoutePreparation(params))
+    }
+
     fun route(
         state: MapLocationState,
         to: List<FramePoint>,

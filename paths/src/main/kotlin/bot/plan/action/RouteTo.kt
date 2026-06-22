@@ -1,18 +1,19 @@
 package bot.plan.action
 
+import bot.plan.action.routeto.PointMoveAction
 import bot.plan.action.routeto.RouteExecution
 import bot.plan.action.routeto.RouteToGetInFrontOf
-import bot.plan.zstar.route.BreadthFirstSearch
-import bot.plan.zstar.route.BreadthFirstSearch.ActionRoute
 import bot.plan.zstar.FrameRoute
 import bot.plan.zstar.ZStar
 import bot.plan.zstar.route.AttackableDecider
+import bot.plan.zstar.route.BreadthFirstSearch
+import bot.plan.zstar.route.BreadthFirstSearch.ActionRoute
+import bot.plan.zstar.route.GoalFunction
 import bot.state.*
-import bot.state.map.*
+import bot.state.map.MapCell
+import bot.state.map.toGamePad
 import util.LogFile
 import util.d
-import util.w
-import kotlin.collections.ifEmpty
 
 class RouteTo(val params: Param = Param()) {
     private var boomerangCt = 0
@@ -82,6 +83,7 @@ class RouteTo(val params: Param = Param()) {
         val allowBlock: Boolean = true,
         val allowAttack: Boolean = true,
         val allowRangedAttack: Boolean = true,
+        val breadthFirst: Boolean = false,
         val rParam: RoutingParamCommon = RoutingParamCommon()
     )
 
@@ -149,7 +151,11 @@ class RouteTo(val params: Param = Param()) {
         )
         state.currentMapCell.zstar.setNeighborFinder(paramZ)
         val ableToShoot = AttackLongActionDecider.ableToShoot(state)
-        val search = BreadthFirstSearch(ableToShoot, true,
+        val isGoal = { point: FramePoint ->
+            GoalFunction(ableToLongAttack = ableToShoot, ableToAttack = true, state.currentMapCell.zstar.neighborFinder)
+                .isGoal(point, emptyList(), false)
+        }
+        val search = BreadthFirstSearch(isGoal, ableToShoot, true,
             state.currentMapCell.zstar.neighborFinder)
         val attackableAgents: List<Agent> = AttackableDecider.aliveEnemiesCanAttack(state)
         val attackable = attackableSpec.ifEmpty {
@@ -235,16 +241,17 @@ class RouteTo(val params: Param = Param()) {
             d { "in front grid $point"}
         }
 
-        if (state.frameState.ladderDeployed) {
-            val dirToGo = state.bestDirection()
-            d { " make new route ladder deployed Go dir: $dirToGo"}
-            val modifier = if (dirToGo == Direction.None) {
-                GamePad.randomDirection(state.link).toDirection().pointModifier()
-            } else {
-                dirToGo.pointModifier()
-            }
-            return modifier(linkPt)
-        }
+        // don't need I think
+//        if (state.frameState.ladderDeployed) {
+//            val dirToGo = state.bestDirection()
+//            d { " make new route ladder deployed Go dir: $dirToGo"}
+//            val modifier = if (dirToGo == Direction.None) {
+//                GamePad.randomDirection(state.link).toDirection().pointModifier()
+//            } else {
+//                dirToGo.pointModifier()
+//            }
+//            return modifier(linkPt)
+//        }
 
         val paramZ = ZStar.ZRouteParam(
             start = linkPt,
@@ -257,16 +264,21 @@ class RouteTo(val params: Param = Param()) {
                 forceHighCost = param.rParam.forceHighCost + inFrontOfGrids
             )
         )
-        route = FrameRoute(
-            mapCell.zstar.route(paramZ)) //.cornering(state.link, state.frameState.link.dir)
 
+        val routePoints = if (param.breadthFirst) {
+            val determine = routeAction.getDetermine()
+            val isGoal = { point: FramePoint ->
+                val linkCopy = state.frameState.link.copy(point = point)
+                val frameCopy = state.frameState.copy(link = linkCopy)
+                val stateWithLinkMoved = state.copy(frameState = frameCopy)
+                determine.nextAction(stateWithLinkMoved, emptyList(), param, 0, false) != PointMoveAction.Route
+            }
+            mapCell.zstar.routeWithBfs(paramZ, isGoal)
+        } else {
+            mapCell.zstar.route(paramZ)
+        }
+        route = FrameRoute(routePoints)
 
-//        route?.path?.lastOrNull()?.let { lastPt ->
-//            // if it is just projectile then don't try to route towards the projectiles
-//            if (param.rParam.mapNearest || lastPt in to || state.frameState.ladderDeployed || !state.hasEnemies) {
-//                d { "route to success target" }
-//            }
-//        }
         route?.next15()
         nextPoint1 = route?.popOrEmpty() ?: FramePoint() // skip first point because it is the current location
         nextPoint1 = route?.popOrEmpty() ?: FramePoint()

@@ -240,12 +240,14 @@ class ZStar(
     }
 
     fun routeWithBfs(
-        param: ZRouteParam
-    ): List<FramePoint>? {
+        param: ZRouteParam,
+        isGoal: (FramePoint) -> Boolean
+    ): List<FramePoint> {
+        // what kind of route? Safety? Route to shoot? Route to stab?
         setNeighborFinder(param)
-        val search = BreadthFirstSearch(true, true, neighborFinder)
+        val search = BreadthFirstSearch(isGoal, true, true, neighborFinder)
         if (search.isGoal(param.start, param.targets)) {
-            return null
+            return emptyList()
         }
         val route = search.breadthFirstSearch(param.start, param.targets).firstOrNull() ?: emptyList()
         d { " Route with bfs is ${route}"}

@@ -181,20 +181,20 @@ class KillAll(
                     }
 
                     val killRouting = true
-                    if (killRouting) {
-                        val pad = routeToBest(state, aliveEnemies)
-                        // TODO: this probably doesn't work
-                        if (pad == GamePad.B && (firstAttackBomb || useBombs)) {
-                            numPressB = 3
-                            d { "USE BOMB! it=$pad first $firstAttackBomb $useBombs" }
-                            numPressB++
-                            if (numPressB > 3) {
-                                firstAttackBomb = false
-                            }
-                            GamePad.B
-                        }
-                        return pad
-                    }
+//                    if (killRouting) {
+//                        val pad = routeToBest(state, aliveEnemies)
+//                        // TODO: this probably doesn't work
+//                        if (pad == GamePad.B && (firstAttackBomb || useBombs)) {
+//                            numPressB = 3
+//                            d { "USE BOMB! it=$pad first $firstAttackBomb $useBombs" }
+//                            numPressB++
+//                            if (numPressB > 3) {
+//                                firstAttackBomb = false
+//                            }
+//                            GamePad.B
+//                        }
+//                        return pad
+//                    }
 
                     // could route to all targets
                     routeTo.routeTo(
@@ -203,6 +203,7 @@ class KillAll(
                             useB = firstAttackBomb || useBombs,
                             allowRangedAttack = !firstAttackBomb,
                             allowBlock = allowBlock,
+                            breadthFirst = killRouting,
                             rParam = RouteTo.RoutingParamCommon(
                                 mapNearest = true,
                                 finishWithinStrikingRange = true

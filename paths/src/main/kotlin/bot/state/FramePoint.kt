@@ -40,7 +40,7 @@ data class FramePoint(val x: Int = 0, val y: Int = 0, val direction: Direction? 
 
     override fun equals(other: Any?): Boolean {
         return if (other is FramePoint) {
-            other.x == x && other.y == y
+            other.x == x && other.y == y // && other.direction == direction
         } else false
     }
 
