@@ -1,4 +1,4 @@
-start=56,24
-enemies=16,0
+start=55,8
+enemies=16,0;48,0;32,32
 longAttack=false
-startDirection=Left
+startDirection=Right

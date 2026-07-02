@@ -44,6 +44,8 @@ data class FramePoint(val x: Int = 0, val y: Int = 0, val direction: Direction? 
         } else false
     }
 
+    override fun hashCode(): Int = 31 * x + y
+
     val oneStr: String
         get() = "${x}_$y"
 

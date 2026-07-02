@@ -1,7 +1,5 @@
 package bot.plan.zstar.route
 
-import bot.plan.action.AttackActionDecider
-import bot.plan.action.AttackLongActionDecider
 import bot.plan.action.distTo
 import bot.plan.zstar.NeighborFinder
 import bot.plan.zstar.ZStar.Companion.DEBUG_B
@@ -21,10 +19,22 @@ data class SearchNode(
     val foundSafe: Boolean = false
 )
 
+class CachingGoalChecker(
+    private val isGoalCheck: (FramePoint) -> Boolean = { false }
+) {
+    private val cache = TreeMap<FramePoint, Boolean>(BreadthFirstSearch.framePointComparator)
+
+    fun isGoal(framePoint: FramePoint): Boolean =
+        cache.getOrPut(framePoint) { isGoalCheck(framePoint) }
+}
+
+
 class BreadthFirstSearch(
-    private val isGoal: (FramePoint) -> Boolean = { false },
+    isGoal: (FramePoint) -> Boolean = { false },
     private val neighborFinder: NeighborFinder,
 ) {
+    private val goalChecker = CachingGoalChecker(isGoal)
+
     companion object {
         val MAX_PATHS = 3
         // problems
@@ -35,6 +45,7 @@ class BreadthFirstSearch(
         // todo: need to have a constraint to not allow the route to leave an area ever
         // maybe prioritize longer routes?
         val SAFE_GOAL = false
+        val framePointComparator: Comparator<FramePoint> = compareBy({ it.x }, { it.y }, { it.direction?.ordinal ?: -1 })
     }
 
     init {
@@ -80,7 +91,7 @@ class BreadthFirstSearch(
      */
     fun isTheGoal(point: FramePoint): Boolean {
         d { " goal from $point}"}
-        return isGoal(point)
+        return goalChecker.isGoal(point)
     }
 
     private fun isSafe(point: FramePoint): Boolean {
@@ -111,7 +122,7 @@ class BreadthFirstSearch(
         targets: List<FramePoint>,
         maxDepth: Int = 255
     ): ActionRoute {
-        return if (isGoal(start)) {
+        return if (goalChecker.isGoal(start)) {
             d { " BFS: Started at goal: $start"}
             ActionRoute.Attack(false)
         } else {
@@ -126,7 +137,7 @@ class BreadthFirstSearch(
         maxDepth: Int = 5000
     ): List<List<FramePoint>> {
         val queue = LinkedList<SearchNode>()
-        val visited = mutableSetOf<FramePoint>()
+        val visited = TreeSet<FramePoint>(framePointComparator)
         val foundPaths = mutableListOf<List<FramePoint>>()
 
         queue.offer(SearchNode(start, listOf(start), 0))
@@ -144,8 +155,9 @@ class BreadthFirstSearch(
             if (current.depth > maxDepth) continue
 
             // current.depth == 0
-            if (isGoal(current.point)) {
+            if (goalChecker.isGoal(current.point)) {
                 // Ensure the final path includes the current point (last visited point)
+                //                val completePath = if (current.path.last().equalsAndDirection(current.point)) {
                 val completePath = if (current.path.last() == current.point) {
                     current.path
                 } else {
