@@ -67,9 +67,10 @@ class ZStar(
 
     val neighborFinder = NeighborFinder(passable, halfPassable, isLevel)
 
+    // used for debugging
     private val totalCosts = mutableMapOf<FramePoint, Int>()
+    // used for debugging
     private val distanceToGoal = mutableMapOf<FramePoint, Int>()
-    private val pathSizeToGoal = mutableMapOf<FramePoint, Int>()
 
     private val avoid = mutableListOf<FramePoint>()
 
@@ -308,18 +309,14 @@ class ZStar(
             d { "$framePoint"}
         }
 
-        val openList: PriorityQueue<FramePoint> = PriorityQueue<FramePoint> { cell1, cell2 ->
-            val cell1Val = (totalCosts[cell1] ?: 0) + (distanceToGoal[cell1] ?: 0)
-            val cell2Val = (totalCosts[cell2] ?: 0) + (distanceToGoal[cell2] ?: 0)
-            if (cell1Val < cell2Val) -1 else if (cell1Val > cell2Val) 1 else 0
-        }
+        val openList = PriorityQueue<OpenNode>(compareBy { it.priority })
 
         val costFromStart = mutableMapOf(param.start to 0)
         var pointClosestToGoal = FramePoint()
         var pointClosestToGoalPathSize = Int.MAX_VALUE
 
-        var point = FramePoint(0, 0)
-        openList.add(param.start)
+        openList.add(OpenNode(param.start, 0))
+
         iterCount = 0
 //        while (true && iterCount < MAX_ITER) {
         while (iterCount < maxIter) {
@@ -328,17 +325,20 @@ class ZStar(
                 d { " ****** ITERATION $iterCount open ${openList.size} ****** " }
             }
             if (DEBUG) {
-                openList.forEach {
+                openList.forEach { node ->
+                    val pt = node.point
                     d {
-                        " open: ${it.x}, ${it.y} cost ${totalCosts[it]} to " +
+                        " open: ${pt.x}, ${pt.y} cost ${totalCosts[pt]} to " +
                                 "goal" +
                                 " " +
-                                "${distanceToGoal[it]}"
+                                "${distanceToGoal[pt]}"
                     }
                 }
             }
             // 6.5%
-            point = openList.poll() ?: break
+            val node = openList.poll() ?: break
+            val point = node.point
+            if (point in closedList) continue
 
             if (DEBUG) {
                 d { " explore $point" }
@@ -414,18 +414,13 @@ class ZStar(
                     }
                 }
                 val costS = costFromStart.getOrDefault(toPoint, Int.MAX_VALUE)
-//                d {" cost: $cost $costS"}
                 //  cost < maximumCost failed attempt to discourage
-                // link from walking into enemies
-                if (cost < costS) { // && cost < maximumCost) {
+                if (pathCost < costS) {
+//                if (cost < costS) { // && cost < maximumCost) {
                     // todo: prefer short path, so weight path length vs. distance to
-//                    pathSizeToGoal[toPoint] = pathSize(cameFrom, toPoint)
                     if (pointClosestToGoal.isZero ||
                         costToGoal < (distanceToGoal[pointClosestToGoal] ?: Int.MAX_VALUE)
                     ) {
-//                        val pathSize = pathSize(cameFrom, toPoint)
-                        // if distance to goal is same, select based on path
-//                        pointClosestToGoalPathSize = pathSize
                         pointClosestToGoal = toPoint
                     }
                     distanceToGoal[toPoint] = costToGoal
@@ -433,9 +428,7 @@ class ZStar(
                     totalCosts[toPoint] = totalCost
                     cameFrom[toPoint] = point
                     // needs to test equality of directions
-                    if (!openList.contains(toPoint)) {
-                        openList.add(toPoint)
-                    }
+                    openList.add(OpenNode(toPoint, totalCost))
                 }
 //                } else {
 //                    if (DEBUG) {
@@ -767,3 +760,5 @@ class ZStar(
         }
     }
 }
+
+private data class OpenNode(val point: FramePoint, val priority: Int)
