@@ -3,6 +3,7 @@ package bot.plan.zstar.route
 import bot.plan.action.distTo
 import bot.plan.zstar.NeighborFinder
 import bot.plan.zstar.ZStar.Companion.DEBUG_B
+import bot.plan.zstar.ZStar.Companion.DEBUG_V
 import bot.plan.zstar.ZStar.Companion.MAX_ITER
 import bot.state.FramePoint
 import bot.state.dirTo
@@ -137,7 +138,7 @@ class BreadthFirstSearch(
         maxDepth: Int = 5000
     ): List<List<FramePoint>> {
         val queue = LinkedList<SearchNode>()
-        val visited = TreeSet<FramePoint>(framePointComparator)
+        val visited = TreeSet(framePointComparator)
         val foundPaths = mutableListOf<List<FramePoint>>()
 
         queue.offer(SearchNode(start, listOf(start), 0))
@@ -150,6 +151,9 @@ class BreadthFirstSearch(
             
             if (DEBUG_B) {
                 d { "$iterations: exploring ${current.point} at depth ${current.depth}" }
+                if (DEBUG_V) {
+                    d { "currentNode: $current" }
+                }
             }
             
             if (current.depth > maxDepth) continue
@@ -208,13 +212,13 @@ class BreadthFirstSearch(
             }
         }
         
-//        if (DEBUG_B) {
-//            d { "BFS completed: found ${foundPaths.size} paths in $iterations iterations" }
-//            for (path in foundPaths) {
-//                val dist = path.countDistance(targets)
-//                d { "BFS path: ${path.size} $path $dist"}
-//            }
-//        }
+        if (DEBUG_B) {
+            d { "BFS completed: found ${foundPaths.size} paths in $iterations iterations" }
+            for (path in foundPaths) {
+                val dist = path.countDistance(targets)
+                d { "BFS path: ${path.size} $path $dist"}
+            }
+        }
 
         return if (SAFE_GOAL) {
             d { "BFS sort by dist" }
@@ -231,8 +235,6 @@ class BreadthFirstSearch(
                 }
             }
         }
-//        return foundPaths.sortedBy { it.size }
-//        return sortPathsByBestFirst(foundPaths)
     }
 }
 

@@ -1,5 +1,6 @@
 package bot.plan.zstar
 
+import bot.ZeldaBot
 import bot.plan.zstar.route.BreadthFirstSearch
 import bot.plan.zstar.route.BreadthFirstSearch.Companion.framePointComparator
 import bot.state.FramePoint
@@ -7,7 +8,9 @@ import bot.state.map.Direction
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import org.junit.Before
 import org.junit.Test
+import util.LoggerOverride
 import util.Map2d
 
 class BreadthFirstSearchTest {
@@ -19,6 +22,12 @@ class BreadthFirstSearchTest {
         NeighborFinder(allPassableMap(), halfPassable = false).also {
             it.costF = Map2d.Builder<Int>().add(168, 256, 0).build()
         }
+
+    @Before
+    fun setup() {
+        ZeldaBot.log = true
+        LoggerOverride.init()
+    }
 
     /**
      * Regression test for direction-aware visited set (TreeSet with framePointComparator).
@@ -47,6 +56,21 @@ class BreadthFirstSearchTest {
         goal.x shouldBe goalX
         goal.y shouldBe goalY
         goal.direction shouldBe Direction.Down
+    }
+
+    @Test
+    fun `BFS finds straight line route of 3 points`() {
+        val start = FramePoint(8, 8)
+        val goal = FramePoint(10, 8)
+
+        val bfs = BreadthFirstSearch({ it.x == goal.x && it.y == goal.y }, makeNeighborFinder())
+        val paths = bfs.breadthFirstSearch(start)
+
+        paths.shouldNotBeEmpty()
+        val path = paths.first()
+        path.last().x shouldBe goal.x
+        path.last().y shouldBe goal.y
+        path.size shouldBe 3
     }
 
     @Test
