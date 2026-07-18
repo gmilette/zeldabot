@@ -222,7 +222,8 @@ class RouteTo(val params: Param = Param()) {
         to: List<FramePoint>,
         avoid: List<Agent>,
         avoidProjectiles: List<Agent>,
-        nextPoint: FramePoint
+        nextPoint: FramePoint,
+        attackableSpec: List<Agent> = emptyList()
     ): FramePoint {
         val linkPt = state.frameState.link.point
         val ladder = state.frameState.ladder
@@ -265,7 +266,7 @@ class RouteTo(val params: Param = Param()) {
         )
 
         val routePoints = if (param.breadthFirst) {
-            val determine = routeAction.getDetermine()
+            val determine = routeAction.getDetermine(state, param, attackableSpec)
             val isGoal = { point: FramePoint ->
                 val linkCopy = state.frameState.link.copy(point = point)
                 val frameCopy = state.frameState.copy(link = linkCopy)
