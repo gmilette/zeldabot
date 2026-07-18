@@ -209,7 +209,9 @@ class KillAll(
                                 finishWithinStrikingRange = true
                             ),
                         ),
-                        attackableSpec = aliveEnemies
+                        // usually want the empty list so that routeTo can determine attackable
+                        // but not if we are handling the special filter cases
+                        attackableSpec = if (enemyFilter.attackOnlySpecified) aliveEnemies else emptyList()
                     ).let {
                         if (numPressB > 0) {
                             numPressB--

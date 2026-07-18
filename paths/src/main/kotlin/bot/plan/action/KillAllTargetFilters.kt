@@ -1,5 +1,6 @@
 package bot.plan.action
 
+import bot.plan.action.routeto.RouteToGetInFrontOf
 import bot.state.Agent
 import bot.state.ItemDropPrediction
 import bot.state.MapLocationState
@@ -17,6 +18,9 @@ class KillAllTargetFilters(private val state: MapLocationState,
         state.frameState.enemiesClosestToLink()
     }.toMutableList()
 
+    var attackOnlySpecified = false
+        private set
+
     fun filter(lookForBombs: Boolean): List<Agent> {
         removeDamaged()
         if (considerEnemiesInCenter) {
@@ -32,6 +36,10 @@ class KillAllTargetFilters(private val state: MapLocationState,
 
         return aliveEnemies
     }
+
+//    fun removeInFrontOf() {
+//        RouteToGetInFrontOf.getInFrontOfGrids()
+//    }
 
     fun considerEnemiesInCenter() {
         val numEnemiesInCenter = state.numEnemiesAliveInCenter()
@@ -59,6 +67,8 @@ class KillAllTargetFilters(private val state: MapLocationState,
         if (targetOnlyUse.isNotEmpty()) {
             d { " target only $targetOnlyUse" }
             aliveEnemies = aliveEnemies.filter { targetOnlyUse.contains(it.tile) }.toMutableList()
+            // test on the dragon i think
+            attackOnlySpecified = true
         }
     }
 
@@ -72,6 +82,7 @@ class KillAllTargetFilters(private val state: MapLocationState,
                 if (enemiesThatMightProduceBombs.isNotEmpty()) {
                     d { " !! only target enemies that might produce bombs" }
                     aliveEnemies = enemiesThatMightProduceBombs.toMutableList()
+                    attackOnlySpecified = true
                 }
             } else {
                 val enemiesThatWillNotProduceBombs =
@@ -79,6 +90,7 @@ class KillAllTargetFilters(private val state: MapLocationState,
                 if (enemiesThatWillNotProduceBombs.isNotEmpty()) {
                     d { " !! only target enemies that will not produce bombs" }
                     aliveEnemies = enemiesThatWillNotProduceBombs.toMutableList()
+                    attackOnlySpecified = true
                 }
             }
         }

@@ -382,7 +382,8 @@ class PlanBuilder(
 
     val killAFewWithB: PlanBuilder
         get() {
-            add(lastMapLoc, lootAndKill(KillAll(useBombs = true, numberLeftToBeDead = 8)))
+            // do not get loot incase there is a key on the board
+            add(lastMapLoc, KillAll(useBombs = true, numberLeftToBeDead = 8))
             return this
         }
 
