@@ -180,7 +180,7 @@ class KillAll(
                         d { " !On Target " }
                     }
 
-                    val killRouting = true
+                    val killRouting = false
 //                    if (killRouting) {
 //                        val pad = routeToBest(state, aliveEnemies)
 //                        // TODO: this probably doesn't work

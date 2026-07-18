@@ -17,21 +17,20 @@ class KillAllTargetFilters(private val state: MapLocationState,
         state.frameState.enemiesClosestToLink()
     }.toMutableList()
 
-    private var attackOnlySpecified = false
-
     fun filter(lookForBombs: Boolean): List<Agent> {
         removeDamaged()
         if (considerEnemiesInCenter) {
             considerEnemiesInCenter()
         }
-        targetOnlyInUse()
+        // either of these could filter the targets
         lookForBombs(lookForBombs)
+        targetOnlyInUse()
 
         aliveEnemies.forEach {
             d { "alive enemy $it dist ${it.point.distTo(state.frameState.link.point)}" }
         }
 
-        return if (attackOnlySpecified) aliveEnemies else emptyList()
+        return aliveEnemies
     }
 
     fun considerEnemiesInCenter() {
@@ -60,8 +59,6 @@ class KillAllTargetFilters(private val state: MapLocationState,
         if (targetOnlyUse.isNotEmpty()) {
             d { " target only $targetOnlyUse" }
             aliveEnemies = aliveEnemies.filter { targetOnlyUse.contains(it.tile) }.toMutableList()
-            // test on the dragon i think
-            attackOnlySpecified = true
         }
     }
 
@@ -75,7 +72,6 @@ class KillAllTargetFilters(private val state: MapLocationState,
                 if (enemiesThatMightProduceBombs.isNotEmpty()) {
                     d { " !! only target enemies that might produce bombs" }
                     aliveEnemies = enemiesThatMightProduceBombs.toMutableList()
-                    attackOnlySpecified = true
                 }
             } else {
                 val enemiesThatWillNotProduceBombs =
@@ -83,7 +79,6 @@ class KillAllTargetFilters(private val state: MapLocationState,
                 if (enemiesThatWillNotProduceBombs.isNotEmpty()) {
                     d { " !! only target enemies that will not produce bombs" }
                     aliveEnemies = enemiesThatWillNotProduceBombs.toMutableList()
-                    attackOnlySpecified = true
                 }
             }
         }
