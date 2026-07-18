@@ -137,11 +137,6 @@ class ZStar(
             pointBeforeStart = param.pointBeforeStart)
     }
 
-    // if safe needed
-    // BFS
-    // greedy (if fail)
-    // astar
-
     /**
      * find the path that gets closest to the goal
      */
@@ -723,14 +718,9 @@ class ZStar(
                 }.map { it.toRect() } + (enemies - projectiles.toSet()).map { it.toRect() }
             }
 
-//            d { " set enemy cost for intersecting" }
+            // note: more efficient to cycle over enemies than over points, but this more logical
             costsF.mapXyCurrent { x, y, current ->
-//                val pt = FramePoint(x,y).toRectPlus(MapConstants.halfGrid)
-                val pt = FramePoint(x,y).toRect() //Plus(MapConstants.oneGrid)
-
-//                val cost = enemyRect.sumOf { 1 / it.distTo(pt) } * nearEnemyCost
-//                (current + cost).toInt()
-
+                val pt = FramePoint(x,y).toRect()
                 if (enemyRect.any { pt.intersect(it) }) {
                     current + nearEnemyCost
                 } else {
