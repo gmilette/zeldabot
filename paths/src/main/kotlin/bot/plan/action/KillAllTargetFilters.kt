@@ -23,8 +23,8 @@ class KillAllTargetFilters(private val state: MapLocationState,
             considerEnemiesInCenter()
         }
         // either of these could filter the targets
-        lookForBombs(lookForBombs)
         targetOnlyInUse()
+        lookForBombs(lookForBombs)
 
         aliveEnemies.forEach {
             d { "alive enemy $it dist ${it.point.distTo(state.frameState.link.point)}" }
