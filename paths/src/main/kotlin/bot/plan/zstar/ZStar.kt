@@ -67,11 +67,6 @@ class ZStar(
 
     val neighborFinder = NeighborFinder(passable, halfPassable, isLevel)
 
-    // used for debugging
-    private val totalCosts = mutableMapOf<FramePoint, Int>()
-    // used for debugging
-    private val distanceToGoal = mutableMapOf<FramePoint, Int>()
-
     private val avoid = mutableListOf<FramePoint>()
 
 
@@ -254,6 +249,11 @@ class ZStar(
     fun route(
         param: ZRouteParam
     ): List<FramePoint> {
+        // used for debugging
+        val totalCosts = mutableMapOf<FramePoint, Int>()
+        // used for debugging
+        val distanceToGoal = mutableMapOf<FramePoint, Int>()
+
         setNeighborFinder(param)
 
         val maxIter = MAX_ITER
@@ -444,7 +444,7 @@ class ZStar(
         }
         // todo: actually should pick the best path so far..
         // if there is no goal, then use the closest point to the goal
-        return generatePath(target, cameFrom, pointClosestToGoal).also {
+        return generatePath(target, cameFrom, pointClosestToGoal, totalCosts).also {
             if (it.isEmpty() || it.size == 1) {
                 if (DEBUG) {
                     d { " ****** EMPTY ****** " }
@@ -479,7 +479,6 @@ class ZStar(
         //* can't go right if x + 16 is impassible
         //* can't go up if y + 8 - 1 is impassible (middle of link)
         //* can't go left if x-1 is impassible
-//        if (from.rightEnd)
     }
 
     private fun directionToDir(from: FramePoint, to: FramePoint): Direction {
@@ -516,7 +515,8 @@ class ZStar(
     private fun generatePath(
         targets: List<FramePoint>,
         cameFrom: Map<FramePoint, FramePoint>,
-        lastExplored: FramePoint
+        lastExplored: FramePoint,
+        totalCosts: Map<FramePoint, Int> = emptyMap()
     ): List<FramePoint> {
         val target = targets.firstOrNull { cameFrom.containsKey(it) }
 
@@ -536,7 +536,7 @@ class ZStar(
             if (!cameFrom.containsKey(target)) {
                 d { "no target use $lastExplored looked for $target" }
 
-                cameFrom.forEach { t, u ->
+                cameFrom.forEach { (t, u) ->
                     d { "came from $t -> $u" }
                 }
                 d { " targets " }
