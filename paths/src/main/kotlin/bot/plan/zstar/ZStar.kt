@@ -2,6 +2,7 @@ package bot.plan.zstar
 
 import bot.plan.action.AttackActionDecider
 import bot.plan.action.AttackLongActionDecider
+import bot.plan.action.NavUtil
 import bot.plan.action.RouteTo
 import bot.plan.action.isInGrid
 import bot.plan.zstar.route.BreadthFirstSearch
@@ -87,22 +88,6 @@ class ZStar(
         val enemies: List<FramePoint> = emptyList(),
         val rParam: RouteTo.RoutingParamCommon = RouteTo.RoutingParamCommon(),
     )
-
-//    fun route(
-//        start: FramePoint,
-//        beforeStart: FramePoint? = null,
-//        target: FramePoint,
-//        makePassable: List<FramePoint> = emptyList()
-//    ): List<FramePoint> {
-//        return route(
-//            ZRouteParam(
-//                start = start, targets = listOf(target), pointBeforeStart = beforeStart, enemies = emptyList(),
-//                rParam = RouteTo.RoutingParamCommon(
-//                    forcePassable = makePassable
-//                ),
-//            )
-//        )
-//    }
 
     private fun sum(): Int {
         var sum = 0
@@ -411,7 +396,6 @@ class ZStar(
                 val costS = costFromStart.getOrDefault(toPoint, Int.MAX_VALUE)
                 //  cost < maximumCost failed attempt to discourage
                 if (pathCost < costS) {
-//                if (cost < costS) { // && cost < maximumCost) {
                     // todo: prefer short path, so weight path length vs. distance to
                     if (pointClosestToGoal.isZero ||
                         costToGoal < (distanceToGoal[pointClosestToGoal] ?: Int.MAX_VALUE)
@@ -454,55 +438,12 @@ class ZStar(
         }
     }
 
-    private fun getQuadCost(point: FramePoint): Int =
-        costsF.get(point) + costsF.get(point.justRightEnd) + costsF.get(point.justLeftDown) + costsF.get(point.justRightEndBottom)
-
-    private fun passableFrom(from: FramePoint, to: FramePoint): Boolean {
-        // which direction is it
-
-        val dir = directionToDir(from, to)
-        return when (dir) {
-            Direction.Right -> passable.get(from.rightEnd) && passable.get(from.rightEndDown)
-            Direction.Left -> passable.get(to) && passable.get(from.leftDown)
-            // should be
-            // just the to
-            Direction.Down -> passable.get(from.downEnd)
-                    && passable.get(from.downEndRight)
-
-            Direction.Up -> {
-                passable.get(from.upEnd) && passable.get(from.upEndRight)
-            }
-
-            Direction.None -> true //
-        }
-        //* Can't go down if y + 16, is impassible
-        //* can't go right if x + 16 is impassible
-        //* can't go up if y + 8 - 1 is impassible (middle of link)
-        //* can't go left if x-1 is impassible
-    }
-
     private fun directionToDir(from: FramePoint, to: FramePoint): Direction {
-        return when {
-            from.x == to.x -> {
-                if (from.y < to.y) Direction.Down else Direction.Up
-            }
-
-            from.y == to.y -> {
-                if (from.x < to.x) Direction.Right else Direction.Left
-            }
-
-            else -> Direction.Left
-        }
+        return NavUtil.directionToDir(from, to)
     }
 
     private fun pathSize(cameFrom: Map<FramePoint, FramePoint>, from: FramePoint): Int {
         var current = from
-
-        val path = mutableListOf(current)
-//        d { " came froms "}
-//        for (entry in cameFrom) {
-//            d { " ${entry.key} -> ${entry.value}"}
-//        }
         var size = 0
         while (cameFrom.containsKey(current)) {
             current = cameFrom.getValue(current)
@@ -524,10 +465,6 @@ class ZStar(
         var current = target ?: lastExplored
 
         val path = mutableListOf(current)
-//        d { " came froms "}
-//        for (entry in cameFrom) {
-//            d { " ${entry.key} -> ${entry.value}"}
-//        }
         while (cameFrom.containsKey(current)) {
             current = cameFrom.getValue(current)
             path.add(0, current)
@@ -554,18 +491,9 @@ class ZStar(
         val pathAdjusted = path.toMutableList().map { it.noDir() }
 
         return pathAdjusted.also {
-            // this doesn't work well
-//            if (it.size > 2) {
-//                d { " avoid ${avoid}"}
-//                avoid.add(0, it[1])
-//            }
-//            if (avoid.size > 8) {
-//                avoid.removeLast()
-//            }
             if (DEBUG) {
                 d {
                     it.fold("") { sum, e -> "$sum -> ${e.x},${e.y}${if (e.onHighway) "*" else ""}${if (e.isTopRightCorner) "C" else ""} ${e.direction ?: ""}" }
-                        .toString()
                 }
             }
         }
@@ -600,7 +528,6 @@ class ZStar(
 
     inner class GridCustomizer {
         fun customize(param: ZRouteParam) {
-//            val startSum = sum()
             d { "Plan: iter = enemies ${param.enemies.size}" }
             resetPassable(param.start)
             setAllEnemyCosts(param)
@@ -626,18 +553,6 @@ class ZStar(
             neighborFinder.passable = passable
         }
 
-        private fun surroundedByNotPassable(point: FramePoint) {
-//            val surrounded =
-//                passable.get(point.x - 1, point.y) &&
-//                    passable.get(point.x + 1, point.y) &&
-//                    passable.get(point.x, point.y - 1) &&
-//                    passable.get(point.x, point.y + 1)
-//
-            if (!neighborFinder.passableAndWithin(point)) {
-                d { " !! ALL PASSABLE "}
-                passable = allPassable
-            }
-        }
 
         fun setEnemy(from: FramePoint, point: FramePoint, size: Int = 16) {
             // make cost relative to the distance??? so it's not all the same badness
@@ -662,9 +577,6 @@ class ZStar(
         }
 
         fun setEnemyBig(from: FramePoint, point: FramePoint) {
-//            costsF.modify(from, point.upLeftOneGrid, MapConstants.twoGrid) { _, current ->
-//                current + nearEnemyCost
-//            }
             d { " enemy cost modify from ${point.upHalfLeftOneGrid}" }
             // try it
             costsF.modify(
@@ -672,8 +584,6 @@ class ZStar(
                 point.upLeftHalfOneGrid,
                 sizeWide = MapConstants.twoGrid,
                 sizeTall = MapConstants.oneGridPoint5
-//                sizeWide = MapConstants.threeGrid,
-//                sizeTall = MapConstants.twoGridPoint5
             ) { _, current ->
                 current + nearEnemyCost
             }
@@ -690,8 +600,6 @@ class ZStar(
                 d { " set enemy cost for $enemy" }
                 setEnemyBig(from, enemy)
             }
-            ///???
-//        setForcePassable(enemies, setTo = false)
         }
 
         private fun setAllEnemyCosts(param: ZRouteParam, progress: Int = 0) {
@@ -703,7 +611,6 @@ class ZStar(
                                              projectiles: List<FramePoint>,
                                              progress: Int = 0) {
             reset()
-//            val enemyRect = enemies.map { it.toRectPlus(MapConstants.halfGrid) }
             // it takes about 4 to turn around
             val turnAroundTolerance = 0 // eh, maybe helps a little but no
             val enemyRect = if (progress == 0) {
@@ -743,8 +650,6 @@ class ZStar(
             // was some repeats
             for (grid in grids.toSet()) {
                 d { " set highcost $grid" }
-//                if (DEBUG) {
-//                }
                 costsF.modifyTo(grid, MapConstants.oneGrid, HIGH_COST)
             }
         }
