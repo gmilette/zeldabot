@@ -990,7 +990,6 @@ class GetLoot(
             d { "loot to get: loot $it dist ${it.point.distTo(state.frameState.link.point)}" }
         }
 
-        val previousTarget = target
         target = loot.first().point
 
         // the target cannot actually be beyond the bottom two
@@ -1011,7 +1010,7 @@ class GetLoot(
         d { " get loot for $target from targets $targets" }
         return routeTo.routeTo(
             state, targets,
-            RouteTo.RouteParam(forceNew = previousTarget != target),
+            RouteTo.RouteParam(),
         )
     }
 

@@ -21,10 +21,6 @@ class KillAll(
     // do not try to kill the enemies in the center
     private val considerEnemiesInCenter: Boolean = false,
     /**
-     * how long to wait after all enemies dead to assume all is dead
-     */
-    private var needLongWait: Boolean = false,
-    /**
      * only target these tiles
      */
     private val targetOnly: List<Int> = listOf(),
@@ -105,18 +101,7 @@ class KillAll(
         }
 
     override fun nextStep(state: MapLocationState): GamePad {
-        // once set to true, do not change it back
-        // only the wizzrobes
-        if (!needLongWait && !considerEnemiesInCenter && state.frameState.level in Monsters.levelsWithWizzrobes) {
-            needLongWait = state.longWait.isNotEmpty()
-            if (needLongWait) {
-                d { " set long waited "}
-            } else {
-                d { " no long wait "}
-            }
-        }
-
-        d { " KILL ALL step ${state.currentMapCell.mapLoc} count $frameCount wait $waitAfterAllKilled needLong $needLongWait" }
+        d { " KILL ALL step ${state.currentMapCell.mapLoc} count $frameCount wait $waitAfterAllKilled" }
 
         for (enemy in state.frameState.enemies.filter { it.state != EnemyState.Dead }) {
             d { " enemy: $enemy" }
@@ -173,16 +158,12 @@ class KillAll(
                     d { "No enemies!!" }
                     return routeTo.routeTo(
                         state, listOf(FramePoint(8.grid, 6.grid)),
-                        RouteTo.RouteParam(forceNew = true)
+                        RouteTo.RouteParam()
                     )
                 }
                 firstEnemyOrNull.let { firstEnemy ->
-                    val previousTarget = target
                     target = firstEnemy.point
                     val link = state.frameState.link
-                    // force a new route if this has changed targets
-                    val forceNew = previousTarget.oneStr != target.oneStr
-                    d { "Plan: attack: ${firstEnemy.point} target changed was $previousTarget now $target forceNew = $forceNew" }
 
                     // possibly remove some attack points in front of the enemy
                     val targetsToAttack = when {
@@ -193,25 +174,43 @@ class KillAll(
                         else -> AttackActionDecider.attackPoints(target, not = firstEnemy.dir)
                     }
 
+                    d { "Plan: attack: ${firstEnemy.point} target is $target targets $targetsToAttack" }
+
                     if (link.point in targetsToAttack) {
                         d { " !On Target " }
                     }
 
+                    val killRouting = false
+//                    if (killRouting) {
+//                        val pad = routeToBest(state, aliveEnemies)
+//                        // TODO: this probably doesn't work
+//                        if (pad == GamePad.B && (firstAttackBomb || useBombs)) {
+//                            numPressB = 3
+//                            d { "USE BOMB! it=$pad first $firstAttackBomb $useBombs" }
+//                            numPressB++
+//                            if (numPressB > 3) {
+//                                firstAttackBomb = false
+//                            }
+//                            GamePad.B
+//                        }
+//                        return pad
+//                    }
+
                     // could route to all targets
                     routeTo.routeTo(
-//                    routeTo.routeToBest(
                         state, targetsToAttack,
                         RouteTo.RouteParam(
                             useB = firstAttackBomb || useBombs,
                             allowRangedAttack = !firstAttackBomb,
-                            forceNew = forceNew,
                             allowBlock = allowBlock,
+                            breadthFirst = killRouting,
                             rParam = RouteTo.RoutingParamCommon(
-                                attackTarget = target,
                                 mapNearest = true,
                                 finishWithinStrikingRange = true
                             ),
                         ),
+                        // usually want the empty list so that routeTo can determine attackable
+                        // but not if we are handling the special filter cases
                         attackableSpec = if (enemyFilter.attackOnlySpecified) aliveEnemies else emptyList()
                     ).let {
                         if (numPressB > 0) {
@@ -234,6 +233,23 @@ class KillAll(
             }
         }
     }
+
+    private fun routeToBest(state: MapLocationState, aliveEnemies: List<Agent>): GamePad {
+        return routeTo.routeToBest(
+            state,
+            RouteTo.RouteParam(
+                useB = firstAttackBomb || useBombs,
+                allowRangedAttack = !firstAttackBomb,
+                allowBlock = allowBlock,
+                rParam = RouteTo.RoutingParamCommon(
+                    mapNearest = true,
+                    finishWithinStrikingRange = true
+                ),
+            ),
+            attackableSpec = aliveEnemies
+        )
+    }
+
 }
 
 class DeadForAWhile(

@@ -48,6 +48,16 @@ class RouteExecution(val params: Param = Param()) {
 
     private var theAttack: AlwaysAttackWhenCan = attack
 
+    fun getDetermine(
+        state: MapLocationState,
+        param: RouteParam,
+        attackableSpec: List<Agent> = emptyList(),
+    ): RouteToDetermineAction {
+        val prep = RoutePreparation(params)
+        prep.prepare(state, param, attackableSpec)
+        return RouteToDetermineAction(prep)
+    }
+
     fun route(
         state: MapLocationState,
         to: List<FramePoint>,
@@ -83,14 +93,14 @@ class RouteExecution(val params: Param = Param()) {
             PointMoveAction.Route -> {
                 attack.reset()
                 attackB.reset()
-//                routeTo.doRouteTo(state, to, param)
                 val nextPoint = routeTo.makeNewRoute(
                     param,
                     state,
                     to,
                     preparation.avoid,
                     preparation.avoidProjectiles,
-                    FramePoint()
+                    FramePoint(),
+                    attackableSpec
                 )
                 routeTo.getActionFromRoute(nextPoint, state.link)
             }

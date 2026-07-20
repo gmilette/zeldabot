@@ -22,14 +22,14 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
         param: RouteTo.RouteParam = RouteTo.RouteParam(),
         boomerangCt: Int,
         isAttacking: Boolean,
+        linkDir: Direction = state.frameState.link.dir,
+        link: FramePoint = state.link
     ): PointMoveAction {
 //        if (to.isEmpty()) {
 //            w { " no where to go " }
 //            return PointMoveAction.ForceAction.RandomAction(NavUtil.randomDir(state.link))
 //        }
 
-        val linkDir = state.frameState.link.dir
-        val link = state.link
 
         val attackablePoints by lazy { preparation.attackable.points }
         val blockReflex: GamePad? = if (param.allowBlock && preparation.params.whatToAvoid != WhatToAvoid.JustEnemies) {
@@ -105,6 +105,7 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
     }
 
     private fun exitOfScreen(linkPt: FramePoint, to: List<FramePoint>): GamePad {
+        if (to.isEmpty()) return GamePad.None
         // why this? let's go without it and see if it's ok
         // it gets stuck almost about to exit some levels
         // i'm not sure if this fixes it

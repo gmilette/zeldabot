@@ -70,8 +70,7 @@ class PlanBuilder(
                             lootAndKill(
                                 KillAll(
                                     numberLeftToBeDead = 0,
-                                    lookForBombs = true,
-                                    needLongWait = false,
+                                    lookForBombs = true
                                 )
                             )
                         )
@@ -329,12 +328,12 @@ class PlanBuilder(
         }
     val kill: PlanBuilder
         get() {
-            add(lastMapLoc, lootAndKill(KillAll(needLongWait = false)))
+            add(lastMapLoc, lootAndKill(KillAll()))
             return this
         }
     val killCenterMonster: PlanBuilder
         get() {
-            add(lastMapLoc, KillAll(needLongWait = false, ignoreUntilOnly = circleMonsterCenters))
+            add(lastMapLoc, KillAll(ignoreUntilOnly = circleMonsterCenters))
             return this
         }
     val killUntilBombsLikely: PlanBuilder
@@ -347,19 +346,20 @@ class PlanBuilder(
             killUntilGetBomb(0)
             return this
         }
+    // no longer need to wait long possibly
     val killLongWait: PlanBuilder
         get() {
-            add(lastMapLoc, lootAndKill(KillAll(needLongWait = true)))
+            add(lastMapLoc, lootAndKill(KillAll()))
             return this
         }
     val killFirstAttackBomb: PlanBuilder
         get() {
-            add(lastMapLoc, KillAll(needLongWait = false, firstAttackBomb = true))
+            add(lastMapLoc, KillAll(firstAttackBomb = true))
             return this
         }
     val killWithBombs: PlanBuilder
         get() {
-            add(lastMapLoc, KillAll(needLongWait = false, useBombs = true))
+            add(lastMapLoc, KillAll(useBombs = true))
             return this
         }
     val starKill: PlanBuilder
@@ -368,7 +368,6 @@ class PlanBuilder(
                 lastMapLoc,
                 lootAndKill(
                     KillAll(
-                        needLongWait = false,
                         firstAttackBomb = true,
                         allowBlock = false,
                         // ignore just projectiles I think
@@ -383,25 +382,26 @@ class PlanBuilder(
 
     val killAFewWithB: PlanBuilder
         get() {
-            add(lastMapLoc, lootAndKill(KillAll(needLongWait = false, useBombs = true, numberLeftToBeDead = 8)))
+            // do not get loot incase there is a key on the board
+            add(lastMapLoc, KillAll(useBombs = true, numberLeftToBeDead = 8))
             return this
         }
 
     val killUntil2: PlanBuilder
         get() {
-            add(lastMapLoc, lootAndKill(KillAll(needLongWait = false, numberLeftToBeDead = 2)))
+            add(lastMapLoc, lootAndKill(KillAll(numberLeftToBeDead = 2)))
             return this
         }
     val killLev4Dragon: PlanBuilder
         get() {
-            add(lastMapLoc, KillAll(needLongWait = false,
+            add(lastMapLoc, KillAll(
                 whatToAvoid = RouteTo.WhatToAvoid.JustEnemies,
                 targetOnly = listOf(dragon4Head, dragonHead, dragonHead2)))
             return this
         }
     val killLev1Dragon: PlanBuilder
         get() {
-            add(lastMapLoc, KillAll(needLongWait = false,
+            add(lastMapLoc, KillAll(
                 targetOnly = EnemyGroup.dragon1.toList(),
                 //targetOnly = listOf(dragonHead), //, dragonNeckTile
                 whatToAvoid = RouteTo.WhatToAvoid.JustEnemies))// .JustProjectiles))

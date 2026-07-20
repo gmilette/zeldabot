@@ -199,7 +199,6 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
     private var rDir: Direction? = null
     private var linkDir: Direction? = null
     override fun nextStep(state: MapLocationState): GamePad {
-        val previousTarget = target
         rDir = state.rhinoDir()
 
         updateState(state)
@@ -312,7 +311,7 @@ class KillRhino(private val params: RhinoStrategyParameters = RhinoStrategyParam
         val allowAttack = shouldAttack && (waitCt <= 0)
         val action = routeTo.routeTo(
             state, targets,
-            RouteTo.RouteParam(forceNew = true,
+            RouteTo.RouteParam(
                 useB = useB,
 //                allowAttack = attackRhinoWithSword,
                 allowAttack = shouldAttack && (waitCt <= 0),

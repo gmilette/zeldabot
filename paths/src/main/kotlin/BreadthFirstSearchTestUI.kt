@@ -163,9 +163,10 @@ class BreadthFirstSearchTestUIState {
                 costF = costGrid
             }
             
-            // Create a real BreadthFirstSearch instance - now much simpler!
+            // Goal: within 16px of any enemy (sword strike range)
+            val enemyList = enemies.toList()
             val breadthFirstSearch = BreadthFirstSearch(
-                ableToLongAttack = ableToLongAttack,
+                isGoal = { point -> enemyList.any { point.distTo(it) <= 16 } },
                 neighborFinder = neighborFinder
             )
             

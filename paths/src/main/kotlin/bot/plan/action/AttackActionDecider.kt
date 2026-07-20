@@ -172,17 +172,7 @@ object AttackActionDecider {
     }
 
     private fun directionToDir(from: FramePoint, to: FramePoint): Direction {
-        return when {
-            from.x == to.x -> {
-                if (from.y < to.y) Direction.Down else Direction.Up
-            }
-
-            from.y == to.y -> {
-                if (from.x < to.x) Direction.Right else Direction.Left
-            }
-
-            else -> Direction.Left
-        }
+        return NavUtil.directionToDir(from, to)
     }
 
     // throw b randomly

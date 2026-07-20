@@ -1,5 +1,6 @@
 package bot.plan.action
 
+import bot.plan.action.routeto.RouteToGetInFrontOf
 import bot.state.Agent
 import bot.state.ItemDropPrediction
 import bot.state.MapLocationState
@@ -18,12 +19,14 @@ class KillAllTargetFilters(private val state: MapLocationState,
     }.toMutableList()
 
     var attackOnlySpecified = false
+        private set
 
     fun filter(lookForBombs: Boolean): List<Agent> {
         removeDamaged()
         if (considerEnemiesInCenter) {
             considerEnemiesInCenter()
         }
+        // either of these could filter the targets
         targetOnlyInUse()
         lookForBombs(lookForBombs)
 
@@ -33,6 +36,10 @@ class KillAllTargetFilters(private val state: MapLocationState,
 
         return aliveEnemies
     }
+
+//    fun removeInFrontOf() {
+//        RouteToGetInFrontOf.getInFrontOfGrids()
+//    }
 
     fun considerEnemiesInCenter() {
         val numEnemiesInCenter = state.numEnemiesAliveInCenter()

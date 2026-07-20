@@ -1,18 +1,19 @@
 package bot.plan.action
 
+import bot.plan.action.routeto.PointMoveAction
 import bot.plan.action.routeto.RouteExecution
 import bot.plan.action.routeto.RouteToGetInFrontOf
-import bot.plan.zstar.route.BreadthFirstSearch
-import bot.plan.zstar.route.BreadthFirstSearch.ActionRoute
 import bot.plan.zstar.FrameRoute
 import bot.plan.zstar.ZStar
 import bot.plan.zstar.route.AttackableDecider
+import bot.plan.zstar.route.BreadthFirstSearch
+import bot.plan.zstar.route.BreadthFirstSearch.ActionRoute
+import bot.plan.zstar.route.GoalFunction
 import bot.state.*
-import bot.state.map.*
+import bot.state.map.MapCell
+import bot.state.map.toGamePad
 import util.LogFile
 import util.d
-import util.w
-import kotlin.collections.ifEmpty
 
 class RouteTo(val params: Param = Param()) {
     private var boomerangCt = 0
@@ -72,10 +73,6 @@ class RouteTo(val params: Param = Param()) {
 
     data class RouteParam(
         /**
-         * trigger a new plan
-         */
-        val forceNew: Boolean = false,
-        /**
          * if set, use this map cell, otherwise look up from the current state
          */
         val overrideMapCell: MapCell? = null,
@@ -86,6 +83,7 @@ class RouteTo(val params: Param = Param()) {
         val allowBlock: Boolean = true,
         val allowAttack: Boolean = true,
         val allowRangedAttack: Boolean = true,
+        val breadthFirst: Boolean = false,
         val rParam: RoutingParamCommon = RoutingParamCommon()
     )
 
@@ -98,7 +96,6 @@ class RouteTo(val params: Param = Param()) {
          */
         @Deprecated("Ignored")
         val attackTarget: FramePoint? = null,
-        val ladderSpec: ZStar.LadderSpec? = null,
         /**
          * move any points to their nearest highway grid spot
          */
@@ -126,9 +123,6 @@ class RouteTo(val params: Param = Param()) {
         private set
     private var planCount = 0
 
-    private val attack = AlwaysAttack()
-    private val attackB = AlwaysAttack(useB = true)
-
     fun needsRoute(
         state: MapLocationState,
         to: List<FramePoint>,
@@ -141,7 +135,6 @@ class RouteTo(val params: Param = Param()) {
 
     fun routeToBest(
         state: MapLocationState,
-        to: List<FramePoint>,
         param: RouteParam = RouteParam(),
         // pass in attack targets
         attackableSpec: List<Agent> = emptyList()
@@ -150,7 +143,7 @@ class RouteTo(val params: Param = Param()) {
         val linkPt = state.link
         val paramZ = ZStar.ZRouteParam(
             start = linkPt,
-            targets = to,
+            targets = emptyList(),
             pointBeforeStart = state.previousMove.from,
             enemies = emptyList(),
             projectiles = emptyList(),
@@ -158,8 +151,11 @@ class RouteTo(val params: Param = Param()) {
         )
         state.currentMapCell.zstar.setNeighborFinder(paramZ)
         val ableToShoot = AttackLongActionDecider.ableToShoot(state)
-        val search = BreadthFirstSearch(ableToShoot, true,
-            state.currentMapCell.zstar.neighborFinder)
+        val isGoal = { point: FramePoint ->
+            GoalFunction(ableToLongAttack = ableToShoot, ableToAttack = true, state.currentMapCell.zstar.neighborFinder)
+                .isGoal(point, emptyList(), false)
+        }
+        val search = BreadthFirstSearch(isGoal, state.currentMapCell.zstar.neighborFinder)
         val attackableAgents: List<Agent> = AttackableDecider.aliveEnemiesCanAttack(state)
         val attackable = attackableSpec.ifEmpty {
             attackableAgents
@@ -194,99 +190,14 @@ class RouteTo(val params: Param = Param()) {
         }
     }
 
-    //routeAction
     fun routeTo(
         state: MapLocationState,
         to: List<FramePoint>,
         param: RouteParam = RouteParam(),
-        // pass in attack targets
         attackableSpec: List<Agent> = emptyList()
     ): GamePad {
-        // extract more of the code before actually calling makeRoute and use the route preparation instead
         return routeAction.route(state, to, param, attackableSpec, this)
     }
-
-//    fun routeToOld(
-//        state: MapLocationState,
-//        to: List<FramePoint>,
-//        param: RouteParam = RouteParam(),
-//        // pass in attack targets
-//        attackableSpec: List<Agent> = emptyList()
-//    ): GamePad {
-////        val canAttack = param.allowAttack && !state.frameState.linkDoingAnAttack() && (param.useB || state.frameState.canUseSword)
-//        val preparation = RoutePreparation()
-//        preparation.prepare(state, to, param, attackableSpec)
-//        val decide = RouteToDetermineAction(preparation)
-//        decide.needsImmediateAction()
-//
-//        val blockReflex: GamePad? = if (param.allowBlock && this.params.whatToAvoid != WhatToAvoid.JustEnemies) AttackActionBlockDecider.blockReflex(state) else null
-//        val inRangeOf by lazy { AttackActionDecider.inRangeOf(state, attackable.map { it.point } , useB) }
-//        val shouldLongAttack by lazy { param.allowRangedAttack && AttackLongActionDecider.shouldShootSword(state, attackable.map { it.point }) }
-//        val shouldLongBoomerang by lazy { param.allowRangedAttack && boomerangCt <= 0 && AttackLongActionDecider.shouldBoomerang(state, boomerangable) }
-//        boomerangCt--
-//
-//        val considerAttacks = allowAttack && attackPossible
-//        return when {
-//            blockReflex != null -> {
-//                d { " Route Action -> Block Reflex! $blockReflex" }
-//                blockReflex
-//            }
-//            considerAttacks && (attack.isAttacking()) -> {
-//                d { " Route Action -> Keep Attacking" }
-//                theAttack.nextStep(state)
-//            }
-//
-//            considerAttacks && canAttack && shouldLongAttack -> {
-//                d { " Route Action -> LongAttack" }
-//                theAttack.nextStep(state)
-//            }
-//
-//            considerAttacks && canAttack && shouldLongBoomerang -> {
-//                d { " Route Action -> LongAttack Boomerang" }
-//                boomerangCt = if (state.boomerangActive) {
-//                    // it's possible to get stuck doing the boomerang over and over never attacking
-//                    typically(WAIT_BETWEEN_BOOMERANG, everySoOften = WAIT_BETWEEN_BOOMERANG * 2)
-//                } else {
-//                    WAIT_BETWEEN_NOT_BOOMERANG
-//                }
-//                attackB.nextStep(state)
-//            }
-//
-//            !allowAttack ||
-//                    !attackPossible ||
-//                    (inRangeOf.isAttack && theAttack.attackWaiting()) || //rhino
-//                    (state.frameState.clockActivated && Random.nextInt(10) == 1) ||
-//                    // this is weird, no need to do this yet
-////                    AttackActionDecider.getInFrontOfGrids(state) ||
-//                    inRangeOf == GamePad.None -> {
-//                attack.reset()
-//                attackB.reset()
-//                d { " Route Action -> No Attack allow=${allowAttack} possible=${attackPossible} clock=${state.frameState.clockActivated} inRangeOf=${inRangeOf == GamePad.None} rh=${(inRangeOf.isAttack && theAttack.attackWaiting())}" }
-//                doRouteTo(state, to, param)
-//            }
-//
-//            else -> {
-//                d { " Route Action -> RangeAction $inRangeOf use ${theAttack.gameAction} is=${inRangeOf.isAttack}" }
-//                // Problem --> if link is at a crossroads and especially if he is trying to move perpendicular
-//                // it will probably not work
-//                // solutions -> Include this in the cornering logic
-//                // don't allow perpendicular facing of the enemy,
-//                //  but then again, link can't turn around, so really this is just to turn off facing the enemy
-//                if (inRangeOf.isAttack) {
-//                    theAttack.nextStep(state)
-//                } else {
-//                    inRangeOf
-//                }
-//            }
-//        }
-//    }
-
-//    private fun typically(typical: Int, everySoOften: Int): Int =
-//        if (Random.nextInt(6) == 1) {
-//            everySoOften
-//        } else {
-//            typical
-//        }
 
     private fun writeFile(
         to: List<FramePoint>,
@@ -305,143 +216,14 @@ class RouteTo(val params: Param = Param()) {
         )
     }
 
-    fun doRouteTo(
-        state: MapLocationState,
-        to: List<FramePoint>,
-        paramIn: RouteParam
-    ): GamePad {
-        d { " DO routeTo TO ${to.size} points first ${to.firstOrNull()} currently at ${state.currentMapCell.mapLoc} what to avoid: ${params.whatToAvoid}" }
-        val param = paramIn.copy(rParam = paramIn.rParam.copy(attackTarget = null))
-        var forceNew = true || param.forceNew
-        if (to.isEmpty()) {
-            w { " no where to go " }
-            return NavUtil.randomDir(state.link)
-        }
-        val linkPt = state.frameState.link.point
-        val exitOffScreenAction = exitOfScreen(linkPt, to)
-        if (exitOffScreenAction != GamePad.None) {
-            return exitOffScreenAction
-        }
-
-        val skippedButIsOnRoute = (state.previousMove.skipped && route?.isOn(linkPt, 5) != null)
-        if (skippedButIsOnRoute) {
-            route?.popUntil(linkPt)
-        }
-
-        // getting me suck: && params.planCountMax != 1000
-        // there are no enemies so it just keeps forcing replanning
-        // make a new boolean force new ONCE
-        if (!state.hasEnemiesOrLootOrProjectiles && params.planCountMax != 1000) {
-            d { " NO alive enemies, no need to replan just go plan count max: ${params.planCountMax}" }
-            // make a plan now though
-            forceNew = false // wny is this true?? no enemies!
-            params.planCountMax = 1000
-        } else {
-            d { " alive enemies, keep re planning" }
-            // don't reset this if there are no more enemies
-            // otherwise this gets into a loop, reset to 20, then force replan
-            // set to 1000, then reset
-            // TODO needs test, it breaks shop
-//            if (state.hasEnemiesOrLoot && params.planCountMax != 1000) {
-//                params.planCountMax = 20
-//            }
-            params.planCountMax = 20
-        }
-
-        var nextPoint: FramePoint = route?.pop() ?: FramePoint()
-        val routeSize = route?.path?.size ?: 0
-
-        // this is an optimization I dont think is necessary
-        val linkPoints = linkPt.corners
-        val enemiesNear =
-            state.aliveOrProjectile.filter { it.point.minDistToAny(linkPoints) < MapConstants.oneGrid * 5 }
-        // nothing to avoid if the clock is activated
-        var avoid = if (!state.frameState.clockActivated) {
-            // this seems to be ok, except link can get hit from the side
-            // unless it avoids projectiles
-            when (params.whatToAvoid) {
-                WhatToAvoid.None -> emptyList()
-                WhatToAvoid.JustProjectiles -> state.projectiles
-                WhatToAvoid.JustEnemies -> state.aliveEnemies
-                else -> state.aliveOrProjectile
-            }
-        } else {
-            emptyList()
-        }
-
-        var avoidProjectiles = if (!state.frameState.clockActivated) {
-            // this seems to be ok, except link can get hit from the side
-            // unless it avoids projectiles
-            when (params.whatToAvoid) {
-                WhatToAvoid.None,
-                WhatToAvoid.JustEnemies -> emptyList()
-                else -> state.projectiles
-            }
-        } else {
-            emptyList()
-        }
-
-//
-//        if (param.ignoreEnemies) {
-//            d { "ignore enemies" }
-//            avoid = avoid.filter { it.state != EnemyState.Alive }
-//        }
-
-        param.rParam.attackTarget?.let { targetAttack ->
-            d { " remove enemy from filter $targetAttack" }
-            avoid = avoid.filter { it.point != targetAttack }
-        }
-
-        for (agent in avoid) {
-            d { " enemy avoid $agent" }
-        }
-
-        if (forceNew ||
-            route == null || // reset
-            routeSize <= 2 ||
-            planCount >= params.planCountMax || // could have gotten off track
-            !state.previousMove.movedNear || // got hit
-            enemiesNear.isNotEmpty() // if near an enemy replan, probably not important
-        ) {
-            val why = when {
-                forceNew -> "force new $planCount of ${params.planCountMax}"
-                !state.previousMove.movedNear -> "got hit"
-                planCount >= params.planCountMax -> "old plan max=${params.planCountMax}"
-                route == null -> "no plan"
-                routeSize <= 2 -> " 2 sized route"
-                !skippedButIsOnRoute -> "skipped and not on route"
-                enemiesNear.isNotEmpty() -> "nearby enemies, replan"
-                else -> "I donno"
-            }
-
-            d { " Plan: ${state.currentMapCell.mapLoc} new plan! because ($why) to $to" }
-            nextPoint = makeNewRoute(param, state, to, avoid, avoidProjectiles, nextPoint)
-        } else {
-            d { " Plan: same plan ct $planCount" }
-        }
-
-        planCount++
-        d { " go to from $linkPt to next $nextPoint $to" }
-
-        return when {
-            nextPoint.isZero && linkPt.x == 0 -> GamePad.MoveLeft
-            nextPoint.isZero && linkPt.y == 0 -> GamePad.MoveUp
-            // already in a good spot
-            nextPoint.isZero -> GamePad.None
-            else -> nextPoint.direction?.toGamePad() ?: linkPt.directionTo(nextPoint)
-        }.also {
-            //        writeFile(to, state, it)
-            d { " next point $nextPoint dir: $it ${if (nextPoint.direction != null) "HAS DIR ${nextPoint.direction}" else ""}" }
-        }
-    }
-
     fun makeNewRoute(
         param: RouteParam,
         state: MapLocationState,
         to: List<FramePoint>,
         avoid: List<Agent>,
         avoidProjectiles: List<Agent>,
-        nextPoint: FramePoint
+        nextPoint: FramePoint,
+        attackableSpec: List<Agent> = emptyList()
     ): FramePoint {
         val linkPt = state.frameState.link.point
         val ladder = state.frameState.ladder
@@ -459,16 +241,17 @@ class RouteTo(val params: Param = Param()) {
             d { "in front grid $point"}
         }
 
-        if (state.frameState.ladderDeployed) {
-            val dirToGo = state.bestDirection()
-            d { " make new route ladder deployed Go dir: $dirToGo"}
-            val modifier = if (dirToGo == Direction.None) {
-                GamePad.randomDirection(state.link).toDirection().pointModifier()
-            } else {
-                dirToGo.pointModifier()
-            }
-            return modifier(linkPt)
-        }
+        // don't need I think
+//        if (state.frameState.ladderDeployed) {
+//            val dirToGo = state.bestDirection()
+//            d { " make new route ladder deployed Go dir: $dirToGo"}
+//            val modifier = if (dirToGo == Direction.None) {
+//                GamePad.randomDirection(state.link).toDirection().pointModifier()
+//            } else {
+//                dirToGo.pointModifier()
+//            }
+//            return modifier(linkPt)
+//        }
 
         val paramZ = ZStar.ZRouteParam(
             start = linkPt,
@@ -481,16 +264,21 @@ class RouteTo(val params: Param = Param()) {
                 forceHighCost = param.rParam.forceHighCost + inFrontOfGrids
             )
         )
-        route = FrameRoute(
-            mapCell.zstar.route(paramZ)) //.cornering(state.link, state.frameState.link.dir)
 
+        val routePoints = if (param.breadthFirst) {
+            val determine = routeAction.getDetermine(state, param, attackableSpec)
+            val isGoal = { point: FramePoint ->
+                val linkCopy = state.frameState.link.copy(point = point)
+                val frameCopy = state.frameState.copy(link = linkCopy)
+                val stateWithLinkMoved = state.copy(frameState = frameCopy)
+                determine.nextAction(stateWithLinkMoved, emptyList(), param, 0, false) != PointMoveAction.Route
+            }
+            mapCell.zstar.routeWithBfs(paramZ, isGoal)
+        } else {
+            mapCell.zstar.route(paramZ)
+        }
+        route = FrameRoute(routePoints)
 
-//        route?.path?.lastOrNull()?.let { lastPt ->
-//            // if it is just projectile then don't try to route towards the projectiles
-//            if (param.rParam.mapNearest || lastPt in to || state.frameState.ladderDeployed || !state.hasEnemies) {
-//                d { "route to success target" }
-//            }
-//        }
         route?.next15()
         nextPoint1 = route?.popOrEmpty() ?: FramePoint() // skip first point because it is the current location
         nextPoint1 = route?.popOrEmpty() ?: FramePoint()
@@ -507,32 +295,5 @@ class RouteTo(val params: Param = Param()) {
             route?.decideDirection(linkPt, state.frameState.link.dir)
         d { " next is $nextPoint1 of ${route?.numPoints ?: 0}" }
         return nextPoint1.copy(direction = pointDir)
-    }
-
-    private fun exitOfScreen(linkPt: FramePoint, to: List<FramePoint>): GamePad {
-        // why this? let's go without it and see if it's ok
-        // it gets stuck almost about to exit some levels
-        // i'm not sure if this fixes it
-        val closest = to.minBy { it.distTo(linkPt) }
-        return if (linkPt.distTo(closest) <= 1) {
-            d { " CLOSE!! $closest" }
-            if (closest.y <= 1) {
-                d { " CLOSE!! up" }
-                GamePad.MoveUp
-            } else if (closest.x <= 1) {
-                d { " CLOSE!! left" }
-                GamePad.MoveLeft
-            } else if (closest.x >= MapConstants.MAX_X - 2) {
-                d { " CLOSE!! right" }
-                GamePad.MoveRight
-            } else if (closest.y >= MapConstants.MAX_Y - 2) {
-                d { " CLOSE!! down" }
-                GamePad.MoveDown
-            } else {
-                GamePad.None
-            }
-        } else {
-            GamePad.None
-        }
     }
 }

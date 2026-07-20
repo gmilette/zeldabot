@@ -74,7 +74,6 @@ class NavUtilTest {
         cell: MapLoc, from: FramePoint, target: FramePoint,
         dirResult: GamePad, level: Int = 0, before: FramePoint? = null, makePassable: FramePoint? = null,
         enemies: List<FramePoint> = emptyList(),
-        ladderSpec: ZStar.LadderSpec? = null,
         routeSafe: Boolean = false
     ) {
         checkA(
@@ -86,7 +85,6 @@ class NavUtilTest {
             level,
             makePassable = makePassable,
             enemies = enemies,
-            ladderSpec,
             routeSafe
         )
     }
@@ -94,7 +92,7 @@ class NavUtilTest {
     private fun checkA(
         cell: MapLoc, from: FramePoint, targets: List<FramePoint>,
         before: FramePoint? = null, dirResult: GamePad, level: Int = 0, makePassable: FramePoint? = null,
-        enemies: List<FramePoint> = emptyList(), ladderSpec: ZStar.LadderSpec? = null,
+        enemies: List<FramePoint> = emptyList(),
         routeSafe: Boolean = false
     ) {
         val hyrule = Hyrule()
@@ -159,7 +157,6 @@ class NavUtilTest {
                     enemies = enemies,
                     rParam = RouteTo.RoutingParamCommon(
                         forcePassable = passable,
-                        ladderSpec = ladderSpec
                     ),
                 )
             )
@@ -172,7 +169,6 @@ class NavUtilTest {
                     enemies = enemies,
                     rParam = RouteTo.RoutingParamCommon(
                         forcePassable = passable,
-                        ladderSpec = ladderSpec
                     ),
                 )
             )
@@ -435,13 +431,12 @@ class NavUtilTest {
         // works if I give it more iterations, to find a route
         // that isn't on the highway
         ZStar.MAX_ITER = 1000
-        val ladder = FramePoint(120, 99)
         val link = FramePoint(120, 104)
 //        val target = FramePoint(48, 70)
         val target = FramePoint(56, 90)
         check(
             51, link, target, GamePad.MoveUp, level = 1,
-            before = link.left, ladderSpec = ZStar.LadderSpec(false, ladder)
+            before = link.left
         )
     }
 
