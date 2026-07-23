@@ -30,8 +30,8 @@ object Level2Plan {
             right
             kill
             goTo(Loc.keyMid)
-            loot // maybe try to get loot
-            up // nothing here
+            loot
+            up
             seg("gather key 2")
             left
             kill
@@ -42,7 +42,6 @@ object Level2Plan {
             right // grid room
             seg("sprint up from grid")
             up
-//                seg("go get blue boomerang")
             upm
             seg("gather key 3", ZeldaItem.Key)
             kill
@@ -55,10 +54,8 @@ object Level2Plan {
             upNoBlock // the squishy guy appears like a projectile so do not block
             kill
             seg("bomb room")
-            // no key I think
-//            goTo(Loc.keyMid)
             up
-            kill // blocked before going // allow bombs
+            kill // blocked before going
             goTo(Loc.bombItemRight)
             up
             seg(Phases.Segment.lev2Boss)
