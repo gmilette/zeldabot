@@ -23,12 +23,19 @@ object AttackActionDecider {
 
     fun attackPoints(point: FramePoint, not: Direction): List<FramePoint> {
         return when (not) {
-            Direction.Up -> point.upPoints() + point.rightPoints() + point.leftPoint() // + point.downPoint()
-            Direction.Down -> point.rightPoints() + point.leftPoint() + point.downPoint()
-            Direction.Left -> point.upPoints() + point.leftPoint() + point.downPoint()
-            Direction.Right -> point.upPoints() + point.rightPoints() + point.downPoint()
+            Direction.Up -> point.downPoint() + point.rightPoints() + point.leftPoint() // + point.downPoint()
+            Direction.Down -> point.rightPoints() + point.leftPoint() + point.upPoints()
+            Direction.Left -> point.upPoints() + point.rightPoints() + point.downPoint()
+            Direction.Right -> point.upPoints() + point.leftPoint() + point.downPoint()
             else -> attackPointsNoCorner(point)
         }
+//        return when (not) {
+//            Direction.Up -> point.upPoints() + point.rightPoints() + point.leftPoint() // + point.downPoint()
+//            Direction.Down -> point.rightPoints() + point.leftPoint() + point.downPoint()
+//            Direction.Left -> point.upPoints() + point.leftPoint() + point.downPoint()
+//            Direction.Right -> point.upPoints() + point.rightPoints() + point.downPoint()
+//            else -> attackPointsNoCorner(point)
+//        }
     }
 
 
@@ -281,8 +288,19 @@ object AttackActionDecider {
             if (DEBUG) {
                 d { " ** face" }
             }
+
             // check other directions
-            val otherDirs = swords.filter { it.key != from}
+            val otherDirs = swords.filter { it.key != from}.toMutableMap()
+            // if near vertical highway, can face up/down,
+            if (!link.onHighwayXAlmostOrBeyond) {
+                otherDirs.remove(Direction.Up)
+                otherDirs.remove(Direction.Down)
+            }
+            if (!link.onHighwayYAlmostOrBeyond) {
+                otherDirs.remove(Direction.Left)
+                otherDirs.remove(Direction.Right)
+            }
+
             if (DEBUG) {
                 d { " ** face other $otherDirs $from num close ${enemiesClose.size}" }
                 for (rectangle in enemiesClose) {

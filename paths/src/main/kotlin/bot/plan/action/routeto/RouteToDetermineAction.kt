@@ -16,6 +16,49 @@ import kotlin.random.Random
 class RouteToDetermineAction(val preparation: RoutePreparation) {
     private val ladderDecider = LadderActionDecider()
 
+    fun nextAttackAction(
+        state: MapLocationState,
+        to: List<FramePoint>,
+        param: RouteTo.RouteParam = RouteTo.RouteParam(),
+        boomerangCt: Int,
+        isAttacking: Boolean,
+        linkDir: Direction = state.frameState.link.dir,
+        link: FramePoint = state.link
+    ): PointMoveAction {
+        val attackablePoints by lazy { preparation.attackable.points }
+        val shouldLongAttack by lazy { param.allowRangedAttack && AttackLongActionDecider.shouldShootSword(state, attackablePoints, link, linkDir) }
+        val shouldLongBoomerang by lazy { param.allowRangedAttack && boomerangCt <= 0 && AttackLongActionDecider.shouldBoomerang(state, preparation.boomerangable, link, linkDir) }
+        val inRangeOf by lazy { AttackActionDecider.inRangeOf(linkDir, link, attackablePoints, param.useB, faceEnemy = true) }
+        val shouldShortAttack by lazy { inRangeOf.isAttack }
+        val shouldFace by lazy { inRangeOf.isDirection }
+
+        val canAttack = preparation.canAttack
+        val attackPossible = preparation.attackPossible
+
+        val considerAttacks = RouteTo.allowAttack && attackPossible
+        d { " Determine route action attacking=$isAttacking consider=$considerAttacks "}
+
+        return when {
+            considerAttacks && canAttack && shouldLongAttack -> {
+                PointMoveAction.LongAttack
+            }
+            considerAttacks && canAttack && shouldShortAttack -> {
+                PointMoveAction.ShortAttack
+            }
+            considerAttacks && preparation.canLongAttack && shouldLongBoomerang -> {
+                PointMoveAction.BoomerangAttack
+            }
+            considerAttacks && canAttack && shouldFace -> {
+                d { " Route Action -> Face $inRangeOf" }
+                PointMoveAction.ForceAction.FaceEnemyForAttack(inRangeOf)
+            }
+            else -> {
+                d { " Route Action -> Route" }
+                PointMoveAction.Route
+            }
+        }
+    }
+
     fun nextAction(
         state: MapLocationState,
         to: List<FramePoint>,

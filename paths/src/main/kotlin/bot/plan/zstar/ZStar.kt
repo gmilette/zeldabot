@@ -29,8 +29,8 @@ class ZStar(
     private val allPassable = passable.copy().mapXy { i, i2 -> true }
     companion object {
         var DEBUG = false
-        var DEBUG_B = true
-        var DEBUG_V = true
+        var DEBUG_B = false
+        var DEBUG_V = false
         private val DEBUG_DIR = false
         val DEBUG_ONE = false
 
@@ -86,6 +86,7 @@ class ZStar(
         val projectiles: List<FramePoint> = emptyList(),
         val pointBeforeStart: FramePoint? = null,
         val enemies: List<FramePoint> = emptyList(),
+        val isGoal: (FramePoint) -> Boolean = { false },
         val rParam: RouteTo.RoutingParamCommon = RouteTo.RoutingParamCommon(),
     )
 
@@ -143,6 +144,7 @@ class ZStar(
         pointBeforeStart: FramePoint?,
         visited: MutableSet<FramePoint> = mutableSetOf()
     ): List<FramePoint> {
+        d { " find neighbors bf "}
         val toExplore = neighborFinder.neighbors(current, from = pointBeforeStart).toMutableList()
         val cameFrom = mutableMapOf<FramePoint, FramePoint>()
         var finalPoint = FramePoint()
@@ -326,23 +328,34 @@ class ZStar(
 
             // enemy target is always null currently, this is going to route to nearest
             // which is what we want anyway I think
-            var doneBecause = "strike"
+            var doneBecause = "unknown"
             // iterCount > 0 check is here so that this doesn't return an empty route
             // if the current point really was in range of striking it wouldn't have entered
             // this routine
-            val done = if (iterCount > 0 && param.rParam.finishWithinStrikingRange) {
-                val inLongRange = param.rParam.finishWithinLongStrikingRange &&
-                        // hard to do without direction..
-                        AttackLongActionDecider.inStrikingRange(point, enemies = param.enemies)
-                // this does match how inRangeOf determines attacking
-                AttackActionDecider.inStrikingRange(point, enemies = param.enemies)
-            } else if (routeToSafe && costsF.safe(point)) {
-                doneBecause = "safe"
-                true
-            } else {
-                doneBecause = "at target"
-                target.contains(point) // && costsF.safe(point)
+            val done = when {
+                param.rParam.finishWithinStrikingRange && param.isGoal(point) -> {
+                    doneBecause = "goal"
+                    true
+                }
+                (false && iterCount > 0 && param.rParam.finishWithinStrikingRange) -> {
+                    doneBecause = "strike"
+                    val inLongRange = param.rParam.finishWithinLongStrikingRange &&
+                            // hard to do without direction..
+                            AttackLongActionDecider.inStrikingRange(point, enemies = param.enemies)
+                    // this does match how inRangeOf determines attacking
+                    // TODO: Ignores sword in front of!!
+                    AttackActionDecider.inStrikingRange(point, enemies = param.enemies)
+                }
+                (routeToSafe && costsF.safe(point)) -> {
+                    doneBecause = "safe"
+                    true
+                }
+                else -> {
+                    doneBecause = "at target"
+                    target.contains(point) // && costsF.safe(point)
+                }
             }
+
             if (done) {
                 if (DEBUG) {
                     d { " explore found: $point done because $doneBecause" }
@@ -370,8 +383,14 @@ class ZStar(
 
             neighborFinder.costF = costsF
             val fromPoint = cameFrom[point]
+            d { " find neighbors "}
             val neighbors =
                 (neighborFinder.neighbors(point, dir, dist ?: 0, from = fromPoint) - closedList - avoid).shuffled()
+            if (neighbors.isEmpty()) {
+                d(DEBUG) { " no neighbors for $point closed: $closedList avoid: $avoid" }
+            } else {
+                d(DEBUG) { "found neighbors for $point: ${neighbors.size}" }
+            }
             for (toPoint in neighbors) {
                 // raw cost of this cell
                 val cost = costsF.get(toPoint)
@@ -540,6 +559,7 @@ class ZStar(
 
         private fun resetPassable(start: FramePoint) {
             // and no neighbors
+            d { " reset passable " }
             val initialNeighbors = neighborFinder.neighbors(start, Direction.None)
             passable = if (initialNeighbors.isNotEmpty() && neighborFinder.passableAndWithin(start)) {
                 initialPassable.copy()
