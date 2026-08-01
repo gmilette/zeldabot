@@ -28,7 +28,7 @@ class ZStar(
     }
     private val allPassable = passable.copy().mapXy { i, i2 -> true }
     companion object {
-        var DEBUG = false
+        var DEBUG = true
         var DEBUG_B = false
         var DEBUG_V = false
         private val DEBUG_DIR = false
@@ -383,7 +383,7 @@ class ZStar(
 
             neighborFinder.costF = costsF
             val fromPoint = cameFrom[point]
-            d { " find neighbors "}
+            d(DEBUG) { " find neighbors "}
             val neighbors =
                 (neighborFinder.neighbors(point, dir, dist ?: 0, from = fromPoint) - closedList - avoid).shuffled()
             if (neighbors.isEmpty()) {

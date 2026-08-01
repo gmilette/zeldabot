@@ -360,7 +360,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         private val drawAttackPoints = false
         private val drawDamaged = true
         private val drawHasLessThanMaxHp = false
-        private val drawEnemyCosts = false
+        private val drawEnemyCosts = true
 
         private val rhinoHeadLeftUp = 0xFA // foot up
         private val rhinoHeadLeftUp2 = 0xFC // foot down
