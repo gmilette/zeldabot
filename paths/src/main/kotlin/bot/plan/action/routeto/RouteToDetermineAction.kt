@@ -16,6 +16,60 @@ import kotlin.random.Random
 class RouteToDetermineAction(val preparation: RoutePreparation) {
     private val ladderDecider = LadderActionDecider()
 
+    fun nextAttackAction(
+        state: MapLocationState,
+        to: List<FramePoint>,
+        param: RouteTo.RouteParam = RouteTo.RouteParam(),
+        boomerangCt: Int,
+        isAttacking: Boolean,
+        linkDir: Direction = state.frameState.link.dir,
+        link: FramePoint = state.link
+    ): PointMoveAction {
+        val attackPossible = preparation.attackPossible
+        val considerAttacks = RouteTo.allowAttack && attackPossible
+        d { " Determine route action consider=$considerAttacks "}
+
+        if (!considerAttacks) {
+            d { " Route Action -> Route (consider)" }
+            return PointMoveAction.Route
+        }
+
+        if (isAttacking) {
+            return PointMoveAction.ContinueAttack
+        }
+
+        val canAttack = preparation.canAttack
+        val shouldLongBoomerang by lazy { preparation.canLongAttack && param.allowRangedAttack && boomerangCt <= 0 && AttackLongActionDecider.shouldBoomerang(state, preparation.boomerangable, link, linkDir) }
+        val attackablePoints by lazy { preparation.attackable.points }
+        val shouldLongAttack by lazy { canAttack && param.allowRangedAttack && AttackLongActionDecider.shouldShootSword(state, attackablePoints, link, linkDir) }
+        val inRangeOf by lazy { AttackActionDecider.inRangeOf(linkDir, link, attackablePoints, param.useB, faceEnemy = true) }
+        val shouldShortAttack by lazy { canAttack && inRangeOf.isAttack }
+        val shouldFace by lazy { canAttack && inRangeOf.isDirection }
+
+        return when {
+            shouldLongAttack -> {
+                d { " Route Action -> Long" }
+                PointMoveAction.LongAttack
+            }
+            shouldShortAttack -> {
+                d { " Route Action -> Short" }
+                PointMoveAction.ShortAttack
+            }
+            shouldLongBoomerang -> {
+                d { " Route Action -> Boomerang" }
+                PointMoveAction.BoomerangAttack
+            }
+            shouldFace -> {
+                d { " Route Action -> Face $inRangeOf" }
+                PointMoveAction.ForceAction.FaceEnemyForAttack(inRangeOf)
+            }
+            else -> {
+                d { " Route Action -> Route" }
+                PointMoveAction.Route
+            }
+        }
+    }
+
     fun nextAction(
         state: MapLocationState,
         to: List<FramePoint>,
@@ -30,22 +84,22 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
 //            return PointMoveAction.ForceAction.RandomAction(NavUtil.randomDir(state.link))
 //        }
 
-
         val attackablePoints by lazy { preparation.attackable.points }
         val blockReflex: GamePad? = if (param.allowBlock && preparation.params.whatToAvoid != WhatToAvoid.JustEnemies) {
             AttackActionBlockDecider.blockReflex(state)
         } else {
             null
         }
-        val shouldLongAttack by lazy { param.allowRangedAttack && AttackLongActionDecider.shouldShootSword(state, attackablePoints) }
-        val shouldLongBoomerang by lazy { param.allowRangedAttack && boomerangCt <= 0 && AttackLongActionDecider.shouldBoomerang(state, preparation.boomerangable) }
+        val canAttack = preparation.canAttack
+        val shouldLongBoomerang by lazy { preparation.canLongAttack && param.allowRangedAttack && boomerangCt <= 0 && AttackLongActionDecider.shouldBoomerang(state, preparation.boomerangable, link, linkDir) }
+        val shouldLongAttack by lazy { canAttack && param.allowRangedAttack && AttackLongActionDecider.shouldShootSword(state, attackablePoints, link, linkDir) }
         val inRangeOf by lazy { AttackActionDecider.inRangeOf(linkDir, link, attackablePoints, param.useB, faceEnemy = true) }
-        val shouldShortAttack by lazy { inRangeOf.isAttack }
-        val shouldFace by lazy { inRangeOf.isDirection }
+        val shouldShortAttack by lazy { canAttack && inRangeOf.isAttack }
+        val shouldFace by lazy { canAttack && inRangeOf.isDirection }
+
         val ladderAction by lazy { ladderDecider.doLadderAction(state) }
         val exitOffScreenAction by lazy { exitOfScreen(state.frameState.link.point, to) }
 
-        val canAttack = preparation.canAttack
         val attackPossible = preparation.attackPossible
 //        val canAttack = param.allowAttack && !state.frameState.linkDoingAnAttack() && (param.useB || state.frameState.canUseSword)
 
@@ -71,20 +125,20 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
             // idea: if sword is flying, do not route in to short attack
             // instead evade until the sword is not flying
             // then after that do normal routing
-            considerAttacks && canAttack && shouldLongAttack -> {
+            considerAttacks && shouldLongAttack -> {
                 d { " Route Action -> LongAttack" }
                 PointMoveAction.LongAttack
             }
             // prefer short attack over boomeranging
-            considerAttacks && canAttack && shouldShortAttack -> {
+            considerAttacks && shouldShortAttack -> {
                 d { " Route Action -> Attack" }
                 PointMoveAction.ShortAttack
             }
-            considerAttacks && preparation.canLongAttack && shouldLongBoomerang -> {
+            considerAttacks && shouldLongBoomerang -> {
                 d { " Route Action -> LongAttack Boomerang" }
                 PointMoveAction.BoomerangAttack
             }
-            considerAttacks && canAttack && shouldFace -> {
+            considerAttacks && shouldFace -> {
                 d { " Route Action -> Face $inRangeOf" }
                 PointMoveAction.ForceAction.FaceEnemyForAttack(inRangeOf)
             }

@@ -128,6 +128,13 @@ val Int.notOnEdgeY: Boolean
 
 val Int.notOnEdge: Boolean
     get() = this in (MapConstants.oneGrid + 4)..(MapConstants.MAX_X - MapConstants.oneGrid)
+
+val FramePoint.onHighwayXAlmostOrBeyond: Boolean
+    get() = onHighwayXAlmost || onHighwayXAlmostBeyond || onHighwayX
+
+val FramePoint.onHighwayYAlmostOrBeyond: Boolean
+    get() = onHighwayYAlmost || onHighwayYAlmostBeyond || onHighwayY
+
 val FramePoint.onHighway: Boolean
     get() = onHighwayX || onHighwayY
 
