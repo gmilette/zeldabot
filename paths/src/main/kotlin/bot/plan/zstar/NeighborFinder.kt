@@ -117,10 +117,10 @@ class NeighborFinder(
                 // it's pointless to explore a point link cannot walk on. Link can
                 // only walk on highways
                 if (next.onHighway) {
-                    d { " within and passable and on highway $next"}
+                    d(ZStar.DEBUG) { " within and passable and on highway $next"}
                     neigh.add(next)
                 } else {
-                    d { " not on highway"}
+                    d(ZStar.DEBUG) { " not on highway"}
                 }
 
                 // but it's possible link could attempt to move before a corner
