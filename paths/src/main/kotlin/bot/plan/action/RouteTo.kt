@@ -18,7 +18,6 @@ import util.LogFile
 import util.d
 
 class RouteTo(val params: Param = Param()) {
-    private var boomerangCt = 0
     private var routeAction = RouteExecution(params)
 
     companion object {
@@ -298,14 +297,14 @@ class RouteTo(val params: Param = Param()) {
 }
 
 private class IsGoal(
-    routeAction: RouteExecution,
+    private val routeAction: RouteExecution,
     private val state: MapLocationState,
     private val param: RouteParam,
     attackableSpec: List<Agent> = emptyList()
 ) {
     val determine = routeAction.getDetermine(state, param, attackableSpec)
     fun isGoal(point: FramePoint): Boolean {
-        val action = determine.nextAttackAction(state, emptyList(), param, 0, false, link = point, linkDir = point.direction ?: Direction.None)
+        val action = determine.nextAttackAction(state, emptyList(), param, routeAction.boomerangCt, routeAction.theAttack.isAttacking(state), link = point, linkDir = point.direction ?: Direction.None)
 //            action == PointMoveAction.LongAttack || action == PointMoveAction.ShortAttack || action == PointMoveAction.BoomerangAttack
         return action != PointMoveAction.Route
     }
