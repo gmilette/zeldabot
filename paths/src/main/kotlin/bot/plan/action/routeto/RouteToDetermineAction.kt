@@ -40,7 +40,7 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
 
         val canAttack = preparation.canAttack
         val shouldLongBoomerang by lazy { preparation.canLongAttack && param.allowRangedAttack && boomerangCt <= 0 && AttackLongActionDecider.shouldBoomerang(state, preparation.boomerangable, link, linkDir) }
-        val attackablePoints by lazy { preparation.attackable.points }
+        val attackablePoints by lazy { preparation.attackable(linkDir).points }
         val shouldLongAttack by lazy { canAttack && param.allowRangedAttack && AttackLongActionDecider.shouldShootSword(state, attackablePoints, link, linkDir) }
         val inRangeOf by lazy { AttackActionDecider.inRangeOf(linkDir, link, attackablePoints, param.useB, faceEnemy = true) }
         val shouldShortAttack by lazy { canAttack && inRangeOf.isAttack }
@@ -84,7 +84,7 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
 //            return PointMoveAction.ForceAction.RandomAction(NavUtil.randomDir(state.link))
 //        }
 
-        val attackablePoints by lazy { preparation.attackable.points }
+        val attackablePoints by lazy { preparation.attackable(linkDir).points }
         val blockReflex: GamePad? = if (param.allowBlock && preparation.params.whatToAvoid != WhatToAvoid.JustEnemies) {
             AttackActionBlockDecider.blockReflex(state)
         } else {

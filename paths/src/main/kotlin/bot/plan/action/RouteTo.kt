@@ -157,7 +157,7 @@ class RouteTo(val params: Param = Param()) {
                 .isGoal(point, emptyList(), false)
         }
         val search = BreadthFirstSearch(isGoal, state.currentMapCell.zstar.neighborFinder)
-        val attackableAgents: List<Agent> = AttackableDecider.aliveEnemiesCanAttack(state)
+        val attackableAgents: List<Agent> = AttackableDecider.aliveEnemiesCanAttack(state)[state.frameState.link.dir] ?: emptyList()
         val attackable = attackableSpec.ifEmpty {
             attackableAgents
         }
@@ -304,7 +304,11 @@ private class IsGoal(
 ) {
     val determine = routeAction.getDetermine(state, param, attackableSpec)
     fun isGoal(point: FramePoint): Boolean {
-        val action = determine.nextAttackAction(state, emptyList(), param, routeAction.boomerangCt, routeAction.theAttack.isAttacking(state), link = point, linkDir = point.direction ?: Direction.None)
+        val action = determine.nextAttackAction(state, emptyList(),
+            param, routeAction.boomerangCt,
+            routeAction.theAttack.isAttacking(state),
+            link = point, linkDir = point.direction ?: Direction.None
+        )
 //            action == PointMoveAction.LongAttack || action == PointMoveAction.ShortAttack || action == PointMoveAction.BoomerangAttack
         return action != PointMoveAction.Route
     }
