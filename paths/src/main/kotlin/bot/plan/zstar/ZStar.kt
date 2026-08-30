@@ -86,7 +86,7 @@ class ZStar(
         val projectiles: List<FramePoint> = emptyList(),
         val pointBeforeStart: FramePoint? = null,
         val enemies: List<FramePoint> = emptyList(),
-        val isGoal: (FramePoint) -> Boolean = { false },
+        val isGoal: (FramePoint, Boolean) -> Boolean = { _, _ -> false },
         val rParam: RouteTo.RoutingParamCommon = RouteTo.RoutingParamCommon(),
     )
 
@@ -220,7 +220,7 @@ class ZStar(
 
     fun routeWithBfs(
         param: ZRouteParam,
-        isGoal: (FramePoint) -> Boolean
+        isGoal: (FramePoint, Boolean) -> Boolean
     ): List<FramePoint> {
         // what kind of route? Safety? Route to shoot? Route to stab?
         setNeighborFinder(param)
@@ -333,7 +333,7 @@ class ZStar(
             // if the current point really was in range of striking it wouldn't have entered
             // this routine
             val done = when {
-                param.rParam.finishWithinStrikingRange && param.isGoal(point) -> {
+                param.rParam.finishWithinStrikingRange && param.isGoal(point, costsF.safe(point)) -> {
                     doneBecause = "goal"
                     true
                 }

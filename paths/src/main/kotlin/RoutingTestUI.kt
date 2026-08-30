@@ -46,7 +46,11 @@ enum class TargetMode(val label: String) {
     /** the original BFS test goal: get within one grid of an enemy */
     EnemyProximity("Near enemy"),
 
-    /** goal is anywhere link's sword would hit, [AttackActionDecider.inStrikingRange] */
+    /**
+     * goal is anywhere link can attack from, [AttackActionDecider.inRangeOf], the same call
+     * RouteToDetermineAction makes. When link is safe a spot he only has to turn around in
+     * counts too, when he is not safe he has to be able to swing right now
+     */
     StrikingRange("Striking range"),
 
     /** what KillAll does: [AttackActionDecider.attackPoints] minus the enemy's facing direction */
@@ -107,32 +111,43 @@ object RoutingSearchRunner {
             }
         }.distinct()
 
+    /**
+     * The goal the search stops at. Second parameter is whether link is safe at that point,
+     * the searches pass it in now (ZStar uses its cost grid, the breadth first search always
+     * says safe). Like RouteToDetermineAction does, it decides whether merely being able to
+     * turn and face the enemy is good enough.
+     */
     fun goalFor(
         mode: TargetMode,
         enemies: List<FramePoint>,
         targets: List<FramePoint>,
         ableToLongAttack: Boolean = false,
         passable: Map2d<Boolean>? = null
-    ): (FramePoint) -> Boolean {
+    ): (FramePoint, Boolean) -> Boolean {
         val enemyPoints = enemies.map { it.noDir() }
         val targetSet = targets.toHashSet()
-        val shortGoal: (FramePoint) -> Boolean = when (mode) {
-            TargetMode.EnemyProximity -> { point ->
+        val shortGoal: (FramePoint, Boolean) -> Boolean = when (mode) {
+            TargetMode.EnemyProximity -> { point, _ ->
                 enemyPoints.any { point.distTo(it) <= MapConstants.oneGrid }
             }
 
-            TargetMode.StrikingRange -> { point ->
-                AttackActionDecider.inStrikingRange(point, enemyPoints)
+            TargetMode.StrikingRange -> { point, isSafe ->
+                val action = AttackActionDecider.inRangeOf(
+                    point.direction ?: Direction.None, point, enemyPoints,
+                    useB = false, faceEnemy = isSafe
+                )
+                // can swing from here, or is safe enough to spend a frame turning around first
+                action.isAttack || (isSafe && action.isDirection)
             }
 
             TargetMode.AttackPoints,
-            TargetMode.AttackPointsNoCorner -> { point -> point in targetSet }
+            TargetMode.AttackPointsNoCorner -> { point, _ -> point in targetSet }
         }
 
         if (!ableToLongAttack) return shortGoal
 
-        return { point ->
-            shortGoal(point) || AttackLongActionDecider.inStrikingRange(point, enemyPoints) ||
+        return { point, isSafe ->
+            shortGoal(point, isSafe) || AttackLongActionDecider.inStrikingRange(point, enemyPoints) ||
                     (passable != null && AttackLongActionDecider.targetInLongRange(passable, point, enemyPoints))
         }
     }
@@ -236,13 +251,13 @@ object RoutingSearchRunner {
         request: RoutingRequest,
         targets: List<FramePoint>,
         passable: Map2d<Boolean>? = null
-    ): (FramePoint) -> Boolean =
+    ): (FramePoint, Boolean) -> Boolean =
         goalFor(request.targetMode, request.enemies, targets, request.ableToLongAttack, passable)
 
     private fun zRouteParam(
         request: RoutingRequest,
         targets: List<FramePoint>,
-        isGoal: (FramePoint) -> Boolean
+        isGoal: (FramePoint, Boolean) -> Boolean
     ) = ZStar.ZRouteParam(
         start = request.start,
         targets = targets,

@@ -44,7 +44,7 @@ class BreadthFirstSearchTest {
         val goalX = 16
         val goalY = 8
 
-        val isGoal: (FramePoint) -> Boolean = { point ->
+        val isGoal: (FramePoint, Boolean) -> Boolean = { point, _ ->
             point.x == goalX && point.y == goalY && point.direction == Direction.Down
         }
 
@@ -63,7 +63,7 @@ class BreadthFirstSearchTest {
         val start = FramePoint(8, 8)
         val goal = FramePoint(10, 8)
 
-        val bfs = BreadthFirstSearch({ it.x == goal.x && it.y == goal.y }, makeNeighborFinder())
+        val bfs = BreadthFirstSearch({ point, _ -> point.x == goal.x && point.y == goal.y }, makeNeighborFinder())
         val paths = bfs.breadthFirstSearch(start)
 
         paths.shouldNotBeEmpty()

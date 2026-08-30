@@ -21,17 +21,17 @@ data class SearchNode(
 )
 
 class CachingGoalChecker(
-    private val isGoalCheck: (FramePoint) -> Boolean = { false }
+    private val isGoalCheck: (FramePoint, Boolean) -> Boolean = { _, _ -> false }
 ) {
     private val cache = TreeMap<FramePoint, Boolean>(BreadthFirstSearch.framePointComparator)
 
-    fun isGoal(framePoint: FramePoint): Boolean =
-        cache.getOrPut(framePoint) { isGoalCheck(framePoint) }
+    fun isGoal(framePoint: FramePoint, isSafe: Boolean): Boolean =
+        cache.getOrPut(framePoint) { isGoalCheck(framePoint, isSafe) }
 }
 
 
 class BreadthFirstSearch(
-    isGoal: (FramePoint) -> Boolean = { false },
+    isGoal: (FramePoint, Boolean) -> Boolean = { _, _ -> false },
     private val neighborFinder: NeighborFinder,
 ) {
     private val goalChecker = CachingGoalChecker(isGoal)
@@ -92,7 +92,7 @@ class BreadthFirstSearch(
      */
     fun isTheGoal(point: FramePoint): Boolean {
         d { " goal from $point}"}
-        return goalChecker.isGoal(point)
+        return goalChecker.isGoal(point, true)
     }
 
     private fun isSafe(point: FramePoint): Boolean {
@@ -123,7 +123,7 @@ class BreadthFirstSearch(
         targets: List<FramePoint>,
         maxDepth: Int = 255
     ): ActionRoute {
-        return if (goalChecker.isGoal(start)) {
+        return if (goalChecker.isGoal(start, true)) {
             d { " BFS: Started at goal: $start"}
             ActionRoute.Attack(false)
         } else {
@@ -159,7 +159,7 @@ class BreadthFirstSearch(
             if (current.depth > maxDepth) continue
 
             // current.depth == 0
-            if (goalChecker.isGoal(current.point)) {
+            if (goalChecker.isGoal(current.point, true)) {
                 // Ensure the final path includes the current point (last visited point)
                 //                val completePath = if (current.path.last().equalsAndDirection(current.point)) {
                 val completePath = if (current.path.last() == current.point) {
