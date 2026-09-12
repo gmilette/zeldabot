@@ -33,12 +33,12 @@ object AttackLongActionDecider {
         return (canShoot && !swordIsFlying && isInEnoughToShoot)
     }
 
-    fun shouldShootSword(state: MapLocationState, targets: List<FramePoint>): Boolean {
-        return ableToShoot(state) && targetInLongRange(state, targets)
+    fun shouldShootSword(state: MapLocationState, targets: List<FramePoint>, link: FramePoint = state.link, linkDir: Direction = state.frameState.link.dir): Boolean {
+        return ableToShoot(state) && targetInLongRange(state, targets, link, linkDir)
     }
 
     // problem: Need to pass in non-boomerangable enemies since they could potentially block projectiles
-    fun shouldBoomerang(state: MapLocationState, targets: List<FramePoint>): Boolean {
+    fun shouldBoomerang(state: MapLocationState, targets: List<FramePoint>, link: FramePoint = state.link, linkDir: Direction = state.frameState.link.dir): Boolean {
         d { "X-> should boomerang targets=$targets ${state.frameState.projectileStatus.status()}" }
         // includes loot
         val shouldShoot = targets.isNotEmpty()
@@ -58,7 +58,7 @@ object AttackLongActionDecider {
             }
             else -> false
         }
-        val inRange by lazy { targetInLongRange(state, targets) }
+        val inRange by lazy { targetInLongRange(state, targets, link, linkDir) }
         d { "Shoot boomerang $shouldShoot can=$canShoot flying=$boomerangIsFlying range=$inRange"}
         return (shouldShoot && canShoot && !boomerangIsFlying && inRange)
     }
@@ -78,8 +78,8 @@ object AttackLongActionDecider {
         return firstEnemyIntersect(longRectangle(passable, from, from.direction ?: Direction.None), targets) != null
     }
 
-    fun targetInLongRange(state: MapLocationState, targets: List<FramePoint>): Boolean {
-        return firstEnemyIntersect(longRectangle(state.currentMapCell.passable,  state.link, state.frameState.link.dir), targets) != null
+    fun targetInLongRange(state: MapLocationState, targets: List<FramePoint>, link: FramePoint = state.link, linkDir: Direction = state.frameState.link.dir): Boolean {
+        return firstEnemyIntersect(longRectangle(state.currentMapCell.passable,  link, linkDir), targets) != null
     }
 
     fun longRectangle(passable: Map2d<Boolean>, link: FramePoint, dir: Direction): Geom.Rectangle {

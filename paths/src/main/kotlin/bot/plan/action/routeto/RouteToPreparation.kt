@@ -9,6 +9,7 @@ import bot.state.Agent
 import bot.state.FramePoint
 import bot.state.Inventory
 import bot.state.MapLocationState
+import bot.state.map.Direction
 import util.d
 
 /**
@@ -21,7 +22,10 @@ class RoutePreparation(val params: Param = Param()) {
         const val STUN_AGAIN = 4
     }
 
-    var attackable: List<Agent> = emptyList()
+    var attackableFrom: Map<Direction, List<Agent>> = emptyMap()
+        private set
+    private var attackable: List<Agent> = emptyList()
+        private set
     var boomerangable: List<FramePoint> = emptyList()
     // can be stopped by a bubble
     var canAttack = false
@@ -35,6 +39,8 @@ class RoutePreparation(val params: Param = Param()) {
     var avoidProjectiles: List<Agent> = emptyList()
     var passable: List<FramePoint> = emptyList()
     var forceHighCost: List<FramePoint> = emptyList()
+
+    fun attackable(forDir: Direction): List<Agent> = attackableFrom.getOrDefault(forDir, emptyList())
 
     fun prepare(
         state: MapLocationState,
@@ -57,22 +63,28 @@ class RoutePreparation(val params: Param = Param()) {
             param.useB
         }
 
-        val attackableAgents: List<Agent> = AttackableDecider.aliveEnemiesCanAttack(state)
-        val specOrAgents: List<Agent> = attackableSpec.ifEmpty {
-            attackableAgents
+        if (attackableSpec.isNotEmpty()) {
+            attackable = attackableSpec
+            val fromAttackable = emptyMap<Direction, List<Agent>>().toMutableMap()
+            for (direction in Direction.entries) {
+                fromAttackable[direction] = attackableSpec
+            }
+            attackableFrom = fromAttackable
+        } else {
+            attackableFrom = AttackableDecider.aliveEnemiesCanAttack(state) //// TODO
+            attackable = attackableFrom[state.frameState.link.dir] ?: emptyList()
         }
-        attackable = specOrAgents
 
         val level = state.frameState.level
 
         val affectedByProjectileAgents: List<Agent> = when {
-            state.boomerangActive || state.wandActive -> specOrAgents.filter { it.affectedByBoomerang(level) }
+            state.boomerangActive || state.wandActive -> attackable.filter { it.affectedByBoomerang(level) }
             // if you can hit it with a boomerang, you can hit it with an arrow
-            state.arrowActive -> specOrAgents.filter { it.arrowKillable(level) || (level != 8 && it.affectedByBoomerang(level)) }
+            state.arrowActive -> attackable.filter { it.arrowKillable(level) || (level != 8 && it.affectedByBoomerang(level)) }
             // bomb? or candle?
             else -> emptyList()
         }
-        val stunnedAgents = specOrAgents.filter { it.stunnedLeft in 1..STUN_AGAIN }.toSet()
+        val stunnedAgents = attackable.filter { it.stunnedLeft in 1..STUN_AGAIN }.toSet()
         val affectedByProjectileLoot = state.loot.filter { it.lootNeeded(state) }
         boomerangable =
             (affectedByProjectileAgents + affectedByProjectileLoot - stunnedAgents)
@@ -84,7 +96,7 @@ class RoutePreparation(val params: Param = Param()) {
         prepareAvoid(state, param)
 
         //// LOG
-        log(param, state, attackableSpec, attackableAgents)
+        log(param, state, attackableSpec, attackable)
     }
 
     private fun log(
@@ -106,6 +118,13 @@ class RoutePreparation(val params: Param = Param()) {
         for (framePoint in attackableAgents) {
             d { " attackable agent: $framePoint" }
         }
+
+        for (directionAgents in attackableFrom.entries) {
+            for (agent in directionAgents.value) {
+                d { "${directionAgents.key.toArrow()} attackable agent: $agent" }
+            }
+        }
+
         if (attackable.isEmpty()) {
             d { "No attackable" }
         } else {

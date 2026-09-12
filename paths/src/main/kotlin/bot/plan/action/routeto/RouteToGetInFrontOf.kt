@@ -55,8 +55,10 @@ object RouteToGetInFrontOf {
             d { " sword agent at ${agent.point} dir ${agent.dir} calc ${swordDir.dirFront(agent)}"}
             swordDir.dirFront(agent)?.let { dir ->
                 val pt = dir.pointModifier(MapConstants.oneGrid)(agent.point)
+                val ptOutMore = dir.pointModifier(MapConstants.twoGrid)(agent.point)
                 listOf(
                     pt,
+                    ptOutMore,
                     // ok to be next to the enemy, just not half on top of the enemy
                     if (dir.horizontal) pt.upHalfGrid else pt.leftHalfGrid
                 )

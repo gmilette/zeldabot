@@ -18,9 +18,17 @@ object AttackableDecider {
     /**
      * it's annoying to watch link attack the spin guys, ignore those
      */
-    fun aliveEnemiesCanAttack(state: MapLocationState): List<Agent> {
-        val oppositeFrom by lazy { state.frameState.link.dir.opposite() }
+    fun aliveEnemiesCanAttack(state: MapLocationState): Map<Direction, List<Agent>> {
+        val enemiesPerDirection: MutableMap<Direction, List<Agent>> = mutableMapOf()
 
+        for (direction in Direction.entries) {
+            enemiesPerDirection[direction] = aliveEnemiesCanAttack(state, direction.opposite())
+        }
+
+        return enemiesPerDirection
+    }
+
+    private fun aliveEnemiesCanAttack(state: MapLocationState, oppositeFrom: Direction): List<Agent> {
         val enemies = state.aliveEnemies.toMutableList()
         return if (state.frameState.isLevel) {
             forLevel(state, enemies, oppositeFrom)

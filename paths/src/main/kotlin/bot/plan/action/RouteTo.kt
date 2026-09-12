@@ -1,5 +1,6 @@
 package bot.plan.action
 
+import bot.plan.action.RouteTo.RouteParam
 import bot.plan.action.routeto.PointMoveAction
 import bot.plan.action.routeto.RouteExecution
 import bot.plan.action.routeto.RouteToGetInFrontOf
@@ -10,13 +11,13 @@ import bot.plan.zstar.route.BreadthFirstSearch
 import bot.plan.zstar.route.BreadthFirstSearch.ActionRoute
 import bot.plan.zstar.route.GoalFunction
 import bot.state.*
+import bot.state.map.Direction
 import bot.state.map.MapCell
 import bot.state.map.toGamePad
 import util.LogFile
 import util.d
 
 class RouteTo(val params: Param = Param()) {
-    private var boomerangCt = 0
     private var routeAction = RouteExecution(params)
 
     companion object {
@@ -28,7 +29,7 @@ class RouteTo(val params: Param = Param()) {
         var allowAttack = true
         fun hardlyReplan(dodgeEnemies: Boolean = true,
                          /** don't try to block or route around projectiles **/
-                         ignoreProjectiles: Boolean = false) = RouteTo(
+                         ignoreProjectiles:  Boolean = false) = RouteTo(
             Param(
                 planCountMax = 100,
                 whatToAvoid =
@@ -151,12 +152,12 @@ class RouteTo(val params: Param = Param()) {
         )
         state.currentMapCell.zstar.setNeighborFinder(paramZ)
         val ableToShoot = AttackLongActionDecider.ableToShoot(state)
-        val isGoal = { point: FramePoint ->
+        val isGoal = { point: FramePoint, isSafe: Boolean ->
             GoalFunction(ableToLongAttack = ableToShoot, ableToAttack = true, state.currentMapCell.zstar.neighborFinder)
                 .isGoal(point, emptyList(), false)
         }
         val search = BreadthFirstSearch(isGoal, state.currentMapCell.zstar.neighborFinder)
-        val attackableAgents: List<Agent> = AttackableDecider.aliveEnemiesCanAttack(state)
+        val attackableAgents: List<Agent> = AttackableDecider.aliveEnemiesCanAttack(state)[state.frameState.link.dir] ?: emptyList()
         val attackable = attackableSpec.ifEmpty {
             attackableAgents
         }
@@ -253,12 +254,15 @@ class RouteTo(val params: Param = Param()) {
 //            return modifier(linkPt)
 //        }
 
+        val goalFunction = IsGoal(routeAction, state, param, attackableSpec)
+        val bypassGoal = { point: FramePoint -> false}
         val paramZ = ZStar.ZRouteParam(
             start = linkPt,
             targets = to,
             pointBeforeStart = state.previousMove.from,
             enemies = avoid.points,
             projectiles = avoidProjectiles.map { it.point }, // don't add if there is no dodging
+            isGoal = goalFunction::isGoal,
             rParam = param.rParam.copy(
                 forcePassable = passable,
                 forceHighCost = param.rParam.forceHighCost + inFrontOfGrids
@@ -266,14 +270,8 @@ class RouteTo(val params: Param = Param()) {
         )
 
         val routePoints = if (param.breadthFirst) {
-            val determine = routeAction.getDetermine(state, param, attackableSpec)
-            val isGoal = { point: FramePoint ->
-                val linkCopy = state.frameState.link.copy(point = point)
-                val frameCopy = state.frameState.copy(link = linkCopy)
-                val stateWithLinkMoved = state.copy(frameState = frameCopy)
-                determine.nextAction(stateWithLinkMoved, emptyList(), param, 0, false) != PointMoveAction.Route
-            }
-            mapCell.zstar.routeWithBfs(paramZ, isGoal)
+            val goalFunction = IsGoal(routeAction, state, param, attackableSpec)
+            mapCell.zstar.routeWithBfs(paramZ, goalFunction::isGoal)
         } else {
             mapCell.zstar.route(paramZ)
         }
@@ -295,5 +293,24 @@ class RouteTo(val params: Param = Param()) {
             route?.decideDirection(linkPt, state.frameState.link.dir)
         d { " next is $nextPoint1 of ${route?.numPoints ?: 0}" }
         return nextPoint1.copy(direction = pointDir)
+    }
+}
+
+private class IsGoal(
+    private val routeAction: RouteExecution,
+    private val state: MapLocationState,
+    private val param: RouteParam,
+    attackableSpec: List<Agent> = emptyList()
+) {
+    val determine = routeAction.getDetermine(state, param, attackableSpec)
+    fun isGoal(point: FramePoint, isSafe: Boolean): Boolean {
+        val action = determine.nextAttackAction(state, emptyList(),
+            param, routeAction.boomerangCt,
+            routeAction.theAttack.isAttacking(state),
+            isLinkSafe = isSafe,
+            link = point, linkDir = point.direction ?: Direction.None
+        )
+//            action == PointMoveAction.LongAttack || action == PointMoveAction.ShortAttack || action == PointMoveAction.BoomerangAttack
+        return action != PointMoveAction.Route
     }
 }
