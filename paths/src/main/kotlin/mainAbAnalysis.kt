@@ -111,9 +111,11 @@ fun main(vararg args: String) {
     if (report.rooms.size > 1) {
         println()
         println("=== per room ===")
+        val shortA = report.a.label.take(8)
+        val shortB = report.b.label.take(8)
         println("%-10s %11s %11s %13s %13s %9s".format(
-            "room", "n ${report.a.label.take(8)}", "n ${report.b.label.take(8)}",
-            "clear A/B", "median A/B", "p"))
+            "room", "n $shortA", "n $shortB",
+            "clear $shortA/$shortB".take(13), "median $shortA/$shortB".take(13), "p"))
         println("-".repeat(72))
         report.breakdown.forEach { r ->
             println("%-10s %11d %11d %13s %13s %9s".format(
@@ -122,19 +124,45 @@ fun main(vararg args: String) {
                 "%.0f/%.0f".format(r.medianA, r.medianB),
                 if (r.p.isNaN()) "n/a" else "%.4f".format(r.p)))
         }
-        println("stratified across rooms (van Elteren): p = %s".format(
-            if (report.stratifiedP.isNaN()) "n/a" else "%.4f".format(report.stratifiedP)))
-        println("ranks are formed inside each room, so rooms of different difficulty are never")
-        println("compared against each other. Prefer this over the pooled figures below.")
+
+        println()
+        println("=== per room, every metric: median $shortA -> $shortB, with p ===")
+        fun num(v: Double) = if (kotlin.math.abs(v) >= 100) "%.0f".format(v) else "%.2f".format(v)
+        val head = StringBuilder("%-24s".format("metric"))
+        report.rooms.forEach { head.append("%24s".format(it)) }
+        head.append("%12s".format("stratified"))
+        println(head)
+        println("-".repeat(24 + report.rooms.size * 24 + 12))
+        report.stratified.forEach { ms ->
+            val line = StringBuilder("%-24s".format(ms.metric.label))
+            ms.perRoom.forEach { r ->
+                val cell = "${num(r.medianA)}->${num(r.medianB)} p=" +
+                        (if (r.p.isNaN()) "n/a" else "%.3f".format(r.p))
+                line.append("%24s".format(cell))
+            }
+            line.append("%12s".format(
+                if (ms.stratifiedP.isNaN()) "n/a" else "%.4f".format(ms.stratifiedP)))
+            println(line)
+        }
+        println("ranks are formed inside each room, so rooms of different scale are never")
+        println("ranked against each other. The stratified column is the one to quote.")
     }
 
     println()
-    println("%-20s %12s %12s %9s %9s".format("metric (cleared)", "median A", "median B", "change", "p"))
+    val nameA = report.a.label.take(12)
+    val nameB = report.b.label.take(12)
+    val pooledNote = if (report.rooms.size > 1)
+        "metric (POOLED ${report.rooms.size} rooms)" else "metric (cleared)"
+    println("%-20s %12s %12s %9s %9s".format(pooledNote, nameA, nameB, "change", "p"))
     println("-".repeat(68))
     report.comparisons.forEach { c ->
         println("%-20s %12.2f %12.2f %8.1f%% %9s".format(
             c.metric.label, c.medianA, c.medianB, c.relativeDelta * 100,
             if (c.p.isNaN()) "n/a" else "%.4f".format(c.p)))
+    }
+
+    if (report.rooms.size > 1) {
+        println("^ pooled across rooms of different scale - prefer the stratified column above")
     }
 
     println()

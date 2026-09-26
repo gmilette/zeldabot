@@ -21,7 +21,7 @@ data class Metric(
             Metric("elapsedFrames", "Frames to clear", "frames") { it.elapsedFrames.toDouble() },
             Metric("rawDamage", "Damage taken", "hearts") { it.rawDamage },
             Metric("damagedEvents", "Times hit", "hits") { it.damagedEvents.toDouble() },
-            Metric("damagePerKFrames", "Damage per 1000 frames", "hearts") {
+            Metric("damagePerKFrames", "Damage per 1k frames", "hearts") {
                 if (it.elapsedFrames > 0) it.rawDamage * 1000 / it.elapsedFrames else 0.0
             },
             Metric("netHeartsLost", "Net hearts lost", "hearts") { it.netHeartsLost },
@@ -79,6 +79,21 @@ data class RoomBreakdown(
     val p: Double
 )
 
+data class RoomResult(
+    val room: String,
+    val nA: Int,
+    val nB: Int,
+    val medianA: Double,
+    val medianB: Double,
+    val p: Double
+)
+
+data class MetricStratified(
+    val metric: Metric,
+    val perRoom: List<RoomResult>,
+    val stratifiedP: Double
+)
+
 data class AbReport(
     val source: String,
     val a: ArmSummary,
@@ -89,6 +104,7 @@ data class AbReport(
     val comparisons: List<MetricComparison>,
     val rooms: List<String>,
     val breakdown: List<RoomBreakdown>,
+    val stratified: List<MetricStratified>,
     val stratifiedP: Double,
     val outcome: OutcomeComparison,
     val bootstrapLow: Double,
@@ -257,6 +273,21 @@ object AbAnalysis {
                 p = Stats.mannWhitneyU(va, vb)
             )
         }
+        val stratified = Metric.all.map { m ->
+            val perRoom = roomList.map { room ->
+                val va = a.cleared.filter { it.start == room }.map(m.get)
+                val vb = b.cleared.filter { it.start == room }.map(m.get)
+                RoomResult(room, va.size, vb.size, va.median(), vb.median(),
+                    Stats.mannWhitneyU(va, vb))
+            }
+            val metricStrata = roomList.map { room ->
+                a.cleared.filter { it.start == room }.map(m.get) to
+                        b.cleared.filter { it.start == room }.map(m.get)
+            }
+            MetricStratified(m, perRoom,
+                if (roomList.size > 1) Stats.vanElteren(metricStrata) else Double.NaN)
+        }
+
         val strata = roomList.map { room ->
             a.cleared.filter { it.start == room }.map(Metric.primary.get) to
                     b.cleared.filter { it.start == room }.map(Metric.primary.get)
@@ -265,7 +296,8 @@ object AbAnalysis {
 
         return AbReport(
             source = source, a = a, b = b,
-            rooms = roomList, breakdown = breakdown, stratifiedP = stratifiedP,
+            rooms = roomList, breakdown = breakdown, stratified = stratified,
+            stratifiedP = stratifiedP,
             room = rooms.firstOrNull() ?: "?",
             warnings = warnings, fisherP = fisher, comparisons = comparisons, outcome = outcome,
             bootstrapLow = lo, bootstrapHigh = hi, detectableEffect = detectable
