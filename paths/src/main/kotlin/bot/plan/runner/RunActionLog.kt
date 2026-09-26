@@ -8,7 +8,7 @@ import bot.state.MapLoc
 import bot.state.MapLocationState
 import bot.state.map.MapCell
 import com.github.doyaaaaaken.kotlincsv.client.CsvWriter
-import util.JsonFile.Companion.gson
+import com.google.gson.Gson
 import util.d
 import java.io.File
 import java.text.SimpleDateFormat
@@ -24,6 +24,7 @@ class RunActionLog(private val fileNameRoot: String,
                    private val experiment: Experiment,
                    private val save: Boolean = true,
                    private val label: String = "",
+                   private val runId: String = "",
                    private val trial: Int = 0
 ) {
     val started = System.currentTimeMillis()
@@ -116,6 +117,8 @@ class RunActionLog(private val fileNameRoot: String,
                 return
             }
             settled = true
+            totalFrames = 0
+            framesForStep = 0
             heartsAtStart = state.frameState.inventory.heartCalc.lifeInHearts()
             previousDamagedFlag = state.frameState.link.damaged
             runStartFrame = frame
@@ -222,6 +225,7 @@ class RunActionLog(private val fileNameRoot: String,
         val summary = TrialSummary(
             date = now(),
             label = label,
+            runId = runId,
             gitSha = gitSha(),
             experiment = fileNameRoot,
             file = outputFileName,
@@ -252,7 +256,7 @@ class RunActionLog(private val fileNameRoot: String,
             boom = experiment.boomerang.name,
             shield = experiment.shield
         )
-        File(outputFileAll).appendText(gson.toJson(summary) + "\n")
+        File(outputFileAll).appendText(summaryGson.toJson(summary) + "\n")
     }
 
     fun advance(action: Action, state: MapLocationState, masterPlan: MasterPlan) {
@@ -310,6 +314,9 @@ class RunActionLog(private val fileNameRoot: String,
     }
 
     companion object {
+        // JsonFile's shared instance pretty-prints, which would break one-object-per-line
+        private val summaryGson = Gson()
+
         private const val NO_FRAME = -1
         private const val NORMAL_PLAY = 5
         private const val SETTLE_FRAMES = 30

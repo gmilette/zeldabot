@@ -10,13 +10,16 @@ import kotlin.system.exitProcess
 
 fun main(vararg args: String) {
     if (args.size < 2) {
-        println("usage: analyzeAb <labelA> <labelB> [experiments.jsonl] [csv=<path>]")
+        println("usage: analyzeAb <labelA> <labelB> [file.jsonl] [room=<level_mapLoc>] [exclude=<runId,...>] [csv=<path>]")
         exitProcess(1)
     }
     val labelA = args[0]
     val labelB = args[1]
-    val csvExport = args.firstOrNull { it.startsWith("csv=") }?.substringAfter("=")
-    val positional = args.drop(2).filterNot { it.startsWith("csv=") }
+    fun opt(key: String) = args.firstOrNull { it.startsWith("$key=") }?.substringAfter("=")
+    val csvExport = opt("csv")
+    val roomFilter = opt("room")
+    val excluded = opt("exclude")?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() } ?: emptyList()
+    val positional = args.drop(2).filterNot { it.contains("=") }
     val csv = File(positional.firstOrNull() ?: "${DirectoryConstants.outDir("zexperiment")}experiments.jsonl")
 
     val rows = try {
@@ -30,8 +33,26 @@ fun main(vararg args: String) {
         exitProcess(1)
     }
 
+    val rooms = rows.map { it.start }.distinct().sorted()
+    if (roomFilter == null && rooms.size > 1) {
+        println("error: ${csv.path} holds several rooms (${rooms.joinToString(", ")}).")
+        println("       different rooms are different difficulties, so comparing across them is meaningless.")
+        println("       pass room=<level_mapLoc> to pick one.")
+        exitProcess(1)
+    }
+    val selected = rows
+        .filter { roomFilter == null || it.start == roomFilter }
+        .filter { it.runId !in excluded }
+    if (selected.isEmpty()) {
+        println("error: nothing left after filtering (room=$roomFilter exclude=$excluded)")
+        exitProcess(1)
+    }
+    if (excluded.isNotEmpty()) {
+        println("excluded runs: ${excluded.joinToString(", ")} (${rows.size - selected.size} trials dropped)")
+    }
+
     val report = try {
-        AbAnalysis.compare(csv.path, rows, labelA, labelB)
+        AbAnalysis.compare(csv.path, selected, labelA, labelB)
     } catch (e: IllegalArgumentException) {
         println("error: ${e.message}")
         exitProcess(1)
@@ -39,8 +60,11 @@ fun main(vararg args: String) {
 
     println("source : ${csv.path}")
     println("room   : ${report.room}")
-    println("arms   : ${report.a.label} n=${report.a.n} build=${report.a.builds.joinToString(",").ifBlank { "?" }}")
-    println("         ${report.b.label} n=${report.b.n} build=${report.b.builds.joinToString(",").ifBlank { "?" }}")
+    listOf(report.a, report.b).forEachIndexed { i, arm ->
+        val prefix = if (i == 0) "arms   :" else "        "
+        println("$prefix ${arm.label} n=${arm.n} build=${arm.builds.joinToString(",").ifBlank { "?" }}" +
+                " runs=${arm.rows.map { it.runId }.distinct().joinToString(",").ifBlank { "?" }}")
+    }
     if (report.warnings.isNotEmpty()) {
         println()
         report.warnings.forEach { println("WARNING: $it") }

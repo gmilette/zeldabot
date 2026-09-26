@@ -237,6 +237,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         var maxTrialFrames: Int? = null
         var startHearts: Int? = null
         var startShield: Boolean = false
+        var runId: String = ""
 
         @JvmStatic
         fun startIt(monitor: ZeldaMonitor): ZeldaBot {

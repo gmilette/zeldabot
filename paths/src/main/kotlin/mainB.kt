@@ -30,6 +30,8 @@ import kotlinx.coroutines.launch
 import ui.FollowView
 import util.ZRandom
 import util.d
+import java.text.SimpleDateFormat
+import java.util.Date
 
 fun main(vararg args: String) = application {
     for (arg in args) {
@@ -43,10 +45,12 @@ fun main(vararg args: String) = application {
     ZeldaBot.maxTrialFrames = args.argValue("maxframes")?.toIntOrNull()
     ZeldaBot.startHearts = args.argValue("hearts")?.toIntOrNull()
     ZeldaBot.startShield = args.contains("shield")
+    ZeldaBot.runId = args.argValue("run")
+        ?: SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
     args.argValue("seed")?.toLongOrNull()?.let {
         ZRandom.seed = it
     }
-    d { " label=${ZeldaBot.runLabel} trials=${ZeldaBot.trials} maxframes=${ZeldaBot.maxTrialFrames} hearts=${ZeldaBot.startHearts} shield=${ZeldaBot.startShield} seed=${ZRandom.seed}" }
+    d { " label=${ZeldaBot.runLabel} trials=${ZeldaBot.trials} maxframes=${ZeldaBot.maxTrialFrames} hearts=${ZeldaBot.startHearts} shield=${ZeldaBot.startShield} seed=${ZRandom.seed} runId=${ZeldaBot.runId}" }
     // Note: If you want to run the shadowJar directly
     // in Nintaco, addd noUi because the ui doesn't currently work
     // it is unable to find resources for some reason

@@ -54,6 +54,15 @@ tasks.register<JavaExec>("analyzeAb") {
     args = (project.findProperty("args") as String? ?: "").split(" ").filter { it.isNotBlank() }
 }
 
+// List or delete trial batches:  ./gradlew trials            ./gradlew trials -Pargs="delete=<runId>"
+tasks.register<JavaExec>("trials") {
+    group = "verification"
+    description = "List the trial batches in experiments.jsonl, or delete one by runId"
+    mainClass.set("MainTrialsKt")
+    classpath = sourceSets["main"].runtimeClasspath
+    args = (project.findProperty("args") as String? ?: "").split(" ").filter { it.isNotBlank() }
+}
+
 tasks.jar {
     manifest {
         attributes["Main-Class"] = "MainBKt"

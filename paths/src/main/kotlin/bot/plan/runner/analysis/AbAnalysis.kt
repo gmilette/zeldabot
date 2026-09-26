@@ -2,7 +2,7 @@ package bot.plan.runner.analysis
 
 import bot.plan.runner.TrialSummary
 import com.google.gson.JsonObject
-import com.google.gson.JsonParser
+import com.google.gson.JsonStreamParser
 import java.io.File
 import kotlin.math.abs
 import kotlin.math.exp
@@ -59,6 +59,9 @@ data class ArmSummary(
         rows.filter { it.result == "dead" }.groupingBy { it.end }.eachCount()
     val builds = rows.map { it.gitSha }.filter { it.isNotBlank() }.distinct().sorted()
     val rooms = rows.map { it.start }.distinct()
+    val loadouts = rows.map {
+        "${it.sword}/${it.ring}/${it.heartsStart}h/${if (it.shield) "shield" else "no shield"}"
+    }.distinct()
 }
 
 data class AbReport(
@@ -106,26 +109,31 @@ object AbAnalysis {
         require(file.exists()) {
             "no trial file at ${file.absolutePath}. Run the bot with `dev label=<arm>` first."
         }
-        val bad = mutableListOf<Int>()
-        val rows = file.readLines().mapIndexedNotNull { index, line ->
-            if (line.isBlank()) return@mapIndexedNotNull null
-            try {
-                parse(JsonParser.parseString(line).asJsonObject)
-            } catch (e: Exception) {
-                bad += index + 1
-                null
+        val rows = mutableListOf<TrialSummary>()
+        var bad = 0
+        file.reader().use { reader ->
+            val stream = JsonStreamParser(reader)
+            while (true) {
+                val element = try {
+                    if (!stream.hasNext()) break
+                    stream.next()
+                } catch (e: Exception) {
+                    bad++
+                    break
+                }
+                try {
+                    rows += parse(element.asJsonObject)
+                } catch (e: Exception) {
+                    bad++
+                }
             }
         }
-        if (bad.isNotEmpty()) {
-            println("WARNING: ${file.name} has unreadable lines, skipped: ${bad.joinToString(",")}")
+        if (bad > 0) {
+            println("WARNING: ${file.name} had $bad unreadable entries, skipped")
         }
         return rows.filter { it.label.isNotBlank() }
     }
 
-    // Gson's reflective binding instantiates without a constructor, so a missing field
-    // lands as null inside a non-null Kotlin type and blows up later. Reading each field
-    // explicitly keeps an old line missing a newer field readable, which is the whole
-    // point of one object per line.
     private fun parse(o: JsonObject): TrialSummary {
         fun str(name: String, default: String = "") =
             o.get(name)?.takeIf { !it.isJsonNull }?.asString ?: default
@@ -136,7 +144,7 @@ object AbAnalysis {
         fun bool(name: String, default: Boolean = false) =
             o.get(name)?.takeIf { !it.isJsonNull }?.asBoolean ?: default
         return TrialSummary(
-            date = str("date"), label = str("label"), gitSha = str("gitSha"),
+            date = str("date"), label = str("label"), runId = str("runId"), gitSha = str("gitSha"),
             experiment = str("experiment"), file = str("file"), trial = int("trial"),
             start = str("start", "?"), result = str("result", "other"),
             percent = int("percent"), end = str("end", "?"),
@@ -160,7 +168,10 @@ object AbAnalysis {
         for (arm in listOf(a, b)) {
             if (arm.rooms.size > 1) warnings += "${arm.label} mixes rooms ${arm.rooms} - not one experiment"
             if (arm.builds.size > 1) warnings += "${arm.label} mixes builds ${arm.builds} - the arm is not a single code state"
+            if (arm.loadouts.size > 1) warnings += "${arm.label} mixes loadouts ${arm.loadouts} - trials did not start equal"
         }
+        val loadouts = (a.loadouts + b.loadouts).distinct()
+        if (loadouts.size > 1) warnings += "the arms do not share a loadout ($loadouts) - they are not comparable"
         val rooms = (a.rooms + b.rooms).distinct()
         if (rooms.size > 1) warnings += "the arms are not the same room ($rooms) - they are not comparable"
         if (minOf(a.n, b.n) < 10) warnings += "fewer than 10 trials in an arm - only very large effects will show"

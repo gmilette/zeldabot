@@ -238,6 +238,7 @@ class PlanRunner(private val makePlan: PlanMaker,
             ex.name, ex,
             save = DirectoryConstants.enableInfo,
             label = ZeldaBot.runLabel ?: "",
+            runId = ZeldaBot.runId,
             trial = runCt + 1
         )
         if (load) {
@@ -357,18 +358,21 @@ class PlanRunner(private val makePlan: PlanMaker,
 
     private fun endTrial(state: MapLocationState, result: String) {
         if (batchDone) return
-        runLog?.logFinalComplete(state, masterPlan, result)
+        runLog.logFinalComplete(state, masterPlan, result)
 
         val limit = ZeldaBot.trials
         if (limit != null && runCt >= limit) {
             batchDone = true
             action = null
             ZeldaBot.doAct = false
-            val where = "${runLog?.outputFileName}"
+            val where = runLog.outputFileName
             println("=== batch done: $runCt trials of '$experiment'" +
                     " label='${ZeldaBot.runLabel ?: ""}' last=$where ===")
             d { " batch done after $runCt trials" }
             return
+        } else {
+            println("=== completed: $runCt trials of '$experiment'" +
+                    " label='${ZeldaBot.runLabel ?: ""}' ===")
         }
         rerun()
     }
