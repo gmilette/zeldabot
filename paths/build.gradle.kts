@@ -60,7 +60,10 @@ tasks.register<JavaExec>("trials") {
     description = "List the trial batches in experiments.jsonl, or delete one by runId"
     mainClass.set("MainTrialsKt")
     classpath = sourceSets["main"].runtimeClasspath
-    args = (project.findProperty("args") as String? ?: "").split(" ").filter { it.isNotBlank() }
+    // -Pdelete=<runId> is the same as -Pargs="delete=<runId>", without the quoting trap
+    args = ((project.findProperty("args") as String? ?: "") + " " +
+            (project.findProperty("delete") as String?)?.let { "delete=$it" }.orEmpty())
+        .split(" ").filter { it.isNotBlank() }
 }
 
 tasks.jar {

@@ -10,6 +10,7 @@ import bot.state.map.destination.ZeldaItem
 import nintaco.api.API
 import util.ZRandom
 import util.d
+import util.w
 import java.io.File
 
 typealias PlanMaker = () -> MasterPlan
@@ -44,21 +45,33 @@ class PlanRunner(private val makePlan: PlanMaker,
     private var maxFramesPerTrial = 0
     private var batchDone = false
 
+    // room_<lvl>_<loc>[_<sword>[_<ring>]][,<lvl>_<loc>...] - a spec with no sword/ring
+    // inherits them from the first, so room_8_62_m_b,8_94,7_24 is all magic sword + blue ring
+    private val roomsToTrial: List<Experiment> by lazy {
+        val specs = experiment.removePrefix("room_").split(",").map { it.trim().split("_") }
+        val firstSword = specs.first().getOrElse(2) { "d" }
+        val firstRing = specs.first().getOrElse(3) { "g" }
+        specs.map { spec ->
+            Experiments.roomTrial(
+                level = spec[0].toInt(),
+                mapLoc = spec[1].toInt(),
+                name = "room_${spec[0]}_${spec[1]}",
+                sword = swordFor(spec.getOrElse(2) { firstSword }),
+                ring = ringFor(spec.getOrElse(3) { firstRing }),
+                hearts = ZeldaBot.startHearts,
+                shield = ZeldaBot.startShield,
+                maxFramesPerTrial = ZeldaBot.maxTrialFrames ?: Experiments.DEFAULT_TRIAL_FRAME_BUDGET
+            )
+        }
+    }
+
     private fun runFrom() {
         val exp = experiment
         d { " run from $exp"}
         if (exp.startsWith("room_")) {
-            val split = exp.removePrefix("room_").split("_", ",")
-            runIt(load = true, ex = Experiments.roomTrial(
-                level = split[0].toInt(),
-                mapLoc = split[1].toInt(),
-                name = exp,
-                sword = swordFor(split.getOrElse(2) { "d" }),
-                ring = ringFor(split.getOrElse(3) { "g" }),
-                hearts = ZeldaBot.startHearts,
-                shield = ZeldaBot.startShield,
-                maxFramesPerTrial = ZeldaBot.maxTrialFrames ?: Experiments.DEFAULT_TRIAL_FRAME_BUDGET
-            ))
+            // rotate rather than run each room to exhaustion, so drift over a long batch
+            // lands on every room equally instead of only the last one
+            runIt(load = true, ex = roomsToTrial[runCt % roomsToTrial.size])
         } else if (exp.contains("run")) {
             runHere()
         } else if (exp.contains("_") || exp.contains(",")) {
@@ -258,12 +271,24 @@ class PlanRunner(private val makePlan: PlanMaker,
 
     fun runSetup(manipulator: StateManipulator) {
         d { " run setup "}
-        if (runSetupCt > 20) {
+        // api.loadState is asynchronous and can land after these writes, restoring the
+        // save state's own inventory over them. Never latch on a single confirmation:
+        // keep checking for the whole window and rewrite only when something is wrong,
+        // so a late load is caught but consumed bombs are not silently restored.
+        if (runSetupCt > SETUP_FRAME_LIMIT) {
             return
         }
 //        api.setSpeed(400)
         runSetupCt++
         val ex = levelExperiment ?: this.target
+
+        if (runSetupCt > ALWAYS_APPLY_FRAMES) {
+            if (loadoutMatches(manipulator, ex)) return
+            w {"WARNING: loadout drifted at frame $runSetupCt, reapplying" +
+                    " (wanted ${ex.hearts}h/${ex.sword}/${ex.ring}/shield=${ex.shield}," +
+                    " have ${manipulator.heartContainers()}h/sword=${manipulator.swordId()}" +
+                    "/ring=${manipulator.ringId()}/shield=${manipulator.hasMagicShield()})" }
+        }
         d { " set sword to ${ex.sword} hearts to ${ex.hearts}"}
         manipulator.setSword(ex.sword)
         d { "set ring to ${ex.ring}" }
@@ -314,6 +339,35 @@ class PlanRunner(private val makePlan: PlanMaker,
         if (ex.bait) {
             manipulator.setBait()
         }
+
+        if (runSetupCt >= SETUP_FRAME_LIMIT) {
+            w { "WARNING: loadout never took after $SETUP_FRAME_LIMIT frames -" +
+                    " wanted ${ex.hearts}h/${ex.sword}/${ex.ring}/shield=${ex.shield}," +
+                    " have ${manipulator.heartContainers()}h/sword=${manipulator.swordId()}" +
+                    "/ring=${manipulator.ringId()}/shield=${manipulator.hasMagicShield()}"}
+        }
+    }
+
+    // only the permanent equipment: bombs, keys and rupees are legitimately spent
+    private fun loadoutMatches(manipulator: StateManipulator, ex: Experiment): Boolean {
+        ex.hearts?.let { if (manipulator.heartContainers() != it) return false }
+        if (manipulator.swordId() != swordId(ex.sword)) return false
+        if (manipulator.ringId() != ringId(ex.ring)) return false
+        if (ex.shield && !manipulator.hasMagicShield()) return false
+        return true
+    }
+
+    private fun swordId(item: ZeldaItem) = when (item) {
+        ZeldaItem.WoodenSword -> 1
+        ZeldaItem.WhiteSword -> 2
+        ZeldaItem.MagicSword -> 3
+        else -> 0
+    }
+
+    private fun ringId(item: ZeldaItem) = when (item) {
+        ZeldaItem.BlueRing -> 1
+        ZeldaItem.RedRing -> 2
+        else -> 0
     }
 
     private fun withDefaultAction(action: Action) = moveHistoryAttackAction(action)
@@ -360,7 +414,8 @@ class PlanRunner(private val makePlan: PlanMaker,
         if (batchDone) return
         runLog.logFinalComplete(state, masterPlan, result)
 
-        val limit = ZeldaBot.trials
+        val roomCount = if (experiment.startsWith("room_")) roomsToTrial.size else 1
+        val limit = ZeldaBot.trials?.let { it * roomCount }
         if (limit != null && runCt >= limit) {
             batchDone = true
             action = null
@@ -416,5 +471,10 @@ class PlanRunner(private val makePlan: PlanMaker,
 
     override fun toString(): String {
         return "*** ${action?.name ?: ""}: Plan: $masterPlan"
+    }
+
+    companion object {
+        private const val ALWAYS_APPLY_FRAMES = 40
+        private const val SETUP_FRAME_LIMIT = 600
     }
 }

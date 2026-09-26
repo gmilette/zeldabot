@@ -17,7 +17,7 @@ fun main(vararg args: String) {
     val labelB = args[1]
     fun opt(key: String) = args.firstOrNull { it.startsWith("$key=") }?.substringAfter("=")
     val csvExport = opt("csv")
-    val roomFilter = opt("room")
+    val roomFilter = opt("room")?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() }
     val excluded = opt("exclude")?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() } ?: emptyList()
     val positional = args.drop(2).filterNot { it.contains("=") }
     val csv = File(positional.firstOrNull() ?: "${DirectoryConstants.outDir("zexperiment")}experiments.jsonl")
@@ -34,14 +34,14 @@ fun main(vararg args: String) {
     }
 
     val rooms = rows.map { it.start }.distinct().sorted()
-    if (roomFilter == null && rooms.size > 1) {
+    if (roomFilter.isNullOrEmpty() && rooms.size > 1) {
         println("error: ${csv.path} holds several rooms (${rooms.joinToString(", ")}).")
         println("       different rooms are different difficulties, so comparing across them is meaningless.")
-        println("       pass room=<level_mapLoc> to pick one.")
+        println("       pass room=<level_mapLoc> to pick one, or room=a,b to combine them.")
         exitProcess(1)
     }
     val selected = rows
-        .filter { roomFilter == null || it.start == roomFilter }
+        .filter { roomFilter.isNullOrEmpty() || it.start in roomFilter }
         .filter { it.runId !in excluded }
     if (selected.isEmpty()) {
         println("error: nothing left after filtering (room=$roomFilter exclude=$excluded)")
@@ -52,18 +52,19 @@ fun main(vararg args: String) {
     }
 
     val report = try {
-        AbAnalysis.compare(csv.path, selected, labelA, labelB)
+        AbAnalysis.compare(csv.path, selected, labelA, labelB,
+            roomsCombinedOnPurpose = (roomFilter?.size ?: 0) > 1)
     } catch (e: IllegalArgumentException) {
         println("error: ${e.message}")
         exitProcess(1)
     }
 
     println("source : ${csv.path}")
-    println("room   : ${report.room}")
+    println("room   : ${report.rooms.joinToString(", ")}")
     listOf(report.a, report.b).forEachIndexed { i, arm ->
         val prefix = if (i == 0) "arms   :" else "        "
         println("$prefix ${arm.label} n=${arm.n} build=${arm.builds.joinToString(",").ifBlank { "?" }}" +
-                " runs=${arm.rows.map { it.runId }.distinct().joinToString(",").ifBlank { "?" }}")
+                " runs=${arm.runIds.joinToString(",")}")
     }
     if (report.warnings.isNotEmpty()) {
         println()
@@ -102,6 +103,26 @@ fun main(vararg args: String) {
                     .joinToString(", ") { "${it.key} x${it.value}" })
             }
         }
+    }
+
+    if (report.rooms.size > 1) {
+        println()
+        println("=== per room ===")
+        println("%-10s %11s %11s %13s %13s %9s".format(
+            "room", "n ${report.a.label.take(8)}", "n ${report.b.label.take(8)}",
+            "clear A/B", "median A/B", "p"))
+        println("-".repeat(72))
+        report.breakdown.forEach { r ->
+            println("%-10s %11d %11d %13s %13s %9s".format(
+                r.room, r.nA, r.nB,
+                "%.0f%%/%.0f%%".format(r.clearA * 100, r.clearB * 100),
+                "%.0f/%.0f".format(r.medianA, r.medianB),
+                if (r.p.isNaN()) "n/a" else "%.4f".format(r.p)))
+        }
+        println("stratified across rooms (van Elteren): p = %s".format(
+            if (report.stratifiedP.isNaN()) "n/a" else "%.4f".format(report.stratifiedP)))
+        println("ranks are formed inside each room, so rooms of different difficulty are never")
+        println("compared against each other. Prefer this over the pooled figures below.")
     }
 
     println()

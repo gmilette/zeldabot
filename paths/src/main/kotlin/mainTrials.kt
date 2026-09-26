@@ -30,7 +30,12 @@ fun main(vararg args: String) {
                     batch.map { it.gitSha }.distinct().joinToString(",")))
             }
         println()
-        println("delete a batch:  ./gradlew trials -Pargs=\"delete=<runId>\"")
+        println("delete a batch:  ./gradlew trials -Pdelete=<runId>")
+        val malformed = args.filter { it.contains("delete") && !it.startsWith("delete=") }
+        if (malformed.isNotEmpty()) {
+            println()
+            println("NOTE: got $malformed but nothing was deleted - the form is delete=<runId>")
+        }
         return
     }
 

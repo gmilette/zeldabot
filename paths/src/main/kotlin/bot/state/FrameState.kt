@@ -131,7 +131,7 @@ data class Inventory(
 
     val inventoryItems = InventoryItems(api)
     val heartCalc = HeartsStateCalculator(this)
-    val items: Set<ZeldaItem> by lazy { InventoryReader.readInventory(api) }
+    val items: Set<ZeldaItem> by lazy { InventoryReader.readInventory(api, inventoryItems) }
 
     val hasHalfPotion: Boolean
         get() = items.contains(ZeldaItem.Potion)
