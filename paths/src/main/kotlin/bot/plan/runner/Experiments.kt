@@ -195,5 +195,41 @@ class Experiments(private val masterPlan: PlanMaker) {
         val segment = PlanSegment("phase", "set", action.toList())
         return MasterPlan(listOf(segment))
     }
+
+    companion object {
+        const val DEFAULT_TRIAL_FRAME_BUDGET = 5 * 60 * 60
+
+        fun roomTrial(
+            level: Int,
+            mapLoc: Int,
+            name: String = "room_${level}_${mapLoc}",
+            sword: ZeldaItem = ZeldaItem.MagicSword,
+            ring: ZeldaItem = ZeldaItem.None,
+            hearts: Int? = null,
+            shield: Boolean = false,
+            maxFramesPerTrial: Int = DEFAULT_TRIAL_FRAME_BUDGET
+        ) = Experiment(
+            name = name,
+            startSave = "mapstate/mapstate_${level}_${mapLoc}.save",
+            plan = {
+                MasterPlan(listOf(PlanSegment("roomTrial", name,
+                    listOf(StartAtAction(mapLoc, level), KillAll.make()))))
+            },
+            addEquipment = false,
+            sword = sword,
+            ring = ring,
+            hearts = hearts,
+            shield = shield,
+            keys = 4,
+            bombs = 4,
+            rupees = 250,
+            potion = true,
+            boomerang = ZeldaItem.MagicalBoomerang,
+            magicArrowAndBow = true,
+            level = level,
+            startMapLoc = mapLoc,
+            maxFramesPerTrial = maxFramesPerTrial
+        )
+    }
 }
 

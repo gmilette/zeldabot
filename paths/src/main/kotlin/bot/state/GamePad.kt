@@ -3,7 +3,7 @@ package bot.state
 import bot.state.map.Direction
 import bot.state.map.MapConstants
 import nintaco.api.GamepadButtons
-import kotlin.random.Random
+import util.ZRandom
 
 enum class GamePad {
     None, MoveRight, MoveLeft, MoveDown, MoveUp,
@@ -63,12 +63,11 @@ enum class GamePad {
             if (from.x < MapConstants.MAX_X - MapConstants.oneGrid - 2) {
                 possible.add(MoveRight)
             }
-            possible.shuffle()
-            return possible.firstOrNull() ?: None
+            return ZRandom.shuffled(possible).firstOrNull() ?: None
         }
 
         fun randomDirection() =
-            when (Random.nextInt(4)) {
+            when (ZRandom.nextInt(4)) {
                 0 -> MoveUp
                 1 -> MoveDown
                 2 -> MoveLeft

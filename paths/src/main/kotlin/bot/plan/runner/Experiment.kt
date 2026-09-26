@@ -26,5 +26,8 @@ data class Experiment(
     val magicKey: Boolean = false,
     val addEquipment: Boolean = false,
     val startAt: Int = 52,
+    val level: Int = -1,
+    val startMapLoc: Int = -1,
+    val maxFramesPerTrial: Int = 0,
     val nameFull: String = "${name}_s${sword.name.first()}_h${hearts}_r${ring.name.first()}_b${bombs}"
 )

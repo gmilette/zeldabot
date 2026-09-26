@@ -8,7 +8,7 @@ import bot.state.oam.potion
 import nintaco.api.API
 import nintaco.api.ApiSource
 import util.d
-import kotlin.random.Random
+import util.ZRandom
 
 
 class SwitchToItem(private val inventoryPosition: () -> Int = { Inventory.Selected.candle }) : Action {
@@ -50,7 +50,7 @@ class SwitchToItem(private val inventoryPosition: () -> Int = { Inventory.Select
         }
         // this is weird, link cannot just keep pressing left for right, it has to
         // press none inbetween sometimes. Whatever this works
-        return if (selectedItem(state) || Random.nextBoolean()) {
+        return if (selectedItem(state) || ZRandom.nextBoolean()) {
             GamePad.None
         } else {
             directionToSelection(state)

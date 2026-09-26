@@ -11,7 +11,7 @@ import bot.state.oam.*
 import nintaco.api.ApiSource
 import util.d
 import util.i
-import kotlin.random.Random
+import util.ZRandom
 
 interface Action {
     /**
@@ -652,7 +652,7 @@ class GoIn(
         val complete = movements >= moves || linkInDesiredDirectionEnoughTimes
         if (complete && reset) {
 //            d { " --> RESET $name $movements"}
-            if (randomlyMoveHalf && Random.nextInt(4) > 3) {
+            if (randomlyMoveHalf && ZRandom.nextInt(4) > 3) {
                 d { " do less"}
                 movements = moves / 2
             } else {

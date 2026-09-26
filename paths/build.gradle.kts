@@ -45,6 +45,15 @@ compose.desktop {
     }
 }
 
+// Compare two A/B arms:  ./gradlew analyzeAb -Pargs="armA armB"
+tasks.register<JavaExec>("analyzeAb") {
+    group = "verification"
+    description = "Compare two labelled arms of room trials, print stats and write an HTML report"
+    mainClass.set("MainAbAnalysisKt")
+    classpath = sourceSets["main"].runtimeClasspath
+    args = (project.findProperty("args") as String? ?: "").split(" ").filter { it.isNotBlank() }
+}
+
 tasks.jar {
     manifest {
         attributes["Main-Class"] = "MainBKt"

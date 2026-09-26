@@ -8,6 +8,7 @@ import bot.plan.action.moveHistoryAttackAction
 import bot.state.*
 import bot.state.map.destination.ZeldaItem
 import nintaco.api.API
+import util.ZRandom
 import util.d
 import java.io.File
 
@@ -40,10 +41,25 @@ class PlanRunner(private val makePlan: PlanMaker,
 
     private var levelExperiment: Experiment? = null
 
+    private var maxFramesPerTrial = 0
+    private var batchDone = false
+
     private fun runFrom() {
         val exp = experiment
         d { " run from $exp"}
-        if (exp.contains("run")) {
+        if (exp.startsWith("room_")) {
+            val split = exp.removePrefix("room_").split("_", ",")
+            runIt(load = true, ex = Experiments.roomTrial(
+                level = split[0].toInt(),
+                mapLoc = split[1].toInt(),
+                name = exp,
+                sword = swordFor(split.getOrElse(2) { "d" }),
+                ring = ringFor(split.getOrElse(3) { "g" }),
+                hearts = ZeldaBot.startHearts,
+                shield = ZeldaBot.startShield,
+                maxFramesPerTrial = ZeldaBot.maxTrialFrames ?: Experiments.DEFAULT_TRIAL_FRAME_BUDGET
+            ))
+        } else if (exp.contains("run")) {
             runHere()
         } else if (exp.contains("_") || exp.contains(",")) {
             val split = exp.split("_", ",")
@@ -58,16 +74,8 @@ class PlanRunner(private val makePlan: PlanMaker,
                 startSave = "",
                 { MasterPlan(emptyList()) },
                 addEquipment = false,
-                sword = when (s) {
-                    "w" -> ZeldaItem.WhiteSword
-                    "m" -> ZeldaItem.MagicSword
-                    else -> ZeldaItem.WoodenSword
-                },
-                ring = when (ring) {
-                    "b" -> ZeldaItem.BlueRing
-                    "r" -> ZeldaItem.RedRing
-                    else -> ZeldaItem.None
-                },
+                sword = swordFor(s),
+                ring = ringFor(ring),
                 keys = 4,
                 bombs = 4,
                 rupees = 250,
@@ -79,6 +87,18 @@ class PlanRunner(private val makePlan: PlanMaker,
         } else {
             runIt(exp)
         }
+    }
+
+    private fun swordFor(s: String) = when (s) {
+        "w" -> ZeldaItem.WhiteSword
+        "m" -> ZeldaItem.MagicSword
+        else -> ZeldaItem.WoodenSword
+    }
+
+    private fun ringFor(s: String) = when (s) {
+        "b" -> ZeldaItem.BlueRing
+        "r" -> ZeldaItem.RedRing
+        else -> ZeldaItem.None
     }
 
     init {
@@ -212,7 +232,14 @@ class PlanRunner(private val makePlan: PlanMaker,
         masterPlan.reset()
         action = withDefaultAction(masterPlan.skipToStart())
         d { " START AT ${action?.name}"}
-        runLog = RunActionLog(ex.name, ex, save = DirectoryConstants.enableInfo)
+        levelExperiment = ex
+        maxFramesPerTrial = ex.maxFramesPerTrial
+        runLog = RunActionLog(
+            ex.name, ex,
+            save = DirectoryConstants.enableInfo,
+            label = ZeldaBot.runLabel ?: "",
+            trial = runCt + 1
+        )
         if (load) {
             d { "reset" }
             Thread( {
@@ -225,6 +252,7 @@ class PlanRunner(private val makePlan: PlanMaker,
         }
         runCt++
         runSetupCt = 0
+        ZRandom.startTrial(runCt)
     }
 
     fun runSetup(manipulator: StateManipulator) {
@@ -293,6 +321,13 @@ class PlanRunner(private val makePlan: PlanMaker,
         val action = action ?: return GamePad.None
         runLog?.frameCompleted(state)
 
+        if (maxFramesPerTrial > 0 && (runLog?.elapsedFrames ?: 0) > maxFramesPerTrial) {
+            d { " trial timed out after $maxFramesPerTrial frames" }
+            runLog?.advance(action, state, masterPlan)
+            endTrial(state, "timeout")
+            return GamePad.None
+        }
+
         if (action.complete(state) || state.frameState.isDead) {
             runLog?.advance(action, state, masterPlan)
             advance(state)
@@ -311,14 +346,31 @@ class PlanRunner(private val makePlan: PlanMaker,
     private fun advance(state: MapLocationState) {
         if (masterPlan.complete || state.frameState.isDead) {
             d { " complete "}
-            runLog?.logFinalComplete(state, masterPlan)
-            rerun()
+            endTrial(state, if (state.frameState.isDead) "dead" else "complete")
         } else {
             d { " complete action ${action?.javaClass?.name ?: ""}"}
             completedAction(state, action)
             action = withDefaultAction(masterPlan.pop())
             action?.reset()
         }
+    }
+
+    private fun endTrial(state: MapLocationState, result: String) {
+        if (batchDone) return
+        runLog?.logFinalComplete(state, masterPlan, result)
+
+        val limit = ZeldaBot.trials
+        if (limit != null && runCt >= limit) {
+            batchDone = true
+            action = null
+            ZeldaBot.doAct = false
+            val where = "${runLog?.outputFileName}"
+            println("=== batch done: $runCt trials of '$experiment'" +
+                    " label='${ZeldaBot.runLabel ?: ""}' last=$where ===")
+            d { " batch done after $runCt trials" }
+            return
+        }
+        rerun()
     }
 
     private fun completedAction(state: MapLocationState, action: Action?) {

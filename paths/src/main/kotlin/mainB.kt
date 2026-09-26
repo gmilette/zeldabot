@@ -28,6 +28,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ui.FollowView
+import util.ZRandom
 import util.d
 
 fun main(vararg args: String) = application {
@@ -37,6 +38,15 @@ fun main(vararg args: String) = application {
     ZeldaBot.experiment = args.getOrNull(0)
     val isDev = args.contains("dev")
     DirectoryConstants.enableInfo = isDev
+    ZeldaBot.runLabel = args.argValue("label")
+    ZeldaBot.trials = args.argValue("trials")?.toIntOrNull()
+    ZeldaBot.maxTrialFrames = args.argValue("maxframes")?.toIntOrNull()
+    ZeldaBot.startHearts = args.argValue("hearts")?.toIntOrNull()
+    ZeldaBot.startShield = args.contains("shield")
+    args.argValue("seed")?.toLongOrNull()?.let {
+        ZRandom.seed = it
+    }
+    d { " label=${ZeldaBot.runLabel} trials=${ZeldaBot.trials} maxframes=${ZeldaBot.maxTrialFrames} hearts=${ZeldaBot.startHearts} shield=${ZeldaBot.startShield} seed=${ZRandom.seed}" }
     // Note: If you want to run the shadowJar directly
     // in Nintaco, addd noUi because the ui doesn't currently work
     // it is unable to find resources for some reason
@@ -63,6 +73,9 @@ fun main(vararg args: String) = application {
         }
     }
 }
+
+private fun Array<out String>.argValue(key: String): String? =
+    firstOrNull { it.startsWith("$key=") }?.substringAfter("=")?.takeIf { it.isNotBlank() }
 
 @Composable
 private fun Debugview(model: ZeldaModel, debugView: MutableState<Boolean>) {

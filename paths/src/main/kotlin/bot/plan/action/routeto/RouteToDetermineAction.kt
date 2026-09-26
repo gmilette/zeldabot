@@ -12,7 +12,7 @@ import bot.state.map.Direction
 import bot.state.map.MapConstants
 import bot.state.map.toGamePad
 import util.d
-import kotlin.random.Random
+import util.ZRandom
 
 class RouteToDetermineAction(val preparation: RoutePreparation) {
     private val ladderDecider = LadderActionDecider()
@@ -115,7 +115,7 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
 
         return when {
             // don't get stuck attacking emptu space when the clock is activated
-            (state.frameState.clockActivated && Random.nextInt(10) == 1) -> {
+            (state.frameState.clockActivated && ZRandom.nextInt(10) == 1) -> {
                 d { " Route Action -> Force Route Clock" }
                 PointMoveAction.Route
             }

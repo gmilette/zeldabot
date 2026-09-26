@@ -232,6 +232,12 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         var log: Boolean = false
         var experiment: String? = null
 
+        var runLabel: String? = null
+        var trials: Int? = null
+        var maxTrialFrames: Int? = null
+        var startHearts: Int? = null
+        var startShield: Boolean = false
+
         @JvmStatic
         fun startIt(monitor: ZeldaMonitor): ZeldaBot {
             ApiSource.initRemoteAPI("localhost", 9999)
