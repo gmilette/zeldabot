@@ -17,8 +17,8 @@ fun main(vararg args: String) {
         println("${file.absolutePath}  (${rows.size} labelled trials)")
         println()
         println("%-18s %-14s %-8s %5s %6s %5s %6s %s".format(
-            "runId", "label", "room", "n", "clear", "dead", "t/out", "build"))
-        println("-".repeat(86))
+            "runId", "label", "room", "n", "clear", "dead", "t/out", "config"))
+        println("-".repeat(110))
         rows.groupBy { Triple(it.runId, it.label, it.start) }
             .toSortedMap(compareBy({ it.first }, { it.second }))
             .forEach { (key, batch) ->
@@ -27,7 +27,7 @@ fun main(vararg args: String) {
                     batch.count { it.result == "complete" },
                     batch.count { it.result == "dead" },
                     batch.count { it.result == "timeout" },
-                    batch.map { it.gitSha }.distinct().joinToString(",")))
+                    batch.map { it.config }.distinct().joinToString(" | ").ifBlank { "(none)" }))
             }
         println()
         println("delete a batch:  ./gradlew trials -Pdelete=<runId>")

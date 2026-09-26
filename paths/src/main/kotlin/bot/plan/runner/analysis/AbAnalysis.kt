@@ -19,8 +19,13 @@ data class Metric(
     companion object {
         val all = listOf(
             Metric("elapsedFrames", "Frames to clear", "frames") { it.elapsedFrames.toDouble() },
-            Metric("netHeartsLost", "Hearts lost", "hearts") { it.netHeartsLost },
+            Metric("rawDamage", "Damage taken", "hearts") { it.rawDamage },
             Metric("damagedEvents", "Times hit", "hits") { it.damagedEvents.toDouble() },
+            Metric("damagePerKFrames", "Damage per 1000 frames", "hearts") {
+                if (it.elapsedFrames > 0) it.rawDamage * 1000 / it.elapsedFrames else 0.0
+            },
+            Metric("netHeartsLost", "Net hearts lost", "hearts") { it.netHeartsLost },
+            Metric("rawHeal", "Healing picked up", "hearts") { it.rawHeal },
             Metric("totalFrames", "Decision frames", "frames") { it.totalFrames.toDouble() },
             Metric("damagedFraction", "Time damaged", "fraction") { it.damagedFraction },
             Metric("bombsUsed", "Bombs used", "bombs") { it.bombsUsed.toDouble() }
@@ -58,11 +63,21 @@ data class ArmSummary(
     val deathPlaces: Map<String, Int> =
         rows.filter { it.result == "dead" }.groupingBy { it.end }.eachCount()
     val builds = rows.map { it.gitSha }.filter { it.isNotBlank() }.distinct().sorted()
+    val runIds = rows.map { it.runId.ifBlank { "(none)" } }.distinct().sorted()
     val rooms = rows.map { it.start }.distinct()
-    val loadouts = rows.map {
-        "${it.sword}/${it.ring}/${it.heartsStart}h/${if (it.shield) "shield" else "no shield"}"
-    }.distinct()
+    val loadouts = rows.map { "${it.config}/${it.heartsStart}h" }.distinct()
 }
+
+data class RoomBreakdown(
+    val room: String,
+    val nA: Int,
+    val nB: Int,
+    val clearA: Double,
+    val clearB: Double,
+    val medianA: Double,
+    val medianB: Double,
+    val p: Double
+)
 
 data class AbReport(
     val source: String,
@@ -72,6 +87,9 @@ data class AbReport(
     val warnings: List<String>,
     val fisherP: Double,
     val comparisons: List<MetricComparison>,
+    val rooms: List<String>,
+    val breakdown: List<RoomBreakdown>,
+    val stratifiedP: Double,
     val outcome: OutcomeComparison,
     val bootstrapLow: Double,
     val bootstrapHigh: Double,
@@ -144,7 +162,7 @@ object AbAnalysis {
         fun bool(name: String, default: Boolean = false) =
             o.get(name)?.takeIf { !it.isJsonNull }?.asBoolean ?: default
         return TrialSummary(
-            date = str("date"), label = str("label"), runId = str("runId"), gitSha = str("gitSha"),
+            date = str("date"), label = str("label"), runId = str("runId"), config = str("config"), gitSha = str("gitSha"),
             experiment = str("experiment"), file = str("file"), trial = int("trial"),
             start = str("start", "?"), result = str("result", "other"),
             percent = int("percent"), end = str("end", "?"),
@@ -158,7 +176,13 @@ object AbAnalysis {
         )
     }
 
-    fun compare(source: String, all: List<TrialSummary>, labelA: String, labelB: String): AbReport {
+    fun compare(
+        source: String,
+        all: List<TrialSummary>,
+        labelA: String,
+        labelB: String,
+        roomsCombinedOnPurpose: Boolean = false
+    ): AbReport {
         val a = ArmSummary(labelA, all.filter { it.label == labelA })
         val b = ArmSummary(labelB, all.filter { it.label == labelB })
         require(a.n > 0) { "no rows labelled '$labelA'. Labels present: ${all.map { it.label }.distinct()}" }
@@ -166,14 +190,18 @@ object AbAnalysis {
 
         val warnings = mutableListOf<String>()
         for (arm in listOf(a, b)) {
-            if (arm.rooms.size > 1) warnings += "${arm.label} mixes rooms ${arm.rooms} - not one experiment"
+            if (arm.rooms.size > 1 && !roomsCombinedOnPurpose) {
+                warnings += "${arm.label} mixes rooms ${arm.rooms} - not one experiment"
+            }
             if (arm.builds.size > 1) warnings += "${arm.label} mixes builds ${arm.builds} - the arm is not a single code state"
             if (arm.loadouts.size > 1) warnings += "${arm.label} mixes loadouts ${arm.loadouts} - trials did not start equal"
         }
         val loadouts = (a.loadouts + b.loadouts).distinct()
         if (loadouts.size > 1) warnings += "the arms do not share a loadout ($loadouts) - they are not comparable"
         val rooms = (a.rooms + b.rooms).distinct()
-        if (rooms.size > 1) warnings += "the arms are not the same room ($rooms) - they are not comparable"
+        if (rooms.size > 1 && !roomsCombinedOnPurpose) {
+            warnings += "the arms are not the same room ($rooms) - they are not comparable"
+        }
         if (minOf(a.n, b.n) < 10) warnings += "fewer than 10 trials in an arm - only very large effects will show"
 
         val comparisons = Metric.all.mapNotNull { m ->
@@ -212,8 +240,32 @@ object AbAnalysis {
         val n = minOf(a.cleared.size, b.cleared.size)
         val detectable = if (cv > 0 && n > 0) sqrt(2 * 2.8 * 2.8 * cv * cv / n) else 0.0
 
+        val roomList = (a.rooms + b.rooms).distinct().sorted()
+        val breakdown = roomList.map { room ->
+            val ra = a.cleared.filter { it.start == room }
+            val rb = b.cleared.filter { it.start == room }
+            val va = ra.map(Metric.primary.get)
+            val vb = rb.map(Metric.primary.get)
+            RoomBreakdown(
+                room = room,
+                nA = a.rows.count { it.start == room }, nB = b.rows.count { it.start == room },
+                clearA = a.rows.filter { it.start == room }.let {
+                    if (it.isEmpty()) 0.0 else it.count { r -> r.cleared }.toDouble() / it.size },
+                clearB = b.rows.filter { it.start == room }.let {
+                    if (it.isEmpty()) 0.0 else it.count { r -> r.cleared }.toDouble() / it.size },
+                medianA = va.median(), medianB = vb.median(),
+                p = Stats.mannWhitneyU(va, vb)
+            )
+        }
+        val strata = roomList.map { room ->
+            a.cleared.filter { it.start == room }.map(Metric.primary.get) to
+                    b.cleared.filter { it.start == room }.map(Metric.primary.get)
+        }
+        val stratifiedP = if (roomList.size > 1) Stats.vanElteren(strata) else Double.NaN
+
         return AbReport(
             source = source, a = a, b = b,
+            rooms = roomList, breakdown = breakdown, stratifiedP = stratifiedP,
             room = rooms.firstOrNull() ?: "?",
             warnings = warnings, fisherP = fisher, comparisons = comparisons, outcome = outcome,
             bootstrapLow = lo, bootstrapHigh = hi, detectableEffect = detectable
@@ -334,6 +386,49 @@ object Stats {
         val centre = p + z * z / (2 * n)
         val spread = z * sqrt(p * (1 - p) / n + z * z / (4.0 * n * n))
         return ((centre - spread) / d).coerceAtLeast(0.0) to ((centre + spread) / d).coerceAtMost(1.0)
+    }
+
+    /**
+     * van Elteren: a Wilcoxon rank sum blocked by stratum. Ranks are formed inside each
+     * room and only then combined, so rooms of different difficulty never get compared
+     * against each other - which naive pooling does, and which can reverse the result
+     * when the arms have uneven trial counts per room.
+     */
+    fun vanElteren(strata: List<Pair<List<Double>, List<Double>>>): Double {
+        var numerator = 0.0
+        var variance = 0.0
+        for ((a, b) in strata) {
+            val n1 = a.size
+            val n2 = b.size
+            if (n1 == 0 || n2 == 0) continue
+            val total = n1 + n2
+            val weight = 1.0 / (total + 1)
+            val all = (a.map { it to 0 } + b.map { it to 1 }).sortedBy { it.first }
+            val ranks = DoubleArray(all.size)
+            var tieTerm = 0.0
+            var i = 0
+            while (i < all.size) {
+                var j = i
+                while (j + 1 < all.size && all[j + 1].first == all[i].first) j++
+                val rank = (i + j + 2) / 2.0
+                for (k in i..j) ranks[k] = rank
+                val t = (j - i + 1).toDouble()
+                tieTerm += t * t * t - t
+                i = j + 1
+            }
+            var rankSumA = 0.0
+            all.forEachIndexed { idx, (_, group) -> if (group == 0) rankSumA += ranks[idx] }
+            val expected = n1 * (total + 1) / 2.0
+            val varI = if (total > 1) {
+                n1.toDouble() * n2 / (total * (total - 1.0)) *
+                        (ranks.sumOf { it * it } - total * (total + 1.0) * (total + 1.0) / 4.0)
+            } else 0.0
+            numerator += weight * (rankSumA - expected)
+            variance += weight * weight * varI
+        }
+        if (variance <= 0) return Double.NaN
+        val z = abs(numerator) / sqrt(variance)
+        return (2 * (1 - normalCdf(z))).coerceIn(0.0, 1.0)
     }
 
     fun normalCdf(z: Double): Double {

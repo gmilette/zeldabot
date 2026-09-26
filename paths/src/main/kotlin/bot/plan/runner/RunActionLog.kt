@@ -9,6 +9,7 @@ import bot.state.MapLocationState
 import bot.state.map.MapCell
 import com.github.doyaaaaaken.kotlincsv.client.CsvWriter
 import com.google.gson.Gson
+import util.ZRandom
 import util.d
 import java.io.File
 import java.text.SimpleDateFormat
@@ -226,6 +227,7 @@ class RunActionLog(private val fileNameRoot: String,
             date = now(),
             label = label,
             runId = runId,
+            config = experiment.signature + (ZRandom.seed?.let { "/seed$it" } ?: ""),
             gitSha = gitSha(),
             experiment = fileNameRoot,
             file = outputFileName,

@@ -4,6 +4,7 @@ data class TrialSummary(
     val date: String,
     val label: String,
     val runId: String,
+    val config: String,
     val gitSha: String,
     val experiment: String,
     val file: String,

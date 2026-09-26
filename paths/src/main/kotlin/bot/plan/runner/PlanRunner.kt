@@ -475,6 +475,6 @@ class PlanRunner(private val makePlan: PlanMaker,
 
     companion object {
         private const val ALWAYS_APPLY_FRAMES = 40
-        private const val SETUP_FRAME_LIMIT = 600
+        private const val SETUP_FRAME_LIMIT = 60
     }
 }

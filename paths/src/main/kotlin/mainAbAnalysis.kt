@@ -65,6 +65,9 @@ fun main(vararg args: String) {
         val prefix = if (i == 0) "arms   :" else "        "
         println("$prefix ${arm.label} n=${arm.n} build=${arm.builds.joinToString(",").ifBlank { "?" }}" +
                 " runs=${arm.runIds.joinToString(",")}")
+        arm.rows.map { it.config }.distinct().filter { it.isNotBlank() }.forEach {
+            println("         config: $it")
+        }
     }
     if (report.warnings.isNotEmpty()) {
         println()
