@@ -382,17 +382,17 @@ class PlanRunner(private val makePlan: PlanMaker,
 
     fun next(state: MapLocationState): GamePad {
         val action = action ?: return GamePad.None
-        runLog?.frameCompleted(state)
+        runLog.frameCompleted(state)
 
-        if (maxFramesPerTrial > 0 && (runLog?.elapsedFrames ?: 0) > maxFramesPerTrial) {
+        if (maxFramesPerTrial > 0 && (runLog.elapsedFrames) > maxFramesPerTrial) {
             d { " trial timed out after $maxFramesPerTrial frames" }
-            runLog?.advance(action, state, masterPlan)
+            runLog.advance(action, state, masterPlan)
             endTrial(state, "timeout")
             return GamePad.None
         }
 
         if (action.complete(state) || state.frameState.isDead) {
-            runLog?.advance(action, state, masterPlan)
+            runLog.advance(action, state, masterPlan)
             advance(state)
         }
 

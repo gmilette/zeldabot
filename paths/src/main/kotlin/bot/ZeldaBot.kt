@@ -172,8 +172,9 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             frameStateUpdater.updateFrame(currentFrame, currentGamePad)
         }
 
-        /// REMOVE THIS
-        api.setSpeed(400)
+        if (fast) {
+            api.setSpeed(400)
+        }
 
         // this is a debug function so the debug UI can control link
         if (unstick > 0) {
@@ -242,6 +243,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         var startShield: Boolean = false
         var runId: String = ""
         var startBoomerang: String? = null
+        var fast: Boolean = false
 
         @JvmStatic
         fun startIt(monitor: ZeldaMonitor): ZeldaBot {
