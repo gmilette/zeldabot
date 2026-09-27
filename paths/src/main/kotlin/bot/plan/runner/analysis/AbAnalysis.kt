@@ -18,19 +18,19 @@ data class Metric(
 ) {
     companion object {
         val all = listOf(
-            Metric("elapsedFrames", "Frames to clear", "frames") { it.elapsedFrames.toDouble() },
             Metric("rawDamage", "Damage taken", "hearts") { it.rawDamage },
-            Metric("damagedEvents", "Times hit", "hits") { it.damagedEvents.toDouble() },
             Metric("damagePerKFrames", "Damage per 1k frames", "hearts") {
                 if (it.elapsedFrames > 0) it.rawDamage * 1000 / it.elapsedFrames else 0.0
             },
-            Metric("netHeartsLost", "Net hearts lost", "hearts") { it.netHeartsLost },
-            Metric("rawHeal", "Healing picked up", "hearts") { it.rawHeal },
-            Metric("totalFrames", "Decision frames", "frames") { it.totalFrames.toDouble() },
-            Metric("damagedFraction", "Time damaged", "fraction") { it.damagedFraction },
-            Metric("bombsUsed", "Bombs used", "bombs") { it.bombsUsed.toDouble() }
+            Metric("damagedEvents", "Damage episodes", "episodes") { it.damagedEvents.toDouble() },
+            Metric("drainRatio", "Drain ratio (ticks/ep)", "ratio") {
+                if (it.damagedEvents > 0) it.rawHits.toDouble() / it.damagedEvents else 0.0
+            },
+            Metric("totalFrames", "Decision frames", "frames") { it.totalFrames.toDouble() }
         )
-        val primary = all.first()
+
+        val primary = all.first { it.name == "damagePerKFrames" }
+        const val ALPHA = 0.01
     }
 }
 

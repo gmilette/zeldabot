@@ -362,6 +362,8 @@ class ZStar(
                     d { " explore found: $point done because $doneBecause" }
                 }
                 closedList.add(point)
+                // the point goal
+                pointClosestToGoal = point
                 break
             }
 
@@ -448,7 +450,7 @@ class ZStar(
         }
         // todo: actually should pick the best path so far..
         // if there is no goal, then use the closest point to the goal
-        return generatePath(target, cameFrom, pointClosestToGoal, totalCosts).also {
+        return generatePath(cameFrom, pointClosestToGoal, totalCosts).also {
             if (it.isEmpty() || it.size == 1) {
                 if (DEBUG) {
                     d { " ****** EMPTY ****** " }
@@ -474,15 +476,11 @@ class ZStar(
     }
 
     private fun generatePath(
-        targets: List<FramePoint>,
         cameFrom: Map<FramePoint, FramePoint>,
-        lastExplored: FramePoint,
+        endPoint: FramePoint,
         totalCosts: Map<FramePoint, Int> = emptyMap()
     ): List<FramePoint> {
-        val target = targets.firstOrNull { cameFrom.containsKey(it) }
-
-        // last explored is a problem
-        var current = target ?: lastExplored
+        var current = endPoint
 
         val path = mutableListOf(current)
         while (cameFrom.containsKey(current)) {
@@ -490,15 +488,11 @@ class ZStar(
             path.add(0, current)
         }
         if (DEBUG) {
-            if (!cameFrom.containsKey(target)) {
-                d { "no target use $lastExplored looked for $target" }
+            if (!cameFrom.containsKey(endPoint)) {
+                d { "end point $endPoint has no path back to the start" }
 
                 cameFrom.forEach { (t, u) ->
                     d { "came from $t -> $u" }
-                }
-                d { " targets " }
-                for (target in targets) {
-                    d { " targ $target" }
                 }
             }
             d { " start " }

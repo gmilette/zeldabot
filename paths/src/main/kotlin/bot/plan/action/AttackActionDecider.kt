@@ -16,17 +16,19 @@ object AttackActionDecider {
     private val shortExtra = MapConstants.swordGrid
 
     fun attackPoints(point: FramePoint) =
-        point.upPoints() + point.rightPoints() + point.leftPoint() + point.downPoint() + point.cornersIn()
+        point.allPoints() + point.cornersIn()
 
     fun attackPointsNoCorner(point: FramePoint) =
-        point.upPoints() + point.rightPoints() + point.leftPoint() + point.downPoint()
+        point.allPoints()
 
     fun attackPoints(point: FramePoint, not: Direction): List<FramePoint> {
         return when (not) {
-            Direction.Up -> point.downPoint() + point.rightPoints() + point.leftPoint() // + point.downPoint()
-            Direction.Down -> point.rightPoints() + point.leftPoint() + point.upPoints()
-            Direction.Left -> point.upPoints() + point.rightPoints() + point.downPoint()
-            Direction.Right -> point.upPoints() + point.leftPoint() + point.downPoint()
+            // up points is really below the enemy so if the enemy
+            // is facing up, then ok to be up
+            Direction.Up -> point.horizontalPoints() + point.upPoints()
+            Direction.Down -> point.horizontalPoints() + point.downPoint()
+            Direction.Left -> point.verticalPoints() + point.leftPoint()
+            Direction.Right -> point.verticalPoints() + point.rightPoints()
             else -> attackPointsNoCorner(point)
         }
 //        return when (not) {
@@ -38,6 +40,9 @@ object AttackActionDecider {
 //        }
     }
 
+    fun FramePoint.verticalPoints(): List<FramePoint> = upPoints() + downPoint()
+    fun FramePoint.horizontalPoints(): List<FramePoint> = leftPoint() + rightPoints()
+    fun FramePoint.allPoints(): List<FramePoint> = upPoints() + rightPoints() + leftPoint() + downPoint()
 
     fun FramePoint.upPoints(): List<FramePoint> =
         FramePointBuilder.hasL(
@@ -107,9 +112,6 @@ object AttackActionDecider {
                 x + shortExtra to (y - longExtra) - 3,
             )
         )
-
-    fun FramePoint.isInUpPointPosition(): Boolean =
-        this in upPoints()
 
     fun getInFrontOfGrids(state: MapLocationState): Boolean {
         val linkDir = state.frameState.link.dir

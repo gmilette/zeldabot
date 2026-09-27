@@ -154,21 +154,29 @@ fun main(vararg args: String) {
     val nameB = report.b.label.take(12)
     val pooledNote = if (report.rooms.size > 1)
         "metric (POOLED ${report.rooms.size} rooms)" else "metric (cleared)"
-    println("%-20s %12s %12s %9s %9s".format(pooledNote, nameA, nameB, "change", "p"))
-    println("-".repeat(68))
+    println("%-22s %12s %12s %9s %9s %8s".format(pooledNote, nameA, nameB, "change", "p", "signif"))
+    println("-".repeat(78))
     report.comparisons.forEach { c ->
-        println("%-20s %12.2f %12.2f %8.1f%% %9s".format(
+        val sig = when {
+            c.p.isNaN() -> "-"
+            c.p < Metric.ALPHA -> "YES"
+            else -> "no"
+        }
+        println("%-22s %12.2f %12.2f %8.1f%% %9s %8s".format(
             c.metric.label, c.medianA, c.medianB, c.relativeDelta * 100,
-            if (c.p.isNaN()) "n/a" else "%.4f".format(c.p)))
+            "%.4f".format(c.p), sig))
     }
+    println("signif = p < ${Metric.ALPHA}. Measured on self-comparisons, that bar keeps the")
+    println("chance of a false positive anywhere in this table near 3%; p < 0.05 would make it 17%.")
 
     if (report.rooms.size > 1) {
         println("^ pooled across rooms of different scale - prefer the stratified column above")
     }
 
     println()
-    println("median %s difference (B - A): %d to %d frames (95%% bootstrap CI)".format(
-        Metric.primary.label.lowercase(), report.bootstrapLow.roundToInt(), report.bootstrapHigh.roundToInt()))
+    println("median %s difference (B - A): %.2f to %.2f %s (95%% bootstrap CI)".format(
+        Metric.primary.label.lowercase(), report.bootstrapLow, report.bootstrapHigh,
+        Metric.primary.unit))
     if (report.bootstrapLow <= 0 && report.bootstrapHigh >= 0) {
         println("  interval spans zero: this sample does not show a difference")
     }

@@ -136,7 +136,10 @@ object AttackLongActionDecider {
         if (dir == Direction.None) return FramePoint()
         var farthestPoint = point.copy()
         val modifier = dir.pointModifier()
-        while (map.getOr(point, false) && farthestPoint.isOnMap) {
+        // it is ok to shoot over not passible areas
+//        while (map.getOr(farthestPoint, false) && farthestPoint.isOnMap) {
+        // could be more efficient and just find the farthest point on the map
+        while (farthestPoint.isOnMap) {
             farthestPoint = modifier(farthestPoint)
         }
         return farthestPoint
