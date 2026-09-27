@@ -26,5 +26,39 @@ data class Experiment(
     val magicKey: Boolean = false,
     val addEquipment: Boolean = false,
     val startAt: Int = 52,
+    val level: Int = -1,
+    val startMapLoc: Int = -1,
+    val maxFramesPerTrial: Int = 0,
     val nameFull: String = "${name}_s${sword.name.first()}_h${hearts}_r${ring.name.first()}_b${bombs}"
-)
+) {
+    val signature: String
+        get() = listOfNotNull(
+            when (sword) {
+                ZeldaItem.MagicSword -> "m"
+                ZeldaItem.WhiteSword -> "w"
+                ZeldaItem.WoodenSword -> "d"
+                else -> "no-sword"
+            },
+            when (ring) {
+                ZeldaItem.BlueRing -> "b"
+                ZeldaItem.RedRing -> "r"
+                else -> "g"
+            },
+            hearts?.let { "${it}h" },
+            "shield".takeIf { shield },
+            "b$bombs".takeIf { bombs > 0 },
+            "k$keys".takeIf { keys > 0 },
+            "r$rupees".takeIf { rupees > 0 },
+            "potion".takeIf { potion },
+            "marrow".takeIf { magicArrowAndBow } ?: "arrow".takeIf { arrowAndBow },
+            when (boomerang) {
+                ZeldaItem.MagicalBoomerang -> "mboom"
+                ZeldaItem.Boomerang -> "boom"
+                else -> null
+            },
+            "wand".takeIf { wand },
+            "candle".takeIf { candle },
+            "ladder".takeIf { ladderAndRaft },
+            "max$maxFramesPerTrial".takeIf { maxFramesPerTrial > 0 }
+        ).joinToString("/")
+}

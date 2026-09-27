@@ -6,6 +6,7 @@ import nintaco.api.API
 import util.d
 
 class InventoryItems(api: API) {
+    val hasSword by lazy { api.readCPU(api.readCPU(Addresses.hasSword)) }
     val hasRing by lazy { api.readCPU(api.readCPU(Addresses.hasRing)) }
     val hasMagicShield by lazy { api.readCpuB(Addresses.hasShield) }
 
@@ -18,11 +19,10 @@ class InventoryItems(api: API) {
 }
 
 object InventoryReader {
-//    val sword by lazy { api.readCPU(Addresses.hasSword) }
 
-    fun readInventory(api: API): Set<ZeldaItem> {
+    fun readInventory(api: API, inventoryItems: InventoryItems): Set<ZeldaItem> {
         val items = mutableSetOf<ZeldaItem>()
-        when (api.readCPU(Addresses.hasSword)) {
+        when (inventoryItems.hasSword) {
             1 -> items.add(ZeldaItem.WoodenSword)
             2 -> items.add(ZeldaItem.WhiteSword)
             3 -> items.add(ZeldaItem.MagicSword)
@@ -52,12 +52,12 @@ object InventoryReader {
         }
         if (api.readCpuB(Addresses.hasPotion)) items.add(ZeldaItem.Potion)
         if (api.readCpuB(Addresses.hasRaft)) items.add(ZeldaItem.Raft)
-        when (api.readCPU(Addresses.hasRing)) {
+        when (inventoryItems.hasRing) {
             1 -> items.add(ZeldaItem.BlueRing)
             2 -> items.add(ZeldaItem.RedRing)
             else -> {}
         } // todo
-        if (api.readCpuB(Addresses.hasShield)) items.add(ZeldaItem.MagicShield)
+        if (inventoryItems.hasMagicShield) items.add(ZeldaItem.MagicShield)
         if (api.readCpuB(Addresses.hasWhistle)) items.add(ZeldaItem.Whistle)
         if (api.readCpuB(Addresses.hasRod)) items.add(ZeldaItem.Wand)
         d { " items in inventory: $items"}

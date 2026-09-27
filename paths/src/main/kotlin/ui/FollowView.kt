@@ -68,15 +68,15 @@ fun FollowView(
 
         state.planRunner.runLog.let { runLog ->
             Row {
-                FollowCard(title = "Hits", text = "${runLog.totalHits}")
-                FollowCard(title = "Bombs", text = runLog.bombsUsed.total.toString())
-                FollowCard(title = "Keys      Total", text = runLog.keysGot.total.toString())
+                FollowCard(title = "Hits", text = "${runLog.hits.totalInt}")
+                FollowCard(title = "Bombs", text = runLog.bombsUsed.totalInt.toString())
+                FollowCard(title = "Keys      Total", text = runLog.keysGot.totalInt.toString())
             }
 
             Row {
-                FollowCard(title = "Keys Used", text = runLog.keysUsed.total.toString())
-                FollowCard(title = "Rupees Spent", text = runLog.rupeesSpent.total.toString())
-                FollowCard(title = "Rupees Total", text = runLog.rupeesGained.total.toString())
+                FollowCard(title = "Keys Used", text = runLog.keysUsed.totalInt.toString())
+                FollowCard(title = "Rupees Spent", text = runLog.rupeesSpent.totalInt.toString())
+                FollowCard(title = "Rupees Total", text = runLog.rupeesGained.totalInt.toString())
             }
 
         }

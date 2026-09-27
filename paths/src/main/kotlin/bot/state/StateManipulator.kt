@@ -28,6 +28,15 @@ class StateManipulator(
         api.writeCPU(Addresses.numBombs, num)
     }
 
+    // read live: runSetup runs before the frame state is refreshed each frame
+    fun heartContainers(): Int = (api.readCPU(Addresses.heartContainers) shr 4) + 1
+
+    fun swordId(): Int = state.frameState.inventory.inventoryItems.hasSword
+
+    fun ringId(): Int = state.frameState.inventory.inventoryItems.hasRing
+
+    fun hasMagicShield(): Boolean = state.frameState.inventory.inventoryItems.hasMagicShield
+
     fun setHearts(num: Int) {
 //        val h = (num + 1) + (num + 1) * 16
         d { "set hearts $num" }

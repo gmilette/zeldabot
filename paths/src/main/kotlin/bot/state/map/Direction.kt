@@ -3,7 +3,7 @@ package bot.state.map
 import bot.state.*
 import util.Geom
 import util.d
-import kotlin.random.Random
+import util.ZRandom
 
 enum class Direction {
     Left, Right, Up, Down, None;
@@ -17,7 +17,7 @@ enum class Direction {
             get() = listOf(Up, Right, Down, Left)
         val allSet: Set<Direction> = all.toSet()
         fun randomDirection(): Direction =
-            when (Random.nextInt(4)) {
+            when (ZRandom.nextInt(4)) {
                 0 -> Up
                 1 -> Down
                 2 -> Left
@@ -42,6 +42,7 @@ enum class Direction {
             6 -> Left // left-down
             9 -> Right // right-up
             10 -> Left // left-up
+            0 -> None.also { d { "direction unset to 0"}}
             else -> None.also { d { "unknown direction bitmask: $bitmask hex value: ${bitmask.toString(16)}" } }
         }
 
@@ -54,6 +55,7 @@ enum class Direction {
             6 -> MovingDirection.Diagonal.DownLeft
             9 -> MovingDirection.Diagonal.UpRight
             10 -> MovingDirection.Diagonal.UpLeft
+            0 -> MovingDirection.UnknownOrStationary.also { d { "unknown or stationary"}}
             else -> MovingDirection.UnknownOrStationary.also { d { "unknown direction bitmask: $bitmask hex value: ${bitmask.toString(16)}" } }
         }
 

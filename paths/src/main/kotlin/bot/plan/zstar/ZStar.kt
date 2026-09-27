@@ -261,7 +261,8 @@ class ZStar(
         val startIsSafe = costsF.safe(param.start)
 
         // testing
-        if (param.rParam.findNearestSafeIfCurrentlyNotSafe == true && !startIsSafe) {
+        val routeSafe = true
+        if (routeSafe && param.rParam.findNearestSafeIfCurrentlyNotSafe == true && !startIsSafe) {
             d { " dodge! "}
             return routeNearestSafe(param)
         } else {

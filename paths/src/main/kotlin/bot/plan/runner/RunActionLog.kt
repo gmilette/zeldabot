@@ -2,41 +2,64 @@ package bot.plan.runner
 
 import bot.DirectoryConstants
 import bot.plan.action.Action
-import bot.plan.action.UsePotion
 import bot.state.GamePad
+import bot.state.MapCoordinates
 import bot.state.MapLoc
 import bot.state.MapLocationState
 import bot.state.map.MapCell
 import com.github.doyaaaaaken.kotlincsv.client.CsvWriter
+import com.google.gson.Gson
+import util.ZRandom
 import util.d
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.abs
 
+/**
+ * file outputs:
+ *  perStep output: per run
+ *  all experiments output: one row per run, accumulate
+ */
 class RunActionLog(private val fileNameRoot: String,
                    private val experiment: Experiment,
-                   private val save: Boolean = true
+                   private val save: Boolean = true,
+                   private val label: String = "",
+                   private val runId: String = "",
+                   private val trial: Int = 0
 ) {
     val started = System.currentTimeMillis()
     var startedStep = System.currentTimeMillis()
     var framesForStep = 0
     private var totalFrames = 0
 
-    var totalHits = 0
-    var totalDamage = 0.0
-    var stepHits = 0
-    var stepDamage = 0.0
-    var stepHeal = 0.0
-    var totalHeal = 0.0
+    /**
+     * need these so we can limit any trials to an absolute number of frames
+     */
+    private var runStartFrame = NO_FRAME
+    private var lastFrame = NO_FRAME
+
+    val elapsedFrames: Int
+        get() = if (runStartFrame == NO_FRAME) 0 else lastFrame - runStartFrame
+
+    private var settled = false
+    private var previousDamagedFlag = false
+    var heartsAtStart = 0.0
+        private set
+
+    val hits = DataCount()
+    val damage = DataCount()
+    val heal = DataCount()
     val bombsUsed = DataCount()
     val keysUsed = DataCount()
-    val keysGot = DataCount(0, 0)
+    val keysGot = DataCount()
     val rupeesSpent = DataCount()
-    val rupeesGained = DataCount(-1, -1)
+    val rupeesGained = DataCount()
     val damaged = DataCount()
+    val damagedEvents = DataCount()
 
-    private val dataCounts = listOf(bombsUsed, keysGot, keysUsed, rupeesSpent, rupeesGained, damaged)
+    private val dataCounts = listOf(hits, damage, heal, bombsUsed, keysGot, keysUsed,
+        rupeesSpent, rupeesGained, damaged, damagedEvents)
 
     private var directionCt = mutableMapOf<GamePad, DataCount>()
 
@@ -48,14 +71,11 @@ class RunActionLog(private val fileNameRoot: String,
 
     private val experimentRoot = DirectoryConstants.outDir("zexperiment")
 
-    val outputFileName = "${fileNameRoot}_${System.currentTimeMillis()}"
+    private val labelPrefix = if (label.isBlank()) "" else "${label}_"
+    val outputFileName = "${labelPrefix}${fileNameRoot}_${System.currentTimeMillis()}"
     val outputFile = "$experimentRoot${outputFileName}.csv"
-    val outputFileAll = "${experimentRoot}experiments.csv"
-    val heartLog = "${experimentRoot}heartLog_${System.currentTimeMillis()}.txt"
+    val outputFileAll = "${experimentRoot}experiments.jsonl"
 
-    // bombs used
-    // time
-    // damage taken
     data class StepCompleted(
         val level: Int,
         val mapLoc: MapLoc,
@@ -66,11 +86,12 @@ class RunActionLog(private val fileNameRoot: String,
         val time: Long,
         val totalTime: Long,
         val bombsUsed: Int,
-        val frames: Int,
+        val frame: Int,
         val numFrames: Int = 0,
         val hits: Int = 0,
         val damage: Double = 0.0,
         val damaged: Int = 0,
+        val damagedEvents: Int = 0,
         val heal: Double = 0.0,
         val keys: Int = 0,
         val rupees: Int,
@@ -86,6 +107,25 @@ class RunActionLog(private val fileNameRoot: String,
         framesForStep++
         totalFrames++
 
+        val frame = state.frameState.currentFrame
+        if (runStartFrame == NO_FRAME) {
+            runStartFrame = frame
+        }
+        lastFrame = frame
+
+        if (!settled) {
+            if (state.frameState.gameMode != NORMAL_PLAY || totalFrames < SETTLE_FRAMES) {
+                return
+            }
+            settled = true
+            totalFrames = 0
+            framesForStep = 0
+            heartsAtStart = state.frameState.inventory.heartCalc.lifeInHearts()
+            previousDamagedFlag = state.frameState.link.damaged
+            runStartFrame = frame
+            return
+        }
+
         setDamage(state)
         setHearts(state)
         setBombs(state)
@@ -94,48 +134,30 @@ class RunActionLog(private val fileNameRoot: String,
     }
 
     private fun setDamage(state: MapLocationState) {
-        if (state.frameState.link.damaged) {
+        val isDamaged = state.frameState.link.damaged
+        if (isDamaged) {
             damaged.inc()
+            if (!previousDamagedFlag) {
+                damagedEvents.inc()
+            }
         }
+        previousDamagedFlag = isDamaged
     }
 
     private fun setHearts(state: MapLocationState) {
-        // always decreases, but isn't always exactly accurate for some reason
         val currentHeart = state.frameState.inventory.heartCalc.lifeInHearts()
         val previousHeart = state.previousHeart
-//        d { " previous heart $previousHeart current heart $currentHeart" }
-        // should just check if
-        val currentDamage = state.frameState.damageNumber
-        val previousDamage = state.previousDamageNumber
         val damage = previousHeart - currentHeart
         if (damage != 0.0) {
-            val WRITE_HEART = false
-            if (WRITE_HEART && save) {
-                val csvWriter2 = CsvWriter()
-                // damage, hearts, damageIn, life, life2, damage number
-                csvWriter2.open(heartLog, true) {
-                    writeRow(
-                        state.frameState.inventory.damage.toString(16),
-                        state.frameState.inventory.hearts.toString(16),
-                        state.frameState.inventory.heartCalc.damageInHearts(),
-                        state.frameState.inventory.heartCalc.lifeInHearts(),
-                        state.frameState.inventory.heartCalc.lifeInHearts2(),
-                        state.frameState.inventory.heartCalc.damageNumber()
-                    )
-                }
-            }
             if (damage > 0) {
-                totalHits++
-                totalDamage += damage
-                stepHits++
-                stepDamage += damage
+                hits.inc()
+                this.damage.add(damage)
             } else {
-                stepHeal += -damage
-                totalHeal += -damage
+                heal.add(-damage)
             }
         }
     }
-    
+
     private fun setBombs(state: MapLocationState) {
         val numBombs = state.frameState.inventory.numBombs
         val previousNumBombs = state.previousNumBombs
@@ -165,87 +187,86 @@ class RunActionLog(private val fileNameRoot: String,
         }
     }
 
+    private var rowsWritten = 0
+
     private fun logCompletedStep() {
-        completedStep.forEachIndexed { index, stepCompleted ->
-            stepCompleted.apply {
-                d { "$index, $time, $totalTime, $action, $bombsUsed, $hits, $damage" }
+        if (!save || rowsWritten >= completedStep.size) return
+
+        val csvWriter = CsvWriter()
+        if (rowsWritten == 0) {
+            csvWriter.open(outputFile, false) {
+                writeRow("index", "level", "mapLoc", "seg", "name", "time", "totalTime",
+                    "frame", "numFrames", "action", "hearts", "bombsUsed",
+                    "hits", "damage", "damaged", "damagedEvents", "heal", "keys", "rupees",
+                    "potion", "bombs")
             }
         }
-        if (save) {
-            val csvWriter2 = CsvWriter()
-            csvWriter2.open(outputFile, false) {
-                writeRow("index", "level", "mapLoc", "name", "time", "totalTime", "totalFrames", "numFrames", "action", "hearts", "bombsUsed", "hits", "damage", "damaged", "heal", "keys", "rupees", "potion", "bombs")
-                completedStep.forEachIndexed { index, stepCompleted ->
-                    stepCompleted.apply {
-                        writeRow(index, level, mapLoc, name, time, totalTime, frames, numFrames, action, hearts, bombsUsed, hits, damage, damaged, heal, keys, rupees, potionFills, numBombs)
-                    }
+        csvWriter.open(outputFile, true) {
+            for (index in rowsWritten until completedStep.size) {
+                completedStep[index].apply {
+                    writeRow(index, level, mapLoc, seg, name, time, totalTime,
+                        frame, numFrames, action, hearts, bombsUsed,
+                        hits, damage, damaged, damagedEvents, heal, keys, rupees,
+                        potionFills, numBombs)
                 }
             }
         }
+        rowsWritten = completedStep.size
     }
 
-    fun logFinalComplete(state: MapLocationState, masterPlan: MasterPlan) {
-        // it's possible that link just
-        val result = when {
-            masterPlan.complete -> "complete"
-            state.frameState.isDead -> "dead"
-            else -> "other"
-        }
-        val percentDone = masterPlan.percentDoneInt
-        val finalMapLoc = state.currentMapCell.mapLoc
-        if (save) {
-            writeFinalHeader()
-            val stepCompleted = calculateStep(fileNameRoot, masterPlan.toStringCurrentSeg(), state, totalFrames, totalHits, totalDamage, totalHeal)
-            val csvWriter2 = CsvWriter()
-            csvWriter2.open(outputFileAll, true) {
-                writeRow(
-                    now(),
-                    stepCompleted.action,
-                    outputFileName,
-                    stepCompleted.totalTime,
-                    totalFrames,
-                    totalHits,
-                    totalDamage,
-                    totalHeal,
-                    bombsUsed.total,
-                    state.frameState.inventory.numRupees,
-                    state.frameState.gameMode,
-                    percentDone,
-                    finalMapLoc,
-                    result,
-                    experiment.sword,
-                    experiment.ring,
-                    experiment.hearts,
-                    experiment.bombs,
-                    experiment.boomerang,
-                    experiment.shield,
-                )
-            }
-        }
-    }
+    fun logFinalComplete(state: MapLocationState, masterPlan: MasterPlan, forcedResult: String? = null) {
+        if (!save) return
 
-    private fun writeFinalHeader() {
-        val csvWriter2 = CsvWriter()
-        if (!File(outputFileAll).exists() && save) {
-            csvWriter2.open(outputFileAll, true) {
-                writeRow("date", "action", "file", "totalTime", "totalFrames",
-                    "totalHits", "totalDamage", "totalHeal", "bombsUsed", "rupees",
-                    "gamemode", "percent", "mapLoc", "result",
-                    "sword", "ring", "hearts", "bombs",
-                    "boom", "shield")
-            }
-        }
+        logCompletedStep()
+
+        val heartsAtEnd = state.frameState.inventory.heartCalc.lifeInHearts()
+        // a trial can end before the settle window, leaving no measured baseline. Use the
+        // current hearts so netHeartsLost reads 0 rather than the whole heart bar.
+        val heartsAtStart = if (settled) heartsAtStart else heartsAtEnd
+        val summary = TrialSummary(
+            date = now(),
+            label = label,
+            runId = runId,
+            config = experiment.signature + (ZRandom.seed?.let { "/seed$it" } ?: ""),
+            gitSha = gitSha(),
+            experiment = fileNameRoot,
+            file = outputFileName,
+            trial = trial,
+            start = MapCoordinates(experiment.level, experiment.startMapLoc).id,
+            result = forcedResult ?: when {
+                masterPlan.complete -> "complete"
+                state.frameState.isDead -> "dead"
+                else -> "other"
+            },
+            percent = masterPlan.percentDoneInt,
+            end = MapCoordinates(state.frameState.level, state.currentMapCell.mapLoc).id,
+            elapsedFrames = elapsedFrames,
+            totalFrames = totalFrames,
+            heartsStart = heartsAtStart,
+            heartsEnd = heartsAtEnd,
+            netHeartsLost = heartsAtStart - heartsAtEnd,
+            damagedEvents = damagedEvents.totalInt,
+            damagedFrames = damaged.totalInt,
+            bombsUsed = bombsUsed.totalInt,
+            rupees = state.frameState.inventory.numRupees,
+            rawHits = hits.totalInt,
+            rawDamage = damage.total,
+            rawHeal = heal.total,
+            sword = experiment.sword.name,
+            ring = experiment.ring.name,
+            bombs = experiment.bombs,
+            boom = experiment.boomerang.name,
+            shield = experiment.shield
+        )
+        File(outputFileAll).appendText(summaryGson.toJson(summary) + "\n")
     }
 
     fun advance(action: Action, state: MapLocationState, masterPlan: MasterPlan) {
         d { "*** advance time" }
+        completedStep.add(calculateStep(action.name, masterPlan.toStringCurrentSeg(), state, framesForStep))
         logCompletedStep()
-        completedStep.add(calculateStep(action.name, masterPlan.toStringCurrentSeg(), state, framesForStep, stepHits, stepDamage, stepHeal))
         startedStep = System.currentTimeMillis()
         framesForStep = 0
-        stepDamage = 0.0
-        stepHits = 0
-        stepHeal = 0.0
         for (dataCount in dataCounts) {
             dataCount.actionDone()
         }
@@ -254,21 +275,16 @@ class RunActionLog(private val fileNameRoot: String,
         }
     }
 
-    private val potionOrReplace = "${UsePotion::javaClass.javaClass.simpleName} or "
     private val potionReplace = "UsePotion or "
 
     private fun calculateStep(
         name: String,
         seg: String,
         state: MapLocationState,
-        frameCt: Int,
-        hits: Int,
-        damage: Double,
-        heal: Double
+        frameCt: Int
     ): StepCompleted {
-        val time = (System.currentTimeMillis() - startedStep) / 1000
-        val totalTime = (System.currentTimeMillis() - started) / 1000
         val cellName = state.getCell().mapData.name
+        val frame = state.frameState.currentFrame
         return StepCompleted(
             level = state.frameState.level,
             mapLoc = state.frameState.mapLoc,
@@ -276,15 +292,16 @@ class RunActionLog(private val fileNameRoot: String,
             name = cellName.take(8),
             action = name.replace("\"", "").replace(potionReplace, "").trim(),
             hearts = state.frameState.inventory.heartCalc.lifeInHearts(),
-            time = time,
-            totalTime = totalTime,
-            bombsUsed = bombsUsed.perStep,
-            frames = state.frameState.currentFrame,
+            time = (System.currentTimeMillis() - startedStep) / 1000,
+            totalTime = (System.currentTimeMillis() - started) / 1000,
+            bombsUsed = bombsUsed.perStepInt,
+            frame = frame,
             numFrames = frameCt,
-            hits = hits,
-            damage = damage,
-            damaged = damaged.perStep,
-            heal = heal,
+            hits = hits.perStepInt,
+            damage = damage.perStep,
+            damaged = damaged.perStepInt,
+            damagedEvents = damagedEvents.perStepInt,
+            heal = heal.perStep,
             keys = state.frameState.numKeys,
             rupees = state.frameState.numRupees,
             potionFills = state.frameState.inventory.numPotions,
@@ -297,25 +314,35 @@ class RunActionLog(private val fileNameRoot: String,
     } else {
         hyrule.levelMap.cellOrEmpty(frameState.level, frameState.mapLoc)
     }
+
+    companion object {
+        // JsonFile's shared instance pretty-prints, which would break one-object-per-line
+        private val summaryGson = Gson()
+
+        private const val NO_FRAME = -1
+        private const val NORMAL_PLAY = 5
+        private const val SETTLE_FRAMES = 30
+    }
 }
 
 data class DataCount(
-    // maybe a name?
-    var total: Int = 0,
-    var perStep: Int = 0) {
+    var total: Double = 0.0,
+    var perStep: Double = 0.0) {
 
-    fun inc() {
-        perStep++
-        total++
-    }
+    val totalInt get() = total.toInt()
+    val perStepInt get() = perStep.toInt()
 
-    fun add(amount: Int) {
+    fun inc() = add(1.0)
+
+    fun add(amount: Int) = add(amount.toDouble())
+
+    fun add(amount: Double) {
         perStep += amount
         total += amount
     }
 
     fun actionDone() {
-        perStep = 0
+        perStep = 0.0
     }
 }
 
@@ -326,3 +353,26 @@ fun now(): String {
     return date
 }
 
+private val gitShaValue: String by lazy {
+    try {
+        var dir: File? = File(".").absoluteFile
+        var gitDir: File? = null
+        while (dir != null && gitDir == null) {
+            val candidate = File(dir, ".git")
+            if (candidate.isDirectory) gitDir = candidate
+            dir = dir.parentFile
+        }
+        gitDir ?: return@lazy ""
+        val head = File(gitDir, "HEAD").readText().trim()
+        val sha = if (head.startsWith("ref:")) {
+            File(gitDir, head.removePrefix("ref:").trim()).readText().trim()
+        } else {
+            head
+        }
+        sha.take(8)
+    } catch (e: Exception) {
+        ""
+    }
+}
+
+fun gitSha(): String = gitShaValue
