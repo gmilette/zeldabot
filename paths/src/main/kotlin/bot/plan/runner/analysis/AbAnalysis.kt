@@ -65,7 +65,10 @@ data class ArmSummary(
     val builds = rows.map { it.gitSha }.filter { it.isNotBlank() }.distinct().sorted()
     val runIds = rows.map { it.runId.ifBlank { "(none)" } }.distinct().sorted()
     val rooms = rows.map { it.start }.distinct()
-    val loadouts = rows.map { "${it.config}/${it.heartsStart}h" }.distinct()
+    val loadouts = rows.map {
+        "${it.sword}/${it.ring}/shield=${it.shield}/b${it.bombs}/${it.heartsStart}h"
+    }.distinct()
+    val configs = rows.map { it.config }.filter { it.isNotBlank() }.distinct()
 }
 
 data class RoomBreakdown(
@@ -211,6 +214,7 @@ object AbAnalysis {
             }
             if (arm.builds.size > 1) warnings += "${arm.label} mixes builds ${arm.builds} - the arm is not a single code state"
             if (arm.loadouts.size > 1) warnings += "${arm.label} mixes loadouts ${arm.loadouts} - trials did not start equal"
+            if (arm.configs.size > 1) warnings += "${arm.label} mixes configs ${arm.configs}"
         }
         val loadouts = (a.loadouts + b.loadouts).distinct()
         if (loadouts.size > 1) warnings += "the arms do not share a loadout ($loadouts) - they are not comparable"

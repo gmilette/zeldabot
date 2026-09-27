@@ -207,6 +207,7 @@ class Experiments(private val masterPlan: PlanMaker) {
             ring: ZeldaItem = ZeldaItem.None,
             hearts: Int? = null,
             shield: Boolean = false,
+            boomerang: ZeldaItem = ZeldaItem.MagicalBoomerang,
             maxFramesPerTrial: Int = DEFAULT_TRIAL_FRAME_BUDGET
         ) = Experiment(
             name = name,
@@ -224,7 +225,7 @@ class Experiments(private val masterPlan: PlanMaker) {
             bombs = 4,
             rupees = 250,
             potion = true,
-            boomerang = ZeldaItem.MagicalBoomerang,
+            boomerang = boomerang,
             magicArrowAndBow = true,
             level = level,
             startMapLoc = mapLoc,

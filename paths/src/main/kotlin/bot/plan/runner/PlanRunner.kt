@@ -60,6 +60,7 @@ class PlanRunner(private val makePlan: PlanMaker,
                 ring = ringFor(spec.getOrElse(3) { firstRing }),
                 hearts = ZeldaBot.startHearts,
                 shield = ZeldaBot.startShield,
+                boomerang = boomerangFor(ZeldaBot.startBoomerang),
                 maxFramesPerTrial = ZeldaBot.maxTrialFrames ?: Experiments.DEFAULT_TRIAL_FRAME_BUDGET
             )
         }
@@ -106,6 +107,13 @@ class PlanRunner(private val makePlan: PlanMaker,
         "w" -> ZeldaItem.WhiteSword
         "m" -> ZeldaItem.MagicSword
         else -> ZeldaItem.WoodenSword
+    }
+
+    private fun boomerangFor(s: String?) = when (s?.lowercase()) {
+        null -> ZeldaItem.MagicalBoomerang
+        "none", "n" -> ZeldaItem.None
+        "wood", "w", "regular" -> ZeldaItem.Boomerang
+        else -> ZeldaItem.MagicalBoomerang
     }
 
     private fun ringFor(s: String) = when (s) {

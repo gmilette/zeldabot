@@ -45,6 +45,7 @@ fun main(vararg args: String) = application {
     ZeldaBot.maxTrialFrames = args.argValue("maxframes")?.toIntOrNull()
     ZeldaBot.startHearts = args.argValue("hearts")?.toIntOrNull()
     ZeldaBot.startShield = args.contains("shield")
+    ZeldaBot.startBoomerang = args.argValue("boom")
     ZeldaBot.runId = args.argValue("run")
         ?: SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
     args.argValue("seed")?.toLongOrNull()?.let {

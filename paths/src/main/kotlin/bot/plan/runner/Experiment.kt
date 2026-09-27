@@ -51,7 +51,11 @@ data class Experiment(
             "r$rupees".takeIf { rupees > 0 },
             "potion".takeIf { potion },
             "marrow".takeIf { magicArrowAndBow } ?: "arrow".takeIf { arrowAndBow },
-            "boom".takeIf { boomerang != ZeldaItem.None },
+            when (boomerang) {
+                ZeldaItem.MagicalBoomerang -> "mboom"
+                ZeldaItem.Boomerang -> "boom"
+                else -> null
+            },
             "wand".takeIf { wand },
             "candle".takeIf { candle },
             "ladder".takeIf { ladderAndRaft },

@@ -26,7 +26,7 @@ object AbReportHtml {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>A/B ${esc(r.a.label)} vs ${esc(r.b.label)} - room ${esc(r.rooms.joinToString(","))}</title>
+<title>A/B ${esc(r.a.label)} vs ${esc(r.b.label)} - ${esc(r.rooms.joinToString(",") { RoomNames.label(it) })}</title>
 <style>
   :root {
     color-scheme: light;
@@ -93,7 +93,7 @@ object AbReportHtml {
         )
 
         append("<h1>${esc(r.a.label)} vs ${esc(r.b.label)}</h1>\n")
-        append("<p class=\"sub\">room ${esc(r.rooms.joinToString(", "))} &middot; ")
+        append("<p class=\"sub\">room ${esc(r.rooms.joinToString(", ") { RoomNames.label(it) })} &middot; ")
         append("${r.a.n} vs ${r.b.n} trials &middot; builds ")
         append("${esc(r.a.builds.joinToString(",").ifBlank { "?" })} / ")
         append("${esc(r.b.builds.joinToString(",").ifBlank { "?" })}</p>\n")
@@ -270,7 +270,7 @@ object AbReportHtml {
             if (places.size > 1) {
                 append(" Death rooms: ")
                 append(places.joinToString(", ") { room ->
-                    "$room (${o.deathPlacesA[room] ?: 0}/${o.deathPlacesB[room] ?: 0})"
+                    "${RoomNames.label(room)} (${o.deathPlacesA[room] ?: 0}/${o.deathPlacesB[room] ?: 0})"
                 })
                 append(".")
             }

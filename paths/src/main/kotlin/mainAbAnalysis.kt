@@ -3,6 +3,7 @@ import bot.plan.runner.analysis.AbAnalysis
 import bot.plan.runner.analysis.AbReportHtml
 import bot.plan.runner.analysis.Metric
 import bot.plan.runner.analysis.OutcomeRate
+import bot.plan.runner.analysis.RoomNames
 import java.awt.Desktop
 import java.io.File
 import kotlin.math.roundToInt
@@ -60,7 +61,7 @@ fun main(vararg args: String) {
     }
 
     println("source : ${csv.path}")
-    println("room   : ${report.rooms.joinToString(", ")}")
+    println("room   : ${report.rooms.joinToString(", ") { RoomNames.label(it) }}")
     listOf(report.a, report.b).forEachIndexed { i, arm ->
         val prefix = if (i == 0) "arms   :" else "        "
         println("$prefix ${arm.label} n=${arm.n} build=${arm.builds.joinToString(",").ifBlank { "?" }}" +
@@ -113,13 +114,13 @@ fun main(vararg args: String) {
         println("=== per room ===")
         val shortA = report.a.label.take(8)
         val shortB = report.b.label.take(8)
-        println("%-10s %11s %11s %13s %13s %9s".format(
+        println("%-20s %11s %11s %13s %13s %9s".format(
             "room", "n $shortA", "n $shortB",
             "clear $shortA/$shortB".take(13), "median $shortA/$shortB".take(13), "p"))
-        println("-".repeat(72))
+        println("-".repeat(82))
         report.breakdown.forEach { r ->
-            println("%-10s %11d %11d %13s %13s %9s".format(
-                r.room, r.nA, r.nB,
+            println("%-20s %11d %11d %13s %13s %9s".format(
+                RoomNames.label(r.room), r.nA, r.nB,
                 "%.0f%%/%.0f%%".format(r.clearA * 100, r.clearB * 100),
                 "%.0f/%.0f".format(r.medianA, r.medianB),
                 if (r.p.isNaN()) "n/a" else "%.4f".format(r.p)))
@@ -129,7 +130,7 @@ fun main(vararg args: String) {
         println("=== per room, every metric: median $shortA -> $shortB, with p ===")
         fun num(v: Double) = if (kotlin.math.abs(v) >= 100) "%.0f".format(v) else "%.2f".format(v)
         val head = StringBuilder("%-24s".format("metric"))
-        report.rooms.forEach { head.append("%24s".format(it)) }
+        report.rooms.forEach { head.append("%24s".format(RoomNames.label(it).take(24))) }
         head.append("%12s".format("stratified"))
         println(head)
         println("-".repeat(24 + report.rooms.size * 24 + 12))
