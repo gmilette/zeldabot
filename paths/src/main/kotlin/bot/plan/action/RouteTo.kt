@@ -256,13 +256,16 @@ class IsGoal(
 ) {
     val determine = routeAction.getDetermine(state, param, attackableSpec)
     fun isGoal(point: FramePoint, isSafe: Boolean): Boolean {
-        val action = determine.nextAttackAction(state, emptyList(),
+        val action = getGoalAction(point, isSafe)
+//            action == PointMoveAction.LongAttack || action == PointMoveAction.ShortAttack || action == PointMoveAction.BoomerangAttack
+        return action != PointMoveAction.Route
+    }
+
+    fun getGoalAction(point: FramePoint, isSafe: Boolean): PointMoveAction =
+        determine.nextAttackAction(state, emptyList(),
             param, routeAction.boomerangCt,
             routeAction.theAttack.isAttacking(state),
             isLinkSafe = isSafe,
             link = point, linkDir = point.direction ?: Direction.None
         )
-//            action == PointMoveAction.LongAttack || action == PointMoveAction.ShortAttack || action == PointMoveAction.BoomerangAttack
-        return action != PointMoveAction.Route
-    }
 }
