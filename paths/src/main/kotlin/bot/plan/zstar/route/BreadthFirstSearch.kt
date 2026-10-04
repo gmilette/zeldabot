@@ -113,30 +113,11 @@ class BreadthFirstSearch(
         // for now, only progress projectiles, how fast do they go? let's say 1 pixel per frame?
     }
 
-    sealed class ActionRoute {
-        data class Attack(val useB: Boolean) : ActionRoute()
-        data class Route(val route: List<FramePoint>) : ActionRoute()
-    }
-
-    fun bestRoute(
-        start: FramePoint,
-        targets: List<FramePoint>,
-        maxDepth: Int = 255
-    ): ActionRoute {
-        return if (goalChecker.isGoal(start, true)) {
-            d { " BFS: Started at goal: $start"}
-            ActionRoute.Attack(false)
-        } else {
-            val routes = breadthFirstSearch(start, targets, maxDepth)
-            ActionRoute.Route(routes.first())
-        }
-    }
-
     fun breadthFirstSearch(
         start: FramePoint,
         targets: List<FramePoint> = emptyList(),
         maxDepth: Int = 5000
-    ): List<List<FramePoint>> {
+    ): List<Path> {
         val queue = LinkedList<SearchNode>()
         val visited = TreeSet(framePointComparator)
         val foundPaths = mutableListOf<List<FramePoint>>()

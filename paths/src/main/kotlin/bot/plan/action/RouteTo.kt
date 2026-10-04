@@ -6,10 +6,6 @@ import bot.plan.action.routeto.RouteExecution
 import bot.plan.action.routeto.RouteToGetInFrontOf
 import bot.plan.zstar.FrameRoute
 import bot.plan.zstar.ZStar
-import bot.plan.zstar.route.AttackableDecider
-import bot.plan.zstar.route.BreadthFirstSearch
-import bot.plan.zstar.route.BreadthFirstSearch.ActionRoute
-import bot.plan.zstar.route.GoalFunction
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapCell
@@ -134,50 +130,6 @@ class RouteTo(val params: Param = Param()) {
         return GamePad.None
     }
 
-    fun routeToBest(
-        state: MapLocationState,
-        param: RouteParam = RouteParam(),
-        // pass in attack targets
-        attackableSpec: List<Agent> = emptyList()
-    ): GamePad {
-        d { "BFS START"}
-        val linkPt = state.link
-        val paramZ = ZStar.ZRouteParam(
-            start = linkPt,
-            targets = emptyList(),
-            pointBeforeStart = state.previousMove.from,
-            enemies = emptyList(),
-            projectiles = emptyList(),
-            rParam = param.rParam
-        )
-        state.currentMapCell.zstar.setNeighborFinder(paramZ)
-        val ableToShoot = AttackLongActionDecider.ableToShoot(state)
-        val isGoal = { point: FramePoint, isSafe: Boolean ->
-            GoalFunction(ableToLongAttack = ableToShoot, ableToAttack = true, state.currentMapCell.zstar.neighborFinder)
-                .isGoal(point, emptyList(), false)
-        }
-        val search = BreadthFirstSearch(isGoal, state.currentMapCell.zstar.neighborFinder)
-        val attackableAgents: List<Agent> = AttackableDecider.aliveEnemiesCanAttack(state)[state.frameState.link.dir] ?: emptyList()
-        val attackable = attackableSpec.ifEmpty {
-            attackableAgents
-        }
-        val linkDir = state.frameState.link.dir
-        val result = search.bestRoute(linkPt.withDir(linkDir), attackable.map { it.point })
-        d { " BFS result action $result"}
-        // refactor to one function
-        return when (result) {
-            is ActionRoute.Attack -> GamePad.aOrB(result.useB)
-            is ActionRoute.Route -> {
-                route = FrameRoute(result.route)
-                var nextPoint = route?.path?.getOrNull(1) ?: FramePoint()
-                val pointDir = route?.decideDirection(linkPt, state.frameState.link.dir)
-                d { " next is $nextPoint of ${route?.numPoints ?: 0} chose direction $pointDir" }
-                nextPoint = nextPoint.copy(direction = pointDir)
-                getActionFromRoute(nextPoint, linkPt)
-            }
-        }
-    }
-
     fun getActionFromRoute(nextPoint: FramePoint, linkPt: FramePoint): GamePad {
         return when {
             nextPoint.isZero && linkPt.x == 0 -> GamePad.MoveLeft
@@ -296,7 +248,7 @@ class RouteTo(val params: Param = Param()) {
     }
 }
 
-private class IsGoal(
+class IsGoal(
     private val routeAction: RouteExecution,
     private val state: MapLocationState,
     private val param: RouteParam,
