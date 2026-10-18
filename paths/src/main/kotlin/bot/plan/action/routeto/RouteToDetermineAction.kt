@@ -6,7 +6,6 @@ import bot.plan.action.AttackLongActionDecider
 import bot.plan.action.LadderActionDecider
 import bot.plan.action.RouteTo
 import bot.plan.action.RouteTo.WhatToAvoid
-import bot.plan.zstar.NeighborFinder
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapConstants
@@ -16,6 +15,7 @@ import util.ZRandom
 
 class RouteToDetermineAction(val preparation: RoutePreparation) {
     private val ladderDecider = LadderActionDecider()
+    private val DEBUG = false
 
     fun nextAttackAction(
         state: MapLocationState,
@@ -23,16 +23,16 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
         param: RouteTo.RouteParam = RouteTo.RouteParam(),
         boomerangCt: Int,
         isAttacking: Boolean,
-        isLinkSafe: Boolean, // note only for nextAttackAction right now, I dont know how to compute it
+        faceEnemy: Boolean, // note only for nextAttackAction right now, I dont know how to compute it
         linkDir: Direction = state.frameState.link.dir,
         link: FramePoint = state.link
     ): PointMoveAction {
         val attackPossible = preparation.attackPossible
         val considerAttacks = RouteTo.allowAttack && attackPossible
-        d { " Determine route action consider=$considerAttacks "}
+        d(DEBUG) { " Determine route action consider=$considerAttacks "}
 
         if (!considerAttacks) {
-            d { " Route Action -> Route (consider)" }
+            d(DEBUG) { " Route Action -> Route (consider)" }
             return PointMoveAction.Route
         }
 
@@ -45,30 +45,30 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
         val attackablePoints by lazy { preparation.attackable(linkDir).points }
         val shouldLongAttack by lazy { canAttack && param.allowRangedAttack && AttackLongActionDecider.shouldShootSword(state, attackablePoints, link, linkDir) }
         val inRangeOf by lazy {
-            AttackActionDecider.inRangeOf(linkDir, link, attackablePoints, param.useB, faceEnemy = isLinkSafe)
+            AttackActionDecider.inRangeOf(linkDir, link, attackablePoints, param.useB, faceEnemy = faceEnemy)
         }
         val shouldShortAttack by lazy { canAttack && inRangeOf.isAttack }
         val shouldFace by lazy { canAttack && inRangeOf.isDirection }
 
         return when {
             shouldLongAttack -> {
-                d { " Route Action -> Long" }
+                d(DEBUG) { " Route Action -> Long" }
                 PointMoveAction.LongAttack
             }
             shouldShortAttack -> {
-                d { " Route Action -> Short" }
+                d(DEBUG) { " Route Action -> Short" }
                 PointMoveAction.ShortAttack
             }
             shouldLongBoomerang -> {
-                d { " Route Action -> Boomerang" }
+                d(DEBUG) { " Route Action -> Boomerang" }
                 PointMoveAction.BoomerangAttack
             }
             shouldFace -> {
-                d { " Route Action -> Face $inRangeOf" }
+                d(DEBUG) { " Route Action -> Face $inRangeOf" }
                 PointMoveAction.ForceAction.FaceEnemyForAttack(inRangeOf)
             }
             else -> {
-                d { " Route Action -> Route" }
+                d(DEBUG) { " Route Action -> Route" }
                 PointMoveAction.Route
             }
         }
@@ -111,42 +111,42 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
 //        val canAttack = param.allowAttack && !state.frameState.linkDoingAnAttack() && (param.useB || state.frameState.canUseSword)
 
         val considerAttacks = RouteTo.allowAttack && attackPossible
-        d { " Determine route action attacking=$isAttacking consider=$considerAttacks "}
+        d(DEBUG) { " Determine route action attacking=$isAttacking consider=$considerAttacks "}
 
         return when {
             // don't get stuck attacking emptu space when the clock is activated
             (state.frameState.clockActivated && ZRandom.nextInt(10) == 1) -> {
-                d { " Route Action -> Force Route Clock" }
+                d(DEBUG) { " Route Action -> Force Route Clock" }
                 PointMoveAction.Route
             }
             // get stuck in level1 trying to block the boomerang
             blockReflex != null -> {
-                d { " Route Action -> Block Reflex! $blockReflex" }
+                d(DEBUG) { " Route Action -> Block Reflex! $blockReflex" }
                 PointMoveAction.Block(blockReflex)
             }
             // this makes it so that link will keep trying to attack, instead of turning around during it
             isAttacking -> {
-                d { " Route Action -> Keep Attacking" }
+                d(DEBUG) { " Route Action -> Keep Attacking" }
                 PointMoveAction.ContinueAttack
             }
             // idea: if sword is flying, do not route in to short attack
             // instead evade until the sword is not flying
             // then after that do normal routing
             considerAttacks && shouldLongAttack -> {
-                d { " Route Action -> LongAttack" }
+                d(DEBUG) { " Route Action -> LongAttack" }
                 PointMoveAction.LongAttack
             }
             // prefer short attack over boomeranging
             considerAttacks && shouldShortAttack -> {
-                d { " Route Action -> Attack" }
+                d(DEBUG) { " Route Action -> Attack" }
                 PointMoveAction.ShortAttack
             }
             considerAttacks && shouldLongBoomerang -> {
-                d { " Route Action -> LongAttack Boomerang" }
+                d(DEBUG) { " Route Action -> LongAttack Boomerang" }
                 PointMoveAction.BoomerangAttack
             }
             considerAttacks && shouldFace -> {
-                d { " Route Action -> Face $inRangeOf" }
+                d(DEBUG) { " Route Action -> Face $inRangeOf" }
                 PointMoveAction.ForceAction.FaceEnemyForAttack(inRangeOf)
             }
             // put this lower in the list so that link might
@@ -155,11 +155,11 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
                 PointMoveAction.ForceAction.LadderAction(ladderAction.toGamePad())
             }
             exitOffScreenAction != GamePad.None -> {
-                d { " Route Action -> Exit" }
+                d(DEBUG) { " Route Action -> Exit" }
                 PointMoveAction.ForceAction.ExitAction(exitOffScreenAction)
             }
             else -> {
-                d { " Route Action -> Route" }
+                d(DEBUG) { " Route Action -> Route" }
                 PointMoveAction.Route
             }
         }
@@ -172,18 +172,18 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
         // i'm not sure if this fixes it
         val closest = to.minBy { it.distTo(linkPt) }
         return if (linkPt.distTo(closest) <= 1) {
-            d { " CLOSE!! $closest" }
+            d(DEBUG) { " CLOSE!! $closest" }
             if (closest.y <= 1) {
-                d { " CLOSE!! up" }
+                d(DEBUG) { " CLOSE!! up" }
                 GamePad.MoveUp
             } else if (closest.x <= 1) {
-                d { " CLOSE!! left" }
+                d(DEBUG) { " CLOSE!! left" }
                 GamePad.MoveLeft
             } else if (closest.x >= MapConstants.MAX_X - 2) {
-                d { " CLOSE!! right" }
+                d(DEBUG) { " CLOSE!! right" }
                 GamePad.MoveRight
             } else if (closest.y >= MapConstants.MAX_Y - 2) {
-                d { " CLOSE!! down" }
+                d(DEBUG) { " CLOSE!! down" }
                 GamePad.MoveDown
             } else {
                 GamePad.None
