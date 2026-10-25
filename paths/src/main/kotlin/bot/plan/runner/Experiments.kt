@@ -3,9 +3,12 @@ package bot.plan.runner
 import bot.plan.Phases
 import bot.plan.action.Action
 import bot.plan.action.KillAll
+import bot.plan.action.MoveTo
 import bot.plan.action.StartAtAction
 import bot.plan.action.dodge
+import bot.state.map.Direction
 import bot.state.map.destination.ZeldaItem
+import bot.state.up
 
 class Experiments(private val masterPlan: PlanMaker) {
     val default = Experiment("all", "start_nothing.save", masterPlan, sword = ZeldaItem.WoodenSword, addEquipment = false)
@@ -202,6 +205,7 @@ class Experiments(private val masterPlan: PlanMaker) {
         fun roomTrial(
             level: Int,
             mapLoc: Int,
+            fromDirection: Direction?,
             name: String = "room_${level}_${mapLoc}",
             sword: ZeldaItem = ZeldaItem.MagicSword,
             ring: ZeldaItem = ZeldaItem.None,
@@ -211,10 +215,13 @@ class Experiments(private val masterPlan: PlanMaker) {
             maxFramesPerTrial: Int = DEFAULT_TRIAL_FRAME_BUDGET
         ) = Experiment(
             name = name,
-            startSave = "mapstate/mapstate_${level}_${mapLoc}.save",
+            startSave = "mapstate/mapstate_${level}_${mapLoc.up}.save",
             plan = {
                 MasterPlan(listOf(PlanSegment("roomTrial", name,
-                    listOf(StartAtAction(mapLoc, level), KillAll.make()))))
+                    listOf(
+                        StartAtAction(mapLoc, level),
+                        KillAll.make()
+                    ))))
             },
             addEquipment = false,
             sword = sword,

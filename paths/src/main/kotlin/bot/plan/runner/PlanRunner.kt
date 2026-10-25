@@ -6,6 +6,13 @@ import bot.plan.action.Action
 import bot.plan.action.DoNothing
 import bot.plan.action.moveHistoryAttackAction
 import bot.state.*
+import bot.state.map.Direction
+import bot.state.map.Direction.Down
+import bot.state.map.Direction.Left
+import bot.state.map.Direction.None
+import bot.state.map.Direction.Right
+import bot.state.map.Direction.Up
+import bot.state.map.Hyrule
 import bot.state.map.destination.ZeldaItem
 import nintaco.api.API
 import util.ZRandom
@@ -16,6 +23,7 @@ import java.io.File
 typealias PlanMaker = () -> MasterPlan
 
 class PlanRunner(private val makePlan: PlanMaker,
+                 private val hyrule: Hyrule,
                  private val api: API,
                  private val experiment: String = "default"
 ) {
@@ -51,10 +59,14 @@ class PlanRunner(private val makePlan: PlanMaker,
         val specs = experiment.removePrefix("room_").split(",").map { it.trim().split("_") }
         val firstSword = specs.first().getOrElse(2) { "d" }
         val firstRing = specs.first().getOrElse(3) { "g" }
+        val direction = specs.first().getOrElse(4) { null } // could specify direction
         specs.map { spec ->
+            val mapLoc = spec[1].toInt()
+            val directionStartFrom = direction?.toDir() ?: hyrule.map[mapLoc]?.exits?.entries?.first()?.key
             Experiments.roomTrial(
                 level = spec[0].toInt(),
-                mapLoc = spec[1].toInt(),
+                mapLoc = mapLoc,
+                fromDirection = directionStartFrom,
                 name = "room_${spec[0]}_${spec[1]}",
                 sword = swordFor(spec.getOrElse(2) { firstSword }),
                 ring = ringFor(spec.getOrElse(3) { firstRing }),
@@ -64,6 +76,14 @@ class PlanRunner(private val makePlan: PlanMaker,
                 maxFramesPerTrial = ZeldaBot.maxTrialFrames ?: Experiments.DEFAULT_TRIAL_FRAME_BUDGET
             )
         }
+    }
+
+    private fun String.toDir() = when(this) {
+        "u" -> Up
+        "d" -> Down
+        "l" -> Left
+        "r" -> Right
+        else -> None
     }
 
     private fun runFrom() {
