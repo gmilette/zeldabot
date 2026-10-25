@@ -304,6 +304,7 @@ class PlanRunner(private val makePlan: PlanMaker,
         ex.hearts?.let {
             manipulator.setHearts(it)
         }
+        manipulator.randomizeSeed()
         manipulator.clearRupee()
         manipulator.setBombs(ex.bombs)
         if (ex.shield) {
