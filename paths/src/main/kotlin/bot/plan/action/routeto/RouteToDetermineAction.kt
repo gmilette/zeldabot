@@ -20,6 +20,7 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
     fun nextAttackAction(
         state: MapLocationState,
         to: List<FramePoint>,
+        enemies: List<Agent> = emptyList(), // should probably come from preparation so it can be filtered
         param: RouteTo.RouteParam = RouteTo.RouteParam(),
         boomerangCt: Int,
         isAttacking: Boolean,
@@ -40,7 +41,11 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
             return PointMoveAction.ContinueAttack
         }
 
-        val canAttack = preparation.canAttack
+        val safeToAttack = AttackActionBlockDecider.safeToAttack(link, enemies)
+        if (!safeToAttack) {
+            d(DEBUG) { " Unsafe to attack! (decision) "}
+        }
+        val canAttack = preparation.canAttack && safeToAttack
         val shouldLongBoomerang by lazy { preparation.canLongAttack && param.allowRangedAttack && boomerangCt <= 0 && AttackLongActionDecider.shouldBoomerang(state, preparation.boomerangable, link, linkDir) }
         val attackablePoints by lazy { preparation.attackable(linkDir).points }
         val shouldLongAttack by lazy { canAttack && param.allowRangedAttack && AttackLongActionDecider.shouldShootSword(state, attackablePoints, link, linkDir) }
@@ -77,6 +82,7 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
     fun nextAction(
         state: MapLocationState,
         to: List<FramePoint>,
+        enemies: List<Agent>,
         param: RouteTo.RouteParam = RouteTo.RouteParam(),
         boomerangCt: Int,
         isAttacking: Boolean,
@@ -94,10 +100,11 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
         } else {
             null
         }
+        val safeToAttack = AttackActionBlockDecider.safeToAttack(link, enemies)
 
         // check if link intersects any enemies or dangerzones..?
         val isSafe = state.currentMapCell.zstar.neighborFinder
-        val canAttack = preparation.canAttack
+        val canAttack = preparation.canAttack && safeToAttack
         val shouldLongBoomerang by lazy { preparation.canLongAttack && param.allowRangedAttack && boomerangCt <= 0 && AttackLongActionDecider.shouldBoomerang(state, preparation.boomerangable, link, linkDir) }
         val shouldLongAttack by lazy { canAttack && param.allowRangedAttack && AttackLongActionDecider.shouldShootSword(state, attackablePoints, link, linkDir) }
         val inRangeOf by lazy { AttackActionDecider.inRangeOf(linkDir, link, attackablePoints, param.useB, faceEnemy = true) }
