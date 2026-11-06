@@ -234,6 +234,11 @@ object AttackActionDecider {
     }
 
     /**
+     * a darknut will move approximately 2 or 3 pixels while link is getting his sword out
+     */
+    private const val DISTANCE_MOVED_WHILE_SWINGING = 2
+
+    /**
      * null, no attack
      * gamepad dir, move, or gamePad.None not in range, cant attack
      * gamepad
@@ -252,6 +257,7 @@ object AttackActionDecider {
         val enemiesClose = enemies
             .filter { link.distTo(it) < MapConstants.sixGrid }
             .sortedBy { it.distTo(link) }
+            .map { it.direction?.pointModifier(DISTANCE_MOVED_WHILE_SWINGING)(it) ?: it} // move the enemies by approximately 2 in their current direction
             .map { if (smallTarget) it.toCenteredRect() else it.toRect16() }
 
         logDebugInfo(enemiesClose, swords, enemies, link, from, smallTarget)
