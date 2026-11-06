@@ -224,6 +224,7 @@ class RouteTo(val params: Param = Param()) {
         val routePoints = if (param.breadthFirst) {
             val goalFunction = IsGoal(routeAction, state, param, attackableSpec)
             mapCell.zstar.routeWithBfs(paramZ, goalFunction::isGoal)
+            // do the NO goal zstar route
         } else {
             mapCell.zstar.route(paramZ)
         }
@@ -235,14 +236,15 @@ class RouteTo(val params: Param = Param()) {
         if (nextPoint1.isZero) {
             d { "NO ROUTE" }
         } else {
-            d { " router size: ${route?.numPoints ?: 0}" }
+            d { " router size: ${route?.numPoints ?: 0} goal: ${goalFunction.getGoalAction(nextPoint1, isSafe = true)}" }
             route?.next5()
 //            d { " next 100 "}
 //            route?.next100()
         }
         planCount = 0
-        val pointDir = nextPoint1.direction ?:
-            route?.decideDirection(linkPt, state.frameState.link.dir)
+//        val pointDir = nextPoint1.direction ?:
+//            route?.decideDirection(linkPt, state.frameState.link.dir)
+        val pointDir = route?.decideDirection(linkPt, state.frameState.link.dir) ?: nextPoint1.direction
         d { " next is $nextPoint1 of ${route?.numPoints ?: 0}" }
         return nextPoint1.copy(direction = pointDir)
     }
@@ -263,9 +265,10 @@ class IsGoal(
 
     fun getGoalAction(point: FramePoint, isSafe: Boolean): PointMoveAction =
         determine.nextAttackAction(state, emptyList(),
+            state.aliveEnemies, // not sure if this will contain what i want
             param, routeAction.boomerangCt,
             routeAction.theAttack.isAttacking(state),
-            isLinkSafe = isSafe,
+            faceEnemy = isSafe && false, // just for now never face the enemy
             link = point, linkDir = point.direction ?: Direction.None
         )
 }

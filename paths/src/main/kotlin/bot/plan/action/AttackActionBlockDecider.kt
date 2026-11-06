@@ -1,6 +1,5 @@
 package bot.plan.action
 
-import bot.plan.action.AttackActionBlockDecider.DEBUG
 import bot.state.*
 import bot.state.map.*
 import bot.state.oam.ProjectileDirectionLookup
@@ -39,11 +38,20 @@ object AttackActionBlockDecider {
     fun safeToAttack(link: FramePoint, enemy: List<Agent>): Boolean =
         enemy.all { safeToAttack(link, it) }
 
-    private fun safeToAttack(link: FramePoint, projectile: Agent): Boolean {
-        if (projectile.dir == Direction.None) return true
+    private fun safeToAttack(link: FramePoint, agent: Agent): Boolean {
+        if (agent.dir == Direction.None) return true
 
-        val modifier = projectile.dir.pointModifier(MapConstants.halfGrid)
-        val projectileTarget = modifier(projectile.point).toRect()
+        val modifier = if (agent.state == EnemyState.Projectile) {
+            // fireball speed: 25
+            agent.dir.pointModifier(MapConstants.oneGridPoint5)
+            // arrow slightly more 28
+            // boomerang 35 (2.5 grid = 40)
+            // might need to check multiple intersections
+        } else {
+            // darknut speed and most other enemies
+            agent.dir.pointModifier(MapConstants.halfGrid)
+        }
+        val projectileTarget = modifier(agent.point).toRect()
 
         return !projectileTarget.intersect(link.toRect())
     }
