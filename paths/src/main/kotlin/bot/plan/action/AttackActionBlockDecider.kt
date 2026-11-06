@@ -36,6 +36,18 @@ object AttackActionBlockDecider {
             Blockable.WithMagicShield -> magicShield
         }
 
+    fun safeToAttack(link: FramePoint, enemy: List<Agent>): Boolean =
+        enemy.all { safeToAttack(link, it) }
+
+    private fun safeToAttack(link: FramePoint, projectile: Agent): Boolean {
+        if (projectile.dir == Direction.None) return true
+
+        val modifier = projectile.dir.pointModifier(MapConstants.halfGrid)
+        val projectileTarget = modifier(projectile.point).toRect()
+
+        return !projectileTarget.intersect(link.toRect())
+    }
+
     private fun check(link: Agent, projectile: Agent): GamePad? {
         if (projectile.dir == Direction.None) return null
 
