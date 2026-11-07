@@ -2,9 +2,9 @@ package bot.state
 
 import bot.state.map.destination.ZeldaItem
 import nintaco.api.API
-import util.ZRandom
 import util.d
 import kotlin.math.max
+import kotlin.random.Random
 
 /**
  * help bot change the game memory
@@ -38,9 +38,9 @@ class StateManipulator(
 
     fun hasMagicShield(): Boolean = state.frameState.inventory.inventoryItems.hasMagicShield
 
-    fun randomizeSeed() {
+    fun randomizeSeed(random: Random) {
         for (i in 0 until 12) {
-            api.writeCPU(Addresses.More.rngBase + i, ZRandom.nextInt(256))
+            api.writeCPU(Addresses.More.rngBase + i, random.nextInt(256))
         }
     }
 

@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -16,7 +17,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import bot.plan.action.AttackActionDecider
-import bot.plan.action.AttackLongActionDecider
 import bot.plan.action.RouteTo
 import bot.plan.zstar.NeighborFinder
 import bot.plan.zstar.ZStar
@@ -40,29 +40,16 @@ enum class RoutingAlgorithm(val label: String) {
 }
 
 /**
- * How the targets/goal are derived from the placed enemies.
+ * What the placed enemies are. Sword carriers cannot be hit from the front, and the game decides
+ * that from their TILE, so picking Sword also moves the synthetic state to a level that has them.
  */
-enum class TargetMode(val label: String) {
-    /** the original BFS test goal: get within one grid of an enemy */
-    EnemyProximity("Near enemy"),
-
-    /**
-     * goal is anywhere link can attack from, [AttackActionDecider.inRangeOf], the same call
-     * RouteToDetermineAction makes. When link is safe a spot he only has to turn around in
-     * counts too, when he is not safe he has to be able to swing right now
-     */
-    StrikingRange("Striking range"),
-
-    /** what KillAll does: [AttackActionDecider.attackPoints] minus the enemy's facing direction */
-    AttackPoints("Attack points (not dir)"),
-
-    /** [AttackActionDecider.attackPointsNoCorner], used when the enemy can attack in front */
-    AttackPointsNoCorner("Attack points no corner")
+enum class EnemyKind(val label: String) {
+    Generic("Generic"),
+    Sword("Sword (no front)")
 }
 
 data class RoutingRequest(
     val algorithm: RoutingAlgorithm,
-    val targetMode: TargetMode,
     val start: FramePoint,
     /** enemy points, the [FramePoint.direction] is the direction the enemy is facing */
     val enemies: List<FramePoint>,
@@ -75,8 +62,36 @@ data class RoutingRequest(
     val mapNearest: Boolean = true,
     val finishWithinStrikingRange: Boolean = true,
     val findNearestSafeIfCurrentlyNotSafe: Boolean = true,
-    val maxDepth: Int = 300
+    val maxDepth: Int = 300,
+    val mapLoc: Int = 0,
+    val enemyKind: EnemyKind = EnemyKind.Generic,
+    /** price the squares in front of sword enemies out of the route, as RouteTo does */
+    val avoidFrontOfEnemies: Boolean = false,
+    /** replaces production's IsGoal, same shape as ZStar.ZRouteParam.isGoal */
+    val goalOverride: ((FramePoint, Boolean) -> Boolean)? = null
 )
+
+data class GoalReached(
+    val point: FramePoint,
+    /** what the search passed to the goal test; the plain BFS always claims true */
+    val askedSafe: Boolean,
+    val actuallySafe: Boolean,
+    val rules: List<String>,
+    val nearestEnemy: FramePoint?,
+    val distToNearestEnemy: Int
+) {
+    val reached: Boolean
+        get() = rules.isNotEmpty()
+
+    override fun toString(): String {
+        val where = "(${point.x},${point.y})${point.direction?.let { " ${it.name}" } ?: ""}"
+        val safety = if (askedSafe == actuallySafe) "safe=$askedSafe"
+        else "safe=$askedSafe(asked)/$actuallySafe(grid)"
+        val enemy = nearestEnemy?.let { " nearest enemy (${it.x},${it.y}) d=$distToNearestEnemy" } ?: ""
+        return if (reached) "GOAL $where $safety via ${rules.joinToString(" + ")}$enemy"
+        else "NOT a goal $where $safety$enemy"
+    }
+}
 
 data class RoutingResult(
     val paths: List<List<FramePoint>>,
@@ -86,6 +101,7 @@ data class RoutingResult(
     val dangerCost: Int = ZStar.nearEnemyCost,
     /** cost below this is a cheap (highway) square */
     val normalCost: Int = 1,
+    val goals: List<GoalReached> = emptyList(),
     val summary: String = ""
 )
 
@@ -97,72 +113,72 @@ object RoutingSearchRunner {
     /** the cost the plain BFS grid uses around an enemy, matches what the BFS UI always did */
     private const val bfsEnemyCost = 1000
 
-    fun targetsFor(enemies: List<FramePoint>, mode: TargetMode): List<FramePoint> =
-        when (mode) {
-            TargetMode.EnemyProximity,
-            TargetMode.StrikingRange -> enemies.map { it.noDir() }
-
-            TargetMode.AttackPoints -> enemies.flatMap {
-                AttackActionDecider.attackPoints(it.noDir(), not = it.direction ?: Direction.None)
-            }
-
-            TargetMode.AttackPointsNoCorner -> enemies.flatMap {
-                AttackActionDecider.attackPointsNoCorner(it.noDir())
-            }
-        }.distinct()
+    fun targetsFor(enemies: List<FramePoint>): List<FramePoint> =
+        enemies.flatMap { AttackActionDecider.attackPointsNoCorner(it.noDir()) }.distinct()
 
     /**
-     * The goal the search stops at. Second parameter is whether link is safe at that point,
-     * the searches pass it in now (ZStar uses its cost grid, the breadth first search always
-     * says safe). Like RouteToDetermineAction does, it decides whether merely being able to
-     * turn and face the enemy is good enough.
+     * The goal every search stops at is production's own IsGoal from RouteTo, run against a
+     * synthetic MapLocationState. The targets are only what ZStar aims at and what is drawn.
      */
-    fun goalFor(
-        mode: TargetMode,
-        enemies: List<FramePoint>,
-        targets: List<FramePoint>,
-        ableToLongAttack: Boolean = false,
-        passable: Map2d<Boolean>? = null
-    ): (FramePoint, Boolean) -> Boolean {
-        val enemyPoints = enemies.map { it.noDir() }
-        val targetSet = targets.toHashSet()
-        val shortGoal: (FramePoint, Boolean) -> Boolean = when (mode) {
-            TargetMode.EnemyProximity -> { point, _ ->
-                enemyPoints.any { point.distTo(it) <= MapConstants.oneGrid }
-            }
+    private class GoalForRun(request: RoutingRequest) {
+        private val override = request.goalOverride
+        private val production = RoutingTestGoal.productionGoal(
+            start = request.start,
+            startDirection = request.startDirection,
+            enemies = request.enemies,
+            isLevel = request.isLevel,
+            mapLoc = request.mapLoc,
+            fullHealth = request.ableToLongAttack,
+            swordEnemies = request.enemyKind == EnemyKind.Sword
+        )
 
-            TargetMode.StrikingRange -> { point, isSafe ->
-                val action = AttackActionDecider.inRangeOf(
-                    point.direction ?: Direction.None, point, enemyPoints,
-                    useB = false, faceEnemy = isSafe
-                )
-                // can swing from here, or is safe enough to spend a frame turning around first
-                action.isAttack || (isSafe && action.isDirection)
-            }
+        val test: (FramePoint, Boolean) -> Boolean = override ?: production::isGoal
 
-            TargetMode.AttackPoints,
-            TargetMode.AttackPointsNoCorner -> { point, _ -> point in targetSet }
-        }
+        val inFrontOf: List<FramePoint> =
+            if (request.avoidFrontOfEnemies) production.inFrontOfEnemies() else emptyList()
 
-        if (!ableToLongAttack) return shortGoal
+        fun rulesAt(point: FramePoint, isSafe: Boolean): List<String> =
+            if (!test(point, isSafe)) emptyList()
+            else listOf(if (override == null) production.describe(point, isSafe) else "injected isGoal")
+    }
 
-        return { point, isSafe ->
-            shortGoal(point, isSafe) || AttackLongActionDecider.inStrikingRange(point, enemyPoints) ||
-                    (passable != null && AttackLongActionDecider.targetInLongRange(passable, point, enemyPoints))
-        }
+    private fun frontNote(request: RoutingRequest, goal: GoalForRun): String = when {
+        !request.avoidFrontOfEnemies -> ""
+        goal.inFrontOf.isEmpty() ->
+            " - don't attack front priced out nothing: no sword enemies (needs Enemy: ${EnemyKind.Sword.label})"
+        else -> " - avoiding ${goal.inFrontOf.size} square(s) in front"
+    }
+
+    private fun describeGoal(
+        request: RoutingRequest,
+        goal: GoalForRun,
+        point: FramePoint,
+        askedSafe: Boolean,
+        actuallySafe: Boolean
+    ): GoalReached {
+        val nearest = request.enemies.map { it.noDir() }.minByOrNull { point.distTo(it) }
+        return GoalReached(
+            point = point,
+            askedSafe = askedSafe,
+            actuallySafe = actuallySafe,
+            rules = goal.rulesAt(point, askedSafe),
+            nearestEnemy = nearest,
+            distToNearestEnemy = nearest?.let { point.distTo(it) } ?: -1
+        )
     }
 
     fun run(request: RoutingRequest): RoutingResult {
         // these are on by default and make the search crawl (they loop the open list every iteration)
         ZStar.DEBUG = false
-        ZStar.DEBUG_B = false
+//        ZStar.DEBUG_B = false
         ZStar.DEBUG_V = false
 
-        val targets = targetsFor(request.enemies, request.targetMode)
+        val targets = targetsFor(request.enemies)
+        val goal = GoalForRun(request)
         return when (request.algorithm) {
-            RoutingAlgorithm.BreadthFirst -> runBreadthFirst(request, targets)
-            RoutingAlgorithm.ZStarAStar -> runZStar(request, targets)
-            RoutingAlgorithm.ZStarBreadthFirst -> runZStarBreadthFirst(request, targets)
+            RoutingAlgorithm.BreadthFirst -> runBreadthFirst(request, targets, goal)
+            RoutingAlgorithm.ZStarAStar -> runZStar(request, targets, goal)
+            RoutingAlgorithm.ZStarBreadthFirst -> runZStarBreadthFirst(request, targets, goal)
         }
     }
 
@@ -171,33 +187,43 @@ object RoutingSearchRunner {
             (0 until request.gridWidth).map { true }.toMutableList()
         })
 
-    private fun bfsCosts(request: RoutingRequest): Map2d<Int> =
+    private fun bfsCosts(request: RoutingRequest, inFrontOf: List<FramePoint>): Map2d<Int> =
+        // the base must be nonzero: a cost-ordered search over an all-zero grid has no notion of
+        // "further", so the priority queue is arbitrary and it never expands outward
         Map2d((0 until request.gridHeight).map {
-            (0 until request.gridWidth).map { 0 }.toMutableList()
+            (0 until request.gridWidth).map { 1 }.toMutableList()
         }).also { costs ->
             for (enemy in request.enemies) {
                 costs.modifyTo(enemy.noDir(), MapConstants.oneGrid, bfsEnemyCost)
             }
+            // the plain BFS takes no rParam, so forceHighCost has to land on its grid by hand
+            for (point in inFrontOf) {
+                costs.set(point, bfsEnemyCost)
+            }
         }
 
-    private fun runBreadthFirst(request: RoutingRequest, targets: List<FramePoint>): RoutingResult {
+    private fun runBreadthFirst(
+        request: RoutingRequest, targets: List<FramePoint>, goal: GoalForRun
+    ): RoutingResult {
         val passable = allPassable(request)
-        val costs = bfsCosts(request)
+        val costs = bfsCosts(request, goal.inFrontOf)
         val neighborFinder = NeighborFinder(passable, request.halfPassable, request.isLevel).apply {
             costF = costs
         }
         return search(
-            request, targets, neighborFinder, passable,
+            request, targets, goal, neighborFinder,
             costs = costs, dangerCost = bfsEnemyCost, normalCost = 1, name = "BFS"
         )
     }
 
-    private fun runZStarBreadthFirst(request: RoutingRequest, targets: List<FramePoint>): RoutingResult {
+    private fun runZStarBreadthFirst(
+        request: RoutingRequest, targets: List<FramePoint>, goal: GoalForRun
+    ): RoutingResult {
         val zstar = ZStar(allPassable(request), request.halfPassable, request.isLevel)
         // gives the breadth first search the same cost/passable grid ZStar.routeWithBfs would use
-        zstar.setNeighborFinder(zRouteParam(request, targets, goalFor(request, targets)))
+        zstar.setNeighborFinder(zRouteParam(request, targets, goal.test, goal.inFrontOf))
         return search(
-            request, targets, zstar.neighborFinder, zstar.passable(),
+            request, targets, goal, zstar.neighborFinder,
             costs = zstar.costsF, dangerCost = ZStar.nearEnemyCost, normalCost = 1000, name = "ZStar BFS"
         )
     }
@@ -205,59 +231,69 @@ object RoutingSearchRunner {
     private fun search(
         request: RoutingRequest,
         targets: List<FramePoint>,
+        goal: GoalForRun,
         neighborFinder: NeighborFinder,
-        passable: Map2d<Boolean>,
         costs: Map2d<Int>,
         dangerCost: Int,
         normalCost: Int,
         name: String
     ): RoutingResult {
-        val isGoal = goalFor(request, targets, passable)
-        val search = BreadthFirstSearch(isGoal, neighborFinder)
+        val search = BreadthFirstSearch(goal.test, neighborFinder)
         if (search.isTheGoal(request.start)) {
             return RoutingResult(
                 paths = emptyList(), targets = targets, costs = costs,
                 dangerCost = dangerCost, normalCost = normalCost,
+                goals = listOf(
+                    describeGoal(request, goal, request.start, true, neighborFinder.isSafe(request.start))
+                ),
                 summary = "$name: start is already the goal, attack"
             )
         }
         val paths = search.breadthFirstSearch(request.start, targets, request.maxDepth)
+        val goals = paths.map { path ->
+            val end = path.last()
+            describeGoal(request, goal, end, true, neighborFinder.isSafe(end))
+        }
         return RoutingResult(
             paths = paths, targets = targets, costs = costs,
-            dangerCost = dangerCost, normalCost = normalCost,
-            summary = "$name: ${paths.size} path(s), ${targets.size} target(s)"
+            dangerCost = dangerCost, normalCost = normalCost, goals = goals,
+            summary = "$name: ${paths.size} path(s), ${targets.size} target(s)" +
+                    frontNote(request, goal)
         )
     }
 
-    private fun runZStar(request: RoutingRequest, targets: List<FramePoint>): RoutingResult {
+    private fun runZStar(
+        request: RoutingRequest, targets: List<FramePoint>, goal: GoalForRun
+    ): RoutingResult {
         val zstar = ZStar(allPassable(request), request.halfPassable, request.isLevel)
-        val param = zRouteParam(request, targets, goalFor(request, targets, zstar.passable()))
+        val param = zRouteParam(request, targets, goal.test, goal.inFrontOf)
         val path = zstar.route(param)
         // ZStar strips the direction off of every point, put it back so the arrows render
         val withDirection = withDirections(path)
-        val reachedTarget = path.lastOrNull()?.let { it in targets } ?: false
+        // not "is the end IN targets": a goal is a place to attack FROM, and in striking range
+        // mode the targets are the enemies, which link never stands on
+        val reached = path.lastOrNull()?.let { end ->
+            val safe = zstar.neighborFinder.isSafe(end)
+            describeGoal(request, goal, withDirection.lastOrNull() ?: end, safe, safe)
+        }
         return RoutingResult(
             paths = if (path.size > 1) listOf(withDirection) else emptyList(),
             targets = targets,
             costs = zstar.costsF,
             dangerCost = ZStar.nearEnemyCost,
             normalCost = 1000,
+            goals = if (path.size > 1 && reached != null) listOf(reached) else emptyList(),
             summary = "ZStar A*: ${path.size} step(s), ${targets.size} target(s)" +
-                    if (reachedTarget) ", reached a target" else ", stopped short of the targets"
+                    (if (reached?.reached == true) ", reached the goal" else ", stopped short of the goal") +
+                    frontNote(request, goal)
         )
     }
-
-    private fun goalFor(
-        request: RoutingRequest,
-        targets: List<FramePoint>,
-        passable: Map2d<Boolean>? = null
-    ): (FramePoint, Boolean) -> Boolean =
-        goalFor(request.targetMode, request.enemies, targets, request.ableToLongAttack, passable)
 
     private fun zRouteParam(
         request: RoutingRequest,
         targets: List<FramePoint>,
-        isGoal: (FramePoint, Boolean) -> Boolean
+        isGoal: (FramePoint, Boolean) -> Boolean,
+        inFrontOf: List<FramePoint> = emptyList()
     ) = ZStar.ZRouteParam(
         start = request.start,
         targets = targets,
@@ -267,6 +303,7 @@ object RoutingSearchRunner {
             request.startDirection.opposite().pointModifier(1)(request.start),
         isGoal = isGoal,
         rParam = RouteTo.RoutingParamCommon(
+            forceHighCost = inFrontOf,
             mapNearest = request.mapNearest,
             finishWithinStrikingRange = request.finishWithinStrikingRange,
             findNearestSafeIfCurrentlyNotSafe = request.findNearestSafeIfCurrentlyNotSafe
@@ -276,7 +313,12 @@ object RoutingSearchRunner {
     private fun withDirections(path: List<FramePoint>): List<FramePoint> =
         path.mapIndexed { index, point ->
             val next = path.getOrNull(index + 1)
-            if (next == null) point else point.copy(direction = point.dirTo(next))
+            // link arrives facing the way he walked in, so the last point keeps the incoming
+            // direction rather than none at all: with no direction inRangeOf can never say
+            // "can swing from here" and every A* route looked like it stopped short
+            val dir = if (next != null) point.dirTo(next)
+            else path.getOrNull(index - 1)?.dirTo(point)
+            if (dir == null) point else point.copy(direction = dir)
         }
 }
 
@@ -299,8 +341,9 @@ class RoutingTestUIState(initialAlgorithm: RoutingAlgorithm? = null) {
 
     var cellSize by mutableStateOf(10)
 
-    var algorithm by mutableStateOf(initialAlgorithm ?: RoutingAlgorithm.BreadthFirst)
-    var targetMode by mutableStateOf(TargetMode.EnemyProximity)
+    var algorithm by mutableStateOf(initialAlgorithm ?: RoutingAlgorithm.ZStarBreadthFirst)
+    var enemyKind by mutableStateOf(EnemyKind.Generic)
+    var avoidFrontOfEnemies by mutableStateOf(false)
 
     var startPoint: FramePoint? by mutableStateOf(null)
     var startDirection by mutableStateOf(Direction.None)
@@ -317,12 +360,39 @@ class RoutingTestUIState(initialAlgorithm: RoutingAlgorithm? = null) {
     var findNearestSafeIfCurrentlyNotSafe by mutableStateOf(true)
 
     var showInstructions by mutableStateOf(false)
+    var showResults by mutableStateOf(false)
+    var showSteps by mutableStateOf(false)
     var showCosts by mutableStateOf(true)
     var showTargets by mutableStateOf(true)
 
     var foundPaths = mutableStateListOf<List<FramePoint>>()
+
+    var foundGoals = mutableStateListOf<GoalReached>()
     var selectedPathIndex by mutableStateOf(0) // -1 means show all paths
     var summary by mutableStateOf("")
+
+    fun goalOf(index: Int): GoalReached? = foundGoals.getOrNull(index)
+
+    // the grid cost the search accumulates: every point entered after the start. Turn cost is not
+    // included, it lives in the search and is not reported back
+    fun pathCost(index: Int): Int? {
+        val grid = costs ?: return null
+        val path = foundPaths.getOrNull(index) ?: return null
+        return path.drop(1).sumOf { grid.get(it) }
+    }
+
+    fun pathTurns(index: Int): Int {
+        val path = foundPaths.getOrNull(index) ?: return 0
+        return path.zipWithNext().count { (a, b) -> a.direction != null && a.direction != b.direction }
+    }
+
+    fun pathLabel(index: Int): String {
+        val cost = pathCost(index)?.let { ", cost $it" } ?: ""
+        val turns = pathTurns(index).let { if (it > 0) ", $it turn(s)" else "" }
+        return "Path ${index + 1} (${foundPaths[index].size} steps$cost$turns)"
+    }
+
+    var goalOverride: ((FramePoint, Boolean) -> Boolean)? = null
 
     // lookups rebuilt whenever the scenario changes so drawing a cell is a hash lookup
     private var pathDirections by mutableStateOf<Map<FramePoint, Direction?>>(emptyMap())
@@ -386,6 +456,7 @@ class RoutingTestUIState(initialAlgorithm: RoutingAlgorithm? = null) {
     /** the route is stale as soon as anything about the scenario changes */
     fun clearResults() {
         foundPaths.clear()
+        foundGoals.clear()
         selectedPathIndex = 0
         costs = null
         summary = ""
@@ -402,11 +473,11 @@ class RoutingTestUIState(initialAlgorithm: RoutingAlgorithm? = null) {
         if (enemies.isEmpty()) return
 
         foundPaths.clear()
+        foundGoals.clear()
         try {
             val result = RoutingSearchRunner.run(
                 RoutingRequest(
                     algorithm = algorithm,
-                    targetMode = targetMode,
                     start = start,
                     enemies = enemies.toList(),
                     gridWidth = gridWidth,
@@ -417,10 +488,14 @@ class RoutingTestUIState(initialAlgorithm: RoutingAlgorithm? = null) {
                     isLevel = isLevel,
                     mapNearest = mapNearest,
                     finishWithinStrikingRange = finishWithinStrikingRange,
-                    findNearestSafeIfCurrentlyNotSafe = findNearestSafeIfCurrentlyNotSafe
+                    findNearestSafeIfCurrentlyNotSafe = findNearestSafeIfCurrentlyNotSafe,
+                    enemyKind = enemyKind,
+                    avoidFrontOfEnemies = avoidFrontOfEnemies,
+                    goalOverride = goalOverride
                 )
             )
             foundPaths.addAll(result.paths)
+            foundGoals.addAll(result.goals)
             selectedPathIndex = if (result.paths.isNotEmpty()) 0 else -1
             costs = result.costs
             dangerCost = result.dangerCost
@@ -436,7 +511,7 @@ class RoutingTestUIState(initialAlgorithm: RoutingAlgorithm? = null) {
 
     private fun refreshLookups() {
         enemyPoints = enemies.associate { it.noDir() to it.direction }
-        targetPoints = RoutingSearchRunner.targetsFor(enemies.toList(), targetMode).toHashSet()
+        targetPoints = RoutingSearchRunner.targetsFor(enemies.toList()).toHashSet()
         val paths = if (selectedPathIndex == -1) foundPaths.toList() else
             listOfNotNull(foundPaths.getOrNull(selectedPathIndex))
         val directions = mutableMapOf<FramePoint, Direction?>()
@@ -461,12 +536,15 @@ class RoutingTestUIState(initialAlgorithm: RoutingAlgorithm? = null) {
             lines.add("startDirection=${startDirection.name}")
             lines.add("enemyDirection=${enemyDirection.name}")
             lines.add("algorithm=${algorithm.name}")
-            lines.add("targetMode=${targetMode.name}")
             lines.add("halfPassable=$halfPassable")
             lines.add("isLevel=$isLevel")
             lines.add("mapNearest=$mapNearest")
             lines.add("finishWithinStrikingRange=$finishWithinStrikingRange")
             lines.add("findNearestSafe=$findNearestSafeIfCurrentlyNotSafe")
+            lines.add("enemyKind=$enemyKind")
+            lines.add("avoidFront=$avoidFrontOfEnemies")
+            lines.add("showResults=$showResults")
+            lines.add("showSteps=$showSteps")
             lines.add("showCosts=$showCosts")
             lines.add("showTargets=$showTargets")
             lines.add("cellSize=$cellSize")
@@ -498,6 +576,12 @@ class RoutingTestUIState(initialAlgorithm: RoutingAlgorithm? = null) {
             settings["findNearestSafe"]?.let {
                 findNearestSafeIfCurrentlyNotSafe = it.toBooleanStrictOrNull() ?: true
             }
+            settings["enemyKind"]?.let { name ->
+                EnemyKind.entries.find { it.name == name }?.let { enemyKind = it }
+            }
+            settings["avoidFront"]?.let { avoidFrontOfEnemies = it.toBooleanStrictOrNull() ?: false }
+            settings["showResults"]?.let { showResults = it.toBooleanStrictOrNull() ?: false }
+            settings["showSteps"]?.let { showSteps = it.toBooleanStrictOrNull() ?: false }
             settings["showCosts"]?.let { showCosts = it.toBooleanStrictOrNull() ?: true }
             settings["showTargets"]?.let { showTargets = it.toBooleanStrictOrNull() ?: true }
             settings["cellSize"]?.toIntOrNull()?.let { cellSize = it.coerceIn(4, 24) }
@@ -505,9 +589,6 @@ class RoutingTestUIState(initialAlgorithm: RoutingAlgorithm? = null) {
             settings["enemyDirection"]?.let { enemyDirection = it.toDirection() }
             settings["algorithm"]?.let { name ->
                 RoutingAlgorithm.entries.find { it.name == name }?.let { algorithm = it }
-            }
-            settings["targetMode"]?.let { name ->
-                TargetMode.entries.find { it.name == name }?.let { targetMode = it }
             }
             forceAlgorithm?.let { algorithm = it }
 
@@ -584,11 +665,11 @@ fun RoutingTestUI(initialAlgorithm: RoutingAlgorithm? = null) {
                 }
 
                 PickerButton(
-                    label = "Target: ${uiState.targetMode.label}",
-                    options = TargetMode.entries,
+                    label = "Enemy: ${uiState.enemyKind.label}",
+                    options = EnemyKind.entries,
                     optionLabel = { it.label }
                 ) {
-                    uiState.targetMode = it
+                    uiState.enemyKind = it
                     uiState.clearResults()
                     uiState.saveSettings()
                 }
@@ -624,13 +705,23 @@ fun RoutingTestUI(initialAlgorithm: RoutingAlgorithm? = null) {
                         options = listOf(-1) + uiState.foundPaths.indices.toList(),
                         optionLabel = { index ->
                             if (index == -1) "All Paths"
-                            else "Path ${index + 1} (${uiState.foundPaths[index].size} steps)"
+                            else uiState.pathLabel(index)
                         }
                     ) { uiState.selectPath(it) }
                 }
 
                 Button(onClick = { uiState.showInstructions = !uiState.showInstructions }) {
                     Text("Info")
+                }
+
+                Button(onClick = { uiState.showResults = !uiState.showResults }) {
+                    Text(if (uiState.showResults) "Hide results" else "Show results")
+                }
+
+                if (uiState.showResults) {
+                    Button(onClick = { uiState.showSteps = !uiState.showSteps }) {
+                        Text(if (uiState.showSteps) "Hide steps" else "Show steps")
+                    }
                 }
 
                 Spacer(Modifier.weight(1f))
@@ -652,6 +743,12 @@ fun RoutingTestUI(initialAlgorithm: RoutingAlgorithm? = null) {
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                LabeledCheckbox("Don't attack front", uiState.avoidFrontOfEnemies) {
+                    uiState.avoidFrontOfEnemies = it
+                    uiState.saveSettings()
+                    uiState.runSearch()
+                }
+
                 LabeledCheckbox("Long attack", uiState.ableToLongAttack) {
                     uiState.ableToLongAttack = it
                     uiState.clearResults()
@@ -696,7 +793,9 @@ fun RoutingTestUI(initialAlgorithm: RoutingAlgorithm? = null) {
 
             Spacer(Modifier.height(8.dp))
 
+            if (uiState.showResults) {
             Card(modifier = Modifier.fillMaxWidth(), elevation = 2.dp) {
+                SelectionContainer {
                 Column(Modifier.padding(8.dp)) {
                     Text("Coordinates:", fontWeight = FontWeight.Bold)
                     uiState.startPoint?.let {
@@ -709,9 +808,41 @@ fun RoutingTestUI(initialAlgorithm: RoutingAlgorithm? = null) {
                         Text(uiState.summary, fontWeight = FontWeight.Bold)
                     }
                     uiState.foundPaths.forEachIndexed { index, path ->
-                        Text("Path ${index + 1}: ${path.size} steps, ends at ${path.lastOrNull()}")
+                        val goal = uiState.goalOf(index)
+                        Text(
+                            "${uiState.pathLabel(index)} ends at ${path.lastOrNull()}",
+                            fontWeight = if (index == uiState.selectedPathIndex) FontWeight.Bold
+                            else FontWeight.Normal
+                        )
+                        Text(
+                            "    ${goal?.toString() ?: "goal not reported"}",
+                            color = when {
+                                goal == null -> Color.Gray
+                                goal.reached -> Color(0xFF1B5E20)
+                                else -> Color.Red
+                            }
+                        )
+                        if (uiState.showSteps &&
+                            (uiState.selectedPathIndex == -1 || uiState.selectedPathIndex == index)
+                        ) {
+                            path.forEachIndexed { step, point ->
+                                val last = step == path.size - 1
+                                Text(
+                                    "      ${step + 1}. (${point.x}, ${point.y}) " +
+                                            (point.direction?.name ?: "none") +
+                                            if (last) "  <- ${goal?.rules?.firstOrNull() ?: "no goal"}" else "",
+                                    color = if (last && goal?.reached == true) Color(0xFF1B5E20)
+                                    else Color.DarkGray
+                                )
+                            }
+                        }
+                    }
+                    if (uiState.foundPaths.isEmpty()) {
+                        uiState.goalOf(0)?.let { Text("Start: $it") }
                     }
                 }
+                }
+            }
             }
 
             Spacer(Modifier.height(8.dp))

@@ -1,9 +1,7 @@
 package bot.plan.action
 
 import bot.state.*
-import bot.state.map.MapConstants
 import bot.state.map.grid
-import bot.state.oam.Monsters
 import bot.state.oam.sun1
 import bot.state.oam.sun2
 import util.LogFile
@@ -180,7 +178,7 @@ class KillAll(
                         d { " !On Target " }
                     }
 
-                    val killRouting = false
+                    val killRouting = true
 //                    if (killRouting) {
 //                        val pad = routeToBest(state, aliveEnemies)
 //                        // TODO: this probably doesn't work
@@ -233,23 +231,6 @@ class KillAll(
             }
         }
     }
-
-    private fun routeToBest(state: MapLocationState, aliveEnemies: List<Agent>): GamePad {
-        return routeTo.routeToBest(
-            state,
-            RouteTo.RouteParam(
-                useB = firstAttackBomb || useBombs,
-                allowRangedAttack = !firstAttackBomb,
-                allowBlock = allowBlock,
-                rParam = RouteTo.RoutingParamCommon(
-                    mapNearest = true,
-                    finishWithinStrikingRange = true
-                ),
-            ),
-            attackableSpec = aliveEnemies
-        )
-    }
-
 }
 
 class DeadForAWhile(
