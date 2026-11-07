@@ -28,7 +28,7 @@ class ZStar(
     }
     private val allPassable = passable.copy().mapXy { i, i2 -> true }
     companion object {
-        var DEBUG = true
+        var DEBUG = false
         var DEBUG_B = false
         var DEBUG_V = false
         private val DEBUG_DIR = false
@@ -48,6 +48,12 @@ class ZStar(
 //        val HIGH_COST = nearEnemyCost - 1000 // less than near enemy so app can tell
         // a little worse than just plain near enemy
         val HIGH_COST = nearEnemyCost + 1000
+
+        /**
+         * shouldn't need to have any extra off highway cost since link doesn't route there anyway, but still keep it
+         * as slightly higher
+         */
+        val OFF_HIGHWAY_COST = 10
 //        val HIGH_COST = onEnemyCost - 1000// this makes link avoid the swords even more, but also attack less
     }
 
@@ -60,7 +66,7 @@ class ZStar(
 
     // try x,y
     private val initialMap: Map2d<Int> =
-        passable.mapXy { y, x -> if (x % highwayDivisor == 0 || y % highwayDivisor == 0) 1 else 1000 }
+        passable.mapXy { y, x -> if (x % highwayDivisor == 0 || y % highwayDivisor == 0) 1 else OFF_HIGHWAY_COST }
 
     // f values
     private val initialPassable = passable
@@ -255,13 +261,13 @@ class ZStar(
         val closedList = mutableSetOf<FramePoint>()
         val cameFrom = mutableMapOf<FramePoint, FramePoint>()
 
+        val routeToGoal = param.rParam.finishWithinStrikingRange
         // really what I want is it to just seek ANY safe point
         var routeToSafe = false
 
         val startIsSafe = costsF.safe(param.start)
-
         // testing
-        val routeSafe = true
+        val routeSafe = false
         if (routeSafe && param.rParam.findNearestSafeIfCurrentlyNotSafe == true && !startIsSafe) {
             d { " dodge! "}
             return routeNearestSafe(param)
@@ -283,14 +289,14 @@ class ZStar(
             // if all else fails just go with the original list
             .ifEmpty { targets.toList() }
 
-        d { " target before ${targets.size} now ${target.size}"}
+//        d { " target before ${targets.size} now ${target.size}"}
 
         // stil getting NO ROUTE
 //        d { "From safe: $startIsSafe cost = ${costsF.get(param.start)} targets size = ${target.size} routeToSafe=${routeToSafe}"}
-        d { " targets zstar: "}
-        for (framePoint in target) {
-            d { "$framePoint"}
-        }
+//        d { " targets zstar: "}
+//        for (framePoint in target) {
+//            d { "$framePoint"}
+//        }
 
         val openList = PriorityQueue<OpenNode>(compareBy { it.priority })
 
@@ -300,6 +306,7 @@ class ZStar(
 
         openList.add(OpenNode(param.start, 0))
 
+        var done = false
         iterCount = 0
 //        while (true && iterCount < MAX_ITER) {
         while (iterCount < maxIter) {
@@ -333,7 +340,11 @@ class ZStar(
             // iterCount > 0 check is here so that this doesn't return an empty route
             // if the current point really was in range of striking it wouldn't have entered
             // this routine
-            val done = when {
+            done = when {
+//                !startIsSafe -> {
+//                    doneBecause = "safe"
+//                    costsF.safe(point)
+//                }
                 param.rParam.finishWithinStrikingRange && param.isGoal(point, costsF.safe(point)) -> {
                     doneBecause = "goal"
                     true
@@ -347,13 +358,13 @@ class ZStar(
                     // TODO: Ignores sword in front of!!
                     AttackActionDecider.inStrikingRange(point, enemies = param.enemies)
                 }
-                (routeToSafe && costsF.safe(point)) -> {
+                (!routeToGoal && routeToSafe && costsF.safe(point)) -> {
                     doneBecause = "safe"
                     true
                 }
                 else -> {
                     doneBecause = "at target"
-                    target.contains(point) // && costsF.safe(point)
+                    !routeToGoal && target.contains(point) // && costsF.safe(point)
                 }
             }
 
@@ -399,7 +410,7 @@ class ZStar(
                 val cost = costsF.get(toPoint)
                 //val cost = getQuadCost(toPoint)
                 // add to the cost of the point
-                val parentCost = costFromStart[point] ?: 99999
+                val parentCost = costFromStart[point] ?: 0 // 99999
                 // route to get to this point including parent
                 val pathCost = cost + parentCost
 
@@ -407,7 +418,7 @@ class ZStar(
                 val minDistToLong = toPoint.distTo(param.start)
                 val minDistToTarget = toPoint.minDistToAny(target)
                 val costToGoal = if (routeToSafe) minDistToLong else minDistToTarget
-                val totalCost = costToGoal + pathCost
+                val totalCost = if (routeToGoal) pathCost else costToGoal + pathCost
 
                 if (DEBUG) {
                     d {
@@ -447,6 +458,10 @@ class ZStar(
 
         if (DEBUG) {
             d { " ****** DONE $iterCount ****** " }
+        }
+        // only a goal search should give up; a target route falls back to the closest point
+        if (routeToGoal && !done) {
+            return emptyList()
         }
         // todo: actually should pick the best path so far..
         // if there is no goal, then use the closest point to the goal
