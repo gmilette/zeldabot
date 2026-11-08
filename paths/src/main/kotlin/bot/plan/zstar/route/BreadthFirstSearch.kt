@@ -56,6 +56,10 @@ class BreadthFirstSearch(
         initialCalculations()
     }
 
+    private fun sortByCostThenSize(foundPaths: List<FoundPath>): List<List<FramePoint>> {
+        return foundPaths.sortedWith(compareBy({ it.cost }, { it.path.size })).map { it.path }
+    }
+
     private fun sortPathsByBestFirst(foundPaths: List<List<FramePoint>>): List<List<FramePoint>> {
         return foundPaths.sortedWith(
             compareBy<List<FramePoint>> { countUnsafe(it) }
@@ -116,17 +120,20 @@ class BreadthFirstSearch(
         // for now, only progress projectiles, how fast do they go? let's say 1 pixel per frame?
     }
 
+    data class FoundPath(val path: List<FramePoint>, val cost: Int)
+
     fun breadthFirstSearch(
         start: FramePoint,
         targets: List<FramePoint> = emptyList(),
-        maxDepth: Int = 5000
+        maxDepth: Int = 5000,
+        safeFirst: Boolean = true,
     ): List<Path> {
         val queue = PriorityQueue<SearchNode>( compareBy { it.cost })
-//        val queue = LinkedList<SearchNode>()
         val visited = TreeSet(framePointComparator)
-        val foundPaths = mutableListOf<List<FramePoint>>()
+        val foundPaths = mutableListOf<FoundPath>()
+        val defaultFoundSafe = !safeFirst
 
-        queue.offer(SearchNode(start, listOf(start), 0, cost = 0))
+        queue.offer(SearchNode(start, listOf(start), 0, foundSafe = defaultFoundSafe, cost = 0))
         
         var iterations = 0
         while (queue.isNotEmpty() && iterations < MAX_ITER && foundPaths.size < MAX_PATHS) {
@@ -159,7 +166,6 @@ class BreadthFirstSearch(
             //  to the 8 grid route, and explore it all. Maybe if it find no action it can find the safest route that leads
             // to a grid location instead. Rough 8 grid is all i need to create a go in X direction.
 
-            // current.depth == 0
             if (current.foundSafe && goalChecker.isGoal(current.point, true)) {
                 // Ensure the final path includes the current point (last visited point)
                 //                val completePath = if (current.path.last().equalsAndDirection(current.point)) {
@@ -169,7 +175,7 @@ class BreadthFirstSearch(
                     current.path + current.point
                 }
                 
-                foundPaths.add(completePath)
+                foundPaths.add(FoundPath(completePath, cost = current.cost))
                 if (DEBUG_B) {
                     d { "Found goal path: $completePath" }
                 }
@@ -228,18 +234,19 @@ class BreadthFirstSearch(
         if (DEBUG_B) {
             d { "BFS completed: found ${foundPaths.size} paths in $iterations iterations" }
             for (path in foundPaths) {
-                val dist = path.countDistance(targets)
-                d { "BFS path: ${path.size} $path $dist"}
+                val dist = path.path.countDistance(targets)
+                d { "BFS path: ${path.path.size} $path $dist"}
             }
         }
 
-        return if (SAFE_GOAL) {
-            d { "BFS sort by dist" }
-            sortPathsByBestFirstDist(foundPaths, enemies = targets) // TODO: Add back in the enemies
-        } else {
-            d { "BFS sort by size" }
-            sortPathsByBestFirst(foundPaths)
-        }.also {
+        if (foundPaths.isEmpty() && safeFirst) {
+            d(DEBUG_B) { "No safe route try to find unsafe" }
+            return breadthFirstSearch(start, targets, maxDepth, false)
+        }
+
+        d { "BFS sort by size" }
+        return sortByCostThenSize(foundPaths)
+        .also {
             if (DEBUG_B) {
                 d { "BFS sorted" }
                 for (path in it) {

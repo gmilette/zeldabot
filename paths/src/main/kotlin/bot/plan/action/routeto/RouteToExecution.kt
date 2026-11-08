@@ -4,14 +4,11 @@ import bot.plan.action.AlwaysAttackWhenCan
 import bot.plan.action.RouteTo
 import bot.plan.action.RouteTo.Param
 import bot.plan.action.RouteTo.RouteParam
-import bot.plan.action.aliveEnemies
 import bot.plan.action.boomerangActive
-import bot.state.Agent
-import bot.state.FramePoint
-import bot.state.GamePad
-import bot.state.MapLocationState
-import util.d
+import bot.state.*
+import bot.state.map.toGamePad
 import util.ZRandom
+import util.d
 
 
 sealed class PointMoveAction {
@@ -106,7 +103,7 @@ class RouteExecution(val params: Param = Param()) {
                     FramePoint(),
                     attackableSpec
                 )
-                routeTo.getActionFromRoute(nextPoint, state.link)
+                getActionFromRoute(nextPoint, state.link, state)
             }
             PointMoveAction.BoomerangAttack -> {
                 boomerangCt = if (state.boomerangActive) {
@@ -121,6 +118,20 @@ class RouteExecution(val params: Param = Param()) {
             PointMoveAction.ShortAttack -> theAttack.nextStep(state)
             PointMoveAction.ContinueAttack -> theAttack.nextStep(state)
             is PointMoveAction.ForceAction -> action.gamePad
+        }
+    }
+
+    fun getActionFromRoute(nextPoint: FramePoint, linkPt: FramePoint, state: MapLocationState): GamePad {
+        return when {
+            nextPoint.isZero && linkPt.x == 0 -> GamePad.MoveLeft
+            nextPoint.isZero && linkPt.y == 0 -> GamePad.MoveUp
+            // already in a good spot
+            // this is the default action when link does not find a safe or unsafe route
+            nextPoint.isZero -> theAttack.nextStep(state)
+            else -> nextPoint.direction?.toGamePad() ?: linkPt.directionTo(nextPoint)
+        }.also {
+            //        writeFile(to, state, it)
+            d { " link point $linkPt next point $nextPoint dir: $it ${if (nextPoint.direction != null) "HAS DIR ${nextPoint.direction}" else ""}" }
         }
     }
 

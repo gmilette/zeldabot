@@ -9,7 +9,6 @@ import bot.plan.zstar.ZStar
 import bot.state.*
 import bot.state.map.Direction
 import bot.state.map.MapCell
-import bot.state.map.toGamePad
 import util.LogFile
 import util.d
 
@@ -130,19 +129,6 @@ class RouteTo(val params: Param = Param()) {
         return GamePad.None
     }
 
-    fun getActionFromRoute(nextPoint: FramePoint, linkPt: FramePoint): GamePad {
-        return when {
-            nextPoint.isZero && linkPt.x == 0 -> GamePad.MoveLeft
-            nextPoint.isZero && linkPt.y == 0 -> GamePad.MoveUp
-            // already in a good spot
-            nextPoint.isZero -> GamePad.None
-            else -> nextPoint.direction?.toGamePad() ?: linkPt.directionTo(nextPoint)
-        }.also {
-            //        writeFile(to, state, it)
-            d { " link point $linkPt next point $nextPoint dir: $it ${if (nextPoint.direction != null) "HAS DIR ${nextPoint.direction}" else ""}" }
-        }
-    }
-
     fun routeTo(
         state: MapLocationState,
         to: List<FramePoint>,
@@ -242,8 +228,6 @@ class RouteTo(val params: Param = Param()) {
 //            route?.next100()
         }
         planCount = 0
-//        val pointDir = nextPoint1.direction ?:
-//            route?.decideDirection(linkPt, state.frameState.link.dir)
         val pointDir = route?.decideDirection(linkPt, state.frameState.link.dir) ?: nextPoint1.direction
         d { " next is $nextPoint1 of ${route?.numPoints ?: 0}" }
         return nextPoint1.copy(direction = pointDir)
