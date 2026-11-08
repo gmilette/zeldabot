@@ -6,18 +6,30 @@ import bot.plan.action.Action
 import bot.plan.action.DoNothing
 import bot.plan.action.moveHistoryAttackAction
 import bot.state.*
+import bot.state.map.Direction
+import bot.state.map.Direction.Down
+import bot.state.map.Direction.Left
+import bot.state.map.Direction.None
+import bot.state.map.Direction.Right
+import bot.state.map.Direction.Up
+import bot.state.map.Hyrule
+import bot.state.map.MapCell
 import bot.state.map.destination.ZeldaItem
 import nintaco.api.API
 import util.ZRandom
 import util.d
 import util.w
 import java.io.File
+import kotlin.random.Random
 
 typealias PlanMaker = () -> MasterPlan
 
 class PlanRunner(private val makePlan: PlanMaker,
+                 private val hyrule: Hyrule,
                  private val api: API,
-                 private val experiment: String = "default"
+                 private val experiment: String = "default",
+                 private val cellAt: (Int, MapLoc) -> MapCell,
+                 private val resetBotState: () -> Unit = {}
 ) {
     var action: Action? = null
         private set
@@ -45,25 +57,56 @@ class PlanRunner(private val makePlan: PlanMaker,
     private var maxFramesPerTrial = 0
     private var batchDone = false
 
+    // api.loadState is asynchronous and Nintaco posts no completion event, so the plan
+    // must not run until the save state has actually landed - otherwise it advances
+    // against the previous trial's room. ZeldaBot spots the landing as a frame counter
+    // discontinuity and calls loadLanded.
+    var awaitingLoad = false
+        private set
+
+    fun loadLanded(manipulator: StateManipulator) {
+        if (!awaitingLoad) return
+        awaitingLoad = false
+        // once per trial, on the frame the save state has just restored RAM
+        val random = ZRandom.seed?.let { Random(it * GAME_RNG_SALT + runCt) } ?: Random.Default
+        manipulator.randomizeSeed(random)
+    }
+
     // room_<lvl>_<loc>[_<sword>[_<ring>]][,<lvl>_<loc>...] - a spec with no sword/ring
     // inherits them from the first, so room_8_62_m_b,8_94,7_24 is all magic sword + blue ring
     private val roomsToTrial: List<Experiment> by lazy {
         val specs = experiment.removePrefix("room_").split(",").map { it.trim().split("_") }
         val firstSword = specs.first().getOrElse(2) { "d" }
         val firstRing = specs.first().getOrElse(3) { "g" }
+        val direction = specs.first().getOrElse(4) { null } // could specify direction
         specs.map { spec ->
+            val level = spec[0].toInt()
+            val mapLoc = spec[1].toInt()
+            // hyrule.map is the overworld only, so a level room has to come from cellAt
+            val directionStartFrom = direction?.toDir()
+                ?: cellAt(level, mapLoc).exits.entries.firstOrNull()?.key
+                ?: Up
             Experiments.roomTrial(
-                level = spec[0].toInt(),
-                mapLoc = spec[1].toInt(),
+                level = level,
+                mapLoc = mapLoc,
+                fromDirection = directionStartFrom,
                 name = "room_${spec[0]}_${spec[1]}",
                 sword = swordFor(spec.getOrElse(2) { firstSword }),
                 ring = ringFor(spec.getOrElse(3) { firstRing }),
                 hearts = ZeldaBot.startHearts,
                 shield = ZeldaBot.startShield,
                 boomerang = boomerangFor(ZeldaBot.startBoomerang),
-                maxFramesPerTrial = ZeldaBot.maxTrialFrames ?: Experiments.DEFAULT_TRIAL_FRAME_BUDGET
+                maxFramesPerTrial = ZeldaBot.maxTrialFrames ?: Experiments.DEFAULT_TRIAL_FRAME_BUDGET,
             )
         }
+    }
+
+    private fun String.toDir() = when(this) {
+        "u" -> Up
+        "d" -> Down
+        "l" -> Left
+        "r" -> Right
+        else -> None
     }
 
     private fun runFrom() {
@@ -245,6 +288,9 @@ class PlanRunner(private val makePlan: PlanMaker,
 
     private fun runIt(load: Boolean = false, ex: Experiment) {
         d { "  run experiment ${ex.name} load=$load"}
+        // room trials build their plan with ex.plan() and never go through makePlan,
+        // so without this each trial inherited the previous trial's MapLocationState
+        resetBotState()
 
 //        val ex = experiments.getExp()
 //        ZeldaBot.addEquipment = ex.addEquipment
@@ -264,13 +310,16 @@ class PlanRunner(private val makePlan: PlanMaker,
         )
         if (load) {
             d { "reset" }
-            Thread( {
-                api.reset()
-            }).start()
-            Thread.sleep(100)
+//            Thread( {
+//                api.reset()
+//            }).start()
+//            Thread.sleep(100)
+            api.reset()
             d { "reload" }
             val root = DirectoryConstants.states
             api.loadState("$root/${startPath}")
+            awaitingLoad = true
+            d { "reload issued, waiting for it to land" }
         }
         runCt++
         runSetupCt = 0
@@ -482,6 +531,7 @@ class PlanRunner(private val makePlan: PlanMaker,
     }
 
     companion object {
+        private const val GAME_RNG_SALT = 1_000_003L
         private const val ALWAYS_APPLY_FRAMES = 40
         private const val SETUP_FRAME_LIMIT = 60
     }

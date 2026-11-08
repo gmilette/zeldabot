@@ -22,6 +22,7 @@ import java.io.File
 
 class ZeldaBot(private val monitor: ZeldaMonitor) {
     private val api: API = ApiSource.getAPI()
+    private var lastFrame = -1
 
     fun launch() {
         startAndSetListeners()
@@ -88,7 +89,11 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
     private var setEquipmentCt = 200
     private var frameStateUpdater: FrameStateUpdater = FrameStateUpdater(api, hyrule)
     private val cheater = Cheater(api, frameStateUpdater)
-    val plan = PlanRunner(::makePlan, api, ZeldaBot.experiment ?: "default")
+    val plan = PlanRunner(::makePlan, hyrule, api, ZeldaBot.experiment ?: "default", ::cellAt,
+        resetBotState = { frameStateUpdater.reset() })
+
+    private fun cellAt(level: Int, loc: MapLoc): MapCell =
+        if (level == 0) hyrule.getMapCell(loc) else hyrule.levelMap.cellOrEmpty(level, loc)
 
     private fun makePlan(): MasterPlan {
         d { " make a plan "}
@@ -101,6 +106,20 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         val currentFrame = api.frameCount
 
         d { "execute ### $currentFrame" }
+
+        // api.loadState is asynchronous and Nintaco posts no completion message. The
+        // save state carries its own frame counter, so the load shows up as the counter
+        // jumping. Backwards can only be a load; a large forward jump is the first load
+        // of a batch, when the live counter is still below the saved one. Small forward
+        // gaps are dropped frames and must not count.
+        val loadLanded = lastFrame >= 0 &&
+                (currentFrame < lastFrame || currentFrame - lastFrame > LOAD_FRAME_JUMP)
+        lastFrame = currentFrame
+        if (loadLanded) {
+            d { " save state landed at frame $currentFrame" }
+            plan.loadLanded(cheater.stateManipulator)
+        }
+
         // could log zapper to try different routes
         // zapperLoc -> fix Link location -> advanceFrame (hopefully render route)
         // Action, Map, ZParam, click listener
@@ -197,6 +216,12 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
             return GamePad.None
         }
 
+        // until the save state lands the live state is still the previous trial, so
+        // running the plan here advances actions against the wrong room
+        if (plan.awaitingLoad) {
+            return GamePad.None
+        }
+
         val nextGamePad = plan.next(frameStateUpdater.state)
 
         frameStateUpdater.updateDecision(nextGamePad)
@@ -216,6 +241,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         private const val SPRITE_ID = 123
         private const val SPRITE_ID_2 = 456
         private const val SPRITE_SIZE = 6
+        private const val LOAD_FRAME_JUMP = 60
 
         // parameters controlled by the debug UI
         var hasLadder = false
@@ -243,7 +269,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         var startShield: Boolean = false
         var runId: String = ""
         var startBoomerang: String? = null
-        var fast: Boolean = false
+        var fast: Boolean = true
 
         @JvmStatic
         fun startIt(monitor: ZeldaMonitor): ZeldaBot {
@@ -374,6 +400,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
         private val drawDamaged = true
         private val drawHasLessThanMaxHp = false
         private val drawEnemyCosts = true
+        private val drawLinkSafetyIndicator = true
 
         private val rhinoHeadLeftUp = 0xFA // foot up
         private val rhinoHeadLeftUp2 = 0xFC // foot down
@@ -523,6 +550,22 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                             api.color = Colors.GRAY
                             api.drawRect(topLeft.x, topLeft.y + MapConstants.yAdjust, width, height)
                         }
+                    }
+
+                    if (drawLinkSafetyIndicator && link.isInLevelMap) {
+                        val finder = frameStateUpdater.state.currentMapCell.zstar.neighborFinder
+                        api.color = when {
+                            !finder.costF.empty && finder.isSafe(link) -> Colors.GREEN
+                            else -> Colors.RED
+                        }
+                        api.fillOval(link.x, link.y + MapConstants.yAdjust, 3, 3)
+
+                        val safeToAttack = AttackActionBlockDecider.safeToAttack(link, frameStateUpdater.state.frameState.enemies)
+                        api.color = when {
+                            safeToAttack -> Colors.GREEN
+                            else -> Colors.RED
+                        }
+                        api.fillOval(link.x + MapConstants.oneGrid, link.y + MapConstants.yAdjust, 3, 3)
                     }
 
                     val drawRhinoAttack = false

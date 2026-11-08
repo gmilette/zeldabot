@@ -4,6 +4,7 @@ import bot.plan.action.AlwaysAttackWhenCan
 import bot.plan.action.RouteTo
 import bot.plan.action.RouteTo.Param
 import bot.plan.action.RouteTo.RouteParam
+import bot.plan.action.aliveEnemies
 import bot.plan.action.boomerangActive
 import bot.state.Agent
 import bot.state.FramePoint
@@ -82,6 +83,7 @@ class RouteExecution(val params: Param = Param()) {
         val action = determine.nextAction(
             state,
             to,
+            state.frameState.enemies,
             param,
             boomerangCt,
              theAttack.isAttacking(state),

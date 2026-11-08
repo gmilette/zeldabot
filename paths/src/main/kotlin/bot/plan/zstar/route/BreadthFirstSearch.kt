@@ -3,7 +3,6 @@ package bot.plan.zstar.route
 import bot.plan.action.distTo
 import bot.plan.zstar.NeighborFinder
 import bot.plan.zstar.ZStar.Companion.DEBUG_B
-import bot.plan.zstar.ZStar.Companion.DEBUG_V
 import bot.plan.zstar.ZStar.Companion.MAX_ITER
 import bot.state.FramePoint
 import bot.state.dirTo
@@ -13,15 +12,19 @@ import java.util.*
 typealias Paths = List<Path>
 typealias Path = List<FramePoint>
 
+private var idCt = 0
+
 data class SearchNode(
     val point: FramePoint,
     val path: List<FramePoint>,
     val depth: Int,
-    val foundSafe: Boolean = false
+    val foundSafe: Boolean = false,
+    val cost: Int,
+    val id: Int = idCt++,
 )
 
 class CachingGoalChecker(
-    private val isGoalCheck: (FramePoint, Boolean) -> Boolean = { _, _ -> false }
+    private val isGoalCheck: (FramePoint, Boolean) -> Boolean = { _, _ -> false },
 ) {
     private val cache = TreeMap<FramePoint, Boolean>(BreadthFirstSearch.framePointComparator)
 
@@ -113,53 +116,51 @@ class BreadthFirstSearch(
         // for now, only progress projectiles, how fast do they go? let's say 1 pixel per frame?
     }
 
-    sealed class ActionRoute {
-        data class Attack(val useB: Boolean) : ActionRoute()
-        data class Route(val route: List<FramePoint>) : ActionRoute()
-    }
-
-    fun bestRoute(
-        start: FramePoint,
-        targets: List<FramePoint>,
-        maxDepth: Int = 255
-    ): ActionRoute {
-        return if (goalChecker.isGoal(start, true)) {
-            d { " BFS: Started at goal: $start"}
-            ActionRoute.Attack(false)
-        } else {
-            val routes = breadthFirstSearch(start, targets, maxDepth)
-            ActionRoute.Route(routes.first())
-        }
-    }
-
     fun breadthFirstSearch(
         start: FramePoint,
         targets: List<FramePoint> = emptyList(),
         maxDepth: Int = 5000
-    ): List<List<FramePoint>> {
-        val queue = LinkedList<SearchNode>()
+    ): List<Path> {
+        val queue = PriorityQueue<SearchNode>( compareBy { it.cost })
+//        val queue = LinkedList<SearchNode>()
         val visited = TreeSet(framePointComparator)
         val foundPaths = mutableListOf<List<FramePoint>>()
 
-        queue.offer(SearchNode(start, listOf(start), 0))
+        queue.offer(SearchNode(start, listOf(start), 0, cost = 0))
         
         var iterations = 0
         while (queue.isNotEmpty() && iterations < MAX_ITER && foundPaths.size < MAX_PATHS) {
-            iterations++
-
             val current = queue.poll()
             
             if (DEBUG_B) {
-                d { "$iterations: exploring ${current.point} at depth ${current.depth}" }
-                if (DEBUG_V) {
+                d { "$iterations: exploring ${current.point} at depth ${current.depth} queue: ${queue.size}" }
+                for (node in queue) {
+                    d { "   $iterations: $node" }
+                }
+                if (DEBUG_B) {
                     d { "currentNode: $current" }
                 }
             }
             
             if (current.depth > maxDepth) continue
 
+            // find a safe route first!!
+            // could say that it MUST find a route to safety first, then start looking for goals
+            // so run this twice, once to find routes to safe starting points, then route to goals
+
+            // maybe just do limited path length
+            // then pick safest
+            // generally going towards safety is going to help keep link alive
+            // an opportunity to attack will appear
+
+            // how would this work if it was an 8x8 grid?
+            // start at nearest point on grid. then at end of grid.
+            //  before routing on the grid. explore the routes within 8 or 16 depth, if there is nothing there, then change
+            //  to the 8 grid route, and explore it all. Maybe if it find no action it can find the safest route that leads
+            // to a grid location instead. Rough 8 grid is all i need to create a go in X direction.
+
             // current.depth == 0
-            if (goalChecker.isGoal(current.point, true)) {
+            if (current.foundSafe && goalChecker.isGoal(current.point, true)) {
                 // Ensure the final path includes the current point (last visited point)
                 //                val completePath = if (current.path.last().equalsAndDirection(current.point)) {
                 val completePath = if (current.path.last() == current.point) {
@@ -172,18 +173,22 @@ class BreadthFirstSearch(
                 if (DEBUG_B) {
                     d { "Found goal path: $completePath" }
                 }
+                visited.add(current.point)
                 continue
             }
             
             if (current.point in visited) continue
+            iterations++
             visited.add(current.point)
 
             val from = current.path.getOrNull(current.path.size - 2)
-            
+
+//            val ONLY_SAFE = !isSafe(current.point)
+//            d(DEBUG_B) { "ONLY_SAFE $ONLY_SAFE" }
             val neighbors = neighborFinder.neighbors(
                 current.point, 
                 from = from
-            )
+            )//.filter { !ONLY_SAFE || isSafe(it) }
             if (DEBUG_B) {
                 d { "Neighbors of ${current.point} from ${from}: $neighbors" }
             }
@@ -198,12 +203,20 @@ class BreadthFirstSearch(
                         direction = current.point.dirTo(neighbor)
                     )
 
+                    // add turning cost?, it's better to keep going straight
+//                    val arriveDir = neighbor.direction ?: current.point.dirTo(neighbor)
+//                    val turning = current.point.direction != null && current.point.direction != arriveDir
+//                    val cost = neighborFinder.costF.get(neighbor) + if (turning) TURN_COST else 0
+                    val cost = neighborFinder.costF.get(neighbor)
+                    d(DEBUG_B) { "  $neighbor: $cost to $newPath" }
+
                     queue.offer(
                         SearchNode(
                             point = neighbor,
                             path = newPath,
                             depth = current.depth + 1,
-                            foundSafe = newFoundSafe
+                            foundSafe = newFoundSafe,
+                            cost = current.cost + cost,
                         )
                     )
                 } else {

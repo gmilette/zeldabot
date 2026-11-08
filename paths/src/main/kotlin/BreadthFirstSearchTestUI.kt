@@ -8,7 +8,7 @@ import androidx.compose.ui.window.Window
  */
 @Composable
 fun BreadthFirstSearchTestUI() {
-    RoutingTestUI(initialAlgorithm = RoutingAlgorithm.BreadthFirst)
+    RoutingTestUI(initialAlgorithm = RoutingAlgorithm.ZStarBreadthFirst)
 }
 
 @Composable

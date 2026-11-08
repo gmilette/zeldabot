@@ -113,7 +113,7 @@ data class DirectionMap(
 val swordDir = DirectionMap(
     up = setOf(0xb4, //02, 42
         0xb6), //42x
-    down = setOf(0xac, 0xb0, 0xB2), //02
+    down = setOf(0xac, 0xb0, 0xB2, 0xae), //02
     left = setOf(0xbe, //42
 //        0xBC, // was left
         0xba

@@ -3,8 +3,12 @@ package bot.plan.runner
 import bot.plan.Phases
 import bot.plan.action.Action
 import bot.plan.action.KillAll
+import bot.plan.action.Leave
 import bot.plan.action.StartAtAction
 import bot.plan.action.dodge
+import bot.state.MapLoc
+import bot.state.map.Direction
+import bot.state.map.MapCell
 import bot.state.map.destination.ZeldaItem
 
 class Experiments(private val masterPlan: PlanMaker) {
@@ -21,14 +25,6 @@ class Experiments(private val masterPlan: PlanMaker) {
 
     val evaluation: Map<String, Experiment>
 
-//    fun getExp(): Experiment {
-//        val one = Experiment("level1", "level1_start_no_ladder.save",
-//            { masterPlan().getPlanPhase("Destroy level 1") },
-//            addEquipment = false,
-//            sword = ZeldaItem.WoodenSword)
-//        return one.copy(name = "lev1white5", hearts = 5, bombs = 4, sword = ZeldaItem.WhiteSword)
-//    }
-//
     init {
         val one = Experiment("level1", "level1_start_no_ladder.save",
             { masterPlan().getPlanPhase("Destroy level 1") },
@@ -202,19 +198,24 @@ class Experiments(private val masterPlan: PlanMaker) {
         fun roomTrial(
             level: Int,
             mapLoc: Int,
+            fromDirection: Direction?,
             name: String = "room_${level}_${mapLoc}",
             sword: ZeldaItem = ZeldaItem.MagicSword,
             ring: ZeldaItem = ZeldaItem.None,
             hearts: Int? = null,
             shield: Boolean = false,
             boomerang: ZeldaItem = ZeldaItem.MagicalBoomerang,
-            maxFramesPerTrial: Int = DEFAULT_TRIAL_FRAME_BUDGET
+            maxFramesPerTrial: Int = DEFAULT_TRIAL_FRAME_BUDGET,
         ) = Experiment(
             name = name,
             startSave = "mapstate/mapstate_${level}_${mapLoc}.save",
             plan = {
                 MasterPlan(listOf(PlanSegment("roomTrial", name,
-                    listOf(StartAtAction(mapLoc, level), KillAll.make()))))
+                    listOf(
+                        StartAtAction(mapLoc, level),
+                        Leave(),
+                        KillAll.make()
+                    ))))
             },
             addEquipment = false,
             sword = sword,

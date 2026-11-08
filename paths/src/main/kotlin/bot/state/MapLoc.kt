@@ -1,5 +1,7 @@
 package bot.state
 
+import bot.state.map.Direction
+
 // // Value equals map x location + 0x10 * map y location, that's hex
 // so y location * 16 + x
 // each screen has unique id.
@@ -21,6 +23,14 @@ val MapLoc.x
 
 val MapLoc.y
     get() = this / 16
+
+fun MapLoc.modify(direction: Direction?): MapLoc = when (direction) {
+    Direction.Up -> up
+    Direction.Left -> left
+    Direction.Right -> right
+    Direction.Down -> down
+    else -> this
+}
 
 val MapLoc.up
     get() = this - 16

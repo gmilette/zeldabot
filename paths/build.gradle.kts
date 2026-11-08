@@ -37,6 +37,8 @@ java {
 
 tasks.test {
     useJUnit()
+    // Hyrule parses the 16MB mapTile5.csv into strings; the default test heap cannot hold it
+    maxHeapSize = "2g"
 }
 
 compose.desktop {

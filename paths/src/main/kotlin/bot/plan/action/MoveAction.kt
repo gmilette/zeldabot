@@ -275,6 +275,75 @@ class StartAtAction(val at: MapLoc = 0, val atLevel: Int = -1) : Action {
         }
 }
 
+class Leave(ignoreProjectiles: Boolean = false) : Action {
+    private val routeTo = RouteTo(params = RouteTo.Param(
+        whatToAvoid = RouteTo.Param.makeIgnoreProjectiles(ignoreProjectiles)))
+
+    private val leaveParam = RouteTo.RouteParam(
+        allowAttack = false,
+        allowRangedAttack = false,
+        allowBlock = false,
+        rParam = RouteTo.RoutingParamCommon(findNearestSafeIfCurrentlyNotSafe = false)
+    )
+
+    private var startLoc: MapLoc = -1
+    private var exitDir: Direction? = null
+    private var targets = listOf<FramePoint>()
+    private var pushing = false
+
+    override fun reset() {
+        startLoc = -1
+        exitDir = null
+        targets = emptyList()
+        pushing = false
+    }
+
+    override fun complete(state: MapLocationState): Boolean =
+        (startLoc != -1 && state.frameState.mapLoc != startLoc)
+
+    override fun nextStep(state: MapLocationState): GamePad {
+        if (startLoc == -1) {
+            startLoc = state.frameState.mapLoc
+        }
+        val cell = state.currentMapCell
+        // chosen once, so Link does not flip between two doors at similar distances
+        val dir = exitDir ?: nearestExitDir(cell, state.link)?.also {
+            exitDir = it
+            targets = cell.exitsFor(it).orEmpty()
+        } ?: return GamePad.None
+
+        // once at the edge just keep walking: the route ends on the exit point and an empty route
+        // presses nothing for the bottom and right edges (getActionFromRoute only handles x==0 / y==0)
+        if (!pushing && targets.any { it.distTo(state.link) <= DOORWAY_REACHED }) {
+            pushing = true
+        }
+        return if (pushing || targets.isEmpty()) {
+            dir.toGamePad()
+        } else {
+            routeTo.routeTo(state, targets, leaveParam)
+        }
+    }
+
+    private fun nearestExitDir(cell: MapCell, link: FramePoint): Direction? =
+        cell.exits
+            .filterValues { it.isNotEmpty() }
+            .minByOrNull { (_, points) -> points.minOf { it.distTo(link) } }
+            ?.key
+
+    override fun target(): FramePoint = targets.firstOrNull() ?: FramePoint()
+
+    override fun targets(): List<FramePoint> = targets
+
+    override fun path(): List<FramePoint> = routeTo.route?.path ?: emptyList()
+
+    override val name: String
+        get() = "Leave by ${exitDir ?: "nearest exit"}"
+
+    companion object {
+        private const val DOORWAY_REACHED = 4
+    }
+}
+
 class MoveTo(
     private val fromLoc: MapLoc = 0,
     val next: MapCell,

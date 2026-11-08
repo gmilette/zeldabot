@@ -367,36 +367,6 @@ class MoveHistoryAction(private val wrapped: Action, private val escapeAction: A
         get() = wrapped.name
 }
 
-/**
- * say you tried to burn a tree and missed, the only thing you can do is leave
- * the screen and come back
- */
-class ExitReturnIfNecessary(private val wrapped: Action): Action {
-    private var frameCt = 0
-    private var attack = AlwaysAttack(useB = true)
-
-    override fun complete(state: MapLocationState): Boolean =
-        wrapped.complete(state)
-
-    override fun nextStep(state: MapLocationState): GamePad {
-        frameCt++
-
-        // it worked! it took a while though at 1000
-        return if (frameCt > 600) {
-            d { "REBOMB!!!" }
-            if (frameCt > 700) {
-                frameCt = 0
-                d { "ah well restart" }
-            }
-            attack.nextStep(state)
-        } else {
-            wrapped.nextStep(state)
-        }
-    }
-}
-
-
-
 class ReBombIfNecessary(private val wrapped: Action): Action {
     private var frameCt = 0
     private var attack = AlwaysAttack(useB = true)
@@ -420,32 +390,6 @@ class ReBombIfNecessary(private val wrapped: Action): Action {
         }
     }
 }
-
-class ReBurnIfNecessary(private val wrapped: Action): Action {
-    private var frameCt = 0
-    private var attack = AlwaysAttack(useB = true)
-
-    override fun complete(state: MapLocationState): Boolean =
-        wrapped.complete(state)
-
-    override fun nextStep(state: MapLocationState): GamePad {
-        frameCt++
-
-        // it worked! it took a while though at 1000
-        return if (frameCt > 600) {
-            d { "Reburn!!!" }
-            if (frameCt > 700) {
-                frameCt = 0
-                d { "ah well restart" }
-            }
-            // TODO: this requires leaving the spot and returning
-            attack.nextStep(state)
-        } else {
-            wrapped.nextStep(state)
-        }
-    }
-}
-
 
 class StayInCurrentMapCell(private val wrapped: Action) : Action {
     private val routeTo = RouteTo(params = RouteTo.Param())

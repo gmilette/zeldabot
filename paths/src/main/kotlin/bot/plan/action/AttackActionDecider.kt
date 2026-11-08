@@ -234,6 +234,11 @@ object AttackActionDecider {
     }
 
     /**
+     * a darknut will move approximately 2 or 3 pixels while link is getting his sword out
+     */
+    private const val DISTANCE_MOVED_WHILE_SWINGING = 2
+
+    /**
      * null, no attack
      * gamepad dir, move, or gamePad.None not in range, cant attack
      * gamepad
@@ -245,13 +250,14 @@ object AttackActionDecider {
         useB: Boolean,
         faceEnemy: Boolean = true
     ): GamePad {
-        d { " ** in range of start ** "}
+        d(DEBUG) { " ** in range of start ** "}
         val swords = swordRectangles(link)
         val smallTarget = useB // for bombing
 
         val enemiesClose = enemies
             .filter { link.distTo(it) < MapConstants.sixGrid }
             .sortedBy { it.distTo(link) }
+            .map { it.direction?.pointModifier(DISTANCE_MOVED_WHILE_SWINGING)(it) ?: it} // move the enemies by approximately 2 in their current direction
             .map { if (smallTarget) it.toCenteredRect() else it.toRect16() }
 
         logDebugInfo(enemiesClose, swords, enemies, link, from, smallTarget)
@@ -261,13 +267,13 @@ object AttackActionDecider {
 
         // i donno, it seems like it isn't good for fighting sword guys
         if (enemiesClose.any { it == linkRectExact || (it.topLeft == linkRectExact.topLeft) }) {
-            d { " kill the pancake!" }
+            d(DEBUG) { " kill the pancake!" }
             return GamePad.aOrB(useB)
         }
 
         val intersectResult = handleIntersectWithLink(enemiesClose, linkRect, swords, from, useB)
         if (intersectResult != null) {
-            d { " ** intersect result ** "}
+            d(DEBUG) { " ** intersect result ** "}
             return intersectResult
         }
 
@@ -280,7 +286,7 @@ object AttackActionDecider {
                 )
             }) {
             // attack it
-            d { " ** attack it "}
+            d(DEBUG) { " ** attack it "}
             return GamePad.aOrB(useB)
         }
 
@@ -310,6 +316,7 @@ object AttackActionDecider {
                 }
             }
             enemiesClose.firstNotNullOfOrNull { enemy ->
+                // TODO: if the enemy is a sword then do not face it
                 val attackDir = otherDirs.firstNotNullOfOrNull {
                     val dir = it.key
                     val intersect = enemy.intersect(it.value)
@@ -324,11 +331,11 @@ object AttackActionDecider {
                 attackDir
             }?.toGamePad() ?: GamePad.None
         } else {
-            d { " ** face: DONT "}
+            d(DEBUG) { " ** face: DONT "}
             GamePad.None
         }
 
-        d {"Attack move $attackMove" }
+        d(DEBUG) {"Attack move $attackMove" }
         return attackMove
     }
 
@@ -342,19 +349,19 @@ object AttackActionDecider {
         // need?
         val intersectWithLink = enemiesClose.firstOrNull { it.intersect(linkRect) } ?: return null
 
-        d { " intersects with link $linkRect enemy that intersects: $intersectWithLink" }
+        d(DEBUG) { " intersects with link $linkRect enemy that intersects: $intersectWithLink" }
         val dirToAttack = intersectWithLink.distTo(swords[from] ?: Geom.Rectangle())
-        d { " sword is ${swords[from]} $dirToAttack"}
+        d(DEBUG) { " sword is ${swords[from]} $dirToAttack"}
 
         // if link is in a pancake then no swords will intersect
         if (intersectWithLink.intersect(swords[from] ?: Geom.Rectangle())) {
-            d { " intersects with link's sword. Attack!" }
+            d(DEBUG) { " intersects with link's sword. Attack!" }
             return GamePad.aOrB(useB)
         } else {
             for (enemy in enemiesClose) {
-                d { " enemy close to not evade $enemy" }
+                d(DEBUG) { " enemy close to not evade $enemy" }
             }
-            d { " doesnt intersect, evade" }
+            d(DEBUG) { " doesnt intersect, evade" }
             return null // try null, maybe link will move towards enemy then
             // otherwise he just sits there, doesn't actually move
 //            return GamePad.None
@@ -363,7 +370,7 @@ object AttackActionDecider {
 
     private fun logDebugInfo(enemiesClose: List<Geom.Rectangle>, swords: Map<Direction, Geom.Rectangle>,
                              enemies: List<FramePoint>, link: FramePoint, from: Direction, smallTarget: Boolean) {
-        if (DEBUG || true) {
+        if (DEBUG) {
             d { " link $link from direction $from" }
             for (enemy in enemies) {
                 d { " enemy $enemy dist=${enemy.distTo(link)}" }

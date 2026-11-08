@@ -4,6 +4,7 @@ import bot.state.map.destination.ZeldaItem
 import nintaco.api.API
 import util.d
 import kotlin.math.max
+import kotlin.random.Random
 
 /**
  * help bot change the game memory
@@ -36,6 +37,12 @@ class StateManipulator(
     fun ringId(): Int = state.frameState.inventory.inventoryItems.hasRing
 
     fun hasMagicShield(): Boolean = state.frameState.inventory.inventoryItems.hasMagicShield
+
+    fun randomizeSeed(random: Random) {
+        for (i in 0 until 12) {
+            api.writeCPU(Addresses.More.rngBase + i, random.nextInt(256))
+        }
+    }
 
     fun setHearts(num: Int) {
 //        val h = (num + 1) + (num + 1) * 16
