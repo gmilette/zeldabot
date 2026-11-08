@@ -208,7 +208,7 @@ class BreadthFirstSearch(
 //                    val turning = current.point.direction != null && current.point.direction != arriveDir
 //                    val cost = neighborFinder.costF.get(neighbor) + if (turning) TURN_COST else 0
                     val cost = neighborFinder.costF.get(neighbor)
-                    d { "  $neighbor: $cost to $newPath" }
+                    d(DEBUG_B) { "  $neighbor: $cost to $newPath" }
 
                     queue.offer(
                         SearchNode(

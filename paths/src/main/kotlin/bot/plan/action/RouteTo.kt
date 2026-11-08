@@ -265,7 +265,7 @@ class IsGoal(
 
     fun getGoalAction(point: FramePoint, isSafe: Boolean): PointMoveAction =
         determine.nextAttackAction(state, emptyList(),
-            state.aliveEnemies, // not sure if this will contain what i want
+            state.frameState.enemies, // not sure if this will contain what i want
             param, routeAction.boomerangCt,
             routeAction.theAttack.isAttacking(state),
             faceEnemy = isSafe && false, // just for now never face the enemy

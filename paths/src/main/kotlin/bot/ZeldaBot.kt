@@ -560,7 +560,7 @@ class ZeldaBot(private val monitor: ZeldaMonitor) {
                         }
                         api.fillOval(link.x, link.y + MapConstants.yAdjust, 3, 3)
 
-                        val safeToAttack = AttackActionBlockDecider.safeToAttack(link, frameStateUpdater.state.aliveEnemies)
+                        val safeToAttack = AttackActionBlockDecider.safeToAttack(link, frameStateUpdater.state.frameState.enemies)
                         api.color = when {
                             safeToAttack -> Colors.GREEN
                             else -> Colors.RED

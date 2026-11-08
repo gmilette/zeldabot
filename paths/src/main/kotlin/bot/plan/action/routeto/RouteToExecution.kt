@@ -83,7 +83,7 @@ class RouteExecution(val params: Param = Param()) {
         val action = determine.nextAction(
             state,
             to,
-            state.aliveEnemies,
+            state.frameState.enemies,
             param,
             boomerangCt,
              theAttack.isAttacking(state),
