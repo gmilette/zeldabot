@@ -19,7 +19,8 @@ class DirectionByMemoryLookup(
         val damaged: Int = 0,
         val stunned: Int = 0,
         val hp: Int = 0,
-        val type: Int = 0
+        val type: Int = 0,
+        val subPixel: Int = 0 // every time it passes 255, the enemy moves 1 pixel
     )
 
     private val enemyPoints: Map<String, PointAndDamage>
@@ -58,7 +59,8 @@ class DirectionByMemoryLookup(
             val hpVal = hp[i]
             val typeVal = types[i]
             val stunned = stunned[i]
-            val all = PointAndDamage(i, pt, moveDirection, damage, stunned, hpVal, typeVal)
+            val subPixel = api.readCPU(Addresses.subPixel + 1 + i)
+            val all = PointAndDamage(i, pt, moveDirection, damage, stunned, hpVal, typeVal, subPixel)
             info.add(all)
             d(DEBUG) { "readEnemyPointDir info: $i: $pt $all" }
         }
