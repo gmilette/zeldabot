@@ -43,7 +43,11 @@ object Addresses {
    const val objInputDir = 0x03F8
    const val objQSpeedFrac = 0x03BC
    // alternates between -128 and 0
+   // objPosFrac
+   // 0 is for link
+   // 1-11 are monsters
    const val subPixel = 0x03A8
+   const val objPosFrac = subPixel
    // 0, 1, 3, 4, 6, 7
    // 0,0 x
    // 1,- x
