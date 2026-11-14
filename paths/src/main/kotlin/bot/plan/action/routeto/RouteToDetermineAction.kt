@@ -86,6 +86,7 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
         param: RouteTo.RouteParam = RouteTo.RouteParam(),
         boomerangCt: Int,
         isAttacking: Boolean,
+        isStuckInLikeLike: Boolean = state.frameState.likelike.holding,
         linkDir: Direction = state.frameState.link.dir,
         link: FramePoint = state.link
     ): PointMoveAction {
@@ -121,6 +122,10 @@ class RouteToDetermineAction(val preparation: RoutePreparation) {
         d(DEBUG) { " Determine route action attacking=$isAttacking consider=$considerAttacks "}
 
         return when {
+            isStuckInLikeLike -> {
+                d(DEBUG) { " Route Action -> Attack Likelike" }
+                PointMoveAction.ShortAttack
+            }
             // don't get stuck attacking emptu space when the clock is activated
             (state.frameState.clockActivated && ZRandom.nextInt(10) == 1) -> {
                 d(DEBUG) { " Route Action -> Force Route Clock" }

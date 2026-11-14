@@ -28,7 +28,7 @@ object Level6Plan {
             left
             seg("first ghost")
             up // capture any loot dropped, there is usually some bombs
-            switchToBoomerang
+////            switchToBoomerang
             seg("squishies")
             up // todo grab key in center
             seg("kill bats")

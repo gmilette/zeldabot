@@ -22,6 +22,7 @@ data class FrameState(
 ) {
     val trigger by lazy { SecretTriggeredDetector(api, mapLoc) }
     val whistle by lazy { WhistleCalculator(api) }
+    val likelike by lazy { LikeLikeLogic(api) }
     val projectileStatus = LinkProjectileStatus(api)
     val enemiesLeftCalculator: EnemiesLeftCalculator by lazy { EnemiesLeftCalculator(api) }
 

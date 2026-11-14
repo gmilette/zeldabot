@@ -9,7 +9,7 @@ import util.d
 object AttackActionDecider {
     // how close to get to enemies before engaging the dodge
     private const val dodgeBuffer = 3
-    var DEBUG = false
+    var DEBUG = true
 
     private val longExtra = MapConstants.swordGridPlusOne
     // if link is half way into a grid, can he swing and hit the target
@@ -204,16 +204,6 @@ object AttackActionDecider {
         return swords[dir]?.intersect(enemy) ?: false
     }
 
-    fun inRangeOf(state: MapLocationState, targets: List<FramePoint>, useB: Boolean = false, faceEnemy: Boolean = true): GamePad {
-        return inRangeOf(
-            state.frameState.link.dir,
-            state.link,
-            targets,
-            useB,
-            faceEnemy
-        )
-    }
-
     fun inStrikingRange(from: FramePoint, enemies: List<FramePoint>): Boolean {
         val swords = swordRectangles(from)
 
@@ -250,7 +240,7 @@ object AttackActionDecider {
         useB: Boolean,
         faceEnemy: Boolean = true
     ): GamePad {
-        d(DEBUG) { " ** in range of start ** "}
+        d(DEBUG) { " ** in range of start ** link: $link enemy: ${enemies.toTypedArray()}"}
         val swords = swordRectangles(link)
         val smallTarget = useB // for bombing
 
@@ -263,13 +253,6 @@ object AttackActionDecider {
         logDebugInfo(enemiesClose, swords, enemies, link, from, smallTarget)
 
         val linkRect = link.toRectPlus(-2)
-        val linkRectExact = link.toRectPlus(0)
-
-        // i donno, it seems like it isn't good for fighting sword guys
-        if (enemiesClose.any { it == linkRectExact || (it.topLeft == linkRectExact.topLeft) }) {
-            d(DEBUG) { " kill the pancake!" }
-            return GamePad.aOrB(useB)
-        }
 
         val intersectResult = handleIntersectWithLink(enemiesClose, linkRect, swords, from, useB)
         if (intersectResult != null) {
