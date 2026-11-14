@@ -40,6 +40,7 @@ object Addresses {
 //   val objPosFrac: Int,      // $03A8
 //   val objQSpeedFrac: Int    // $03BC
 
+   const val stunnedByLikeLike = 0x0512
    const val objInputDir = 0x03F8
    const val objQSpeedFrac = 0x03BC
    // alternates between -128 and 0
