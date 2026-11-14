@@ -120,14 +120,16 @@ data class Inventory(
     val isItemMenuOpen by lazy { itemMenu == 7 }
     val selectedItem by lazy { api.readCPU(Addresses.selectedItem) }
     val hasWand by lazy { api.readCpuB(Addresses.hasRod) }
-    val numBombs by lazy { api.readCPU(Addresses.numBombs) }
-    val numRupees by lazy { api.readCPU(Addresses.numRupees) }
+    val numBombs = api.readCPU(Addresses.numBombs)
+    val numRupees = api.readCPU(Addresses.numRupees)
     val hasRupees: Boolean
         get() = numRupees > 0
     val numPotions by lazy { api.readCPU(Addresses.hasPotion) }
-    val numKeys by lazy { api.readCPU(Addresses.numKeys) }
-    val hearts by lazy { api.readCPU(Addresses.heartContainers) }
-    val damage by lazy { api.readCPU(Addresses.heartContainersHalf) }
+    // these values are not lazy because they are compared between
+    // states and we want them to be set
+    val numKeys = api.readCPU(Addresses.numKeys)
+    val hearts = api.readCPU(Addresses.heartContainers)
+    val damage = api.readCPU(Addresses.heartContainersHalf)
 
     val inventoryItems = InventoryItems(api)
     val heartCalc = HeartsStateCalculator(this)
